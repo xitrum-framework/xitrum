@@ -3,12 +3,11 @@ package xt.server
 import org.jboss.netty.channel.{Channels, ChannelPipeline, ChannelPipelineFactory => CPF}
 import org.jboss.netty.handler.codec.http.{HttpRequestDecoder, HttpChunkAggregator, HttpResponseEncoder}
 
-import xt.middleware.RoutedApp
+import xt.middleware.App
 
-class ChannelPipelineFactory extends CPF {
+class ChannelPipelineFactory(app: App) extends CPF {
   def getPipeline: ChannelPipeline = {
     val pipeline = Channels.pipeline
-    val app      = new RoutedApp
 
     pipeline.addLast("decoder",    new HttpRequestDecoder)
     pipeline.addLast("aggregator", new HttpChunkAggregator(1024*1024))

@@ -1,5 +1,7 @@
 package xt.server
 
+import scala.collection.mutable.HashMap
+
 import org.jboss.netty.channel.{SimpleChannelUpstreamHandler,
                                 ChannelHandlerContext,
                                 MessageEvent,
@@ -8,7 +10,6 @@ import org.jboss.netty.channel.{SimpleChannelUpstreamHandler,
 import org.jboss.netty.handler.codec.http.{HttpRequest,
                                            DefaultHttpResponse,
                                            HttpResponse}
-
 import org.jboss.netty.handler.codec.http.HttpHeaders._
 import org.jboss.netty.handler.codec.http.HttpHeaders.Names._
 import org.jboss.netty.handler.codec.http.HttpResponseStatus._
@@ -22,8 +23,10 @@ class Handler(app: App) extends SimpleChannelUpstreamHandler {
     if (m.isInstanceOf[HttpRequest]) {
       val req = m.asInstanceOf[HttpRequest]
       val res = new DefaultHttpResponse(HTTP_1_1, OK)
-      res.setHeader(CONTENT_TYPE, "text/plain")
-      app.handle(req, res)
+      res.addHeader(CONTENT_TYPE, "text/html")
+      res.addHeader(CONTENT_ENCODING, "UTF-8")
+      val env = new HashMap[String, Any]()
+      app.call(req, res, env)
       respond(e, req, res)
     }
   }
