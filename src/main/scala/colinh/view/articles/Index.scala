@@ -5,7 +5,7 @@ import colinh.model.Article
 
 class Index extends Env {
   def render = {
-    val articles = params[List[Article]]("articles")
+    val articles = at[List[Article]]("articles")
     <ul>
       {articles.map(a => <li>{renderArticle(a)}</li>)}
     </ul>

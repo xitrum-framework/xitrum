@@ -27,7 +27,7 @@ object Params {
       // to avoid UnsupportedOperationException when p is empty. Whe p is empty,
       // it is a java.util.Collections$EmptyMap, which is immutable.
       // See the source code of QueryStringDecoder as of Netty 3.2.1.Final
-      val p2 = if (p.isEmpty) new java.util.LinkedHashMap[String, List[String]]() else p
+      val p2 = if (p.isEmpty) new java.util.LinkedHashMap[String, java.util.List[String]]() else p
 
       env.put("params", p2)
       env.put("path",   d.getPath)

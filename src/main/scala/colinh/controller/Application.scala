@@ -1,5 +1,7 @@
 package colinh.controller
 
-class Application {
+import xt.framework.Env
+
+class Application extends Env {
 
 }
