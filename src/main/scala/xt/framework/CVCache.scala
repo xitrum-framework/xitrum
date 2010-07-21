@@ -3,9 +3,6 @@ package xt.framework
 /**
  * Note: cuncurrenct access
  */
-object CVCache {
-  var controllerPackages: List[String] = null
-  var viewPackges: List[String] = null
-
-
+class CVCache(cPackages: List[String], vPackges: List[String]) {
+  def 
 }
