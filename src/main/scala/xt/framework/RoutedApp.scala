@@ -26,7 +26,7 @@ class RoutedApp extends App {
 
     // Set params for controller
     val params = env("params").asInstanceOf[java.util.Map[String, java.util.List[String]]]
-    val c2 = c.asInstanceOf[Env]
+    val c2 = c.asInstanceOf[CV]
     c2.setParams(params)
 
     // Set at for controller
@@ -35,6 +35,7 @@ class RoutedApp extends App {
 
     try {
       a.invoke(c)
+      res.setContent(ChannelBuffers.copiedBuffer("Hello", CharsetUtil.UTF_8))
     } catch {
       case e1 =>
         try {
@@ -54,8 +55,5 @@ class RoutedApp extends App {
             res.setContent(ChannelBuffers.copiedBuffer("Not found", CharsetUtil.UTF_8))
         }
     }
-  }
-
-  private def initEnv(c: Env, env: Map[String, Any]) {
   }
 }

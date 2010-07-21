@@ -3,7 +3,7 @@ package xt.framework
 import scala.collection.mutable.{Map, ListBuffer}
 import scala.collection.JavaConversions
 
-trait Env {
+trait CV {
   private var _params: java.util.Map[String, java.util.List[String]] = _
 
   def setParams(params: java.util.Map[String, java.util.List[String]]) { _params = params }
@@ -33,4 +33,8 @@ trait Env {
 
   def at(key: String, value: Any) = _at.put(key, value)
   def at[T](key: String): T       = _at(key).asInstanceOf[T]
+
+  //----------------------------------------------------------------------------
+
+  def layout: Option[String] = None
 }
