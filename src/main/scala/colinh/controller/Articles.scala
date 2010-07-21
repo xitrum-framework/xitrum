@@ -8,4 +8,8 @@ class Articles {
   def show {
 
   }
+
+  def edit {
+
+  }
 }

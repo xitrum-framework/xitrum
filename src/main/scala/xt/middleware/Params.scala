@@ -1,6 +1,8 @@
 package xt.middleware
 
 import scala.collection.mutable.Map
+import scala.collection.JavaConversions
+
 import org.jboss.netty.handler.codec.http.{HttpRequest, HttpResponse, QueryStringDecoder, HttpMethod}
 
 /**
@@ -21,7 +23,13 @@ object Params {
       val d = new QueryStringDecoder(u2)
       val p = d.getParameters
 
-      env.put("params", p)
+      // Because we will likely put things to params in later middlewares, we need
+      // to avoid UnsupportedOperationException when p is empty. Whe p is empty,
+      // it is a java.util.Collections$EmptyMap, which is immutable.
+      // See the source code of QueryStringDecoder as of Netty 3.2.1.Final
+      val p2 = if (p.isEmpty) new java.util.LinkedHashMap[String, List[String]]() else p
+
+      env.put("params", p2)
       env.put("path",   d.getPath)
       app.call(req, res, env)
     }

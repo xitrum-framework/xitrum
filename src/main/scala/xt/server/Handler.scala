@@ -22,10 +22,13 @@ class Handler(app: App) extends SimpleChannelUpstreamHandler {
     val m = e.getMessage
     if (m.isInstanceOf[HttpRequest]) {
       val req = m.asInstanceOf[HttpRequest]
+
       val res = new DefaultHttpResponse(HTTP_1_1, OK)
       res.addHeader(CONTENT_TYPE, "text/html")
       res.addHeader(CONTENT_ENCODING, "UTF-8")
-      val env = new HashMap[String, Any]()
+
+      val env = new HashMap[String, Any]
+
       app.call(req, res, env)
       respond(e, req, res)
     }

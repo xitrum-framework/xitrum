@@ -4,19 +4,22 @@ import org.jboss.netty.handler.codec.http.HttpMethod._
 
 import xt.server.Server
 import xt.framework.RoutedApp
-import xt.middleware.Params
+import xt.middleware.{Params, Route}
 
 object Http {
   private val routes =
-    (GET, "/",                  "Articles#index") ::
-    (GET, "/articles/:id",      "Articles#show")  ::
-    (GET, "/articles/:id/edit", "Articles#edit")  :: Nil
+    (GET,  "/",                  "colinh.controller.Articles#index")  ::
+    (GET,  "/articles/:id",      "colinh.controller.Articles#show")   ::
+    (GET,  "/articles/:id/edit", "colinh.controller.Articles#edit")   ::
+    (null, "404",                "colinh.controller.Errors#error404") ::
+    (null, "500",                "colinh.controller.Errors#error500") :: Nil
 
   def main(args: Array[String]) {
     val a1 = new RoutedApp
-    val a2 = Params.wrap(a1)
+    val a2 = Route.wrap(a1, routes, List("colinh.controller"))
+    val a3 = Params.wrap(a2)
 
-    val s = new Server(a2)
+    val s = new Server(a3)
     s.start
   }
 }
