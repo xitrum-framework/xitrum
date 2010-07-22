@@ -16,8 +16,8 @@ import org.jboss.netty.handler.codec.http.{HttpRequest, HttpResponse, HttpMethod
  */
 object MethodOverride {
   def wrap(app: App) = new App {
-    def call(req: HttpRequest, res: HttpResponse, env: Map[String, Any]) {
-      val m1 = req.getMethod
+    def call(request: HttpRequest, response: HttpResponse, env: Map[String, Any]) {
+      val m1 = request.getMethod
       val m2: HttpMethod = if (m1 != HttpMethod.POST)
         m1
       else {
@@ -28,7 +28,7 @@ object MethodOverride {
 
       env.put("request_method", m2)
 
-      app.call(req, res, env)
+      app.call(request, response, env)
     }
   }
 }

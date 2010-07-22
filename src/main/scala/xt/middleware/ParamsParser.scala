@@ -12,10 +12,10 @@ import org.jboss.netty.handler.codec.http.{HttpRequest, HttpResponse, QueryStrin
  */
 object ParamsParser {
   def wrap(app: App) = new App {
-    def call(req: HttpRequest, res: HttpResponse, env: Map[String, Any]) {
-      val u1 = req.getUri
-      val u2 = if (req.getMethod == HttpMethod.POST) {
-        val c = req.getContent
+    def call(request: HttpRequest, response: HttpResponse, env: Map[String, Any]) {
+      val u1 = request.getUri
+      val u2 = if (request.getMethod == HttpMethod.POST) {
+        val c = request.getContent
         if (u1.endsWith("&")) u1 + c else u1 + "&" + c
       } else
         u1
@@ -31,7 +31,7 @@ object ParamsParser {
 
       env.put("params", p2)
       env.put("path_info", d.getPath)
-      app.call(req, res, env)
+      app.call(request, response, env)
     }
   }
 }

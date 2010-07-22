@@ -14,11 +14,11 @@ import xt.middleware.App
  * ParamsParser -> MethodOverride -> Dispatcher -> Failsafe
  */
 class RoutedApp extends App {
-  def call(req: HttpRequest, res: HttpResponse, env: Map[String, Any]) {
+  def call(request: HttpRequest, response: HttpResponse, env: Map[String, Any]) {
     val controller = env("controller").asInstanceOf[Controller]
-    val action = env("action").asInstanceOf[Method]
+    val action     = env("action").asInstanceOf[Method]
 
     action.invoke(controller)
-    res.setContent(ChannelBuffers.copiedBuffer("Hello", CharsetUtil.UTF_8))
+    response.setContent(ChannelBuffers.copiedBuffer("Hello", CharsetUtil.UTF_8))
   }
 }

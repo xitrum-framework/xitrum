@@ -28,7 +28,7 @@ object Dispatcher {
     val (controller500, action500) = findErrorCA("500")
 
     new App {
-      def call(req: HttpRequest, res: HttpResponse, env: Map[String, Any]) {
+      def call(request: HttpRequest, response: HttpResponse, env: Map[String, Any]) {
         val method   = env("request_method").asInstanceOf[HttpMethod]
         val pathInfo = env("path_info").asInstanceOf[String]
         matchRoute(method, pathInfo) match {
@@ -52,7 +52,7 @@ object Dispatcher {
         env.put("controller500", controller500)
         env.put("action500",     action500)
 
-        app.call(req, res, env)
+        app.call(request, response, env)
       }
     }
   }

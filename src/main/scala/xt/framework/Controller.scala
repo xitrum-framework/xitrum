@@ -26,4 +26,26 @@ trait Controller extends Helper {
     val view = ViewCache.newView(csas)
     view.render
   }
+
+  /*
+   * renderView(csas)
+
+renderText(String, Elem)
+
+renderFile(path: String)
+
+------
+
+layout
+
+contentType
+
+status
+
+headers
+
+cookie
+
+session
+   */
 }
