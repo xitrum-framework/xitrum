@@ -7,10 +7,10 @@ import org.jboss.netty.handler.codec.http.{HttpRequest, HttpResponse, QueryStrin
 
 /**
  * This middleware:
- *   parses params in URI and request body and puts them to env under the key "params"
- *   puts the request path to env under the key "path"
+ *   + parses params in URI and request body and puts them to env under the key "params"
+ *   + puts the request path to env under the key "path_info"
  */
-object Params {
+object ParamsParser {
   def wrap(app: App) = new App {
     def call(req: HttpRequest, res: HttpResponse, env: Map[String, Any]) {
       val u1 = req.getUri
@@ -30,7 +30,7 @@ object Params {
       val p2 = if (p.isEmpty) new java.util.LinkedHashMap[String, java.util.List[String]]() else p
 
       env.put("params", p2)
-      env.put("path",   d.getPath)
+      env.put("path_info", d.getPath)
       app.call(req, res, env)
     }
   }

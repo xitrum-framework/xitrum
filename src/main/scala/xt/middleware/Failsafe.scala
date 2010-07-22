@@ -11,7 +11,7 @@ import xt.framework.Controller
 
 /**
  * Catches error 500 and 404.
- * This middleware should be put behind Route.
+ * This middleware should be put behind Dispatcher.
  */
 object Failsafe {
   def wrap(app: App) = new App {

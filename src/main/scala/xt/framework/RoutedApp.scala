@@ -11,7 +11,7 @@ import xt.middleware.App
 
 /**
  * This app should be put behind middlewares:
- * Param -> Route -> Failsafe
+ * ParamsParser -> MethodOverride -> Dispatcher -> Failsafe
  */
 class RoutedApp extends App {
   def call(req: HttpRequest, res: HttpResponse, env: Map[String, Any]) {

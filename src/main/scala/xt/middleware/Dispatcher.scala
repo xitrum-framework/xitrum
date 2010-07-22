@@ -7,9 +7,9 @@ import org.jboss.netty.handler.codec.http.{HttpRequest, HttpResponse, HttpMethod
 import xt.framework.{Controller, ViewCache}
 
 /**
- * This middleware should be put behind Params and MultipartParams.
+ * This middleware should be put behind ParamsParser and MultipartParamsParser.
  */
-object Route {
+object Dispatcher {
   private type Route           = (HttpMethod, String, String)
   private type CompiledPattern = Array[(String, Boolean)]  // String: token, Boolean: true if the token is constant
   private type CsAs            = (String, String)
@@ -29,9 +29,9 @@ object Route {
 
     new App {
       def call(req: HttpRequest, res: HttpResponse, env: Map[String, Any]) {
-        val method = req.getMethod
-        val path   = env("path").asInstanceOf[String]
-        matchRoute(method, path) match {
+        val method   = env("request_method").asInstanceOf[HttpMethod]
+        val pathInfo = env("path_info").asInstanceOf[String]
+        matchRoute(method, pathInfo) match {
           case Some((ka, uriParams)) =>
 
             val params = env("params").asInstanceOf[UriParams]
@@ -106,8 +106,8 @@ object Route {
   /**
    * Returns None if not matched.
    */
-  private def matchRoute(method: HttpMethod, path: String): (Option[(CompiledKA, UriParams)]) = {
-    val tokens = path.split("/").filter(_ != "")
+  private def matchRoute(method: HttpMethod, pathInfo: String): (Option[(CompiledKA, UriParams)]) = {
+    val tokens = pathInfo.split("/").filter(_ != "")
     var uriParams: UriParams = null
 
     val finder = (cr: CompiledRoute) => {
