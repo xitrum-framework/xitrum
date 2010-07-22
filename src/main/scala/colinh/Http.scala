@@ -14,9 +14,13 @@ object Http {
     (null, "404",                "colinh.controller.Errors#error404") ::
     (null, "500",                "colinh.controller.Errors#error500") :: Nil
 
+  private val controllerPaths = List("colinh.controller")
+  private val viewPaths       = List("colinh.view")
+
+
   def main(args: Array[String]) {
     val a1 = new RoutedApp
-    val a2 = Route.wrap(a1, routes, List("colinh.controller"))
+    val a2 = Route.wrap(a1, routes, controllerPaths, viewPaths)
     val a3 = Params.wrap(a2)
 
     val s = new Server(a3)

@@ -1,13 +1,18 @@
-Xitrum (XT) is a thin web server and web framework on top of Netty.
+Xitrum (XT) is a super fast web server and web framework on top of Netty.
 
-+-------------+
-|  Your app   |
-+-------------+
-|  Framework  |
-+-------------+
-| Middlewares |
-+-------------+
-|   Server    |
-+-------------+
-|    Netty    |
-+-------------+
++-----------------+
+|    Your app     |
++-----------------+
+|       XT        |
+| +-------------+ |
+| |  Framework  | |
+| +-------------+ |
+| | Middlewares | |
+| +-------------+ |
+| |   Server    | |
+| +-------------+ |
++-----------------+
+|      Netty      |
++-----------------+
+
+Things in XT are tightly coupled for speed.

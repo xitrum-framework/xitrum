@@ -1,8 +1,8 @@
 package colinh.view.layouts
 
-import xt.framework.CV
+import xt.framework.View
 
-class Application extends CV {
+class Application extends View {
   def render = {
     <html>
       <head>

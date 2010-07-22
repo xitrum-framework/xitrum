@@ -1,6 +1,6 @@
 package colinh.controller
 
-class Errors {
+class Errors extends Application {
   def error404 {
 
   }

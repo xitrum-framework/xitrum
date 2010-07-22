@@ -1,12 +1,10 @@
 package colinh.view.articles
 
-import xt.framework.CV
+import xt.framework.View
 import colinh.model.Article
 
-class Index extends CV {
+class Index extends View {
   def render = {
-    at("title", "Colinh Home")
-
     val articles = at[List[Article]]("articles")
     <ul>
       {articles.map(a => <li>{renderArticle(a)}</li>)}

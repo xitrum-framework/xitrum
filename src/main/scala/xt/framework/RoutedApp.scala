@@ -26,7 +26,7 @@ class RoutedApp extends App {
 
     // Set params for controller
     val params = env("params").asInstanceOf[java.util.Map[String, java.util.List[String]]]
-    val c2 = c.asInstanceOf[CV]
+    val c2 = c.asInstanceOf[Controller]
     c2.setParams(params)
 
     // Set at for controller

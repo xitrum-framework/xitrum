@@ -2,7 +2,7 @@ package colinh.controller
 
 class Articles extends Application {
   def index {
-    //println(params("hi"))
+    at("title", "Colinh Home")
   }
 
   def show {

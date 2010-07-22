@@ -1,7 +1,7 @@
 package colinh.view.errors
 
-import xt.framework.CV
+import xt.framework.View
 
-class Error500 extends CV {
+class Error500 extends View {
   def render = <div>Internal Error</div>
 }

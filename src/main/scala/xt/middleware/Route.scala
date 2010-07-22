@@ -4,6 +4,8 @@ import java.lang.reflect.Method
 import scala.collection.mutable.Map
 import org.jboss.netty.handler.codec.http.{HttpRequest, HttpResponse, HttpMethod}
 
+import xt.framework.{Controller, ViewCache}
+
 /**
  * This middleware should be put behind Params and MultipartParams.
  */
@@ -11,13 +13,15 @@ object Route {
   private type Route           = (HttpMethod, String, String)
   private type CompiledPattern = Array[(String, Boolean)]  // String: token, Boolean: true if the token is constant
   private type CsAs            = (String, String)
-  private type CompiledCA      = (Any, Method)  // Any: an instance of controller
-  private type CompiledRoute   = (HttpMethod, CompiledPattern, CsAs, CompiledCA)
+  private type CompiledKA      = (Class[Controller], Method)
+  private type CompiledRoute   = (HttpMethod, CompiledPattern, CsAs, CompiledKA)
   private type UriParams       = java.util.LinkedHashMap[String, java.util.List[String]]
 
   private var compiledRoutes: Iterable[CompiledRoute] = _
 
-  def wrap(app: App, routes: List[Route], controllerPackages: List[String]) = {
+  def wrap(app: App, routes: List[Route], controllerPaths: List[String], viewPaths: List[String]) = {
+    ViewCache.viewPaths = viewPaths
+
     compiledRoutes = routes.map(compileRoute(_))
 
     val (controller404, action404) = findErrorCA("404")
@@ -28,13 +32,14 @@ object Route {
         val method = req.getMethod
         val path   = env("path").asInstanceOf[String]
         matchRoute(method, path) match {
-          case Some((ca, uriParams)) =>
+          case Some((ka, uriParams)) =>
 
             val params = env("params").asInstanceOf[UriParams]
             params.putAll(uriParams)
 
             // Controller: Any, Action: Method
-            val (c, a) = ca
+            val (k, a) = ka
+            val c = k.newInstance
             env.put("controller", c)
             env.put("action",     a)
 
@@ -57,13 +62,15 @@ object Route {
    *   controller: Any
    *   action    : Method
    */
-  private def findErrorCA(errorCode: String) = {
+  private def findErrorCA(errorCode: String): (Controller, Method) = {
     val crOption = compiledRoutes.find { cr =>
       val (method, cp, _, _) = cr
       (method == null) && (cp(0)._1 == errorCode)
     }
     val cr = crOption.get
-    cr._4
+    val (k, a) = cr._4
+    val c = k.newInstance
+    (c, a)
   }
 
   private def compileRoute(route: Route): CompiledRoute = {
@@ -71,10 +78,9 @@ object Route {
     val caa = csas.split("#")
     val cs  = caa(0)
     val as  = caa(1)
-    val k   = Class.forName(cs)
-    val c   = k.newInstance
+    val k   = Class.forName(cs).asInstanceOf[Class[Controller]]
     val a   = k.getMethod(as)
-    (method, compilePattern(pattern), (cs, as), (c, a))
+    (method, compilePattern(pattern), (cs, as), (k, a))
   }
 
   private def compilePattern(pattern: String): CompiledPattern = {
@@ -89,7 +95,7 @@ object Route {
   /**
    * Returns None if not matched.
    */
-  private def matchRoute(method: HttpMethod, path: String): (Option[(CompiledCA, UriParams)]) = {
+  private def matchRoute(method: HttpMethod, path: String): (Option[(CompiledKA, UriParams)]) = {
     val tokens = path.split("/").filter(_ != "")
     var uriParams: UriParams = null
 
@@ -119,17 +125,20 @@ object Route {
     }
     compiledRoutes.find(finder) match {
       case Some(cr) =>
-        val (m, compiledPattern, csas, compiledCA) = cr
+        val (m, compiledPattern, csas, compiledKA) = cr
         val (cs, as) = csas
         uriParams.put("controller", toValues(cs))
         uriParams.put("action",     toValues(as))
-        Some((compiledCA, uriParams))
+        Some((compiledKA, uriParams))
 
       case None => None
     }
   }
 
-  private def toValues(value: String): java.util.ArrayList[String] = {
+  /**
+   * Wraps a single String by a List.
+   */
+  private def toValues(value: String): java.util.List[String] = {
     val values = new java.util.ArrayList[String](1)
     values.add(value)
     values

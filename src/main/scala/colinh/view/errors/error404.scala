@@ -1,7 +1,7 @@
 package colinh.view.errors
 
-import xt.framework.CV
+import xt.framework.View
 
-class Error404 extends CV {
+class Error404 extends View {
   def render = <div>Not found</div>
 }

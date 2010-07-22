@@ -1,7 +1,7 @@
 package colinh.controller
 
-import xt.framework.CV
+import xt.framework.Controller
 
-class Application extends CV {
+class Application extends Controller {
   override def layout = Some("Layouts#application")
 }
