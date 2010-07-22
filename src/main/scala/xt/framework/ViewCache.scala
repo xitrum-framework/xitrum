@@ -36,6 +36,8 @@ object ViewCache {
             case _ => false
           }
         }
+        if (k == null) throw(new Exception("Could not load " + csas))
+
         k.newInstance
     }
   }

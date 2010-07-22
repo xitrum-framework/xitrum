@@ -22,7 +22,7 @@ object Route {
   def wrap(app: App, routes: List[Route], controllerPaths: List[String], viewPaths: List[String]) = {
     ViewCache.viewPaths = viewPaths
 
-    compiledRoutes = routes.map(compileRoute(_))
+    compiledRoutes = routes.map(compileRoute(_, controllerPaths))
 
     val (controller404, action404) = findErrorCA("404")
     val (controller500, action500) = findErrorCA("500")
@@ -73,13 +73,24 @@ object Route {
     (c, a)
   }
 
-  private def compileRoute(route: Route): CompiledRoute = {
+  private def compileRoute(route: Route, controllerPaths: List[String]): CompiledRoute = {
     val (method, pattern, csas) = route
     val caa = csas.split("#")
     val cs  = caa(0)
     val as  = caa(1)
-    val k   = Class.forName(cs).asInstanceOf[Class[Controller]]
-    val a   = k.getMethod(as)
+
+    var k: Class[Controller] = null
+    controllerPaths.find { p =>
+      try {
+        k = Class.forName(p + "." + cs).asInstanceOf[Class[Controller]]
+        true
+      } catch {
+        case _ => false
+      }
+    }
+    if (k == null) throw(new Exception("Could not load " + csas))
+
+    val a = k.getMethod(as)
     (method, compilePattern(pattern), (cs, as), (k, a))
   }
 

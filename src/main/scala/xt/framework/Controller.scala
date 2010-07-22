@@ -8,9 +8,9 @@ trait Controller extends Helper {
   def layout: Option[String] = None
 
   def render: Elem = {
-    val cs   = params("controller")
-    val as   = params("action")
-    val csas = cs + "#" + as
+    val cs   = params("controller")  // Articles
+    val as   = params("action")      // index
+    val csas = cs + "#" + as         // Articles#index
     render(csas)
   }
 
