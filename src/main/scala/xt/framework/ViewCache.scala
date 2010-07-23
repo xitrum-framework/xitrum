@@ -14,8 +14,9 @@ object ViewCache {
   /**
    * Given "Articles#index", returns an instance of xxx.articles.Index.
    */
-  def newView(csas: String): View = {
-    cache.get(csas) match {
+  def newView(csas: String, helper: Helper): View = {
+    // Create a view instance
+    val view = cache.get(csas) match {
       case Some(k) => k.newInstance
 
       case None =>
@@ -28,7 +29,7 @@ object ViewCache {
 
         var k: Class[View] = null
         viewPaths.find { p =>
-          val fp = p + end
+          val fp = p + "." + end
           try {
             k = Class.forName(fp).asInstanceOf[Class[View]]
             true
@@ -40,5 +41,8 @@ object ViewCache {
 
         k.newInstance
     }
+
+    view.setRefs(helper)
+    view
   }
 }

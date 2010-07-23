@@ -23,7 +23,7 @@ class Application extends View {
             <h1>Colinh</h1>
           </div>
 
-          <div id="content">{at("content-for-layout")}</div>
+          <div id="content">{at("content_for_layout")}</div>
 
           <div id="footer">Powered by Colinh &amp; Xitrum</div>
         </div>

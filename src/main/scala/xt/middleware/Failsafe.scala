@@ -65,16 +65,8 @@ object Failsafe {
 
   private def setHelper(controller: Controller,
       channel: Channel, request: HttpRequest, response: HttpResponse, env: Map[String, Any]) {
-  	controller.request  = request
-  	controller.response = response
-  	controller.env      = env
-
-    // Set params
-    val params = env("params").asInstanceOf[java.util.Map[String, java.util.List[String]]]
-    controller._params = params
-
-    // Set at
-    val at = new HashMap[String, Any]
-    controller._at = at
+    val paramsMap = env("params").asInstanceOf[java.util.Map[String, java.util.List[String]]]
+    val atMap = new HashMap[String, Any]
+    controller.setRefs(channel, request, response, env, paramsMap, atMap)
   }
 }

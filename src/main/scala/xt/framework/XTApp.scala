@@ -5,8 +5,6 @@ import scala.collection.mutable.{Map, HashMap}
 
 import org.jboss.netty.channel.Channel
 import org.jboss.netty.handler.codec.http.{HttpRequest, HttpResponse, HttpResponseStatus}
-import org.jboss.netty.buffer.ChannelBuffers
-import org.jboss.netty.util.CharsetUtil
 
 import xt.middleware.App
 
@@ -20,6 +18,5 @@ class XTApp extends App {
     val action     = env("action").asInstanceOf[Method]
 
     action.invoke(controller)
-    response.setContent(ChannelBuffers.copiedBuffer("Hello", CharsetUtil.UTF_8))
   }
 }
