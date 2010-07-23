@@ -21,6 +21,8 @@ class Handler(app: App) extends SimpleChannelUpstreamHandler {
   override def messageReceived(ctx: ChannelHandlerContext, e: MessageEvent) {
     val m = e.getMessage
     if (m.isInstanceOf[HttpRequest]) {
+      val channel = e.getChannel
+
       val req = m.asInstanceOf[HttpRequest]
 
       val res = new DefaultHttpResponse(HTTP_1_1, OK)
@@ -29,7 +31,7 @@ class Handler(app: App) extends SimpleChannelUpstreamHandler {
 
       val env = new HashMap[String, Any]
 
-      app.call(req, res, env)
+      app.call(channel, req, res, env)
       respond(e, req, res)
     }
   }

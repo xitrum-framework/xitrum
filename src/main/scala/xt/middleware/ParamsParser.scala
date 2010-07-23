@@ -3,6 +3,7 @@ package xt.middleware
 import scala.collection.mutable.Map
 import scala.collection.JavaConversions
 
+import org.jboss.netty.channel.Channel
 import org.jboss.netty.handler.codec.http.{HttpRequest, HttpResponse, QueryStringDecoder, HttpMethod}
 
 /**
@@ -12,7 +13,7 @@ import org.jboss.netty.handler.codec.http.{HttpRequest, HttpResponse, QueryStrin
  */
 object ParamsParser {
   def wrap(app: App) = new App {
-    def call(request: HttpRequest, response: HttpResponse, env: Map[String, Any]) {
+    def call(channel: Channel, request: HttpRequest, response: HttpResponse, env: Map[String, Any]) {
       val u1 = request.getUri
       val u2 = if (request.getMethod == HttpMethod.POST) {
         val c = request.getContent
@@ -31,7 +32,7 @@ object ParamsParser {
 
       env.put("params", p2)
       env.put("path_info", d.getPath)
-      app.call(request, response, env)
+      app.call(channel, request, response, env)
     }
   }
 }

@@ -1,4 +1,10 @@
-Xitrum (XT) is a super fast web server and web framework on top of Netty.
+Xitrum (XT) is a super fast web server and framework on top of Netty:
+* It fills the gap between Scalatra (Step) and Lift: it is more powerful than
+  Scalatra and less complex than Lift
+* It combines MVC (controller first) style and component-based (view first) style
+* If you are familiar with Merb or Nitrogen, you will be at home with XT
+* It does not try to abstract away from the underlying network layer, but lets
+  you talk directly to Netty whenever you want, unlike most frameworks
 
 +-----------------+
 |    Your app     |
@@ -9,10 +15,10 @@ Xitrum (XT) is a super fast web server and web framework on top of Netty.
 | +-------------+ |
 | | Middlewares | |
 | +-------------+ |
-| |   Server    | |
+| | HTTP Server | |
 | +-------------+ |
 +-----------------+
 |      Netty      |
 +-----------------+
 
-Things in XT are tightly coupled for speed.
+Layers in XT are tightly coupled for speed.

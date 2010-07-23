@@ -3,6 +3,7 @@ package xt.middleware
 import java.lang.reflect.Method
 import scala.collection.mutable.{Map, HashMap}
 
+import org.jboss.netty.channel.Channel
 import org.jboss.netty.handler.codec.http.{HttpRequest, HttpResponse, HttpResponseStatus}
 import org.jboss.netty.buffer.ChannelBuffers
 import org.jboss.netty.util.CharsetUtil
@@ -15,13 +16,13 @@ import xt.framework.Controller
  */
 object Failsafe {
   def wrap(app: App) = new App {
-    def call(request: HttpRequest, response: HttpResponse, env: Map[String, Any]) {
+    def call(channel: Channel, request: HttpRequest, response: HttpResponse, env: Map[String, Any]) {
       env.get("controller") match {
         case Some(c) =>
           try {
             val controller = c.asInstanceOf[Controller]
-            setHelper(controller, request, response, env)
-            app.call(request, response, env)
+            setHelper(controller, channel, request, response, env)
+            app.call(channel, request, response, env)
           } catch {
             case e1 =>
               try {
@@ -31,7 +32,7 @@ object Failsafe {
                 val controller = env("controller500").asInstanceOf[Controller]
                 val action     = env("action500").asInstanceOf[Method]
 
-                setHelper(controller, request, response, env)
+                setHelper(controller, channel, request, response, env)
                 response.setStatus(HttpResponseStatus.INTERNAL_SERVER_ERROR)
                 action.invoke(controller)
               } catch {
@@ -48,7 +49,7 @@ object Failsafe {
             val controller = env("controller404").asInstanceOf[Controller]
             val action     = env("action404").asInstanceOf[Method]
 
-            setHelper(controller, request, response, env)
+            setHelper(controller, channel, request, response, env)
             response.setStatus(HttpResponseStatus.NOT_FOUND)
             action.invoke(controller)
           } catch {
@@ -62,7 +63,8 @@ object Failsafe {
     }
   }
 
-  private def setHelper(controller: Controller, request: HttpRequest, response: HttpResponse, env: Map[String, Any]) {
+  private def setHelper(controller: Controller,
+      channel: Channel, request: HttpRequest, response: HttpResponse, env: Map[String, Any]) {
   	controller.request  = request
   	controller.response = response
   	controller.env      = env

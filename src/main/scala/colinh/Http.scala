@@ -3,7 +3,7 @@ package colinh
 import org.jboss.netty.handler.codec.http.HttpMethod._
 
 import xt.server.Server
-import xt.framework.RoutedApp
+import xt.framework.XTApp
 import xt.middleware.{App, ParamsParser, MethodOverride, Dispatcher, Failsafe}
 
 object Http {
@@ -18,7 +18,7 @@ object Http {
   private val viewPaths       = List("colinh.view")
 
   def main(args: Array[String]) {
-    var app: App = new RoutedApp
+    var app: App = new XTApp
     app = Failsafe.wrap(app)
     app = Dispatcher.wrap(app, routes, controllerPaths, viewPaths)
     app = MethodOverride.wrap(app)

@@ -3,6 +3,7 @@ package xt.middleware
 import scala.collection.mutable.Map
 import scala.collection.JavaConversions
 
+import org.jboss.netty.channel.Channel
 import org.jboss.netty.handler.codec.http.{HttpRequest, HttpResponse, HttpMethod}
 
 /**
@@ -16,7 +17,7 @@ import org.jboss.netty.handler.codec.http.{HttpRequest, HttpResponse, HttpMethod
  */
 object MethodOverride {
   def wrap(app: App) = new App {
-    def call(request: HttpRequest, response: HttpResponse, env: Map[String, Any]) {
+    def call(channel: Channel, request: HttpRequest, response: HttpResponse, env: Map[String, Any]) {
       val m1 = request.getMethod
       val m2: HttpMethod = if (m1 != HttpMethod.POST)
         m1
@@ -28,7 +29,7 @@ object MethodOverride {
 
       env.put("request_method", m2)
 
-      app.call(request, response, env)
+      app.call(channel, request, response, env)
     }
   }
 }

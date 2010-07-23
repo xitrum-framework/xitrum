@@ -3,13 +3,15 @@ package xt.framework
 import scala.collection.mutable.{Map, ListBuffer}
 import scala.collection.JavaConversions
 
+import org.jboss.netty.channel.Channel
 import org.jboss.netty.handler.codec.http.{HttpRequest, HttpResponse}
 
 trait Helper {
 	// These variables will be set by middleware Failsafe
 
-	var request:  HttpRequest  = _
-	var response: HttpResponse = _
+  var channel:  Channel          = _
+	var request:  HttpRequest      = _
+	var response: HttpResponse     = _
 	var env:      Map[String, Any] = _
 
 	var _params: java.util.Map[String, java.util.List[String]] = _
