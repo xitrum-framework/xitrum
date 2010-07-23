@@ -2,7 +2,7 @@ package xt.framework
 
 import scala.collection.mutable.{Map, ListBuffer}
 import scala.collection.JavaConversions
-import scala.xml.{Elem, Unparsed}
+import scala.xml.Elem
 
 import org.jboss.netty.buffer.ChannelBuffers
 import org.jboss.netty.util.CharsetUtil
@@ -13,7 +13,7 @@ trait Controller extends Helper {
   def renderView {
     val cs   = param("controller").get  // Articles
     val as   = param("action").get      // index
-    val csas = cs + "#" + as             // Articles#index
+    val csas = cs + "#" + as            // Articles#index
     renderView(csas)
   }
 
@@ -53,7 +53,7 @@ trait Controller extends Helper {
   def renderText(text: String, layout: Option[String]) {
     layout match {
       case Some(csasOrAs) =>
-        at("content_for_layout", Unparsed(text))
+        at("content_for_layout", text)
         val text2 = renderViewToString(csasOrAs)
         outputTextToResponse(text2)
 
@@ -71,8 +71,9 @@ trait Controller extends Helper {
     else
       csasOrAs
 
-    val view = ViewCache.newView(csas, this)
-    view.render.toString
+    val view = new View
+    view.setRefs(this)
+    view.renderView(view, csasOrAs)
   }
 
   private def outputTextToResponse(text: String) {

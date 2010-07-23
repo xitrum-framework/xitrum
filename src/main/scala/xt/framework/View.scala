@@ -1,18 +1,10 @@
 package xt.framework
 
-import scala.collection.mutable.{Map, ListBuffer}
-import scala.xml.Elem
-
-trait View extends Helper {
-  /**
-   * Views will implement this method.
-   */
-  def render: Elem
-
+class View extends Helper {
   /**
    * Renders another view.
    */
-  def renderView: Elem = {
+  def renderView: String = {
     val cs   = params("controller")  // Articles
     val as   = params("action")      // index
     val csas = cs + "#" + as         // Articles#index
@@ -24,13 +16,18 @@ trait View extends Helper {
    *
    * csasOrAs: "Articles#index" or "index"
    */
-  def renderView(csasOrAs: String): Elem = {
-    val csas = if (csasOrAs.indexOf("#") == -1)
-      params("controller") + "#" + csasOrAs
-    else
-      csasOrAs
+  def renderView(csasOrAs: String): String = {
+    renderView(this, csasOrAs)
+  }
 
-    val view = ViewCache.newView(csas, this)
-    view.render
+  def renderView(view: View, csasOrAs: String): String = {
+    val caa = csasOrAs.split("#")
+    val csas = if (caa.size == 2)
+      caa(0).toLowerCase + "/" + caa(1)
+    else
+      param("controller").get.toLowerCase + "/" + csasOrAs
+
+    val path = "view" + "/" + csas + ".scaml"
+    Scalate.render(view, path)
   }
 }

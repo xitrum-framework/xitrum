@@ -1,0 +1,21 @@
+!!!
+%html(xmlns="http://www.w3.org/1999/xhtml" xml:lang="en" lang="en")
+  %head
+    %title= at("title")
+
+    %link(rel="shortcut icon" href="/static/img/favicon.ico")
+    %link(rel="stylesheet"    href="/static/css/960/reset.css")
+    %link(rel="stylesheet"    href="/static/css/960/text.css")
+    %link(rel="stylesheet"    href="/static/css/960/960.css")
+    %link(rel="stylesheet"    href="/static/css/application.css")
+
+    %script(type="text/javascript" src="/static/js/jquery-1.4.2.min.js")
+
+  %body
+    .container_12
+      #header
+        %h1 Colinh
+        - println(at("content_for_layout"))
+    #content!= at("content_for_layout")
+
+    #footer Powered by Colinh & Xitrum

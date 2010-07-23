@@ -7,12 +7,15 @@ class Project(info: ProjectInfo) extends DefaultProject(info) {
   val jbossRepo = "JBoss Repo" at
     "https://repository.jboss.org/nexus/content/groups/public/"
 
+  val scalateRepo = "Scalate Repo" at
+    "http://repo.fusesource.com/nexus/content/repositories/snapshots"
+
   override def libraryDependencies =
     Set(
-      "org.jboss.netty" % "netty"         % "3.2.1.Final" % "compile->default",
-      "log4j"           % "log4j"         % "1.2.14"      % "compile->default",
-      "org.slf4j"       % "slf4j-api"     % "1.5.10"      % "compile->default",
-      "org.slf4j"       % "slf4j-log4j12" % "1.5.6"       % "compile->default"
+      "org.jboss.netty"        % "netty"         % "3.2.1.Final"  % "compile->default",
+      "org.fusesource.scalate" % "scalate-core"  % "1.2-SNAPSHOT" % "compile->default",
+      "org.slf4j"              % "slf4j-api"     % "1.6.1 "       % "compile->default",
+      "org.slf4j"              % "slf4j-log4j12" % "1.6.1"        % "compile->default"
     ) ++ super.libraryDependencies
 
   override def mainClass = Some("colinh.Http")
