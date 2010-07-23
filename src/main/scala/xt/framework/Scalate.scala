@@ -5,8 +5,15 @@ import org.fusesource.scalate.{TemplateEngine, Binding, DefaultRenderContext}
 
 object Scalate {
   val engine = new TemplateEngine
-  engine.allowReload  = false
-  engine.allowCaching = true
+
+  if (true) {  // production
+    engine.allowReload  = false
+    engine.allowCaching = true
+  } else {
+    engine.allowReload  = true
+    engine.allowCaching = false
+  }
+
   engine.bindings = List(Binding("helper", "xt.framework.View", true))
 
   def render(view: View, path: String): String = {

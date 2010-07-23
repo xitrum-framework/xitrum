@@ -10,7 +10,7 @@ import xt.middleware.App
 
 /**
  * This app should be put behind middlewares:
- * ParamsParser -> MethodOverride -> Dispatcher -> Failsafe
+ * Static -> ParamsParser -> MethodOverride -> Dispatcher -> Failsafe -> XTApp
  */
 class XTApp extends App {
   def call(channel: Channel, request: HttpRequest, response: HttpResponse, env: Map[String, Any]) {

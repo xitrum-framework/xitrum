@@ -4,7 +4,9 @@ import org.jboss.netty.handler.codec.http.HttpMethod._
 
 import xt.server.Server
 import xt.framework.XTApp
-import xt.middleware.{App, ParamsParser, MethodOverride, Dispatcher, Failsafe}
+import xt.middleware.{App, Static,
+                      ParamsParser,
+                      MethodOverride, Dispatcher, Failsafe}
 
 object Http {
   private val routes =
@@ -23,6 +25,7 @@ object Http {
     app = Dispatcher.wrap(app, routes, controllerPaths)
     app = MethodOverride.wrap(app)
     app = ParamsParser.wrap(app)
+    app = Static.wrap(app)
 
     val s = new Server(app)
     s.start

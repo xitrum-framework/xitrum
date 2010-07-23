@@ -21,18 +21,13 @@ class Handler(app: App) extends SimpleChannelUpstreamHandler {
   override def messageReceived(ctx: ChannelHandlerContext, e: MessageEvent) {
     val m = e.getMessage
     if (m.isInstanceOf[HttpRequest]) {
-      val channel = e.getChannel
+      val channel  = e.getChannel
+      val request  = m.asInstanceOf[HttpRequest]
+      val response = new DefaultHttpResponse(HTTP_1_1, OK)
+      val env      = new HashMap[String, Any]
 
-      val req = m.asInstanceOf[HttpRequest]
-
-      val res = new DefaultHttpResponse(HTTP_1_1, OK)
-      res.addHeader(CONTENT_TYPE, "text/html")
-      res.addHeader(CONTENT_ENCODING, "UTF-8")
-
-      val env = new HashMap[String, Any]
-
-      app.call(channel, req, res, env)
-      respond(e, req, res)
+      app.call(channel, request, response, env)
+      if (env.get("bypass_respond").isEmpty) respond(e, request, response)
     }
   }
 
@@ -43,15 +38,15 @@ class Handler(app: App) extends SimpleChannelUpstreamHandler {
 
   //----------------------------------------------------------------------------
 
-  private def respond(e: MessageEvent, req: HttpRequest, res: HttpResponse) {
-    val keepAlive = isKeepAlive(req)
+  private def respond(e: MessageEvent, request: HttpRequest, response: HttpResponse) {
+    val keepAlive = isKeepAlive(request)
 
     // Add 'Content-Length' header only for a keep-alive connection.
     // Close the non-keep-alive connection after the write operation is done.
     if (keepAlive) {
-      res.setHeader(CONTENT_LENGTH, res.getContent.readableBytes)
+      response.setHeader(CONTENT_LENGTH, response.getContent.readableBytes)
     }
-    val future = e.getChannel.write(res)
+    val future = e.getChannel.write(response)
     if (!keepAlive) {
       future.addListener(ChannelFutureListener.CLOSE)
     }
