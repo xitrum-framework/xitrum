@@ -1,10 +1,10 @@
 package xt.framework
 
 import java.lang.reflect.Method
-import scala.collection.mutable.{Map, HashMap}
+import scala.collection.mutable.Map
 
 import org.jboss.netty.channel.Channel
-import org.jboss.netty.handler.codec.http.{HttpRequest, HttpResponse, HttpResponseStatus}
+import org.jboss.netty.handler.codec.http.{HttpRequest, HttpResponse}
 
 import xt.middleware.App
 

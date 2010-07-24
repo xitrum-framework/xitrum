@@ -1,16 +1,12 @@
 package xt.framework
 
-import scala.collection.mutable.{Map, ListBuffer}
-import scala.collection.JavaConversions
-import scala.xml.NodeSeq
-
-import org.jboss.netty.buffer.ChannelBuffers
+import org.jboss.netty.buffer.ChannelBuffer
 import org.jboss.netty.util.CharsetUtil
 
 trait Controller extends Helper {
   def layout: Option[String] = None
 
-  def render: String = {
+  def render: ChannelBuffer = {
     val as = param("action").get
     render(as)
   }
@@ -24,11 +20,11 @@ trait Controller extends Helper {
   /**
    * @param layout None for no layout
    */
-  def render(csasOrAs: String, layout: Option[String]): String = {
-    val t1: String = super.render(csasOrAs)
-    val t2: String = layout match {
+  def render(csasOrAs: String, layout: Option[String]): ChannelBuffer = {
+    val t1 = super.render(csasOrAs)
+    val t2 = layout match {
       case Some(csasOrAs) =>
-        at("content_for_layout", t1)
+        at("content_for_layout", t1.toString(CharsetUtil.UTF_8))
         super.render(csasOrAs)
 
       case None =>
@@ -46,8 +42,8 @@ trait Controller extends Helper {
 
   //----------------------------------------------------------------------------
 
-  private def outputTextToResponse(text: String): String = {
-    response.setContent(ChannelBuffers.copiedBuffer(text, CharsetUtil.UTF_8))
-    text
+  private def outputTextToResponse(buffer: ChannelBuffer): ChannelBuffer = {
+    response.setContent(buffer)
+    buffer
   }
 }

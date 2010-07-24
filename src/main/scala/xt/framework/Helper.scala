@@ -1,6 +1,6 @@
 package xt.framework
 
-import scala.collection.mutable.{Map, ListBuffer}
+import scala.collection.mutable.Map
 import scala.collection.JavaConversions
 
 import org.jboss.netty.channel.Channel
@@ -70,5 +70,5 @@ trait Helper {
    *
    * csasOrAs: String in the pattern "Articles#index" or "index"
    */
-  def render(csasOrAs: String): String = Scalate.render(csasOrAs, this)
+  def render(csasOrAs: String) = Scalate.render(csasOrAs, this)
 }

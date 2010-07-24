@@ -8,4 +8,4 @@ trait App {
 == env
 
 path_info
-bypass_respond
+ignore_response

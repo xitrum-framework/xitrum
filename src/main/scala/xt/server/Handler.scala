@@ -27,7 +27,7 @@ class Handler(app: App) extends SimpleChannelUpstreamHandler {
       val env      = new HashMap[String, Any]
 
       app.call(channel, request, response, env)
-      if (env.get("bypass_respond").isEmpty) respond(e, request, response)
+      if (env.get("ignore_response").isEmpty) respond(e, request, response)
     }
   }
 

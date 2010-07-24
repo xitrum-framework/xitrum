@@ -81,7 +81,7 @@ object Static {
             }
 
             // The Netty handler should not do anything with the response
-            env.put("bypass_respond", true)
+            env.put("ignore_response", true)
         }
       }
     }
