@@ -62,4 +62,13 @@ trait Helper {
 
   def at(key: String, value: Any) = atMap.put(key, value)
   def at[T](key: String): T       = atMap(key).asInstanceOf[T]
+
+  //----------------------------------------------------------------------------
+
+  def normalizeCsasOrAs(csasOrAs: String): String = {
+    if (csasOrAs.indexOf("#") == -1)
+      param("controller").get + "#" + csasOrAs
+    else
+      csasOrAs
+  }
 }

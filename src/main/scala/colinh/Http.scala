@@ -22,7 +22,7 @@ object Http {
   def main(args: Array[String]) {
     var app: App = new XTApp
     app = Failsafe.wrap(app)
-    app = Dispatcher.wrap(app, routes, controllerPaths)
+    app = Dispatcher.wrap(app, routes, controllerPaths, viewPaths)
     app = MethodOverride.wrap(app)
     app = ParamsParser.wrap(app)
     app = Static.wrap(app)
