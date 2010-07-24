@@ -8,6 +8,8 @@ import org.jboss.netty.buffer.ChannelBuffers
 import org.jboss.netty.util.CharsetUtil
 
 trait Controller extends Helper {
+  var docType: String = DocType.xhtmlTransitional
+
   def layout: Option[String] = None
 
   def renderView {
@@ -37,7 +39,9 @@ trait Controller extends Helper {
       case None =>
         xml1
     }
-    outputTextToResponse(xml2.toString)
+
+    val output = docType + "\n" + xml2.toString
+    outputTextToResponse(output)
   }
 
   //----------------------------------------------------------------------------

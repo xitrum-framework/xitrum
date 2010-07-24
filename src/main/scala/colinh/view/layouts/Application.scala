@@ -5,16 +5,17 @@ import xt.framework.View
 
 class Application extends View {
   def render = {
-    <html>
+    <html xmlns="http://www.w3.org/1999/xhtml" xml:lang="en" lang="en">
       <head>
         <title>{at("title")}</title>
+        <meta http-equiv="Content-Type" content="text/html; charset=UTF-8" />
 
-        <link rel="shortcut icon" href="/static/img/favicon.ico" />
+        <link type="image/vnd.microsoft.icon" rel="shortcut icon" href="/static/img/favicon.ico" />
 
-        <link rel="stylesheet" href="/static/css/960/reset.css" />
-        <link rel="stylesheet" href="/static/css/960/text.css" />
-        <link rel="stylesheet" href="/static/css/960/960.css" />
-        <link rel="stylesheet" href="/static/css/application.css" />
+        <link type="text/css" rel="stylesheet" media="all" href="/static/css/960/reset.css" />
+        <link type="text/css" rel="stylesheet" media="all" href="/static/css/960/text.css" />
+        <link type="text/css" rel="stylesheet" media="all" href="/static/css/960/960.css" />
+        <link type="text/css" rel="stylesheet" media="all" href="/static/css/application.css" />
 
         <script type="text/javascript" src="/static/js/jquery-1.4.2.min.js"></script>
       </head>
