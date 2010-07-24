@@ -65,10 +65,10 @@ trait Helper {
 
   //----------------------------------------------------------------------------
 
-  def normalizeCsasOrAs(csasOrAs: String): String = {
-    if (csasOrAs.indexOf("#") == -1)
-      param("controller").get + "#" + csasOrAs
-    else
-      csasOrAs
-  }
+  /**
+   * Renders a view without layout.
+   *
+   * csasOrAs: String in the pattern "Articles#index" or "index"
+   */
+  def render(csasOrAs: String): String = Scalate.render(csasOrAs, this)
 }

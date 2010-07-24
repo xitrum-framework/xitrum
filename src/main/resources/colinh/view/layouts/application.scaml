@@ -1,0 +1,30 @@
+!!!
+%html(xmlns="http://www.w3.org/1999/xhtml" xml:lang="en" lang="en")
+  %head
+    %meta(content="text/html; charset=utf-8" http-equiv="content-type")
+
+    %title= at("title")
+
+    %link(type="image/vnd.microsoft.icon" rel="shortcut icon" href="/static/img/favicon.ico")
+
+    %link(type="text/css" rel="stylesheet" media="all" href="/static/css/960/reset.css")
+    %link(type="text/css" rel="stylesheet" media="all" href="/static/css/960/text.css")
+    %link(type="text/css" rel="stylesheet" media="all" href="/static/css/960/960.css")
+    %link(type="text/css" rel="stylesheet" media="all" href="/static/css/application.css")
+
+    %script(type="text/javascript" src="/static/js/jquery-1.4.2.min.js")
+
+  %body
+    .container_12
+      #header
+        %h1 Colinh
+
+      #content.grid_9
+        != at("content_for_layout")
+
+      #sidebar.grid_3
+        Sidebar goes here
+
+      .clear
+
+      #footer Powered by Colinh & Xitrum

@@ -8,40 +8,34 @@ import org.jboss.netty.buffer.ChannelBuffers
 import org.jboss.netty.util.CharsetUtil
 
 trait Controller extends Helper {
-  var docType: String = DocType.xhtmlTransitional
-
   def layout: Option[String] = None
 
-  def renderView {
-    val cs   = param("controller").get  // Articles
-    val as   = param("action").get      // index
-    val csas = cs + "#" + as            // Articles#index
-    renderView(csas)
+  def render: String = {
+    val as = param("action").get
+    render(as)
   }
 
   /**
+   * @param csasOrAs: String in the pattern Articles#index or index
    * The layout is determined from the result of the layout method.
    */
-  def renderView(csasOrAs: String) {
-    renderView(csasOrAs, layout)
-  }
+  override def render(csasOrAs: String) = render(csasOrAs, layout)
 
   /**
    * @param layout None for no layout
    */
-  def renderView(csasOrAs: String, layout: Option[String]) {
-    val xml1 = callView(csasOrAs)
-    val xml2 = layout match {
+  def render(csasOrAs: String, layout: Option[String]): String = {
+    val t1: String = super.render(csasOrAs)
+    val t2: String = layout match {
       case Some(csasOrAs) =>
-        at("content_for_layout", xml1)
-        callView(csasOrAs)
+        at("content_for_layout", t1)
+        super.render(csasOrAs)
 
       case None =>
-        xml1
+        t1
     }
 
-    val output = docType + "\n" + xml2.toString
-    outputTextToResponse(output)
+    outputTextToResponse(t2)
   }
 
   //----------------------------------------------------------------------------
@@ -52,15 +46,8 @@ trait Controller extends Helper {
 
   //----------------------------------------------------------------------------
 
-  /**
-   * @param csasOrAs Points to a view or a layout (a layout is just a normal view)
-   */
-  private def callView(csasOrAs: String): NodeSeq = {
-    val csas = normalizeCsasOrAs(csasOrAs)
-    ViewCache.renderView(csas, this)
-  }
-
-  private def outputTextToResponse(text: String) {
+  private def outputTextToResponse(text: String): String = {
     response.setContent(ChannelBuffers.copiedBuffer(text, CharsetUtil.UTF_8))
+    text
   }
 }

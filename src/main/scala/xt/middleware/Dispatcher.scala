@@ -6,7 +6,7 @@ import scala.collection.mutable.Map
 import org.jboss.netty.channel.Channel
 import org.jboss.netty.handler.codec.http.{HttpRequest, HttpResponse, HttpMethod}
 
-import xt.framework.{Controller, ViewCache}
+import xt.framework.Controller
 
 /**
  * This middleware should be put behind ParamsParser and MultipartParamsParser.
@@ -21,9 +21,7 @@ object Dispatcher {
 
   private var compiledRoutes: Iterable[CompiledRoute] = _
 
-  def wrap(app: App, routes: List[Route], controllerPaths: List[String], viewPaths: List[String]) = {
-    ViewCache.viewPaths = viewPaths
-
+  def wrap(app: App, routes: List[Route], controllerPaths: List[String]) = {
     compiledRoutes = routes.map(compileRoute(_, controllerPaths))
 
     val (controller404, action404) = findErrorCA("404")
