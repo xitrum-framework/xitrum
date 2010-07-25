@@ -10,11 +10,12 @@ import xt.middleware.{App, Static,
 
 object Http {
   private val routes =
-    (GET,   "/",                  "Articles#index")  ::
-    (GET,   "/articles/make",     "Articles#make")   ::
-    (POST,  "/articles",          "Articles#create") ::
-    (GET,   "/articles/:id",      "Articles#show")   ::
-    (GET,   "/articles/:id/edit", "Articles#edit")   :: Nil
+    (GET,   "/",                    "Articles#index")  ::
+    (GET,   "/articles/page/:page", "Articles#index")  ::
+    (GET,   "/articles/make",       "Articles#make")   ::
+    (POST,  "/articles",            "Articles#create") ::
+    (GET,   "/articles/:id",        "Articles#show")   ::
+    (GET,   "/articles/:id/edit",   "Articles#edit")   :: Nil
 
   private val errorRoutes = Map(
     "404" -> "Errors#error404",

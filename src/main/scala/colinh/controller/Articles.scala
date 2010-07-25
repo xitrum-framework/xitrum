@@ -5,7 +5,11 @@ import colinh.model.Article
 
 class Articles extends Application {
   def index {
-    at("articles", Article.all)
+    val currentPage = param("page").getOrElse("1").toInt
+    val (numPages, articles) = Article.page(currentPage)
+    at("numPages",    numPages)
+    at("currentPage", currentPage)
+    at("articles",    articles)
     render
   }
 

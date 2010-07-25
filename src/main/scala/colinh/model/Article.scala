@@ -17,7 +17,17 @@ class Article (
 }
 
 object Article {
-  def all: Iterable[Article] = from(articles)(a => select(a))
+  val pageLength = 10
+
+  def all = from(articles)(a => select(a) orderBy(a.updatedAt desc))
+
+  def page(p: Int) = {
+    val size = all.size
+    val numPages1 = size/pageLength
+    val numPages2 = if (numPages1*pageLength < size) numPages1 + 1 else numPages1
+    val articles = all.page(p - 1, pageLength)
+    (numPages2, articles)
+  }
 
   def first(id: Long): Option[Article] = {
     val q = from(articles)(a => where(a.id === id) select(a))
