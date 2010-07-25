@@ -24,11 +24,10 @@ object MethodOverride {
       else {
         val params = env("params").asInstanceOf[java.util.Map[String, java.util.List[String]]]
         val _methods = params.get("_method")
-        if (_methods.isEmpty) m1 else new HttpMethod(_methods.get(0))
+        if (_methods == null || _methods.isEmpty) m1 else new HttpMethod(_methods.get(0))
       }
 
       env.put("request_method", m2)
-
       app.call(channel, request, response, env)
     }
   }

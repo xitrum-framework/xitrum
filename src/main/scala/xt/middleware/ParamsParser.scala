@@ -1,5 +1,7 @@
 package xt.middleware
 
+import java.nio.charset.Charset
+
 import scala.collection.mutable.Map
 import scala.collection.JavaConversions
 
@@ -16,8 +18,10 @@ object ParamsParser {
     def call(channel: Channel, request: HttpRequest, response: HttpResponse, env: Map[String, Any]) {
       val u1 = request.getUri
       val u2 = if (request.getMethod == HttpMethod.POST) {
-        val c = request.getContent
-        if (u1.endsWith("&")) u1 + c else u1 + "&" + c
+        val c1 = request.getContent  // ChannelBuffer
+        val c2 = c1.toString(Charset.forName("UTF-8"))
+        val p  = if (u1.indexOf("?") == -1) "?" + c2 else "&" + c2
+        u1 + p
       } else
         u1
 

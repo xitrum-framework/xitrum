@@ -132,35 +132,67 @@ object Dispatcher {
    */
   private def matchRoute(method: HttpMethod, pathInfo: String): Option[(KA, UriParams)] = {
     val tokens = pathInfo.split("/").filter(_ != "")
+    val max1   = tokens.size
+
     var uriParams: UriParams = null
 
     val finder = (cr: CompiledRoute) => {
       val (m, compiledPattern, csas, compiledCA) = cr
-      if (m != method)
+
+      // Must be <= max1
+      // If < max1, the last token must be "*" and non-fixed
+      val max2 = compiledPattern.size
+
+      if (max2 > max1 || m != method)
         false
       else {
-        uriParams = new java.util.LinkedHashMap[String, java.util.List[String]]()
-        var i = 0
-        val m = tokens.size
+        if (max2 == 0) {
+          if (max1 == 0) {
+            uriParams = new java.util.LinkedHashMap[String, java.util.List[String]]()
+            true
+          } else
+            false
+        } else {
+          uriParams = new java.util.LinkedHashMap[String, java.util.List[String]]()
+          var i = 0  // i will go from 0 until max1
 
-        if (compiledPattern.size == 0)
-          (tokens.size == 0)
-        else
           compiledPattern.forall { tc =>
             val (token, constant) = tc
             val ret = if (constant)
-              (i < m && token == tokens(i))
+              (token == tokens(i))
             else {
-              val value = if (token == "*") tokens.slice(i, m).mkString("/") else tokens(i)
-              uriParams.put(token, toValues(value))
-              true
+              if (i == max2 - 1) {
+                if (token == "*") {
+                  val value = tokens.slice(i, max1).mkString("/")
+                  uriParams.put(token, toValues(value))
+                  true
+                } else {
+                  if (max2 < max1) {
+                    false
+                  } else {  // max2 = max1
+                    val value = tokens(i)
+                    uriParams.put(token, toValues(value))
+                    true
+                  }
+                }
+              } else {  // Not the last token
+                if (token == "*") {
+                  false
+                } else {
+                  val value = tokens(i)
+                  uriParams.put(token, toValues(value))
+                  true
+                }
+              }
             }
 
             i += 1
             ret
           }
+        }
       }
     }
+
     compiledRoutes.find(finder) match {
       case Some(cr) =>
         val (m, compiledPattern, csas, compiledKA) = cr

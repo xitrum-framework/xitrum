@@ -1,5 +1,7 @@
 - import colinh.model.Article
 
+- at("title", "Home")
+
 %ul.articles
   - for (a <- at[Iterable[Article]]("articles"))
     %li

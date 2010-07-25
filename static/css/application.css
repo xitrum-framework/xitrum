@@ -13,3 +13,15 @@ ul.articles {
 ul.articles > li {
   margin-left: 0;
 }
+
+input[type="text"], textarea {
+  width: 99%;
+}
+
+textarea {
+  height: 200px;
+}
+
+textarea.article_body {
+  height: 400px;
+}

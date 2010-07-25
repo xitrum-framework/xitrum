@@ -12,7 +12,7 @@ object Scalate {
   engine.workingDirectory = new File("/tmp/scalate")
   engine.bindings = List(Binding("helper", "xt.framework.Helper", true))
 
-  if (true) {  // production
+  if (false) {  // production
     engine.allowReload  = false
     engine.allowCaching = true
 

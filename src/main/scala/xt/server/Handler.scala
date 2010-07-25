@@ -32,7 +32,9 @@ class Handler(app: App) extends SimpleChannelUpstreamHandler {
   }
 
   override def exceptionCaught(ctx: ChannelHandlerContext, e: ExceptionEvent) {
-    error(e.toString)
+    // FIXME: log
+    val throwable = e.getCause
+    throwable.printStackTrace
     e.getChannel.close
   }
 
