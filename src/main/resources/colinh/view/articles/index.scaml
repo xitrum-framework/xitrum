@@ -3,5 +3,7 @@
 %ul
   - for (a <- at[Iterable[Article]]("articles"))
     %li.article
-      %h1=  a.title
+      %h1
+        - val href = "/articles/" + a.id
+        %a(href=href)= a.title
       %div= a.teaser

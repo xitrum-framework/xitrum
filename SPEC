@@ -9,3 +9,6 @@ trait App {
 
 path_info
 ignore_response
+
+uriParams
+-> params

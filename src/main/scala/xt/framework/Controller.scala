@@ -7,7 +7,7 @@ trait Controller extends Helper {
   def layout: Option[String] = None
 
   def render: ChannelBuffer = {
-    val as = param("action").get
+    val as = param("action").getOrElse(env("action404").asInstanceOf[String])
     render(as)
   }
 
@@ -23,9 +23,9 @@ trait Controller extends Helper {
   def render(csasOrAs: String, layout: Option[String]): ChannelBuffer = {
     val t1 = super.render(csasOrAs)
     val t2 = layout match {
-      case Some(csasOrAs) =>
+      case Some(csasOrAs2) =>
         at("content_for_layout", t1.toString(CharsetUtil.UTF_8))
-        super.render(csasOrAs)
+        super.render(csasOrAs2)
 
       case None =>
         t1

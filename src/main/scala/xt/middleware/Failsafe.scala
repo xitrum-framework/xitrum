@@ -8,65 +8,40 @@ import org.jboss.netty.handler.codec.http.{HttpRequest, HttpResponse, HttpRespon
 import org.jboss.netty.buffer.ChannelBuffers
 import org.jboss.netty.util.CharsetUtil
 
-import xt.framework.Controller
-
 /**
- * Catches error 500 and 404.
+ * Runs the app with exception handler.
  * This middleware should be put behind Dispatcher.
  */
 object Failsafe {
   def wrap(app: App) = new App {
     def call(channel: Channel, request: HttpRequest, response: HttpResponse, env: Map[String, Any]) {
-      env.get("controller") match {
-        case Some(c) =>
+      try {
+        app.call(channel, request, response, env)
+      } catch {
+        case e1 =>
           try {
-            val controller = c.asInstanceOf[Controller]
-            setHelper(controller, channel, request, response, env)
-            app.call(channel, request, response, env)
+            // TODO: log
+            e1.printStackTrace
+
+            // Replace the intended controller/action with those of error 500
+            // and run the app again
+            val (csast, ka) = env("error500").asInstanceOf[Dispatcher.CompiledCsas]
+            val (cs, as)    = csast
+
+            val uriParams = new java.util.LinkedHashMap[String, java.util.List[String]]()
+            uriParams.put("controller", Dispatcher.toValues(cs))
+            uriParams.put("action",     Dispatcher.toValues(as))
+
+            response.setStatus(HttpResponseStatus.INTERNAL_SERVER_ERROR)
+            Dispatcher.dispatch(app, channel, request, response, env, ka, uriParams)
           } catch {
-            case e1 =>
-              try {
-                // TODO: log
-                e1.printStackTrace
-
-                val controller = env("controller500").asInstanceOf[Controller]
-                val action     = env("action500").asInstanceOf[Method]
-
-                setHelper(controller, channel, request, response, env)
-                response.setStatus(HttpResponseStatus.INTERNAL_SERVER_ERROR)
-                action.invoke(controller)
-              } catch {
-                case e2 =>
-                  // TODO: log
-                  e2.printStackTrace
-
-                  response.setContent(ChannelBuffers.copiedBuffer("Internal Server Error", CharsetUtil.UTF_8))
-              }
-          }
-
-        case None =>
-          try {
-            val controller = env("controller404").asInstanceOf[Controller]
-            val action     = env("action404").asInstanceOf[Method]
-
-            setHelper(controller, channel, request, response, env)
-            response.setStatus(HttpResponseStatus.NOT_FOUND)
-            action.invoke(controller)
-          } catch {
-            case e =>
+            case e2 =>
               // TODO: log
-              e.printStackTrace
+              e2.printStackTrace
 
-              response.setContent(ChannelBuffers.copiedBuffer("Not Found", CharsetUtil.UTF_8))
+              response.setContent(ChannelBuffers.copiedBuffer("Internal Server Error", CharsetUtil.UTF_8))
           }
       }
     }
-  }
-
-  private def setHelper(controller: Controller,
-      channel: Channel, request: HttpRequest, response: HttpResponse, env: Map[String, Any]) {
-    val paramsMap = env("params").asInstanceOf[java.util.Map[String, java.util.List[String]]]
-    val atMap = new HashMap[String, Any]
-    controller.setRefs(channel, request, response, env, paramsMap, atMap)
   }
 }

@@ -10,10 +10,10 @@ trait Helper {
 	// These variables will be set by middleware Failsafe or
   // when an action renders a view, or when a view renders another view
 
-  protected var channel:  Channel          = _
-	protected var request:  HttpRequest      = _
-	protected var response: HttpResponse     = _
-	protected var env:      Map[String, Any] = _
+  var channel:  Channel          = _
+	var request:  HttpRequest      = _
+	var response: HttpResponse     = _
+	var env:      Map[String, Any] = _
 
 	protected var paramsMap: java.util.Map[String, java.util.List[String]] = _
 
