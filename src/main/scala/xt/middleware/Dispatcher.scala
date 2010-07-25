@@ -143,17 +143,11 @@ object Dispatcher {
         var i = 0
         val m = tokens.size
 
-println(pathInfo, "-----------------")
-        if (compiledPattern.size == 0 && tokens.size == 0)
-{println(0)
-          true
-}        else
-println(1)
-println(compiledPattern.map(println(_)))
+        if (compiledPattern.size == 0)
+          (tokens.size == 0)
+        else
           compiledPattern.forall { tc =>
-println(2)
             val (token, constant) = tc
-println(token, constant)
             val ret = if (constant)
               (i < m && token == tokens(i))
             else {
@@ -165,7 +159,6 @@ println(token, constant)
             i += 1
             ret
           }
-        false
       }
     }
     compiledRoutes.find(finder) match {

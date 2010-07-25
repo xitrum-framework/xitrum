@@ -4,14 +4,16 @@ import colinh.model.Article
 
 class Articles extends Application {
   def index {
-    at("title", "Colinh Home")
+    at("title", "Home")
     at("articles", Article.all)
     render
   }
 
   def show {
     val id = param("id").get.toLong
-    at("article", Article.first(id))
+    val article = Article.first(id)
+    at("title", article.title)
+    at("article", article)
     render
   }
 

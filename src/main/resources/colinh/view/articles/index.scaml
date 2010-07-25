@@ -1,8 +1,8 @@
 - import colinh.model.Article
 
-%ul
+%ul.articles
   - for (a <- at[Iterable[Article]]("articles"))
-    %li.article
+    %li
       %h1
         - val href = "/articles/" + a.id
         %a(href=href)= a.title

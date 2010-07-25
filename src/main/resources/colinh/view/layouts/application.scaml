@@ -3,7 +3,7 @@
   %head
     %meta(content="text/html; charset=utf-8" http-equiv="content-type")
 
-    %title= at("title")
+    %title Colinh - #{at("title")}
 
     %link(type="image/vnd.microsoft.icon" rel="shortcut icon" href="/static/img/favicon.ico")
 
@@ -16,15 +16,13 @@
 
   %body
     .container_12
-      #header
-        %h1 Colinh
+      #header.grid_12
+        %h1
+          %a(href="/") Colinh
 
       #content.grid_9
         != at("content_for_layout")
+        #footer Powered by Colinh & Xitrum
 
       #sidebar.grid_3
         Sidebar goes here
-
-      .clear
-
-      #footer Powered by Colinh & Xitrum
