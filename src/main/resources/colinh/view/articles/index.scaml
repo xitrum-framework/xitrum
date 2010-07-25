@@ -1,7 +1,7 @@
 - import colinh.model.Article
 
 %ul
-  - for (a <- at[List[Article]]("articles"))
+  - for (a <- at[Iterable[Article]]("articles"))
     %li.article
       %h1=  a.title
       %div= a.teaser

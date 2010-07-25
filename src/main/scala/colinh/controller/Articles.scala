@@ -4,8 +4,10 @@ import colinh.model.Article
 
 class Articles extends Application {
   def index {
+    //colinh.model.Schema.create
+
     at("title", "Colinh Home")
-    at("articles", List(new Article, new Article))
+    at("articles", Article.all)
     render
   }
 

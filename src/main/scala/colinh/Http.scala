@@ -6,7 +6,7 @@ import xt.server.Server
 import xt.framework.XTApp
 import xt.middleware.{App, Static,
                       ParamsParser,
-                      MethodOverride, Dispatcher, Failsafe}
+                      MethodOverride, Dispatcher, Failsafe, Squeryl}
 
 object Http {
   private val routes =
@@ -20,6 +20,7 @@ object Http {
 
   def main(args: Array[String]) {
     var app: App = new XTApp
+    app = Squeryl.wrap(app, "postgresql")
     app = Failsafe.wrap(app)
     app = Dispatcher.wrap(app, routes, controllerPaths)
     app = MethodOverride.wrap(app)

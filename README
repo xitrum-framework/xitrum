@@ -22,3 +22,5 @@ Xitrum (XT) is a super fast web server and framework on top of Netty:
 +-----------------+
 
 Layers in XT are tightly coupled for speed.
+
+Requirements: Java 6 (JDBC4 uses Java 6)
