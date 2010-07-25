@@ -13,7 +13,10 @@ class Article (
 }
 
 object Article {
-  def all = from(articles)(a => select(a))
+  def all: Iterable[Article] = from(articles)(a => select(a))
 
-  def first(id: Long) = from(articles)(a => where(a.id === id) select(a)).single
+  def first(id: Long): Option[Article] = {
+    val q = from(articles)(a => where(a.id === id) select(a))
+    if (q.size == 0) None else Some(q.single)
+  }
 }

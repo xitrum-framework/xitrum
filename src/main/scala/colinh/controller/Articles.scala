@@ -1,5 +1,6 @@
 package colinh.controller
 
+import org.jboss.netty.handler.codec.http.HttpResponseStatus
 import colinh.model.Article
 
 class Articles extends Application {
@@ -10,9 +11,15 @@ class Articles extends Application {
 
   def show {
     val id = param("id").get.toLong
-    val article = Article.first(id)
-    at("article", article)
-    render
+    Article.first(id) match {
+      case None =>
+        response.setStatus(HttpResponseStatus.NOT_FOUND)
+        render("Errors#error404")
+
+      case Some(article) =>
+        at("article", article)
+        render
+    }
   }
 
   def make {

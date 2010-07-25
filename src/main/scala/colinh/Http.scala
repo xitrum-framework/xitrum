@@ -24,8 +24,8 @@ object Http {
 
   def main(args: Array[String]) {
     var app: App = new XTApp
+    app = Failsafe.wrap(app)  // Failsafe should be the last in the middleware chain
     app = Squeryl.wrap(app, "postgresql")
-    app = Failsafe.wrap(app)
     app = Dispatcher.wrap(app, routes, errorRoutes, controllerPaths)
     app = MethodOverride.wrap(app)
     app = ParamsParser.wrap(app)

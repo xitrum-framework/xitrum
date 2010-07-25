@@ -10,7 +10,8 @@ import org.jboss.netty.util.CharsetUtil
 
 /**
  * Runs the app with exception handler.
- * This middleware should be put behind Dispatcher.
+ * This middleware should be put behind Dispatcher and should be the last in
+ * the middleware chain.
  */
 object Failsafe {
   def wrap(app: App) = new App {

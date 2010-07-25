@@ -6,6 +6,16 @@
   text-align: center;
 }
 
+.notice {
+  color: green;
+  font-weight: bold;
+}
+
+.error {
+  color: red;
+  font-weight: bold;
+}
+
 ul.articles {
   list-style-type: none;
 }
