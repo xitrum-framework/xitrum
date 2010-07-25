@@ -4,6 +4,9 @@
 - at("title", article.title)
 
 .article
-  %h1=  article.title
-  %div= article.teaser
-  %div= article.body
+  %h1
+    !=  article.title
+  %div
+    != article.teaser
+  %div
+    != article.body

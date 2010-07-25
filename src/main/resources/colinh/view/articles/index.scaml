@@ -8,4 +8,5 @@
       %h1
         - val href = "/articles/" + a.id
         %a(href=href)= a.title
-      %div= a.teaser
+      %div
+        != a.teaser
