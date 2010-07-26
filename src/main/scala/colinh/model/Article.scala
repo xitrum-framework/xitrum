@@ -4,15 +4,15 @@ import org.squeryl.PrimitiveTypeMode._
 import Schema._
 
 class Article(
-    var id:        Long,
+    var id:        Int,
     var title:     String,
     var teaser:    String,
     var body:      String,
     var sticky:    Boolean,
-    var hits:      Long,
+    var hits:      Int,
     var createdAt: DateType,
     var updatedAt: DateType,
-    var userId: Long) {
+    var userId:    Int) {
   def this() = this(0, "", "", "", false, 0, null, null, 0)
 }
 
