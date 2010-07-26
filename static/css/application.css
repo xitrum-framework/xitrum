@@ -29,9 +29,9 @@ input[type="text"], textarea {
 }
 
 textarea {
-  height: 200px;
+  height: 300px;
 }
 
 textarea.article_body {
-  height: 400px;
+  height: 450px;
 }
