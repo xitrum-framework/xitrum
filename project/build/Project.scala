@@ -17,7 +17,7 @@ class Project(info: ProjectInfo) extends DefaultProject(info) {
       "org.squeryl"            % "squeryl_2.8.0" % "0.9.4beta8"    % "compile->default",
       "c3p0"                   % "c3p0"          % "0.9.1"         % "compile->default",
       "postgresql"             % "postgresql"    % "8.4-701.jdbc4" % "compile->default",
-      "org.slf4j"              % "slf4j-log4j12" % "1.6.1"         % "compile->default",
+      "org.slf4j"              % "slf4j-log4j12" % "1.6.1"         % "compile->default"
     ) ++ super.libraryDependencies
 
   override def mainClass = Some("colinh.Http")

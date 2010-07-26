@@ -8,9 +8,9 @@
   %input(type="text" name="title" value="#{article.title}")
 
   %label Teaser
-  %textarea(name="teaser")= article.teaser
+  %textarea.tinymce(name="teaser")= article.teaser
 
   %label Body
-  %textarea.article_body(name="body")= article.body
+  %textarea.tinymce.article_body(name="body")= article.body
 
-  %input(type="submit")
+  %input(type="submit" value="Save")
