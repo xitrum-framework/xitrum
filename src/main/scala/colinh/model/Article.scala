@@ -3,7 +3,7 @@ package colinh.model
 import org.squeryl.PrimitiveTypeMode._
 import Schema._
 
-class Article (
+class Article(
     var id:        Long,
     var title:     String,
     var teaser:    String,
@@ -22,11 +22,11 @@ object Article {
   def all = from(articles)(a => select(a) orderBy(a.updatedAt desc))
 
   def page(p: Int) = {
-    val size = all.size
+    val size = from(articles)(a => compute(count)).toInt
     val numPages1 = size/pageLength
     val numPages2 = if (numPages1*pageLength < size) numPages1 + 1 else numPages1
-    val articles = all.page(p - 1, pageLength)
-    (numPages2, articles)
+    val col = all.page(p - 1, pageLength)
+    (numPages2, col)
   }
 
   def first(id: Long): Option[Article] = {

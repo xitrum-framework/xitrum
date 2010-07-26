@@ -22,7 +22,10 @@ object Squeryl {
     setupDB(driver)
     new App {
       def call(channel: Channel, request: HttpRequest, response: HttpResponse, env: Map[String, Any]) {
-        inTransaction { app.call(channel, request, response, env) }
+        inTransaction {
+          //org.squeryl.Session.currentSession.setLogger(s => println(s))
+          app.call(channel, request, response, env)
+        }
       }
     }
   }
@@ -35,10 +38,7 @@ object Squeryl {
     val cpds = new ComboPooledDataSource
     cpds.setDriverClass(driverClassName)
 
-    val concreteFactory = () =>
-      Session.create(
-        cpds.getConnection,
-        adapter)
+    val concreteFactory = () => Session.create(cpds.getConnection, adapter)
     SessionFactory.concreteFactory = Some(concreteFactory)
   }
 }
