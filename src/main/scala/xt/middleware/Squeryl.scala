@@ -31,13 +31,11 @@ object Squeryl {
   }
 
   private def setupDB(driver: String) {
-    val (driverClassName, adapter) = driver match {
-      case "postgresql" => ("org.postgresql.Driver", new PostgreSqlAdapter)
+    val adapter = driver match {
+      case "postgresql" => new PostgreSqlAdapter
     }
 
     val cpds = new ComboPooledDataSource
-    cpds.setDriverClass(driverClassName)
-
     val concreteFactory = () => Session.create(cpds.getConnection, adapter)
     SessionFactory.concreteFactory = Some(concreteFactory)
   }
