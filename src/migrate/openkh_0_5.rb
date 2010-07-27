@@ -1,10 +1,14 @@
 # This program migrates data and uploaded files from OpenKH 0.5 to LiKH
 #
-# Required gems: dbi and dbd-pg
-# # Use DBI 0.1.1 if newer versions of DBI cause errors.
+# Required gems:
+#   dbi
+#   dbd-pg
+#   nokogiri
 
 DB = {
   :adapter  => 'DBI:Pg',
+  :host     => 'localhost',
+  :port     => 5432,
   :username => 'postgres',
   :password => 'postgres',
   :openkh   => 'openkh',
@@ -53,8 +57,8 @@ end
 $url_conversion_table = {}
 
 def main
-  $openkh = DBI.connect("#{DB[:adapter]}:#{DB[:openkh]}", DB[:username], DB[:password])
-  $colinh = DBI.connect("#{DB[:adapter]}:#{DB[:colinh]}", DB[:username], DB[:password])
+  $openkh = DBI.connect("#{DB[:adapter]}:#{DB[:openkh]}:#{DB[:host]}:#{DB[:port]}", DB[:username], DB[:password])
+  $colinh = DBI.connect("#{DB[:adapter]}:#{DB[:colinh]}:#{DB[:host]}:#{DB[:port]}", DB[:username], DB[:password])
 
 #  $colinh.do('DELETE FROM user_');             setval('user__id_seq',         1)
 #  $colinh.do('DELETE FROM category');           setval('category_id_seq',       1)
