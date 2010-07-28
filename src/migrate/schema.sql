@@ -21,6 +21,8 @@ CREATE TABLE article
   CONSTRAINT article_pkey PRIMARY KEY (id)
 );
 
+CREATE INDEX article_updatedat_idx ON article(updatedat);
+
 CREATE TABLE "comment"
 (
   id        serial                      NOT NULL,
@@ -31,3 +33,5 @@ CREATE TABLE "comment"
   articleid int                         NOT NULL,
   CONSTRAINT comment_pkey PRIMARY KEY (id)
 );
+
+CREATE INDEX updatedat_idx ON "comment"(createdat);
