@@ -24,3 +24,48 @@ Xitrum (XT) is a super fast web server and framework on top of Netty:
 Layers in XT are tightly coupled for speed.
 
 Requirements: Java 6 (JDBC4 uses Java 6)
+
+== Project source directory layout
+
+A typical blog application will have this directory layout:
+
+lib
+  jrebel.jar
+lib_managed
+project
+public
+  css
+  img
+  js
+src
+  main
+    scala
+      myapp
+        controller
+          Articles.scala
+        helper
+          ArticleHelper.scala
+        model
+          Article.scala
+          Schema.scala
+    resources
+      myapp
+        view
+          articles
+            index.scaml
+            show.scala
+      c3p0.properties
+  migrate
+    schema1.sql
+    schema2.sql
+tmp
+  scalate
+
+== Project deployed directory layout
+
+bin
+lib
+  myapp.jar
+public
+tmp
+  scalate

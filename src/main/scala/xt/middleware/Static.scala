@@ -21,7 +21,7 @@ object Static {
   def wrap(app: App) = new App {
     def call(channel: Channel, request: HttpRequest, response: HttpResponse, env: Map[String, Any]) {
       val uri = request.getUri
-      if (!uri.startsWith("/static"))
+      if (!uri.startsWith("/public"))
         app.call(channel, request, response, env)
       else {
         sanitizeUri(uri) match {
