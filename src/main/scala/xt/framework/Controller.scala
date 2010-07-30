@@ -1,4 +1,4 @@
-package st.framework
+package xt.framework
 
 import org.jboss.netty.buffer.ChannelBuffer
 import org.jboss.netty.util.CharsetUtil
