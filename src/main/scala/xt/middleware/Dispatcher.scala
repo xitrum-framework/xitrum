@@ -1,4 +1,4 @@
-package st.middleware
+package xt.middleware
 
 import java.lang.reflect.Method
 import scala.collection.mutable.Map
@@ -7,7 +7,7 @@ import scala.collection.immutable.{Map => IMap}
 import org.jboss.netty.channel.Channel
 import org.jboss.netty.handler.codec.http.{HttpRequest, HttpResponse, HttpMethod, HttpResponseStatus}
 
-import st.framework.Controller
+import xt.framework.Controller
 
 /**
  * This middleware should be put behind ParamsParser and MultipartParamsParser.

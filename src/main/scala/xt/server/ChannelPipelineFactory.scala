@@ -1,9 +1,9 @@
-package st.server
+package xt.server
 
 import org.jboss.netty.channel.{Channels, ChannelPipeline, ChannelPipelineFactory => CPF}
 import org.jboss.netty.handler.codec.http.{HttpRequestDecoder, HttpChunkAggregator, HttpResponseEncoder}
 
-import st.middleware.App
+import xt.middleware.App
 
 class ChannelPipelineFactory(app: App) extends CPF {
   def getPipeline: ChannelPipeline = {

@@ -1,4 +1,4 @@
-package st.server
+package xt.server
 
 import java.net.InetSocketAddress
 import java.util.concurrent.Executors
@@ -6,7 +6,7 @@ import java.util.concurrent.Executors
 import org.jboss.netty.bootstrap.ServerBootstrap
 import org.jboss.netty.channel.socket.nio.NioServerSocketChannelFactory
 
-import st.middleware.App
+import xt.middleware.App
 
 class Server(app: App) {
   def start {

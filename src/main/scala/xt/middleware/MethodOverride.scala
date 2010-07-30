@@ -1,4 +1,4 @@
-package st.middleware
+package xt.middleware
 
 import scala.collection.mutable.Map
 import scala.collection.JavaConversions

@@ -1,4 +1,4 @@
-package st.middleware
+package xt.middleware
 
 import java.lang.reflect.Method
 import scala.collection.mutable.{Map, HashMap}
