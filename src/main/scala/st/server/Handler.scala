@@ -1,4 +1,4 @@
-package xt.server
+package st.server
 
 import scala.collection.mutable.HashMap
 
@@ -15,7 +15,7 @@ import org.jboss.netty.handler.codec.http.HttpHeaders.Names._
 import org.jboss.netty.handler.codec.http.HttpResponseStatus._
 import org.jboss.netty.handler.codec.http.HttpVersion._
 
-import xt.middleware.App
+import st.middleware.App
 
 class Handler(app: App) extends SimpleChannelUpstreamHandler {
   override def messageReceived(ctx: ChannelHandlerContext, e: MessageEvent) {

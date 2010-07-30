@@ -1,4 +1,4 @@
-package xt.framework
+package st.framework
 
 import java.io.{File, StringWriter, PrintWriter}
 
@@ -10,7 +10,7 @@ import org.jboss.netty.buffer.ChannelBuffer
 object Scalate {
   val engine = new TemplateEngine
   engine.workingDirectory = new File("tmp/scalate")
-  engine.bindings = List(Binding("helper", "xt.framework.Helper", true))
+  engine.bindings = List(Binding("helper", "st.framework.Helper", true))
 
   if (true) {  // production
     engine.allowReload  = false

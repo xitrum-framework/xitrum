@@ -1,4 +1,4 @@
-package xt.framework
+package st.framework
 
 import scala.collection.mutable.Map
 import scala.collection.JavaConversions
