@@ -22,6 +22,7 @@ object Squeryl {
     setupDB
     new App {
       def call(channel: Channel, request: HttpRequest, response: HttpResponse, env: Map[String, Any]) {
+        // The connection will be closed here after the transaction
         inTransaction {
           //org.squeryl.Session.currentSession.setLogger(s => println(s))
           app.call(channel, request, response, env)
