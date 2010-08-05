@@ -22,8 +22,11 @@ object Squeryl {
     setupDB
     new App {
       def call(channel: Channel, request: HttpRequest, response: HttpResponse, env: Map[String, Any]) {
+        // Do not use inTransaction because we want the session to be unbound:
+        // http://groups.google.com/group/squeryl/browse_thread/thread/e7fe581f7f5f61f9
+        //
         // The connection will be closed here after the transaction
-        inTransaction {
+        transaction {
           //org.squeryl.Session.currentSession.setLogger(s => println(s))
           app.call(channel, request, response, env)
         }
