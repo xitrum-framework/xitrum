@@ -5,8 +5,6 @@ import java.io.{File, StringWriter, PrintWriter}
 import org.fusesource.scalate.{TemplateEngine, Binding, DefaultRenderContext}
 import org.fusesource.scalate.scaml.ScamlOptions
 
-import org.jboss.netty.buffer.ChannelBuffer
-
 object Scalate {
   val engine = new TemplateEngine
   engine.workingDirectory = new File("tmp/scalate")
@@ -27,15 +25,16 @@ object Scalate {
     engine.allowCaching = false
   }
 
-  def render(csasOrAs: String, helper: Helper): ChannelBuffer = {
+  def render(csasOrAs: String, helper: Helper): String = {
     val path     = csasOrAsToPath(csasOrAs, helper)
     val template = engine.load(path)
 
-    val context = new ChannelBufferRenderContext(engine)
+    val buffer = new StringWriter
+    val context = new DefaultRenderContext(path, engine, new PrintWriter(buffer))
     context.attributes("helper") = helper
 
     template.render(context)
-    context.out
+    buffer.toString
   }
 
   //----------------------------------------------------------------------------

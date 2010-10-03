@@ -15,7 +15,7 @@ class Project(info: ProjectInfo) extends DefaultProject(info) {
       "org.slf4j"              % "slf4j-log4j12"        % "1.6.1"         % "compile->default",
       "org.jboss.netty"        % "netty"                % "3.2.1.Final"   % "compile->default",
       "org.fusesource.scalate" % "scalate-core"         % "1.3-SNAPSHOT"  % "compile->default",
-      "org.squeryl"            % "squeryl_2.8.0"        % "0.9.4beta8"    % "compile->default",
+      "org.squeryl"            % "squeryl_2.8.0"        % "0.9.4-RC2"     % "compile->default",
       "c3p0"                   % "c3p0"                 % "0.9.1"         % "compile->default",
       "postgresql"             % "postgresql"           % "8.4-701.jdbc4" % "compile->default",
       "mysql"                  % "mysql-connector-java" % "5.1.13"        % "compile->default"

@@ -1,12 +1,12 @@
 package xt.framework
 
-import org.jboss.netty.buffer.ChannelBuffer
+import org.jboss.netty.buffer.ChannelBuffers
 import org.jboss.netty.util.CharsetUtil
 
 trait Controller extends Helper {
   def layout: Option[String] = None
 
-  def render: ChannelBuffer = {
+  def render: String = {
     val as = param("action").getOrElse(env("action404").asInstanceOf[String])
     render(as)
   }
@@ -20,11 +20,11 @@ trait Controller extends Helper {
   /**
    * @param layout None for no layout
    */
-  def render(csasOrAs: String, layout: Option[String]): ChannelBuffer = {
+  def render(csasOrAs: String, layout: Option[String]): String = {
     val t1 = super.render(csasOrAs)
     val t2 = layout match {
       case Some(csasOrAs2) =>
-        at("content_for_layout", t1.toString(CharsetUtil.UTF_8))
+        at("content_for_layout", t1)
         super.render(csasOrAs2)
 
       case None =>
@@ -42,8 +42,8 @@ trait Controller extends Helper {
 
   //----------------------------------------------------------------------------
 
-  private def outputTextToResponse(buffer: ChannelBuffer): ChannelBuffer = {
-    response.setContent(buffer)
-    buffer
+  private def outputTextToResponse(text: String): String = {
+    response.setContent(ChannelBuffers.copiedBuffer(text, CharsetUtil.UTF_8))
+    text
   }
 }
