@@ -1,0 +1,15 @@
+Connection pool using c3p0 is included.
+
+You must manually add driver for your specific DB.
+
+For example, for PostgreSQL or MySQL, add to your SBT project definition
+something like:
+
+override def libraryDependencies =
+  Set(
+    "postgresql" % "postgresql"           % "8.4-701.jdbc4" % "compile->default",
+    //"mysql"      % "mysql-connector-java" % "5.1.13"        % "compile->default"
+  ) ++ super.libraryDependencies
+
+For Oracle, you must download the driver manualy:
+http://www.oracle.com/technology/software/tech/java/sqlj%5Fjdbc/index.html
