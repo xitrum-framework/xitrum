@@ -1,0 +1,5 @@
+To add everything to your SBT project, use:
+"cntt" %% "xitrum" % "0.1-SNAPSHOT" % "compile"
+
+To add only xitrum-core, use:
+"cntt" %% "xitrum-core" % "0.1-SNAPSHOT" % "compile"
