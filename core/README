@@ -1,15 +1,15 @@
-Xitrum (XT) is a super fast web server and framework on top of Netty:
-* It fills the gap between Scalatra (Step) and Lift: it is more powerful than
+Xitrum is a super fast web server and framework on top of Netty:
+* It fills the gap between Scalatra and Lift: it is more powerful than
   Scalatra and less complex than Lift
 * It combines MVC (controller first) style and component-based (view first) style
-* If you are familiar with Merb or Nitrogen, you will be at home with XT
-* It does not try to abstract away from the underlying network layer, but lets
+* If you are familiar with Merb or Nitrogen, you will be at home with Xitrum
+* It does not try to abstract away from the underlying network layer, it lets
   you talk directly to Netty whenever you want, unlike most frameworks
 
 +-----------------+
 |    Your app     |
 +-----------------+
-|       XT        |
+|      Xitrum     |
 | +-------------+ |
 | |  Framework  | |
 | +-------------+ |
@@ -21,14 +21,17 @@ Xitrum (XT) is a super fast web server and framework on top of Netty:
 |      Netty      |
 +-----------------+
 
-Layers in XT are tightly coupled for speed.
+Layers in Xitrum are tightly coupled for speed.
 
-Requirements: Java 6 (JDBC4 uses Java 6)
+Xitrum needs Java 5 or above because of Netty.
 
 == Project source directory layout
 
 A typical blog application will have this directory layout:
 
+config
+  blog.properties
+  log4j.properties
 lib
   jrebel.jar
 lib_managed
@@ -40,32 +43,34 @@ public
 src
   main
     scala
-      myapp
+      blog
         controller
           Articles.scala
         helper
           ArticleHelper.scala
         model
           Article.scala
-          Schema.scala
     resources
-      myapp
+      blog
         view
           articles
             index.scaml
-            show.scala
-      c3p0.properties
-  migrate
-    schema1.sql
-    schema2.sql
+            show.scaml
 tmp
   scalate
 
 == Project deployed directory layout
 
 bin
+  xitrum.sh
+config
+  blog.properties
+  log4j.properties
 lib
-  myapp.jar
+  blog.jar
 public
+  css
+  img
+  js
 tmp
   scalate
