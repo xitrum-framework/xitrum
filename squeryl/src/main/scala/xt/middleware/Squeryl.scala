@@ -36,7 +36,7 @@ object Squeryl {
 
   private def setupDB {
     val dataSource  = new ComboPooledDataSource
-    val driverClass = cpds.getDriverClass
+    val driverClass = dataSource.getDriverClass
     val adapter     = guessAdapter(driverClass)
 
     val concreteFactory = () => Session.create(dataSource.getConnection, adapter)
