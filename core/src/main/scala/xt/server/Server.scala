@@ -10,9 +10,8 @@ import xt.middleware.App
 
 class Server(app: App) {
   def start {
-    val bootstrap = new ServerBootstrap(
-      new NioServerSocketChannelFactory(
-        Executors.newCachedThreadPool, Executors.newCachedThreadPool))
+    val bootstrap = new ServerBootstrap(new NioServerSocketChannelFactory(
+      Executors.newCachedThreadPool, Executors.newCachedThreadPool))
     bootstrap.setPipelineFactory(new ChannelPipelineFactory(app))
     bootstrap.setOption("reuseAddress", true)
     bootstrap.setOption("child.tcpNoDelay", true)

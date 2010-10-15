@@ -7,17 +7,17 @@ import org.jboss.netty.channel.Channel
 import org.jboss.netty.handler.codec.http.{HttpRequest, HttpResponse}
 
 trait Helper {
-	// These variables will be set by middleware Failsafe or
+  // These variables will be set by middleware Failsafe or
   // when an action renders a view, or when a view renders another view
 
   var channel:  Channel          = _
-	var request:  HttpRequest      = _
-	var response: HttpResponse     = _
-	var env:      Map[String, Any] = _
+  var request:  HttpRequest      = _
+  var response: HttpResponse     = _
+  var env:      Map[String, Any] = _
 
-	protected var paramsMap: java.util.Map[String, java.util.List[String]] = _
+  protected var paramsMap: java.util.Map[String, java.util.List[String]] = _
 
-	// Equivalent to @xxx variables of Rails
+  // Equivalent to @xxx variables of Rails
   protected var atMap: Map[String, Any] = _
 
   /**
@@ -40,7 +40,7 @@ trait Helper {
     this.atMap     = atMap
   }
 
-	//----------------------------------------------------------------------------
+  //----------------------------------------------------------------------------
 
   /**
    * Returns a singular element.
