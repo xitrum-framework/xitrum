@@ -6,18 +6,12 @@ import org.jboss.netty.channel.Channel
 import org.jboss.netty.handler.codec.http.{HttpRequest, HttpResponse}
 
 import org.squeryl.{SessionFactory, Session}
-import org.squeryl.adapters.{MySQLAdapter, OracleAdapter, PostgreSqlAdapter}
+import org.squeryl.adapters.{PostgreSqlAdapter, MySQLAdapter, OracleAdapter}
 import org.squeryl.PrimitiveTypeMode._
 
 import com.mchange.v2.c3p0.ComboPooledDataSource
 
-/**
- * This middleware:
- */
 object Squeryl {
-  /**
-   * @param driver: postgresql, mysql, or oracle
-   */
   def wrap(app: App) = {
     setupDB
     new App {
@@ -44,7 +38,7 @@ object Squeryl {
   }
 
   /**
-   * driverClass: com.mysql.jdbc.Driver or org.postgresql.Driver etc.
+   * driverClass: org.postgresql.Driver or com.mysql.jdbc.Driver etc.
    */
   private def guessAdapter(driverClass: String) = {
     val lower = driverClass.toLowerCase

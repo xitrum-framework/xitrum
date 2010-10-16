@@ -19,6 +19,23 @@ override def libraryDependencies =
 For Oracle, you must download the driver manualy:
 http://www.oracle.com/technology/software/tech/java/sqlj%5Fjdbc/index.html
 
+== Middleware order
+
+Example:
+
+    // Failsafe should be outside Squeryl.
+    // If Failsafe is inside Squeryl, all exceptions would be swallowed.
+    var app: App = new XTApp
+    app = Squeryl.wrap(app)
+    app = Failsafe.wrap(app)
+    app = Dispatcher.wrap(app, routes, errorRoutes, controllerPaths)
+    app = MethodOverride.wrap(app)
+    app = ParamsParser.wrap(app)
+    app = Static.wrap(app)
+
+    val s = new Server(app)
+    s.start
+
 == Project directory layout
 
 A typical blog application will have this directory layout:
