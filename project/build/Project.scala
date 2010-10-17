@@ -4,6 +4,9 @@ class Project(info: ProjectInfo) extends ParentProject(info) {
   val localMavenRepo = "Local Maven Repo" at
     "file://" + Path.userHome + "/.m2/repository"
 
+  val localIvyRepo = "Local Ivy" at
+    "file://" + Path.userHome + "/.ivy2/local"
+
   val jbossRepo = "JBoss Repo" at
     "https://repository.jboss.org/nexus/content/groups/public/"
 
@@ -14,19 +17,23 @@ class Project(info: ProjectInfo) extends ParentProject(info) {
   lazy val squeryl = project("squeryl", "xitrum-squeryl", new Squeryl(_), core)
 
   class Core(info: ProjectInfo) extends DefaultProject(info) {
+    // Use SLF4J with Logback
     override def libraryDependencies =
       Set(
-        "org.slf4j"              % "slf4j-log4j12" % "1.6.1"       % "compile->default",
-        "org.jboss.netty"        % "netty"         % "3.2.2.Final" % "compile->default",
-        "org.fusesource.scalate" % "scalate-core"  % "1.3"         % "compile->default"
+        "ch.qos.logback"         % "logback-classic" % "0.9.25"      % "compile",
+        "org.jboss.netty"        % "netty"           % "3.2.2.Final" % "compile",
+        "org.fusesource.scalate" % "scalate-core"    % "1.3"         % "compile"
       ) ++ super.libraryDependencies
   }
 
   class Squeryl(info: ProjectInfo) extends DefaultProject(info) {
+    // http://www.mchange.com/projects/c3p0/index.html#configuring_logging
+    // Redirect c3p0 log to SLF4J (Logback, see above)
     override def libraryDependencies =
       Set(
-        "org.squeryl" % "squeryl_2.8.0" % "0.9.4-RC2" % "compile->default",
-        "c3p0"        % "c3p0"          % "0.9.1"     % "compile->default"
+        "org.squeryl" % "squeryl_2.8.0"    % "0.9.4-RC2" % "compile",
+        "c3p0"        % "c3p0"             % "0.9.1"     % "compile",
+        "org.slf4j"   % "log4j-over-slf4j" % "1.6.0"     % "compile"
       ) ++ super.libraryDependencies
   }
 }
