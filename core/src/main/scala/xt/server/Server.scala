@@ -8,7 +8,7 @@ import org.jboss.netty.channel.socket.nio.NioServerSocketChannelFactory
 
 import xt.middleware.App
 
-class Server(app: App) {
+class Server(app: App, port: Int) {
   def start {
     val bootstrap = new ServerBootstrap(new NioServerSocketChannelFactory(
       Executors.newCachedThreadPool, Executors.newCachedThreadPool))
@@ -16,6 +16,6 @@ class Server(app: App) {
     bootstrap.setOption("reuseAddress", true)
     bootstrap.setOption("child.tcpNoDelay", true)
     bootstrap.setOption("child.keepAlive",  true)
-    bootstrap.bind(new InetSocketAddress(8080))
+    bootstrap.bind(new InetSocketAddress(port))
   }
 }
