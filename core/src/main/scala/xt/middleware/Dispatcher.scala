@@ -7,6 +7,7 @@ import scala.collection.immutable.{Map => IMap}
 import org.jboss.netty.channel.Channel
 import org.jboss.netty.handler.codec.http.{HttpRequest, HttpResponse, HttpMethod, HttpResponseStatus}
 
+import xt._
 import xt.framework.Controller
 
 /**
@@ -49,7 +50,11 @@ object Dispatcher {
         // by Failsafe midddleware
         env.put("error500", compiledCsas500)
 
+        Log.debug(method + " " + pathInfo + " " + filterParams(uriParams))
+        val t1 = System.currentTimeMillis
         dispatch(app, channel, request, response, env, ka, uriParams)
+        val t2 = System.currentTimeMillis
+        Log.debug((t2 - t1) + " [ms]")
       }
     }
   }
@@ -203,5 +208,15 @@ object Dispatcher {
 
       case None => None
     }
+  }
+
+  // Same as Rails' config.filter_parameters
+  private def filterParams(params: java.util.Map[String, java.util.List[String]]): java.util.Map[String, java.util.List[String]] = {
+    val ret = new java.util.LinkedHashMap[String, java.util.List[String]]()
+    ret.putAll(params)
+    for (key <- Config.filterParams) {
+      if (ret.containsKey(key)) ret.put(key, toValues("[filtered]"))
+    }
+    ret
   }
 }

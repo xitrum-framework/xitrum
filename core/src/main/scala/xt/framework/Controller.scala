@@ -20,24 +20,29 @@ trait Controller extends Helper {
   /**
    * @param layout None for no layout
    */
-  def render(csasOrAs: String, layout: Option[String]): String = {
-    val t1 = super.render(csasOrAs)
+  def render(csasOrAs: String, layout: Option[String]) = {
+    val text = super.render(csasOrAs)
+    renderText(text, layout)
+  }
+
+  //----------------------------------------------------------------------------
+
+  def renderText(text: String): String = renderText(text, layout)
+
+  def renderText(text: String, layout: Option[String]): String = {
     val t2 = layout match {
       case Some(csasOrAs2) =>
-        at("content_for_layout", t1)
+        at("content_for_layout", text)
         super.render(csasOrAs2)
 
       case None =>
-        t1
+        text
     }
 
     outputTextToResponse(t2)
   }
 
-  //----------------------------------------------------------------------------
-
   def renderFile(path: String) {
-
   }
 
   //----------------------------------------------------------------------------

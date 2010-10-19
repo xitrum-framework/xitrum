@@ -8,6 +8,8 @@ import org.jboss.netty.handler.codec.http.{HttpRequest, HttpResponse, HttpRespon
 import org.jboss.netty.buffer.ChannelBuffers
 import org.jboss.netty.util.CharsetUtil
 
+import xt._
+
 /**
  * Runs the app with exception handler.
  * This middleware should be put behind Dispatcher and should be the last in
@@ -21,8 +23,7 @@ object Failsafe {
       } catch {
         case e1 =>
           try {
-            // TODO: log
-            e1.printStackTrace
+            Log.error("xt.middleware.Failsafe", e1)
 
             // Replace the intended controller/action with those of error 500
             // and run the app again
@@ -37,8 +38,7 @@ object Failsafe {
             Dispatcher.dispatch(app, channel, request, response, env, ka, uriParams)
           } catch {
             case e2 =>
-              // TODO: log
-              e2.printStackTrace
+              Log.error("xt.middleware.Failsafe", e2)
 
               response.setContent(ChannelBuffers.copiedBuffer("Internal Server Error", CharsetUtil.UTF_8))
           }

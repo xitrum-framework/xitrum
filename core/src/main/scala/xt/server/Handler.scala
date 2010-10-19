@@ -15,6 +15,7 @@ import org.jboss.netty.handler.codec.http.HttpHeaders.Names._
 import org.jboss.netty.handler.codec.http.HttpResponseStatus._
 import org.jboss.netty.handler.codec.http.HttpVersion._
 
+import xt._
 import xt.middleware.App
 
 class Handler(app: App) extends SimpleChannelUpstreamHandler {
@@ -32,9 +33,8 @@ class Handler(app: App) extends SimpleChannelUpstreamHandler {
   }
 
   override def exceptionCaught(ctx: ChannelHandlerContext, e: ExceptionEvent) {
-    // FIXME: log
     val throwable = e.getCause
-    throwable.printStackTrace
+    Log.error("xt.server.Handler", throwable)
     e.getChannel.close
   }
 
