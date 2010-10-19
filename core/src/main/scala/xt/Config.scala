@@ -12,7 +12,7 @@ object Config {
     ret
   }
 
-  val httpPort = properties.getProperty("xitrum.http_port").toInt
+  val httpPort = properties.getProperty("http_port").toInt
 
-  val filterParams = properties.getProperty("xitrum.filter_params").split(", ")
+  val filterParams = properties.getProperty("filter_params").split(", ")
 }
