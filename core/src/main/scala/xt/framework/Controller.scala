@@ -39,16 +39,14 @@ trait Controller extends Helper {
         text
     }
 
-    outputTextToResponse(t2)
+    response.setContent(ChannelBuffers.copiedBuffer(t2, CharsetUtil.UTF_8))
+    t2
+  }
+
+  def renderBinary(bytes: Array[Byte]) {
+    response.setContent(ChannelBuffers.wrappedBuffer(bytes))
   }
 
   def renderFile(path: String) {
-  }
-
-  //----------------------------------------------------------------------------
-
-  private def outputTextToResponse(text: String): String = {
-    response.setContent(ChannelBuffers.copiedBuffer(text, CharsetUtil.UTF_8))
-    text
   }
 }
