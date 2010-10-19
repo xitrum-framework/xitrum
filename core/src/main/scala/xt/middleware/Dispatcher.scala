@@ -50,17 +50,14 @@ object Dispatcher {
         // by Failsafe midddleware
         env.put("error500", compiledCsas500)
 
-        Log.debug(method + " " + pathInfo + " " + filterParams(uriParams))
-        val t1 = System.currentTimeMillis
+        Log.debug(method + " " + pathInfo)  // TODO: Fix this ugly code (1 of 3)
         dispatch(app, channel, request, response, env, ka, uriParams)
-        val t2 = System.currentTimeMillis
-        Log.debug((t2 - t1) + " [ms]")
       }
     }
   }
 
   /**
-   * Also used by Failsafe when redispatching.
+   * WARN: This method is here because it is also used by Failsafe when redispatching.
    */
   def dispatch(app: App,
       channel: Channel, request: HttpRequest, response: HttpResponse, env: Map[String, Any],
@@ -76,12 +73,17 @@ object Dispatcher {
     env.put("controller", c)
     env.put("action",     a)
 
+    Log.debug(filterParams(params).toString)  // TODO: Fix this ugly code (2 of 3)
+    val t1 = System.currentTimeMillis
     app.call(channel, request, response, env)
+    val t2 = System.currentTimeMillis
+    Log.debug((t2 - t1) + " [ms]")            // TODO: Fix this ugly code (3 of 3)
   }
 
   /**
+   * WARN: This method is here because it is also used by Failsafe when redispatching.
+   *
    * Wraps a single String by a List.
-   * Also used by Failsafe when redispatching.
    */
   def toValues(value: String): java.util.List[String] = {
     val values = new java.util.ArrayList[String](1)
