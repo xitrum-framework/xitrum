@@ -55,10 +55,5 @@ case "$1" in
     release
     ;;
   *)
-    if [ -f src ]
-    then
-      start_development
-    else
-      start_production
-    fi
+    if [ -d src ]; then start_development; else start_production fi
 esac
