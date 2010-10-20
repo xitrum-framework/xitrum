@@ -7,7 +7,7 @@ trait Controller extends Helper {
   def layout: Option[String] = None
 
   def render: String = {
-    val as = param("action").getOrElse(env("action404").asInstanceOf[String])
+    val as = paramo("action").getOrElse(env("action404").asInstanceOf[String])
     render(as)
   }
 

@@ -45,7 +45,14 @@ trait Helper {
   /**
    * Returns a singular element.
    */
-  def param(key: String): Option[String] = {
+  def param(key: String): String = {
+    if (paramsMap.containsKey(key))
+      paramsMap.get(key).get(0)
+    else
+      throw new xt.middleware.Failsafe.MissingParam(key)
+  }
+
+  def paramo(key: String): Option[String] = {
     val values = paramsMap.get(key)
     if (values == null) None else Some(values.get(0))
   }
@@ -53,7 +60,14 @@ trait Helper {
   /**
    * Returns a list of elements.
    */
-  def params(key: String): Option[List[String]] = {
+  def params(key: String): List[String] = {
+    if (paramsMap.containsKey(key))
+      JavaConversions.asBuffer[String](paramsMap.get(key)).toList
+    else
+      throw new xt.middleware.Failsafe.MissingParam(key)
+  }
+
+  def paramso(key: String): Option[List[String]] = {
     val values = paramsMap.get(key)
     if (values == null) None else Some(JavaConversions.asBuffer[String](values).toList)
   }

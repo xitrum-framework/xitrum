@@ -51,7 +51,7 @@ object Scalate {
 
   private def csasOrAsToCsas(csasOrAs: String, helper: Helper): String = {
     if (csasOrAs.indexOf("#") == -1)
-      helper.param("controller").getOrElse(helper.env("controller404").asInstanceOf[String]) + "#" + csasOrAs
+      helper.paramo("controller").getOrElse(helper.env("controller404").asInstanceOf[String]) + "#" + csasOrAs
     else
       csasOrAs
   }
