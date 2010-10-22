@@ -20,9 +20,9 @@ class Project(info: ProjectInfo) extends ParentProject(info) {
     // Use SLF4J with Logback
     override def libraryDependencies =
       Set(
-        "ch.qos.logback"         % "logback-classic" % "0.9.25"      % "compile",
-        "org.jboss.netty"        % "netty"           % "3.2.2.Final" % "compile",
-        "org.fusesource.scalate" % "scalate-core"    % "1.3"         % "compile"
+        "ch.qos.logback"         % "logback-classic" % "0.9.25",
+        "org.jboss.netty"        % "netty"           % "3.2.2.Final",
+        "org.fusesource.scalate" % "scalate-core"    % "1.3"
       ) ++ super.libraryDependencies
   }
 
@@ -31,9 +31,9 @@ class Project(info: ProjectInfo) extends ParentProject(info) {
     // Redirect c3p0 log to SLF4J (Logback, see above)
     override def libraryDependencies =
       Set(
-        "org.squeryl" % "squeryl_2.8.0"    % "0.9.4-RC2" % "compile",
-        "c3p0"        % "c3p0"             % "0.9.1"     % "compile",
-        "org.slf4j"   % "log4j-over-slf4j" % "1.6.0"     % "compile"
+        "org.squeryl" % "squeryl_2.8.0"    % "0.9.4-RC2",
+        "c3p0"        % "c3p0"             % "0.9.1",
+        "org.slf4j"   % "log4j-over-slf4j" % "1.6.0"
       ) ++ super.libraryDependencies
   }
 }

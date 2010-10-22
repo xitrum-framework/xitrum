@@ -6,6 +6,10 @@ import org.jboss.netty.util.CharsetUtil
 trait Controller extends Helper {
   def layout: Option[String] = None
 
+  def beforeFilter = true
+
+  //----------------------------------------------------------------------------
+
   def render: String = {
     val as = paramo("action").getOrElse(env("action404").asInstanceOf[String])
     render(as)
@@ -17,9 +21,6 @@ trait Controller extends Helper {
    */
   override def render(csasOrAs: String) = render(csasOrAs, layout)
 
-  /**
-   * @param layout None for no layout
-   */
   def render(csasOrAs: String, layout: Option[String]) = {
     val text = super.render(csasOrAs)
     renderText(text, layout)

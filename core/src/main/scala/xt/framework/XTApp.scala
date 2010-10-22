@@ -22,6 +22,6 @@ class XTApp extends App {
     val atMap = new HashMap[String, Any]
     controller.setRefs(channel, request, response, env, paramsMap, atMap)
 
-    action.invoke(controller)
+    if (controller.beforeFilter) action.invoke(controller)
   }
 }
