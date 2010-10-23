@@ -1,7 +1,11 @@
 package xt.framework
 
+import java.io.File
+
 import org.jboss.netty.buffer.ChannelBuffers
 import org.jboss.netty.util.CharsetUtil
+
+import xt.middleware.Static
 
 trait Controller extends Helper {
   def layout: Option[String] = None
@@ -48,6 +52,16 @@ trait Controller extends Helper {
     response.setContent(ChannelBuffers.wrappedBuffer(bytes))
   }
 
+  /**
+   * @param path Starts with "/" for absolute path, otherwise it is relative to
+   * the current working directory ((System.getProperty("user.dir"))
+   */
   def renderFile(path: String) {
+  	val abs = if (path.startsWith("/"))
+  		path
+    else
+    	System.getProperty("user.dir") + File.separator + path
+
+    Static.renderFile(abs, channel, request, response, env)
   }
 }
