@@ -31,7 +31,7 @@ object Static {
             if (!file.exists() || file.isHidden())
             	response.setStatus(NOT_FOUND)
             else
-              renderFile(uri, channel, request, response, env)
+              renderFile(abs, channel, request, response, env)
 
           case None =>
             response.setStatus(NOT_FOUND)
@@ -44,7 +44,7 @@ object Static {
    * abs: absolute path.
    */
   def renderFile(abs: String, channel: Channel, request: HttpRequest, response: HttpResponse, env: Map[String, Any]) {
-    val file = new File(abs)
+  	val file = new File(abs)
 
     if (!file.exists() || !file.isFile()) {
       response.setStatus(NOT_FOUND)
