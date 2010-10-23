@@ -20,6 +20,6 @@ class Server(app: App) {
     bootstrap.setOption("child.keepAlive",  true)
     bootstrap.bind(new InetSocketAddress(Config.httpPort))
 
-    Log.info("Xitrum started on port " + Config.httpPort)
+    logger.info("Xitrum started on port " + Config.httpPort)
   }
 }

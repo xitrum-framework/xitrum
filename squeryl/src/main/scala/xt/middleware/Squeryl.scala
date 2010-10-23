@@ -1,4 +1,5 @@
-package xt.middleware
+package xt
+package middleware
 
 import scala.collection.mutable.Map
 
@@ -21,7 +22,7 @@ object Squeryl {
         //
         // The connection will be closed here after the transaction
         transaction {
-          org.squeryl.Session.currentSession.setLogger(s => xt.Log.debug((s)))
+          org.squeryl.Session.currentSession.setLogger(s => logger("xt.middleware.Squeryl").debug((s)))
           app.call(channel, request, response, env)
         }
       }

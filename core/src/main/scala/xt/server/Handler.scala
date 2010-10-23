@@ -34,7 +34,7 @@ class Handler(app: App) extends SimpleChannelUpstreamHandler {
 
   override def exceptionCaught(ctx: ChannelHandlerContext, e: ExceptionEvent) {
     val throwable = e.getCause
-    Log.error("xt.server.Handler", throwable)
+    logger.error("Exception at xt.server.Handler", throwable)
     e.getChannel.close
   }
 

@@ -22,7 +22,7 @@ object Failsafe {
     def call(channel: Channel, request: HttpRequest, response: HttpResponse, env: Map[String, Any]) {
       def processThrowable(t: Throwable) {
         try {
-          Log.error("xt.middleware.Failsafe", t)
+          logger.error("xt.middleware.Failsafe", t)
 
           // Replace the intended controller/action with those of error 500
           // and run the app again
@@ -37,7 +37,7 @@ object Failsafe {
           Dispatcher.dispatch(app, channel, request, response, env, ka, uriParams)
         } catch {
           case t2 =>
-            Log.error("xt.middleware.Failsafe", t2)
+            logger.error("xt.middleware.Failsafe", t2)
             response.setStatus(HttpResponseStatus.INTERNAL_SERVER_ERROR)
             response.setContent(ChannelBuffers.copiedBuffer("Internal Server Error", CharsetUtil.UTF_8))
         }
@@ -51,7 +51,7 @@ object Failsafe {
           if (te.isInstanceOf[MissingParam]) {
             val mp = te.asInstanceOf[MissingParam]
             val msg = "Missing Param: " + mp.getMessage
-            Log.debug(msg, mp)
+            logger.debug(msg, mp)
             response.setStatus(HttpResponseStatus.BAD_REQUEST)
             response.setContent(ChannelBuffers.copiedBuffer(msg, CharsetUtil.UTF_8))
           } else {

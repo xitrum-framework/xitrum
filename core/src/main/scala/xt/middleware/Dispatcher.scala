@@ -50,7 +50,7 @@ object Dispatcher {
         // by Failsafe midddleware
         env.put("error500", compiledCsas500)
 
-        Log.debug(method + " " + pathInfo)  // TODO: Fix this ugly code (1 of 3)
+        logger("xt.middleware.Dispatcher").debug(method + " " + pathInfo)  // TODO: Fix this ugly code (1 of 3)
         dispatch(app, channel, request, response, env, ka, uriParams)
       }
     }
@@ -73,11 +73,11 @@ object Dispatcher {
     env.put("controller", c)
     env.put("action",     a)
 
-    Log.debug(filterParams(params).toString)  // TODO: Fix this ugly code (2 of 3)
+    logger.debug(filterParams(params).toString)  // TODO: Fix this ugly code (2 of 3)
     val t1 = System.currentTimeMillis
     app.call(channel, request, response, env)
     val t2 = System.currentTimeMillis
-    Log.debug((t2 - t1) + " [ms]")            // TODO: Fix this ugly code (3 of 3)
+    logger.debug((t2 - t1) + " [ms]")            // TODO: Fix this ugly code (3 of 3)
   }
 
   /**
