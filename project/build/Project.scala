@@ -17,12 +17,12 @@ class Project(info: ProjectInfo) extends ParentProject(info) {
   lazy val squeryl = project("squeryl", "xitrum-squeryl", new Squeryl(_), core)
 
   class Core(info: ProjectInfo) extends DefaultProject(info) {
-    // Use SLF4J with Logback
+    // Use SLF4J. Projects using Xitrum must provide a concrete implentation (Logback etc.).
     override def libraryDependencies =
       Set(
-        "ch.qos.logback"         % "logback-classic" % "0.9.25",
-        "org.jboss.netty"        % "netty"           % "3.2.2.Final",
-        "org.fusesource.scalate" % "scalate-core"    % "1.3"
+        "org.slf4j"              % "slf4j-api"    % "1.6.0",
+        "org.jboss.netty"        % "netty"        % "3.2.2.Final",
+        "org.fusesource.scalate" % "scalate-core" % "1.3"
       ) ++ super.libraryDependencies
   }
 
