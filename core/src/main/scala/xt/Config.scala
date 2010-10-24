@@ -8,11 +8,11 @@ object Config {
   private val properties = {
     val url = ClassLoader.getSystemResource("xitrum.properties")
     val ret = new Properties
-    ret.load(new FileInputStream(url.getFile()))
+    if (url != null) ret.load(new FileInputStream(url.getFile()))
     ret
   }
 
-  val httpPort = properties.getProperty("http_port").toInt
+  val httpPort = properties.getProperty("http_port", "8080").toInt
 
-  val filterParams = properties.getProperty("filter_params").split(", ")
+  val filterParams = properties.getProperty("filter_params", "password").split(", ")
 }
