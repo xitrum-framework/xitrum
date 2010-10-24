@@ -5,12 +5,14 @@ import java.io.{File, StringWriter, PrintWriter}
 import org.fusesource.scalate.{TemplateEngine, Binding, DefaultRenderContext}
 import org.fusesource.scalate.scaml.ScamlOptions
 
+import xt.Config
+
 object Scalate {
   val engine = new TemplateEngine
   engine.workingDirectory = new File("tmp/scalate")
   engine.bindings = List(Binding("helper", "xt.framework.Helper", true))
 
-  if (true) {  // production
+  if (Config.isProductionMode) {
     engine.allowReload  = false
     engine.allowCaching = true
 
@@ -46,7 +48,7 @@ object Scalate {
     val csas2 = caa(0).toLowerCase + "/" + caa(1)
 
     // FIXME: use viewPaths
-    "colinh/view" + "/" + csas2 + ".scaml"
+    "colinh/view/" + csas2 + ".scaml"
   }
 
   private def csasOrAsToCsas(csasOrAs: String, helper: Helper): String = {

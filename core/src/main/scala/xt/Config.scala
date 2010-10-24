@@ -12,6 +12,8 @@ object Config {
     ret
   }
 
+  val isProductionMode = (System.getProperty("xitrum.mode") == "production")
+
   val httpPort = properties.getProperty("http_port", "8080").toInt
 
   val filterParams = properties.getProperty("filter_params", "password").split(", ")

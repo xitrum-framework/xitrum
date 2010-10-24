@@ -20,6 +20,7 @@ class Server(app: App) {
     bootstrap.setOption("child.keepAlive",  true)
     bootstrap.bind(new InetSocketAddress(Config.httpPort))
 
-    logger.info("Xitrum started on port " + Config.httpPort)
+    val mode = if (Config.isProductionMode) "production" else "development"
+    logger.info("Xitrum started on port " + Config.httpPort + " in " + mode + " mode")
   }
 }
