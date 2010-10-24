@@ -6,6 +6,7 @@ import org.fusesource.scalate.{TemplateEngine, Binding, DefaultRenderContext}
 import org.fusesource.scalate.scaml.ScamlOptions
 
 import xt.Config
+import xt.middleware.Dispatcher
 
 object Scalate {
   val engine = new TemplateEngine
@@ -45,10 +46,11 @@ object Scalate {
     val csas1 = csasOrAsToCsas(csasOrAs, helper)
 
     val caa = csas1.split("#")
-    val csas2 = caa(0).toLowerCase + "/" + caa(1)
+    val csas2 = caa(0).toLowerCase.replace(".", "/") + "/" + caa(1)
 
-    // FIXME: use viewPaths
-    "colinh/view/" + csas2 + ".scaml"
+    // FIXME: search viewPaths
+    val path = Dispatcher.viewPaths.head.replace(".", "/")
+    path + "/" + csas2 + ".scaml"
   }
 
   private def csasOrAsToCsas(csasOrAs: String, helper: Helper): String = {

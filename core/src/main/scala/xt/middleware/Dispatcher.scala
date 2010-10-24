@@ -24,7 +24,11 @@ object Dispatcher {
 
   private var compiledRoutes: Iterable[CompiledRoute] = _
 
-  def wrap(app: App, routes: List[Route], errorRoutes: IMap[String, String], controllerPaths: List[String]) = {
+  var viewPaths: List[String] = _
+
+  def wrap(app: App, routes: List[Route], errorRoutes: IMap[String, String], controllerPaths: List[String], viewPaths: List[String]) = {
+  	this.viewPaths = viewPaths
+
     compiledRoutes = routes.map(compileRoute(_, controllerPaths))
 
     val (csast404, ka404) = compileCsas(errorRoutes("404"), controllerPaths)
