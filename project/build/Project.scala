@@ -15,7 +15,7 @@ class Project(info: ProjectInfo) extends ParentProject(info) {
     override def libraryDependencies =
       Set(
         "org.slf4j"              % "slf4j-api"    % "1.6.0",
-        "org.jboss.netty"        % "netty"        % "3.2.2.Final",
+        "org.jboss.netty"        % "netty"        % "3.2.3.Final",
         "org.fusesource.scalate" % "scalate-core" % "1.3"
       ) ++ super.libraryDependencies
   }
