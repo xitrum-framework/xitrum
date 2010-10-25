@@ -26,8 +26,11 @@ object Dispatcher {
 
   var viewPaths: List[String] = _
 
-  def wrap(app: App, routes: List[Route], errorRoutes: IMap[String, String], controllerPaths: List[String], viewPaths: List[String]) = {
-  	this.viewPaths = viewPaths
+  /**
+   * Application that does not use view (Scalate view) does not have to specify viewPaths.
+   */
+  def wrap(app: App, routes: List[Route], errorRoutes: IMap[String, String], controllerPaths: List[String], viewPaths: List[String] = List()) = {
+    this.viewPaths = viewPaths
 
     compiledRoutes = routes.map(compileRoute(_, controllerPaths))
 
