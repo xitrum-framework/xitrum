@@ -6,9 +6,9 @@ import java.io.FileInputStream
 
 object Config {
   private val properties = {
-    val url = ClassLoader.getSystemResource("xitrum.properties")
+    val stream = getClass.getClassLoader.getResourceAsStream("xitrum.properties")
     val ret = new Properties
-    if (url != null) ret.load(new FileInputStream(url.getFile()))
+    ret.load(stream)
     ret
   }
 

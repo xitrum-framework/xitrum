@@ -1,12 +1,6 @@
 import sbt._
 
 class Project(info: ProjectInfo) extends ParentProject(info) {
-  val localMavenRepo = "Local Maven Repo" at
-    "file://" + Path.userHome + "/.m2/repository"
-
-  val localIvyRepo = "Local Ivy" at
-    "file://" + Path.userHome + "/.ivy2/local"
-
   val jbossRepo = "JBoss Repo" at
     "https://repository.jboss.org/nexus/content/groups/public/"
 
