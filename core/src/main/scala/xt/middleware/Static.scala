@@ -7,8 +7,7 @@ import java.net.URLDecoder
 
 import scala.collection.mutable.Map
 
-import org.jboss.netty.channel.{Channel, ChannelFuture, DefaultFileRegion,
-                                ChannelFutureProgressListener, ChannelFutureListener}
+import org.jboss.netty.channel.{Channel, ChannelFuture, DefaultFileRegion, ChannelFutureListener}
 import org.jboss.netty.handler.codec.http.{HttpRequest, HttpResponse, HttpHeaders}
 import org.jboss.netty.handler.codec.http.HttpResponseStatus._
 import org.jboss.netty.handler.ssl.SslHandler
@@ -24,18 +23,18 @@ object Static {
       if (!uri.startsWith("/public"))
         app.call(channel, request, response, env)
       else {
-      	sanitizeUri(uri) match {
+        sanitizeUri(uri) match {
           case Some(abs) =>
             // Do not return hidden file!
             val file = new File(abs)
             if (!file.exists() || file.isHidden())
-            	response.setStatus(NOT_FOUND)
+              response.setStatus(NOT_FOUND)
             else
               renderFile(abs, channel, request, response, env)
 
           case None =>
             response.setStatus(NOT_FOUND)
-      	}
+        }
       }
     }
   }
@@ -44,7 +43,7 @@ object Static {
    * abs: absolute path.
    */
   def renderFile(abs: String, channel: Channel, request: HttpRequest, response: HttpResponse, env: Map[String, Any]) {
-  	val file = new File(abs)
+    val file = new File(abs)
 
     if (!file.exists() || !file.isFile()) {
       response.setStatus(NOT_FOUND)
@@ -75,12 +74,10 @@ object Static {
       // No encryption - use zero-copy
       val region = new DefaultFileRegion(raf.getChannel(), 0, fileLength)
       future = channel.write(region)
-      future.addListener(new ChannelFutureProgressListener {
+      future.addListener(new ChannelFutureListener {
         def operationComplete(future: ChannelFuture) {
           region.releaseExternalResources
         }
-
-        def operationProgressed(future: ChannelFuture, amount: Long, current: Long, total: Long) {}
       })
     }
 
