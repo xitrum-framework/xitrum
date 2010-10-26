@@ -6,6 +6,7 @@ import org.jboss.netty.buffer.ChannelBuffers
 import org.jboss.netty.util.CharsetUtil
 
 import xt.middleware.Static
+import xt.server.Handler
 
 trait Controller extends Helper {
   def layout: Option[String] = None
@@ -57,11 +58,21 @@ trait Controller extends Helper {
    * the current working directory ((System.getProperty("user.dir"))
    */
   def renderFile(path: String) {
-  	val abs = if (path.startsWith("/"))
-  		path
+    val abs = if (path.startsWith("/"))
+      path
     else
-    	System.getProperty("user.dir") + File.separator + path
+      System.getProperty("user.dir") + File.separator + path
 
     Static.renderFile(abs, channel, request, response, env)
+  }
+
+  //----------------------------------------------------------------------------
+
+  def ignoreResponse {
+    Handler.ignoreResponse(env)
+  }
+
+  def respond {
+    Handler.respond(channel, request, response)
   }
 }

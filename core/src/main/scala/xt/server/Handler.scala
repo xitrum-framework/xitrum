@@ -1,6 +1,6 @@
 package xt.server
 
-import scala.collection.mutable.HashMap
+import scala.collection.mutable.{Map => MMap, HashMap}
 
 import org.jboss.netty.channel.{Channel,
                               SimpleChannelUpstreamHandler,
@@ -21,6 +21,10 @@ import xt.middleware.App
 
 object Handler {
   val IGNORE_RESPONSE = "HANDLER_SHOULD_IGNORE_THE_RESPONSE"
+
+  def ignoreResponse(env: MMap[String, Any]) {
+    env.put(IGNORE_RESPONSE, true)
+  }
 
   /**
    * One may do asynchronous responding by setting IGNORE_RESPONSE to the "env"

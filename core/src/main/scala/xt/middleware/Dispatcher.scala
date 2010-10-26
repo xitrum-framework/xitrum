@@ -1,6 +1,7 @@
 package xt.middleware
 
 import java.lang.reflect.Method
+
 import scala.collection.mutable.Map
 import scala.collection.immutable.{Map => IMap}
 
@@ -193,9 +194,13 @@ object Dispatcher extends Logger {
                 if (token == "*") {
                   false
                 } else {
-                  val value = tokens(i)
-                  uriParams.put(token, toValues(value))
-                  true
+                  URLDecoder.decode(tokens(i)) match {
+                    case None => false
+
+                    case Some(value) =>
+                      uriParams.put(token, toValues(value))
+                      true
+                  }
                 }
               }
             }

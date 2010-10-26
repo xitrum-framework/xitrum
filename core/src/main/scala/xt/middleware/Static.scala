@@ -2,8 +2,6 @@ package xt.middleware
 
 import java.io.File
 import java.io.RandomAccessFile
-import java.io.UnsupportedEncodingException
-import java.net.URLDecoder
 
 import scala.collection.mutable.Map
 
@@ -12,6 +10,9 @@ import org.jboss.netty.handler.codec.http.{HttpRequest, HttpResponse, HttpHeader
 import org.jboss.netty.handler.codec.http.HttpResponseStatus._
 import org.jboss.netty.handler.ssl.SslHandler
 import org.jboss.netty.handler.stream.ChunkedFile
+
+import xt._
+import xt.server.Handler
 
 /**
  * Serves static files inside static directory.
@@ -88,43 +89,36 @@ object Static {
     }
 
     // The Netty handler should not do anything with the response
-    env.put(xt.server.Handler.IGNORE_RESPONSE, true)
+    Handler.ignoreResponse(env)
   }
 
   /**
-   * @return None if uri is invalid
+   * @return None if uri is invalid, otherwise the absolute path to the file
    */
   private def sanitizeUri(uri: String): Option[String] = {
     var decoded: String = null
 
-    // Decode the path
-    try {
-      decoded = URLDecoder.decode(uri, "UTF-8")
-    } catch {
-      case e: UnsupportedEncodingException =>
-        try {
-          decoded = URLDecoder.decode(uri, "ISO-8859-1")
-        } catch {
-          case _ => return None
+    URLDecoder.decode(uri) match {
+      case None => None
+
+      case Some(decoded) =>
+        // Convert file separators
+        val decoded2 = decoded.replace('/', File.separatorChar)
+
+        // Simplistic dumb security check
+        if (decoded2.contains(File.separator + ".") ||
+            decoded2.contains("." + File.separator) ||
+            decoded2.startsWith(".")                ||
+            decoded2.endsWith(".")) {
+          None
+        } else {
+          // Convert to absolute path
+          // user.dir: current working directory
+          // See: http://www.java2s.com/Tutorial/Java/0120__Development/Javasystemproperties.htm
+          val abs = System.getProperty("user.dir") + File.separator + decoded2
+
+          Some(abs)
         }
     }
-
-    // Convert file separators
-    decoded = decoded.replace('/', File.separatorChar)
-
-    // Simplistic dumb security check
-    if (decoded.contains(File.separator + ".") ||
-        decoded.contains("." + File.separator) ||
-        decoded.startsWith(".")                ||
-        decoded.endsWith(".")) {
-      return None
-    }
-
-    // Convert to absolute path
-    // user.dir: current working directory
-    // See: http://www.java2s.com/Tutorial/Java/0120__Development/Javasystemproperties.htm
-    val abs = System.getProperty("user.dir") + File.separator + decoded
-
-    Some(abs)
   }
 }

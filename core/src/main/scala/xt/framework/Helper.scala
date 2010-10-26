@@ -1,6 +1,6 @@
 package xt.framework
 
-import scala.collection.mutable.Map
+import scala.collection.mutable.{Map => MMap}
 import scala.collection.JavaConversions
 
 import org.jboss.netty.channel.Channel
@@ -12,15 +12,15 @@ trait Helper extends Logger {
   // These variables will be set by middleware Failsafe or
   // when an action renders a view, or when a view renders another view
 
-  var channel:  Channel          = _
-  var request:  HttpRequest      = _
-  var response: HttpResponse     = _
-  var env:      Map[String, Any] = _
+  var channel:  Channel           = _
+  var request:  HttpRequest       = _
+  var response: HttpResponse      = _
+  var env:      MMap[String, Any] = _
 
   protected var paramsMap: java.util.Map[String, java.util.List[String]] = _
 
   // Equivalent to @xxx variables of Rails
-  protected var atMap: Map[String, Any] = _
+  protected var atMap: MMap[String, Any] = _
 
   /**
    * Sets references from another helper. Not cloning because we want for example
@@ -31,9 +31,9 @@ trait Helper extends Logger {
   }
 
   def setRefs(channel: Channel, request: HttpRequest, response: HttpResponse,
-      env: Map[String, Any],
+      env:       MMap[String, Any],
       paramsMap: java.util.Map[String, java.util.List[String]],
-      atMap: Map[String, Any]) {
+      atMap:     MMap[String, Any]) {
     this.channel   = channel
     this.request   = request
     this.response  = response
