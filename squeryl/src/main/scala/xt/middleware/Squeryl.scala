@@ -1,5 +1,4 @@
-package xt
-package middleware
+package xt.middleware
 
 import scala.collection.mutable.Map
 
@@ -12,7 +11,9 @@ import org.squeryl.PrimitiveTypeMode._
 
 import com.mchange.v2.c3p0.ComboPooledDataSource
 
-object Squeryl {
+import xt._
+
+object Squeryl extends Logger {
   def wrap(app: App) = {
     setupDB
     new App {
@@ -22,7 +23,7 @@ object Squeryl {
         //
         // The connection will be closed here after the transaction
         transaction {
-          org.squeryl.Session.currentSession.setLogger(s => logger("xt.middleware.Squeryl").debug((s)))
+          org.squeryl.Session.currentSession.setLogger(s => logger.debug((s)))
           app.call(channel, request, response, env)
         }
       }

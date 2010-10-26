@@ -15,7 +15,7 @@ import xt._
  * This middleware should be put behind Dispatcher and should be the last in
  * the middleware chain.
  */
-object Failsafe {
+object Failsafe extends Logger {
   class MissingParam(key: String) extends Throwable(key)
 
   def wrap(app: App) = new App {

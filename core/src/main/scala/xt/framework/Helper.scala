@@ -6,7 +6,9 @@ import scala.collection.JavaConversions
 import org.jboss.netty.channel.Channel
 import org.jboss.netty.handler.codec.http.{HttpRequest, HttpResponse}
 
-trait Helper {
+import xt._
+
+trait Helper extends Logger {
   // These variables will be set by middleware Failsafe or
   // when an action renders a view, or when a view renders another view
 

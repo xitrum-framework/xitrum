@@ -13,7 +13,7 @@ import xt.framework.Controller
 /**
  * This middleware should be put behind ParamsParser and MultipartParamsParser.
  */
-object Dispatcher {
+object Dispatcher extends Logger {
   type Route           = (HttpMethod, String, String)
   type CompiledPattern = Array[(String, Boolean)]  // String: token, Boolean: true if the token is constant
   type Csas            = (String, String)
@@ -57,7 +57,7 @@ object Dispatcher {
         // by Failsafe midddleware
         env.put("error500", compiledCsas500)
 
-        logger("xt.middleware.Dispatcher").debug(method + " " + pathInfo)  // TODO: Fix this ugly code (1 of 3)
+        logger.debug(method + " " + pathInfo)  // TODO: Fix this ugly code (1 of 3)
         dispatch(app, channel, request, response, env, ka, uriParams)
       }
     }

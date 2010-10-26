@@ -10,7 +10,7 @@ import xt._
 import xt.Config
 import xt.middleware.App
 
-class Server(app: App) {
+class Server(app: App) extends Logger {
   def start {
     val bootstrap = new ServerBootstrap(new NioServerSocketChannelFactory(
       Executors.newCachedThreadPool, Executors.newCachedThreadPool))

@@ -42,7 +42,7 @@ object Handler {
   }
 }
 
-class Handler(app: App) extends SimpleChannelUpstreamHandler {
+class Handler(app: App) extends SimpleChannelUpstreamHandler with Logger {
   import Handler._
 
   override def messageReceived(ctx: ChannelHandlerContext, e: MessageEvent) {
