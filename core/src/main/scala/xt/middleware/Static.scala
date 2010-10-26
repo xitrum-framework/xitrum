@@ -88,7 +88,7 @@ object Static {
     }
 
     // The Netty handler should not do anything with the response
-    env.put("ignore_response", true)
+    env.put(xt.server.Handler.IGNORE_RESPONSE, true)
   }
 
   /**
