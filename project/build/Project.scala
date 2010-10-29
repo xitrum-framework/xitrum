@@ -1,6 +1,20 @@
 import sbt._
 
 class Project(info: ProjectInfo) extends ParentProject(info) {
+  // Compile options
+
+  override def compileOptions = super.compileOptions ++
+    Seq("-deprecation",
+        "-Xmigration",
+        "-Xcheckinit",
+        "-Xwarninit",
+        "-encoding", "utf8")
+        .map(x => CompileOption(x))
+
+  override def javaCompileOptions = JavaCompileOption("-Xlint:unchecked") :: super.javaCompileOptions.toList
+
+  // Repos ---------------------------------------------------------------------
+
   val jbossRepo = "JBoss Repo" at
     "https://repository.jboss.org/nexus/content/groups/public/"
 
