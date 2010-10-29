@@ -19,7 +19,7 @@ cd "$ROOT_DIR"
 
 start() {
   nohup java $JAVA_OPTS -cp $CLASS_PATH $MAIN_CLASS > log/$APP.out 2>&1 &
-  ps aux | grep mobion.music.Boot
+  ps aux | grep $MAIN_CLASS
 }
 
 release() {
