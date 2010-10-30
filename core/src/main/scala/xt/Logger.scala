@@ -15,18 +15,6 @@ trait Logger {
   var loggerName: String = null
 
   val logger = {
-    if (loggerName == null) loggerName = inferLoggerNameFromClassName
-    LoggerFactory.getLogger(loggerName)
-  }
-
-  private def inferLoggerNameFromClassName: String = {
-    val className = getClass.getName
-
-    // Remove trailing "$"
-    // Object that ends with "$" is typically Scala's object
-    if (className.endsWith("$"))
-      className.substring(0, className.length - 1)
-    else
-      className
+    LoggerFactory.getLogger(getClass)
   }
 }

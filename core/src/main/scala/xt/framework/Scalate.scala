@@ -15,7 +15,6 @@ object Scalate {
 
   if (Config.isProductionMode) {
     engine.allowReload  = false
-    engine.allowCaching = true
 
     // Reduce the generated document size
     ScamlOptions.indent = ""
@@ -25,7 +24,6 @@ object Scalate {
     ScamlOptions.ugly = true
   } else {
     engine.allowReload  = true
-    engine.allowCaching = false
   }
 
   def render(csasOrAs: String, helper: Helper): String = {
@@ -46,11 +44,14 @@ object Scalate {
     val csas1 = csasOrAsToCsas(csasOrAs, helper)
 
     val caa = csas1.split("#")
-    val csas2 = caa(0).toLowerCase.replace(".", "/") + "/" + caa(1)
+    val controller = caa(0)
+    val action     = caa(1)
+    val csas2 = controller.toLowerCase.replace(".", "/") + "/" + action
 
     // FIXME: search viewPaths
     val path = Dispatcher.viewPaths.head.replace(".", "/")
-    path + "/" + csas2 + ".scaml"
+    val extenstion = if (action.indexOf(".") != -1) "" else ".jade"
+    path + "/" + csas2 + extenstion
   }
 
   private def csasOrAsToCsas(csasOrAs: String, helper: Helper): String = {

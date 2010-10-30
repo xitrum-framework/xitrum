@@ -31,7 +31,7 @@ class Project(info: ProjectInfo) extends DefaultProject(info) {
       Set(
         "org.slf4j"              % "slf4j-api"    % "1.6.0",
         "org.jboss.netty"        % "netty"        % "3.2.3.Final",
-        "org.fusesource.scalate" % "scalate-core" % "1.3"
+        "org.fusesource.scalate" % "scalate-core" % "1.3.1"
       ) ++ super.libraryDependencies
   }
 
