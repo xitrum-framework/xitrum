@@ -1,12 +1,13 @@
 import sbt._
 
-class Project(info: ProjectInfo) extends ParentProject(info) {
+class Project(info: ProjectInfo) extends DefaultProject(info) {
   // Compile options
 
   override def compileOptions = super.compileOptions ++
     Seq("-deprecation",
         "-Xmigration",
         "-Xcheckinit",
+        "-Xstrict-warnings",
         "-Xwarninit",
         "-encoding", "utf8")
         .map(x => CompileOption(x))
