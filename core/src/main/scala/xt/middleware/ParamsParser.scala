@@ -15,7 +15,7 @@ import org.jboss.netty.handler.codec.http.{HttpRequest, HttpResponse, QueryStrin
  */
 object ParamsParser {
   def wrap(app: App) = new App {
-    def call(channel: Channel, request: HttpRequest, response: HttpResponse, env: Map[String, Any]) {
+    def call(remoteIp: String, channel: Channel, request: HttpRequest, response: HttpResponse, env: Map[String, Any]) {
       val u1 = request.getUri
       val u2 = if (request.getMethod == HttpMethod.POST) {
         val c1 = request.getContent  // ChannelBuffer
@@ -36,7 +36,7 @@ object ParamsParser {
 
       env.put("params", p2)
       env.put("path_info", d.getPath)
-      app.call(channel, request, response, env)
+      app.call(remoteIp, channel, request, response, env)
     }
   }
 }

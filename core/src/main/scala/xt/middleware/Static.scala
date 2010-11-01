@@ -19,10 +19,10 @@ import xt.server.Handler
  */
 object Static {
   def wrap(app: App) = new App {
-    def call(channel: Channel, request: HttpRequest, response: HttpResponse, env: Map[String, Any]) {
+    def call(remoteIp: String, channel: Channel, request: HttpRequest, response: HttpResponse, env: Map[String, Any]) {
       val uri = request.getUri
       if (!uri.startsWith("/public"))
-        app.call(channel, request, response, env)
+        app.call(remoteIp, channel, request, response, env)
       else {
         sanitizeUri(uri) match {
           case Some(abs) =>

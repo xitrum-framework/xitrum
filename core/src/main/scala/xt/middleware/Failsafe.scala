@@ -19,7 +19,7 @@ object Failsafe extends Logger {
   class MissingParam(key: String) extends Throwable(key)
 
   def wrap(app: App) = new App {
-    def call(channel: Channel, request: HttpRequest, response: HttpResponse, env: Map[String, Any]) {
+    def call(remoteIp: String, channel: Channel, request: HttpRequest, response: HttpResponse, env: Map[String, Any]) {
       def processThrowable(t: Throwable) {
         try {
           logger.error("xt.middleware.Failsafe", t)
@@ -34,7 +34,7 @@ object Failsafe extends Logger {
           uriParams.put("action",     Dispatcher.toValues(as))
 
           response.setStatus(HttpResponseStatus.INTERNAL_SERVER_ERROR)
-          Dispatcher.dispatch(app, channel, request, response, env, ka, uriParams)
+          Dispatcher.dispatch(app, remoteIp, channel, request, response, env, ka, uriParams)
         } catch {
           case t2 =>
             logger.error("xt.middleware.Failsafe", t2)
@@ -44,7 +44,7 @@ object Failsafe extends Logger {
       }
 
       try {
-        app.call(channel, request, response, env)
+        app.call(remoteIp, channel, request, response, env)
       } catch {
         case ite: java.lang.reflect.InvocationTargetException =>
           val te = ite.getTargetException

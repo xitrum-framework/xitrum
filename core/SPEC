@@ -1,8 +1,11 @@
 == App
 
 trait App {
-  def call(channel: Channel, request: HttpRequest, response: HttpResponse,
-           env: scala.collection.mutable.Map[String, Any])
+  def call(remoteIp: String,
+           channel:  Channel,
+           request:  HttpRequest,
+           response: HttpResponse,
+           env:      scala.collection.mutable.Map[String, Any])
 }
 
 == env

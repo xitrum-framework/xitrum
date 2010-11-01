@@ -2,8 +2,10 @@ package xt.server
 
 import scala.collection.mutable.{Map => MMap, HashMap}
 
+import java.net.SocketAddress
+
 import org.jboss.netty.channel.{Channel,
-                              SimpleChannelUpstreamHandler,
+                                SimpleChannelUpstreamHandler,
                                 ChannelHandlerContext,
                                 MessageEvent,
                                 ExceptionEvent,
@@ -52,18 +54,35 @@ class Handler(app: App) extends SimpleChannelUpstreamHandler with Logger {
   override def messageReceived(ctx: ChannelHandlerContext, e: MessageEvent) {
     val m = e.getMessage
     if (m.isInstanceOf[HttpRequest]) {
-      val channel  = e.getChannel
       val request  = m.asInstanceOf[HttpRequest]
+      val address  = e.getRemoteAddress
+      val remoteIp = getRemoteIp(address, request)
+      val channel  = e.getChannel
+
       val response = new DefaultHttpResponse(HTTP_1_1, OK)
       val env      = new HashMap[String, Any]
 
-      app.call(channel, request, response, env)
+      app.call(remoteIp, channel, request, response, env)
       if (!env.contains(IGNORE_RESPONSE)) respond(channel, request, response)
     }
   }
 
   override def exceptionCaught(ctx: ChannelHandlerContext, e: ExceptionEvent) {
-    logger.error("Exception at xt.server.Handler", e.getCause)
+    logger.error("xt.server.Handler", e.getCause)
     e.getChannel.close
+  }
+
+  //----------------------------------------------------------------------------
+
+  /**
+   * @return IP of the HTTP client, X-Forwarded-For is supported
+   *
+   * See http://en.wikipedia.org/wiki/X-Forwarded-For is suppored
+   */
+  private def getRemoteIp(socketAddress: SocketAddress, request: HttpRequest): String = {
+    // TODO: see http://github.com/pepite/Play--Netty/blob/master/src/play/modules/netty/PlayHandler.java
+    val remoteAddress = socketAddress.toString
+    val ret = remoteAddress.substring(1, remoteAddress.indexOf(':'))
+    ret
   }
 }

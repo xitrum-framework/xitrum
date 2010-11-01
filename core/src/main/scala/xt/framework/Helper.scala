@@ -12,6 +12,7 @@ trait Helper extends Logger {
   // These variables will be set by middleware Failsafe or
   // when an action renders a view, or when a view renders another view
 
+  var remoteIp: String            = _
   var channel:  Channel           = _
   var request:  HttpRequest       = _
   var response: HttpResponse      = _
@@ -27,13 +28,17 @@ trait Helper extends Logger {
    * if something is added in this atMap, it will be reflected at other's atMap.
    */
   def setRefs(other: Helper) {
-    setRefs(other.channel, other.request, other.response, other.env, other.paramsMap, other.atMap)
+    setRefs(other.remoteIp, other.channel, other.request, other.response, other.env, other.paramsMap, other.atMap)
   }
 
-  def setRefs(channel: Channel, request: HttpRequest, response: HttpResponse,
-      env:       MMap[String, Any],
-      paramsMap: java.util.Map[String, java.util.List[String]],
-      atMap:     MMap[String, Any]) {
+  def setRefs(remoteIp:  String,
+              channel:   Channel,
+              request:   HttpRequest,
+              response:  HttpResponse,
+              env:       MMap[String, Any],
+              paramsMap: java.util.Map[String, java.util.List[String]],
+              atMap:     MMap[String, Any]) {
+    this.remoteIp  = remoteIp
     this.channel   = channel
     this.request   = request
     this.response  = response
