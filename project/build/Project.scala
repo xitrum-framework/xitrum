@@ -29,7 +29,7 @@ class Project(info: ProjectInfo) extends DefaultProject(info) {
     // Use SLF4J. Projects using Xitrum must provide a concrete implentation (Logback etc.).
     override def libraryDependencies =
       Set(
-        "org.slf4j"              % "slf4j-api"    % "1.6.0",
+        "org.slf4j"              % "slf4j-api"    % "1.6.1",
         "org.jboss.netty"        % "netty"        % "3.2.3.Final",
         "org.fusesource.scalate" % "scalate-core" % "1.3.1"
       ) ++ super.libraryDependencies
@@ -42,7 +42,7 @@ class Project(info: ProjectInfo) extends DefaultProject(info) {
       Set(
         "org.squeryl" % "squeryl_2.8.0"    % "0.9.4-RC2",
         "c3p0"        % "c3p0"             % "0.9.1",
-        "org.slf4j"   % "log4j-over-slf4j" % "1.6.0"
+        "org.slf4j"   % "log4j-over-slf4j" % "1.6.1"
       ) ++ super.libraryDependencies
   }
 }
