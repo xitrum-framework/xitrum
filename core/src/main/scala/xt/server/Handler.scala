@@ -1,10 +1,9 @@
 package xt.server
 
 import xt._
-import xt.middleware.App
+import xt.middleware.{App, Env}
 
 import java.net.SocketAddress
-import scala.collection.mutable.{Map => MMap, HashMap}
 
 import org.jboss.netty.channel.{Channel,
                                 SimpleChannelUpstreamHandler,
@@ -21,12 +20,6 @@ import org.jboss.netty.handler.codec.http.HttpResponseStatus._
 import org.jboss.netty.handler.codec.http.HttpVersion._
 
 object Handler {
-  val IGNORE_RESPONSE = "HANDLER_SHOULD_IGNORE_THE_RESPONSE"
-
-  def ignoreResponse(env: MMap[String, Any]) {
-    env.put(IGNORE_RESPONSE, true)
-  }
-
   /**
    * One may do asynchronous responding by setting IGNORE_RESPONSE to the "env"
    * so that the automatic response is ignored. Then later, use this function to
@@ -59,10 +52,10 @@ class Handler(app: App) extends SimpleChannelUpstreamHandler with Logger {
       val channel  = e.getChannel
 
       val response = new DefaultHttpResponse(HTTP_1_1, OK)
-      val env      = new HashMap[String, Any]
+      val env      = new Env
 
       app.call(remoteIp, channel, request, response, env)
-      if (!env.contains(IGNORE_RESPONSE)) respond(channel, request, response)
+      if (env.autoRespond) respond(channel, request, response)
     }
   }
 

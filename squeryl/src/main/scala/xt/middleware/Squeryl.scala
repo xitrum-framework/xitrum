@@ -1,6 +1,6 @@
 package xt.middleware
 
-import scala.collection.mutable.Map
+import xt._
 
 import org.jboss.netty.channel.Channel
 import org.jboss.netty.handler.codec.http.{HttpRequest, HttpResponse}
@@ -11,13 +11,11 @@ import org.squeryl.PrimitiveTypeMode._
 
 import com.mchange.v2.c3p0.ComboPooledDataSource
 
-import xt._
-
 object Squeryl extends Logger {
   def wrap(app: App) = {
     setupDB
     new App {
-      def call(remoteIp: String, channel: Channel, request: HttpRequest, response: HttpResponse, env: Map[String, Any]) {
+      def call(remoteIp: String, channel: Channel, request: HttpRequest, response: HttpResponse, env: Env) {
         // Do not use inTransaction because we want the session to be unbound:
         // http://groups.google.com/group/squeryl/browse_thread/thread/e7fe581f7f5f61f9
         //

@@ -3,7 +3,6 @@ package xt.middleware
 import xt._
 
 import java.lang.reflect.Method
-import scala.collection.mutable.{Map, HashMap}
 
 import org.jboss.netty.channel.Channel
 import org.jboss.netty.handler.codec.http.{HttpRequest, HttpResponse, HttpResponseStatus}
@@ -19,7 +18,7 @@ object Failsafe extends Logger {
   class MissingParam(key: String) extends Throwable(key)
 
   def wrap(app: App) = new App {
-    def call(remoteIp: String, channel: Channel, request: HttpRequest, response: HttpResponse, env: Map[String, Any]) {
+    def call(remoteIp: String, channel: Channel, request: HttpRequest, response: HttpResponse, env: Env) {
       def processThrowable(t: Throwable) {
         try {
           logger.error("xt.middleware.Failsafe", t)

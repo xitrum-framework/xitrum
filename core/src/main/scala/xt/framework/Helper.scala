@@ -1,9 +1,10 @@
 package xt.framework
 
 import xt._
+import xt.middleware.Env
 
-import scala.collection.mutable.{Map => MMap}
 import scala.collection.JavaConversions
+import scala.collection.mutable.{Map => MMap}
 
 import org.jboss.netty.channel.Channel
 import org.jboss.netty.handler.codec.http.{HttpRequest, HttpResponse}
@@ -16,7 +17,7 @@ trait Helper extends Logger {
   var channel:  Channel           = _
   var request:  HttpRequest       = _
   var response: HttpResponse      = _
-  var env:      MMap[String, Any] = _
+  var env:      Env               = _
 
   protected var paramsMap: java.util.Map[String, java.util.List[String]] = _
 
@@ -35,7 +36,7 @@ trait Helper extends Logger {
               channel:   Channel,
               request:   HttpRequest,
               response:  HttpResponse,
-              env:       MMap[String, Any],
+              env:       Env,
               paramsMap: java.util.Map[String, java.util.List[String]],
               atMap:     MMap[String, Any]) {
     this.remoteIp  = remoteIp

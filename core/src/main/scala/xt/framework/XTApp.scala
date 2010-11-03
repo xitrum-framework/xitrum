@@ -6,14 +6,14 @@ import scala.collection.mutable.{Map, HashMap}
 import org.jboss.netty.channel.Channel
 import org.jboss.netty.handler.codec.http.{HttpRequest, HttpResponse}
 
-import xt.middleware.App
+import xt.middleware.{App, Env}
 
 /**
  * This app should be put behind middlewares:
  * Static -> ParamsParser -> MethodOverride -> Dispatcher -> Failsafe -> XTApp
  */
 class XTApp extends App {
-  def call(remoteIp: String, channel: Channel, request: HttpRequest, response: HttpResponse, env: Map[String, Any]) {
+  def call(remoteIp: String, channel: Channel, request: HttpRequest, response: HttpResponse, env: Env) {
     val controller = env("controller").asInstanceOf[Controller]
     val action     = env("action").asInstanceOf[Method]
 

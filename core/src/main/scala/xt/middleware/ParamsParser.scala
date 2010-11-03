@@ -1,8 +1,6 @@
 package xt.middleware
 
 import java.nio.charset.Charset
-
-import scala.collection.mutable.Map
 import scala.collection.JavaConversions
 
 import org.jboss.netty.channel.Channel
@@ -15,7 +13,7 @@ import org.jboss.netty.handler.codec.http.{HttpRequest, HttpResponse, QueryStrin
  */
 object ParamsParser {
   def wrap(app: App) = new App {
-    def call(remoteIp: String, channel: Channel, request: HttpRequest, response: HttpResponse, env: Map[String, Any]) {
+    def call(remoteIp: String, channel: Channel, request: HttpRequest, response: HttpResponse, env: Env) {
       val u1 = request.getUri
       val u2 = if (request.getMethod == HttpMethod.POST) {
         val c1 = request.getContent  // ChannelBuffer

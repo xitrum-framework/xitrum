@@ -5,9 +5,6 @@ import xt.framework.Controller
 
 import java.lang.reflect.Method
 
-import scala.collection.mutable.Map
-import scala.collection.immutable.{Map => IMap}
-
 import org.jboss.netty.channel.Channel
 import org.jboss.netty.handler.codec.http.{HttpRequest, HttpResponse, HttpMethod, HttpResponseStatus}
 
@@ -30,7 +27,7 @@ object Dispatcher extends Logger {
   /**
    * Application that does not use view (Scalate view) does not have to specify viewPaths.
    */
-  def wrap(app: App, routes: List[Route], errorRoutes: IMap[String, String], controllerPaths: List[String], viewPaths: List[String] = List()) = {
+  def wrap(app: App, routes: List[Route], errorRoutes: Map[String, String], controllerPaths: List[String], viewPaths: List[String] = List()) = {
     this.viewPaths = viewPaths
 
     compiledRoutes = routes.map(compileRoute(_, controllerPaths))
@@ -39,7 +36,7 @@ object Dispatcher extends Logger {
     val compiledCsas500   = compileCsas(errorRoutes("500"), controllerPaths)
 
     new App {
-      def call(remoteIp: String, channel: Channel, request: HttpRequest, response: HttpResponse, env: Map[String, Any]) {
+      def call(remoteIp: String, channel: Channel, request: HttpRequest, response: HttpResponse, env: Env) {
         val method   = env("request_method").asInstanceOf[HttpMethod]
         val pathInfo = env("path_info").asInstanceOf[String]
         val (ka, uriParams) = matchRoute(method, pathInfo) match {
@@ -68,7 +65,7 @@ object Dispatcher extends Logger {
    * WARN: This method is here because it is also used by Failsafe when redispatching.
    */
   def dispatch(app: App,
-               remoteIp: String, channel: Channel, request: HttpRequest, response: HttpResponse, env: Map[String, Any],
+               remoteIp: String, channel: Channel, request: HttpRequest, response: HttpResponse, env: Env,
                ka: KA, uriParams: UriParams) {
     // Merge uriParams to params
     val params = env("params").asInstanceOf[UriParams]
