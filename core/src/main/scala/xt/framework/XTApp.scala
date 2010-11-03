@@ -22,6 +22,6 @@ class XTApp extends App {
     val atMap = new HashMap[String, Any]
     controller.setRefs(remoteIp, channel, request, response, env, paramsMap, atMap)
 
-    if (controller.beforeFilter) action.invoke(controller)
+    if (controller.beforeFilters.forall(name_f => name_f._2())) action.invoke(controller)
   }
 }

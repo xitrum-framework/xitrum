@@ -1,12 +1,12 @@
 package xt.framework
 
+import xt.Config
+import xt.middleware.Dispatcher
+
 import java.io.{File, StringWriter, PrintWriter}
 
 import org.fusesource.scalate.{TemplateEngine, Binding, DefaultRenderContext}
 import org.fusesource.scalate.scaml.ScamlOptions
-
-import xt.Config
-import xt.middleware.Dispatcher
 
 object Scalate {
   val engine = new TemplateEngine

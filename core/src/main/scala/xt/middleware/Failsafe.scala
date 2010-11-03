@@ -1,5 +1,7 @@
 package xt.middleware
 
+import xt._
+
 import java.lang.reflect.Method
 import scala.collection.mutable.{Map, HashMap}
 
@@ -7,8 +9,6 @@ import org.jboss.netty.channel.Channel
 import org.jboss.netty.handler.codec.http.{HttpRequest, HttpResponse, HttpResponseStatus}
 import org.jboss.netty.buffer.ChannelBuffers
 import org.jboss.netty.util.CharsetUtil
-
-import xt._
 
 /**
  * Runs the app with exception handler.

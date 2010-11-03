@@ -1,12 +1,12 @@
 package xt.framework
 
+import xt._
+
 import scala.collection.mutable.{Map => MMap}
 import scala.collection.JavaConversions
 
 import org.jboss.netty.channel.Channel
 import org.jboss.netty.handler.codec.http.{HttpRequest, HttpResponse}
-
-import xt._
 
 trait Helper extends Logger {
   // These variables will be set by middleware Failsafe or

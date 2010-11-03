@@ -1,9 +1,12 @@
 package xt.middleware
 
+import xt._
+import xt.server.Handler
+
 import java.io.File
 import java.io.RandomAccessFile
 
-import scala.collection.mutable.Map
+import scala.collection.mutable.{Map => MMap}
 
 import org.jboss.netty.channel.{Channel, ChannelFuture, DefaultFileRegion, ChannelFutureListener}
 import org.jboss.netty.handler.codec.http.{HttpRequest, HttpResponse, HttpHeaders}
@@ -11,15 +14,12 @@ import org.jboss.netty.handler.codec.http.HttpResponseStatus._
 import org.jboss.netty.handler.ssl.SslHandler
 import org.jboss.netty.handler.stream.ChunkedFile
 
-import xt._
-import xt.server.Handler
-
 /**
  * Serves static files inside static directory.
  */
 object Static {
   def wrap(app: App) = new App {
-    def call(remoteIp: String, channel: Channel, request: HttpRequest, response: HttpResponse, env: Map[String, Any]) {
+    def call(remoteIp: String, channel: Channel, request: HttpRequest, response: HttpResponse, env: MMap[String, Any]) {
       val uri = request.getUri
       if (!uri.startsWith("/public"))
         app.call(remoteIp, channel, request, response, env)
@@ -43,7 +43,7 @@ object Static {
   /**
    * abs: absolute path.
    */
-  def renderFile(abs: String, channel: Channel, request: HttpRequest, response: HttpResponse, env: Map[String, Any]) {
+  def renderFile(abs: String, channel: Channel, request: HttpRequest, response: HttpResponse, env: MMap[String, Any]) {
     val file = new File(abs)
 
     if (!file.exists() || !file.isFile()) {

@@ -1,8 +1,10 @@
 package xt.server
 
-import scala.collection.mutable.{Map => MMap, HashMap}
+import xt._
+import xt.middleware.App
 
 import java.net.SocketAddress
+import scala.collection.mutable.{Map => MMap, HashMap}
 
 import org.jboss.netty.channel.{Channel,
                                 SimpleChannelUpstreamHandler,
@@ -17,9 +19,6 @@ import org.jboss.netty.handler.codec.http.HttpHeaders._
 import org.jboss.netty.handler.codec.http.HttpHeaders.Names._
 import org.jboss.netty.handler.codec.http.HttpResponseStatus._
 import org.jboss.netty.handler.codec.http.HttpVersion._
-
-import xt._
-import xt.middleware.App
 
 object Handler {
   val IGNORE_RESPONSE = "HANDLER_SHOULD_IGNORE_THE_RESPONSE"
