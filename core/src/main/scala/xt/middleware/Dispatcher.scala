@@ -36,7 +36,7 @@ object Dispatcher extends Logger {
     val compiledCsas500   = compileCsas(errorRoutes("500"), controllerPaths)
 
     new App {
-      def call(remoteIp: String, channel: Channel, request: HttpRequest, response: HttpResponse, env: Env) {
+      def call(channel: Channel, request: HttpRequest, response: HttpResponse, env: Env) {
         val (ka, uriParams) = matchRoute(env.method, env.pathInfo) match {
           case Some((ka, uriParams)) =>
             (ka, uriParams)
@@ -54,7 +54,7 @@ object Dispatcher extends Logger {
         env.put("error500", compiledCsas500)
 
         logger.debug(env.method + " " + env.pathInfo)  // TODO: Fix this ugly code (1 of 3)
-        dispatch(app, remoteIp, channel, request, response, env, ka, uriParams)
+        dispatch(app, channel, request, response, env, ka, uriParams)
       }
     }
   }
@@ -63,7 +63,7 @@ object Dispatcher extends Logger {
    * WARN: This method is here because it is also used by Failsafe when redispatching.
    */
   def dispatch(app: App,
-               remoteIp: String, channel: Channel, request: HttpRequest, response: HttpResponse, env: Env,
+               channel: Channel, request: HttpRequest, response: HttpResponse, env: Env,
                ka: KA, uriParams: UriParams) {
     // Merge uriParams to params
     env.params.putAll(uriParams)
@@ -77,7 +77,7 @@ object Dispatcher extends Logger {
 
     logger.debug(filterParams(env.params).toString)  // TODO: Fix this ugly code (2 of 3)
     val t1 = System.currentTimeMillis
-    app.call(remoteIp, channel, request, response, env)
+    app.call(channel, request, response, env)
     val t2 = System.currentTimeMillis
     logger.debug((t2 - t1) + " [ms]")                // TODO: Fix this ugly code (3 of 3)
   }

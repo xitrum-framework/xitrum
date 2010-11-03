@@ -12,14 +12,28 @@ import xt.middleware.{App, Env}
  * Static -> ParamsParser -> MethodOverride -> Dispatcher -> Failsafe -> XTApp
  */
 class XTApp extends App {
-  def call(remoteIp: String, channel: Channel, request: HttpRequest, response: HttpResponse, env: Env) {
+  def call(channel: Channel, request: HttpRequest, response: HttpResponse, env: Env) {
     val controller = env.controller
     val action     = env.action
 
     val atMap = new HashMap[String, Any]
-    controller.setRefs(remoteIp, channel, request, response, env, atMap)
+    controller.setRefs(channel, request, response, env, atMap)
 
-    val passed = controller.beforeFilters.forall(name_f => name_f._2())
+    val passed = controller.beforeFilters.forall(filter => {
+    	val onlyActions = filter._2
+    	if (onlyActions.isEmpty) {
+	    	val exceptActions = filter._3
+    		if (!exceptActions.contains(action)) {
+    			val method = filter._1
+    			method.invoke(controller).asInstanceOf[Boolean]
+    		}	else true
+    	} else {
+    		if (onlyActions.contains(action)) {
+    			val method = filter._1
+      	  method.invoke(controller).asInstanceOf[Boolean]
+    		} else true
+    	}
+    })
     if (passed) action.invoke(controller)
   }
 }

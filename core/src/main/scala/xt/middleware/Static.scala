@@ -17,10 +17,10 @@ import org.jboss.netty.handler.stream.ChunkedFile
  */
 object Static {
   def wrap(app: App) = new App {
-    def call(remoteIp: String, channel: Channel, request: HttpRequest, response: HttpResponse, env: Env) {
+    def call(channel: Channel, request: HttpRequest, response: HttpResponse, env: Env) {
       val uri = request.getUri
       if (!uri.startsWith("/public"))
-        app.call(remoteIp, channel, request, response, env)
+        app.call(channel, request, response, env)
       else {
         sanitizeUri(uri) match {
           case Some(abs) =>

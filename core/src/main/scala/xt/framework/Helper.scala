@@ -3,6 +3,7 @@ package xt.framework
 import xt._
 import xt.middleware.Env
 
+import java.net.InetSocketAddress
 import scala.collection.JavaConversions
 import scala.collection.mutable.{Map => MMap}
 
@@ -13,7 +14,6 @@ trait Helper extends Logger {
   // These variables will be set by middleware Failsafe or
   // when an action renders a view, or when a view renders another view
 
-  var remoteIp: String            = _
   var channel:  Channel           = _
   var request:  HttpRequest       = _
   var response: HttpResponse      = _
@@ -23,20 +23,34 @@ trait Helper extends Logger {
   protected var atMap: MMap[String, Any] = _
 
   /**
+   * @return IP of the HTTP client, X-Forwarded-For is supported
+   *
+   * See http://en.wikipedia.org/wiki/X-Forwarded-For
+   *
+   * TODO: see http://github.com/pepite/Play--Netty/blob/master/src/play/modules/netty/PlayHandler.java
+   *
+   * TODO: inetSocketAddress can be Inet4Address or Inet6Address
+   * See java.net.preferIPv6Addresses
+   */
+  lazy val remoteIp = {
+  	val inetSocketAddress = channel.getRemoteAddress.asInstanceOf[InetSocketAddress]
+    val ip = inetSocketAddress.getAddress.getHostAddress
+    ip
+  }
+
+  /**
    * Sets references from another helper. Not cloning because we want for example
    * if something is added in this atMap, it will be reflected at other's atMap.
    */
   def setRefs(other: Helper) {
-    setRefs(other.remoteIp, other.channel, other.request, other.response, other.env, other.atMap)
+    setRefs(other.channel, other.request, other.response, other.env, other.atMap)
   }
 
-  def setRefs(remoteIp:  String,
-              channel:   Channel,
+  def setRefs(channel:   Channel,
               request:   HttpRequest,
               response:  HttpResponse,
               env:       Env,
               atMap:     MMap[String, Any]) {
-    this.remoteIp  = remoteIp
     this.channel   = channel
     this.request   = request
     this.response  = response

@@ -3,8 +3,6 @@ package xt.server
 import xt._
 import xt.middleware.{App, Env}
 
-import java.net.SocketAddress
-
 import org.jboss.netty.channel.{Channel,
                                 SimpleChannelUpstreamHandler,
                                 ChannelHandlerContext,
@@ -47,14 +45,12 @@ class Handler(app: App) extends SimpleChannelUpstreamHandler with Logger {
     val m = e.getMessage
     if (m.isInstanceOf[HttpRequest]) {
       val request  = m.asInstanceOf[HttpRequest]
-      val address  = e.getRemoteAddress
-      val remoteIp = getRemoteIp(address, request)
       val channel  = e.getChannel
 
       val response = new DefaultHttpResponse(HTTP_1_1, OK)
       val env      = new Env
 
-      app.call(remoteIp, channel, request, response, env)
+      app.call(channel, request, response, env)
       if (env.autoRespond) respond(channel, request, response)
     }
   }
@@ -62,19 +58,5 @@ class Handler(app: App) extends SimpleChannelUpstreamHandler with Logger {
   override def exceptionCaught(ctx: ChannelHandlerContext, e: ExceptionEvent) {
     logger.error("xt.server.Handler", e.getCause)
     e.getChannel.close
-  }
-
-  //----------------------------------------------------------------------------
-
-  /**
-   * @return IP of the HTTP client, X-Forwarded-For is supported
-   *
-   * See http://en.wikipedia.org/wiki/X-Forwarded-For is suppored
-   */
-  private def getRemoteIp(socketAddress: SocketAddress, request: HttpRequest): String = {
-    // TODO: see http://github.com/pepite/Play--Netty/blob/master/src/play/modules/netty/PlayHandler.java
-    val remoteAddress = socketAddress.toString
-    val ret = remoteAddress.substring(1, remoteAddress.indexOf(':'))
-    ret
   }
 }
