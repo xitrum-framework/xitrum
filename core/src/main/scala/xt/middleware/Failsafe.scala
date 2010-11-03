@@ -10,9 +10,8 @@ import org.jboss.netty.buffer.ChannelBuffers
 import org.jboss.netty.util.CharsetUtil
 
 /**
- * Runs the app with exception handler.
- * This middleware should be put behind Dispatcher and should be the last in
- * the middleware chain.
+ * This middleware runs the app with exception handler. It should be put behind
+ * Dispatcher and should be the last in the middleware chain.
  */
 object Failsafe extends Logger {
   class MissingParam(key: String) extends Throwable(key)

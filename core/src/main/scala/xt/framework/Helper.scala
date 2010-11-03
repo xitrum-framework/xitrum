@@ -19,8 +19,6 @@ trait Helper extends Logger {
   var response: HttpResponse      = _
   var env:      Env               = _
 
-  protected var paramsMap: java.util.Map[String, java.util.List[String]] = _
-
   // Equivalent to @xxx variables of Rails
   protected var atMap: MMap[String, Any] = _
 
@@ -29,7 +27,7 @@ trait Helper extends Logger {
    * if something is added in this atMap, it will be reflected at other's atMap.
    */
   def setRefs(other: Helper) {
-    setRefs(other.remoteIp, other.channel, other.request, other.response, other.env, other.paramsMap, other.atMap)
+    setRefs(other.remoteIp, other.channel, other.request, other.response, other.env, other.atMap)
   }
 
   def setRefs(remoteIp:  String,
@@ -37,14 +35,12 @@ trait Helper extends Logger {
               request:   HttpRequest,
               response:  HttpResponse,
               env:       Env,
-              paramsMap: java.util.Map[String, java.util.List[String]],
               atMap:     MMap[String, Any]) {
     this.remoteIp  = remoteIp
     this.channel   = channel
     this.request   = request
     this.response  = response
     this.env       = env
-    this.paramsMap = paramsMap
     this.atMap     = atMap
   }
 
@@ -54,14 +50,15 @@ trait Helper extends Logger {
    * Returns a singular element.
    */
   def param(key: String): String = {
-    if (paramsMap.containsKey(key))
-      paramsMap.get(key).get(0)
+  	val m = env.params
+    if (m.containsKey(key))
+      m.get(key).get(0)
     else
       throw new xt.middleware.Failsafe.MissingParam(key)
   }
 
   def paramo(key: String): Option[String] = {
-    val values = paramsMap.get(key)
+    val values = env.params.get(key)
     if (values == null) None else Some(values.get(0))
   }
 
@@ -69,14 +66,15 @@ trait Helper extends Logger {
    * Returns a list of elements.
    */
   def params(key: String): List[String] = {
-    if (paramsMap.containsKey(key))
-      JavaConversions.asBuffer[String](paramsMap.get(key)).toList
+  	val m = env.params
+    if (m.containsKey(key))
+      JavaConversions.asBuffer[String](m.get(key)).toList
     else
       throw new xt.middleware.Failsafe.MissingParam(key)
   }
 
   def paramso(key: String): Option[List[String]] = {
-    val values = paramsMap.get(key)
+    val values = env.params.get(key)
     if (values == null) None else Some(JavaConversions.asBuffer[String](values).toList)
   }
 

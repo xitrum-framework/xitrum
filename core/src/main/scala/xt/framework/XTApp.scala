@@ -1,7 +1,6 @@
 package xt.framework
 
-import java.lang.reflect.Method
-import scala.collection.mutable.{Map, HashMap}
+import scala.collection.mutable.HashMap
 
 import org.jboss.netty.channel.Channel
 import org.jboss.netty.handler.codec.http.{HttpRequest, HttpResponse}
@@ -14,14 +13,13 @@ import xt.middleware.{App, Env}
  */
 class XTApp extends App {
   def call(remoteIp: String, channel: Channel, request: HttpRequest, response: HttpResponse, env: Env) {
-    val controller = env("controller").asInstanceOf[Controller]
-    val action     = env("action").asInstanceOf[Method]
+    val controller = env.controller
+    val action     = env.action
 
-    // setRefs
-    val paramsMap = env("params").asInstanceOf[java.util.Map[String, java.util.List[String]]]
     val atMap = new HashMap[String, Any]
-    controller.setRefs(remoteIp, channel, request, response, env, paramsMap, atMap)
+    controller.setRefs(remoteIp, channel, request, response, env, atMap)
 
-    if (controller.beforeFilters.forall(name_f => name_f._2())) action.invoke(controller)
+    val passed = controller.beforeFilters.forall(name_f => name_f._2())
+    if (passed) action.invoke(controller)
   }
 }

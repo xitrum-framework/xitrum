@@ -6,8 +6,7 @@ import org.jboss.netty.channel.Channel
 import org.jboss.netty.handler.codec.http.{HttpRequest, HttpResponse, HttpMethod}
 
 /**
- * This middleware puts the request method (org.jboss.netty.handler.codec.http.HttpMethod)
- * to env under the key "request_method".
+ * This middleware puts the request method env.method.
  *
  * If the real request method is POST and "_method" param exists, the "_method"
  * param will override the POST method.
@@ -21,12 +20,11 @@ object MethodOverride {
       val m2: HttpMethod = if (m1 != HttpMethod.POST)
         m1
       else {
-        val params = env("params").asInstanceOf[java.util.Map[String, java.util.List[String]]]
-        val _methods = params.get("_method")
+        val _methods = env.params.get("_method")
         if (_methods == null || _methods.isEmpty) m1 else new HttpMethod(_methods.get(0))
       }
 
-      env.put("request_method", m2)
+      env.method = m2
       app.call(remoteIp, channel, request, response, env)
     }
   }

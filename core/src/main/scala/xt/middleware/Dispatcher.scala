@@ -37,9 +37,7 @@ object Dispatcher extends Logger {
 
     new App {
       def call(remoteIp: String, channel: Channel, request: HttpRequest, response: HttpResponse, env: Env) {
-        val method   = env("request_method").asInstanceOf[HttpMethod]
-        val pathInfo = env("path_info").asInstanceOf[String]
-        val (ka, uriParams) = matchRoute(method, pathInfo) match {
+        val (ka, uriParams) = matchRoute(env.method, env.pathInfo) match {
           case Some((ka, uriParams)) =>
             (ka, uriParams)
 
@@ -55,7 +53,7 @@ object Dispatcher extends Logger {
         // by Failsafe midddleware
         env.put("error500", compiledCsas500)
 
-        logger.debug(method + " " + pathInfo)  // TODO: Fix this ugly code (1 of 3)
+        logger.debug(env.method + " " + env.pathInfo)  // TODO: Fix this ugly code (1 of 3)
         dispatch(app, remoteIp, channel, request, response, env, ka, uriParams)
       }
     }
@@ -68,21 +66,20 @@ object Dispatcher extends Logger {
                remoteIp: String, channel: Channel, request: HttpRequest, response: HttpResponse, env: Env,
                ka: KA, uriParams: UriParams) {
     // Merge uriParams to params
-    val params = env("params").asInstanceOf[UriParams]
-    params.putAll(uriParams)
+    env.params.putAll(uriParams)
 
     // Put controller (Controller) and action (Method) to env so that
     // the action can be invoked at XTApp
     val (k, a) = ka
     val c = k.newInstance
-    env.put("controller", c)
-    env.put("action",     a)
+    env.controller = c
+    env.action     = a
 
-    logger.debug(filterParams(params).toString)  // TODO: Fix this ugly code (2 of 3)
+    logger.debug(filterParams(env.params).toString)  // TODO: Fix this ugly code (2 of 3)
     val t1 = System.currentTimeMillis
     app.call(remoteIp, channel, request, response, env)
     val t2 = System.currentTimeMillis
-    logger.debug((t2 - t1) + " [ms]")            // TODO: Fix this ugly code (3 of 3)
+    logger.debug((t2 - t1) + " [ms]")                // TODO: Fix this ugly code (3 of 3)
   }
 
   /**

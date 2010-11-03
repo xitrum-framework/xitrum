@@ -8,8 +8,8 @@ import org.jboss.netty.handler.codec.http.{HttpRequest, HttpResponse, QueryStrin
 
 /**
  * This middleware:
- *   + parses params in URI and request body and puts them to env under the key "params"
- *   + puts the request path to env under the key "path_info"
+ * * Puts the request path to env.pathInfo
+ * * Parses params in URI and request body and puts them to env.params
  */
 object ParamsParser {
   def wrap(app: App) = new App {
@@ -32,8 +32,8 @@ object ParamsParser {
       // See the source code of QueryStringDecoder as of Netty 3.2.1.Final
       val p2 = if (p.isEmpty) new java.util.LinkedHashMap[String, java.util.List[String]]() else p
 
-      env.put("params", p2)
-      env.put("path_info", d.getPath)
+      env.pathInfo = d.getPath
+      env.params = p2
       app.call(remoteIp, channel, request, response, env)
     }
   }
