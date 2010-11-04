@@ -11,14 +11,17 @@ object Cookie {
     def call(channel: Channel, request: HttpRequest, response: HttpResponse, env: Env) {
       val decoder = new CookieDecoder
       val header  = request.getHeader(COOKIE)
-      env.cookies = if (header != null) decoder.decode(header) else new TreeSet[NCookie]()
+      val cookies = if (header != null) decoder.decode(header) else new TreeSet[NCookie]()
 
+      env.cookies = cookies
       app.call(channel, request, response, env)
 
-      val encoder = new CookieEncoder(true)
-      val iter = env.cookies.iterator
-      while (iter.hasNext) encoder.addCookie(iter.next)
-      response.setHeader(SET_COOKIE, encoder.encode)
+      if (cookies.size > 0) {
+	      val encoder = new CookieEncoder(true)
+	      val iter = env.cookies.iterator
+	      while (iter.hasNext) encoder.addCookie(iter.next)
+	      response.setHeader(SET_COOKIE, encoder.encode)
+      }
     }
   }
 }

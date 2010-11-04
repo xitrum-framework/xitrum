@@ -64,7 +64,9 @@ object Session {
 
   private def storeSessionId(env: Env) {
     findSessionCookie(env.cookies) match {
-      case Some(cookie) => cookie.setValue(env.session.id)
+      case Some(cookie) =>
+      	cookie.setPath("/")
+      	cookie.setValue(env.session.id)
 
       case None =>
         val cookie = new DefaultCookie(Config.sessionIdName, env.session.id)
