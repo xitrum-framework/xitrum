@@ -5,7 +5,7 @@ import xt._
 import org.jboss.netty.channel.Channel
 import org.jboss.netty.handler.codec.http.{HttpRequest, HttpResponse}
 
-import org.squeryl.{SessionFactory, Session}
+import org.squeryl.{SessionFactory, Session => SSession}
 import org.squeryl.adapters.{PostgreSqlAdapter, MySQLAdapter, OracleAdapter}
 import org.squeryl.PrimitiveTypeMode._
 
@@ -33,7 +33,7 @@ object Squeryl extends Logger {
     val driverClass = dataSource.getDriverClass
     val adapter     = guessAdapter(driverClass)
 
-    val concreteFactory = () => Session.create(dataSource.getConnection, adapter)
+    val concreteFactory = () => SSession.create(dataSource.getConnection, adapter)
     SessionFactory.concreteFactory = Some(concreteFactory)
   }
 

@@ -16,6 +16,9 @@ object Config {
 
   val httpPort = properties.getProperty("http_port", "8080").toInt
 
+  val sessionIdName = properties.getProperty("session_id_name", "JSESSIONID")
+  val sessionsEhcacheName = properties.getProperty("sessions_ehcache_name", "XitrumSessions")
+
   val filterParams = properties.getProperty("filter_params", "password").split(", ")
 
   val filesEhcacheName = properties.getProperty("files_ehcache_name", "XitrumFiles")

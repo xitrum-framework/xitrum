@@ -19,6 +19,8 @@ import net.sf.ehcache.{CacheManager, Element}
  * Serves non-hidden static files inside static directory.
  */
 object Static extends Logger {
+  private val cache = CacheManager.getInstance.getCache(Config.filesEhcacheName)
+
   def wrap(app: App) = new App {
     def call(channel: Channel, request: HttpRequest, response: HttpResponse, env: Env) {
       val uri = request.getUri
@@ -56,7 +58,6 @@ object Static extends Logger {
     }
 
     // Try to serve from cache
-    val cache = CacheManager.getInstance.getCache(Config.filesEhcacheName)
     val elemKey = abs
     val elem = cache.get(elemKey)
     if (elem != null) {
