@@ -68,6 +68,7 @@ object Session {
 
       case None =>
         val cookie = new DefaultCookie(Config.sessionIdName, env.session.id)
+        cookie.setPath("/")
         env.cookies.add(cookie)
     }
   }
