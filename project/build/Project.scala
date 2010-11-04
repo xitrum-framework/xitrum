@@ -16,11 +16,14 @@ class Project(info: ProjectInfo) extends DefaultProject(info) {
 
   // Repos ---------------------------------------------------------------------
 
-  val jbossRepo = "JBoss Repo" at
+  val jbossRepo = "JBoss" at
     "https://repository.jboss.org/nexus/content/groups/public/"
 
-  val scalateRepo = "Scalate Repo" at
+  val scalateRepo = "Scalate" at
     "http://repo.fusesource.com/nexus/content/repositories/snapshots"
+
+  val terracotta = "Terracotta" at
+    "http://www.terracotta.org/download/reflector/releases"
 
   lazy val core    = project("core",    "xitrum-core",    new Core(_))
   lazy val squeryl = project("squeryl", "xitrum-squeryl", new Squeryl(_), core)
