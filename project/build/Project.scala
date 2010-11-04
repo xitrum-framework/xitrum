@@ -31,7 +31,10 @@ class Project(info: ProjectInfo) extends DefaultProject(info) {
       Set(
         "org.slf4j"              % "slf4j-api"    % "1.6.1",
         "org.jboss.netty"        % "netty"        % "3.2.3.Final",
-        "org.fusesource.scalate" % "scalate-core" % "1.3.1"
+        "org.fusesource.scalate" % "scalate-core" % "1.3.1",
+
+        "net.sf.ehcache"    % "ehcache" % "2.2.0",
+        "javax.transaction" % "jta"     % "1.1"  // Used by Ehcache
       ) ++ super.libraryDependencies
   }
 

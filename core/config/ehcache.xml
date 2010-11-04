@@ -1,0 +1,17 @@
+<!-- See http://ehcache.org/documentation/configuration.html -->
+
+<ehcache xsi:noNamespaceSchemaLocation="ehcache.xsd" updateCheck="true" monitoring="autodetect" dynamicConfig="true">
+  <diskStore path="java.io.tmpdir"/>
+  <defaultCache maxElementsInMemory="10000"
+                eternal="false"
+                timeToIdleSeconds="120"
+                timeToLiveSeconds="120"
+                overflowToDisk="true"
+                maxElementsOnDisk="10000000"
+                diskPersistent="false"
+                diskExpiryThreadIntervalSeconds="120"
+                memoryStoreEvictionPolicy="LRU" />
+
+  <!-- Set eternal="false" and timeToLiveSeconds="xxx" if the static files may be changed while the program is running -->
+  <cache name="XitrumFiles" maxElementsInMemory="100000" eternal="true" overflowToDisk="false" memoryStoreEvictionPolicy="LRU" />
+</ehcache>

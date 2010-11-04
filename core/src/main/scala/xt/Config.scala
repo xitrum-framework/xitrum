@@ -17,4 +17,7 @@ object Config {
   val httpPort = properties.getProperty("http_port", "8080").toInt
 
   val filterParams = properties.getProperty("filter_params", "password").split(", ")
+
+  val filesEhcacheName = properties.getProperty("files_ehcache_name", "XitrumFiles")
+  val filesMaxSize     = properties.getProperty("files_max_size", "102400").toInt
 }

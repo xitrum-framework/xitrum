@@ -56,7 +56,7 @@ trait ControllerRender extends Helper {
 
   /**
    * @param path Starts with "/" for absolute path, otherwise it is relative to
-   * the current working directory ((System.getProperty("user.dir"))
+   * the current working directory (System.getProperty("user.dir"))
    */
   def renderFile(path: String) {
     val abs = if (path.startsWith("/"))

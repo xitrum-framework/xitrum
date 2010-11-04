@@ -9,8 +9,12 @@ import java.util.concurrent.Executors
 import org.jboss.netty.bootstrap.ServerBootstrap
 import org.jboss.netty.channel.socket.nio.NioServerSocketChannelFactory
 
+import net.sf.ehcache.CacheManager
+
 class Server(app: App) extends Logger {
   def start {
+    CacheManager.create
+
     val bootstrap = new ServerBootstrap(new NioServerSocketChannelFactory(
       Executors.newCachedThreadPool, Executors.newCachedThreadPool))
     bootstrap.setPipelineFactory(new ChannelPipelineFactory(app))
