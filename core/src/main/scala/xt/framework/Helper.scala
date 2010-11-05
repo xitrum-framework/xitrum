@@ -95,14 +95,19 @@ trait Helper extends Logger {
 
   //----------------------------------------------------------------------------
 
-
+  /**
+   * @param name Controller#action or action
+   */
+  def urlFor(name: String, params: Any*): String = {
+    "TODO"
+  }
 
   //----------------------------------------------------------------------------
 
   /**
-   * Renders a view without layout.
+   * Renders a template without layout.
    *
-   * csasOrAs: String in the pattern "Articles#index" or "index"
+   * csasOrAs: Controller#action or action
    */
   def render(csasOrAs: String) = Scalate.render(csasOrAs, this)
 }

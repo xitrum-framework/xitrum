@@ -24,13 +24,13 @@ trait Controller extends Helper with ControllerFilter with ControllerRender {
    * * Controller#action:       contains "#"
    * * action:                  otherwise
    */
-  def redirectTo(location: String) {
+  def redirectTo(location: String, params: Any*) {
     response.setStatus(FOUND)
 
     val location2 = if (location.contains("://") || location.startsWith("/"))
       location
     else {
-      "TODO"
+      urlFor(location, params)
     }
 
     response.setHeader(LOCATION, location2)

@@ -12,11 +12,22 @@ import org.jboss.netty.handler.codec.http.{HttpMethod, Cookie => NCookie}
  * Used by Netty handler, middlewares, and controllers to share data for both
  * request and response pipeline processing.
  *
- * Design decision: HashMap[String, Any] is not used directly so that strong type
+ * Design decision:
+ * See https://github.com/mmcgrana/ring/blob/master/SPEC
+ * HashMap[String, Any] is not used directly so that strong type
  * checking can be done in the spirit of Scala.
  */
 class Env extends HashMap[String, Any] {
-  var method: HttpMethod = _
+  var serverPort: Int
+  var serverName: String
+  var remoteAddr: String
+  var uri: String
+  var queryString: Option[String]
+  var scheme: String
+  var requestMethod: HttpMethod = _
+  var contentType: Option[String]
+  var contentLength: Option[Long]
+  var characterEncoding: Option[String]
 
   var pathInfo: String = _
 
