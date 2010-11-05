@@ -13,42 +13,43 @@ trait ControllerRender extends Helper {
 
   //----------------------------------------------------------------------------
 
-  def render: String = {
-    val as = paramo("action").getOrElse(env("action404").asInstanceOf[String])
-    render(as)
+  def renderView: String = renderView(layout)
+
+  def renderView(layout: Option[String]): String = {
+    val as = param("action")
+    renderView(as, layout)
   }
 
   /**
    * @param csasOrAs: String in the pattern Articles#index or index
    * The layout is determined from the result of the layout method.
    */
-  override def render(csasOrAs: String) = render(csasOrAs, layout)
+  def renderView(csasOrAs: String): String = renderView(csasOrAs, layout)
 
-  def render(csasOrAs: String, layout: Option[String]) = {
+  def renderView(csasOrAs: String, layout: Option[String]) = {
     val text = super.render(csasOrAs)
     renderText(text, layout)
   }
 
   //----------------------------------------------------------------------------
 
-  def renderText(xml: NodeSeq): String = renderText(xml.toString)
-  def renderText(xml: NodeSeq, layout: Option[String]): String = renderText(xml.toString, layout)
+  def renderText(text: Any): String = renderText(text, layout)
 
-  def renderText(text: String): String = renderText(text, layout)
-
-  def renderText(text: String, layout: Option[String]): String = {
+  def renderText(text: Any, layout: Option[String]): String = {
     val t2 = layout match {
       case Some(csasOrAs2) =>
-        at("content_for_layout", text)
-        super.render(csasOrAs2)
+        at("content_for_layout") = text.toString
+        render(csasOrAs2)
 
       case None =>
-        text
+        text.toString
     }
 
     response.setContent(ChannelBuffers.copiedBuffer(t2, CharsetUtil.UTF_8))
     t2
   }
+
+  //----------------------------------------------------------------------------
 
   def renderBinary(bytes: Array[Byte]) {
     response.setContent(ChannelBuffers.wrappedBuffer(bytes))

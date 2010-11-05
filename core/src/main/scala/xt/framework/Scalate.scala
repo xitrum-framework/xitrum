@@ -62,16 +62,16 @@ object Scalate {
     // to make relPath relative to
     // src/main/resources
     if (Config.isProductionMode)
-    	relPath
+      relPath
     else
-    	System.getProperty("user.dir") + File.separator +
-    	"src" + File.separator + "main" + File.separator + "resources" + File.separator +
-    	relPath
+      System.getProperty("user.dir") + File.separator +
+      "src" + File.separator + "main" + File.separator + "resources" + File.separator +
+      relPath
   }
 
   private def csasOrAsToCsas(csasOrAs: String, helper: Helper): String = {
     if (csasOrAs.indexOf("#") == -1)
-      helper.paramo("controller").getOrElse(helper.env("controller404").asInstanceOf[String]) + "#" + csasOrAs
+      helper.param("controller") + "#" + csasOrAs
     else
       csasOrAs
   }

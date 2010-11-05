@@ -16,23 +16,23 @@ class XTApp extends App {
     val controller = env.controller
     val action     = env.action
 
-    val atMap = new HashMap[String, Any]
-    controller.setRefs(channel, request, response, env, atMap)
+    val at = new HelperAt
+    controller.setRefs(channel, request, response, env, at)
 
     val passed = controller.beforeFilters.forall(filter => {
-    	val onlyActions = filter._2
-    	if (onlyActions.isEmpty) {
-	    	val exceptActions = filter._3
-    		if (!exceptActions.contains(action)) {
-    			val method = filter._1
-    			method.invoke(controller).asInstanceOf[Boolean]
-    		}	else true
-    	} else {
-    		if (onlyActions.contains(action)) {
-    			val method = filter._1
-      	  method.invoke(controller).asInstanceOf[Boolean]
-    		} else true
-    	}
+      val onlyActions = filter._2
+      if (onlyActions.isEmpty) {
+        val exceptActions = filter._3
+        if (!exceptActions.contains(action)) {
+          val method = filter._1
+          method.invoke(controller).asInstanceOf[Boolean]
+        }	else true
+      } else {
+        if (onlyActions.contains(action)) {
+          val method = filter._1
+          method.invoke(controller).asInstanceOf[Boolean]
+        } else true
+      }
     })
     if (passed) action.invoke(controller)
   }
