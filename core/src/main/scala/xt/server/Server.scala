@@ -1,7 +1,7 @@
 package xt.server
 
 import xt._
-import xt.middleware.App
+import xt.http_handler._
 
 import java.net.InetSocketAddress
 import java.util.concurrent.Executors

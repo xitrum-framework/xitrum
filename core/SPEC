@@ -1,17 +1,34 @@
+== Pipeline
+
+->: chaining, =>: wrapping
+  Server ->
+  HttpRequestDecoder ->
+  HttpChunkAggregator ->
+  Handler =>
+    Middleware1 =>
+      Middleware2 =>
+        Middleware3 =>
+          App =>
+            Framework =>
+  HttpResponseEncoder
+
 == App
 
 trait App {
-  def call(remoteIp: String,
-           channel:  Channel,
-           request:  HttpRequest,
-           response: HttpResponse,
-           env:      scala.collection.mutable.Map[String, Any])
+  def apply(channel: Channel, request:  HttpRequest): Option[HttpResponse]
 }
 
-== env
+channel
+  Used for async response. When "apply" returns Some(response), the response
+  is sent automatically to the client by the HTTP handler. To send async
+  response, "apply" should return None to skip auto responding, and channel is
+  used for sending response.
 
-path_info
-ignore_response
+request
+  Variables are sent from one middleware to inner middlewares by setting addition
+  headers with the prefix "XT" in the request.
 
-uriParams
--> params
+response
+  Variables are sent from one middleware to outer middlewares by setting addition
+  headers with the prefix "XT" in the response. The handler will remove these
+  headers when it sends the response to the client.

@@ -16,6 +16,8 @@ object Config {
 
   val httpPort = properties.getProperty("http_port", "8080").toInt
 
+  val maxContentLength = properties.getProperty("max_content_length", "1048576").toInt  // default: 10MB
+
   val sessionIdName = properties.getProperty("session_id_name", "JSESSIONID")
   val sessionsEhcacheName = properties.getProperty("sessions_ehcache_name", "XitrumSessions")
 

@@ -1,6 +1,7 @@
 package xt.middleware
 
 import xt._
+import xt.http_handler._
 
 import org.jboss.netty.channel.Channel
 import org.jboss.netty.handler.codec.http.{HttpRequest, HttpResponse}
@@ -15,14 +16,14 @@ object Squeryl extends Logger {
   def wrap(app: App) = {
     setupDB
     new App {
-      def call(channel: Channel, request: HttpRequest, response: HttpResponse, env: Env) {
+      def call(channel: Channel, request: HttpRequest, response: HttpResponse) {
         // Do not use inTransaction because we want the session to be unbound:
         // http://groups.google.com/group/squeryl/browse_thread/thread/e7fe581f7f5f61f9
         //
         // The connection will be closed here after the transaction
         transaction {
           org.squeryl.Session.currentSession.setLogger(s => logger.debug((s)))
-          app.call(channel, request, response, env)
+          //app.call(channel, request, response, env)
         }
       }
     }
