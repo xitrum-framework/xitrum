@@ -6,9 +6,9 @@ import java.io.FileInputStream
 
 object Config {
   private val properties = {
-    val stream = getClass.getClassLoader.getResourceAsStream("xitrum.properties")
     val ret = new Properties
-    ret.load(stream)
+    val stream = getClass.getClassLoader.getResourceAsStream("xitrum.properties")
+    if (stream != null) ret.load(stream)
     ret
   }
 

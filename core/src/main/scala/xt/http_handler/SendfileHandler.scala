@@ -5,7 +5,7 @@ import xt._
 import java.io.File
 import java.io.RandomAccessFile
 
-import org.jboss.netty.channel.{ChannelUpstreamHandler, ChannelHandlerContext, ChannelEvent, MessageEvent, Channel, ChannelFuture, DefaultFileRegion, ChannelFutureListener}
+import org.jboss.netty.channel.{Channels, ChannelHandlerContext, ChannelEvent, MessageEvent, Channel, ChannelFuture, DefaultFileRegion, ChannelFutureListener}
 import org.jboss.netty.handler.codec.http.{HttpRequest, HttpResponse, HttpHeaders, HttpResponseStatus, DefaultHttpResponse, HttpVersion}
 import HttpResponseStatus._
 import HttpVersion._
@@ -19,24 +19,34 @@ object SendfileHandler {
   val CHUNK_SIZE = 8192
 }
 
+/**
+ * This handler send file to client using various strategies:
+ * 1. If the file is big: use zero-copy for HTTP or chunking for HTTPS
+ * 2. If the file is small: cache in memory and use normal response
+ *
+ * Cache is configureed by files_ehcache_name and files_max_size in xitrum.properties.
+ */
 class SendfileHandler extends ResponseHandler {
   import SendfileHandler._
 
-  def handleResponse(ctx: ChannelHandlerContext, e: MessageEvent, response: HttpResponse) {
+  def handleResponse(ctx: ChannelHandlerContext, e: MessageEvent, env: XtEnv) {
+    import env._
+
     if (!response.containsHeader("X-Sendfile")) {
-      ctx.sendDownstream(e)
+      Channels.write(ctx, e.getFuture, env)
       return
     }
 
+    // X-Sendfile is not standard
+    // To avoid leaking the information, we remove it
     val abs = response.getHeader("X-Sendfile")
     response.removeHeader("X-Sendfile")
-
-    val channel = ctx.getChannel
 
     val file = new File(abs)
     if (!file.exists() || !file.isFile()) {
       response.setStatus(NOT_FOUND)
-      channel.write(response)
+      HttpHeaders.setContentLength(response, 0)
+      Channels.write(ctx, e.getFuture, env)
       return
     }
 
@@ -47,8 +57,9 @@ class SendfileHandler extends ResponseHandler {
     if (elem != null) {
       logger.debug("Serve " + abs + " from cache")
       val bytes = elem.getObjectValue.asInstanceOf[Array[Byte]]
+      HttpHeaders.setContentLength(response, bytes.length)
       response.setContent(ChannelBuffers.wrappedBuffer(bytes))
-      channel.write(response)
+      Channels.write(ctx, e.getFuture, env)
       return
     }
 
@@ -58,7 +69,8 @@ class SendfileHandler extends ResponseHandler {
     } catch {
       case _ =>
         response.setStatus(NOT_FOUND)
-        channel.write(response)
+        HttpHeaders.setContentLength(response, 0)
+        Channels.write(ctx, e.getFuture, env)
         return
     }
 
@@ -67,10 +79,12 @@ class SendfileHandler extends ResponseHandler {
     if (fileLength <= Config.filesMaxSize) {
       val bytes = new Array[Byte](fileLength.toInt)
       raf.read(bytes)
-      raf.close
       cache.put(new Element(elemKey, bytes))
+      raf.close
+
+      HttpHeaders.setContentLength(response, fileLength)
       response.setContent(ChannelBuffers.wrappedBuffer(bytes))
-      channel.write(response)
+      Channels.write(ctx, e.getFuture, env)
       return
     }
 
@@ -78,16 +92,21 @@ class SendfileHandler extends ResponseHandler {
 
     // Write the initial line and the header
     HttpHeaders.setContentLength(response, fileLength)
-    channel.write(response)
+    Channels.write(ctx, e.getFuture, env)
 
     // Write the content
-    if (channel.getPipeline.get(classOf[SslHandler]) != null) {
+    if (ctx.getPipeline.get(classOf[SslHandler]) != null) {
       // Cannot use zero-copy with HTTPS
-      channel.write(new ChunkedFile(raf, 0, fileLength, CHUNK_SIZE))
+      Channels.write(ctx, e.getFuture, new ChunkedFile(raf, 0, fileLength, CHUNK_SIZE))
     } else {
       // No encryption - use zero-copy
       val region = new DefaultFileRegion(raf.getChannel, 0, fileLength)
-      val future = channel.write(region)
+
+      // This will cause ClosedChannelException:
+      // val future = e.getFuture
+      // Channels.write(ctx, future, region)
+
+      val future = Channels.write(ctx.getChannel, region)
       future.addListener(new ChannelFutureListener {
         def operationComplete(future: ChannelFuture) {
           region.releaseExternalResources

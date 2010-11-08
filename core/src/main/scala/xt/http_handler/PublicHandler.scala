@@ -4,25 +4,30 @@ import xt._
 
 import java.io.File
 
-import org.jboss.netty.channel.{ChannelHandlerContext, ChannelEvent, MessageEvent, Channel}
-import org.jboss.netty.handler.codec.http.{HttpRequest, DefaultHttpResponse, HttpResponseStatus, HttpVersion}
+import org.jboss.netty.channel._
+import org.jboss.netty.handler.codec.http._
 import HttpResponseStatus._
 import HttpVersion._
 
 class PublicHandler extends RequestHandler {
-  def handleRequest(ctx: ChannelHandlerContext, e: MessageEvent, request: HttpRequest) {
+  def handleRequest(ctx: ChannelHandlerContext, env: XtEnv) {
+    import env._
+
     val uri = request.getUri
     if (!uri.startsWith("/public")) {
-      ctx.sendUpstream(e)
+      Channels.fireMessageReceived(ctx, env)
       return
     }
 
-    val response = new DefaultHttpResponse(HTTP_1_1, OK)
     sanitizeUri(uri) match {
-      case Some(abs) => response.setHeader("X-Sendfile", abs)
-      case None      => response.setStatus(NOT_FOUND)
+      case Some(abs) =>
+        response.setHeader("X-Sendfile", abs)
+
+      case None =>
+        response.setStatus(NOT_FOUND)
+        HttpHeaders.setContentLength(response, 0)
     }
-    respond(ctx, request, response)
+    respond(ctx, env)
   }
 
   /**

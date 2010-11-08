@@ -13,12 +13,13 @@ class ChannelPipelineFactory(app: App) extends CPF {
     // Upstream
     pipeline.addLast("decoder",    new HttpRequestDecoder)
     pipeline.addLast("aggregator", new HttpChunkAggregator(Config.maxContentLength))
+    pipeline.addLast("netty2xt",   new Netty2Xt)
     pipeline.addLast("public",     new PublicHandler)
 
     // Downstream
     pipeline.addLast("encoder",   new HttpResponseEncoder)
+    pipeline.addLast("xt2netty",  new Xt2Netty)
     pipeline.addLast("sendfile",  new SendfileHandler)
-    pipeline.addLast("keepalive", new KeepaliveHandler)
 
     pipeline
   }

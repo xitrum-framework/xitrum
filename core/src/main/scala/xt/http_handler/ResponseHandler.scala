@@ -2,27 +2,21 @@ package xt.http_handler
 
 import xt._
 
-import org.jboss.netty.channel.{ChannelDownstreamHandler, ChannelHandlerContext, ChannelEvent, MessageEvent}
-import org.jboss.netty.handler.codec.http.HttpResponse
+import org.jboss.netty.channel.{SimpleChannelDownstreamHandler, ChannelHandlerContext, MessageEvent, ExceptionEvent}
+import org.jboss.netty.handler.codec.http.{HttpRequest, HttpResponse}
 
-trait ResponseHandler extends ChannelDownstreamHandler with Logger {
-  def handleDownstream(ctx: ChannelHandlerContext, e: ChannelEvent) {
-    if (!e.isInstanceOf[MessageEvent]) {
+trait ResponseHandler extends SimpleChannelDownstreamHandler with Logger {
+  override def writeRequested(ctx: ChannelHandlerContext, e: MessageEvent) {
+    val m = e.getMessage
+    if (!m.isInstanceOf[XtEnv]) {
       ctx.sendDownstream(e)
       return
     }
 
-    val me = e.asInstanceOf[MessageEvent]
-
-    val m = me.getMessage
-    if (!m.isInstanceOf[HttpResponse]) {
-      ctx.sendDownstream(e)
-      return
-    }
-
-    val request = m.asInstanceOf[HttpResponse]
-    handleResponse(ctx, me, request)
+    val env = m.asInstanceOf[XtEnv]
+    logger.debug("handleResponse")
+    handleResponse(ctx, e, env)
   }
 
-  def handleResponse(ctx: ChannelHandlerContext, e: MessageEvent, response: HttpResponse)
+  def handleResponse(ctx: ChannelHandlerContext, e: MessageEvent, env: XtEnv)
 }
