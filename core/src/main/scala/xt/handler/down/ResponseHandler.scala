@@ -1,6 +1,7 @@
-package xt.http_handler
+package xt.handler.down
 
 import xt._
+import xt.handler._
 
 import org.jboss.netty.channel.{SimpleChannelDownstreamHandler, ChannelHandlerContext, MessageEvent, ExceptionEvent}
 import org.jboss.netty.handler.codec.http.{HttpRequest, HttpResponse}
@@ -14,7 +15,6 @@ trait ResponseHandler extends SimpleChannelDownstreamHandler with Logger {
     }
 
     val env = m.asInstanceOf[XtEnv]
-    logger.debug("handleResponse")
     handleResponse(ctx, e, env)
   }
 

@@ -1,7 +1,7 @@
 package xt.server
 
 import xt._
-import xt.http_handler._
+import xt.handler._
 
 import java.net.InetSocketAddress
 import java.util.concurrent.Executors
@@ -11,13 +11,13 @@ import org.jboss.netty.channel.socket.nio.NioServerSocketChannelFactory
 
 import net.sf.ehcache.CacheManager
 
-class Server(app: App) extends Logger {
+class Server extends Logger {
   def start {
     CacheManager.create
 
     val bootstrap = new ServerBootstrap(new NioServerSocketChannelFactory(
       Executors.newCachedThreadPool, Executors.newCachedThreadPool))
-    bootstrap.setPipelineFactory(new ChannelPipelineFactory(app))
+    bootstrap.setPipelineFactory(new ChannelPipelineFactory)
     bootstrap.setOption("reuseAddress", true)
     bootstrap.setOption("child.tcpNoDelay", true)
     bootstrap.setOption("child.keepAlive",  true)

@@ -1,7 +1,7 @@
 package xt.middleware
 
 import xt._
-import xt.http_handler._
+import xt.handler._
 
 import org.jboss.netty.channel.Channel
 import org.jboss.netty.handler.codec.http.{HttpRequest, HttpResponse}

@@ -1,6 +1,7 @@
-package xt.http_handler
+package xt.handler.down
 
 import xt._
+import xt.handler._
 
 import java.io.File
 import java.io.RandomAccessFile

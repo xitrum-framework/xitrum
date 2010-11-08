@@ -1,13 +1,14 @@
-package xt.http_handler
+package xt.handler.up
 
 import xt._
+import xt.handler._
 
 import org.jboss.netty.channel._
 import org.jboss.netty.handler.codec.http._
 import HttpResponseStatus._
 import HttpVersion._
 
-class Netty2Xt extends SimpleChannelUpstreamHandler with Logger {
+class Netty2XtHandler extends SimpleChannelUpstreamHandler with Logger {
   override def messageReceived(ctx: ChannelHandlerContext, e: MessageEvent) {
     val m = e.getMessage
     if (!m.isInstanceOf[HttpRequest]) {
