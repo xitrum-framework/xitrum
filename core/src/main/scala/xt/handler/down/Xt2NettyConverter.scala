@@ -6,7 +6,7 @@ import xt.handler._
 import org.jboss.netty.channel._
 import org.jboss.netty.handler.codec.http._
 
-class Xt2NettyHandler extends ResponseHandler {
+class Xt2NettyConverter extends ResponseHandler {
   def handleResponse(ctx: ChannelHandlerContext, e: MessageEvent, env: XtEnv) {
     val future = e.getFuture
     Channels.write(ctx, future, env.response)

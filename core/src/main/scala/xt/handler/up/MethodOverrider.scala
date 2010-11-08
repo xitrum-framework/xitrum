@@ -13,7 +13,7 @@ import org.jboss.netty.handler.codec.http.{HttpRequest, HttpResponse, HttpMethod
  *
  * This middleware should be put behind ParamsParser.
  */
-class MethodOverride extends RequestHandler {
+class MethodOverrider extends RequestHandler {
   def handleRequest(ctx: ChannelHandlerContext, env: XtEnv) {
     import env._
 

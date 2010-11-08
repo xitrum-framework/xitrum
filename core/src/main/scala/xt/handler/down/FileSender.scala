@@ -16,7 +16,7 @@ import org.jboss.netty.buffer.ChannelBuffers
 
 import net.sf.ehcache.{CacheManager, Element}
 
-object SendfileHandler {
+object FileSender {
   val CHUNK_SIZE = 8192
 }
 
@@ -27,8 +27,8 @@ object SendfileHandler {
  *
  * Cache is configureed by files_ehcache_name and files_max_size in xitrum.properties.
  */
-class SendfileHandler extends ResponseHandler {
-  import SendfileHandler._
+class FileSender extends ResponseHandler {
+  import FileSender._
 
   def handleResponse(ctx: ChannelHandlerContext, e: MessageEvent, env: XtEnv) {
     import env._

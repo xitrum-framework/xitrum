@@ -10,7 +10,7 @@ import org.jboss.netty.handler.codec.http._
 import HttpResponseStatus._
 import HttpVersion._
 
-class PublicHandler extends RequestHandler {
+class PublicFileServer extends RequestHandler {
   def handleRequest(ctx: ChannelHandlerContext, env: XtEnv) {
     import env._
 
