@@ -9,19 +9,22 @@ import org.jboss.netty.handler.codec.http.{HttpRequestDecoder, HttpChunkAggregat
 
 class ChannelPipelineFactory extends CPF {
   def getPipeline: ChannelPipeline = {
-    val pipeline = Channels.pipeline
+    Channels.pipeline(
+      // Upstream, direction: first handler -> last handler
+      new HttpRequestDecoder,
+      new HttpChunkAggregator(Config.maxContentLength),
+      new Netty2XtHandler,
+      new PublicHandler,
+      new ParamsParser,
+      new MethodOverride,
+      new CookieDecoder,
+      new SessionRestorer,
 
-    // Upstream, direction: first handler -> last handler
-    pipeline.addLast("decoder",    new HttpRequestDecoder)
-    pipeline.addLast("aggregator", new HttpChunkAggregator(Config.maxContentLength))
-    pipeline.addLast("netty2xt",   new Netty2XtHandler)
-    pipeline.addLast("public",     new PublicHandler)
-
-    // Downstream, direction: last handler -> first handler
-    pipeline.addLast("encoder",  new HttpResponseEncoder)
-    pipeline.addLast("xt2netty", new Xt2NettyHandler)
-    pipeline.addLast("sendfile", new SendfileHandler)
-
-    pipeline
+      // Downstream, direction: last handler -> first handler
+      new HttpResponseEncoder,
+      new Xt2NettyHandler,
+      new CookieEncoder,
+      new SessionStorer,
+      new SendfileHandler)
   }
 }
