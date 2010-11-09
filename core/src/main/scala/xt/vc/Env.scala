@@ -27,6 +27,8 @@ class Env {
 
   var method: HttpMethod = _
 
+  var uri: String = _
+
   /** pathInfo for http://example.com/articles?page=2 is /articles */
   var pathInfo: String = _
 

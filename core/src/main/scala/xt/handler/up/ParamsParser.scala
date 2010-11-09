@@ -10,23 +10,23 @@ import org.jboss.netty.handler.codec.http.{QueryStringDecoder, HttpMethod}
 /**
  * This middleware:
  * 1. Puts the request path to env.pathInfo
- * 2. Parses params in URI and request body and puts them to env.params
+ * 2. Parses params in URI and request body and puts them to env.allParams
  */
 class ParamsParser extends RequestHandler {
   def handleRequest(ctx: ChannelHandlerContext, env: Env) {
     import env._
 
-    val u1 = request.getUri
-    val u2 = if (request.getMethod != HttpMethod.POST) {
-      u1
+    uri = request.getUri
+    val query = if (request.getMethod != HttpMethod.POST) {
+      uri
     } else {
       val c1 = request.getContent  // ChannelBuffer
       val c2 = c1.toString(Charset.forName("UTF-8"))
-      val p  = if (u1.indexOf("?") == -1) "?" + c2 else "&" + c2
-      u1 + p
+      val p  = if (uri.indexOf("?") == -1) "?" + c2 else "&" + c2
+      uri + p
     }
 
-    val d = new QueryStringDecoder(u2)
+    val d = new QueryStringDecoder(query)
     val p = d.getParameters
 
     // Because we will likely put things to params in later middlewares, we need

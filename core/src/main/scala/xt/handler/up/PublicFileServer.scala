@@ -10,17 +10,28 @@ import org.jboss.netty.handler.codec.http._
 import HttpResponseStatus._
 import HttpVersion._
 
+/**
+ * Serves special files or files in /public directory.
+ *
+ * Special files:
+ *    favicon.ico may be not at the root: http://en.wikipedia.org/wiki/Favicon
+ *    robots.txt     must be at the root: http://en.wikipedia.org/wiki/Robots_exclusion_standard
+ */
 class PublicFileServer extends RequestHandler {
   def handleRequest(ctx: ChannelHandlerContext, env: Env) {
     import env._
 
-    val uri = request.getUri
-    if (!uri.startsWith("/public")) {
+    val pathInfo2 = if (pathInfo == "/favicon.ico" || pathInfo == "/robots.txt")
+      "/public" + pathInfo
+    else
+      pathInfo
+
+    if (!pathInfo2.startsWith("/public/")) {
       Channels.fireMessageReceived(ctx, env)
       return
     }
 
-    sanitizeUri(uri) match {
+    sanitizePathInfo(pathInfo2) match {
       case Some(abs) =>
         response.setHeader("X-Sendfile", abs)
 
@@ -32,15 +43,15 @@ class PublicFileServer extends RequestHandler {
   }
 
   /**
-   * @return None if uri is invalid or the corresponding file is hidden,
+   * @return None if pathInfo is invalid or the corresponding file is hidden,
    *         otherwise Some(the absolute file path)
    */
-  private def sanitizeUri(uri: String): Option[String] = {
-    // uri starts with "/"
+  private def sanitizePathInfo(pathInfo: String): Option[String] = {
+    // pathInfo starts with "/"
 
     var decoded: String = null
 
-    URLDecoder.decode(uri) match {
+    URLDecoder.decode(pathInfo) match {
       case None => None
 
       case Some(decoded) =>
