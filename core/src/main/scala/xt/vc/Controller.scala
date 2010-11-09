@@ -29,6 +29,7 @@ trait Controller extends Helper with Filter with Renderer {
       urlFor(location, params)
     }
 
+    HttpHeaders.setContentLength(response, 0)
     response.setHeader(LOCATION, location2)
     respond
   }
