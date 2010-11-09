@@ -9,11 +9,15 @@ import org.fusesource.scalate.{TemplateEngine, Binding, DefaultRenderContext}
 import org.fusesource.scalate.scaml.ScamlOptions
 
 object Scalate {
-  var viewPaths: List[String] = _
+  private var viewPaths: List[String] = _
+
+  def apply(viewPaths: List[String]) { this.viewPaths = viewPaths }
+
+  //----------------------------------------------------------------------------
 
   val engine = new TemplateEngine
   engine.workingDirectory = new File("tmp/scalate")
-  engine.bindings = List(Binding("helper", "xt.framework.Helper", true))
+  engine.bindings = List(Binding("helper", "xt.vc.Helper", true))
 
   // See http://scalate.fusesource.org/documentation/scalate-embedding-guide.html#custom_template_loading
   if (Config.isProductionMode) {
