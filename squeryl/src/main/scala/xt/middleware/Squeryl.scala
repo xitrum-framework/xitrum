@@ -1,7 +1,6 @@
 package xt.middleware
 
 import xt._
-import xt.handler._
 
 import org.jboss.netty.channel.Channel
 import org.jboss.netty.handler.codec.http.{HttpRequest, HttpResponse}
@@ -13,23 +12,19 @@ import org.squeryl.PrimitiveTypeMode._
 import com.mchange.v2.c3p0.ComboPooledDataSource
 
 object Squeryl extends Logger {
-  def wrap(app: App) = {
-    setupDB
-    new App {
-      def call(channel: Channel, request: HttpRequest, response: HttpResponse) {
-        // Do not use inTransaction because we want the session to be unbound:
-        // http://groups.google.com/group/squeryl/browse_thread/thread/e7fe581f7f5f61f9
-        //
-        // The connection will be closed here after the transaction
-        transaction {
-          org.squeryl.Session.currentSession.setLogger(s => logger.debug((s)))
-          //app.call(channel, request, response, env)
-        }
-      }
+  // Run f in a transaction with logger. The connection will be closed here after
+  // the transaction.
+  //
+  // Do not use inTransaction because we want the session to be unbound:
+  // http://groups.google.com/group/squeryl/browse_thread/thread/e7fe581f7f5f61f9
+  def tl(f: => Unit) {
+    transaction {
+      org.squeryl.Session.currentSession.setLogger(s => logger.debug((s)))
+      f
     }
   }
 
-  private def setupDB {
+  def setupDB {
     val dataSource  = new ComboPooledDataSource
     val driverClass = dataSource.getDriverClass
     val adapter     = guessAdapter(driverClass)
@@ -37,6 +32,8 @@ object Squeryl extends Logger {
     val concreteFactory = () => SSession.create(dataSource.getConnection, adapter)
     SessionFactory.concreteFactory = Some(concreteFactory)
   }
+
+  //----------------------------------------------------------------------------
 
   /**
    * driverClass: org.postgresql.Driver or com.mysql.jdbc.Driver etc.

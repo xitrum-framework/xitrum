@@ -1,7 +1,7 @@
 package xt.handler.down
 
-import xt._
-import xt.handler._
+import xt.Config
+import xt.vc.Env
 
 import java.io.File
 import java.io.RandomAccessFile
@@ -30,7 +30,7 @@ object FileSender {
 class FileSender extends ResponseHandler {
   import FileSender._
 
-  def handleResponse(ctx: ChannelHandlerContext, e: MessageEvent, env: XtEnv) {
+  def handleResponse(ctx: ChannelHandlerContext, e: MessageEvent, env: Env) {
     import env._
 
     if (!response.containsHeader("X-Sendfile")) {

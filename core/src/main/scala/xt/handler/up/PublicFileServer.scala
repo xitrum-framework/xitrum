@@ -1,7 +1,7 @@
 package xt.handler.up
 
 import xt._
-import xt.handler._
+import xt.vc.Env
 
 import java.io.File
 
@@ -11,7 +11,7 @@ import HttpResponseStatus._
 import HttpVersion._
 
 class PublicFileServer extends RequestHandler {
-  def handleRequest(ctx: ChannelHandlerContext, env: XtEnv) {
+  def handleRequest(ctx: ChannelHandlerContext, env: Env) {
     import env._
 
     val uri = request.getUri

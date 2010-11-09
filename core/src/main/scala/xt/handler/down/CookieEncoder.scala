@@ -1,6 +1,6 @@
 package xt.handler.down
 
-import xt.handler._
+import xt.vc.Env
 
 import java.util.{UUID, HashMap => JMap, TreeSet}
 
@@ -9,12 +9,12 @@ import org.jboss.netty.handler.codec.http.{HttpRequest, HttpResponse, HttpHeader
 import HttpHeaders.Names._
 
 class CookieEncoder extends ResponseHandler {
-  def handleResponse(ctx: ChannelHandlerContext, e: MessageEvent, env: XtEnv) {
+  def handleResponse(ctx: ChannelHandlerContext, e: MessageEvent, env: Env) {
     import env._
 
     if (cookies != null && cookies.size > 0) {   // == null: CookieDecoder has not been run
       val encoder = new NCookieEncoder(true)
-      val iter = env.cookies.iterator
+      val iter = cookies.iterator
       while (iter.hasNext) encoder.addCookie(iter.next)
       response.setHeader(SET_COOKIE, encoder.encode)
     }

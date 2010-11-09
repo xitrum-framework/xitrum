@@ -1,14 +1,14 @@
 package xt.handler.down
 
-import xt._
-import xt.handler._
+import xt.Config
+import xt.vc.Env
 import xt.vc.session._
 
 import org.jboss.netty.channel._
 import org.jboss.netty.handler.codec.http.DefaultCookie
 
 class SessionStorer extends ResponseHandler {
-  def handleResponse(ctx: ChannelHandlerContext, e: MessageEvent, env: XtEnv) {
+  def handleResponse(ctx: ChannelHandlerContext, e: MessageEvent, env: Env) {
     import env._
 
     if (session != null) {  // == null: SessionRestorer has not been run
@@ -23,7 +23,7 @@ class SessionStorer extends ResponseHandler {
         case None =>
           val cookie = new DefaultCookie(Config.sessionIdName, env.session.id)
           cookie.setPath("/")
-          env.cookies.add(cookie)
+          cookies.add(cookie)
       }
     }
 

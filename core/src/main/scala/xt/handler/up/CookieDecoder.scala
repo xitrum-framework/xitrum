@@ -1,6 +1,6 @@
 package xt.handler.up
 
-import xt.handler._
+import xt.vc.Env
 
 import java.util.{UUID, HashMap => JMap, TreeSet}
 
@@ -10,14 +10,13 @@ import HttpHeaders.Names._
 
 /** Decodes once so that the application does not have to decode again and again */
 class CookieDecoder extends RequestHandler {
-  def handleRequest(ctx: ChannelHandlerContext, env: XtEnv) {
+  def handleRequest(ctx: ChannelHandlerContext, env: Env) {
     import env._
 
     val decoder = new NCookieDecoder
     val header  = request.getHeader(COOKIE)
-    val cookies = if (header != null) decoder.decode(header) else new TreeSet[Cookie]()
+    cookies = if (header != null) decoder.decode(header) else new TreeSet[Cookie]()
 
-    env.cookies = cookies
     Channels.fireMessageReceived(ctx, env)
   }
 }

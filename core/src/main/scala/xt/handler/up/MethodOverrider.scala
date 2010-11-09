@@ -1,6 +1,6 @@
 package xt.handler.up
 
-import xt.handler._
+import xt.vc.Env
 
 import org.jboss.netty.channel._
 import org.jboss.netty.handler.codec.http.{HttpRequest, HttpResponse, HttpMethod}
@@ -14,14 +14,14 @@ import org.jboss.netty.handler.codec.http.{HttpRequest, HttpResponse, HttpMethod
  * This middleware should be put behind ParamsParser.
  */
 class MethodOverrider extends RequestHandler {
-  def handleRequest(ctx: ChannelHandlerContext, env: XtEnv) {
+  def handleRequest(ctx: ChannelHandlerContext, env: Env) {
     import env._
 
     val m1 = request.getMethod
     val m2: HttpMethod = if (m1 != HttpMethod.POST) {
       m1
     } else {
-      val _methods = env.params.get("_method")
+      val _methods = allParams.get("_method")
       if (_methods == null || _methods.isEmpty) m1 else new HttpMethod(_methods.get(0))
     }
 

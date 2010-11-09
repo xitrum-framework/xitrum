@@ -1,7 +1,7 @@
 package xt.handler.up
 
-import xt._
-import xt.handler._
+import xt.Logger
+import xt.vc.Env
 
 import org.jboss.netty.channel.{SimpleChannelUpstreamHandler, ChannelHandlerContext, MessageEvent, ExceptionEvent, ChannelFutureListener}
 import org.jboss.netty.handler.codec.http.HttpHeaders
@@ -9,12 +9,12 @@ import org.jboss.netty.handler.codec.http.HttpHeaders
 trait RequestHandler extends SimpleChannelUpstreamHandler with Logger {
   override def messageReceived(ctx: ChannelHandlerContext, e: MessageEvent) {
     val m = e.getMessage
-    if (!m.isInstanceOf[XtEnv]) {
+    if (!m.isInstanceOf[Env]) {
       ctx.sendUpstream(e)
       return
     }
 
-    val env = m.asInstanceOf[XtEnv]
+    val env = m.asInstanceOf[Env]
     handleRequest(ctx, env)
   }
 
@@ -22,9 +22,9 @@ trait RequestHandler extends SimpleChannelUpstreamHandler with Logger {
     logger.error("exceptionCaught", e.getCause)
   }
 
-  def handleRequest(ctx: ChannelHandlerContext, env: XtEnv)
+  def handleRequest(ctx: ChannelHandlerContext, env: Env)
 
-  protected def respond(ctx: ChannelHandlerContext, env: XtEnv) {
+  protected def respond(ctx: ChannelHandlerContext, env: Env) {
     ctx.getChannel.write(env)
   }
 }

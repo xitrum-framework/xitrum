@@ -1,7 +1,7 @@
 package xt.handler.up
 
-import xt._
-import xt.handler._
+import xt.Logger
+import xt.vc.Env
 
 import org.jboss.netty.channel._
 import org.jboss.netty.handler.codec.http._
@@ -17,7 +17,7 @@ class Netty2XtConverter extends SimpleChannelUpstreamHandler with Logger {
     }
 
     val request = m.asInstanceOf[HttpRequest]
-    val env = new XtEnv
+    val env = new Env
     env.request  = request
     env.response = new DefaultHttpResponse(HTTP_1_1, OK)
     Channels.fireMessageReceived(ctx, env)

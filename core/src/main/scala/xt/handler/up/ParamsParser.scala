@@ -1,6 +1,6 @@
 package xt.handler.up
 
-import xt.handler._
+import xt.vc.Env
 
 import java.nio.charset.Charset
 
@@ -13,7 +13,7 @@ import org.jboss.netty.handler.codec.http.{QueryStringDecoder, HttpMethod}
  * 2. Parses params in URI and request body and puts them to env.params
  */
 class ParamsParser extends RequestHandler {
-  def handleRequest(ctx: ChannelHandlerContext, env: XtEnv) {
+  def handleRequest(ctx: ChannelHandlerContext, env: Env) {
     import env._
 
     val u1 = request.getUri
@@ -36,8 +36,8 @@ class ParamsParser extends RequestHandler {
     // See the source code of QueryStringDecoder as of Netty 3.2.3.Final
     val p2 = if (p.isEmpty) new java.util.LinkedHashMap[String, java.util.List[String]]() else p
 
-    env.pathInfo = d.getPath
-    env.params = p2
+    pathInfo = d.getPath
+    allParams = p2
     Channels.fireMessageReceived(ctx, env)
   }
 }

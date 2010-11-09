@@ -1,63 +1,97 @@
 package xt.handler.up
 
 import xt._
-import xt.handler._
-import xt.vc.Controller
+import xt.vc._
+import xt.vc.helper._
 
 import java.lang.reflect.Method
 
 import org.jboss.netty.channel._
-import org.jboss.netty.handler.codec.http.{HttpRequest, HttpResponse, HttpMethod, HttpResponseStatus}
+import org.jboss.netty.handler.codec.http._
+import HttpResponseStatus._
+import HttpVersion._
 
 class Dispatcher extends RequestHandler {
-  def handleRequest(ctx: ChannelHandlerContext, env: XtEnv) {
-    //import env._
+  def handleRequest(ctx: ChannelHandlerContext, env: Env) {
+    import env._
 
-        new App {
-      def call(channel: Channel, request: HttpRequest, response: HttpResponse, env: Env) {
-        val (ka, uriParams) = matchRoute(env.method, env.pathInfo) match {
-          case Some((ka, uriParams)) =>
-            (ka, uriParams)
+    lastUpstreamHandlerCtx = ctx
 
-          case None =>
-            response.setStatus(HttpResponseStatus.NOT_FOUND)
-            val uriParams = new java.util.LinkedHashMap[String, java.util.List[String]]()
-            uriParams.put("controller", toValues(csast404._1))
-            uriParams.put("action",     toValues(csast404._2))
-            (ka404, uriParams)
-        }
+    Router.matchRoute(env.method, env.pathInfo) match {
+      case Some((ka, uriParams)) =>
+        logger.debug(env.method + " " + env.pathInfo)
+        dispatch(env, ka, uriParams)
 
-        // Put (csast500, ka500) to env so that they can be taken out later
-        // by Failsafe midddleware
-        env.put("error500", compiledCsas500)
-
-        logger.debug(env.method + " " + env.pathInfo)  // TODO: Fix this ugly code (1 of 3)
-        dispatch(app, channel, request, response, env, ka, uriParams)
-      }
+      case None =>
+        response.setStatus(NOT_FOUND)
+        env.response.setHeader("X-Sendfile", System.getProperty("user.dir") + "/public/404.html")
+        env.lastUpstreamHandlerCtx.getChannel.write(env)
     }
-
   }
 
   /**
    * WARN: This method is here because it is also used by Failsafe when redispatching.
    */
-  def dispatch(app: App,
-               channel: Channel, request: HttpRequest, response: HttpResponse, env: Env,
-               ka: KA, uriParams: UriParams) {
+  def dispatch(env: Env, ka: Router.KA, uriParams: Router.UriParams) {
+    env.at = new At
+
     // Merge uriParams to params
-    env.params.putAll(uriParams)
+    env.allParams.putAll(uriParams)
+    logger.debug(filterParams(env.allParams).toString)
 
     // Put controller (Controller) and action (Method) to env so that
     // the action can be invoked at XTApp
-    val (k, a) = ka
-    val c = k.newInstance
-    env.controller = c
-    env.action     = a
+    val (k, action) = ka
+    val controller = k.newInstance
+    controller(env)
 
-    logger.debug(filterParams(env.params).toString)  // TODO: Fix this ugly code (2 of 3)
+    // Begin timestamp
     val t1 = System.currentTimeMillis
-    app.call(channel, request, response, env)
+
+    // Failsafe
+    try {
+      // Call before filters
+      val passed = controller.beforeFilters.forall(filter => {
+        val onlyActions = filter._2
+        if (onlyActions.isEmpty) {
+          val exceptActions = filter._3
+          if (!exceptActions.contains(action)) {
+            val method = filter._1
+            method.invoke(controller).asInstanceOf[Boolean]
+          }	else true
+        } else {
+          if (onlyActions.contains(action)) {
+            val method = filter._1
+            method.invoke(controller).asInstanceOf[Boolean]
+          } else true
+        }
+      })
+
+      // Call action
+      if (passed) action.invoke(controller)
+    } catch {
+      case e =>
+        logger.error("Error on dispatching", e)
+
+        env.response.setStatus(INTERNAL_SERVER_ERROR)
+        env.response.setHeader("X-Sendfile", System.getProperty("user.dir") + "/public/500.html")
+        env.lastUpstreamHandlerCtx.getChannel.write(env)
+    }
+
+    // End timestamp
     val t2 = System.currentTimeMillis
-    logger.debug((t2 - t1) + " [ms]")                // TODO: Fix this ugly code (3 of 3)
+    logger.debug((t2 - t1) + " [ms]")
+  }
+
+  //----------------------------------------------------------------------------
+
+  // Same as Rails' config.filter_parameters
+  private def filterParams(params: java.util.Map[String, java.util.List[String]]): java.util.Map[String, java.util.List[String]] = {
+    val ret = new java.util.LinkedHashMap[String, java.util.List[String]]()
+    ret.putAll(params)
+    for (key <- Config.filterParams) {
+      if (ret.containsKey(key)) ret.put(key, Router.toValues("[filtered]"))
+    }
+    ret
   }
 }

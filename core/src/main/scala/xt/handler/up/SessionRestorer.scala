@@ -1,7 +1,7 @@
 package xt.handler.up
 
-import xt._
-import xt.handler._
+import xt.Config
+import xt.vc.Env
 import xt.vc.session._
 
 import java.util.{UUID, HashMap => JMap}
@@ -9,7 +9,7 @@ import java.util.{UUID, HashMap => JMap}
 import org.jboss.netty.channel._
 
 class SessionRestorer extends RequestHandler {
-  def handleRequest(ctx: ChannelHandlerContext, env: XtEnv) {
+  def handleRequest(ctx: ChannelHandlerContext, env: Env) {
     import env._
 
     val id = restoreSessionId(env)
@@ -23,14 +23,14 @@ class SessionRestorer extends RequestHandler {
 
   //----------------------------------------------------------------------------
 
-  private def restoreSessionId(env: XtEnv): String = {
+  private def restoreSessionId(env: Env): String = {
     SessionUtil.findSessionCookie(env.cookies) match {
       case Some(cookie) =>
         cookie.getValue
 
       case None =>
         // No cookie, try from the request parameters
-        val xs = env.params.get(Config.sessionIdName)
+        val xs = env.allParams.get(Config.sessionIdName)
         if (xs == null)
           UUID.randomUUID.toString
         else {

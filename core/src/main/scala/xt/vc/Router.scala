@@ -5,10 +5,9 @@ import xt.handler._
 
 import java.lang.reflect.Method
 
-import org.jboss.netty.channel._
-import org.jboss.netty.handler.codec.http.{HttpRequest, HttpResponse, HttpMethod, HttpResponseStatus}
+import org.jboss.netty.handler.codec.http.HttpMethod
 
-object Routes {
+object Router {
   type Route           = (HttpMethod, String, String)
   type CompiledPattern = Array[(String, Boolean)]  // String: token, Boolean: true if the token is constant
   type Csas            = (String, String)
@@ -19,101 +18,17 @@ object Routes {
 
   private var compiledRoutes: Iterable[CompiledRoute] = _
 
-  var viewPaths: List[String] = _
-
   /**
    * Application that does not use view (Scalate view) does not have to specify viewPaths.
    */
-  def apply(routes: List[Route], errorRoutes: Map[String, String], controllerPaths: List[String], viewPaths: List[String] = List()) = {
-    this.viewPaths = viewPaths
-
+  def apply(routes: List[Route], controllerPaths: List[String]) = {
     compiledRoutes = routes.map(compileRoute(_, controllerPaths))
-
-    val (csast404, ka404) = compileCsas(errorRoutes("404"), controllerPaths)
-    val compiledCsas500   = compileCsas(errorRoutes("500"), controllerPaths)
-  }
-
-  /**
-   * WARN: This method is here because it is also used by Failsafe when redispatching.
-   */
-  def dispatch(app: App,
-               channel: Channel, request: HttpRequest, response: HttpResponse, env: Env,
-               ka: KA, uriParams: UriParams) {
-    // Merge uriParams to params
-    env.params.putAll(uriParams)
-
-    // Put controller (Controller) and action (Method) to env so that
-    // the action can be invoked at XTApp
-    val (k, a) = ka
-    val c = k.newInstance
-    env.controller = c
-    env.action     = a
-
-    logger.debug(filterParams(env.params).toString)  // TODO: Fix this ugly code (2 of 3)
-    val t1 = System.currentTimeMillis
-    app.call(channel, request, response, env)
-    val t2 = System.currentTimeMillis
-    logger.debug((t2 - t1) + " [ms]")                // TODO: Fix this ugly code (3 of 3)
-  }
-
-  /**
-   * WARN: This method is here because it is also used by Failsafe when redispatching.
-   *
-   * Wraps a single String by a List.
-   */
-  def toValues(value: String): java.util.List[String] = {
-    val values = new java.util.ArrayList[String](1)
-    values.add(value)
-    values
-  }
-
-  //----------------------------------------------------------------------------
-
-  private def compileRoute(route: Route, controllerPaths: List[String]): CompiledRoute = {
-    val (method, pattern, csas) = route
-    val cp = compilePattern(pattern)
-    val (csast, ka) = compileCsas(csas, controllerPaths)
-    (method, cp, csast, ka)
-  }
-
-  private def compilePattern(pattern: String): CompiledPattern = {
-    val tokens = pattern.split("/").filter(_ != "")
-    tokens.map { e: String =>
-      val constant = !e.startsWith(":")
-      val token    = if (constant) e else e.substring(1)
-      (token, constant)
-    }
-  }
-
-  /**
-   * Given "Articles#index", rerturns:
-   * ("Articles", "index", Articles class, index method)
-   */
-  private def compileCsas(csas: String, controllerPaths: List[String]): CompiledCsas = {
-    val caa = csas.split("#")
-    val cs  = caa(0)
-    val as  = caa(1)
-
-    var k: Class[Controller] = null
-    controllerPaths.find { p =>
-      try {
-        k = Class.forName(p + "." + cs).asInstanceOf[Class[Controller]]
-        true
-      } catch {
-        case _ => false
-      }
-    }
-    if (k == null) throw(new Exception("Could not load " + csas))
-
-    val a  = k.getMethod(as)
-
-    ((cs, as), (k, a))
   }
 
   /**
    * Returns None if not matched.
    */
-  private def matchRoute(method: HttpMethod, pathInfo: String): Option[(KA, UriParams)] = {
+  def matchRoute(method: HttpMethod, pathInfo: String): Option[(KA, UriParams)] = {
     val tokens = pathInfo.split("/").filter(_ != "")
     val max1   = tokens.size
 
@@ -190,6 +105,60 @@ object Routes {
 
       case None => None
     }
+  }
+
+  /**
+   * WARN: This method is here because it is also used by Failsafe when redispatching.
+   *
+   * Wraps a single String by a List.
+   */
+  def toValues(value: String): java.util.List[String] = {
+    val values = new java.util.ArrayList[String](1)
+    values.add(value)
+    values
+  }
+
+  //----------------------------------------------------------------------------
+
+  private def compileRoute(route: Route, controllerPaths: List[String]): CompiledRoute = {
+    val (method, pattern, csas) = route
+    val cp = compilePattern(pattern)
+    val (csast, ka) = compileCsas(csas, controllerPaths)
+    (method, cp, csast, ka)
+  }
+
+  private def compilePattern(pattern: String): CompiledPattern = {
+    val tokens = pattern.split("/").filter(_ != "")
+    tokens.map { e: String =>
+      val constant = !e.startsWith(":")
+      val token    = if (constant) e else e.substring(1)
+      (token, constant)
+    }
+  }
+
+  /**
+   * Given "Articles#index", rerturns:
+   * ("Articles", "index", Articles class, index method)
+   */
+  private def compileCsas(csas: String, controllerPaths: List[String]): CompiledCsas = {
+    val caa = csas.split("#")
+    val cs  = caa(0)
+    val as  = caa(1)
+
+    var k: Class[Controller] = null
+    controllerPaths.find { p =>
+      try {
+        k = Class.forName(p + "." + cs).asInstanceOf[Class[Controller]]
+        true
+      } catch {
+        case _ => false
+      }
+    }
+    if (k == null) throw(new Exception("Could not load " + csas))
+
+    val a  = k.getMethod(as)
+
+    ((cs, as), (k, a))
   }
 
   // Same as Rails' config.filter_parameters
