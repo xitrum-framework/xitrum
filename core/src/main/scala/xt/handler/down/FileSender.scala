@@ -1,13 +1,12 @@
 package xt.handler.down
 
-import xt.Config
-import xt.vc.Env
+import xt.{Config, Logger}
 
 import java.io.File
 import java.io.RandomAccessFile
 
-import org.jboss.netty.channel.{Channels, ChannelHandlerContext, ChannelEvent, MessageEvent, Channel, ChannelFuture, DefaultFileRegion, ChannelFutureListener}
-import org.jboss.netty.handler.codec.http.{HttpRequest, HttpResponse, HttpHeaders, HttpResponseStatus, DefaultHttpResponse, HttpVersion}
+import org.jboss.netty.channel.{SimpleChannelDownstreamHandler, Channels, ChannelHandlerContext, MessageEvent, ChannelFuture, DefaultFileRegion, ChannelFutureListener}
+import org.jboss.netty.handler.codec.http.{HttpRequest, HttpResponse, HttpHeaders, HttpResponseStatus, HttpVersion}
 import HttpResponseStatus._
 import HttpVersion._
 import org.jboss.netty.handler.ssl.SslHandler
@@ -27,14 +26,20 @@ object FileSender {
  *
  * Cache is configureed by files_ehcache_name and files_max_size in xitrum.properties.
  */
-class FileSender extends ResponseHandler {
+class FileSender extends SimpleChannelDownstreamHandler with Logger {
   import FileSender._
 
-  def handleResponse(ctx: ChannelHandlerContext, e: MessageEvent, env: Env) {
-    import env._
+  override def writeRequested(ctx: ChannelHandlerContext, e: MessageEvent) {
+    val m = e.getMessage
+    if (!m.isInstanceOf[HttpResponse]) {
+      ctx.sendDownstream(e)
+      return
+    }
+
+    val response = m.asInstanceOf[HttpResponse]
 
     if (!response.containsHeader("X-Sendfile")) {
-      Channels.write(ctx, e.getFuture, env)
+      Channels.write(ctx, e.getFuture, response)
       return
     }
 
@@ -47,7 +52,7 @@ class FileSender extends ResponseHandler {
     if (!file.exists() || !file.isFile()) {
       response.setStatus(NOT_FOUND)
       HttpHeaders.setContentLength(response, 0)
-      Channels.write(ctx, e.getFuture, env)
+      Channels.write(ctx, e.getFuture, response)
       return
     }
 
@@ -60,7 +65,7 @@ class FileSender extends ResponseHandler {
       val bytes = elem.getObjectValue.asInstanceOf[Array[Byte]]
       HttpHeaders.setContentLength(response, bytes.length)
       response.setContent(ChannelBuffers.wrappedBuffer(bytes))
-      Channels.write(ctx, e.getFuture, env)
+      Channels.write(ctx, e.getFuture, response)
       return
     }
 
@@ -71,7 +76,7 @@ class FileSender extends ResponseHandler {
       case _ =>
         response.setStatus(NOT_FOUND)
         HttpHeaders.setContentLength(response, 0)
-        Channels.write(ctx, e.getFuture, env)
+        Channels.write(ctx, e.getFuture, response)
         return
     }
 
@@ -85,7 +90,7 @@ class FileSender extends ResponseHandler {
 
       HttpHeaders.setContentLength(response, fileLength)
       response.setContent(ChannelBuffers.wrappedBuffer(bytes))
-      Channels.write(ctx, e.getFuture, env)
+      Channels.write(ctx, e.getFuture, response)
       return
     }
 
@@ -93,7 +98,7 @@ class FileSender extends ResponseHandler {
 
     // Write the initial line and the header
     HttpHeaders.setContentLength(response, fileLength)
-    Channels.write(ctx, e.getFuture, env)
+    Channels.write(ctx, e.getFuture, response)
 
     // Write the content
     if (ctx.getPipeline.get(classOf[SslHandler]) != null) {

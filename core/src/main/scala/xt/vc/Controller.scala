@@ -8,7 +8,8 @@ import HttpResponseStatus._
 
 trait Controller extends Helper with Filter with Renderer {
   def respond {
-    lastUpstreamHandlerCtx.getChannel.write(this)
+    encodeCookies
+    ctx.getChannel.write(this)
   }
 
   /**
@@ -32,5 +33,16 @@ trait Controller extends Helper with Filter with Renderer {
     HttpHeaders.setContentLength(response, 0)
     response.setHeader(LOCATION, location2)
     respond
+  }
+
+  //----------------------------------------------------------------------------
+
+  private def encodeCookies {
+    if (cookies != null && cookies.size > 0) {   // == null: CookieDecoder has not been run
+      val encoder = new CookieEncoder(true)
+      val iter = cookies.iterator
+      while (iter.hasNext) encoder.addCookie(iter.next)
+      response.setHeader(SET_COOKIE, encoder.encode)
+    }
   }
 }

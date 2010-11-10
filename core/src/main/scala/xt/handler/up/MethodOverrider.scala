@@ -1,31 +1,34 @@
 package xt.handler.up
 
-import xt.vc.Env
-
-import org.jboss.netty.channel._
-import org.jboss.netty.handler.codec.http.{HttpRequest, HttpResponse, HttpMethod}
+import org.jboss.netty.channel.{SimpleChannelUpstreamHandler, ChannelHandlerContext, MessageEvent, Channels}
+import org.jboss.netty.handler.codec.http.{HttpRequest, HttpMethod}
+import HttpMethod._
 
 /**
- * This middleware puts the request method env.method.
- *
  * If the real request method is POST and "_method" param exists, the "_method"
  * param will override the POST method.
  *
- * This middleware should be put behind ParamsParser.
+ * This middleware should be put behind BodyParser.
  */
-class MethodOverrider extends RequestHandler {
-  def handleRequest(ctx: ChannelHandlerContext, env: Env) {
-    import env._
-
-    val m1 = request.getMethod
-    val m2: HttpMethod = if (m1 != HttpMethod.POST) {
-      m1
-    } else {
-      val _methods = allParams.get("_method")
-      if (_methods == null || _methods.isEmpty) m1 else new HttpMethod(_methods.get(0))
+class MethodOverrider extends SimpleChannelUpstreamHandler {
+  override def messageReceived(ctx: ChannelHandlerContext, e: MessageEvent) {
+    val m = e.getMessage
+    if (!m.isInstanceOf[BodyParserResult]) {
+      ctx.sendUpstream(e)
+      return
     }
 
-    env.method = m2
-    Channels.fireMessageReceived(ctx, env)
+    val bpr     = m.asInstanceOf[BodyParserResult]
+    val request = bpr.request
+    val method = request.getMethod
+    if (method == POST) {
+      val _methods = bpr.bodyParams.get("_method")
+      if (_methods != null && !_methods.isEmpty) {
+      val _method = new HttpMethod(_methods.get(0))
+      request.setMethod(_method)
+      }
+    }
+
+    Channels.fireMessageReceived(ctx, bpr)
   }
 }

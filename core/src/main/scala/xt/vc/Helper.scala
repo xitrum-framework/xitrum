@@ -2,73 +2,31 @@ package xt.vc
 
 import xt._
 import xt.vc.helper._
+import xt.vc.helper.session.SessionRestorer
 
-import java.net.InetSocketAddress
-import scala.collection.JavaConversions
-import scala.collection.mutable.{Map => MMap}
+import java.util.{Map => JMap, LinkedHashMap => JLinkedHashMap, List => JList}
 
-import org.jboss.netty.channel.Channel
-import org.jboss.netty.handler.codec.http.{HttpRequest, HttpResponse}
+import org.jboss.netty.handler.codec.http.{DefaultHttpResponse, HttpResponseStatus, HttpVersion}
+import HttpResponseStatus._
+import HttpVersion._
 
-trait Helper extends Env with Logger {
-  /**
-   * @return IP of the HTTP client, X-Forwarded-For is supported
-   *
-   * See http://en.wikipedia.org/wiki/X-Forwarded-For
-   *
-   * TODO: see http://github.com/pepite/Play--Netty/blob/master/src/play/modules/netty/PlayHandler.java
-   *
-   * TODO: inetSocketAddress can be Inet4Address or Inet6Address
-   * See java.net.preferIPv6Addresses
-   */
-  lazy val remoteIp = {
-    val inetSocketAddress = lastUpstreamHandlerCtx.getChannel.getRemoteAddress.asInstanceOf[InetSocketAddress]
-    val ip = inetSocketAddress.getAddress.getHostAddress
-    ip
+trait Helper extends Env with Logger with Net with ParamAccess with Url {
+  lazy val allParams = {
+    val ret = new JLinkedHashMap[String, JList[String]]()
+    // The order is important because we want the later to overwrite the former
+    ret.putAll(uriParams)
+    ret.putAll(bodyParams)
+    ret.putAll(routeParams)
+    ret
   }
 
-  //----------------------------------------------------------------------------
+  lazy val response = new DefaultHttpResponse(HTTP_1_1, OK)
 
-  class MissingParam(key: String) extends Throwable(key)
+  lazy val cookies = new Cookies(request)
 
-  /**
-   * Returns a singular element.
-   */
-  def param(key: String): String = {
-    if (allParams.containsKey(key))
-      allParams.get(key).get(0)
-    else
-      throw new MissingParam(key)
-  }
+  lazy val session = SessionRestorer.restore(this)
 
-  def paramo(key: String): Option[String] = {
-    val values = allParams.get(key)
-    if (values == null) None else Some(values.get(0))
-  }
-
-  /**
-   * Returns a list of elements.
-   */
-  def params(key: String): List[String] = {
-    if (allParams.containsKey(key))
-      JavaConversions.asBuffer[String](allParams.get(key)).toList
-    else
-      throw new MissingParam(key)
-  }
-
-  def paramso(key: String): Option[List[String]] = {
-    val values = allParams.get(key)
-    if (values == null) None else Some(JavaConversions.asBuffer[String](values).toList)
-  }
-
-  //----------------------------------------------------------------------------
-
-  /**
-   * @param name Controller#action or action
-   */
-  def urlFor(name: String, params: Any*): String = {
-    "TODO"
-  }
+  lazy val at = new At
 
   //----------------------------------------------------------------------------
 

@@ -1,7 +1,6 @@
 package xt.vc
 
 import xt._
-import xt.handler._
 
 import java.lang.reflect.Method
 
@@ -14,7 +13,6 @@ object Router {
   type KA              = (Class[Controller], Method)
   type CompiledCsas    = (Csas, KA)
   type CompiledRoute   = (HttpMethod, CompiledPattern, Csas, KA)
-  type UriParams       = java.util.LinkedHashMap[String, java.util.List[String]]
 
   private var compiledRoutes: Iterable[CompiledRoute] = _
 
@@ -26,13 +24,15 @@ object Router {
   }
 
   /**
-   * Returns None if not matched.
+   * @return None if not matched or Some(routeParams)
+   *
+   * controller name and action name are put int routeParams.
    */
-  def matchRoute(method: HttpMethod, pathInfo: String): Option[(KA, UriParams)] = {
+  def matchRoute(method: HttpMethod, pathInfo: String): Option[(KA, Env.Params)] = {
     val tokens = pathInfo.split("/").filter(_ != "")
     val max1   = tokens.size
 
-    var uriParams: UriParams = null
+    var routeParams: Env.Params = null
 
     val finder = (cr: CompiledRoute) => {
       val (m, compiledPattern, csas, compiledCA) = cr
@@ -46,12 +46,12 @@ object Router {
       else {
         if (max2 == 0) {
           if (max1 == 0) {
-            uriParams = new java.util.LinkedHashMap[String, java.util.List[String]]()
+            routeParams = new java.util.LinkedHashMap[String, java.util.List[String]]()
             true
           } else
             false
         } else {
-          uriParams = new java.util.LinkedHashMap[String, java.util.List[String]]()
+          routeParams = new java.util.LinkedHashMap[String, java.util.List[String]]()
           var i = 0  // i will go from 0 until max1
 
           compiledPattern.forall { tc =>
@@ -62,14 +62,14 @@ object Router {
               if (i == max2 - 1) {
                 if (token == "*") {
                   val value = tokens.slice(i, max1).mkString("/")
-                  uriParams.put(token, toValues(value))
+                  routeParams.put(token, toValues(value))
                   true
                 } else {
                   if (max2 < max1) {
                     false
                   } else {  // max2 = max1
                     val value = tokens(i)
-                    uriParams.put(token, toValues(value))
+                    routeParams.put(token, toValues(value))
                     true
                   }
                 }
@@ -81,7 +81,7 @@ object Router {
                     case None => false
 
                     case Some(value) =>
-                      uriParams.put(token, toValues(value))
+                      routeParams.put(token, toValues(value))
                       true
                   }
                 }
@@ -99,9 +99,9 @@ object Router {
       case Some(cr) =>
         val (m, compiledPattern, csas, compiledKA) = cr
         val (cs, as) = csas
-        uriParams.put("controller", toValues(cs))
-        uriParams.put("action",     toValues(as))
-        Some((compiledKA, uriParams))
+        routeParams.put("controller", toValues(cs))
+        routeParams.put("action",     toValues(as))
+        Some((compiledKA, routeParams))
 
       case None => None
     }

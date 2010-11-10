@@ -13,17 +13,16 @@ class ChannelPipelineFactory extends CPF {
       // Upstream, direction: first handler -> last handler
       new HttpRequestDecoder,
       new HttpChunkAggregator(Config.maxContentLength),
-      new Netty2XtConverter,
 
-      new ParamsParser,
-      new MethodOverrider,
-      new PublicFileServer,  // uses pathInfo parsed at ParamsParser
-      new Dispatcher,        // Should be last
+      new UriParser,
+      new PublicFileServer,  // uses pathInfo parsed at UriParser
+      new BodyParser,
+      new MethodOverrider,   // uses _method parsed at BodyParser
+      new Dispatcher,        // should be last
 
       // Downstream, direction: last handler -> first handler
       new HttpResponseEncoder,
-      new Xt2NettyConverter,
-      new CookieEncoder,
-      new FileSender)
+      new FileSender,
+      new Xt2NettyConverter)
   }
 }

@@ -1,24 +1,41 @@
-package xt.vc.env
+package xt.vc.helper.session
 
 import xt.Config
-import xt.vc.Env
-import xt.vc.session._
+import xt.vc.Helper
 
 import java.util.{UUID, HashMap => JMap}
 
+import org.jboss.netty.handler.codec.http.DefaultCookie
+
 object SessionRestorer {
-  def restore(env: Env): Session = {
-    val id = restoreSessionId(env)
-    Config.sessionStore.read(id) match {
+  def restore(helper: Helper): Session = {
+    val id = restoreSessionId(helper)
+    val ret = Config.sessionStore.read(id) match {
       case Some(s) => s
       case None    => new Session(id, new JMap[String, Any](), Config.sessionStore)
     }
+
+    // Store session ID to cookie
+    SessionUtil.findSessionCookie(helper.cookies) match {
+      case Some(cookie) =>
+        cookie.setHttpOnly(true)
+        cookie.setPath("/")
+        cookie.setValue(ret.id)
+
+      case None =>
+        val cookie = new DefaultCookie(Config.sessionIdName, ret.id)
+        cookie.setHttpOnly(true)
+        cookie.setPath("/")
+        helper.cookies.add(cookie)
+    }
+
+    ret
   }
 
   //----------------------------------------------------------------------------
 
-  private def restoreSessionId(env: Env): String = {
-    SessionUtil.findSessionCookie(env.cookies) match {
+  private def restoreSessionId(helper: Helper): String = {
+    SessionUtil.findSessionCookie(helper.cookies) match {
       case Some(cookie) =>
         cookie.getValue
 
@@ -27,7 +44,7 @@ object SessionRestorer {
         if (Config.sessionIdInCookieOnly) {
           UUID.randomUUID.toString
         } else {
-          val xs = env.allParams.get(Config.sessionIdName)
+          val xs = helper.allParams.get(Config.sessionIdName)
           if (xs == null) {
             UUID.randomUUID.toString
           } else {
