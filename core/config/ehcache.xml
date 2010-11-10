@@ -14,4 +14,6 @@
 
   <!-- Set eternal="false" and timeToLiveSeconds="xxx" if the static files may be changed while the program is running -->
   <cache name="XitrumFiles" maxElementsInMemory="100000" eternal="true" overflowToDisk="false" memoryStoreEvictionPolicy="LRU" />
+
+  <cache name="XitrumSessions" maxElementsInMemory="100000" eternal="true" overflowToDisk="false" memoryStoreEvictionPolicy="LRU" />
 </ehcache>
