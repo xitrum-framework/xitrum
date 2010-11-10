@@ -1,12 +1,14 @@
 package xt.vc
 
+import xt.Config
 import xt.vc.session._
+import xt.vc.env._
 import xt.vc.helper._
 
 import java.util.{Map => JMap, List => JList, Set => JSet}
 
 import org.jboss.netty.channel.ChannelHandlerContext
-import org.jboss.netty.handler.codec.http.{HttpRequest, HttpResponse, HttpMethod, Cookie => NCookie}
+import org.jboss.netty.handler.codec.http.{HttpRequest, HttpResponse, HttpMethod, DefaultCookie}
 
 /** All state variables for a request are put here */
 class Env {
@@ -17,9 +19,6 @@ class Env {
     pathInfo = other.pathInfo
     lastUpstreamHandlerCtx = other.lastUpstreamHandlerCtx
     allParams = other.allParams
-    cookies = other.cookies
-    session = other.session
-    at = other.at
   }
 
   var request:  HttpRequest  = _
@@ -44,9 +43,27 @@ class Env {
    */
   var allParams: JMap[String, JList[String]] = _
 
-  var cookies: JSet[NCookie] = _
+  lazy val cookies = CookieDecoder.decode(this)
 
-  var session: Session = _
+  lazy val session = {
+    val ret = SessionRestorer.restore(this)
 
-  var at: At = _
+    // Store session ID to cookie
+    SessionUtil.findSessionCookie(cookies) match {
+      case Some(cookie) =>
+        cookie.setHttpOnly(true)
+        cookie.setPath("/")
+        cookie.setValue(ret.id)
+
+      case None =>
+        val cookie = new DefaultCookie(Config.sessionIdName, ret.id)
+        cookie.setHttpOnly(true)
+        cookie.setPath("/")
+        cookies.add(cookie)
+    }
+
+    ret
+  }
+
+  lazy val at = new At
 }

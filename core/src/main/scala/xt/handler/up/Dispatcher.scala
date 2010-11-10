@@ -33,8 +33,6 @@ class Dispatcher extends RequestHandler {
    * WARN: This method is here because it is also used by Failsafe when redispatching.
    */
   def dispatch(env: Env, ka: Router.KA, uriParams: Router.UriParams) {
-    env.at = new At
-
     // Merge uriParams to params
     env.allParams.putAll(uriParams)
     logger.debug(filterParams(env.allParams).toString)

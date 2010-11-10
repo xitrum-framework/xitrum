@@ -7,6 +7,7 @@ import java.io.File
 
 import org.jboss.netty.channel._
 import org.jboss.netty.handler.codec.http._
+import HttpMethod._
 import HttpResponseStatus._
 import HttpVersion._
 
@@ -20,6 +21,11 @@ import HttpVersion._
 class PublicFileServer extends RequestHandler {
   def handleRequest(ctx: ChannelHandlerContext, env: Env) {
     import env._
+
+    if (method != GET) {
+      Channels.fireMessageReceived(ctx, env)
+      return
+    }
 
     val pathInfo2 = if (pathInfo == "/favicon.ico" || pathInfo == "/robots.txt")
       "/public" + pathInfo

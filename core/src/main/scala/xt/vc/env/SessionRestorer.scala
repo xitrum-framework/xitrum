@@ -1,4 +1,4 @@
-package xt.handler.up
+package xt.vc.env
 
 import xt.Config
 import xt.vc.Env
@@ -6,19 +6,13 @@ import xt.vc.session._
 
 import java.util.{UUID, HashMap => JMap}
 
-import org.jboss.netty.channel._
-
-class SessionRestorer extends RequestHandler {
-  def handleRequest(ctx: ChannelHandlerContext, env: Env) {
-    import env._
-
+object SessionRestorer {
+  def restore(env: Env): Session = {
     val id = restoreSessionId(env)
-    session = Config.sessionStore.read(id) match {
+    Config.sessionStore.read(id) match {
       case Some(s) => s
       case None    => new Session(id, new JMap[String, Any](), Config.sessionStore)
     }
-
-    Channels.fireMessageReceived(ctx, env)
   }
 
   //----------------------------------------------------------------------------
@@ -30,12 +24,16 @@ class SessionRestorer extends RequestHandler {
 
       case None =>
         // No cookie, try from the request parameters
-        val xs = env.allParams.get(Config.sessionIdName)
-        if (xs == null)
+        if (Config.sessionIdInCookieOnly) {
           UUID.randomUUID.toString
-        else {
-           val sid = xs.get(0)
-           checkSessionId(sid)
+        } else {
+          val xs = env.allParams.get(Config.sessionIdName)
+          if (xs == null) {
+            UUID.randomUUID.toString
+          } else {
+            val sid = xs.get(0)
+            checkSessionIdFromRequestParameters(sid)
+          }
         }
     }
   }
@@ -45,7 +43,7 @@ class SessionRestorer extends RequestHandler {
    * => Avoid this problem by looking up the session store and create
    * a new ID if the store does not contain the ID
    */
-  private def checkSessionId(id: String): String = {
+  private def checkSessionIdFromRequestParameters(id: String): String = {
     Config.sessionStore.read(id) match {
       case None => UUID.randomUUID.toString
       case _    => id
