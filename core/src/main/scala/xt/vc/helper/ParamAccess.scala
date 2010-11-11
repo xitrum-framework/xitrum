@@ -29,13 +29,13 @@ trait ParamAccess {
    */
   def params(key: String): List[String] = {
     if (allParams.containsKey(key))
-      JavaConversions.asBuffer[String](allParams.get(key)).toList
+      JavaConversions.asScalaBuffer[String](allParams.get(key)).toList
     else
       throw new MissingParam(key)
   }
 
   def paramso(key: String): Option[List[String]] = {
     val values = allParams.get(key)
-    if (values == null) None else Some(JavaConversions.asBuffer[String](values).toList)
+    if (values == null) None else Some(JavaConversions.asScalaBuffer[String](values).toList)
   }
 }
