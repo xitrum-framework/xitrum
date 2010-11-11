@@ -47,8 +47,10 @@ trait Renderer extends Helper {
         text.toString
     }
 
-    HttpHeaders.setContentLength(response, t2.length)
-    response.setContent(ChannelBuffers.copiedBuffer(t2, CharsetUtil.UTF_8))
+    // Content length is number of bytes, not Unicode characters!
+    val cb = ChannelBuffers.copiedBuffer(t2, CharsetUtil.UTF_8)
+    HttpHeaders.setContentLength(response, cb.readableBytes)
+    response.setContent(cb)
     respond
 
     t2
