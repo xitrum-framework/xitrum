@@ -8,7 +8,7 @@ APP=myapp
 
 # Not frequently changed
 MAIN_CLASS='myapp.Boot'
-SCALA_VERSION=2.8.0
+SCALA_VERSION=2.8.1
 
 CLASS_PATH="lib/*:config"
 
