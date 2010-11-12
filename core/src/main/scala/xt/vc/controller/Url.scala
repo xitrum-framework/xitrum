@@ -1,11 +1,11 @@
-package xt.vc.helper
+package xt.vc.controller
 
-import xt.vc.Helper
+import xt.vc.Controller
 
 import java.net.InetSocketAddress
 
 trait Url {
-  this: Helper =>
+  this: Controller =>
 
   /** @param name Controller#action or action */
   def urlFor(name: String, params: Any*): String = {

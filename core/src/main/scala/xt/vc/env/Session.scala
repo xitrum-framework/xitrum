@@ -1,4 +1,6 @@
-package xt.vc.helper.session
+package xt.vc.env
+
+import xt.vc.env.session.SessionStore
 
 import java.util.{UUID, HashMap => JMap, Set => JSet}
 

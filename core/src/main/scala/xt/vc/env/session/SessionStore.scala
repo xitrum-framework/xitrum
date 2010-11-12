@@ -1,4 +1,6 @@
-package xt.vc.helper.session
+package xt.vc.env.session
+
+import xt.vc.env.Session
 
 trait SessionStore {
   def read(id: String): Option[Session]

@@ -1,8 +1,7 @@
 package xt.vc
 
-import xt._
-import xt.vc.helper._
-import xt.vc.helper.session.SessionRestorer
+import xt.vc.env._
+import xt.vc.env.session.SessionRestorer
 
 import java.util.{Map => JMap, LinkedHashMap => JLinkedHashMap, List => JList}
 
@@ -10,7 +9,9 @@ import org.jboss.netty.handler.codec.http.{DefaultHttpResponse, HttpResponseStat
 import HttpResponseStatus._
 import HttpVersion._
 
-trait Helper extends Env with Logger with Net with ParamAccess with Url {
+trait ExtendedEnv extends Env {
+  this: Controller =>
+
   lazy val allParams = {
     val ret = new JLinkedHashMap[String, JList[String]]()
     // The order is important because we want the later to overwrite the former
@@ -27,13 +28,4 @@ trait Helper extends Env with Logger with Net with ParamAccess with Url {
   lazy val session = SessionRestorer.restore(this)
 
   lazy val at = new At
-
-  //----------------------------------------------------------------------------
-
-  /**
-   * Renders a template without layout.
-   *
-   * csasOrAs: Controller#action or action
-   */
-  def render(csasOrAs: String) = Scalate.render(csasOrAs, this)
 }

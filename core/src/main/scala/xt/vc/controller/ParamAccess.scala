@@ -1,13 +1,13 @@
-package xt.vc.helper
+package xt.vc.controller
 
-import xt.vc.Helper
+import xt.vc.Controller
 
 import scala.collection.JavaConversions
 
 class MissingParam(key: String) extends Throwable(key)
 
 trait ParamAccess {
-  this: Helper =>
+  this: Controller =>
 
   /**
    * Returns a singular element.

@@ -1,12 +1,14 @@
 package xt.vc
 
+import xt.Logger
 import xt.vc.controller._
+import xt.vc.view.Renderer
 
 import org.jboss.netty.handler.codec.http._
 import HttpHeaders.Names._
 import HttpResponseStatus._
 
-trait Controller extends Helper with Filter with Renderer {
+trait Controller extends ExtendedEnv with Logger with Net with ParamAccess with Url with Filter with Renderer {
   def respond {
     encodeCookies
     ctx.getChannel.write(this)

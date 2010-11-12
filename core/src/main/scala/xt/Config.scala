@@ -1,6 +1,6 @@
 package xt
 
-import xt.vc.helper.session.SessionStore
+import xt.vc.env.session.SessionStore
 
 import java.util.Properties
 

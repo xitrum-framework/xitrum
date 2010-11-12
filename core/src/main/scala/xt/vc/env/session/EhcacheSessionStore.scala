@@ -1,6 +1,7 @@
-package xt.vc.helper.session
+package xt.vc.env.session
 
 import xt.Config
+import xt.vc.env.Session
 
 import net.sf.ehcache.{CacheManager, Element}
 

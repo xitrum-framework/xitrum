@@ -1,5 +1,6 @@
-package xt.vc
-package controller
+package xt.vc.view
+
+import xt.vc.Controller
 
 import java.io.File
 import scala.xml.NodeSeq
@@ -8,10 +9,19 @@ import org.jboss.netty.buffer.ChannelBuffers
 import org.jboss.netty.util.CharsetUtil
 import org.jboss.netty.handler.codec.http.HttpHeaders
 
-trait Renderer extends Helper {
+trait Renderer extends {
   this: Controller =>
 
   def layout: Option[String] = None
+
+  //----------------------------------------------------------------------------
+
+  /**
+   * Renders a template without layout.
+   *
+   * csasOrAs: Controller#action or action
+   */
+  def render(csasOrAs: String) = Scalate.render(this, csasOrAs)
 
   //----------------------------------------------------------------------------
 
@@ -29,7 +39,7 @@ trait Renderer extends Helper {
   def renderView(csasOrAs: String): String = renderView(csasOrAs, layout)
 
   def renderView(csasOrAs: String, layout: Option[String]) = {
-    val text = super.render(csasOrAs)
+    val text = render(csasOrAs)
     renderText(text, layout)
   }
 

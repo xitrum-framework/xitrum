@@ -1,11 +1,11 @@
-package xt.vc.helper
+package xt.vc.controller
 
-import xt.vc.Helper
+import xt.vc.Controller
 
 import java.net.InetSocketAddress
 
 trait Net {
-  this: Helper =>
+  this: Controller =>
 
   /**
    * @return IP of the HTTP client, X-Forwarded-For is supported

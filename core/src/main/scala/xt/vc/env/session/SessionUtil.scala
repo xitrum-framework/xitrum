@@ -1,4 +1,4 @@
-package xt.vc.helper.session
+package xt.vc.env.session
 
 import xt._
 
