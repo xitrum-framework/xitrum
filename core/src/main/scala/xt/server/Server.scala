@@ -1,7 +1,7 @@
 package xt.server
 
-import xt._
-import xt.handler._
+import xt.{Logger, Config}
+import xt.vc.Router
 
 import java.net.InetSocketAddress
 import java.util.concurrent.Executors
@@ -14,6 +14,7 @@ import net.sf.ehcache.CacheManager
 class Server extends Logger {
   def start {
     CacheManager.create
+    Router.scan
 
     val bootstrap = new ServerBootstrap(new NioServerSocketChannelFactory(
       Executors.newCachedThreadPool, Executors.newCachedThreadPool))

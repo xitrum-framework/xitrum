@@ -1,26 +1,90 @@
 package xt.vc
 
-import xt._
+import xt.{Config, Logger, URLDecoder}
 
 import java.lang.reflect.Method
 
+import scala.collection.mutable.{ArrayBuffer, StringBuilder}
+
+import org.reflections.Reflections
+import org.reflections.util.{ConfigurationBuilder, ClasspathHelper}
+
 import org.jboss.netty.handler.codec.http.HttpMethod
 
-object Router {
-  type Route           = (HttpMethod, String, String)
-  type CompiledPattern = Array[(String, Boolean)]  // String: token, Boolean: true if the token is constant
-  type Csas            = (String, String)
+object Router extends Logger {
   type KA              = (Class[Controller], Method)
+  type Csas            = (String, String)
   type CompiledCsas    = (Csas, KA)
-  type CompiledRoute   = (HttpMethod, CompiledPattern, Csas, KA)
+  type Pattern         = String
+  type CompiledPattern = Array[(String, Boolean)]  // String: token, Boolean: true if the token is constant
+  type Route           = (Option[HttpMethod], Pattern, KA)
+  type CompiledRoute   = (Option[HttpMethod], CompiledPattern, KA, Csas)
 
   private var compiledRoutes: Iterable[CompiledRoute] = _
 
-  /**
-   * Application that does not use view (Scalate view) does not have to specify viewPaths.
-   */
-  def apply(routes: List[Route], controllerPaths: List[String]) = {
-    compiledRoutes = routes.map(compileRoute(_, controllerPaths))
+  /** Scan all subtypes of class Controller to take out the routes */
+  def scan {
+    val cb = new ConfigurationBuilder
+    cb.setUrls(ClasspathHelper.getUrlsForCurrentClasspath)
+    val r = new Reflections(cb)
+
+    val ks = r.getSubTypesOf(classOf[Controller])  // Controller classes
+    val ik = ks.iterator
+    val routes = ArrayBuffer[Route]()
+    while (ik.hasNext) {
+      val k = ik.next.asInstanceOf[Class[Controller]]
+      val ms = k.getMethods                        // Methods
+      for (m <- ms) {
+        val as = m.getAnnotations
+        val paths = ArrayBuffer[String]()
+        val httpMethods = ArrayBuffer[Option[HttpMethod]]()
+        for (a <- as) {
+          if (a.isInstanceOf[Path]) {
+            paths.append(a.asInstanceOf[Path].value)
+          } else if (a.isInstanceOf[GET]) {
+            httpMethods.append(Some(HttpMethod.GET))
+          } else if (a.isInstanceOf[POST]) {
+            httpMethods.append(Some(HttpMethod.POST))
+          } else if (a.isInstanceOf[PUT]) {
+            httpMethods.append(Some(HttpMethod.PUT))
+          } else if (a.isInstanceOf[DELETE]) {
+            httpMethods.append(Some(HttpMethod.DELETE))
+          }
+        }
+
+        if (!paths.isEmpty) {  // m is an action
+          if (httpMethods.isEmpty) httpMethods.append(None)
+
+          for (p <- paths; hm <- httpMethods) routes.append((hm, p, (k, m)))
+        }
+      }
+    }
+
+    val routesDebugString = new StringBuilder
+    routesDebugString.append("Routes:\n")
+    compiledRoutes = routes.map { r =>
+      val ret = compileRoute(r)
+
+      r._1 match {
+        case None     => routesDebugString.append("   ")
+        case Some(hm) => routesDebugString.append(hm)
+      }
+      routesDebugString.append("\t")
+
+      routesDebugString.append(r._2.toString)
+      routesDebugString.append("\t\t")
+
+      routesDebugString.append(ret._4._1)
+      routesDebugString.append("#")
+      routesDebugString.append(ret._4._2)
+
+      routesDebugString.append("\n")
+
+      ret
+    }
+    logger.debug(routesDebugString.toString)
+
+    compiledRoutes
   }
 
   /**
@@ -35,13 +99,13 @@ object Router {
     var routeParams: Env.Params = null
 
     val finder = (cr: CompiledRoute) => {
-      val (m, compiledPattern, csas, compiledCA) = cr
+      val (om, compiledPattern, csas, compiledCA) = cr
 
       // Must be <= max1
       // If < max1, the last token must be "*" and non-fixed
       val max2 = compiledPattern.size
 
-      if (max2 > max1 || m != method)
+      if (max2 > max1 || (om != None && om != Some(method)))
         false
       else {
         if (max2 == 0) {
@@ -97,7 +161,7 @@ object Router {
 
     compiledRoutes.find(finder) match {
       case Some(cr) =>
-        val (m, compiledPattern, csas, compiledKA) = cr
+        val (m, compiledPattern, compiledKA, csas) = cr
         val (cs, as) = csas
         routeParams.put("controller", toValues(cs))
         routeParams.put("action",     toValues(as))
@@ -120,11 +184,10 @@ object Router {
 
   //----------------------------------------------------------------------------
 
-  private def compileRoute(route: Route, controllerPaths: List[String]): CompiledRoute = {
-    val (method, pattern, csas) = route
+  private def compileRoute(route: Route): CompiledRoute = {
+    val (method, pattern, ka) = route
     val cp = compilePattern(pattern)
-    val (csast, ka) = compileCsas(csas, controllerPaths)
-    (method, cp, csast, ka)
+    (method, cp, ka, (ka._1.getName, ka._2.getName))
   }
 
   private def compilePattern(pattern: String): CompiledPattern = {
@@ -134,31 +197,6 @@ object Router {
       val token    = if (constant) e else e.substring(1)
       (token, constant)
     }
-  }
-
-  /**
-   * Given "Articles#index", rerturns:
-   * ("Articles", "index", Articles class, index method)
-   */
-  private def compileCsas(csas: String, controllerPaths: List[String]): CompiledCsas = {
-    val caa = csas.split("#")
-    val cs  = caa(0)
-    val as  = caa(1)
-
-    var k: Class[Controller] = null
-    controllerPaths.find { p =>
-      try {
-        k = Class.forName(p + "." + cs).asInstanceOf[Class[Controller]]
-        true
-      } catch {
-        case _ => false
-      }
-    }
-    if (k == null) throw(new Exception("Could not load " + csas))
-
-    val a  = k.getMethod(as)
-
-    ((cs, as), (k, a))
   }
 
   // Same as Rails' config.filter_parameters
