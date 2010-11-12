@@ -9,8 +9,12 @@ import org.fusesource.scalate.{TemplateEngine, Binding, DefaultRenderContext}
 import org.fusesource.scalate.scaml.ScamlOptions
 
 object Scalate {
-  val SCALATE_EXTENSIONS = Array("jade", "scaml", "ssp", "mustache", "html")
-  val DEFAULT_EXTENSION  = "jade"
+  val SCALATE_EXTENSIONS    = Array("jade", "scaml", "ssp", "mustache", "html")
+  val DEFAULT_EXTENSION     = "jade"
+
+  // templates are compiles to packaged .classes
+  // => use special prefix to avoid package name conflict
+  val VIEW_DIRECTORY_PREFIX = "view"
 
   private lazy val engine = {
     val ret = new TemplateEngine
@@ -58,11 +62,14 @@ object Scalate {
       csasOrAs.replace(".", File.separator).replace("#", File.separator)
     }
 
+    // Append extension if necessary
     val viewPath2 = if (SCALATE_EXTENSIONS.exists(ext => viewPath.endsWith("." + ext))) {
       viewPath
     } else {
       viewPath + "." + DEFAULT_EXTENSION
     }
+
+    val viewPath3 = VIEW_DIRECTORY_PREFIX + File.separator + viewPath2
 
     // When running in development mode ("sbt run"), relPath is relative to
     // target/scala_<VERSION>/resources
@@ -71,11 +78,11 @@ object Scalate {
     // to make relPath relative to
     // src/main/resources
     if (Config.isProductionMode) {
-      viewPath2
+      viewPath3
     } else {
       System.getProperty("user.dir") + File.separator +
       "src" + File.separator + "main" + File.separator + "resources" + File.separator +
-      viewPath2
+      viewPath3
     }
   }
 }

@@ -80,9 +80,10 @@ class FileSender extends SimpleChannelDownstreamHandler with Logger {
         return
     }
 
-    // Cache if the file is small
     val fileLength = raf.length
-    if (fileLength <= Config.filesMaxSize) {
+
+    // Cache if the file is small
+    if (Config.isProductionMode && fileLength <= Config.filesMaxSize) {
       val bytes = new Array[Byte](fileLength.toInt)
       raf.read(bytes)
       cache.put(new Element(elemKey, bytes))
