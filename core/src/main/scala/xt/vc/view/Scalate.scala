@@ -52,7 +52,7 @@ object Scalate {
   private def findTemplate(controller: Controller, csasOrAs: String): String = {
     val viewPath = if (csasOrAs.indexOf("#") == -1) {
       val actionName = csasOrAs
-      val className  = controller.getClass.toString
+      val className  = controller.getClass.getName
       className.replace(".", File.separator) + File.separator + actionName
     } else {
       csasOrAs.replace(".", File.separator).replace("#", File.separator)

@@ -18,7 +18,7 @@ object Config {
   lazy val sessionIdName         = properties.getProperty("session_id_name",           "JSESSIONID")
   lazy val sessionIdInCookieOnly = properties.getProperty("session_id_in_cookie_only", "true") == "true"
   lazy val sessionStore: SessionStore = {
-    val className = properties.getProperty("session_store", "xt.vc.helper.session.EhcacheSessionStore")
+    val className = properties.getProperty("session_store", "xt.vc.env.session.EhcacheSessionStore")
     Class.forName(className).newInstance.asInstanceOf[SessionStore]
   }
 
