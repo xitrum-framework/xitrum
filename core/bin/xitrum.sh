@@ -1,6 +1,6 @@
 #!/bin/sh
 
-JAVA_OPTS='-Xms2000m -Xmx6000m -server -Djava.awt.headless=true'
+JAVA_OPTS='-Xms256m -Xmx512m -server -Djava.awt.headless=true'
 
 # These should be the same as in project/build.properties
 APP_VERSION=1.0
