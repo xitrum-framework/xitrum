@@ -2,7 +2,6 @@ package xt.handler.up
 
 import xt._
 import xt.vc._
-import xt.vc.helper._
 
 import java.lang.reflect.Method
 

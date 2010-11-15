@@ -22,42 +22,16 @@ object Router extends Logger {
 
   private var compiledRoutes: Iterable[CompiledRoute] = _
 
-  /** Scan all subtypes of class Controller to take out the routes */
-  def scan {
-    val cb = new ConfigurationBuilder
-    cb.setUrls(ClasspathHelper.getUrlsForCurrentClasspath)
-    val r = new Reflections(cb)
 
-    val ks = r.getSubTypesOf(classOf[Controller])  // Controller classes
-    val ik = ks.iterator
-    val routes = ArrayBuffer[Route]()
-    while (ik.hasNext) {
-      val k = ik.next.asInstanceOf[Class[Controller]]
-      val ms = k.getMethods                        // Methods
-      for (m <- ms) {
-        val as = m.getAnnotations
-        val paths = ArrayBuffer[String]()
-        val httpMethods = ArrayBuffer[Option[HttpMethod]]()
-        for (a <- as) {
-          if (a.isInstanceOf[Path]) {
-            paths.append(a.asInstanceOf[Path].value)
-          } else if (a.isInstanceOf[GET]) {
-            httpMethods.append(Some(HttpMethod.GET))
-          } else if (a.isInstanceOf[POST]) {
-            httpMethods.append(Some(HttpMethod.POST))
-          } else if (a.isInstanceOf[PUT]) {
-            httpMethods.append(Some(HttpMethod.PUT))
-          } else if (a.isInstanceOf[DELETE]) {
-            httpMethods.append(Some(HttpMethod.DELETE))
-          }
-        }
+  def scanAndCompile {
+    val routes = scanRoutes
 
-        if (!paths.isEmpty) {  // m is an action
-          if (httpMethods.isEmpty) httpMethods.append(None)
+    // Compile and log routes at the same time because the compiled routes do
+    // not contain the original URL pattern.
 
-          for (p <- paths; hm <- httpMethods) routes.append((hm, p, (k, m)))
-        }
-      }
+    val patternMaxLength = routes.foldLeft(0) { (max, r) =>
+      val len = r._2.length
+      if (max < len) len else max
     }
 
     val routesDebugString = new StringBuilder
@@ -65,20 +39,16 @@ object Router extends Logger {
     compiledRoutes = routes.map { r =>
       val ret = compileRoute(r)
 
-      r._1 match {
-        case None     => routesDebugString.append("   ")
-        case Some(hm) => routesDebugString.append(hm)
+      val method = r._1 match {
+        case None     => ""
+        case Some(hm) => hm
       }
-      routesDebugString.append("\t")
+      val pattern = r._2.toString
+      val controller = ret._4._1
+      val action     = ret._4._2
 
-      routesDebugString.append(r._2.toString)
-      routesDebugString.append("\t\t")
-
-      routesDebugString.append(ret._4._1)
-      routesDebugString.append("#")
-      routesDebugString.append(ret._4._2)
-
-      routesDebugString.append("\n")
+      val format = "%-6s %-" + patternMaxLength + "s %s#%s\n"
+      routesDebugString.append(format.format(method, pattern, controller, action))
 
       ret
     }
@@ -183,6 +153,47 @@ object Router extends Logger {
   }
 
   //----------------------------------------------------------------------------
+
+  /** Scan all subtypes of class Controller to take out the routes */
+  def scanRoutes: Array[Route] = {
+    val cb = new ConfigurationBuilder
+    cb.setUrls(ClasspathHelper.getUrlsForCurrentClasspath)
+    val r = new Reflections(cb)
+
+    val ks = r.getSubTypesOf(classOf[Controller])  // Controller classes
+    val ik = ks.iterator
+    val routes = ArrayBuffer[Route]()
+    while (ik.hasNext) {
+      val k = ik.next.asInstanceOf[Class[Controller]]
+      val ms = k.getMethods                        // Methods
+      for (m <- ms) {
+        val as = m.getAnnotations
+        val paths = ArrayBuffer[String]()
+        val httpMethods = ArrayBuffer[Option[HttpMethod]]()
+        for (a <- as) {
+          if (a.isInstanceOf[Path]) {
+            paths.append(a.asInstanceOf[Path].value)
+          } else if (a.isInstanceOf[GET]) {
+            httpMethods.append(Some(HttpMethod.GET))
+          } else if (a.isInstanceOf[POST]) {
+            httpMethods.append(Some(HttpMethod.POST))
+          } else if (a.isInstanceOf[PUT]) {
+            httpMethods.append(Some(HttpMethod.PUT))
+          } else if (a.isInstanceOf[DELETE]) {
+            httpMethods.append(Some(HttpMethod.DELETE))
+          }
+        }
+
+        if (!paths.isEmpty) {  // m is an action
+          if (httpMethods.isEmpty) httpMethods.append(None)
+
+          for (p <- paths; hm <- httpMethods) routes.append((hm, p, (k, m)))
+        }
+      }
+    }
+
+    routes.toArray
+  }
 
   private def compileRoute(route: Route): CompiledRoute = {
     val (method, pattern, ka) = route
