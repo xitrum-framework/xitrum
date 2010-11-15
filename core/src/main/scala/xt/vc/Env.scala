@@ -18,24 +18,24 @@ object Env {
  * and Controller can be inferred from these variables.
  */
 class Env {
-  var ctx:         ChannelHandlerContext = _
-  var request:     HttpRequest           = _
-  var pathInfo:    String                = _
-  var uriParams:   Env.Params            = _
-  var bodyParams:  Env.Params            = _
-  var routeParams: Env.Params            = _
+  var ctx:        ChannelHandlerContext = _
+  var request:    HttpRequest           = _
+  var pathInfo:   String                = _
+  var uriParams:  Env.Params            = _
+  var bodyParams: Env.Params            = _
+  var pathParams: Env.Params            = _
 
-  def apply(ctx:         ChannelHandlerContext,
-            request:     HttpRequest,
-            pathInfo:    String,
-            uriParams:   Env.Params,
-            bodyParams:  Env.Params,
-            routeParams: Env.Params) {
-    this.ctx         = ctx
-    this.request     = request
-    this.pathInfo    = pathInfo
-    this.uriParams   = uriParams
-    this.bodyParams  = bodyParams
-    this.routeParams = routeParams
+  def apply(ctx:        ChannelHandlerContext,
+            request:    HttpRequest,
+            pathInfo:   String,
+            uriParams:  Env.Params,
+            bodyParams: Env.Params,
+            pathParams: Env.Params) {
+    this.ctx        = ctx
+    this.request    = request
+    this.pathInfo   = pathInfo
+    this.uriParams  = uriParams
+    this.bodyParams = bodyParams
+    this.pathParams = pathParams
   }
 }

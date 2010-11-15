@@ -17,7 +17,7 @@ trait ExtendedEnv extends Env {
     // The order is important because we want the later to overwrite the former
     ret.putAll(uriParams)
     ret.putAll(bodyParams)
-    ret.putAll(routeParams)
+    ret.putAll(pathParams)
     ret
   }
 
