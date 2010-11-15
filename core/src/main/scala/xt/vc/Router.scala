@@ -2,6 +2,7 @@ package xt.vc
 
 import xt.{Config, Logger, URLDecoder}
 
+import java.util.{LinkedHashMap => JLinkedHashMap, List => JList}
 import java.lang.reflect.Method
 
 import scala.collection.mutable.{ArrayBuffer, StringBuilder}
@@ -68,64 +69,76 @@ object Router extends Logger {
 
     var routeParams: Env.Params = null
 
-    val finder = (cr: CompiledRoute) => {
-      val (om, compiledPattern, csas, compiledCA) = cr
+    def finder(cr: CompiledRoute): Boolean = {
+      val (om, compiledPattern, compiledCA, csas) = cr
 
-      // Must be <= max1
-      // If < max1, the last token must be "*" and non-fixed
+      // Check methods
+      if (om != None && om != Some(method)) return false
+
       val max2 = compiledPattern.size
 
-      if (max2 > max1 || (om != None && om != Some(method)))
-        false
-      else {
-        if (max2 == 0) {
-          if (max1 == 0) {
-            routeParams = new java.util.LinkedHashMap[String, java.util.List[String]]()
-            true
-          } else
-            false
-        } else {
-          routeParams = new java.util.LinkedHashMap[String, java.util.List[String]]()
-          var i = 0  // i will go from 0 until max1
+      // Check the number of tokens
+      // max2 must be <= max1
+      // If max2 < max1, the last token must be "*" and non-fixed
+      if (max2 < max1) {
+        if (max2 == 0) return false
 
-          compiledPattern.forall { tc =>
-            val (token, constant) = tc
-            val ret = if (constant)
-              (token == tokens(i))
-            else {
-              if (i == max2 - 1) {
-                if (token == "*") {
-                  val value = tokens.slice(i, max1).mkString("/")
-                  routeParams.put(token, toValues(value))
-                  true
-                } else {
-                  if (max2 < max1) {
-                    false
-                  } else {  // max2 = max1
-                    val value = tokens(i)
-                    routeParams.put(token, toValues(value))
-                    true
-                  }
-                }
-              } else {  // Not the last token
-                if (token == "*") {
-                  false
-                } else {
-                  URLDecoder.decode(tokens(i)) match {
-                    case None => false
+        val lastToken = compiledPattern.last
+        if (lastToken._2) return false
+      }
 
-                    case Some(value) =>
-                      routeParams.put(token, toValues(value))
-                      true
-                  }
-                }
+      // Special case
+      // 0 = max2 <= max1
+      if (max2 == 0) {
+        if (max1 == 0) {
+          routeParams = new JLinkedHashMap[String, JList[String]]()
+          return true
+        }
+
+        return false
+      }
+
+      // 0 < max2 <= max1
+
+      routeParams = new JLinkedHashMap[String, JList[String]]()
+      var i = 0  // i will go from 0 until max1
+
+      compiledPattern.forall { tc =>
+        val (token, fixed) = tc
+        val ret = if (fixed)
+          (token == tokens(i))
+        else {
+          if (i == max2 - 1) {
+            if (token == "*") {
+              val value = tokens.slice(i, max1).mkString("/")
+              routeParams.put(token, toValues(value))
+              true
+            } else {
+              if (max2 < max1) {
+                false
+              } else {  // max2 = max1
+                val value = tokens(i)
+                routeParams.put(token, toValues(value))
+                true
               }
             }
+          } else {  // Not the last token
+            if (token == "*") {
+              false
+            } else {
+              URLDecoder.decode(tokens(i)) match {
+                case None => false
 
-            i += 1
-            ret
+                case Some(value) =>
+                  routeParams.put(token, toValues(value))
+                  true
+              }
+            }
           }
         }
+
+        i += 1
+        ret
       }
     }
 
