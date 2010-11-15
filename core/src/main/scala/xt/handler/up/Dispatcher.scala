@@ -2,10 +2,13 @@ package xt.handler.up
 
 import xt._
 import xt.vc._
+import xt.vc.controller.MissingParam
 
-import java.lang.reflect.Method
+import java.lang.reflect.{Method, InvocationTargetException}
 
 import org.jboss.netty.channel._
+import org.jboss.netty.buffer.ChannelBuffers
+import org.jboss.netty.util.CharsetUtil
 import org.jboss.netty.handler.codec.http._
 import HttpResponseStatus._
 import HttpVersion._
@@ -75,11 +78,29 @@ class Dispatcher extends SimpleChannelUpstreamHandler with Logger {
       logger.debug((t2 - t1) + " [ms]")
     } catch {
       case e =>
-        logger.error("Error on dispatching", e)
-
         val response = new DefaultHttpResponse(HTTP_1_1, OK)
-        response.setStatus(INTERNAL_SERVER_ERROR)
-        response.setHeader("X-Sendfile", System.getProperty("user.dir") + "/public/500.html")
+
+        // MissingParam is a special case
+
+        if (e.isInstanceOf[InvocationTargetException]) {
+          val ite = e.asInstanceOf[InvocationTargetException]
+          val c = ite.getCause
+          if (c.isInstanceOf[MissingParam]) {
+            val mp = c.asInstanceOf[MissingParam]
+            val key = mp.key
+            response.setStatus(BAD_REQUEST)
+            val cb = ChannelBuffers.copiedBuffer("Missing Param: " + key, CharsetUtil.UTF_8)
+            HttpHeaders.setContentLength(response, cb.readableBytes)
+            response.setContent(cb)
+          }
+        }
+
+        if (response.getStatus != BAD_REQUEST) {
+          logger.error("Error on dispatching", e)
+          response.setStatus(INTERNAL_SERVER_ERROR)
+          response.setHeader("X-Sendfile", System.getProperty("user.dir") + "/public/500.html")
+        }
+
         ctx.getChannel.write(response)
     }
   }
