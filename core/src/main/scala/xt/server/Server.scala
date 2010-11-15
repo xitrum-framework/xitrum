@@ -14,7 +14,7 @@ import net.sf.ehcache.CacheManager
 class Server extends Logger {
   def start {
     CacheManager.create
-    Router.scanAndCompile
+    Router.collectAndCompile
 
     val bootstrap = new ServerBootstrap(new NioServerSocketChannelFactory(
       Executors.newCachedThreadPool, Executors.newCachedThreadPool))

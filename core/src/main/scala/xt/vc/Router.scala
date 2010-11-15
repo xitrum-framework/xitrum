@@ -23,8 +23,8 @@ object Router extends Logger {
   private var compiledRoutes: Iterable[CompiledRoute] = _
 
 
-  def scanAndCompile {
-    val routes = scanRoutes
+  def collectAndCompile {
+    val routes = collectRoutes
 
     // Compile and log routes at the same time because the compiled routes do
     // not contain the original URL pattern.
@@ -154,8 +154,8 @@ object Router extends Logger {
 
   //----------------------------------------------------------------------------
 
-  /** Scan all subtypes of class Controller to take out the routes */
-  def scanRoutes: Array[Route] = {
+  /** Scan all subtypes of class Controller to collect routes. */
+  def collectRoutes: Array[Route] = {
     val cb = new ConfigurationBuilder
     cb.setUrls(ClasspathHelper.getUrlsForCurrentClasspath)
     val r = new Reflections(cb)
@@ -165,6 +165,11 @@ object Router extends Logger {
     val routes = ArrayBuffer[Route]()
     while (ik.hasNext) {
       val k = ik.next.asInstanceOf[Class[Controller]]
+      val pathPrefix = {
+        val pathAnnotation = k.getAnnotation(classOf[Path])
+        if (pathAnnotation != null) pathAnnotation.value else ""
+      }
+
       val ms = k.getMethods                        // Methods
       for (m <- ms) {
         val as = m.getAnnotations
@@ -172,7 +177,7 @@ object Router extends Logger {
         val httpMethods = ArrayBuffer[Option[HttpMethod]]()
         for (a <- as) {
           if (a.isInstanceOf[Path]) {
-            paths.append(a.asInstanceOf[Path].value)
+            paths.append(pathPrefix + a.asInstanceOf[Path].value)
           } else if (a.isInstanceOf[GET]) {
             httpMethods.append(Some(HttpMethod.GET))
           } else if (a.isInstanceOf[POST]) {
