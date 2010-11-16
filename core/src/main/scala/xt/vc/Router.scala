@@ -80,6 +80,9 @@ object Router extends Logger {
       // Check the number of tokens
       // max2 must be <= max1
       // If max2 < max1, the last token must be "*" and non-fixed
+
+      if (max2 > max1) return false
+
       if (max2 < max1) {
         if (max2 == 0) return false
 
@@ -105,6 +108,7 @@ object Router extends Logger {
 
       compiledPattern.forall { tc =>
         val (token, fixed) = tc
+
         val ret = if (fixed)
           (token == tokens(i))
         else {

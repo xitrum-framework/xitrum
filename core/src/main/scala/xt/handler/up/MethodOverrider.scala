@@ -1,6 +1,8 @@
 package xt.handler.up
 
-import org.jboss.netty.channel.{SimpleChannelUpstreamHandler, ChannelHandlerContext, MessageEvent, Channels}
+import xt.Logger
+
+import org.jboss.netty.channel.{SimpleChannelUpstreamHandler, ChannelHandlerContext, MessageEvent, ExceptionEvent, Channels}
 import org.jboss.netty.handler.codec.http.{HttpRequest, HttpMethod}
 import HttpMethod._
 
@@ -10,7 +12,7 @@ import HttpMethod._
  *
  * This middleware should be put behind BodyParser.
  */
-class MethodOverrider extends SimpleChannelUpstreamHandler {
+class MethodOverrider extends SimpleChannelUpstreamHandler with Logger {
   override def messageReceived(ctx: ChannelHandlerContext, e: MessageEvent) {
     val m = e.getMessage
     if (!m.isInstanceOf[BodyParserResult]) {
@@ -30,5 +32,10 @@ class MethodOverrider extends SimpleChannelUpstreamHandler {
     }
 
     Channels.fireMessageReceived(ctx, bpr)
+  }
+
+  override def exceptionCaught(ctx: ChannelHandlerContext, e: ExceptionEvent) {
+    logger.error("MethodOverrider", e.getCause)
+    e.getChannel.close
   }
 }

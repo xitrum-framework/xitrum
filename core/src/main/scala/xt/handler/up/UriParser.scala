@@ -1,8 +1,10 @@
 package xt.handler.up
 
+import xt.Logger
+
 import java.util.{Map => JMap, List => JList}
 
-import org.jboss.netty.channel.{SimpleChannelUpstreamHandler, ChannelHandlerContext, MessageEvent, Channels}
+import org.jboss.netty.channel.{SimpleChannelUpstreamHandler, ChannelHandlerContext, MessageEvent, ExceptionEvent, Channels}
 import org.jboss.netty.handler.codec.http.{HttpRequest, QueryStringDecoder}
 
 /**
@@ -10,7 +12,7 @@ import org.jboss.netty.handler.codec.http.{HttpRequest, QueryStringDecoder}
  */
 case class UriParserResult(request: HttpRequest, pathInfo: String, uriParams: JMap[String, JList[String]])
 
-class UriParser extends SimpleChannelUpstreamHandler {
+class UriParser extends SimpleChannelUpstreamHandler with Logger {
   override def messageReceived(ctx: ChannelHandlerContext, e: MessageEvent) {
     val m = e.getMessage
     if (!m.isInstanceOf[HttpRequest]) {
@@ -23,5 +25,10 @@ class UriParser extends SimpleChannelUpstreamHandler {
     val pathInfo  = decoder.getPath
     val uriParams = decoder.getParameters
     Channels.fireMessageReceived(ctx, UriParserResult(request, pathInfo, uriParams))
+  }
+
+  override def exceptionCaught(ctx: ChannelHandlerContext, e: ExceptionEvent) {
+    logger.error("UriParser", e.getCause)
+    e.getChannel.close
   }
 }

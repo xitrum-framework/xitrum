@@ -39,9 +39,14 @@ class Dispatcher extends SimpleChannelUpstreamHandler with Logger {
     }
   }
 
+  override def exceptionCaught(ctx: ChannelHandlerContext, e: ExceptionEvent) {
+    logger.error("Dispatcher", e.getCause)
+    e.getChannel.close
+  }
+
   //----------------------------------------------------------------------------
 
-  def dispatchWithFailsafe(ctx: ChannelHandlerContext, bpr: BodyParserResult, ka: Router.KA, routeParams: Env.Params) {
+  private def dispatchWithFailsafe(ctx: ChannelHandlerContext, bpr: BodyParserResult, ka: Router.KA, routeParams: Env.Params) {
     try {
       val (klass, action) = ka
       val controller      = klass.newInstance
@@ -104,8 +109,6 @@ class Dispatcher extends SimpleChannelUpstreamHandler with Logger {
         ctx.getChannel.write(response)
     }
   }
-
-  //----------------------------------------------------------------------------
 
   // Same as Rails' config.filter_parameters
   private def filterParams(params: java.util.Map[String, java.util.List[String]]): java.util.Map[String, java.util.List[String]] = {

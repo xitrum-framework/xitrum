@@ -1,8 +1,10 @@
 package xt.handler.up
 
+import xt.Logger
+
 import java.io.File
 
-import org.jboss.netty.channel.{SimpleChannelUpstreamHandler, ChannelHandlerContext, MessageEvent, Channels}
+import org.jboss.netty.channel.{SimpleChannelUpstreamHandler, ChannelHandlerContext, MessageEvent, ExceptionEvent, Channels}
 import org.jboss.netty.handler.codec.http.{HttpMethod, HttpResponseStatus, HttpVersion, DefaultHttpResponse, HttpHeaders}
 import HttpMethod._
 import HttpResponseStatus._
@@ -15,7 +17,7 @@ import HttpVersion._
  *    favicon.ico may be not at the root: http://en.wikipedia.org/wiki/Favicon
  *    robots.txt     must be at the root: http://en.wikipedia.org/wiki/Robots_exclusion_standard
  */
-class PublicFileServer extends SimpleChannelUpstreamHandler {
+class PublicFileServer extends SimpleChannelUpstreamHandler with Logger {
   override def messageReceived(ctx: ChannelHandlerContext, e: MessageEvent) {
     val m = e.getMessage
     if (!m.isInstanceOf[UriParserResult]) {
@@ -52,6 +54,11 @@ class PublicFileServer extends SimpleChannelUpstreamHandler {
         HttpHeaders.setContentLength(response, 0)
     }
     ctx.getChannel.write(response)
+  }
+
+  override def exceptionCaught(ctx: ChannelHandlerContext, e: ExceptionEvent) {
+    logger.error("PublicFileServer", e.getCause)
+    e.getChannel.close
   }
 
   //----------------------------------------------------------------------------
