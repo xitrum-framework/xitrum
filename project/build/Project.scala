@@ -22,9 +22,11 @@ class Project(info: ProjectInfo) extends DefaultProject(info) {
   val scalate = "Scalate" at
     "http://repo.fusesource.com/nexus/content/repositories/snapshots"
 
-  val ehcache = "Ehcache" at "https://oss.sonatype.org/content/repositories/sourceforge-releases"
+  val sf = "SF" at
+    "https://oss.sonatype.org/content/repositories/sourceforge-releases"
 
-  val reflections = "Reflections" at "http://reflections.googlecode.com/svn/repo"
+  val reflections = "Reflections" at
+    "http://reflections.googlecode.com/svn/repo"
 
   lazy val core    = project("core",    "xitrum-core",    new Core(_))
   lazy val squeryl = project("squeryl", "xitrum-squeryl", new Squeryl(_), core)
