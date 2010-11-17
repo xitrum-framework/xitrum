@@ -28,8 +28,8 @@ class Dispatcher extends SimpleChannelUpstreamHandler with Logger {
     val bodyParams = bpr.bodyParams
 
     Router.matchRoute(request.getMethod, pathInfo) match {
-      case Some((ka, routeParams)) =>
-        dispatchWithFailsafe(ctx, bpr, ka, routeParams)
+      case Some((ka, pathParams)) =>
+        dispatchWithFailsafe(ctx, bpr, ka, pathParams)
 
       case None =>
         val response = new DefaultHttpResponse(HTTP_1_1, OK)
@@ -46,11 +46,11 @@ class Dispatcher extends SimpleChannelUpstreamHandler with Logger {
 
   //----------------------------------------------------------------------------
 
-  private def dispatchWithFailsafe(ctx: ChannelHandlerContext, bpr: BodyParserResult, ka: Router.KA, routeParams: Env.Params) {
+  private def dispatchWithFailsafe(ctx: ChannelHandlerContext, bpr: BodyParserResult, ka: Router.KA, pathParams: Env.Params) {
     try {
       val (klass, action) = ka
       val controller      = klass.newInstance
-      controller(ctx, bpr.request, bpr.pathInfo, bpr.uriParams, bpr.bodyParams, routeParams)
+      controller(ctx, bpr.request, bpr.pathInfo, bpr.uriParams, bpr.bodyParams, pathParams)
 
       logger.debug(bpr.request.getMethod + " " + bpr.pathInfo)
       logger.debug(filterParams(controller.allParams).toString)

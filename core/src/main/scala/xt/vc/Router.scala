@@ -59,15 +59,15 @@ object Router extends Logger {
   }
 
   /**
-   * @return None if not matched or Some(routeParams)
+   * @return None if not matched or Some(pathParams)
    *
-   * controller name and action name are put int routeParams.
+   * controller name and action name are put int pathParams.
    */
   def matchRoute(method: HttpMethod, pathInfo: String): Option[(KA, Env.Params)] = {
     val tokens = pathInfo.split("/").filter(_ != "")
     val max1   = tokens.size
 
-    var routeParams: Env.Params = null
+    var pathParams: Env.Params = null
 
     def finder(cr: CompiledRoute): Boolean = {
       val (om, compiledPattern, compiledCA, csas) = cr
@@ -94,7 +94,7 @@ object Router extends Logger {
       // 0 = max2 <= max1
       if (max2 == 0) {
         if (max1 == 0) {
-          routeParams = new JLinkedHashMap[String, JList[String]]()
+          pathParams = new JLinkedHashMap[String, JList[String]]()
           return true
         }
 
@@ -103,7 +103,7 @@ object Router extends Logger {
 
       // 0 < max2 <= max1
 
-      routeParams = new JLinkedHashMap[String, JList[String]]()
+      pathParams = new JLinkedHashMap[String, JList[String]]()
       var i = 0  // i will go from 0 until max1
 
       compiledPattern.forall { tc =>
@@ -112,21 +112,31 @@ object Router extends Logger {
         val ret = if (fixed)
           (token == tokens(i))
         else {
-          if (i == max2 - 1) {
+          if (i == max2 - 1) {  // The last token
             if (token == "*") {
               val value = tokens.slice(i, max1).mkString("/")
-              routeParams.put(token, toValues(value))
-              true
+              URLDecoder.decode(value) match {
+                case None => false
+
+                case Some(decodedValue) =>
+                  pathParams.put(token, toValues(decodedValue))
+                  true
+              }
             } else {
               if (max2 < max1) {
                 false
               } else {  // max2 = max1
                 val value = tokens(i)
-                routeParams.put(token, toValues(value))
-                true
+                URLDecoder.decode(value) match {
+                  case None => false
+
+                  case Some(decodedValue) =>
+                    pathParams.put(token, toValues(decodedValue))
+                    true
+                }
               }
             }
-          } else {  // Not the last token
+          } else {
             if (token == "*") {
               false
             } else {
@@ -134,7 +144,7 @@ object Router extends Logger {
                 case None => false
 
                 case Some(value) =>
-                  routeParams.put(token, toValues(value))
+                  pathParams.put(token, toValues(value))
                   true
               }
             }
@@ -150,9 +160,9 @@ object Router extends Logger {
       case Some(cr) =>
         val (m, compiledPattern, compiledKA, csas) = cr
         val (cs, as) = csas
-        routeParams.put("controller", toValues(cs))
-        routeParams.put("action",     toValues(as))
-        Some((compiledKA, routeParams))
+        pathParams.put("controller", toValues(cs))
+        pathParams.put("action",     toValues(as))
+        Some((compiledKA, pathParams))
 
       case None => None
     }
