@@ -55,7 +55,7 @@ class Project(info: ProjectInfo) extends DefaultProject(info) {
   class Squeryl(info: ProjectInfo) extends DefaultProject(info) {
     override def libraryDependencies =
       Set(
-        "org.squeryl" % "squeryl_2.8.0"    % "0.9.4-RC2",
+        "org.squeryl" % "squeryl_2.8.1"    % "0.9.4-RC3",
 
         // http://www.mchange.com/projects/c3p0/index.html#configuring_logging
         // Redirect c3p0 log to SLF4J (Logback, see above)
