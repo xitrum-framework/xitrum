@@ -1,6 +1,7 @@
 package xt.vc
 
 import xt.{Config, Logger, URLDecoder}
+import xt.vc.annotation._
 
 import java.util.{LinkedHashMap => JLinkedHashMap, List => JList}
 import java.lang.reflect.Method

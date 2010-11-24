@@ -1,4 +1,4 @@
-package xt.vc;
+package xt.vc.annotation;
 
 import java.lang.annotation.Retention;
 import java.lang.annotation.RetentionPolicy;
