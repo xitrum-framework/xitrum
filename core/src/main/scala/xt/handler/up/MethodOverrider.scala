@@ -26,8 +26,8 @@ class MethodOverrider extends SimpleChannelUpstreamHandler with Logger {
     if (method == POST) {
       val _methods = bpr.bodyParams.get("_method")
       if (_methods != null && !_methods.isEmpty) {
-      val _method = new HttpMethod(_methods.get(0))
-      request.setMethod(_method)
+        val _method = new HttpMethod(_methods.get(0))
+        request.setMethod(_method)
       }
     }
 

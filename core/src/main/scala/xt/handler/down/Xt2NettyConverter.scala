@@ -14,8 +14,7 @@ class Xt2NettyConverter extends SimpleChannelDownstreamHandler {
     }
 
     val controller = m.asInstanceOf[Controller]
-
-    val future = e.getFuture
+    val future     = e.getFuture
     Channels.write(ctx, future, controller.response)
 
     // Keep alive

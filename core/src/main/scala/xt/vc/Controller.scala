@@ -9,9 +9,16 @@ import HttpHeaders.Names._
 import HttpResponseStatus._
 
 trait Controller extends ExtendedEnv with Logger with Net with ParamAccess with Url with Filter with Renderer {
-  def respond {
-    encodeCookies
-    ctx.getChannel.write(this)
+  private var responded = false
+
+  def respond = synchronized {
+    if (responded) {
+      throw new Exception("Double respond")
+    } else {
+      responded = true
+      encodeCookies
+      ctx.getChannel.write(this)
+    }
   }
 
   /**

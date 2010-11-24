@@ -21,10 +21,10 @@ class Dispatcher extends SimpleChannelUpstreamHandler with Logger {
       return
     }
 
-    val bpr = m.asInstanceOf[BodyParserResult]
-    val request = bpr.request
-    val pathInfo = bpr.pathInfo
-    val uriParams = bpr.uriParams
+    val bpr        = m.asInstanceOf[BodyParserResult]
+    val request    = bpr.request
+    val pathInfo   = bpr.pathInfo
+    val uriParams  = bpr.uriParams
     val bodyParams = bpr.bodyParams
 
     Router.matchRoute(request.getMethod, pathInfo) match {
@@ -32,8 +32,7 @@ class Dispatcher extends SimpleChannelUpstreamHandler with Logger {
         dispatchWithFailsafe(ctx, bpr, ka, pathParams)
 
       case None =>
-        val response = new DefaultHttpResponse(HTTP_1_1, OK)
-        response.setStatus(NOT_FOUND)
+        val response = new DefaultHttpResponse(HTTP_1_1, NOT_FOUND)
         response.setHeader("X-Sendfile", System.getProperty("user.dir") + "/public/404.html")
         ctx.getChannel.write(response)
     }
@@ -83,7 +82,7 @@ class Dispatcher extends SimpleChannelUpstreamHandler with Logger {
       logger.debug((t2 - t1) + " [ms]")
     } catch {
       case e =>
-        val response = new DefaultHttpResponse(HTTP_1_1, OK)
+        val response = new DefaultHttpResponse(HTTP_1_1, INTERNAL_SERVER_ERROR)
 
         // MissingParam is a special case
 
@@ -91,10 +90,10 @@ class Dispatcher extends SimpleChannelUpstreamHandler with Logger {
           val ite = e.asInstanceOf[InvocationTargetException]
           val c = ite.getCause
           if (c.isInstanceOf[MissingParam]) {
-            val mp = c.asInstanceOf[MissingParam]
-            val key = mp.key
             response.setStatus(BAD_REQUEST)
-            val cb = ChannelBuffers.copiedBuffer("Missing Param: " + key, CharsetUtil.UTF_8)
+            val mp  = c.asInstanceOf[MissingParam]
+            val key = mp.key
+            val cb  = ChannelBuffers.copiedBuffer("Missing Param: " + key, CharsetUtil.UTF_8)
             HttpHeaders.setContentLength(response, cb.readableBytes)
             response.setContent(cb)
           }
@@ -102,7 +101,6 @@ class Dispatcher extends SimpleChannelUpstreamHandler with Logger {
 
         if (response.getStatus != BAD_REQUEST) {
           logger.error("Error on dispatching", e)
-          response.setStatus(INTERNAL_SERVER_ERROR)
           response.setHeader("X-Sendfile", System.getProperty("user.dir") + "/public/500.html")
         }
 

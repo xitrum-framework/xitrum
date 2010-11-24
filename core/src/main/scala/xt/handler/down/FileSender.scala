@@ -37,9 +37,8 @@ class FileSender extends SimpleChannelDownstreamHandler with Logger {
     }
 
     val response = m.asInstanceOf[HttpResponse]
-
     if (!response.containsHeader("X-Sendfile")) {
-      Channels.write(ctx, e.getFuture, response)
+      ctx.sendDownstream(e)
       return
     }
 
@@ -47,7 +46,6 @@ class FileSender extends SimpleChannelDownstreamHandler with Logger {
     // To avoid leaking the information, we remove it
     val abs = response.getHeader("X-Sendfile")
     response.removeHeader("X-Sendfile")
-
     val file = new File(abs)
     if (!file.exists() || !file.isFile()) {
       response.setStatus(NOT_FOUND)
