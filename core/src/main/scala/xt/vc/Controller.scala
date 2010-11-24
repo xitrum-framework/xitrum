@@ -13,7 +13,13 @@ trait Controller extends ExtendedEnv with Logger with Net with ParamAccess with 
 
   def respond = synchronized {
     if (responded) {
-      throw new Exception("Double respond")
+      // Print the stack trace so that application developers know where to fix
+      try {
+        throw new Exception("Double respond")
+      } catch {
+        case e =>
+          logger.error("Double respond", e)
+      }
     } else {
       responded = true
       encodeCookies
