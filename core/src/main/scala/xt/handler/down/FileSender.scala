@@ -5,7 +5,8 @@ import xt.{Config, Logger}
 import java.io.File
 import java.io.RandomAccessFile
 
-import org.jboss.netty.channel.{SimpleChannelDownstreamHandler, Channels, ChannelHandlerContext, MessageEvent, ChannelFuture, DefaultFileRegion, ChannelFutureListener}
+import org.jboss.netty.channel.{ChannelHandler, SimpleChannelDownstreamHandler, Channels, ChannelHandlerContext, MessageEvent, ChannelFuture, DefaultFileRegion, ChannelFutureListener}
+import ChannelHandler.Sharable
 import org.jboss.netty.handler.codec.http.{HttpRequest, HttpResponse, HttpHeaders, HttpResponseStatus, HttpVersion}
 import HttpResponseStatus._
 import HttpVersion._
@@ -26,6 +27,7 @@ object FileSender {
  *
  * Cache is configureed by files_ehcache_name and files_max_size in xitrum.properties.
  */
+@Sharable
 class FileSender extends SimpleChannelDownstreamHandler with Logger {
   import FileSender._
 

@@ -5,7 +5,8 @@ import xt.Logger
 import java.util.{Map => JMap, List => JList, LinkedHashMap}
 import java.nio.charset.Charset
 
-import org.jboss.netty.channel.{SimpleChannelUpstreamHandler, ChannelHandlerContext, MessageEvent, ExceptionEvent, Channels}
+import org.jboss.netty.channel.{ChannelHandler, SimpleChannelUpstreamHandler, ChannelHandlerContext, MessageEvent, ExceptionEvent, Channels}
+import ChannelHandler.Sharable
 import org.jboss.netty.handler.codec.http.{HttpRequest, HttpMethod, QueryStringDecoder}
 import HttpMethod._
 
@@ -15,6 +16,7 @@ case class BodyParserResult(
   uriParams:  JMap[String, JList[String]],
   bodyParams: JMap[String, JList[String]])
 
+@Sharable
 class BodyParser extends SimpleChannelUpstreamHandler with Logger {
   override def messageReceived(ctx: ChannelHandlerContext, e: MessageEvent) {
     val m = e.getMessage

@@ -2,9 +2,11 @@ package xt.handler.down
 
 import xt.vc.Controller
 
-import org.jboss.netty.channel._
-import org.jboss.netty.handler.codec.http._
+import org.jboss.netty.channel.{ChannelHandler, SimpleChannelDownstreamHandler, ChannelHandlerContext, MessageEvent, Channels, ChannelFutureListener}
+import ChannelHandler.Sharable
+import org.jboss.netty.handler.codec.http.HttpHeaders
 
+@Sharable
 class Xt2NettyConverter extends SimpleChannelDownstreamHandler {
   override def writeRequested(ctx: ChannelHandlerContext, e: MessageEvent) {
     val m = e.getMessage

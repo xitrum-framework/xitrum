@@ -2,7 +2,8 @@ package xt.handler.up
 
 import xt.Logger
 
-import org.jboss.netty.channel.{SimpleChannelUpstreamHandler, ChannelHandlerContext, MessageEvent, ExceptionEvent, Channels}
+import org.jboss.netty.channel.{ChannelHandler, SimpleChannelUpstreamHandler, ChannelHandlerContext, MessageEvent, ExceptionEvent, Channels}
+import ChannelHandler.Sharable
 import org.jboss.netty.handler.codec.http.{HttpRequest, HttpMethod}
 import HttpMethod._
 
@@ -12,6 +13,7 @@ import HttpMethod._
  *
  * This middleware should be put behind BodyParser.
  */
+@Sharable
 class MethodOverrider extends SimpleChannelUpstreamHandler with Logger {
   override def messageReceived(ctx: ChannelHandlerContext, e: MessageEvent) {
     val m = e.getMessage
