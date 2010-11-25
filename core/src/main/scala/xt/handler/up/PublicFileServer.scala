@@ -86,10 +86,7 @@ class PublicFileServer extends SimpleChannelUpstreamHandler with Logger {
       // user.dir: current working directory
       // See: http://www.java2s.com/Tutorial/Java/0120__Development/Javasystemproperties.htm
       val abs = System.getProperty("user.dir") + path
-
-      // For security do not return hidden file
-      val file = new File(abs)
-      if (!file.exists() || file.isHidden()) None else Some(abs)
+      Some(abs)
     }
   }
 }

@@ -18,7 +18,7 @@ trait Controller extends ExtendedEnv with Logger with Net with ParamAccess with 
         throw new Exception("Double respond")
       } catch {
         case e =>
-          logger.error("Double respond", e)
+          logger.warn("Double respond", e)
       }
     } else {
       responded = true
