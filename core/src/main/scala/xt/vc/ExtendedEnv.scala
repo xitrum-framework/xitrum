@@ -5,7 +5,7 @@ import xt.vc.env.session.SessionRestorer
 
 import java.util.{Map => JMap, LinkedHashMap => JLinkedHashMap, List => JList}
 
-import org.jboss.netty.handler.codec.http.{DefaultHttpResponse, HttpResponseStatus, HttpVersion}
+import org.jboss.netty.handler.codec.http.{DefaultHttpResponse, HttpResponseStatus, HttpVersion, HttpHeaders}
 import HttpResponseStatus._
 import HttpVersion._
 
@@ -21,7 +21,12 @@ trait ExtendedEnv extends Env {
     ret
   }
 
-  lazy val response = new DefaultHttpResponse(HTTP_1_1, OK)
+  /** The default response is empty 200 OK */
+  lazy val response = {
+    val ret = new DefaultHttpResponse(HTTP_1_1, OK)
+    HttpHeaders.setContentLength(ret, 0)
+    ret
+  }
 
   lazy val cookies = new Cookies(request)
 
