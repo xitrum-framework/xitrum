@@ -42,7 +42,7 @@ class Project(info: ProjectInfo) extends DefaultProject(info) {
         "org.jboss.netty"        % "netty"        % "3.2.3.Final",
 
         // Template engine
-        "org.fusesource.scalate" % "scalate-core" % "1.3.1",
+        "org.fusesource.scalate" % "scalate-core" % "1.3.2",
 
         // For scanning all Controllers to build routes
         "org.reflections"        % "reflections"  % "0.9.5-RC2",  // Uses Javassist
