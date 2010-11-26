@@ -31,14 +31,15 @@ class FileSender extends SimpleChannelDownstreamHandler with Logger {
 
   override def writeRequested(ctx: ChannelHandlerContext, e: MessageEvent) {
     val m = e.getMessage
-    if (!m.isInstanceOf[HttpResponse]) {
+    if (!m.isInstanceOf[(HttpRequest, HttpResponse)]) {
       ctx.sendDownstream(e)
       return
     }
 
-    val response = m.asInstanceOf[HttpResponse]
+    val (request, response) = m.asInstanceOf[(HttpRequest, HttpResponse)]
     if (!response.containsHeader("X-Sendfile")) {
-      ctx.sendDownstream(e)
+      //ctx.sendDownstream(e)
+      Channels.write(ctx, e.getFuture, response)
       return
     }
 
@@ -50,15 +51,15 @@ class FileSender extends SimpleChannelDownstreamHandler with Logger {
     // Try to serve from cache
     SmallFileCache.get(abs) match {
       case SmallFileCache.Hit(bytes, lastModified) =>
-        if (false) {//request.getHeader(IF_MODIFIED_SINCE) == lastModified) {
+        if (request.getHeader(IF_MODIFIED_SINCE) == lastModified) {
           response.setStatus(NOT_MODIFIED)
         } else {
           logger.debug("Serve " + abs + " from cache")
           HttpHeaders.setContentLength(response, bytes.length)
           response.setHeader(LAST_MODIFIED, lastModified)
           response.setContent(ChannelBuffers.wrappedBuffer(bytes))
-          Channels.write(ctx, e.getFuture, response)
         }
+        Channels.write(ctx, e.getFuture, response)
 
       case SmallFileCache.FileNotFound =>
         response.setStatus(NOT_FOUND)
@@ -66,8 +67,9 @@ class FileSender extends SimpleChannelDownstreamHandler with Logger {
         Channels.write(ctx, e.getFuture, response)
 
       case SmallFileCache.FileTooBig(raf, fileLength, lastModified) =>
-        if (false) {//request.getHeader(IF_MODIFIED_SINCE) == lastModified) {
+        if (request.getHeader(IF_MODIFIED_SINCE) == lastModified) {
           response.setStatus(NOT_MODIFIED)
+          Channels.write(ctx, e.getFuture, response)
         } else {
           // Write the initial line and the header
           HttpHeaders.setContentLength(response, fileLength)

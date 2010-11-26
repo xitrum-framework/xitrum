@@ -50,12 +50,13 @@ class PublicFileServer extends SimpleChannelUpstreamHandler with Logger {
     sanitizePathInfo(decoded2) match {
       case Some(abs) =>
         response.setHeader("X-Sendfile", abs)
+        ctx.getChannel.write((request, response))
 
       case None =>
         response.setStatus(NOT_FOUND)
         HttpHeaders.setContentLength(response, 0)
+        ctx.getChannel.write(response)
     }
-    ctx.getChannel.write(response)
   }
 
   override def exceptionCaught(ctx: ChannelHandlerContext, e: ExceptionEvent) {
