@@ -50,7 +50,7 @@ class FileSender extends SimpleChannelDownstreamHandler with Logger {
     // Try to serve from cache
     SmallFileCache.get(abs) match {
       case SmallFileCache.Hit(bytes, lastModified) =>
-        if (request.getHeader(IF_MODIFIED_SINCE) == lastModified) {
+        if (false) {//request.getHeader(IF_MODIFIED_SINCE) == lastModified) {
           response.setStatus(NOT_MODIFIED)
         } else {
           logger.debug("Serve " + abs + " from cache")
@@ -66,7 +66,7 @@ class FileSender extends SimpleChannelDownstreamHandler with Logger {
         Channels.write(ctx, e.getFuture, response)
 
       case SmallFileCache.FileTooBig(raf, fileLength, lastModified) =>
-        if (request.getHeader(IF_MODIFIED_SINCE) == lastModified) {
+        if (false) {//request.getHeader(IF_MODIFIED_SINCE) == lastModified) {
           response.setStatus(NOT_MODIFIED)
         } else {
           // Write the initial line and the header

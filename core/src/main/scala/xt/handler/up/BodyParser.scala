@@ -1,6 +1,7 @@
 package xt.handler.up
 
 import xt.Logger
+import xt.vc.env.PathInfo
 
 import java.util.{Map => JMap, List => JList, LinkedHashMap}
 import java.nio.charset.Charset
@@ -12,7 +13,7 @@ import HttpMethod._
 
 case class BodyParserResult(
   request:    HttpRequest,
-  pathInfo:   String,
+  pathInfo:   PathInfo,
   uriParams:  JMap[String, JList[String]],
   bodyParams: JMap[String, JList[String]])
 

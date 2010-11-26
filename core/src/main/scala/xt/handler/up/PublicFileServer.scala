@@ -27,27 +27,27 @@ class PublicFileServer extends SimpleChannelUpstreamHandler with Logger {
       return
     }
 
-    val upr      = m.asInstanceOf[UriParserResult]
-    val request  = upr.request
-    val pathInfo = upr.pathInfo
+    val upr     = m.asInstanceOf[UriParserResult]
+    val request = upr.request
+    val decoded = upr.pathInfo.decoded
 
     if (request.getMethod != GET) {
       Channels.fireMessageReceived(ctx, upr)
       return
     }
 
-    val pathInfo2 = if (pathInfo == "/favicon.ico" || pathInfo == "/robots.txt")
-      "/public" + pathInfo
+    val decoded2 = if (decoded == "/favicon.ico" || decoded == "/robots.txt")
+      "/public" + decoded
     else
-      pathInfo
+      decoded
 
-    if (!pathInfo2.startsWith("/public/")) {
+    if (!decoded2.startsWith("/public/")) {
       Channels.fireMessageReceived(ctx, upr)
       return
     }
 
     val response = new DefaultHttpResponse(HTTP_1_1, OK)
-    sanitizePathInfo(pathInfo2) match {
+    sanitizePathInfo(decoded2) match {
       case Some(abs) =>
         response.setHeader("X-Sendfile", abs)
 

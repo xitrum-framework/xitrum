@@ -1,5 +1,7 @@
 package xt.vc
 
+import xt.vc.env.PathInfo
+
 import java.util.{Map => JMap, List => JList}
 
 import org.jboss.netty.channel.ChannelHandlerContext
@@ -20,14 +22,14 @@ object Env {
 class Env {
   var ctx:        ChannelHandlerContext = _
   var request:    HttpRequest           = _
-  var pathInfo:   String                = _
+  var pathInfo:   PathInfo              = _
   var uriParams:  Env.Params            = _
   var bodyParams: Env.Params            = _
   var pathParams: Env.Params            = _
 
   def apply(ctx:        ChannelHandlerContext,
             request:    HttpRequest,
-            pathInfo:   String,
+            pathInfo:   PathInfo,
             uriParams:  Env.Params,
             bodyParams: Env.Params,
             pathParams: Env.Params) {

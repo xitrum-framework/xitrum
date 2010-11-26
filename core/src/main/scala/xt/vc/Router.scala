@@ -1,7 +1,8 @@
 package xt.vc
 
-import xt.{Config, Logger, URLDecoder}
+import xt.{Config, Logger}
 import xt.vc.annotation._
+import xt.vc.env.PathInfo
 
 import java.util.{LinkedHashMap => JLinkedHashMap, List => JList}
 import java.lang.reflect.Method
@@ -64,8 +65,8 @@ object Router extends Logger {
    *
    * controller name and action name are put int pathParams.
    */
-  def matchRoute(method: HttpMethod, pathInfo: String): Option[(KA, Env.Params)] = {
-    val tokens = pathInfo.split("/").filter(_ != "")
+  def matchRoute(method: HttpMethod, pathInfo: PathInfo): Option[(KA, Env.Params)] = {
+    val tokens = pathInfo.tokens
     val max1   = tokens.size
 
     var pathParams: Env.Params = null
@@ -116,38 +117,22 @@ object Router extends Logger {
           if (i == max2 - 1) {  // The last token
             if (token == "*") {
               val value = tokens.slice(i, max1).mkString("/")
-              URLDecoder.decode(value) match {
-                case None => false
-
-                case Some(decodedValue) =>
-                  pathParams.put(token, toValues(decodedValue))
-                  true
-              }
+              pathParams.put(token, toValues(value))
+              true
             } else {
               if (max2 < max1) {
                 false
               } else {  // max2 = max1
-                val value = tokens(i)
-                URLDecoder.decode(value) match {
-                  case None => false
-
-                  case Some(decodedValue) =>
-                    pathParams.put(token, toValues(decodedValue))
-                    true
-                }
+                pathParams.put(token, toValues(tokens(i)))
+                true
               }
             }
           } else {
             if (token == "*") {
               false
             } else {
-              URLDecoder.decode(tokens(i)) match {
-                case None => false
-
-                case Some(value) =>
-                  pathParams.put(token, toValues(value))
-                  true
-              }
+              pathParams.put(token, toValues(tokens(i)))
+              true
             }
           }
         }

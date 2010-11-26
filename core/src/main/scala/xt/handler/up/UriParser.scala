@@ -1,6 +1,7 @@
 package xt.handler.up
 
 import xt.Logger
+import xt.vc.env.PathInfo
 
 import java.util.{Map => JMap, List => JList}
 
@@ -11,7 +12,7 @@ import org.jboss.netty.handler.codec.http.{HttpRequest, QueryStringDecoder}
 /**
  * @param pathInfo URL: http://example.com/articles?page=2 => pathInfo: /articles
  */
-case class UriParserResult(request: HttpRequest, pathInfo: String, uriParams: JMap[String, JList[String]])
+case class UriParserResult(request: HttpRequest, pathInfo: PathInfo, uriParams: JMap[String, JList[String]])
 
 @Sharable
 class UriParser extends SimpleChannelUpstreamHandler with Logger {
@@ -24,7 +25,7 @@ class UriParser extends SimpleChannelUpstreamHandler with Logger {
 
     val request   = m.asInstanceOf[HttpRequest]
     val decoder   = new QueryStringDecoder(request.getUri)
-    val pathInfo  = decoder.getPath
+    val pathInfo  = new PathInfo(decoder.getPath)
     val uriParams = decoder.getParameters
     Channels.fireMessageReceived(ctx, UriParserResult(request, pathInfo, uriParams))
   }
