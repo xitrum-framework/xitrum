@@ -1,11 +1,13 @@
 package xt.handler.up
 
 import xt.Logger
+import xt.handler.Env
+import xt.vc.env.PathInfo
 
 import java.io.File
 
 import org.jboss.netty.channel.{ChannelHandler, SimpleChannelUpstreamHandler, ChannelHandlerContext, MessageEvent, ExceptionEvent, Channels}
-import org.jboss.netty.handler.codec.http.{HttpMethod, HttpResponseStatus, HttpVersion, DefaultHttpResponse, HttpHeaders}
+import org.jboss.netty.handler.codec.http.{HttpRequest, HttpMethod, HttpResponseStatus, HttpVersion, DefaultHttpResponse, HttpHeaders}
 import ChannelHandler.Sharable
 import HttpMethod._
 import HttpResponseStatus._
@@ -22,17 +24,18 @@ import HttpVersion._
 class PublicFileServer extends SimpleChannelUpstreamHandler with Logger {
   override def messageReceived(ctx: ChannelHandlerContext, e: MessageEvent) {
     val m = e.getMessage
-    if (!m.isInstanceOf[UriParserResult]) {
+    if (!m.isInstanceOf[Env]) {
       ctx.sendUpstream(e)
       return
     }
 
-    val upr     = m.asInstanceOf[UriParserResult]
-    val request = upr.request
-    val decoded = upr.pathInfo.decoded
+    val env      = m.asInstanceOf[Env]
+    val request  = env("request").asInstanceOf[HttpRequest]
+    val pathInfo = env("pathInfo").asInstanceOf[PathInfo]
+    val decoded   = pathInfo.decoded
 
     if (request.getMethod != GET) {
-      Channels.fireMessageReceived(ctx, upr)
+      Channels.fireMessageReceived(ctx, env)
       return
     }
 
@@ -42,7 +45,7 @@ class PublicFileServer extends SimpleChannelUpstreamHandler with Logger {
       decoded
 
     if (!decoded2.startsWith("/public/")) {
-      Channels.fireMessageReceived(ctx, upr)
+      Channels.fireMessageReceived(ctx, env)
       return
     }
 
@@ -50,13 +53,14 @@ class PublicFileServer extends SimpleChannelUpstreamHandler with Logger {
     sanitizePathInfo(decoded2) match {
       case Some(abs) =>
         response.setHeader("X-Sendfile", abs)
-        ctx.getChannel.write((request, response))
 
       case None =>
         response.setStatus(NOT_FOUND)
         HttpHeaders.setContentLength(response, 0)
-        ctx.getChannel.write(response)
+
     }
+    env("response") = response
+    ctx.getChannel.write(env)
   }
 
   override def exceptionCaught(ctx: ChannelHandlerContext, e: ExceptionEvent) {
@@ -67,14 +71,14 @@ class PublicFileServer extends SimpleChannelUpstreamHandler with Logger {
   //----------------------------------------------------------------------------
 
   /**
-   * @return None if pathInfo is invalid or the corresponding file is hidden,
+   * @return None if decodedPathInfo is invalid or the corresponding file is hidden,
    *         otherwise Some(the absolute file path)
    */
-  private def sanitizePathInfo(pathInfo: String): Option[String] = {
+  private def sanitizePathInfo(decodedPathInfo: String): Option[String] = {
     // pathInfo starts with "/"
 
     // Convert file separators
-    val path = pathInfo.replace('/', File.separatorChar)
+    val path = decodedPathInfo.replace('/', File.separatorChar)
 
     // Simplistic dumb security check
     if (path.contains(File.separator + ".") ||

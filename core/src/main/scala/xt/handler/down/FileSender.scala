@@ -1,7 +1,7 @@
 package xt.handler.down
 
 import xt.{Config, Logger}
-import xt.handler.SmallFileCache
+import xt.handler.{Env, SmallFileCache}
 
 import java.io.File
 import java.io.RandomAccessFile
@@ -31,15 +31,16 @@ class FileSender extends SimpleChannelDownstreamHandler with Logger {
 
   override def writeRequested(ctx: ChannelHandlerContext, e: MessageEvent) {
     val m = e.getMessage
-    if (!m.isInstanceOf[(HttpRequest, HttpResponse)]) {
+    if (!m.isInstanceOf[Env]) {
       ctx.sendDownstream(e)
       return
     }
 
-    val (request, response) = m.asInstanceOf[(HttpRequest, HttpResponse)]
+    val env      = m.asInstanceOf[Env]
+    val request  = env("request").asInstanceOf[HttpRequest]
+    val response = env("response").asInstanceOf[HttpResponse]
     if (!response.containsHeader("X-Sendfile")) {
-      //ctx.sendDownstream(e)
-      Channels.write(ctx, e.getFuture, response)
+      ctx.sendDownstream(e)
       return
     }
 
@@ -59,22 +60,22 @@ class FileSender extends SimpleChannelDownstreamHandler with Logger {
           response.setHeader(LAST_MODIFIED, lastModified)
           response.setContent(ChannelBuffers.wrappedBuffer(bytes))
         }
-        Channels.write(ctx, e.getFuture, response)
+        ctx.sendDownstream(e)
 
       case SmallFileCache.FileNotFound =>
         response.setStatus(NOT_FOUND)
         HttpHeaders.setContentLength(response, 0)
-        Channels.write(ctx, e.getFuture, response)
+        ctx.sendDownstream(e)
 
       case SmallFileCache.FileTooBig(raf, fileLength, lastModified) =>
         if (request.getHeader(IF_MODIFIED_SINCE) == lastModified) {
           response.setStatus(NOT_MODIFIED)
-          Channels.write(ctx, e.getFuture, response)
+          ctx.sendDownstream(e)
         } else {
           // Write the initial line and the header
           HttpHeaders.setContentLength(response, fileLength)
           response.setHeader(LAST_MODIFIED, lastModified)
-          Channels.write(ctx, e.getFuture, response)
+          ctx.sendDownstream(e)
 
           // Write the content
           if (ctx.getPipeline.get(classOf[SslHandler]) != null) {
@@ -85,6 +86,11 @@ class FileSender extends SimpleChannelDownstreamHandler with Logger {
                 raf.close
               }
             })
+
+            // Keep alive
+            if (!HttpHeaders.isKeepAlive(request)) {
+              future.addListener(ChannelFutureListener.CLOSE)
+            }
           } else {
             // No encryption - use zero-copy
             val region = new DefaultFileRegion(raf.getChannel, 0, fileLength)
@@ -99,6 +105,11 @@ class FileSender extends SimpleChannelDownstreamHandler with Logger {
                 raf.close
               }
             })
+
+            // Keep alive
+            if (!HttpHeaders.isKeepAlive(request)) {
+              future.addListener(ChannelFutureListener.CLOSE)
+            }
           }
         }
     }

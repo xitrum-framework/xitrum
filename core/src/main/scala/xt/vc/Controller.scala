@@ -23,7 +23,8 @@ trait Controller extends ExtendedEnv with Logger with Net with ParamAccess with 
     } else {
       responded = true
       encodeCookies
-      ctx.getChannel.write(this)
+      henv("response") = response
+      ctx.getChannel.write(henv)
     }
   }
 

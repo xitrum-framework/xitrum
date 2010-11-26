@@ -13,7 +13,7 @@ class ChannelPipelineFactory extends CPF {
       // Upstream, direction: first handler -> last handler
       new HttpRequestDecoder,
       new HttpChunkAggregator(Config.maxContentLength),
-
+      new Request2Env,
       new UriParser,
       new PublicFileServer,  // uses pathInfo parsed at UriParser
       new BodyParser,
@@ -22,7 +22,7 @@ class ChannelPipelineFactory extends CPF {
 
       // Downstream, direction: last handler -> first handler
       new HttpResponseEncoder,
-      new FileSender,
-      new Xt2NettyConverter)
+      new Env2Response,
+      new FileSender)
   }
 }

@@ -1,5 +1,6 @@
 package xt.vc
 
+import xt.handler.{Env => HEnv}
 import xt.vc.env.PathInfo
 
 import java.util.{Map => JMap, List => JList}
@@ -21,23 +22,20 @@ object Env {
  */
 class Env {
   var ctx:        ChannelHandlerContext = _
+  var henv:       HEnv                  = _
   var request:    HttpRequest           = _
   var pathInfo:   PathInfo              = _
   var uriParams:  Env.Params            = _
   var bodyParams: Env.Params            = _
   var pathParams: Env.Params            = _
 
-  def apply(ctx:        ChannelHandlerContext,
-            request:    HttpRequest,
-            pathInfo:   PathInfo,
-            uriParams:  Env.Params,
-            bodyParams: Env.Params,
-            pathParams: Env.Params) {
+  def apply(ctx: ChannelHandlerContext, henv: HEnv) {
     this.ctx        = ctx
-    this.request    = request
-    this.pathInfo   = pathInfo
-    this.uriParams  = uriParams
-    this.bodyParams = bodyParams
-    this.pathParams = pathParams
+    this.henv       = henv
+    this.request    = henv("request").asInstanceOf[HttpRequest]
+    this.pathInfo   = henv("pathInfo").asInstanceOf[PathInfo]
+    this.uriParams  = henv("uriParams").asInstanceOf[Env.Params]
+    this.bodyParams = henv("bodyParams").asInstanceOf[Env.Params]
+    this.pathParams = henv("pathParams").asInstanceOf[Env.Params]
   }
 }

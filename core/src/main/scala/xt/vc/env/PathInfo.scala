@@ -3,6 +3,7 @@ package xt.vc.env
 import xt.URLDecoder
 import scala.collection.mutable.ArrayBuffer
 
+/** URL: http://example.com/articles?page=2 => pathInfo: /articles */
 class PathInfo(val encoded: String) {
   val decoded = URLDecoder.decode(encoded).get
 

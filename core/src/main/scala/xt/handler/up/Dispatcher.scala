@@ -1,10 +1,13 @@
 package xt.handler.up
 
 import xt._
-import xt.vc._
+import xt.handler.Env
+import xt.vc.env.PathInfo
+import xt.vc.{Router, Env => CEnv}
 import xt.vc.controller.MissingParam
 
 import java.lang.reflect.{Method, InvocationTargetException}
+import java.util.{Map => JMap, List => JList, LinkedHashMap}
 
 import org.jboss.netty.channel._
 import org.jboss.netty.buffer.ChannelBuffers
@@ -18,25 +21,27 @@ import HttpVersion._
 class Dispatcher extends SimpleChannelUpstreamHandler with Logger {
   override def messageReceived(ctx: ChannelHandlerContext, e: MessageEvent) {
     val m = e.getMessage
-    if (!m.isInstanceOf[BodyParserResult]) {
+    if (!m.isInstanceOf[Env]) {
       ctx.sendUpstream(e)
       return
     }
 
-    val bpr        = m.asInstanceOf[BodyParserResult]
-    val request    = bpr.request
-    val pathInfo   = bpr.pathInfo
-    val uriParams  = bpr.uriParams
-    val bodyParams = bpr.bodyParams
+    val env        = m.asInstanceOf[Env]
+    val request    = env("request").asInstanceOf[HttpRequest]
+    val pathInfo   = env("pathInfo").asInstanceOf[PathInfo]
+    val uriParams  = env("uriParams").asInstanceOf[CEnv.Params]
+    val bodyParams = env("bodyParams").asInstanceOf[CEnv.Params]
 
     Router.matchRoute(request.getMethod, pathInfo) match {
       case Some((ka, pathParams)) =>
-        dispatchWithFailsafe(ctx, bpr, ka, pathParams)
+        env("pathParams") = pathParams
+        dispatchWithFailsafe(ctx, ka, env)
 
       case None =>
         val response = new DefaultHttpResponse(HTTP_1_1, NOT_FOUND)
         response.setHeader("X-Sendfile", System.getProperty("user.dir") + "/public/404.html")
-        ctx.getChannel.write(response)
+        env("response") = response
+        ctx.getChannel.write(env)
     }
   }
 
@@ -47,13 +52,13 @@ class Dispatcher extends SimpleChannelUpstreamHandler with Logger {
 
   //----------------------------------------------------------------------------
 
-  private def dispatchWithFailsafe(ctx: ChannelHandlerContext, bpr: BodyParserResult, ka: Router.KA, pathParams: Env.Params) {
+  private def dispatchWithFailsafe(ctx: ChannelHandlerContext, ka: Router.KA, env: Env) {
     try {
       val (klass, action) = ka
       val controller      = klass.newInstance
-      controller(ctx, bpr.request, bpr.pathInfo, bpr.uriParams, bpr.bodyParams, pathParams)
+      controller(ctx, env)
 
-      logger.debug(bpr.request.getMethod + " " + bpr.pathInfo)
+      logger.debug(controller.request.getMethod + " " + controller.pathInfo.decoded)
       logger.debug(filterParams(controller.allParams).toString)
 
       // Begin timestamp
@@ -106,7 +111,8 @@ class Dispatcher extends SimpleChannelUpstreamHandler with Logger {
           response.setHeader("X-Sendfile", System.getProperty("user.dir") + "/public/500.html")
         }
 
-        ctx.getChannel.write(response)
+        env("response") = response
+        ctx.getChannel.write(env)
     }
   }
 
