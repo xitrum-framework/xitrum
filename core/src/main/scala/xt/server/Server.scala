@@ -25,6 +25,6 @@ class Server extends Logger {
     bootstrap.bind(new InetSocketAddress(Config.httpPort))
 
     val mode = if (Config.isProductionMode) "production" else "development"
-    logger.info("Xitrum started on port %d in %s mode", Config.httpPort, mode)
+    logger.info("Xitrum started on port {} in {} mode", Config.httpPort, mode)
   }
 }
