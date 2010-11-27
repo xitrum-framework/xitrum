@@ -26,7 +26,7 @@ class Env2Response extends SimpleChannelDownstreamHandler {
     // If HttpHeaders.getContentLength(response) > response.getContent.readableBytes,
     // it is because the response body will be sent later and the channel will
     // be closed later by the code that sends the response body
-    if (!HttpHeaders.isKeepAlive(request) && HttpHeaders.getContentLength(response) > response.getContent.readableBytes) {
+    if (!HttpHeaders.isKeepAlive(request) && HttpHeaders.getContentLength(response) == response.getContent.readableBytes) {
       future.addListener(ChannelFutureListener.CLOSE)
     }
   }
