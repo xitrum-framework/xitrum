@@ -190,7 +190,8 @@ object Router extends Logger {
         val httpMethods = ArrayBuffer[Option[HttpMethod]]()
         for (a <- as) {
           if (a.isInstanceOf[Path]) {
-            paths.append(pathPrefix + a.asInstanceOf[Path].value)
+            val pathAnnotation = a.asInstanceOf[Path]
+            for (pv <- pathAnnotation.value) paths.append(pathPrefix + pv)
           } else if (a.isInstanceOf[GET]) {
             httpMethods.append(Some(HttpMethod.GET))
           } else if (a.isInstanceOf[POST]) {
