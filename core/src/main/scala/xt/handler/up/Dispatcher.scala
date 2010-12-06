@@ -1,6 +1,6 @@
 package xt.handler.up
 
-import xt._
+import xt.Config
 import xt.handler.Env
 import xt.vc.env.PathInfo
 import xt.vc.{Router, Env => CEnv}
@@ -18,7 +18,7 @@ import HttpResponseStatus._
 import HttpVersion._
 
 @Sharable
-class Dispatcher extends SimpleChannelUpstreamHandler with Logger {
+class Dispatcher extends SimpleChannelUpstreamHandler with ClosedClientSilencer {
   override def messageReceived(ctx: ChannelHandlerContext, e: MessageEvent) {
     val m = e.getMessage
     if (!m.isInstanceOf[Env]) {

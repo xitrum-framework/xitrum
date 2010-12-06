@@ -1,6 +1,5 @@
 package xt.handler.up
 
-import xt.Logger
 import xt.handler.Env
 import xt.vc.{Env => CEnv}
 import xt.vc.env.PathInfo
@@ -14,7 +13,7 @@ import org.jboss.netty.handler.codec.http.{HttpRequest, HttpMethod, QueryStringD
 import HttpMethod._
 
 @Sharable
-class BodyParser extends SimpleChannelUpstreamHandler with Logger {
+class BodyParser extends SimpleChannelUpstreamHandler with ClosedClientSilencer {
   override def messageReceived(ctx: ChannelHandlerContext, e: MessageEvent) {
     val m = e.getMessage
     if (!m.isInstanceOf[Env]) {
@@ -37,10 +36,5 @@ class BodyParser extends SimpleChannelUpstreamHandler with Logger {
 
     env("bodyParams") = bodyParams
     Channels.fireMessageReceived(ctx, env)
-  }
-
-  override def exceptionCaught(ctx: ChannelHandlerContext, e: ExceptionEvent) {
-    logger.error("BodyParser", e.getCause)
-    e.getChannel.close
   }
 }

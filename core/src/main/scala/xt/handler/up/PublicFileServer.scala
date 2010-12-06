@@ -1,6 +1,5 @@
 package xt.handler.up
 
-import xt.Logger
 import xt.handler.Env
 import xt.vc.env.PathInfo
 
@@ -21,7 +20,7 @@ import HttpVersion._
  *    robots.txt     must be at the root: http://en.wikipedia.org/wiki/Robots_exclusion_standard
  */
 @Sharable
-class PublicFileServer extends SimpleChannelUpstreamHandler with Logger {
+class PublicFileServer extends SimpleChannelUpstreamHandler with ClosedClientSilencer {
   override def messageReceived(ctx: ChannelHandlerContext, e: MessageEvent) {
     val m = e.getMessage
     if (!m.isInstanceOf[Env]) {
@@ -61,11 +60,6 @@ class PublicFileServer extends SimpleChannelUpstreamHandler with Logger {
     }
     env("response") = response
     ctx.getChannel.write(env)
-  }
-
-  override def exceptionCaught(ctx: ChannelHandlerContext, e: ExceptionEvent) {
-    logger.error("PublicFileServer", e.getCause)
-    e.getChannel.close
   }
 
   //----------------------------------------------------------------------------

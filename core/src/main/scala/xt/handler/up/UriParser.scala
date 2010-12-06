@@ -1,6 +1,5 @@
 package xt.handler.up
 
-import xt.Logger
 import xt.handler.Env
 import xt.vc.{Env => CEnv}
 import xt.vc.env.PathInfo
@@ -10,7 +9,7 @@ import ChannelHandler.Sharable
 import org.jboss.netty.handler.codec.http.{HttpRequest, QueryStringDecoder}
 
 @Sharable
-class UriParser extends SimpleChannelUpstreamHandler with Logger {
+class UriParser extends SimpleChannelUpstreamHandler with ClosedClientSilencer {
   override def messageReceived(ctx: ChannelHandlerContext, e: MessageEvent) {
     val m = e.getMessage
     if (!m.isInstanceOf[Env]) {
@@ -24,10 +23,5 @@ class UriParser extends SimpleChannelUpstreamHandler with Logger {
     env("pathInfo")  = new PathInfo(decoder.getPath)
     env("uriParams") = decoder.getParameters
     Channels.fireMessageReceived(ctx, env)
-  }
-
-  override def exceptionCaught(ctx: ChannelHandlerContext, e: ExceptionEvent) {
-    logger.error("UriParser", e.getCause)
-    e.getChannel.close
   }
 }

@@ -1,6 +1,5 @@
 package xt.handler.up
 
-import xt.Logger
 import xt.handler.Env
 import xt.vc.{Env => CEnv}
 
@@ -16,7 +15,7 @@ import HttpMethod._
  * This middleware should be put behind BodyParser.
  */
 @Sharable
-class MethodOverrider extends SimpleChannelUpstreamHandler with Logger {
+class MethodOverrider extends SimpleChannelUpstreamHandler with ClosedClientSilencer {
   override def messageReceived(ctx: ChannelHandlerContext, e: MessageEvent) {
     val m = e.getMessage
     if (!m.isInstanceOf[Env]) {
@@ -37,10 +36,5 @@ class MethodOverrider extends SimpleChannelUpstreamHandler with Logger {
     }
 
     Channels.fireMessageReceived(ctx, env)
-  }
-
-  override def exceptionCaught(ctx: ChannelHandlerContext, e: ExceptionEvent) {
-    logger.error("MethodOverrider", e.getCause)
-    e.getChannel.close
   }
 }

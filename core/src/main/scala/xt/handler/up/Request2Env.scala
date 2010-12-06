@@ -1,6 +1,5 @@
 package xt.handler.up
 
-import xt.Logger
 import xt.handler.Env
 
 import org.jboss.netty.channel.{ChannelHandler, SimpleChannelUpstreamHandler, ChannelHandlerContext, MessageEvent, ExceptionEvent, Channels}
@@ -8,7 +7,7 @@ import ChannelHandler.Sharable
 import org.jboss.netty.handler.codec.http.HttpRequest
 
 @Sharable
-class Request2Env extends SimpleChannelUpstreamHandler with Logger {
+class Request2Env extends SimpleChannelUpstreamHandler with ClosedClientSilencer {
   override def messageReceived(ctx: ChannelHandlerContext, e: MessageEvent) {
     val m = e.getMessage
     if (!m.isInstanceOf[HttpRequest]) {
@@ -19,10 +18,5 @@ class Request2Env extends SimpleChannelUpstreamHandler with Logger {
     val env = new Env
     env("request") = m.asInstanceOf[HttpRequest]
     Channels.fireMessageReceived(ctx, env)
-  }
-
-  override def exceptionCaught(ctx: ChannelHandlerContext, e: ExceptionEvent) {
-    logger.error("Request2Map", e.getCause)
-    e.getChannel.close
   }
 }
