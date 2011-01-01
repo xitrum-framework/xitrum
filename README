@@ -1,5 +1,76 @@
-To add everything to your SBT project, use:
-"cntt" %% "xitrum" % "0.1-SNAPSHOT" % "compile"
+Xitrum is a super fast web server and framework on top of Netty:
+* It fills the gap between Scalatra and Lift: it is more powerful than
+  Scalatra and less complex than Lift
+* It combines MVC (controller first) style and component-based (view first) style
+* If you are familiar with Merb or Nitrogen, you will be at home with Xitrum
+* It does not try to abstract away from the underlying network layer, it lets
+  you talk directly to Netty whenever you want, unlike most frameworks
 
-To add only xitrum-core, use:
-"cntt" %% "xitrum-core" % "0.1-SNAPSHOT" % "compile"
++-----------------+
+|    Your app     |
++-----------------+
+|      Xitrum     |
+| +-------------+ |
+| |  Framework  | |
+| +-------------+ |
+| | Middlewares | |
+| +-------------+ |
+| | HTTP Server | |
+| +-------------+ |
++-----------------+
+|      Netty      |
++-----------------+
+
+Layers in Xitrum are tightly coupled for speed.
+
+Xitrum needs Java 5 or above because of Netty.
+
+== Project source directory layout
+
+A typical blog application will have this directory layout:
+
+config
+  blog.properties
+  log4j.properties
+lib
+  jrebel.jar
+lib_managed
+project
+public
+  css
+  img
+  js
+src
+  main
+    scala
+      blog
+        controller
+          Articles.scala
+        helper
+          ArticleHelper.scala
+        model
+          Article.scala
+    resources
+      blog
+        view
+          articles
+            index.scaml
+            show.scaml
+tmp
+  scalate
+
+== Project deployed directory layout
+
+bin
+  xitrum.sh
+config
+  blog.properties
+  log4j.properties
+lib
+  blog.jar
+public
+  css
+  img
+  js
+tmp
+  scalate
