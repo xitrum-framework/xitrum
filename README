@@ -59,8 +59,8 @@ src
 tmp
   scalate
 
-To add only xitrum to project dependencies:
-"tv.cntt" %% "xitrum" % "1.0-SNAPSHOT" % "compile"
+To add Xitrum to project dependencies:
+"tv.cntt" %% "xitrum" % "1.0-SNAPSHOT"
 
 == Project deployed directory layout
 
@@ -71,6 +71,7 @@ config
   log4j.properties
 lib
   blog.jar
+  ...
 public
   css
   img

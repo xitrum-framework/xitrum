@@ -11,7 +11,7 @@ import ChannelHandler.Sharable
 import HttpResponseStatus._
 import HttpVersion._
 
-import xt.Config
+import xt.{Config, Controller}
 import xt.handler.Env
 import xt.vc.env.PathInfo
 import xt.vc.controller.{Routes, Util}
@@ -54,17 +54,14 @@ class Dispatcher extends SimpleChannelUpstreamHandler with ClosedClientSilencer 
   //----------------------------------------------------------------------------
 
   private def dispatchWithFailsafe(ctx: ChannelHandlerContext, ka: Routes.KA, env: Env) {
+    // Begin timestamp
+    val beginTimestamp = System.currentTimeMillis
+
+    val (klass, action) = ka
+    val controller      = klass.newInstance
+    controller(ctx, env)
+
     try {
-      val (klass, action) = ka
-      val controller      = klass.newInstance
-      controller(ctx, env)
-
-      logger.debug(controller.request.getMethod + " " + controller.pathInfo.decoded)
-      logger.debug(filterParams(controller.allParams).toString)
-
-      // Begin timestamp
-      val t1 = System.currentTimeMillis
-
       // Call before filters
       val passed = controller.beforeFilters.forall(filter => {
         val onlyActions = filter._2
@@ -85,11 +82,12 @@ class Dispatcher extends SimpleChannelUpstreamHandler with ClosedClientSilencer 
       // Call action
       if (passed) action.invoke(controller)
 
-      // End timestamp
-      val t2 = System.currentTimeMillis
-      logger.debug((t2 - t1) + " [ms]")
+      logAccess(beginTimestamp, controller)
     } catch {
       case e =>
+        // End timestamp
+        val t2 = System.currentTimeMillis
+
         val response = new DefaultHttpResponse(HTTP_1_1, INTERNAL_SERVER_ERROR)
 
         // MissingParam is a special case
@@ -108,12 +106,37 @@ class Dispatcher extends SimpleChannelUpstreamHandler with ClosedClientSilencer 
         }
 
         if (response.getStatus != BAD_REQUEST) {
-          logger.error("Error on dispatching", e)
+          logAccess(beginTimestamp, controller, e)
           response.setHeader("X-Sendfile", System.getProperty("user.dir") + "/public/500.html")
+        } else {
+          logAccess(beginTimestamp, controller)
         }
 
         env("response") = response
         ctx.getChannel.write(env)
+    }
+  }
+
+  private def logAccess(beginTimestamp: Long, controller: Controller, e: Throwable = null) {
+    val endTimestamp = System.currentTimeMillis
+    val dt           = endTimestamp - beginTimestamp
+
+    if (e == null) {
+      val msg =
+        controller.request.getMethod       + " " +
+        controller.pathInfo.decoded        + " " +
+        filterParams(controller.allParams) + " " +
+        dt + " [ms]"
+      logger.debug(msg)
+    } else {
+      val msg =
+        "Dispatching error " +
+        controller.request.getMethod       + " " +
+        controller.pathInfo.decoded        + " " +
+        filterParams(controller.allParams) + " " +
+        dt + " [ms]"
+
+      logger.error(msg, e)
     }
   }
 
