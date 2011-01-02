@@ -11,12 +11,11 @@ import ChannelHandler.Sharable
 import HttpResponseStatus._
 import HttpVersion._
 
-import xt.{Config, Controller}
+import xt.{Config, Controller, MissingParam}
 import xt.handler.Env
 import xt.vc.env.PathInfo
 import xt.vc.controller.{Routes, Util}
 import xt.vc.env.{Env => CEnv}
-import xt.vc.controller.MissingParam
 
 @Sharable
 class Dispatcher extends SimpleChannelUpstreamHandler with ClosedClientSilencer {

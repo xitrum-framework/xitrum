@@ -1,10 +1,7 @@
 package xt.vc.controller
 
-import xt.Controller
-
 import scala.collection.JavaConversions
-
-class MissingParam(val key: String) extends Throwable(key)
+import xt.{Controller, MissingParam}
 
 trait ParamAccess {
   this: Controller =>
