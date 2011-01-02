@@ -1,6 +1,6 @@
-package xt.vc
+package xt.vc.env
 
-import xt.vc.env._
+import xt.Controller
 import xt.vc.env.session.SessionRestorer
 
 import java.util.{Map => JMap, LinkedHashMap => JLinkedHashMap, List => JList}

@@ -9,12 +9,6 @@ import org.slf4j.LoggerFactory
  * We use a trait for better speed, because getStackTrace is slow.
  */
 trait Logger {
-  /**
-   * By default, the logger name is inferred from the class name.
-   */
-  var loggerName: String = null
-
-  val logger = {
-    LoggerFactory.getLogger(getClass)
-  }
+  /** Logger name is inferred from the class name. */
+  val logger = LoggerFactory.getLogger(getClass)
 }

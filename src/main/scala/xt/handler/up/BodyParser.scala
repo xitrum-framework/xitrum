@@ -1,7 +1,7 @@
 package xt.handler.up
 
 import xt.handler.Env
-import xt.vc.{Env => CEnv}
+import xt.vc.env.{Env => CEnv}
 import xt.vc.env.PathInfo
 
 import java.util.{List => JList}

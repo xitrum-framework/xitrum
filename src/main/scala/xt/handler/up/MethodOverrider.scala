@@ -1,7 +1,7 @@
 package xt.handler.up
 
 import xt.handler.Env
-import xt.vc.{Env => CEnv}
+import xt.vc.env.{Env => CEnv}
 
 import org.jboss.netty.channel.{ChannelHandler, SimpleChannelUpstreamHandler, ChannelHandlerContext, MessageEvent, ExceptionEvent, Channels}
 import ChannelHandler.Sharable

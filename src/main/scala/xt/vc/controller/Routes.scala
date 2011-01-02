@@ -1,20 +1,17 @@
-package xt.vc
+package xt.vc.controller
 
-import xt.{Config, Logger}
-import xt.vc.annotation._
-import xt.vc.env.PathInfo
-
-import java.util.{LinkedHashMap => JLinkedHashMap, List => JList}
+import java.net.URLDecoder
 import java.lang.reflect.Method
+import java.util.{LinkedHashMap => JLinkedHashMap, List => JList}
 
 import scala.collection.mutable.{ArrayBuffer, StringBuilder}
 
-import org.reflections.Reflections
-import org.reflections.util.{ConfigurationBuilder, ClasspathHelper}
-
 import org.jboss.netty.handler.codec.http.HttpMethod
 
-object Router extends Logger {
+import xt._
+import xt.vc.env.{Env, PathInfo}
+
+object Routes extends Logger {
   type KA              = (Class[Controller], Method)
   type Csas            = (String, String)
   type CompiledCsas    = (Csas, KA)
@@ -25,9 +22,11 @@ object Router extends Logger {
 
   private var compiledRoutes: Iterable[CompiledRoute] = _
 
-
   def collectAndCompile {
-    val routes = collectRoutes
+    // Avoid loading twice in some servlet containers
+    if (compiledRoutes != null) return
+
+    val routes = (new RouteCollector).collect
 
     // Compile and log routes at the same time because the compiled routes do
     // not contain the original URL pattern.
@@ -37,8 +36,8 @@ object Router extends Logger {
       if (max < len) len else max
     }
 
-    val routesDebugString = new StringBuilder
-    routesDebugString.append("Routes:\n")
+    val builder = new StringBuilder
+    builder.append("Routes:\n")
     compiledRoutes = routes.map { r =>
       val ret = compileRoute(r)
 
@@ -51,13 +50,11 @@ object Router extends Logger {
       val action     = ret._4._2
 
       val format = "%-6s %-" + patternMaxLength + "s %s#%s\n"
-      routesDebugString.append(format.format(method, pattern, controller, action))
+      builder.append(format.format(method, pattern, controller, action))
 
       ret
     }
-    logger.debug(routesDebugString.toString)
-
-    compiledRoutes
+    logger.info(builder.toString)
   }
 
   /**
@@ -67,6 +64,7 @@ object Router extends Logger {
    */
   def matchRoute(method: HttpMethod, pathInfo: PathInfo): Option[(KA, Env.Params)] = {
     val tokens = pathInfo.tokens
+
     val max1   = tokens.size
 
     var pathParams: Env.Params = null
@@ -117,13 +115,13 @@ object Router extends Logger {
           if (i == max2 - 1) {  // The last token
             if (token == "*") {
               val value = tokens.slice(i, max1).mkString("/")
-              pathParams.put(token, toValues(value))
+              pathParams.put(token, Util.toValues(value))
               true
             } else {
               if (max2 < max1) {
                 false
               } else {  // max2 = max1
-                pathParams.put(token, toValues(tokens(i)))
+                pathParams.put(token, Util.toValues(tokens(i)))
                 true
               }
             }
@@ -131,7 +129,7 @@ object Router extends Logger {
             if (token == "*") {
               false
             } else {
-              pathParams.put(token, toValues(tokens(i)))
+              pathParams.put(token, Util.toValues(tokens(i)))
               true
             }
           }
@@ -146,75 +144,15 @@ object Router extends Logger {
       case Some(cr) =>
         val (m, compiledPattern, compiledKA, csas) = cr
         val (cs, as) = csas
-        pathParams.put("controller", toValues(cs))
-        pathParams.put("action",     toValues(as))
+        pathParams.put("controller", Util.toValues(cs))
+        pathParams.put("action",     Util.toValues(as))
         Some((compiledKA, pathParams))
 
       case None => None
     }
   }
 
-  /**
-   * WARN: This method is here because it is also used by Failsafe when redispatching.
-   *
-   * Wraps a single String by a List.
-   */
-  def toValues(value: String): java.util.List[String] = {
-    val values = new java.util.ArrayList[String](1)
-    values.add(value)
-    values
-  }
-
   //----------------------------------------------------------------------------
-
-  /** Scan all subtypes of class Controller to collect routes. */
-  def collectRoutes: Array[Route] = {
-    val cb = new ConfigurationBuilder
-    cb.setUrls(ClasspathHelper.getUrlsForCurrentClasspath)
-    val r = new Reflections(cb)
-
-    val ks = r.getSubTypesOf(classOf[Controller])  // Controller classes
-    val ik = ks.iterator
-    val routes = ArrayBuffer[Route]()
-    while (ik.hasNext) {
-      val k = ik.next.asInstanceOf[Class[Controller]]
-      val pathPrefix = {
-        val pathAnnotation = k.getAnnotation(classOf[Path])
-        if (pathAnnotation != null) pathAnnotation.value else ""
-      }
-
-      val ms = k.getMethods                        // Methods
-      for (m <- ms) {
-        val as = m.getAnnotations
-        val paths = ArrayBuffer[String]()
-        val httpMethods = ArrayBuffer[Option[HttpMethod]]()
-        for (a <- as) {
-          if (a.isInstanceOf[Path]) {
-            paths.append(pathPrefix + a.asInstanceOf[Path].value)
-          } else if (a.isInstanceOf[Paths]) {
-            val pathsAnnotation = a.asInstanceOf[Paths]
-            for (pv <- pathsAnnotation.value) paths.append(pathPrefix + pv)
-          } else if (a.isInstanceOf[GET]) {
-            httpMethods.append(Some(HttpMethod.GET))
-          } else if (a.isInstanceOf[POST]) {
-            httpMethods.append(Some(HttpMethod.POST))
-          } else if (a.isInstanceOf[PUT]) {
-            httpMethods.append(Some(HttpMethod.PUT))
-          } else if (a.isInstanceOf[DELETE]) {
-            httpMethods.append(Some(HttpMethod.DELETE))
-          }
-        }
-
-        if (!paths.isEmpty) {  // m is an action
-          if (httpMethods.isEmpty) httpMethods.append(None)
-
-          for (p <- paths; hm <- httpMethods) routes.append((hm, p, (k, m)))
-        }
-      }
-    }
-
-    routes.toArray
-  }
 
   private def compileRoute(route: Route): CompiledRoute = {
     val (method, pattern, ka) = route
@@ -229,15 +167,5 @@ object Router extends Logger {
       val token    = if (constant) e else e.substring(1)
       (token, constant)
     }
-  }
-
-  // Same as Rails' config.filter_parameters
-  private def filterParams(params: java.util.Map[String, java.util.List[String]]): java.util.Map[String, java.util.List[String]] = {
-    val ret = new java.util.LinkedHashMap[String, java.util.List[String]]()
-    ret.putAll(params)
-    for (key <- Config.filterParams) {
-      if (ret.containsKey(key)) ret.put(key, toValues("[filtered]"))
-    }
-    ret
   }
 }

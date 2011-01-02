@@ -1,8 +1,7 @@
 package xt.vc.env.session
 
 import xt.Config
-import xt.vc.ExtendedEnv
-import xt.vc.env.Session
+import xt.vc.env.{ExtendedEnv, Session}
 
 import java.util.{UUID, HashMap => JMap}
 

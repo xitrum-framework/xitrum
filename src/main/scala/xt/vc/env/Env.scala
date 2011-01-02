@@ -1,7 +1,6 @@
-package xt.vc
+package xt.vc.env
 
 import xt.handler.{Env => HEnv}
-import xt.vc.env.PathInfo
 
 import java.util.{Map => JMap, List => JList}
 
@@ -10,8 +9,9 @@ import org.jboss.netty.handler.codec.http.HttpRequest
 
 object Env {
   /**
-   * Design decision: Java Map is used instead of Scala Map because Netty produces
-   * Java Map and we want to avoid costly conversion from Java Map to Scala Map.
+   * Design decision: Java Map is used instead of Scala Map because Netty's
+   * QueryStringDecoder#getParameters produces Java Map[String, java.util.List[String]]
+   * and we want to avoid costly conversion from Java Map to Scala Map.
    */
   type Params = JMap[String, JList[String]]
 }

@@ -1,7 +1,6 @@
 package xt.vc.view
 
-import xt.Config
-import xt.vc.Controller
+import xt.{Config, Controller}
 
 import java.io.{File, StringWriter, PrintWriter}
 

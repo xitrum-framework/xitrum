@@ -1,11 +1,5 @@
 package xt.handler.up
 
-import xt.Config
-import xt.handler.Env
-import xt.vc.env.PathInfo
-import xt.vc.{Router, Env => CEnv}
-import xt.vc.controller.MissingParam
-
 import java.lang.reflect.{Method, InvocationTargetException}
 import java.util.{Map => JMap, List => JList, LinkedHashMap}
 
@@ -16,6 +10,13 @@ import org.jboss.netty.handler.codec.http._
 import ChannelHandler.Sharable
 import HttpResponseStatus._
 import HttpVersion._
+
+import xt.Config
+import xt.handler.Env
+import xt.vc.env.PathInfo
+import xt.vc.controller.{Routes, Util}
+import xt.vc.env.{Env => CEnv}
+import xt.vc.controller.MissingParam
 
 @Sharable
 class Dispatcher extends SimpleChannelUpstreamHandler with ClosedClientSilencer {
@@ -32,7 +33,7 @@ class Dispatcher extends SimpleChannelUpstreamHandler with ClosedClientSilencer 
     val uriParams  = env("uriParams").asInstanceOf[CEnv.Params]
     val bodyParams = env("bodyParams").asInstanceOf[CEnv.Params]
 
-    Router.matchRoute(request.getMethod, pathInfo) match {
+    Routes.matchRoute(request.getMethod, pathInfo) match {
       case Some((ka, pathParams)) =>
         env("pathParams") = pathParams
         dispatchWithFailsafe(ctx, ka, env)
@@ -52,7 +53,7 @@ class Dispatcher extends SimpleChannelUpstreamHandler with ClosedClientSilencer 
 
   //----------------------------------------------------------------------------
 
-  private def dispatchWithFailsafe(ctx: ChannelHandlerContext, ka: Router.KA, env: Env) {
+  private def dispatchWithFailsafe(ctx: ChannelHandlerContext, ka: Routes.KA, env: Env) {
     try {
       val (klass, action) = ka
       val controller      = klass.newInstance
@@ -121,7 +122,7 @@ class Dispatcher extends SimpleChannelUpstreamHandler with ClosedClientSilencer 
     val ret = new java.util.LinkedHashMap[String, java.util.List[String]]()
     ret.putAll(params)
     for (key <- Config.filterParams) {
-      if (ret.containsKey(key)) ret.put(key, Router.toValues("[filtered]"))
+      if (ret.containsKey(key)) ret.put(key, Util.toValues("[filtered]"))
     }
     ret
   }

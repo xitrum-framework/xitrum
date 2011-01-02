@@ -25,7 +25,7 @@ Layers in Xitrum are tightly coupled for speed.
 
 Xitrum needs Java 5 or above because of Netty.
 
-== Project source directory layout
+== SBT project layout
 
 A typical blog application will have this directory layout:
 
@@ -58,6 +58,9 @@ src
             show.scaml
 tmp
   scalate
+
+To add only xitrum to project dependencies:
+"tv.cntt" %% "xitrum" % "1.0-SNAPSHOT" % "compile"
 
 == Project deployed directory layout
 

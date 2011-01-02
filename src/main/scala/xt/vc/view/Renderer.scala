@@ -1,6 +1,6 @@
 package xt.vc.view
 
-import xt.vc.Controller
+import xt.Controller
 
 import java.io.File
 import scala.xml.NodeSeq

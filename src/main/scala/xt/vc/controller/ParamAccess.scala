@@ -1,6 +1,6 @@
 package xt.vc.controller
 
-import xt.vc.Controller
+import xt.Controller
 
 import scala.collection.JavaConversions
 
