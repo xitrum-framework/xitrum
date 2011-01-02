@@ -59,8 +59,14 @@ src
 tmp
   scalate
 
+== SBT project dependency
+
 To add Xitrum to project dependencies:
 "tv.cntt" %% "xitrum" % "1.0-SNAPSHOT"
+
+Xitrum uses SLF4J 1.6.1. You must provide an SLF4J implentation that compatible
+with SLF4J 1.6.1, like logback-classic 0.9.27:
+"ch.qos.logback" % "logback-classic" % "0.9.27"
 
 == Project deployed directory layout
 
