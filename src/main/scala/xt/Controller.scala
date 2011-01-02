@@ -56,7 +56,7 @@ trait Controller extends ExtendedEnv with Logger with Net with ParamAccess with 
   //----------------------------------------------------------------------------
 
   private def encodeCookies {
-    if (cookies != null && cookies.size > 0) {   // == null: CookieDecoder has not been run
+    if (cookies != null && cookies.size > 0) {  // == null: CookieDecoder has not been run
       val encoder = new CookieEncoder(true)
       val iter = cookies.iterator
       while (iter.hasNext) encoder.addCookie(iter.next)

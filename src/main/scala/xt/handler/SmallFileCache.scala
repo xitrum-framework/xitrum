@@ -1,10 +1,10 @@
 package xt.handler
 
-import xt.Config
-
 import java.io.{File, RandomAccessFile}
 import java.text.SimpleDateFormat
 import net.sf.ehcache.{CacheManager, Element}
+
+import xt.Config
 
 /** Cache is configureed by files_ehcache_name and files_max_size in xitrum.properties. */
 object SmallFileCache {

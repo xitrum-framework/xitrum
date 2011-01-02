@@ -1,12 +1,13 @@
 package xt.handler.up
 
-import xt.handler.Env
-import xt.vc.env.{Env => CEnv}
-import xt.vc.env.PathInfo
-
 import org.jboss.netty.channel.{ChannelHandler, SimpleChannelUpstreamHandler, ChannelHandlerContext, MessageEvent, ExceptionEvent, Channels}
 import ChannelHandler.Sharable
 import org.jboss.netty.handler.codec.http.{HttpRequest, QueryStringDecoder}
+
+import xt.Config
+import xt.handler.Env
+import xt.vc.env.{Env => CEnv}
+import xt.vc.env.PathInfo
 
 @Sharable
 class UriParser extends SimpleChannelUpstreamHandler with ClosedClientSilencer {
@@ -19,7 +20,7 @@ class UriParser extends SimpleChannelUpstreamHandler with ClosedClientSilencer {
 
     val env          = m.asInstanceOf[Env]
     val request      = env("request").asInstanceOf[HttpRequest]
-    val decoder      = new QueryStringDecoder(request.getUri)
+    val decoder      = new QueryStringDecoder(request.getUri, Config.paramCharset)
     env("pathInfo")  = new PathInfo(decoder.getPath)
     env("uriParams") = decoder.getParameters
     Channels.fireMessageReceived(ctx, env)

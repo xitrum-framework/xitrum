@@ -1,15 +1,15 @@
 package xt.vc.view
 
-import xt.{Config, Controller}
-
 import java.io.{File, StringWriter, PrintWriter}
 
 import org.fusesource.scalate.{TemplateEngine, Binding, DefaultRenderContext}
 import org.fusesource.scalate.scaml.ScamlOptions
 
+import xt.{Config, Controller}
+
 object Scalate {
-  val SCALATE_EXTENSIONS    = Array("jade", "scaml", "ssp", "mustache", "html")
-  val DEFAULT_EXTENSION     = "jade"
+  val SCALATE_EXTENSIONS = Array("jade", "scaml", "ssp", "mustache", "html")
+  val DEFAULT_EXTENSION  = "jade"
 
   // templates are compiles to packaged .classes
   // => use special prefix to avoid package name conflict

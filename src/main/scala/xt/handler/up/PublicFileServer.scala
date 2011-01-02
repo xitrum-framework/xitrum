@@ -1,8 +1,5 @@
 package xt.handler.up
 
-import xt.handler.Env
-import xt.vc.env.PathInfo
-
 import java.io.File
 
 import org.jboss.netty.channel.{ChannelHandler, SimpleChannelUpstreamHandler, ChannelHandlerContext, MessageEvent, ExceptionEvent, Channels}
@@ -11,6 +8,9 @@ import ChannelHandler.Sharable
 import HttpMethod._
 import HttpResponseStatus._
 import HttpVersion._
+
+import xt.handler.Env
+import xt.vc.env.PathInfo
 
 /**
  * Serves special files or files in /public directory.

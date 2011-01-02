@@ -1,10 +1,9 @@
 package xt.vc.env.session
 
-import xt._
-
 import java.util.{UUID, HashMap => JMap, Set => JSet}
-
 import org.jboss.netty.handler.codec.http.Cookie
+
+import xt._
 
 object SessionUtil {
   /** Take out the cookie that stores the session ID */

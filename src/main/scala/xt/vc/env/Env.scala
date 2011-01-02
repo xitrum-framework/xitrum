@@ -1,11 +1,11 @@
 package xt.vc.env
 
-import xt.handler.{Env => HEnv}
-
 import java.util.{Map => JMap, List => JList}
 
 import org.jboss.netty.channel.ChannelHandlerContext
 import org.jboss.netty.handler.codec.http.HttpRequest
+
+import xt.handler.{Env => HEnv}
 
 object Env {
   /**

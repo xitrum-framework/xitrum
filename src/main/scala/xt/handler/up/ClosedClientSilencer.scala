@@ -1,10 +1,10 @@
 package xt.handler.up
 
-import xt.Logger
-
 import java.io.IOException
 import java.nio.channels.ClosedChannelException
 import org.jboss.netty.channel.{ChannelHandlerContext, ExceptionEvent, SimpleChannelUpstreamHandler}
+
+import xt.Logger
 
 /**
  * Closed clients will cause java.io.IOException and java.nio.channels.ClosedChannelException

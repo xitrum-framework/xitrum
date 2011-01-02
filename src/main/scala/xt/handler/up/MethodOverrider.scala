@@ -1,12 +1,12 @@
 package xt.handler.up
 
-import xt.handler.Env
-import xt.vc.env.{Env => CEnv}
-
 import org.jboss.netty.channel.{ChannelHandler, SimpleChannelUpstreamHandler, ChannelHandlerContext, MessageEvent, ExceptionEvent, Channels}
 import ChannelHandler.Sharable
 import org.jboss.netty.handler.codec.http.{HttpRequest, HttpMethod}
 import HttpMethod._
+
+import xt.handler.Env
+import xt.vc.env.{Env => CEnv}
 
 /**
  * If the real request method is POST and "_method" param exists, the "_method"

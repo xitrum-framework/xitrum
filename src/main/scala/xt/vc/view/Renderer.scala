@@ -1,13 +1,13 @@
 package xt.vc.view
 
-import xt.Controller
-
 import java.io.File
 import scala.xml.NodeSeq
 
 import org.jboss.netty.buffer.ChannelBuffers
 import org.jboss.netty.util.CharsetUtil
 import org.jboss.netty.handler.codec.http.HttpHeaders
+
+import xt.Controller
 
 trait Renderer extends {
   this: Controller =>

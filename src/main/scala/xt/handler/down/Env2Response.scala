@@ -1,10 +1,10 @@
 package xt.handler.down
 
-import xt.handler.Env
-
 import org.jboss.netty.channel.{ChannelHandler, SimpleChannelDownstreamHandler, ChannelHandlerContext, MessageEvent, Channels, ChannelFutureListener}
 import ChannelHandler.Sharable
 import org.jboss.netty.handler.codec.http.{HttpHeaders, HttpRequest, HttpResponse}
+
+import xt.handler.Env
 
 @Sharable
 class Env2Response extends SimpleChannelDownstreamHandler {

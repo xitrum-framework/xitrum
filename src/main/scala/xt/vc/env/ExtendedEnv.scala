@@ -1,13 +1,13 @@
 package xt.vc.env
 
-import xt.Controller
-import xt.vc.env.session.SessionRestorer
-
 import java.util.{Map => JMap, LinkedHashMap => JLinkedHashMap, List => JList}
 
 import org.jboss.netty.handler.codec.http.{DefaultHttpResponse, HttpResponseStatus, HttpVersion, HttpHeaders}
 import HttpResponseStatus._
 import HttpVersion._
+
+import xt.Controller
+import xt.vc.env.session.SessionRestorer
 
 trait ExtendedEnv extends Env {
   this: Controller =>
@@ -28,8 +28,8 @@ trait ExtendedEnv extends Env {
     ret
   }
 
+  // TODO: avoid encoding, decoding when cookies/session is not touched by the application
   lazy val cookies = new Cookies(request)
-
   lazy val session = SessionRestorer.restore(this)
 
   lazy val at = new At

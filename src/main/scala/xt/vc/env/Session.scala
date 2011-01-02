@@ -1,8 +1,7 @@
 package xt.vc.env
 
-import xt.vc.env.session.SessionStore
-
 import java.util.{UUID, HashMap => JMap, Set => JSet}
+import xt.vc.env.session.SessionStore
 
 class Session(var id: String, var data: JMap[String, Any], store: SessionStore) {
   def reset {

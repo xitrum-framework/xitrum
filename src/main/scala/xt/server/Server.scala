@@ -1,8 +1,5 @@
 package xt.server
 
-import xt.{Logger, Config}
-import xt.vc.controller.Routes
-
 import java.net.InetSocketAddress
 import java.util.concurrent.Executors
 
@@ -10,6 +7,9 @@ import org.jboss.netty.bootstrap.ServerBootstrap
 import org.jboss.netty.channel.socket.nio.NioServerSocketChannelFactory
 
 import net.sf.ehcache.CacheManager
+
+import xt.{Logger, Config}
+import xt.vc.controller.Routes
 
 class Server extends Logger {
   def start {

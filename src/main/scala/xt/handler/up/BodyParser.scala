@@ -1,9 +1,5 @@
 package xt.handler.up
 
-import xt.handler.Env
-import xt.vc.env.{Env => CEnv}
-import xt.vc.env.PathInfo
-
 import java.util.{List => JList}
 import java.nio.charset.Charset
 
@@ -11,6 +7,11 @@ import org.jboss.netty.channel.{ChannelHandler, SimpleChannelUpstreamHandler, Ch
 import ChannelHandler.Sharable
 import org.jboss.netty.handler.codec.http.{HttpRequest, HttpMethod, QueryStringDecoder}
 import HttpMethod._
+
+import xt.Config
+import xt.handler.Env
+import xt.vc.env.{Env => CEnv}
+import xt.vc.env.PathInfo
 
 @Sharable
 class BodyParser extends SimpleChannelUpstreamHandler with ClosedClientSilencer {
@@ -28,9 +29,9 @@ class BodyParser extends SimpleChannelUpstreamHandler with ClosedClientSilencer 
       java.util.Collections.emptyMap[String, JList[String]]()
     } else {
       val c1 = request.getContent  // ChannelBuffer
-      val c2 = c1.toString(Charset.forName("UTF-8"))
+      val c2 = c1.toString(Config.paramCharset)
       val query = "?" + c2
-      val decoder = new QueryStringDecoder(query)
+      val decoder = new QueryStringDecoder(query, Config.paramCharset)
       decoder.getParameters
     }
 

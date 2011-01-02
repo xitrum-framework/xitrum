@@ -1,10 +1,10 @@
 package xt.handler.up
 
-import xt.handler.Env
-
 import org.jboss.netty.channel.{ChannelHandler, SimpleChannelUpstreamHandler, ChannelHandlerContext, MessageEvent, ExceptionEvent, Channels}
 import ChannelHandler.Sharable
 import org.jboss.netty.handler.codec.http.HttpRequest
+
+import xt.handler.Env
 
 @Sharable
 class Request2Env extends SimpleChannelUpstreamHandler with ClosedClientSilencer {

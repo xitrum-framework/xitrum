@@ -1,11 +1,10 @@
 package xt.vc.env.session
 
+import java.util.{UUID, HashMap => JMap}
+import org.jboss.netty.handler.codec.http.DefaultCookie
+
 import xt.Config
 import xt.vc.env.{ExtendedEnv, Session}
-
-import java.util.{UUID, HashMap => JMap}
-
-import org.jboss.netty.handler.codec.http.DefaultCookie
 
 object SessionRestorer {
   def restore(extendedEnv: ExtendedEnv): Session = {

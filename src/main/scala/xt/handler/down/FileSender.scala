@@ -1,8 +1,5 @@
 package xt.handler.down
 
-import xt.{Config, Logger}
-import xt.handler.{Env, SmallFileCache}
-
 import java.io.File
 import java.io.RandomAccessFile
 
@@ -15,6 +12,9 @@ import HttpHeaders.Names._
 import org.jboss.netty.handler.ssl.SslHandler
 import org.jboss.netty.handler.stream.ChunkedFile
 import org.jboss.netty.buffer.ChannelBuffers
+
+import xt.{Config, Logger}
+import xt.handler.{Env, SmallFileCache}
 
 object FileSender {
   val CHUNK_SIZE = 8192

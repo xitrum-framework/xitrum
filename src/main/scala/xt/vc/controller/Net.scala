@@ -1,8 +1,7 @@
 package xt.vc.controller
 
-import xt.Controller
-
 import java.net.InetSocketAddress
+import xt.Controller
 
 trait Net {
   this: Controller =>
