@@ -19,7 +19,7 @@ object Scalate {
     val ret = new TemplateEngine
 
     ret.workingDirectory = new File("tmp/scalate")
-    ret.bindings = List(Binding("controller", "xt.vc.Controller", true))
+    ret.bindings = List(Binding("controller", "xt.Controller", true))
 
     // See http://scalate.fusesource.org/documentation/scalate-embedding-guide.html#custom_template_loading
     if (Config.isProductionMode) {
