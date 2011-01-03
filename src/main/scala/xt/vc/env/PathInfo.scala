@@ -12,5 +12,5 @@ class PathInfo(val encoded: String) {
     encodeds.map(URLDecoder.decode(_, Config.paramCharsetName))
   }
 
-  val decoded = tokens.mkString("/")
+  val decoded = "/" + tokens.mkString("/")
 }

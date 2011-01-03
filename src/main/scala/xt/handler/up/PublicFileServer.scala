@@ -31,7 +31,7 @@ class PublicFileServer extends SimpleChannelUpstreamHandler with ClosedClientSil
     val env      = m.asInstanceOf[Env]
     val request  = env("request").asInstanceOf[HttpRequest]
     val pathInfo = env("pathInfo").asInstanceOf[PathInfo]
-    val decoded   = pathInfo.decoded
+    val decoded  = pathInfo.decoded
 
     if (request.getMethod != GET) {
       Channels.fireMessageReceived(ctx, env)
