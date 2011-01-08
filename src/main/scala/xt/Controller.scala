@@ -8,7 +8,7 @@ import xt.vc.controller._
 import xt.vc.env.ExtendedEnv
 import xt.vc.view.Renderer
 
-trait Controller extends ExtendedEnv with Logger with Net with ParamAccess with Url with Filter with Renderer {
+trait Controller extends ExtendedEnv with Logger with Net with ParamAccess with Url with Filter with Authenticate with Renderer {
   // FIXME: this causes warning
   // "the initialization is no longer be executed before the superclass is called"
   private var responded = false
