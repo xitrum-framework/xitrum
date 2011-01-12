@@ -61,24 +61,7 @@ class Dispatcher extends SimpleChannelUpstreamHandler with ClosedClientSilencer 
     controller(ctx, env)
 
     try {
-      // Call before filters
-      val passed = controller.beforeFilters.forall(filter => {
-        val onlyActions = filter._2
-        if (onlyActions.isEmpty) {
-          val exceptActions = filter._3
-          if (!exceptActions.contains(action)) {
-            val method = filter._1
-            method.invoke(controller).asInstanceOf[Boolean]
-          }	else true
-        } else {
-          if (onlyActions.contains(action)) {
-            val method = filter._1
-            method.invoke(controller).asInstanceOf[Boolean]
-          } else true
-        }
-      })
-
-      // Call action
+      val passed = controller.callBeforeFilters(action)
       if (passed) action.invoke(controller)
 
       logAccess(beginTimestamp, controller)

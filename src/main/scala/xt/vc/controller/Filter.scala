@@ -66,4 +66,22 @@ trait Filter {
     }
   }
   */
+
+  def callBeforeFilters(action: Method): Boolean = {
+    beforeFilters.forall(filter => {
+      val onlyActions = filter._2
+      if (onlyActions.isEmpty) {
+        val exceptActions = filter._3
+        if (!exceptActions.contains(action)) {
+          val method = filter._1
+          method.invoke(this).asInstanceOf[Boolean]
+        } else true
+      } else {
+        if (onlyActions.contains(action)) {
+          val method = filter._1
+          method.invoke(this).asInstanceOf[Boolean]
+        } else true
+      }
+    })
+  }
 }
