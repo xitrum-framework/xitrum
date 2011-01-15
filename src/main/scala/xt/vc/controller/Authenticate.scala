@@ -9,23 +9,29 @@ trait Authenticate {
 
   def basicAuthenticate(realm: String, username: String, password: String): Boolean = {
     val authorization = request.getHeader(HttpHeaders.Names.AUTHORIZATION)
-    if (authorization == null || !authorization.startsWith("Basic ")) {
-      response.setHeader(HttpHeaders.Names.WWW_AUTHENTICATE, "Basic realm=\"" + realm + "\"")
-      response.setStatus(HttpResponseStatus.UNAUTHORIZED)
-      respond
+
+    val ret = if (authorization == null || !authorization.startsWith("Basic ")) {
       false
     } else {
-      val username_password = authorization.substring(6)  // Skip "Basic "
-      val decoder = new BASE64Decoder
-      val bytes = decoder.decodeBuffer(username_password)
+      val username_password  = authorization.substring(6)  // Skip "Basic "
+      val decoder            = new BASE64Decoder
+      val bytes              = decoder.decodeBuffer(username_password)
       val username_password2 = new String(bytes)
-
       val username_password3 = username_password2.split(":")
+
       if (username_password3.length != 2) {
         false
       } else {
         username_password3(0) == username && username_password3(1) == password
       }
     }
+
+    if (!ret) {
+      response.setHeader(HttpHeaders.Names.WWW_AUTHENTICATE, "Basic realm=\"" + realm + "\"")
+      response.setStatus(HttpResponseStatus.UNAUTHORIZED)
+      respond
+    }
+
+    ret
   }
 }
