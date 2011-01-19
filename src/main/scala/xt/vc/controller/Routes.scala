@@ -1,6 +1,5 @@
 package xt.vc.controller
 
-import java.net.URLDecoder
 import java.lang.reflect.Method
 import java.util.{LinkedHashMap => JLinkedHashMap, List => JList}
 

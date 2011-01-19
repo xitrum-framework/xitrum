@@ -26,13 +26,23 @@ class BodyParser extends SimpleChannelUpstreamHandler with ClosedClientSilencer 
     val request = env("request").asInstanceOf[HttpRequest]
 
     val bodyParams: CEnv.Params = if (request.getMethod != POST) {
-      java.util.Collections.emptyMap[String, JList[String]]()
+      java.util.Collections.emptyMap[String, JList[String]]
     } else {
       val c1 = request.getContent  // ChannelBuffer
       val c2 = c1.toString(Config.paramCharset)
       val query = "?" + c2
-      val decoder = new QueryStringDecoder(query, Config.paramCharset)
-      decoder.getParameters
+
+      try {
+        val decoder = new QueryStringDecoder(query, Config.paramCharset)
+        decoder.getParameters
+      } catch {
+        case t =>
+          val msg = "Could not parse POST body, URI: " + request.getUri + ", body: " + c2
+          logger.warn(msg, t)
+
+          ctx.getChannel.close
+          return
+      }
     }
 
     env("bodyParams") = bodyParams

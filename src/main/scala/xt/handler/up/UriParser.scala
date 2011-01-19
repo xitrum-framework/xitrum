@@ -18,11 +18,22 @@ class UriParser extends SimpleChannelUpstreamHandler with ClosedClientSilencer {
       return
     }
 
-    val env          = m.asInstanceOf[Env]
-    val request      = env("request").asInstanceOf[HttpRequest]
-    val decoder      = new QueryStringDecoder(request.getUri, Config.paramCharset)
-    env("pathInfo")  = new PathInfo(decoder.getPath)
-    env("uriParams") = decoder.getParameters
+    val env     = m.asInstanceOf[Env]
+    val request = env("request").asInstanceOf[HttpRequest]
+
+    try {
+      val decoder      = new QueryStringDecoder(request.getUri, Config.paramCharset)
+      env("pathInfo")  = new PathInfo(decoder.getPath)
+      env("uriParams") = decoder.getParameters
+    } catch {
+      case t =>
+        val msg = "Could not parse URI: " + request.getUri
+        logger.warn(msg, t)
+
+        ctx.getChannel.close
+        return
+    }
+
     Channels.fireMessageReceived(ctx, env)
   }
 }
