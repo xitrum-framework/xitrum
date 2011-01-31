@@ -27,7 +27,23 @@ class RouteCollector extends MethodAnnotationDiscoveryListener {
 
     val buffer = new ArrayBuffer[Routes.Route]
     for (map <- Array(firsts, others, lasts)) {
-      for ((key, value) <- map) {
+      // Sort routes by controller then action
+      val sorted = map.toBuffer.sortWith { (e1, e2) =>
+        val (ca1, mp1) = e1
+        val (ca2, mp2) = e2
+
+        val (c1, a1) = ca1
+        val (c2, a2) = ca2
+
+        val cs1 = c1.toString
+        val cs2 = c2.toString
+        val as1 = a1.toString
+        val as2 = a2.toString
+
+        if (cs1 == cs2) as1 < as2 else cs1 < cs2
+      }
+
+      for ((key, value) <- sorted) {
         val (httpMethods, paths) = value
 
         // paths is always non-empty, see "discovered" method below
