@@ -8,19 +8,26 @@ import xt.vc.controller._
 import xt.vc.env.ExtendedEnv
 import xt.vc.view.Renderer
 
-trait Controller extends ExtendedEnv with Logger with Net with ParamAccess with Url with Filter with BasicAuthentication with Renderer {
+trait Controller extends ExtendedEnv with ServletLike with Logger with Net with ParamAccess with Url with Filter with BasicAuthentication with Renderer {
+  // async and responded are not mutually exclusive, see respond and respondLater.
+
   // FIXME: this causes warning
   // "the initialization is no longer be executed before the superclass is called"
+
+  private var async     = false
   private var responded = false
 
+  /**
+   * See respondLater. In sync mode, this method will be called by Xitrum if it
+   * is not called during the invocation of the controller action.
+   */
   def respond = synchronized {
     if (responded) {
       // Print the stack trace so that application developers know where to fix
       try {
-        throw new Exception("Double respond")
+        throw new Exception
       } catch {
-        case e =>
-          logger.warn("Double respond", e)
+        case e => logger.warn("Double respond", e)
       }
     } else {
       responded = true
@@ -29,6 +36,40 @@ trait Controller extends ExtendedEnv with Logger with Net with ParamAccess with 
       ctx.getChannel.write(henv)
     }
   }
+
+  /**
+   * Because normally most of a web application is in sync mode, by default
+   * Xitrum is in sync mode, e.g. the response is sent to the client immediately
+   * right after the controller action is invoked.
+   *
+   * To swich to async mode:
+   * 1. Call this method.
+   * 2. Call respond when the application wants to repond.
+   */
+  def respondLater {
+    if (async) {
+      // Print the stack trace so that application developers know where to fix
+      try {
+        throw new Exception
+      } catch {
+        case e => logger.warn("Already in async mode", e)
+      }
+    } else if (responded) {
+      try {
+        throw new Exception
+      } catch {
+        case e => logger.warn("Cannot swich to async mode because the response has been sent", e)
+      }
+    } else {
+      async = true
+    }
+  }
+
+  /**
+   * Called by Xitrum to check if it needs to send the response (see ExtendedEnv)
+   * immediately after invoking the controller action.
+   */
+  def isAutoResponseNeeded = !async && !responded
 
   /**
    * Returns 302 response.

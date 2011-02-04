@@ -31,7 +31,7 @@ A typical blog application will have this directory layout:
 
 config
   blog.properties
-  log4j.properties
+  logback.properties
 lib
   jrebel.jar
 lib_managed
@@ -45,19 +45,11 @@ src
     scala
       blog
         controller
-          Articles.scala
+          ArticleController.scala
         helper
           ArticleHelper.scala
         model
           Article.scala
-    resources
-      blog
-        view
-          articles
-            index.scaml
-            show.scaml
-tmp
-  scalate
 
 == SBT project dependency
 
@@ -71,10 +63,10 @@ with SLF4J 1.6.1, like logback-classic 0.9.27:
 == Project deployed directory layout
 
 bin
-  xitrum.sh
+  runner.sh
 config
   blog.properties
-  log4j.properties
+  logback.properties
 lib
   blog.jar
   ...
@@ -82,5 +74,3 @@ public
   css
   img
   js
-tmp
-  scalate
