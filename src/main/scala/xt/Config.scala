@@ -3,8 +3,6 @@ package xt
 import java.util.Properties
 import java.nio.charset.Charset
 
-import net.sf.ehcache.CacheManager
-
 import xt.vc.env.session.SessionStore
 
 // Use lazy to avoid scala.UninitializedFieldError
@@ -19,19 +17,13 @@ object Config {
 
   lazy val filterParams = properties.getProperty("filter_params", "password").split(", ")
 
-  lazy val filesEhcacheName = properties.getProperty("files_ehcache_name", "XitrumFiles")
   lazy val filesMaxSize     = properties.getProperty("files_max_size",     "102400").toInt
 
   lazy val sessionIdName         = properties.getProperty("session_id_name",           "JSESSIONID")
   lazy val sessionIdInCookieOnly = properties.getProperty("session_id_in_cookie_only", "true") == "true"
   lazy val sessionStore: SessionStore = {
-    val className = properties.getProperty("session_store", "xt.vc.env.session.EhcacheSessionStore")
+    val className = properties.getProperty("session_store", "xt.vc.env.session.CookieSessionStore")
     Class.forName(className).newInstance.asInstanceOf[SessionStore]
-  }
-
-  lazy val sessionEhcache = {
-    val name = Config.properties.getProperty("sessions_ehcache_name", "XitrumSessions")
-    CacheManager.getInstance.getCache(name)
   }
 
   private lazy val properties = {

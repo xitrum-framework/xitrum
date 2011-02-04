@@ -21,7 +21,7 @@ trait Renderer extends {
    *
    * csasOrAs: Controller#action or action
    */
-  def render(csasOrAs: String) = Scalate.render(this, csasOrAs)
+  def render(csasOrAs: String) = "Scalate.render(this, csasOrAs)"
 
   //----------------------------------------------------------------------------
 

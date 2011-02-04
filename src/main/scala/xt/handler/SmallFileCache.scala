@@ -2,7 +2,7 @@ package xt.handler
 
 import java.io.{File, RandomAccessFile}
 import java.text.SimpleDateFormat
-import net.sf.ehcache.{CacheManager, Element}
+import scala.collection.mutable.HashMap
 
 import xt.Config
 
@@ -14,14 +14,15 @@ object SmallFileCache {
   case object FileNotFound                                                                           extends GetResult
   case class  FileTooBig(val file: RandomAccessFile, val fileLength: Long, val lastModified: String) extends GetResult
 
-  private val cache   = CacheManager.getInstance.getCache(Config.filesEhcacheName)
+  //                                                      lastModified
+  private val cache   = new HashMap[String, (Array[Byte], String)]
   private val rfc2822 = new SimpleDateFormat("EEE, dd MMM yyyy HH:mm:ss Z")
 
   /** abs: Absolute file path */
   def get(abs: String): GetResult = {
     val elem = cache.get(abs)
-    if (elem != null) {
-      val (bytes, lastModified) = elem.getObjectValue.asInstanceOf[(Array[Byte], String)]
+    if (elem != None) {
+      val (bytes, lastModified) = elem.get
       return Hit(bytes, lastModified)
     }
 
@@ -44,11 +45,19 @@ object SmallFileCache {
     if (Config.isProductionMode && fileLength <= Config.filesMaxSize) synchronized {
       val bytes = new Array[Byte](fileLength.toInt)
       raf.read(bytes)
-      cache.put(new Element(abs, (bytes, lastModified)))
+      cache(abs) = (bytes, lastModified)
       raf.close
       return Hit(bytes, lastModified)
     }
 
     return FileTooBig(raf, fileLength, lastModified)
+  }
+
+  /**
+   * You may use https://github.com/djpowell/liverepl to attach to a running
+   * Xitrum process to clear the cache.
+   */
+  def clear {
+    cache.clear
   }
 }
