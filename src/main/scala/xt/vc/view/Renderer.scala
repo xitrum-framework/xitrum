@@ -1,72 +1,27 @@
 package xt.vc.view
 
 import java.io.File
-import scala.xml.NodeSeq
 
 import org.jboss.netty.buffer.ChannelBuffers
-import org.jboss.netty.util.CharsetUtil
 import org.jboss.netty.handler.codec.http.HttpHeaders
+import org.jboss.netty.util.CharsetUtil
 
 import xt.Controller
 
 trait Renderer extends {
   this: Controller =>
 
-  def layout: Option[String] = None
-
-  //----------------------------------------------------------------------------
-
-  /**
-   * Renders a template without layout.
-   *
-   * csasOrAs: Controller#action or action
-   */
-  def render(csasOrAs: String) = "Scalate.render(this, csasOrAs)"
-
-  //----------------------------------------------------------------------------
-
-  def renderView: String = renderView(layout)
-
-  def renderView(layout: Option[String]): String = {
-    val as = param("action")
-    renderView(as, layout)
-  }
-
-  /**
-   * @param csasOrAs: String in the pattern Articles#index or index
-   * The layout is determined from the result of the layout method.
-   */
-  def renderView(csasOrAs: String): String = renderView(csasOrAs, layout)
-
-  def renderView(csasOrAs: String, layout: Option[String]) = {
-    val text = render(csasOrAs)
-    renderText(text, layout)
-  }
-
-  //----------------------------------------------------------------------------
-
-  def renderText(text: Any): String = renderText(text, layout)
-
-  def renderText(text: Any, layout: Option[String]): String = {
-    val t2 = layout match {
-      case Some(csasOrAs2) =>
-        at("content_for_layout") = text.toString
-        render(csasOrAs2)
-
-      case None =>
-        text.toString
-    }
+  def renderText(text: Any): String = {
+    val s = text.toString
 
     // Content length is number of bytes, not Unicode characters!
-    val cb = ChannelBuffers.copiedBuffer(t2, CharsetUtil.UTF_8)
+    val cb = ChannelBuffers.copiedBuffer(s, CharsetUtil.UTF_8)
     HttpHeaders.setContentLength(response, cb.readableBytes)
     response.setContent(cb)
     respond
 
-    t2
+    s
   }
-
-  //----------------------------------------------------------------------------
 
   def renderBinary(bytes: Array[Byte]) {
     HttpHeaders.setContentLength(response, bytes.length)
