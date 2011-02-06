@@ -63,7 +63,6 @@ class Dispatcher extends SimpleChannelUpstreamHandler with ClosedClientSilencer 
     try {
       val passed = controller.callBeforeFilters(action)
       if (passed) action.invoke(controller)
-      if (controller.isAutoResponseNeeded) controller.respond
 
       logAccess(beginTimestamp, controller)
     } catch {
