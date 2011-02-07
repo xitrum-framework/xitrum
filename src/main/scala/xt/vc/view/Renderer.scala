@@ -6,7 +6,7 @@ import org.jboss.netty.buffer.ChannelBuffers
 import org.jboss.netty.handler.codec.http.HttpHeaders
 import org.jboss.netty.util.CharsetUtil
 
-import xt.Controller
+import xt.{Controller, View}
 
 trait Renderer extends {
   this: Controller =>
@@ -22,6 +22,25 @@ trait Renderer extends {
 
     s
   }
+
+  //----------------------------------------------------------------------------
+
+  def layout: Option[View] = None
+
+  def renderView(view: View) {
+    renderView(view, layout)
+  }
+
+  def renderView(view: View, layout: Option[View]) {
+    layout match {
+      case None    => renderText(view.render(this))
+      case Some(l) =>
+        at("contentForLayout") = view.render(this)
+        renderText(l.render(this))
+    }
+  }
+
+  //----------------------------------------------------------------------------
 
   def renderBinary(bytes: Array[Byte]) {
     HttpHeaders.setContentLength(response, bytes.length)

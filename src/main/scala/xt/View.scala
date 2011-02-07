@@ -1,5 +1,6 @@
 package xt
 
 trait View {
-  def render(controller: Controller)
+  // The result can be String, XML etc.
+  def render(controller: Controller): Any
 }
