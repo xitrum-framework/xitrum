@@ -103,12 +103,13 @@ class Dispatcher extends SimpleChannelUpstreamHandler with ClosedClientSilencer 
     val endTimestamp = System.currentTimeMillis
     val dt           = endTimestamp - beginTimestamp
 
+    val async = if (controller.responded) "" else " (async)"
     if (e == null) {
       val msg =
         controller.request.getMethod       + " " +
         controller.pathInfo.decoded        + " " +
         filterParams(controller.allParams) + " " +
-        dt + " [ms]"
+        dt + " [ms]" + async
       logger.debug(msg)
     } else {
       val msg =
@@ -116,8 +117,7 @@ class Dispatcher extends SimpleChannelUpstreamHandler with ClosedClientSilencer 
         controller.request.getMethod       + " " +
         controller.pathInfo.decoded        + " " +
         filterParams(controller.allParams) + " " +
-        dt + " [ms]"
-
+        dt + " [ms]" + async
       logger.error(msg, e)
     }
   }

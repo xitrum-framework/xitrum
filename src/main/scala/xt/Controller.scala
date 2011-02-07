@@ -12,10 +12,10 @@ trait Controller extends ExtendedEnv with ServletLike with Logger with Net with 
   // FIXME: this causes warning
   // "the initialization is no longer be executed before the superclass is called"
 
-  private var responded = false
+  private var _responded = false
 
   def respond = synchronized {
-    if (responded) {
+    if (_responded) {
       // Print the stack trace so that application developers know where to fix
       try {
         throw new Exception
@@ -23,12 +23,15 @@ trait Controller extends ExtendedEnv with ServletLike with Logger with Net with 
         case e => logger.warn("Double respond", e)
       }
     } else {
-      responded = true
+      _responded = true
       encodeCookies
       henv("response") = response
       ctx.getChannel.write(henv)
     }
   }
+
+  // Called by Dispatcher
+  def responded = _responded
 
   /**
    * @param location
