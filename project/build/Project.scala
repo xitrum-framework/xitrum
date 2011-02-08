@@ -15,13 +15,9 @@ class Project(info: ProjectInfo) extends DefaultProject(info) {
 
   // Repos ---------------------------------------------------------------------
 
-  // For Netty 4.0.0.Alpha1-SNAPSHOT
-  val mavenLocal = "Local Maven Repository" at
-    "file://"+ Path.userHome + "/.m2/repository"
-
-  // For Netty 3.2.3.Final
-//  val jboss = "JBoss" at
-//    "https://repository.jboss.org/nexus/content/groups/public/"
+  // For netty
+  val jboss = "JBoss" at
+    "https://repository.jboss.org/nexus/content/groups/public/"
 
   // For annovention
   val sonatypeSnapshot = "Sonatype Snapshot" at
@@ -34,7 +30,7 @@ class Project(info: ProjectInfo) extends DefaultProject(info) {
       "org.slf4j"       % "slf4j-api"   % "1.6.1" % "provided",
 
       // Web server
-      "org.jboss.netty" % "netty"       % "4.0.0.Alpha1-SNAPSHOT",
+      "org.jboss.netty" % "netty"       % "3.2.4.Final",
 
       // For scanning all Controllers to build routes
       "tv.cntt"         % "annovention" % "1.0-SNAPSHOT"
