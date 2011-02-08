@@ -1,6 +1,6 @@
 package xt.server
 
-import org.jboss.netty.channel.{Channels, ChannelPipeline, ChannelPipelineFactory => CPF}
+import org.jboss.netty.channel.{StaticChannelPipeline, ChannelPipeline, ChannelPipelineFactory => CPF}
 import org.jboss.netty.handler.codec.http.{HttpRequestDecoder, HttpChunkAggregator, HttpResponseEncoder}
 
 import xt.Config
@@ -9,7 +9,9 @@ import xt.handler.down._
 
 class ChannelPipelineFactory extends CPF {
   def getPipeline: ChannelPipeline = {
-    Channels.pipeline(
+    // StaticChannelPipeline provides extreme performance at the cost of
+    // disabled dynamic manipulation of pipeline
+    new StaticChannelPipeline(
       // Upstream, direction: first handler -> last handler
       new HttpRequestDecoder,
       new HttpChunkAggregator(Config.maxContentLength),
