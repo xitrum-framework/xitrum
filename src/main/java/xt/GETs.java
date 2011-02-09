@@ -4,8 +4,8 @@ import java.lang.annotation.Retention;
 import java.lang.annotation.RetentionPolicy;
 
 @Retention(RetentionPolicy.RUNTIME)
-public @interface DELETE {
-  String value();
+public @interface GETs {
+  String[] value();
   boolean first() default false;
   boolean last()  default false;
 }

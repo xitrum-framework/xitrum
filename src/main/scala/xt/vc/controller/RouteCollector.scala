@@ -15,10 +15,10 @@ import xt._
 
 /** Scan all classes to collect routes. */
 class RouteCollector extends MethodAnnotationDiscoveryListener {
-  //                                 controller         action    HTTP methods       paths
-  private val firsts = new MHashMap[(Class[Controller], Method), (Array[HttpMethod], Array[String])]
-  private val lasts  = new MHashMap[(Class[Controller], Method), (Array[HttpMethod], Array[String])]
-  private val others = new MHashMap[(Class[Controller], Method), (Array[HttpMethod], Array[String])]
+  //                                 controller         action                paths
+  private val firsts = new MHashMap[(Class[Controller], Method), (HttpMethod, Array[String])]
+  private val lasts  = new MHashMap[(Class[Controller], Method), (HttpMethod, Array[String])]
+  private val others = new MHashMap[(Class[Controller], Method), (HttpMethod, Array[String])]
 
   def collect: Array[Routes.Route]  = {
     val discoverer = new ClasspathDiscoverer
@@ -44,27 +44,18 @@ class RouteCollector extends MethodAnnotationDiscoveryListener {
       }
 
       for ((key, value) <- sorted) {
-        val (httpMethods, paths) = value
-
-        // paths is always non-empty, see "discovered" method below
-
-        if (httpMethods.isEmpty) {
-          for (p <- paths) buffer.append((None, p, key))
-        } else {
-          for (hm <- httpMethods; p <- paths) buffer.append((Some(hm), p, key))
-        }
+        val (httpMethod, paths) = value
+        for (p <- paths) buffer.append((httpMethod, p, key))
       }
     }
     buffer.toArray
   }
 
   def supportedAnnotations = Array(
-    classOf[GET].getName,
-    classOf[POST].getName,
-    classOf[PUT].getName,
-    classOf[DELETE].getName,
-    classOf[Path].getName,
-    classOf[Paths].getName)
+    classOf[GET].getName,    classOf[GETs].getName,
+    classOf[POST].getName,   classOf[POSTs].getName,
+    classOf[PUT].getName,    classOf[PUTs].getName,
+    classOf[DELETE].getName, classOf[DELETEs].getName)
 
   def discovered(className: String, methodName: String, _annotationName: String) {
     val klass  = Class.forName(className).asInstanceOf[Class[Controller]]
@@ -73,45 +64,46 @@ class RouteCollector extends MethodAnnotationDiscoveryListener {
 
     if (firsts.contains(key) || lasts.contains(key) || others.contains(key)) return
 
-    val pathPrefix = {
-      val pathAnnotation = klass.getAnnotation(classOf[Path])
-      if (pathAnnotation != null) pathAnnotation.value else ""
-    }
-
     val annotations = method.getAnnotations
-    val httpMethods = new ArrayBuffer[HttpMethod]
-    val paths       = new ArrayBuffer[String]
-    var first       = false
-    var last        = false
-    for (annotation <- annotations) {
-      if (annotation.isInstanceOf[Path]) {
-        val pathAnnotation = annotation.asInstanceOf[Path]
-        first = pathAnnotation.first
-        last  = pathAnnotation.last
-        paths.append(pathPrefix + pathAnnotation.value)
-      } else if (annotation.isInstanceOf[Paths]) {
-        val pathsAnnotation = annotation.asInstanceOf[Paths]
-        first = pathsAnnotation.first
-        last  = pathsAnnotation.last
-        for (pv <- pathsAnnotation.value) paths.append(pathPrefix + pv)
-      } else if (annotation.isInstanceOf[GET]) {
-        httpMethods.append(HttpMethod.GET)
-      } else if (annotation.isInstanceOf[POST]) {
-        httpMethods.append(HttpMethod.POST)
-      } else if (annotation.isInstanceOf[PUT]) {
-        httpMethods.append(HttpMethod.PUT)
-      } else if (annotation.isInstanceOf[DELETE]) {
-        httpMethods.append(HttpMethod.DELETE)
+    for (a <- annotations) {
+      if (a.isInstanceOf[GET]) {
+        val a2    = a.asInstanceOf[GET]
+        val coll  = if (a2.first) firsts else if (a2.first) lasts else others
+        coll(key) = (HttpMethod.GET, Array(a2.value))
+      } else if (a.isInstanceOf[GETs]) {
+        val a2    = a.asInstanceOf[GETs]
+        val coll  = if (a2.first) firsts else if (a2.first) lasts else others
+        coll(key) = (HttpMethod.GET, a2.value)
       }
-    }
 
-    if (!paths.isEmpty) {
-      if (first) {
-        firsts(key) = (httpMethods.toArray, paths.toArray)
-      } else if (last) {
-        lasts(key)  = (httpMethods.toArray, paths.toArray)
-      } else {
-        others(key) = (httpMethods.toArray, paths.toArray)
+      else if (a.isInstanceOf[POST]) {
+        val a2    = a.asInstanceOf[POST]
+        val coll  = if (a2.first) firsts else if (a2.first) lasts else others
+        coll(key) = (HttpMethod.POST, Array(a2.value))
+      } else if (a.isInstanceOf[POSTs]) {
+        val a2    = a.asInstanceOf[POSTs]
+        val coll  = if (a2.first) firsts else if (a2.first) lasts else others
+        coll(key) = (HttpMethod.POST, a2.value)
+      }
+
+      else if (a.isInstanceOf[PUT]) {
+        val a2    = a.asInstanceOf[PUT]
+        val coll  = if (a2.first) firsts else if (a2.first) lasts else others
+        coll(key) = (HttpMethod.PUT, Array(a2.value))
+      } else if (a.isInstanceOf[PUTs]) {
+        val a2    = a.asInstanceOf[PUTs]
+        val coll  = if (a2.first) firsts else if (a2.first) lasts else others
+        coll(key) = (HttpMethod.PUT, a2.value)
+      }
+
+      else if (a.isInstanceOf[DELETE]) {
+        val a2    = a.asInstanceOf[DELETE]
+        val coll  = if (a2.first) firsts else if (a2.first) lasts else others
+        coll(key) = (HttpMethod.DELETE, Array(a2.value))
+      } else if (a.isInstanceOf[DELETEs]) {
+        val a2    = a.asInstanceOf[DELETEs]
+        val coll  = if (a2.first) firsts else if (a2.first) lasts else others
+        coll(key) = (HttpMethod.DELETE, a2.value)
       }
     }
   }

@@ -16,8 +16,8 @@ object Routes extends Logger {
   type CompiledCsas    = (Csas, KA)
   type Pattern         = String
   type CompiledPattern = Array[(String, Boolean)]  // String: token, Boolean: true if the token is constant
-  type Route           = (Option[HttpMethod], Pattern, KA)
-  type CompiledRoute   = (Option[HttpMethod], CompiledPattern, KA, Csas)
+  type Route           = (HttpMethod, Pattern, KA)
+  type CompiledRoute   = (HttpMethod, CompiledPattern, KA, Csas)
 
   private var compiledRoutes: Iterable[CompiledRoute] = _
 
@@ -40,11 +40,8 @@ object Routes extends Logger {
     compiledRoutes = routes.map { r =>
       val ret = compileRoute(r)
 
-      val method = r._1 match {
-        case None     => ""
-        case Some(hm) => hm
-      }
-      val pattern = r._2.toString
+      val method     = r._1
+      val pattern    = r._2.toString
       val controller = ret._4._1
       val action     = ret._4._2
 
@@ -63,7 +60,6 @@ object Routes extends Logger {
    */
   def matchRoute(method: HttpMethod, pathInfo: PathInfo): Option[(KA, Env.Params)] = {
     val tokens = pathInfo.tokens
-
     val max1   = tokens.size
 
     var pathParams: Env.Params = null
@@ -71,8 +67,8 @@ object Routes extends Logger {
     def finder(cr: CompiledRoute): Boolean = {
       val (om, compiledPattern, compiledCA, csas) = cr
 
-      // Check methods
-      if (om != None && om != Some(method)) return false
+      // Check method
+      if (om != method) return false
 
       val max2 = compiledPattern.size
 
