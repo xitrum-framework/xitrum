@@ -47,8 +47,7 @@ trait Filter {
     beforeFilters.append(filter)
   }
 
-  /*
-  def skipBeforeFilter(f: FilterFun, filterOption: FilterOption) {
+  def skipBeforeFilter(f: String, filterOption: FilterOption) {
     beforeFilters.find(tuple => tuple._1 == filterName) match {
       case None => throw new Exception("Filter named " + filterName + " not found")
 
@@ -65,8 +64,8 @@ trait Filter {
         }
     }
   }
-  */
 
+  /** Called by Dispatcher */
   def callBeforeFilters(action: Method): Boolean = {
     beforeFilters.forall(filter => {
       val onlyActions = filter._2
