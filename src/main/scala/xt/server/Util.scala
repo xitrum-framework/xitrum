@@ -1,4 +1,4 @@
-package xt.vc.controller
+package xt.server
 
 object Util {
   /** Wraps a single String by a java.util.List. */

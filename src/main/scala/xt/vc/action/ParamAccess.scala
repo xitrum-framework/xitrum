@@ -1,10 +1,10 @@
-package xt.vc.controller
+package xt.vc.action
 
 import scala.collection.JavaConversions
-import xt.{Controller, MissingParam}
+import xt.{Action, MissingParam}
 
 trait ParamAccess {
-  this: Controller =>
+  this: Action =>
 
   /**
    * Returns a singular element.

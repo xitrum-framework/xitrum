@@ -4,11 +4,15 @@ import org.jboss.netty.handler.codec.http._
 import HttpHeaders.Names._
 import HttpResponseStatus._
 
-import xt.vc.controller._
+import xt.vc.action._
 import xt.vc.env.ExtendedEnv
 import xt.vc.view.Renderer
 
-trait Controller extends ExtendedEnv with ServletLike with Logger with Net with ParamAccess with Url with Filter with BasicAuthentication with Renderer {
+trait Action extends ExtendedEnv with Logger with Net with ParamAccess with Url with Filter with BasicAuthentication with Renderer {
+  def execute
+
+  //----------------------------------------------------------------------------
+
   // FIXME: this causes warning
   // "the initialization is no longer be executed before the superclass is called"
 

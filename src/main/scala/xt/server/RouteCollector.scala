@@ -1,8 +1,4 @@
-package xt.vc.controller
-
-import java.lang.reflect.Method
-import java.net.URL
-import java.net.URLClassLoader
+package xt.server
 
 import scala.collection.mutable.{ArrayBuffer, HashMap => MHashMap}
 
@@ -15,10 +11,9 @@ import xt._
 
 /** Scan all classes to collect routes. */
 class RouteCollector extends MethodAnnotationDiscoveryListener {
-  //                                 controller         action                paths
-  private val firsts = new MHashMap[(Class[Controller], Method), (HttpMethod, Array[String])]
-  private val lasts  = new MHashMap[(Class[Controller], Method), (HttpMethod, Array[String])]
-  private val others = new MHashMap[(Class[Controller], Method), (HttpMethod, Array[String])]
+  private val firsts = new MHashMap[(Class[Action]), (HttpMethod, Array[Routes.Pattern])]
+  private val lasts  = new MHashMap[(Class[Action]), (HttpMethod, Array[Routes.Pattern])]
+  private val others = new MHashMap[(Class[Action]), (HttpMethod, Array[Routes.Pattern])]
 
   def collect: Array[Routes.Route]  = {
     val discoverer = new ClasspathDiscoverer
@@ -27,25 +22,13 @@ class RouteCollector extends MethodAnnotationDiscoveryListener {
 
     val buffer = new ArrayBuffer[Routes.Route]
     for (map <- Array(firsts, others, lasts)) {
-      // Sort routes by controller then action
-      val sorted = map.toBuffer.sortWith { (e1, e2) =>
-        val (ca1, mp1) = e1
-        val (ca2, mp2) = e2
-
-        val (c1, a1) = ca1
-        val (c2, a2) = ca2
-
-        val cs1 = c1.toString
-        val cs2 = c2.toString
-        val as1 = a1.toString
-        val as2 = a2.toString
-
-        if (cs1 == cs2) as1 < as2 else cs1 < cs2
+      val sorted = map.toBuffer.sortWith { (a1, a2) =>
+        a1.toString < a2.toString
       }
 
       for ((key, value) <- sorted) {
-        val (httpMethod, paths) = value
-        for (p <- paths) buffer.append((httpMethod, p, key))
+        val (httpMethod, patterns) = value
+        for (p <- patterns) buffer.append((httpMethod, p, key))
       }
     }
     buffer.toArray
@@ -57,53 +40,51 @@ class RouteCollector extends MethodAnnotationDiscoveryListener {
     classOf[PUT].getName,    classOf[PUTs].getName,
     classOf[DELETE].getName, classOf[DELETEs].getName)
 
-  def discovered(className: String, methodName: String, _annotationName: String) {
-    val klass  = Class.forName(className).asInstanceOf[Class[Controller]]
-    val method = klass.getMethod(methodName)
-    val key    = (klass, method)
+  def discovered(className: String, _methodName: String, _annotationName: String) {
+    val klass  = Class.forName(className).asInstanceOf[Class[Action]]
 
-    if (firsts.contains(key) || lasts.contains(key) || others.contains(key)) return
+    if (firsts.contains(klass) || lasts.contains(klass) || others.contains(klass)) return
 
-    val annotations = method.getAnnotations
+    val annotations = klass.getAnnotations
     for (a <- annotations) {
       if (a.isInstanceOf[GET]) {
         val a2    = a.asInstanceOf[GET]
         val coll  = if (a2.first) firsts else if (a2.first) lasts else others
-        coll(key) = (HttpMethod.GET, Array(a2.value))
+        coll(klass) = (HttpMethod.GET, Array(a2.value))
       } else if (a.isInstanceOf[GETs]) {
         val a2    = a.asInstanceOf[GETs]
         val coll  = if (a2.first) firsts else if (a2.first) lasts else others
-        coll(key) = (HttpMethod.GET, a2.value)
+        coll(klass) = (HttpMethod.GET, a2.value)
       }
 
       else if (a.isInstanceOf[POST]) {
         val a2    = a.asInstanceOf[POST]
         val coll  = if (a2.first) firsts else if (a2.first) lasts else others
-        coll(key) = (HttpMethod.POST, Array(a2.value))
+        coll(klass) = (HttpMethod.POST, Array(a2.value))
       } else if (a.isInstanceOf[POSTs]) {
         val a2    = a.asInstanceOf[POSTs]
         val coll  = if (a2.first) firsts else if (a2.first) lasts else others
-        coll(key) = (HttpMethod.POST, a2.value)
+        coll(klass) = (HttpMethod.POST, a2.value)
       }
 
       else if (a.isInstanceOf[PUT]) {
         val a2    = a.asInstanceOf[PUT]
         val coll  = if (a2.first) firsts else if (a2.first) lasts else others
-        coll(key) = (HttpMethod.PUT, Array(a2.value))
+        coll(klass) = (HttpMethod.PUT, Array(a2.value))
       } else if (a.isInstanceOf[PUTs]) {
         val a2    = a.asInstanceOf[PUTs]
         val coll  = if (a2.first) firsts else if (a2.first) lasts else others
-        coll(key) = (HttpMethod.PUT, a2.value)
+        coll(klass) = (HttpMethod.PUT, a2.value)
       }
 
       else if (a.isInstanceOf[DELETE]) {
         val a2    = a.asInstanceOf[DELETE]
         val coll  = if (a2.first) firsts else if (a2.first) lasts else others
-        coll(key) = (HttpMethod.DELETE, Array(a2.value))
+        coll(klass) = (HttpMethod.DELETE, Array(a2.value))
       } else if (a.isInstanceOf[DELETEs]) {
         val a2    = a.asInstanceOf[DELETEs]
         val coll  = if (a2.first) firsts else if (a2.first) lasts else others
-        coll(key) = (HttpMethod.DELETE, a2.value)
+        coll(klass) = (HttpMethod.DELETE, a2.value)
       }
     }
   }

@@ -11,10 +11,10 @@ import ChannelHandler.Sharable
 import HttpResponseStatus._
 import HttpVersion._
 
-import xt.{Config, Controller, MissingParam}
+import xt.{Config, Action, MissingParam}
 import xt.handler.Env
+import xt.server.{Routes, Util}
 import xt.vc.env.PathInfo
-import xt.vc.controller.{Routes, Util}
 import xt.vc.env.{Env => CEnv}
 
 @Sharable
@@ -33,9 +33,9 @@ class Dispatcher extends SimpleChannelUpstreamHandler with ClosedClientSilencer 
     val bodyParams = env("bodyParams").asInstanceOf[CEnv.Params]
 
     Routes.matchRoute(request.getMethod, pathInfo) match {
-      case Some((ka, pathParams)) =>
+      case Some((actionClass, pathParams)) =>
         env("pathParams") = pathParams
-        dispatchWithFailsafe(ctx, ka, env)
+        dispatchWithFailsafe(ctx, actionClass, env)
 
       case None =>
         val response = new DefaultHttpResponse(HTTP_1_1, NOT_FOUND)
@@ -52,19 +52,18 @@ class Dispatcher extends SimpleChannelUpstreamHandler with ClosedClientSilencer 
 
   //----------------------------------------------------------------------------
 
-  private def dispatchWithFailsafe(ctx: ChannelHandlerContext, ka: Routes.KA, env: Env) {
+  private def dispatchWithFailsafe(ctx: ChannelHandlerContext, actionClass: Class[Action], env: Env) {
     // Begin timestamp
     val beginTimestamp = System.currentTimeMillis
 
-    val (klass, action) = ka
-    val controller      = klass.newInstance
-    controller(ctx, env)
+    val action = actionClass.newInstance
+    action(ctx, env)
 
     try {
-      val passed = controller.callBeforeFilters(action)
-      if (passed) action.invoke(controller)
+      val passed = action.callBeforeFilters
+      if (passed) action.execute
 
-      logAccess(beginTimestamp, controller)
+      logAccess(beginTimestamp, action)
     } catch {
       case e =>
         // End timestamp
@@ -88,10 +87,10 @@ class Dispatcher extends SimpleChannelUpstreamHandler with ClosedClientSilencer 
         }
 
         if (response.getStatus != BAD_REQUEST) {
-          logAccess(beginTimestamp, controller, e)
+          logAccess(beginTimestamp, action, e)
           response.setHeader("X-Sendfile", System.getProperty("user.dir") + "/public/500.html")
         } else {
-          logAccess(beginTimestamp, controller)
+          logAccess(beginTimestamp, action)
         }
 
         env("response") = response
@@ -99,24 +98,24 @@ class Dispatcher extends SimpleChannelUpstreamHandler with ClosedClientSilencer 
     }
   }
 
-  private def logAccess(beginTimestamp: Long, controller: Controller, e: Throwable = null) {
+  private def logAccess(beginTimestamp: Long, action: Action, e: Throwable = null) {
     val endTimestamp = System.currentTimeMillis
     val dt           = endTimestamp - beginTimestamp
 
-    val async = if (controller.responded) "" else " (async)"
+    val async = if (action.responded) "" else " (async)"
     if (e == null) {
       val msg =
-        controller.request.getMethod       + " " +
-        controller.pathInfo.decoded        + " " +
-        filterParams(controller.allParams) + " " +
+        action.request.getMethod       + " " +
+        action.pathInfo.decoded        + " " +
+        filterParams(action.allParams) + " " +
         dt + " [ms]" + async
       logger.debug(msg)
     } else {
       val msg =
         "Dispatching error " +
-        controller.request.getMethod       + " " +
-        controller.pathInfo.decoded        + " " +
-        filterParams(controller.allParams) + " " +
+        action.request.getMethod       + " " +
+        action.pathInfo.decoded        + " " +
+        filterParams(action.allParams) + " " +
         dt + " [ms]" + async
       logger.error(msg, e)
     }

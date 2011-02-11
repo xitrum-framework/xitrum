@@ -6,11 +6,11 @@ import org.jboss.netty.handler.codec.http.{DefaultHttpResponse, HttpResponseStat
 import HttpResponseStatus._
 import HttpVersion._
 
-import xt.Controller
+import xt.Action
 import xt.vc.env.session.SessionRestorer
 
 trait ExtendedEnv extends Env {
-  this: Controller =>
+  this: Action =>
 
   lazy val allParams = {
     val ret = new JLinkedHashMap[String, JList[String]]()

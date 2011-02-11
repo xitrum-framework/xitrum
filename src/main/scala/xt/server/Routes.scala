@@ -1,4 +1,4 @@
-package xt.vc.controller
+package xt.server
 
 import java.lang.reflect.Method
 import java.util.{LinkedHashMap => JLinkedHashMap, List => JList}
@@ -11,13 +11,10 @@ import xt._
 import xt.vc.env.{Env, PathInfo}
 
 object Routes extends Logger {
-  type KA              = (Class[Controller], Method)
-  type Csas            = (String, String)
-  type CompiledCsas    = (Csas, KA)
   type Pattern         = String
   type CompiledPattern = Array[(String, Boolean)]  // String: token, Boolean: true if the token is constant
-  type Route           = (HttpMethod, Pattern, KA)
-  type CompiledRoute   = (HttpMethod, CompiledPattern, KA, Csas)
+  type Route           = (HttpMethod, Pattern,         Class[Action])
+  type CompiledRoute   = (HttpMethod, CompiledPattern, Class[Action])
 
   private var compiledRoutes: Iterable[CompiledRoute] = _
 
@@ -38,17 +35,14 @@ object Routes extends Logger {
     val builder = new StringBuilder
     builder.append("Routes:\n")
     compiledRoutes = routes.map { r =>
-      val ret = compileRoute(r)
+      val method  = r._1
+      val pattern = r._2
+      val action  = r._3
 
-      val method     = r._1
-      val pattern    = r._2.toString
-      val controller = ret._4._1
-      val action     = ret._4._2
+      val format = "%-6s %-" + patternMaxLength + "s %s\n"
+      builder.append(format.format(method, pattern, action.getName))
 
-      val format = "%-6s %-" + patternMaxLength + "s %s#%s\n"
-      builder.append(format.format(method, pattern, controller, action))
-
-      ret
+      compileRoute(r)
     }
     logger.info(builder.toString)
   }
@@ -58,14 +52,14 @@ object Routes extends Logger {
    *
    * controller name and action name are put int pathParams.
    */
-  def matchRoute(method: HttpMethod, pathInfo: PathInfo): Option[(KA, Env.Params)] = {
+  def matchRoute(method: HttpMethod, pathInfo: PathInfo): Option[(Class[Action], Env.Params)] = {
     val tokens = pathInfo.tokens
     val max1   = tokens.size
 
     var pathParams: Env.Params = null
 
     def finder(cr: CompiledRoute): Boolean = {
-      val (om, compiledPattern, compiledCA, csas) = cr
+      val (om, compiledPattern, _action) = cr
 
       // Check method
       if (om != method) return false
@@ -137,11 +131,9 @@ object Routes extends Logger {
 
     compiledRoutes.find(finder) match {
       case Some(cr) =>
-        val (m, compiledPattern, compiledKA, csas) = cr
-        val (cs, as) = csas
-        pathParams.put("controller", Util.toValues(cs))
-        pathParams.put("action",     Util.toValues(as))
-        Some((compiledKA, pathParams))
+        val (m, compiledPattern, action) = cr
+        pathParams.put("action", Util.toValues(action.getName))
+        Some((action, pathParams))
 
       case None => None
     }
@@ -150,9 +142,9 @@ object Routes extends Logger {
   //----------------------------------------------------------------------------
 
   private def compileRoute(route: Route): CompiledRoute = {
-    val (method, pattern, ka) = route
+    val (method, pattern, action) = route
     val cp = compilePattern(pattern)
-    (method, cp, ka, (ka._1.getName, ka._2.getName))
+    (method, cp, action)
   }
 
   private def compilePattern(pattern: String): CompiledPattern = {

@@ -1,11 +1,11 @@
-package xt.vc.controller
+package xt.vc.action
 
 import sun.misc.BASE64Decoder  // FIXME: http://stackoverflow.com/questions/469695/decode-base64-data-in-java
 import org.jboss.netty.handler.codec.http.{HttpHeaders, HttpResponseStatus}
-import xt.Controller
+import xt.Action
 
 trait BasicAuthentication {
-  this: Controller =>
+  this: Action =>
 
   def basicAuthenticationUsernamePassword(): Option[(String, String)] = {
     val authorization = request.getHeader(HttpHeaders.Names.AUTHORIZATION)

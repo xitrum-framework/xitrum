@@ -6,10 +6,10 @@ import org.jboss.netty.buffer.ChannelBuffers
 import org.jboss.netty.handler.codec.http.HttpHeaders
 import org.jboss.netty.util.CharsetUtil
 
-import xt.{Controller, View}
+import xt.{Action, View}
 
 trait Renderer extends {
-  this: Controller =>
+  this: Action =>
 
   def renderText(text: Any): String = {
     val s = text.toString
