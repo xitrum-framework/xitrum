@@ -2,10 +2,8 @@ package xt.routing
 
 import java.lang.reflect.Method
 import java.util.{LinkedHashMap => JLinkedHashMap, List => JList}
-
 import scala.collection.mutable.{ArrayBuffer, StringBuilder}
-
-import org.jboss.netty.handler.codec.http.HttpMethod
+import org.jboss.netty.handler.codec.http.{HttpMethod, QueryStringEncoder}
 
 import xt._
 import xt.vc.env.{Env, PathInfo}
@@ -137,6 +135,29 @@ object Routes extends Logger {
 
       case None => None
     }
+  }
+
+  def urlFor(actionClass: Class[Action], params: (String, Any)*): String = {
+    val cpo = compiledRoutes.find { case (httpMethod, _, klass) =>
+      httpMethod == HttpMethod.GET && klass == actionClass
+    }
+    val compiledPattern = cpo.get._2
+
+    var map = params.toMap
+
+    val url = compiledPattern.map { case (token, constant) =>
+      if (constant) {
+        token
+      } else {
+        val ret = map(token)
+        map = map - token
+        ret
+      }
+    }.mkString
+
+    val qse = new QueryStringEncoder(url, Config.paramCharset)
+    for ((k, v) <- map) qse.addParam(k, v.toString)
+    qse.toString
   }
 
   //----------------------------------------------------------------------------

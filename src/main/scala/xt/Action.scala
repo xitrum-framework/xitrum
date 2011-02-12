@@ -8,7 +8,7 @@ import xt.vc.action._
 import xt.vc.env.ExtendedEnv
 import xt.vc.view.Renderer
 
-trait Action extends ExtendedEnv with Logger with Net with ParamAccess with Url with Filter with BasicAuthentication with Renderer {
+trait Action extends ExtendedEnv with Logger with Net with ParamAccess with Filter with BasicAuthentication with Renderer {
   def execute
 
   //----------------------------------------------------------------------------
@@ -37,24 +37,21 @@ trait Action extends ExtendedEnv with Logger with Net with ParamAccess with Url 
   // Called by Dispatcher
   def responded = _responded
 
-  /**
-   * @param location
-   * * absolute:                contains "://"
-   * * relative to this domain: starts with "/"
-   * * Controller#action:       contains "#"
-   * * action:                  otherwise
-   */
-  def redirectTo(location: String, status: HttpResponseStatus = FOUND, params: Map[String, Any] = Map()) {
+  //----------------------------------------------------------------------------
+
+  def urlFor[T: Manifest]: String = urlFor[T]()
+  def urlFor[T: Manifest](params: (String, Any)*) = {
+    val actionClass = manifest[T].erasure.asInstanceOf[Class[Action]]
+    xt.routing.Routes.urlFor(actionClass, params:_*)
+  }
+
+  def redirectTo[T: Manifest] { redirectTo(urlFor[T]) }
+  def redirectTo[T: Manifest](params: (String, Any)*) { redirectTo(urlFor[T](params:_*)) }
+  def redirectTo(location: String, status: HttpResponseStatus = FOUND) {
     response.setStatus(status)
 
-    val location2 = if (location.contains("://") || location.startsWith("/"))
-      location
-    else {
-      urlFor(location, params)
-    }
-
     HttpHeaders.setContentLength(response, 0)
-    response.setHeader(LOCATION, location2)
+    response.setHeader(LOCATION, location)
     respond
   }
 
