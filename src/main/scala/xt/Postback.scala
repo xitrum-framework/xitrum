@@ -2,12 +2,6 @@ package xt
 
 import org.jboss.netty.handler.codec.http.HttpHeaders.Names._
 
-object Postback {
-  val js =
-    <script type="text/javascript" src="/resources/public/xt/jquery-1.5.min.js"></script>
-    <script type="text/javascript" src="/resources/public/xt/xitrum.js"></script>
-}
-
 trait Postback {
   this: Action =>
 

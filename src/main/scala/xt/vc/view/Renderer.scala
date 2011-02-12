@@ -11,6 +11,13 @@ import xt.Action
 trait Renderer {
   this: Action =>
 
+  /** Put here, not in Postback for convenience when writing layout */
+  lazy val jsHead = {
+    <script type="text/javascript" src="/resources/public/xt/jquery-1.5.min.js"></script>
+    <script type="text/javascript" src="/resources/public/xt/xitrum.js"></script>
+    <script>{"var xt_csrf_token = '" + session("_csrf_token") + "';"}</script>
+  }
+
   def renderText(text: Any): String = {
     val s = text.toString
 

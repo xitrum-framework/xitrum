@@ -8,7 +8,7 @@ import xt.vc.env.{ExtendedEnv, Session}
 
 object SessionRestorer {
   def restore(extendedEnv: ExtendedEnv): Session = {
-    val id = restoreSessionId(extendedEnv)
+    val id  = restoreSessionId(extendedEnv)
     val ret = Config.sessionStore.read(id) match {
       case Some(s) => s
       case None    => new Session(id, new JMap[String, Any](), Config.sessionStore)

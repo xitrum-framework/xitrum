@@ -8,6 +8,7 @@ class Session(var id: String, var data: JMap[String, Any], store: SessionStore) 
     store.delete(id)
     data.clear
     id = UUID.randomUUID.toString
+    update("_csrf_token", UUID.randomUUID.toString)
   }
 
   def apply(key: String) = data.get(key)

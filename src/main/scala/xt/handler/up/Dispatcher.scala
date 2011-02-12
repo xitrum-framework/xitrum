@@ -64,7 +64,12 @@ class Dispatcher extends SimpleChannelUpstreamHandler with ClosedClientSilencer 
       if (passed) {
         if (action.request.getMethod.getName == "POSTBACK") {
           if (action.isInstanceOf[Postback]) {
-            action.asInstanceOf[Postback].postback
+            val csrfToken = action.param("_csrf_token")
+            if (csrfToken != action.session("_csrf_token")) {
+              throw new MissingParam("_csrf_token")
+            } else {
+              action.asInstanceOf[Postback].postback
+            }
           } else {
             throw new Exception(actionClass.getName + " is not a postback class")
           }

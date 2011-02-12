@@ -8,7 +8,7 @@ var xt = {
     var form1 = $(e).attr("form");
     var form2 = (!form1) ? e : form1;
 
-    var data = $(form2).serialize() + "&_method=postback";
+    var data = $(form2).serialize() + "&_method=postback" + "&_csrf_token=" + xt_csrf_token;
 
     $.ajax({
       type: "POST",
