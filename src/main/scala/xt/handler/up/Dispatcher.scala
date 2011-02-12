@@ -11,7 +11,7 @@ import ChannelHandler.Sharable
 import HttpResponseStatus._
 import HttpVersion._
 
-import xt.{Config, Action, MissingParam}
+import xt.{Config, Action, MissingParam, Postback}
 import xt.handler.Env
 import xt.routing.{Routes, Util}
 import xt.vc.env.PathInfo
@@ -61,7 +61,17 @@ class Dispatcher extends SimpleChannelUpstreamHandler with ClosedClientSilencer 
 
     try {
       val passed = action.callBeforeFilters
-      if (passed) action.execute
+      if (passed) {
+        if (action.request.getMethod.getName == "POSTBACK") {
+          if (action.isInstanceOf[Postback]) {
+            action.asInstanceOf[Postback].postback
+          } else {
+            throw new Exception(actionClass.getName + " is not a postback class")
+          }
+        } else {
+          action.execute
+        }
+      }
 
       logAccess(beginTimestamp, action)
     } catch {

@@ -60,7 +60,7 @@ object Routes extends Logger {
       val (om, compiledPattern, _action) = cr
 
       // Check method
-      if (om != method) return false
+      if (method.getName != "POSTBACK" && om != method) return false
 
       val max2 = compiledPattern.size
 
