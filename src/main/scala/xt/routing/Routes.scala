@@ -1,4 +1,4 @@
-package xt.server
+package xt.routing
 
 import java.lang.reflect.Method
 import java.util.{LinkedHashMap => JLinkedHashMap, List => JList}

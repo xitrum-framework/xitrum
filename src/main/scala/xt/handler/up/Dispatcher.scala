@@ -13,7 +13,7 @@ import HttpVersion._
 
 import xt.{Config, Action, MissingParam}
 import xt.handler.Env
-import xt.server.{Routes, Util}
+import xt.routing.{Routes, Util}
 import xt.vc.env.PathInfo
 import xt.vc.env.{Env => CEnv}
 

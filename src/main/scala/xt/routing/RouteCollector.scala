@@ -1,4 +1,4 @@
-package xt.server
+package xt.routing
 
 import scala.collection.mutable.{ArrayBuffer, HashMap => MHashMap}
 

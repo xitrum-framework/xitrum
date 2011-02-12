@@ -1,4 +1,4 @@
-package xt.server
+package xt.routing
 
 object Util {
   /** Wraps a single String by a java.util.List. */

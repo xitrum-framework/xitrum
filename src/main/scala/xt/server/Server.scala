@@ -7,6 +7,7 @@ import org.jboss.netty.bootstrap.ServerBootstrap
 import org.jboss.netty.channel.socket.nio.NioServerSocketChannelFactory
 
 import xt.{Logger, Config}
+import xt.routing.Routes
 
 class Server extends Logger {
   def start {

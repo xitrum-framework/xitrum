@@ -6,10 +6,12 @@ import org.jboss.netty.buffer.ChannelBuffers
 import org.jboss.netty.handler.codec.http.HttpHeaders
 import org.jboss.netty.util.CharsetUtil
 
-import xt.{Action, View}
+import xt.Action
 
-trait Renderer extends {
+trait Renderer {
   this: Action =>
+
+  import DocType._
 
   def renderText(text: Any): String = {
     val s = text.toString
@@ -25,18 +27,18 @@ trait Renderer extends {
 
   //----------------------------------------------------------------------------
 
-  def layout: Option[View] = None
+  def layout: Option[() => Any] = None
 
-  def renderView(view: View) {
+  def renderView(view: Any) {
     renderView(view, layout)
   }
 
-  def renderView(view: View, layout: Option[View]) {
+  def renderView(view: Any, layout: Option[Any]) {
     layout match {
-      case None    => renderText(view.render(this))
-      case Some(l) =>
-        at("contentForLayout") = view.render(this)
-        renderText(l.render(this))
+      case None    => renderText(view)
+      case Some(f) =>
+        at("contentForLayout") = view
+        renderText(f)
     }
   }
 
