@@ -33,12 +33,15 @@ object Routes extends Logger {
     val builder = new StringBuilder
     builder.append("Routes:\n")
     compiledRoutes = routes.map { r =>
-      val method  = r._1
-      val pattern = r._2
-      val action  = r._3
+      val method      = r._1
+      val pattern     = r._2
+      val actionClass = r._3
 
-      val format = "%-6s %-" + patternMaxLength + "s %s\n"
-      builder.append(format.format(method, pattern, action.getName))
+      val format = if (actionClass == classOf[Postback])
+        "%-6s %-" + patternMaxLength + "s %s (POSTBACK)\n"
+      else
+        "%-6s %-" + patternMaxLength + "s %s\n"
+      builder.append(format.format(method, pattern, actionClass.getName))
 
       compileRoute(r)
     }

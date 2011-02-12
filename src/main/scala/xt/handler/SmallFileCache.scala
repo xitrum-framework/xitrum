@@ -43,10 +43,18 @@ object SmallFileCache {
     // Cache if the file is small
     val fileLength = raf.length
     if (Config.isProductionMode && fileLength <= Config.filesMaxSize) synchronized {
-      val bytes = new Array[Byte](fileLength.toInt)
-      raf.read(bytes)
-      cache(abs) = (bytes, lastModified)
+      val len = fileLength.toInt
+      val bytes = new Array[Byte](len)
+
+      // Read whole file
+      var total = 0
+      while (total < len) {
+        val bytesRead = raf.read(bytes, total, len - total)
+        total += bytesRead
+      }
+
       raf.close
+      cache(abs) = (bytes, lastModified)
       return Hit(bytes, lastModified)
     }
 
