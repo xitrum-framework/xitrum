@@ -37,7 +37,7 @@ object Routes extends Logger {
       val pattern     = r._2
       val actionClass = r._3
 
-      val format = if (actionClass == classOf[Postback])
+      val format = if (actionClass.newInstance.isInstanceOf[Postback])
         "%-6s %-" + patternMaxLength + "s %s (POSTBACK)\n"
       else
         "%-6s %-" + patternMaxLength + "s %s\n"
