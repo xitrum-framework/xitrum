@@ -1,4 +1,4 @@
-package xt.vc.view
+package xt
 
 /** See Lift */
 object DocType {

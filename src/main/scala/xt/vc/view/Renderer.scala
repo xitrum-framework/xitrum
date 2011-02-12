@@ -11,8 +11,6 @@ import xt.Action
 trait Renderer {
   this: Action =>
 
-  import DocType._
-
   def renderText(text: Any): String = {
     val s = text.toString
 
