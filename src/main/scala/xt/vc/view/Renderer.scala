@@ -33,10 +33,10 @@ trait Renderer {
 
   def renderView(view: Any, layout: Option[Any]) {
     layout match {
-      case None    => renderText(view)
-      case Some(f) =>
+      case None           => renderText(view)
+      case Some(function) =>
         at("contentForLayout") = view
-        renderText(f)
+        renderText(function.asInstanceOf[() => Any].apply)
     }
   }
 
