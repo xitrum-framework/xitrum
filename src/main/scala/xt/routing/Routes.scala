@@ -144,8 +144,7 @@ object Routes extends Logger {
     val compiledPattern = cpo.get._2
 
     var map = params.toMap
-
-    val url = compiledPattern.map { case (token, constant) =>
+    val tokens = compiledPattern.map { case (token, constant) =>
       if (constant) {
         token
       } else {
@@ -153,7 +152,8 @@ object Routes extends Logger {
         map = map - token
         ret
       }
-    }.mkString
+    }
+    val url = tokens.mkString("/")
 
     val qse = new QueryStringEncoder(url, Config.paramCharset)
     for ((k, v) <- map) qse.addParam(k, v.toString)
