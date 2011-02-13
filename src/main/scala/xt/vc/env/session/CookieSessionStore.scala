@@ -8,8 +8,9 @@ class CookieSessionStore extends SessionStore {
   def restore(extEnv: ExtEnv): Session = {
     extEnv.cookies(Config.sessionMarker) match {
       case Some(cookie) =>
-        val ret = new CookieSession
-        ret.deserialize(cookie.getValue)
+        val base64String = cookie.getValue
+        val ret          = new CookieSession
+        ret.deserialize(base64String)
         ret
 
       case None =>
