@@ -3,7 +3,7 @@ var xt = {
     var e = event.target;
 
     var action1 = $(e).attr("action");
-    var action2 = (!action1) ? window.location : action1;
+    var action2 = (!action1) ? window.location.href : action1;
 
     var form1 = $(e).attr("form");
     var form2 = (!form1) ? e : form1;
@@ -12,12 +12,12 @@ var xt = {
 
     $.ajax({
       type: "POST",
-//      url:  action2,
+      url:  action2,
       data: data,
       error: function(xhr) {
         alert("Could not connect to server or server error.");
       },
-      complete: function() {
+      complete: function(xhr) {
         $(form2).show();
         $(form2).next().remove();
       }

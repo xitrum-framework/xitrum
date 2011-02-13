@@ -22,17 +22,29 @@ trait JQuery {
     .replace("\"",   "\\\"")
     .replace("'",    "\\'")
 
-  def jsUpdate(id: String, value: Any) =
-    "$(\"#" + id + "\").html(\"" + jsEscape(value.toString) + "\")"
+  def jsCall(function: String, args: String*) =
+    function + "(\"" + args.map(jsEscape _).mkString(", ") + "\")"
 
-  def renderJS(values: String*) {
+  def jsChain(jsCalls: String*) = jsCalls.mkString(".")
+
+  def jsUpdate(id: String, value: Any) =
+    jsChain(
+      jsCall("$", "#" + id),
+      jsCall("html", value.toString)
+    )
+
+  def jsRender(values: String*) {
     val js = values.mkString(";\n")
     response.setHeader(CONTENT_TYPE, "text/javascript")
     renderText(js)
   }
 
-  def renderUpdate(id: String, value: Any) {
-    val js = jsUpdate(id, value)
-    renderJS(js)
+  def jsRenderUpdate(id: String, value: Any) {
+    jsRender(jsUpdate(id, value))
+  }
+
+  /** See http://stackoverflow.com/questions/503093/how-can-i-make-a-redirect-page-in-jquery */
+  def jsRedirectTo(location: String) {
+    jsRender("window.location.href = \"" + jsEscape(location) + "\"")
   }
 }

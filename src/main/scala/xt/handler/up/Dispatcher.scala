@@ -141,7 +141,7 @@ class Dispatcher extends SimpleChannelUpstreamHandler with ClosedClientSilencer 
     val ret = new java.util.LinkedHashMap[String, java.util.List[String]]()
     ret.putAll(params)
     for (key <- Config.filterParams) {
-      if (ret.containsKey(key)) ret.put(key, Util.toValues("[filtered]"))
+      if (ret.containsKey(key)) ret.put(key, Util.toValues("*FILTERED*"))
     }
     ret
   }
