@@ -1,9 +1,18 @@
 package xt.vc.env.session
 
-import xt.vc.env.Session
+import xt.Action
+import xt.vc.env.ExtEnv
 
 trait SessionStore {
-  def read(id: String): Option[Session]
-  def write(session: Session)
-  def delete(id: String)
+  /**
+   * Called only at the firt access to the session. If the action does not use
+   * session, no proccessing is performed.
+   */
+  def restore(extEnv: ExtEnv): Session
+
+  /**
+   * Called before the response is sent to the client, but only if "restore" has
+   * been called.
+   */
+  def store(session: Session, extEnv: ExtEnv)
 }

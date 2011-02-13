@@ -6,10 +6,9 @@ import org.jboss.netty.handler.codec.http.{DefaultHttpResponse, HttpResponseStat
 import HttpResponseStatus._
 import HttpVersion._
 
-import xt.Action
-import xt.vc.env.session.SessionRestorer
+import xt.{Action, Config}
 
-trait ExtendedEnv extends Env {
+trait ExtEnv extends Env {
   this: Action =>
 
   lazy val allParams = {
@@ -30,7 +29,7 @@ trait ExtendedEnv extends Env {
 
   // TODO: avoid encoding, decoding when cookies/session is not touched by the application
   lazy val cookies = new Cookies(request)
-  lazy val session = SessionRestorer.restore(this)
+  lazy val session = Config.sessionStore.restore(this)
 
   lazy val at = new At
 }

@@ -1,20 +1,37 @@
 package xt.vc.env.session
 
-import xt.Config
-import xt.vc.env.Session
+import org.jboss.netty.handler.codec.http.DefaultCookie
+import xt.{Action, Config}
+import xt.vc.env.ExtEnv
 
-// TODO
 class CookieSessionStore extends SessionStore {
-  def read(id: String) = {
-    println("read: " + id)
-    None
+  def restore(extEnv: ExtEnv): Session = {
+    extEnv.cookies(Config.sessionMarker) match {
+      case Some(cookie) =>
+        val ret = new CookieSession
+        ret.deserialize(cookie.getValue)
+        ret
+
+      case None =>
+        new CookieSession
+    }
   }
 
-  def write(session: Session) {
-    println("write")
-  }
+  def store(session: Session, extEnv: ExtEnv) {
+    val cookieSession = session.asInstanceOf[CookieSession]
+    val s = cookieSession.serialize
 
-  def delete(id: String) {
-    println("delete: " + id)
+    extEnv.cookies(Config.sessionMarker) match {
+      case Some(cookie) =>
+        cookie.setHttpOnly(true)
+        cookie.setPath("/")
+        cookie.setValue(s)
+
+      case None =>
+        val cookie = new DefaultCookie(Config.sessionMarker, s)
+        cookie.setHttpOnly(true)
+        cookie.setPath("/")
+        extEnv.cookies.add(cookie)
+    }
   }
 }

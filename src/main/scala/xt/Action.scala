@@ -5,10 +5,10 @@ import HttpHeaders.Names._
 import HttpResponseStatus._
 
 import xt.vc.action._
-import xt.vc.env.ExtendedEnv
-import xt.vc.view.Renderer
+import xt.vc.env.ExtEnv
+import xt.vc.view.{JQuery, Renderer}
 
-trait Action extends ExtendedEnv with Logger with Net with ParamAccess with Filter with BasicAuthentication with Renderer {
+trait Action extends ExtEnv with Logger with Net with ParamAccess with Filter with BasicAuthentication with CSRF with Renderer with JQuery {
   def execute
 
   //----------------------------------------------------------------------------
