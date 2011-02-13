@@ -1,0 +1,37 @@
+To know what postback is, please see: http://nitrogenproject.com/doc/tutorial.html
+
+To make a postback, you need to know:
+* The event that triggers postback
+* The element where the event occurs
+* The action destination on the server
+* Parameters to send with the postback
+
+== General case
+
+<tag1 id="form">
+  <!-- form elements in this tag will be posted back -->
+</tag1>
+
+<tag2 postback="event" action="/url/to/action" form="form" />
+
+== Special case 1: action is the same with the current page URL
+
+You can leave out "action".
+
+<tag1 id="form">
+  <!-- form elements in this tag will be posted back -->
+</tag1>
+
+<tag2 postback="event" form ="form" />
+
+== Special case 2: tag1 and tag2 are the same
+
+<tag1 postback="event" action="/url/to/action">
+  <!-- form elements in this tag will be posted back -->
+</tag1>
+
+== Special case 3: combination of the above
+
+<tag1 postback="event">
+  <!-- form elements in this tag will be posted back -->
+</tag1>

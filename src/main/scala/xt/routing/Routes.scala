@@ -141,9 +141,9 @@ object Routes extends Logger {
   }
 
   def urlFor(actionClass: Class[Action], params: (String, Any)*): String = {
-    val cpo = compiledRoutes.find { case (httpMethod, _, klass) =>
-      httpMethod == HttpMethod.GET && klass == actionClass
-    }
+    val cpo = compiledRoutes.find { case (_, _, klass) => klass == actionClass }
+    if (cpo.isEmpty) throw new Exception("No route for " + actionClass)
+
     val compiledPattern = cpo.get._2
 
     var map = params.toMap
