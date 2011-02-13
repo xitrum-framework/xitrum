@@ -1,6 +1,8 @@
 package xt.vc.action
 
-import sun.misc.BASE64Decoder  // FIXME: http://stackoverflow.com/questions/469695/decode-base64-data-in-java
+import java.nio.charset.Charset
+import org.jboss.netty.buffer.ChannelBuffers
+import org.jboss.netty.handler.codec.base64.{Base64, Base64Dialect}
 import org.jboss.netty.handler.codec.http.{HttpHeaders, HttpResponseStatus}
 import xt.Action
 
@@ -13,9 +15,12 @@ trait BasicAuthentication {
     if (authorization == null || !authorization.startsWith("Basic ")) {
       None
     } else {
-      val username_password  = authorization.substring(6)  // Skip "Basic "
-      val decoder            = new BASE64Decoder
-      val bytes              = decoder.decodeBuffer(username_password)
+      val username_password = authorization.substring(6)  // Skip "Basic "
+
+      val buffer = Base64.decode(ChannelBuffers.copiedBuffer(username_password, Charset.forName("UTF-8")), Base64Dialect.URL_SAFE)
+      val bytes  = new Array[Byte](buffer.readableBytes)
+      buffer.readBytes(bytes)
+
       val username_password2 = new String(bytes)
       val username_password3 = username_password2.split(":")
 

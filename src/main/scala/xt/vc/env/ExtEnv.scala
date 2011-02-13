@@ -27,9 +27,22 @@ trait ExtEnv extends Env {
     ret
   }
 
-  // TODO: avoid encoding, decoding when cookies/session is not touched by the application
-  lazy val cookies = new Cookies(request)
-  lazy val session = Config.sessionStore.restore(this)
+  // Avoid encoding, decoding when cookies/session is not touched by the application
+  private var _cookiesTouched = false
+  private var _sessionTouched = false
+
+  def isCookiesTouched = _cookiesTouched
+  def isSessionTouched = _sessionTouched
+
+  lazy val cookies = {
+    _cookiesTouched = true
+    new Cookies(request)
+  }
+
+  lazy val session = {
+    _sessionTouched = true
+    Config.sessionStore.restore(this)
+  }
 
   lazy val at = new At
 }

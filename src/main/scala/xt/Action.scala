@@ -58,7 +58,10 @@ trait Action extends ExtEnv with Logger with Net with ParamAccess with Filter wi
   //----------------------------------------------------------------------------
 
   private def encodeCookies {
-    if (cookies != null && cookies.size > 0) {  // == null: CookieDecoder has not been run
+    // Session may use cookie
+    if (isSessionTouched) Config.sessionStore.store(session, this)
+
+    if (isCookiesTouched) {
       val encoder = new CookieEncoder(true)
       val iter = cookies.iterator
       while (iter.hasNext) encoder.addCookie(iter.next)
