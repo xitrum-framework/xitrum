@@ -12,8 +12,8 @@ object SecureBase64 {
     seal(key, bytes)
   }
 
-  def deserialize(secureBase64String: String): Option[Any] = {
-    unseal(key, secureBase64String) match {
+  def deserialize(base64String: String): Option[Any] = {
+    unseal(key, base64String) match {
       case None        => None
       case Some(bytes) => SeriDeseri.deserialize(bytes)
     }
@@ -83,10 +83,12 @@ object SecureBase64 {
       val data = a(0)
       val mac  = a(1)
 
-      val data2 = Base64.decode(data)
-      if (mac == hmac(key, data2)) Some(decrypt(key, data2)) else None
+      Base64.decode(data) match {
+        case None        => None
+        case Some(data2) => if (mac == hmac(key, data2)) Some(decrypt(key, data2)) else None
+      }
     } catch {
-      case _ => None
+      case e => None
     }
   }
 }

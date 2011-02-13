@@ -15,15 +15,18 @@ trait BasicAuthentication {
       None
     } else {
       val username_password = authorization.substring(6)  // Skip "Basic "
-      val bytes = Base64.decode(username_password)
+      Base64.decode(username_password) match {
+        case None => None
 
-      val username_password2 = new String(bytes)
-      val username_password3 = username_password2.split(":")
+        case Some(bytes) =>
+          val username_password2 = new String(bytes)
+          val username_password3 = username_password2.split(":")
 
-      if (username_password3.length != 2) {
-        None
-      } else {
-        Some((username_password3(0), username_password3(1)))
+          if (username_password3.length != 2) {
+            None
+          } else {
+            Some((username_password3(0), username_password3(1)))
+          }
       }
     }
   }

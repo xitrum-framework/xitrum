@@ -2,8 +2,10 @@ package xt.vc.env
 
 import java.util.{TreeSet => JTreeSet}
 
-import org.jboss.netty.handler.codec.http.{HttpRequest, Cookie, CookieDecoder, HttpHeaders}
+import org.jboss.netty.handler.codec.http.{HttpRequest, Cookie, CookieDecoder, CookieEncoder, HttpHeaders}
 import HttpHeaders.Names._
+
+import xt.{Action, Config}
 
 class Cookies(request: HttpRequest) extends JTreeSet[Cookie] {
   {
@@ -21,5 +23,17 @@ class Cookies(request: HttpRequest) extends JTreeSet[Cookie] {
       if (cookie.getName == key) return Some(cookie)
     }
     None
+  }
+
+  def setCookiesWhenRespond(action: Action) {
+    // Session may use cookie
+    if (action.isSessionTouched) Config.sessionStore.store(action.session, action)
+
+    if (action.isCookiesTouched) {
+      val encoder = new CookieEncoder(true)
+      val iter = this.iterator
+      while (iter.hasNext) encoder.addCookie(iter.next)
+      action.response.setHeader(SET_COOKIE, encoder.encode)
+    }
   }
 }

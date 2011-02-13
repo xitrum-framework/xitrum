@@ -8,7 +8,7 @@ import xt.vc.action._
 import xt.vc.env.ExtEnv
 import xt.vc.view.{JQuery, Renderer}
 
-trait Action extends ExtEnv with Logger with Net with ParamAccess with Filter with BasicAuthentication with CSRF with Renderer with JQuery {
+trait Action extends ExtEnv with Logger with Net with ParamAccess with Filter with Flash with BasicAuthentication with CSRF with Renderer with JQuery {
   def execute
 
   //----------------------------------------------------------------------------
@@ -28,7 +28,10 @@ trait Action extends ExtEnv with Logger with Net with ParamAccess with Filter wi
       }
     } else {
       _responded = true
-      encodeCookies
+
+      clearFlashWhenRespond
+      cookies.setCookiesWhenRespond(this)
+
       henv("response") = response
       ctx.getChannel.write(henv)
     }
@@ -53,19 +56,5 @@ trait Action extends ExtEnv with Logger with Net with ParamAccess with Filter wi
     HttpHeaders.setContentLength(response, 0)
     response.setHeader(LOCATION, location)
     respond
-  }
-
-  //----------------------------------------------------------------------------
-
-  private def encodeCookies {
-    // Session may use cookie
-    if (isSessionTouched) Config.sessionStore.store(session, this)
-
-    if (isCookiesTouched) {
-      val encoder = new CookieEncoder(true)
-      val iter = cookies.iterator
-      while (iter.hasNext) encoder.addCookie(iter.next)
-      response.setHeader(SET_COOKIE, encoder.encode)
-    }
   }
 }
