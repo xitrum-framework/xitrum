@@ -1,26 +1,24 @@
-Xitrum uses LiveValidation (http://livevalidation.com/examples).
+Xitrum uses jQuery Validation: http://bassistance.de/jquery-plugins/jquery-plugin-validation/
 
 == Default validators
 
+import xitrum.vc.validator._
+
 <form postback="submit">
-  {<input type="text" name="username" />.validate[Required].validate[MinLength](5).validate[MaxLength](10)}
-  <input type="password" name="password" />
-  <input type="passord_confirm" name="password_confirm" />
+  {<input type="text" name="username" />.validate(new Required, new MinLength(5), new MaxLength(10)}
+  {<input type="password" name="password" />.validate(new Required)}
+  {<input type="passord_confirm" name="password_confirm" />.validate(new PasswordConfirm("password"))}
 </form>
 
-required
-min
-max
+== Write custom validators
 
+import xitrum.vc.validator.Validator
 
-<input type="text" validator="required" />
-<input type="text" validator={validator[Required]} />
+class MyValidator extends Validator {
+  def render(action: Action, name: String, name2: String) {
+    // Call jsAddToView(js) to add custom piece of JS to the end of the web page
+  }
 
-validator(
-
-
-class X extends Validator {
-  def validate(name: String, action: Action): Boolean = {
-    addError
+  def validate(action: Action, name: String, name2: String): Boolean = {
   }
 }
