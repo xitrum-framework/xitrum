@@ -42,14 +42,19 @@ trait Action extends ExtEnv with Logger with Net with ParamAccess with Filter wi
 
   //----------------------------------------------------------------------------
 
-  def urlFor[T: Manifest]: String = urlFor[T]()
   def urlFor[T: Manifest](params: (String, Any)*) = {
     val actionClass = manifest[T].erasure.asInstanceOf[Class[Action]]
     xt.routing.Routes.urlFor(actionClass, params:_*)
   }
 
-  def redirectTo[T: Manifest] { redirectTo(urlFor[T]) }
-  def redirectTo[T: Manifest](params: (String, Any)*) { redirectTo(urlFor[T](params:_*)) }
+  /**
+   * When there are no params, the programmer can write urlFor[MyAction],
+   * instead of urlFor[MyAction]().
+   */
+  def urlFor[T: Manifest]: String = urlFor[T]()
+
+  //----------------------------------------------------------------------------
+
   def redirectTo(location: String, status: HttpResponseStatus = FOUND) {
     response.setStatus(status)
 
@@ -57,4 +62,8 @@ trait Action extends ExtEnv with Logger with Net with ParamAccess with Filter wi
     response.setHeader(LOCATION, location)
     respond
   }
+
+  def redirectTo[T: Manifest] { redirectTo(urlFor[T]) }
+
+  def redirectTo[T: Manifest](params: (String, Any)*) { redirectTo(urlFor[T](params:_*)) }
 }

@@ -47,4 +47,6 @@ trait JQuery {
   def jsRedirectTo(location: String) {
     jsRender("window.location.href = \"" + jsEscape(location) + "\"")
   }
+
+  def jsRedirectTo[T: Manifest] { jsRedirectTo(urlFor[T]) }
 }
