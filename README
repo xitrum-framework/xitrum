@@ -1,10 +1,13 @@
 Xitrum is Scala web framework and server on top of Netty:
+* It fills the gap between Scalatra and Lift:
+  More powerful than Scalatra but less complex than Lift.
+* It combines MVC (controller first) style and component (view first) style.
+  If you are familiar with Rails or Nitrogen, you will be at home with Xitrum.
 * Asynchronous, in the spirit of Netty.
 * Type-safe, in the spirit of Scala.
-* It fills the gap between Scalatra and Lift: it is more powerful than
-  Scalatra and less complex than Lift.
-* It combines MVC (controller first) style and component-based (view first) style.
-  If you are familiar with Nitrogen, you will be at home with Xitrum.
+* Stateless, by default sessions are saved in cookie. You can easily run
+  multiple instances of your web application behind a firewall. This is a huge
+  win over servlet.
 * It does not try to abstract away from the underlying network layer, it lets
   you talk directly to Netty whenever you want.
 
@@ -39,9 +42,7 @@ lib
 lib_managed
 project
 public
-  css
-  img
-  js
+  upload
 src
   main
     scala
@@ -54,6 +55,13 @@ src
           ArticleHelper.scala
         model
           Article.scala
+    resources
+      public
+        blog
+          css
+          img
+          js
+README
 
 == SBT project dependency
 
@@ -67,14 +75,14 @@ with SLF4J 1.6.1, like logback-classic 0.9.27:
 == Deployed directory layout
 
 bin
-  runner.sh
-config
-  blog.properties
+  runner.sh               <-- Script to start the web server
+config                    <-- Config files are outside .jar files, edit any time you want
+  blog.properties             They are put in classpath by runner.sh
   logback.properties
+  xitrum.properties
 lib
-  blog.jar
+  blog.jar                <-- css/img/js are concrete thus packaged here
   ...
 public
-  css
-  img
-  js
+  upload                  <-- Directory to store user uploaded files
+README                        It may be a symlink

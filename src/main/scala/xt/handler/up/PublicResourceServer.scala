@@ -35,7 +35,8 @@ class PublicResourceServer extends SimpleChannelUpstreamHandler with ClosedClien
       case Some(bytes) =>
         val len  = bytes.length
         val lens = len.toString
-        if (request.containsHeader(IF_MODIFIED_SINCE) == lens) {
+        val ims  = request.getHeader(IF_MODIFIED_SINCE)
+        if (ims != null && ims == lens) {
           val response = new DefaultHttpResponse(HTTP_1_1, NOT_MODIFIED)
           HttpHeaders.setContentLength(response, 0)
           ctx.getChannel.write(response)
@@ -59,21 +60,21 @@ class PublicResourceServer extends SimpleChannelUpstreamHandler with ClosedClien
     if (path.contains("/.")) {  // Simple sanitize
       None
     } else {
-      val inputStream = getClass.getResourceAsStream(path)
-      if (inputStream == null) {
+      val stream = getClass.getResourceAsStream(path)
+      if (stream == null) {
         None
       } else {
-        val len   = inputStream.available
+        val len   = stream.available
         val bytes = new Array[Byte](len)
 
         // Read whole file
         var total = 0
         while (total < len) {
-          val bytesRead = inputStream.read(bytes, total, len - total)
+          val bytesRead = stream.read(bytes, total, len - total)
           total += bytesRead
         }
 
-        inputStream.close
+        stream.close
         Some(bytes)
       }
     }

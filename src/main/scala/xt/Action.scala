@@ -48,8 +48,8 @@ trait Action extends ExtEnv with Logger with Net with ParamAccess with Filter wi
   }
 
   /**
-   * When there are no params, the programmer can write urlFor[MyAction],
-   * instead of urlFor[MyAction]().
+   * When there are no params, the application developer can write
+   * urlFor[MyAction], instead of urlFor[MyAction]().
    */
   def urlFor[T: Manifest]: String = urlFor[T]()
 
