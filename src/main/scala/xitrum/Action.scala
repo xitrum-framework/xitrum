@@ -1,5 +1,6 @@
 package xitrum
 
+import scala.xml.Elem
 import org.jboss.netty.handler.codec.http._
 import HttpHeaders.Names._
 import HttpResponseStatus._
@@ -7,8 +8,11 @@ import HttpResponseStatus._
 import xitrum.vc.action._
 import xitrum.vc.env.ExtEnv
 import xitrum.vc.view.{JQuery, Renderer}
+import xitrum.vc.validator.{JSCollector, ValidatorInjector}
 
-trait Action extends ExtEnv with Logger with Net with ParamAccess with Filter with Flash with BasicAuthentication with CSRF with Renderer with JQuery {
+trait Action extends ExtEnv with Logger with Net with ParamAccess with Filter with Flash with BasicAuthentication with CSRF with Renderer with JSCollector with JQuery {
+  implicit def elemToValidatorInjector(elem: Elem) = new ValidatorInjector(this, elem);
+
   def execute
 
   //----------------------------------------------------------------------------

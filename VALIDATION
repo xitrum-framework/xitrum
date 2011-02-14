@@ -1,3 +1,26 @@
 Xitrum uses LiveValidation (http://livevalidation.com/examples).
 
+== Default validators
 
+<form postback="submit">
+  {<input type="text" name="username" />.validate[Required].validate[MinLength](5).validate[MaxLength](10)}
+  <input type="password" name="password" />
+  <input type="passord_confirm" name="password_confirm" />
+</form>
+
+required
+min
+max
+
+
+<input type="text" validator="required" />
+<input type="text" validator={validator[Required]} />
+
+validator(
+
+
+class X extends Validator {
+  def validate(name: String, action: Action): Boolean = {
+    addError
+  }
+}

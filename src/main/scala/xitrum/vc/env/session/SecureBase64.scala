@@ -42,14 +42,12 @@ object SecureBase64 {
     seed
   }
 
-  /** Generates a Base64 HMAC with the supplied key on a string of data. */
   private def hmac(key: Array[Byte], data: Array[Byte]) = {
     val mac = Mac.getInstance(HMAC_ALGORITHM)
     mac.init(new SecretKeySpec(key, HMAC_ALGORITHM))
-    Base64.encode(mac.doFinal(data))
+    mac.doFinal(data)
   }
 
-  /** Encrypt a string with a key. */
   private def encrypt(key: Array[Byte], data: Array[Byte]): Array[Byte] = {
     val cipher    = Cipher.getInstance(CRYPT_ALGORITHM)
     val secretKey = new SecretKeySpec(key, CRYPT_TYPE)
@@ -59,7 +57,6 @@ object SecureBase64 {
     iv ++ cipher.doFinal(data)
   }
 
-  /** Decrypt an array of bytes with a key. */
   private def decrypt(key: Array[Byte], data: Array[Byte]): Array[Byte] = {
     val cipher      = Cipher.getInstance(CRYPT_ALGORITHM)
     val secretKey   = new SecretKeySpec(key, CRYPT_TYPE)
@@ -70,22 +67,20 @@ object SecureBase64 {
     cipher.doFinal(data2)
   }
 
-  /** Seal a Clojure data structure into an encrypted and HMACed string. */
   private def seal(key: Array[Byte], data: Array[Byte]): String = {
     val data2 = encrypt(key, data)
-    Base64.encode(data2) + "--" + hmac(key, data2)
+    Base64.encode(data2) + "--" + Base64.encode(hmac(key, data2))
   }
 
-  /** Retrieve a sealed Clojure data structure from a string */
   private def unseal(key: Array[Byte], base64String: String): Option[Array[Byte]] = {
     try {
       val a = base64String.split("--")
-      val data = a(0)
-      val mac  = a(1)
+      val base64Data = a(0)
+      val base64hmac  = a(1)
 
-      Base64.decode(data) match {
+      Base64.decode(base64Data) match {
         case None        => None
-        case Some(data2) => if (mac == hmac(key, data2)) Some(decrypt(key, data2)) else None
+        case Some(data2) => if (base64hmac == Base64.encode(hmac(key, data2))) Some(decrypt(key, data2)) else None
       }
     } catch {
       case e => None

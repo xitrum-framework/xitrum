@@ -10,8 +10,7 @@ import HttpMethod._
 
 import xitrum.Config
 import xitrum.handler.Env
-import xitrum.vc.env.{Env => CEnv}
-import xitrum.vc.env.PathInfo
+import xitrum.vc.env.{Env => CEnv, PathInfo}
 
 @Sharable
 class BodyParser extends SimpleChannelUpstreamHandler with ClosedClientSilencer {

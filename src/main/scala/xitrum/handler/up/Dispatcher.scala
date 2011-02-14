@@ -16,6 +16,7 @@ import xitrum.handler.Env
 import xitrum.routing.{Routes, Util}
 import xitrum.vc.env.PathInfo
 import xitrum.vc.env.{Env => CEnv}
+import xitrum.vc.validator.ValidatorCaller
 
 @Sharable
 class Dispatcher extends SimpleChannelUpstreamHandler with ClosedClientSilencer {
@@ -64,10 +65,12 @@ class Dispatcher extends SimpleChannelUpstreamHandler with ClosedClientSilencer 
       if (passed) {
         if (action.request.getMethod.getName == "POSTBACK") {
           if (action.isInstanceOf[Postback]) {
-            if (!action.checkToken) {
-              throw new MissingParam("CSRF token")
-            } else {
-              action.asInstanceOf[Postback].postback
+            if (ValidatorCaller.call(action)) {
+              if (!action.checkToken) {
+                throw new MissingParam("CSRF token")
+              } else {
+                action.asInstanceOf[Postback].postback
+              }
             }
           } else {
             throw new Exception(actionClass.getName + " is not a postback class")
