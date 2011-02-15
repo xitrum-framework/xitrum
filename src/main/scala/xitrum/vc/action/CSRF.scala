@@ -13,13 +13,13 @@ trait CSRF {
   import CSRF._
 
   def csrfToken = {
-    val x = session(TOKEN)
-    if (x.isEmpty) {
-      val y = UUID.randomUUID.toString
-      session(TOKEN) = y
-      y
-    } else {
-      x.get
+    sessiono(TOKEN) match {
+      case Some(x) => x
+
+      case None =>
+        val y = UUID.randomUUID.toString
+        session(TOKEN) = y
+        y
     }
   }
 

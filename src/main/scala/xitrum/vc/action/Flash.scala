@@ -17,10 +17,10 @@ trait Flash {
     session(FLASH_SAME_RESPONSE) = true
   }
 
-  def flash = session(FLASH_KEY)
+  def flasho = sessiono(FLASH_KEY)
 
   def clearFlashWhenRespond {
-    if (session(FLASH_SAME_RESPONSE).isDefined) {
+    if (session.contains(FLASH_SAME_RESPONSE)) {
       session.delete(FLASH_SAME_RESPONSE)
     } else {
       session.delete(FLASH_KEY)

@@ -44,5 +44,13 @@ trait ExtEnv extends Env {
     Config.sessionStore.restore(this)
   }
 
+  def sessiono[T](key: String): Option[T] = {
+    if (session.contains(key)) {
+      Some(session[T](key))
+    } else {
+      None
+    }
+  }
+
   lazy val at = new At
 }

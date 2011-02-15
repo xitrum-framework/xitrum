@@ -35,9 +35,10 @@ class RouteCollector extends ClassAnnotationDiscoveryListener {
   }
 
   def supportedAnnotations = Array(
-    classOf[GET].getName,  classOf[GETs].getName,
-    classOf[POST].getName, classOf[POST2].getName,
-    classOf[PUT].getName,  classOf[DELETE].getName)
+    classOf[GET].getName, classOf[GETs].getName,
+    classOf[POST].getName,
+    classOf[PUT].getName,
+    classOf[DELETE].getName)
 
   def discovered(className: String, _annotationName: String) {
     val klass = Class.forName(className).asInstanceOf[Class[Action]]
@@ -59,9 +60,6 @@ class RouteCollector extends ClassAnnotationDiscoveryListener {
       else if (a.isInstanceOf[POST]) {
         val a2        = a.asInstanceOf[POST]
         others(klass) = (HttpMethod.POST, Array(a2.value))
-      } else if (a.isInstanceOf[POST2]) {
-        val a2        = a.asInstanceOf[POST2]
-        others(klass) = (new HttpMethod("POST2"), Array(a2.value))
       }
 
       else if (a.isInstanceOf[PUT]) {

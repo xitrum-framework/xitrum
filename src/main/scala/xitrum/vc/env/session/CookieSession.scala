@@ -15,9 +15,13 @@ class CookieSession extends Session {
 
   def serialize: String = SecureBase64.serialize(map)
 
-  def apply(key: String): Option[Any] = map.get(key)
+  //----------------------------------------------------------------------------
 
   def update(key: String, value: Any) { map(key) = value.asInstanceOf[Serializable] }
+
+  def get[T](key: String): T = map.get(key).asInstanceOf[T]
+
+  def contains(key: String) = map.contains(key)
 
   def delete(key: String) { map.remove(key) }
 

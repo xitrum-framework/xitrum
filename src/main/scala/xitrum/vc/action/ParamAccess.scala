@@ -38,4 +38,40 @@ trait ParamAccess {
     val values = coll2.get(key)
     if (values == null) None else Some(JavaConversions.asScalaBuffer[String](values).toList)
   }
+
+  //----------------------------------------------------------------------------
+
+  def tparam[T](key: String, coll: Env.Params = null)(implicit m: Manifest[T]): T = {
+    val value = param(key, coll)
+    convert[T](value)
+  }
+
+  def tparamo[T](key: String, coll: Env.Params = null)(implicit m: Manifest[T]): Option[T] = {
+    val valueo = paramo(key, coll)
+    valueo.map(convert[T](_))
+  }
+
+  def tparams[T](key: String, coll: Env.Params = null)(implicit m: Manifest[T]): List[T] = {
+    val values = params(key, coll)
+    values.map(convert[T](_))
+  }
+
+  def tparamso[T](key: String, coll: Env.Params = null)(implicit m: Manifest[T]): Option[List[T]] = {
+    paramso(key, coll) match {
+      case None         => None
+      case Some(values) => Some(values.map(convert[T](_)))
+    }
+  }
+
+  private def convert[T](value: String)(implicit m: Manifest[T]): T = {
+    val v = m.toString match {
+      case "int"    => value.toInt
+      case "short"  => value.toShort
+      case "long"   => value.toLong
+      case "float"  => value.toFloat
+      case "double" => value.toDouble
+      case unknown  => throw new Exception("Cannot covert String to " + unknown)
+    }
+    v.asInstanceOf[T]
+  }
 }
