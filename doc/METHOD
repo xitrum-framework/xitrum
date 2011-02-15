@@ -1,0 +1,86 @@
+== RESTful API oriented
+
+GET
+POST
+PUT
+DELETE
+
+To simulate PUT and DELETE from browser, send a POST request with _method=put or
+_method=delete in the request body.
+
+@GETs("/", "/articles")
+class ArticleIndex extends Action {
+  def execute {
+    ...
+  }
+}
+
+@GET("/articles/:id")
+class ArticleShow extends Action {
+  def execute {
+    ...
+  }
+}
+
+== Ajax form oriented
+
+POST2: _method=post2
+
+This method is for web 2.0 style Ajax form posting (browser with JavaScript).
+
+@GET(value="/articles/new", first=true)
+class ArticleNew extends Action {
+  def execute {
+    renderView(
+      <form postback="submit">
+        Title:
+        {<input type="text" name="title" />.validate(new Required)}<br />
+
+        Body:
+        {textarea name="body"></textarea>.validate(new Required)}<br />
+
+        <input type="submit" value="OK" />
+      </form>
+    )
+  }
+}
+
+@POST2("/articles")
+class ArticleCreate extends Action {
+  beforeFilters("authenticate") = () => sessiono("user").isDefined
+
+  def execute {
+    val title = param("title")
+    val body  = param("body")
+    val user  = session("user").asInstanceOf[User]
+
+    Article.save(user.id, title, body)
+    jsRedirectTo[ArticleIndex]
+  }
+}
+
+== Normal form oriented
+
+TODO
+
+POST1: _method=post1
+
+This method is for web 1.0 style form posting (browser without JavaScript).
+The request body contains _csrf_token to prevent CSRF attack.
+
+To do validation:
+
+val username = vparam("username", Array(new Required, new MaxLength(32))
+                 ↑
+Neu k pass thi se:
+* Set params vao session gi do
+* Redirect lai REFERER de GET action truoc render lai <- Neu la POST (vi du multiscreen wizard) thi sao?
+
+vparam(
+  "username"        -> Array(new Required, new MaxLength(32),
+  "password"        -> new MinLength(6),
+  "passwordConfirm" -> new PasswordConfirm("password")
+) match {
+  case None =>
+  case ((username, password, _)) =>
+}

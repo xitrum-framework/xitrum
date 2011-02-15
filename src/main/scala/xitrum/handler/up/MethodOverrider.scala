@@ -32,6 +32,8 @@ class MethodOverrider extends SimpleChannelUpstreamHandler with ClosedClientSile
       if (_methods != null && !_methods.isEmpty) {
         val _method = new HttpMethod(_methods.get(0).toUpperCase)
         request.setMethod(_method)
+
+        bodyParams.remove("_method")  // Cleaner for application developers when seeing access log
       }
     }
 

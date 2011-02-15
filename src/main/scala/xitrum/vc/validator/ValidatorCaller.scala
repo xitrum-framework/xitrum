@@ -21,6 +21,7 @@ object ValidatorCaller {
 
   //----------------------------------------------------------------------------
 
+  //                                                      decrypted params      name    name2
   private def takeoutValidators(bodyParams: Env.Params): (Env.Params, Iterable[(String, String, Iterable[Validator])]) = {
     val name2s = bodyParams.keySet
     val i      = name2s.iterator
@@ -33,7 +34,7 @@ object ValidatorCaller {
 
       ValidatorInjector.takeOutFromName(name2) match {
         case None =>
-          bodyParams2.put(name2, value)
+          throw new Exception("Request contains invalid parameter name")
 
         case Some(name_validators) =>
           val (name, validators) = name_validators

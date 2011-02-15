@@ -11,7 +11,7 @@ import ChannelHandler.Sharable
 import HttpResponseStatus._
 import HttpVersion._
 
-import xitrum.{Config, Action, MissingParam, Postback}
+import xitrum.{Config, Action, MissingParam}
 import xitrum.handler.Env
 import xitrum.routing.{Routes, Util}
 import xitrum.vc.env.PathInfo
@@ -61,23 +61,10 @@ class Dispatcher extends SimpleChannelUpstreamHandler with ClosedClientSilencer 
     action(ctx, env)
 
     try {
-      val passed = action.callBeforeFilters
-      if (passed) {
-        if (action.request.getMethod.getName == "POSTBACK") {
-          if (action.isInstanceOf[Postback]) {
-            if (ValidatorCaller.call(action)) {
-              if (!action.checkToken) {
-                throw new MissingParam("CSRF token")
-              } else {
-                action.asInstanceOf[Postback].postback
-              }
-            }
-          } else {
-            throw new Exception(actionClass.getName + " is not a postback class")
-          }
-        } else {
-          action.execute
-        }
+      if (action.request.getMethod == POST2Method) {
+        processPOST2Request(action)
+      } else {
+        processNormalRequest(action)
       }
 
       logAccess(beginTimestamp, action)
@@ -113,6 +100,26 @@ class Dispatcher extends SimpleChannelUpstreamHandler with ClosedClientSilencer 
         env("response") = response
         ctx.getChannel.write(env)
     }
+  }
+
+  private def processPOST2Request(action: Action) {
+    if (!action.checkToken) throw new MissingParam("Invalid CSRF token")
+
+    if (ValidatorCaller.call(action)) {
+      processNormalRequest(action)
+    } else {
+      // TODO: some validator may only has server side (no browser side), render the errors
+    }
+  }
+
+  private def processPOST1Request(action: Action) {
+    if (!action.checkToken) throw new MissingParam("Invalid CSRF token")
+    processNormalRequest(action)
+  }
+
+  private def processNormalRequest(action: Action) {
+    val passed = action.callBeforeFilters
+    if (passed) action.execute
   }
 
   private def logAccess(beginTimestamp: Long, action: Action, e: Throwable = null) {

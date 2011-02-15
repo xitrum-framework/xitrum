@@ -1,5 +1,5 @@
 var xt = {
-  postback: function(event) {
+  post2: function(event) {
     var e = $(event.target);
 
     var action1 = e.attr("action");
@@ -18,7 +18,7 @@ var xt = {
     $(form2).hide();
     $(form2).after('<img src="/resources/public/xitrum/ajax-loader.gif" />');
 
-    data += "_method=postback" + "&_csrf_token=" + xt_csrf_token;
+    data += "_method=post2" + "&_csrf_token=" + xt_csrf_token;
     $.ajax({
       type: "POST",
       url:  action2,
@@ -40,8 +40,8 @@ $(function() {
   // jQuery Validation plugin only works on forms and the form must be validated once
   $("form").validate();
 
-  $("[postback]").each(function(i, e) {
-    var eventType = $(e).attr("postback");
-    $(e).bind(eventType, xt.postback);
+  $("[post2]").each(function(i, e) {
+    var eventType = $(e).attr("post2");
+    $(e).bind(eventType, xt.post2);
   });
 });

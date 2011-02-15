@@ -24,7 +24,9 @@ trait CSRF {
   }
 
   def checkToken = {
-    val csrfTokenInRequest = param(TOKEN)
+    // The token must be in the request body for more security
+    val csrfTokenInRequest = param(TOKEN, bodyParams)
+    bodyParams.remove(TOKEN)  // Cleaner for application developers when seeing access log
     val csrfTokenInSession = csrfToken
     csrfTokenInRequest == csrfTokenInSession
   }

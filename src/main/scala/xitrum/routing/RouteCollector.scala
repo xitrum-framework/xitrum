@@ -11,9 +11,9 @@ import xitrum._
 
 /** Scan all classes to collect routes. */
 class RouteCollector extends ClassAnnotationDiscoveryListener {
-  private val firsts    = new MHashMap[Class[Action], (HttpMethod, Array[Routes.Pattern])]
-  private val lasts     = new MHashMap[Class[Action], (HttpMethod, Array[Routes.Pattern])]
-  private val others    = new MHashMap[Class[Action], (HttpMethod, Array[Routes.Pattern])]
+  private val firsts = new MHashMap[Class[Action], (HttpMethod, Array[Routes.Pattern])]
+  private val lasts  = new MHashMap[Class[Action], (HttpMethod, Array[Routes.Pattern])]
+  private val others = new MHashMap[Class[Action], (HttpMethod, Array[Routes.Pattern])]
 
   def collect: Array[Routes.Route]  = {
     val discoverer = new ClasspathDiscoverer
@@ -35,10 +35,9 @@ class RouteCollector extends ClassAnnotationDiscoveryListener {
   }
 
   def supportedAnnotations = Array(
-    classOf[GET].getName,    classOf[GETs].getName,
-    classOf[POST].getName,   classOf[POSTs].getName,
-    classOf[PUT].getName,    classOf[PUTs].getName,
-    classOf[DELETE].getName, classOf[DELETEs].getName)
+    classOf[GET].getName,  classOf[GETs].getName,
+    classOf[POST].getName, classOf[POST2].getName,
+    classOf[PUT].getName,  classOf[DELETE].getName)
 
   def discovered(className: String, _annotationName: String) {
     val klass = Class.forName(className).asInstanceOf[Class[Action]]
@@ -58,33 +57,19 @@ class RouteCollector extends ClassAnnotationDiscoveryListener {
       }
 
       else if (a.isInstanceOf[POST]) {
-        val a2      = a.asInstanceOf[POST]
-        val coll    = if (a2.first) firsts else if (a2.last) lasts else others
-        coll(klass) = (HttpMethod.POST, Array(a2.value))
-      } else if (a.isInstanceOf[POSTs]) {
-        val a2      = a.asInstanceOf[POSTs]
-        val coll    = if (a2.first) firsts else if (a2.last) lasts else others
-        coll(klass) = (HttpMethod.POST, a2.value)
+        val a2        = a.asInstanceOf[POST]
+        others(klass) = (HttpMethod.POST, Array(a2.value))
+      } else if (a.isInstanceOf[POST2]) {
+        val a2        = a.asInstanceOf[POST2]
+        others(klass) = (new HttpMethod("POST2"), Array(a2.value))
       }
 
       else if (a.isInstanceOf[PUT]) {
-        val a2      = a.asInstanceOf[PUT]
-        val coll    = if (a2.first) firsts else if (a2.last) lasts else others
-        coll(klass) = (HttpMethod.PUT, Array(a2.value))
-      } else if (a.isInstanceOf[PUTs]) {
-        val a2      = a.asInstanceOf[PUTs]
-        val coll    = if (a2.first) firsts else if (a2.last) lasts else others
-        coll(klass) = (HttpMethod.PUT, a2.value)
-      }
-
-      else if (a.isInstanceOf[DELETE]) {
-        val a2      = a.asInstanceOf[DELETE]
-        val coll    = if (a2.first) firsts else if (a2.last) lasts else others
-        coll(klass) = (HttpMethod.DELETE, Array(a2.value))
-      } else if (a.isInstanceOf[DELETEs]) {
-        val a2      = a.asInstanceOf[DELETEs]
-        val coll    = if (a2.first) firsts else if (a2.last) lasts else others
-        coll(klass) = (HttpMethod.DELETE, a2.value)
+        val a2        = a.asInstanceOf[PUT]
+        others(klass) = (HttpMethod.PUT, Array(a2.value))
+      } else if (a.isInstanceOf[DELETE]) {
+        val a2        = a.asInstanceOf[DELETE]
+        others(klass) = (HttpMethod.DELETE, Array(a2.value))
       }
     }
   }

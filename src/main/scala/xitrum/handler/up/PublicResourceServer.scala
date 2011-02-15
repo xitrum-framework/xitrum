@@ -36,7 +36,7 @@ class PublicResourceServer extends SimpleChannelUpstreamHandler with ClosedClien
         val len  = bytes.length
         val lens = len.toString
         val ims  = request.getHeader(IF_MODIFIED_SINCE)
-        if (ims != null && ims == lens) {
+        if (ims != null && ims == lens) {  // Size comparison is good enough
           val response = new DefaultHttpResponse(HTTP_1_1, NOT_MODIFIED)
           HttpHeaders.setContentLength(response, 0)
           ctx.getChannel.write(response)
