@@ -6,7 +6,7 @@ import org.jboss.netty.handler.codec.http.{HttpRequest, HttpMethod}
 import HttpMethod._
 
 import xitrum.handler.Env
-import xitrum.vc.env.{Env => CEnv}
+import xitrum.action.env.{Env => CEnv}
 
 /**
  * If the real request method is POST and "_method" param exists, the "_method"

@@ -6,8 +6,8 @@ import org.jboss.netty.handler.codec.http.{HttpRequest, QueryStringDecoder}
 
 import xitrum.Config
 import xitrum.handler.Env
-import xitrum.vc.env.{Env => CEnv}
-import xitrum.vc.env.PathInfo
+import xitrum.action.env.{Env => CEnv}
+import xitrum.action.env.PathInfo
 
 @Sharable
 class UriParser extends SimpleChannelUpstreamHandler with ClosedClientSilencer {

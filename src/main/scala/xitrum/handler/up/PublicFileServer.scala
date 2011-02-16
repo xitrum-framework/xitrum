@@ -10,7 +10,7 @@ import HttpResponseStatus._
 import HttpVersion._
 
 import xitrum.handler.Env
-import xitrum.vc.env.PathInfo
+import xitrum.action.env.PathInfo
 
 /**
  * Serves special files or files in /public directory.

@@ -1,8 +1,13 @@
-Xitrum uses jQuery Validation: http://bassistance.de/jquery-plugins/jquery-plugin-validation/
+Xitrum integrates with jQuery Validation plugin:
+http://bassistance.de/jquery-plugins/jquery-plugin-validation/
+
+Validation is performed on both browser side (by jQuery Validation plugin) and
+server side.
 
 == Default validators
 
-import xitrum.vc.validator._
+// See this package for a complete list of avaiable default validators
+import xitrum.validation._
 
 <form postback="submit">
   {<input type="text" name="username" />.validate(new Required, new MinLength(5), new MaxLength(10)}
@@ -12,13 +17,18 @@ import xitrum.vc.validator._
 
 == Write custom validators
 
-import xitrum.vc.validator.Validator
+import xitrum.validation.Validator
 
 class MyValidator extends Validator {
-  def render(action: Action, name: String, name2: String) {
-    // Call jsAddToView(js) to add custom piece of JS to the end of the web page
+  // Client side validation
+  //
+  // This method should output JS that uses jQuery Validation plugin to validate securedParamName
+  def render(action: Action, paramName: String, securedParamName: String) {
+    // Call jsAddToView(<JS that uses jQuery Validation plugin>)
+    // to add JS to the end of the web page
   }
 
-  def validate(action: Action, name: String, name2: String): Boolean = {
+  // Server side validation
+  def validate(action: Action, paramName: String, securedParamName: String): Boolean = {
   }
 }

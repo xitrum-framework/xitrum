@@ -11,62 +11,21 @@ import ChannelHandler.Sharable
 import HttpResponseStatus._
 import HttpVersion._
 
-import xitrum.{Config, Action, MissingParam}
+import xitrum.{Config, Logger}
+import xitrum.action.Action
 import xitrum.handler.Env
-import xitrum.routing.{Routes, Util}
-import xitrum.vc.env.PathInfo
-import xitrum.vc.env.{Env => CEnv}
-import xitrum.vc.validator.ValidatorCaller
+import xitrum.action.env.{PathInfo, Env => CEnv}
+import xitrum.action.exception.MissingParam
+import xitrum.action.routing.{Routes, POST2Action, Util}
 
-@Sharable
-class Dispatcher extends SimpleChannelUpstreamHandler with ClosedClientSilencer {
-  override def messageReceived(ctx: ChannelHandlerContext, e: MessageEvent) {
-    val m = e.getMessage
-    if (!m.isInstanceOf[Env]) {
-      ctx.sendUpstream(e)
-      return
-    }
-
-    val env        = m.asInstanceOf[Env]
-    val request    = env("request").asInstanceOf[HttpRequest]
-    val pathInfo   = env("pathInfo").asInstanceOf[PathInfo]
-    val uriParams  = env("uriParams").asInstanceOf[CEnv.Params]
-    val bodyParams = env("bodyParams").asInstanceOf[CEnv.Params]
-
-    Routes.matchRoute(request.getMethod, pathInfo) match {
-      case Some((actionClass, pathParams)) =>
-        env("pathParams") = pathParams
-        dispatchWithFailsafe(ctx, actionClass, env)
-
-      case None =>
-        val response = new DefaultHttpResponse(HTTP_1_1, NOT_FOUND)
-        response.setHeader("X-Sendfile", System.getProperty("user.dir") + "/public/404.html")
-        env("response") = response
-        ctx.getChannel.write(env)
-    }
-  }
-
-  override def exceptionCaught(ctx: ChannelHandlerContext, e: ExceptionEvent) {
-    logger.error("Dispatcher", e.getCause)
-    e.getChannel.close
-  }
-
-  //----------------------------------------------------------------------------
-
-  private def dispatchWithFailsafe(ctx: ChannelHandlerContext, actionClass: Class[Action], env: Env) {
+object Dispatcher extends Logger {
+  def dispatchWithFailsafe(action: Action) {
     // Begin timestamp
     val beginTimestamp = System.currentTimeMillis
 
-    val action = actionClass.newInstance
-    action(ctx, env)
-
     try {
-      if (action.request.getMethod == POST2Method) {
-        processPOST2Request(action)
-      } else {
-        processNormalRequest(action)
-      }
-
+      val passed = action.callBeforeFilters
+      if (passed) action.execute
       logAccess(beginTimestamp, action)
     } catch {
       case e =>
@@ -97,32 +56,17 @@ class Dispatcher extends SimpleChannelUpstreamHandler with ClosedClientSilencer 
           logAccess(beginTimestamp, action)
         }
 
-        env("response") = response
-        ctx.getChannel.write(env)
+        action.henv("response") = action.response
+        action.ctx.getChannel.write(action.henv)
     }
   }
 
-  private def processPOST2Request(action: Action) {
-    if (!action.checkToken) throw new MissingParam("Invalid CSRF token")
-
-    if (ValidatorCaller.call(action)) {
-      processNormalRequest(action)
-    } else {
-      // TODO: some validator may only has server side (no browser side), render the errors
-    }
-  }
-
-  private def processPOST1Request(action: Action) {
-    if (!action.checkToken) throw new MissingParam("Invalid CSRF token")
-    processNormalRequest(action)
-  }
-
-  private def processNormalRequest(action: Action) {
-    val passed = action.callBeforeFilters
-    if (passed) action.execute
-  }
+  //----------------------------------------------------------------------------
 
   private def logAccess(beginTimestamp: Long, action: Action, e: Throwable = null) {
+    // POST2Action is a gateway, skip it to avoid noisy log
+    if (action.isInstanceOf[POST2Action]) return
+
     val endTimestamp = System.currentTimeMillis
     val dt           = endTimestamp - beginTimestamp
 
@@ -153,5 +97,45 @@ class Dispatcher extends SimpleChannelUpstreamHandler with ClosedClientSilencer 
       if (ret.containsKey(key)) ret.put(key, Util.toValues("*FILTERED*"))
     }
     ret
+  }
+}
+
+@Sharable
+class Dispatcher extends SimpleChannelUpstreamHandler with ClosedClientSilencer {
+  import Dispatcher._
+
+  override def messageReceived(ctx: ChannelHandlerContext, e: MessageEvent) {
+    val m = e.getMessage
+    if (!m.isInstanceOf[Env]) {
+      ctx.sendUpstream(e)
+      return
+    }
+
+    val env        = m.asInstanceOf[Env]
+    val request    = env("request").asInstanceOf[HttpRequest]
+    val pathInfo   = env("pathInfo").asInstanceOf[PathInfo]
+    val uriParams  = env("uriParams").asInstanceOf[CEnv.Params]
+    val bodyParams = env("bodyParams").asInstanceOf[CEnv.Params]
+
+    Routes.matchRoute(request.getMethod, pathInfo) match {
+      case Some((method, actionClass, pathParams)) =>
+        request.setMethod(method)  // Override
+        env("pathParams") = pathParams
+
+        val action = actionClass.newInstance
+        action(ctx, env)
+        dispatchWithFailsafe(action)
+
+      case None =>
+        val response = new DefaultHttpResponse(HTTP_1_1, NOT_FOUND)
+        response.setHeader("X-Sendfile", System.getProperty("user.dir") + "/public/404.html")
+        env("response") = response
+        ctx.getChannel.write(env)
+    }
+  }
+
+  override def exceptionCaught(ctx: ChannelHandlerContext, e: ExceptionEvent) {
+    logger.error("Dispatcher", e.getCause)
+    e.getChannel.close
   }
 }

@@ -1,6 +1,6 @@
 package xitrum.handler.up
 
-import java.util.{List => JList}
+import java.util.{Collections, List => JList}
 import java.nio.charset.Charset
 
 import org.jboss.netty.channel.{ChannelHandler, SimpleChannelUpstreamHandler, ChannelHandlerContext, MessageEvent, ExceptionEvent, Channels}
@@ -10,7 +10,7 @@ import HttpMethod._
 
 import xitrum.Config
 import xitrum.handler.Env
-import xitrum.vc.env.{Env => CEnv, PathInfo}
+import xitrum.action.env.{Env => CEnv, PathInfo}
 
 @Sharable
 class BodyParser extends SimpleChannelUpstreamHandler with ClosedClientSilencer {
@@ -25,7 +25,7 @@ class BodyParser extends SimpleChannelUpstreamHandler with ClosedClientSilencer 
     val request = env("request").asInstanceOf[HttpRequest]
 
     val bodyParams: CEnv.Params = if (request.getMethod != POST) {
-      java.util.Collections.emptyMap[String, JList[String]]
+      Collections.emptyMap[String, JList[String]]
     } else {
       val c1 = request.getContent  // ChannelBuffer
       val c2 = c1.toString(Config.paramCharset)

@@ -3,7 +3,7 @@ package xitrum
 import java.util.Properties
 import java.nio.charset.Charset
 
-import xitrum.vc.env.session.SessionStore
+import xitrum.action.env.session.SessionStore
 
 // Use lazy to avoid scala.UninitializedFieldError
 object Config {

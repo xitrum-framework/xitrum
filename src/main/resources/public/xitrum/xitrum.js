@@ -18,7 +18,6 @@ var xt = {
     $(form2).hide();
     $(form2).after('<img src="/resources/public/xitrum/ajax-loader.gif" />');
 
-    data += "_method=post2" + "&_csrf_token=" + xt_csrf_token;
     $.ajax({
       type: "POST",
       url:  action2,
