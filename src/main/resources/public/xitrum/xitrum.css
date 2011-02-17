@@ -1,0 +1,20 @@
+.flash {
+  background-color: #FAEC7F;
+  border: 2px solid #FFE800;
+  color: #303030;
+  margin-bottom: 7px;
+  padding: 3px 5px;
+}
+
+.flash_msg {
+  margin-right: 50px;
+}
+
+.flash_close {
+  float: right;
+  font-size: 90%;
+}
+
+.error {
+  color: orange;
+}

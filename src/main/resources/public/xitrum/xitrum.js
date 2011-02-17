@@ -1,4 +1,4 @@
-var xt = {
+var xitrum = {
   post2: function(event) {
     var e = $(event.target);
 
@@ -9,10 +9,9 @@ var xt = {
     var form2 = (!form1) ? e : $("#" + form1);
 
     var data = ""
-
     if (form2[0].tagName == "FORM") {
        if (!form2.valid()) return false;
-       data += form2.serialize() + "&";
+       data += form2.serialize();
     }
 
     $(form2).hide();
@@ -32,15 +31,28 @@ var xt = {
     });
 
     return false;
+  },
+
+  flash: function(msg) {
+    var div =
+      "<div class='flash'>" +
+        "<a class='flash_close' href='javascript:'>Ｘ</a>" +
+        "<div class='flash_msg'>" + msg + "</div>" +
+      "</div>";
+    $("#flash").append($(div).hide().fadeIn(1000));
   }
 };
 
 $(function() {
+  $(".flash_close").live("click", function(event) {
+    $(event.target).parent().remove();
+  });
+
   // jQuery Validation plugin only works on forms and the form must be validated once
   $("form").validate();
 
   $("[post2]").each(function(i, e) {
     var eventType = $(e).attr("post2");
-    $(e).bind(eventType, xt.post2);
+    $(e).bind(eventType, xitrum.post2);
   });
 });

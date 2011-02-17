@@ -6,7 +6,8 @@ import xitrum.action.Action
 trait JQuery {
   this: Action =>
 
-  lazy val jsHead = {
+  lazy val xitrumHead = {
+    <link href="/resources/public/xitrum/xitrum.css" type="text/css" rel="stylesheet" media="all"></link>
     <script type="text/javascript" src="/resources/public/xitrum/jquery-1.5.min.js"></script>
     <script type="text/javascript" src="/resources/public/xitrum/validation-1.7.pack.js"></script>
     <script type="text/javascript" src="/resources/public/xitrum/xitrum.js"></script>

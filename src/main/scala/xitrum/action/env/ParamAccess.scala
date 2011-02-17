@@ -1,8 +1,8 @@
-package xitrum.action
+package xitrum.action.env
 
 import scala.collection.JavaConversions
 
-import xitrum.action.env.Env
+import xitrum.action.Action
 import xitrum.action.exception.MissingParam
 
 trait ParamAccess {

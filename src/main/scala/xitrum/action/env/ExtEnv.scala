@@ -10,7 +10,7 @@ import xitrum.Config
 import xitrum.action.Action
 import xitrum.action.env.session.CSRF
 
-trait ExtEnv extends Env with CSRF {
+trait ExtEnv extends Env with ParamAccess with CSRF {
   this: Action =>
 
   lazy val allParams = {

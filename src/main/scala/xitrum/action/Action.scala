@@ -13,7 +13,7 @@ import xitrum.action.validation.ValidatorInjector
 import xitrum.action.view.Renderer
 import xitrum.handler.up.Dispatcher
 
-trait Action extends ExtEnv with Logger with Net with ParamAccess with Filter with Flash with BasicAuthentication with Renderer {
+trait Action extends ExtEnv with Logger with Net with Filter with BasicAuthentication with Renderer {
   implicit def elemToValidatorInjector(elem: Elem) = new ValidatorInjector(this, elem);
 
   def execute

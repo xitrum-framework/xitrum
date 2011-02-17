@@ -5,8 +5,8 @@ import scala.xml.Unparsed
 trait JSCollector {
   private val buffer = new StringBuilder
 
-  def jsAddToView(js: String) {
-    buffer.append(js)
+  def jsAddToView(js: Any) {
+    buffer.append(js.toString)
     buffer.append("\n")
   }
 
