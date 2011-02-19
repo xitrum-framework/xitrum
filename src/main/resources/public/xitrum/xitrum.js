@@ -45,7 +45,8 @@ var xitrum = {
 
 $(function() {
   $(".flash_close").live("click", function(event) {
-    $(event.target).parent().remove();
+    var parent = $(event.target).parent();
+    parent.fadeOut(1000, function() { parent.remove() });
   });
 
   // jQuery Validation plugin only works on forms and the form must be validated once

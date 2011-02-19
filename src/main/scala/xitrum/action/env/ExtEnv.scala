@@ -30,8 +30,8 @@ trait ExtEnv extends Env with ParamAccess with CSRF {
   }
 
   // Avoid encoding, decoding when cookies/session is not touched by the application
-  private var _cookiesTouched = false
-  private var _sessionTouched = false
+  private[this] var _cookiesTouched = false
+  private[this] var _sessionTouched = false
 
   def isCookiesTouched = _cookiesTouched
   def isSessionTouched = _sessionTouched

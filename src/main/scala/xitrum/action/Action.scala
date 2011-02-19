@@ -20,10 +20,7 @@ trait Action extends ExtEnv with Logger with Net with Filter with BasicAuthentic
 
   //----------------------------------------------------------------------------
 
-  // FIXME: this causes warning
-  // "the initialization is no longer be executed before the superclass is called"
-
-  private var _responded = false
+  private[this] var _responded = false
 
   def respond = synchronized {
     if (_responded) {
