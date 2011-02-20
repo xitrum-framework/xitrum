@@ -11,7 +11,7 @@
     </rollingPolicy>
   </appender>
 
-  <logger name="xt" level="INFO"/>
+  <logger name="xitrum" level="INFO"/>
 
   <root level="INFO">
     <appender-ref ref="R"/>

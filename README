@@ -26,9 +26,7 @@ Xitrum is Scala web framework and server on top of Netty:
 |      Netty      |
 +-----------------+
 
-Layers in Xitrum are tightly coupled for speed.
-
-Xitrum needs Java 5 or above because of Netty.
+See doc directory for more information.
 
 == SBT project source directory layout
 
@@ -37,10 +35,20 @@ A typical blog application will have this directory layout:
 config
   blog.properties
   logback.properties
+  xitrum.properties
+  i18n
+    en.po
+    ja.po
+    mylib
+      en.po
+      ja.po
 lib
   jrebel.jar
 lib_managed
 project
+  build.properties
+  build
+    Project.scala
 public
   upload
 src
@@ -80,6 +88,12 @@ config                    <-- Config files are outside .jar files, edit any time
   blog.properties             They are put in classpath by runner.sh
   logback.properties
   xitrum.properties
+  i18n
+    en.po
+    ja.po
+    mylib
+      en.po
+      ja.po
 lib
   blog.jar                <-- css/img/js are concrete thus packaged here
   ...
