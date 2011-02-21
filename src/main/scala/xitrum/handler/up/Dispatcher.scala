@@ -35,21 +35,16 @@ object Dispatcher extends Logger {
         val response = new DefaultHttpResponse(HTTP_1_1, INTERNAL_SERVER_ERROR)
 
         // MissingParam is a special case
-
-        if (e.isInstanceOf[InvocationTargetException]) {
-          val ite = e.asInstanceOf[InvocationTargetException]
-          val c = ite.getCause
-          if (c.isInstanceOf[MissingParam]) {
-            response.setStatus(BAD_REQUEST)
-            val mp  = c.asInstanceOf[MissingParam]
-            val key = mp.key
-            val cb  = ChannelBuffers.copiedBuffer("Missing Param: " + key, CharsetUtil.UTF_8)
-            HttpHeaders.setContentLength(response, cb.readableBytes)
-            response.setContent(cb)
-          }
+        if (e.isInstanceOf[MissingParam]) {
+          response.setStatus(BAD_REQUEST)
+          val mp  = e.asInstanceOf[MissingParam]
+          val key = mp.key
+          val cb  = ChannelBuffers.copiedBuffer("Missing Param: " + key, CharsetUtil.UTF_8)
+          HttpHeaders.setContentLength(response, cb.readableBytes)
+          response.setContent(cb)
         }
 
-        if (response.getStatus != BAD_REQUEST) {
+        if (response.getStatus != BAD_REQUEST) {  // MissingParam
           logAccess(beginTimestamp, action, e)
           response.setHeader("X-Sendfile", System.getProperty("user.dir") + "/public/500.html")
         } else {
