@@ -7,7 +7,7 @@ import org.jboss.netty.util.CharsetUtil
 
 import xitrum.action.Action
 
-trait Renderer extends JQuery with JSCollector with Flash {
+trait Renderer extends JQuery with JSCollector with Flash with I18n {
   this: Action =>
 
   def renderText(text: Any): String = {

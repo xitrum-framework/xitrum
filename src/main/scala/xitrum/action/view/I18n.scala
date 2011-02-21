@@ -1,4 +1,6 @@
-package xitrum.action
+package xitrum.action.view
+
+import xitrum.action.Action
 
 trait I18n {
   this: Action =>
