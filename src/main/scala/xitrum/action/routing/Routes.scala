@@ -66,7 +66,7 @@ object Routes extends Logger {
       val (om, compiledPattern, _action) = cr
 
       // Check method
-      if (method.getName != "POSTBACK" && om != method) return false
+      if (om != method) return false
 
       val max2 = compiledPattern.size
 
@@ -135,7 +135,7 @@ object Routes extends Logger {
 
     compiledRoutes.find(finder) match {
       case Some(cr) =>
-        val (m, compiledPattern, action) = cr
+        val (_m, _compiledPattern, action) = cr
         Some((method, action, pathParams))
 
       case None => None

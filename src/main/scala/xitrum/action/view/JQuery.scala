@@ -46,6 +46,11 @@ trait JQuery {
     renderText(js)
   }
 
+  def jsRenderCall(function: String, args: String*) {
+    val js = jsCall(function, args:_*)
+    jsRender(js)
+  }
+
   def jsRenderUpdate(id: String, value: Any) {
     jsRender(jsUpdate(id, value))
   }

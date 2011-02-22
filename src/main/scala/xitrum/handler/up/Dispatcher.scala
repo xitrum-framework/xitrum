@@ -59,8 +59,8 @@ object Dispatcher extends Logger {
   //----------------------------------------------------------------------------
 
   private def logAccess(beginTimestamp: Long, action: Action, e: Throwable = null) {
-    // POST2Action is a gateway, skip it to avoid noisy log
-    if (action.isInstanceOf[POST2Action]) return
+    // POST2Action is a gateway, skip it to avoid noisy log if there is no error
+    if (action.isInstanceOf[POST2Action] && e == null) return
 
     val endTimestamp = System.currentTimeMillis
     val dt           = endTimestamp - beginTimestamp
