@@ -1,6 +1,7 @@
 package xitrum.action
 
 import java.net.InetSocketAddress
+import org.jboss.netty.handler.codec.http.HttpHeaders.Names.HOST
 
 trait Net {
   this: Action =>
@@ -16,8 +17,23 @@ trait Net {
    * See java.net.preferIPv6Addresses
    */
   lazy val remoteIp = {
-    val inetSocketAddress = ctx.getChannel.getRemoteAddress.asInstanceOf[InetSocketAddress]
-    val ip = inetSocketAddress.getAddress.getHostAddress
-    ip
+    val xRealIp = request.getHeader("X-Real-IP")
+    if (xRealIp == null) {
+      val inetSocketAddress = ctx.getChannel.getRemoteAddress.asInstanceOf[InetSocketAddress]
+      inetSocketAddress.getAddress.getHostAddress
+    } else {
+      xRealIp
+    }
   }
+
+  // TODO
+  lazy val scheme = "http"
+
+  lazy val (serverName, serverPort) = {
+    val np = request.getHeader(HOST)  // Ex: localhost:3000
+    val xs = np.split(":")
+    (xs(0), xs(1).toInt)
+  }
+
+  lazy val contextPath = ""
 }
