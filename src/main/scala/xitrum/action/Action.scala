@@ -5,7 +5,7 @@ import org.jboss.netty.handler.codec.http._
 import HttpHeaders.Names._
 import HttpResponseStatus._
 
-import xitrum.Logger
+import xitrum.{Config, Logger}
 import xitrum.action._
 import xitrum.action.env.ExtEnv
 import xitrum.action.routing.Routes
@@ -33,8 +33,7 @@ trait Action extends ExtEnv with Logger with Net with Filter with BasicAuthentic
     } else {
       _responded = true
 
-      clearFlashWhenRespond
-      cookies.setCookiesWhenRespond(this)
+      prepareWhenRespond
 
       henv("response") = response
       ctx.getChannel.write(henv)

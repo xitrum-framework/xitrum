@@ -55,4 +55,15 @@ trait ExtEnv extends Env with ParamAccess with CSRF {
   }
 
   lazy val at = new At
+
+  def prepareWhenRespond {
+    if (isSessionTouched) {
+      clearFlashWhenRespond
+      Config.sessionStore.store(session, this)
+    }
+
+    if (isCookiesTouched) {
+      cookies.setCookiesWhenRespond(this)
+    }
+  }
 }
