@@ -32,7 +32,12 @@ trait Net {
   lazy val (serverName, serverPort) = {
     val np = request.getHeader(HOST)  // Ex: localhost:3000
     val xs = np.split(":")
-    (xs(0), xs(1).toInt)
+    if (xs.length == 1) {
+      val port = if (scheme == "http") 80 else 443
+      (xs(0), port)
+    } else {
+      (xs(0), xs(1).toInt)
+    }
   }
 
   lazy val contextPath = ""
