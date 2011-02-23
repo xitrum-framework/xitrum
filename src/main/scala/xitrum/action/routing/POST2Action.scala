@@ -11,6 +11,8 @@ import xitrum.action.validation.ValidatorCaller
 /** Route to this action is automatically added by RouteCollector. */
 class POST2Action extends Action {
   def execute {
+    isPost2 = true
+
     pathParams.remove("*")  // Remove noisy information
 
     val encoded                = pathInfo.encoded
