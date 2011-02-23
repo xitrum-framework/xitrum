@@ -16,7 +16,7 @@ class Request2Env extends SimpleChannelUpstreamHandler with ClosedClientSilencer
     }
 
     val env = new Env
-    env("request") = m.asInstanceOf[HttpRequest]
+    env.request = m.asInstanceOf[HttpRequest]
     Channels.fireMessageReceived(ctx, env)
   }
 }

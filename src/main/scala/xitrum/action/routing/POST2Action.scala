@@ -29,8 +29,8 @@ class POST2Action extends Action {
 
     val actionClass = Class.forName(actionClassName).asInstanceOf[Class[Action]]
     if (ValidatorCaller.call(this)) {
-      henv("pathInfo")   = new PathInfo(actionClass.getName)  // /xitrum/post2/blahblah is meaningless => Use the destination class name
-      henv("bodyParams") = bodyParams                         // Set decrypted params before forwarding
+      henv.pathInfo   = new PathInfo(actionClass.getName)  // /xitrum/post2/blahblah is meaningless => Use the destination class name
+      henv.bodyParams = bodyParams                         // Set decrypted params before forwarding
       forward(actionClass)
     } else {
       // TODO: some validator may only has server side (no browser side), render the errors

@@ -3,14 +3,13 @@ package xitrum.handler.up
 import java.io.File
 
 import org.jboss.netty.channel.{ChannelHandler, SimpleChannelUpstreamHandler, ChannelHandlerContext, MessageEvent, ExceptionEvent, Channels}
-import org.jboss.netty.handler.codec.http.{HttpRequest, HttpMethod, HttpResponseStatus, HttpVersion, DefaultHttpResponse, HttpHeaders}
+import org.jboss.netty.handler.codec.http.{HttpMethod, HttpResponseStatus, HttpVersion, DefaultHttpResponse, HttpHeaders}
 import ChannelHandler.Sharable
 import HttpMethod._
 import HttpResponseStatus._
 import HttpVersion._
 
 import xitrum.handler.Env
-import xitrum.action.env.PathInfo
 
 /**
  * Serves special files or files in /public directory.
@@ -29,8 +28,8 @@ class PublicFileServer extends SimpleChannelUpstreamHandler with ClosedClientSil
     }
 
     val env      = m.asInstanceOf[Env]
-    val request  = env("request").asInstanceOf[HttpRequest]
-    val pathInfo = env("pathInfo").asInstanceOf[PathInfo]
+    val request  = env.request
+    val pathInfo = env.pathInfo
     val decoded  = pathInfo.decoded
 
     if (request.getMethod != GET) {
@@ -58,7 +57,7 @@ class PublicFileServer extends SimpleChannelUpstreamHandler with ClosedClientSil
         HttpHeaders.setContentLength(response, 0)
 
     }
-    env("response") = response
+    env.response = response
     ctx.getChannel.write(env)
   }
 

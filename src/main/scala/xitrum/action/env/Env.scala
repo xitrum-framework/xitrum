@@ -23,6 +23,8 @@ object Env {
 class Env {
   var ctx:        ChannelHandlerContext = _
   var henv:       HEnv                  = _
+
+  // Shortcuts from henv for easy access for web developers
   var request:    HttpRequest           = _
   var pathInfo:   PathInfo              = _
   var uriParams:  Env.Params            = _
@@ -32,10 +34,11 @@ class Env {
   def apply(ctx: ChannelHandlerContext, henv: HEnv) {
     this.ctx        = ctx
     this.henv       = henv
-    this.request    = henv("request").asInstanceOf[HttpRequest]
-    this.pathInfo   = henv("pathInfo").asInstanceOf[PathInfo]
-    this.uriParams  = henv("uriParams").asInstanceOf[Env.Params]
-    this.bodyParams = henv("bodyParams").asInstanceOf[Env.Params]
-    this.pathParams = henv("pathParams").asInstanceOf[Env.Params]
+
+    this.request    = henv.request
+    this.pathInfo   = henv.pathInfo
+    this.uriParams  = henv.uriParams
+    this.bodyParams = henv.bodyParams
+    this.pathParams = henv.pathParams
   }
 }

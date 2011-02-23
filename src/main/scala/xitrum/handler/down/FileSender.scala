@@ -5,7 +5,7 @@ import java.io.RandomAccessFile
 
 import org.jboss.netty.channel.{ChannelHandler, SimpleChannelDownstreamHandler, Channels, ChannelHandlerContext, MessageEvent, ChannelFuture, DefaultFileRegion, ChannelFutureListener}
 import ChannelHandler.Sharable
-import org.jboss.netty.handler.codec.http.{HttpRequest, HttpResponse, HttpHeaders, HttpResponseStatus, HttpVersion}
+import org.jboss.netty.handler.codec.http.{HttpHeaders, HttpResponseStatus, HttpVersion}
 import HttpResponseStatus._
 import HttpVersion._
 import HttpHeaders.Names._
@@ -37,8 +37,8 @@ class FileSender extends SimpleChannelDownstreamHandler with Logger {
     }
 
     val env      = m.asInstanceOf[Env]
-    val request  = env("request").asInstanceOf[HttpRequest]
-    val response = env("response").asInstanceOf[HttpResponse]
+    val request  = env.request
+    val response = env.response
     if (!response.containsHeader("X-Sendfile")) {
       ctx.sendDownstream(e)
       return

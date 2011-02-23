@@ -14,7 +14,7 @@ import HttpVersion._
 import xitrum.{Config, Logger}
 import xitrum.action.Action
 import xitrum.handler.Env
-import xitrum.action.env.{PathInfo, Env => CEnv}
+import xitrum.action.env.{Env => CEnv}
 import xitrum.action.exception.MissingParam
 import xitrum.action.routing.{Routes, POST2Action, Util}
 
@@ -51,7 +51,7 @@ object Dispatcher extends Logger {
           logAccess(beginTimestamp, action)
         }
 
-        action.henv("response") = action.response
+        action.henv.response = action.response
         action.ctx.getChannel.write(action.henv)
     }
   }
@@ -107,15 +107,15 @@ class Dispatcher extends SimpleChannelUpstreamHandler with ClosedClientSilencer 
     }
 
     val env        = m.asInstanceOf[Env]
-    val request    = env("request").asInstanceOf[HttpRequest]
-    val pathInfo   = env("pathInfo").asInstanceOf[PathInfo]
-    val uriParams  = env("uriParams").asInstanceOf[CEnv.Params]
-    val bodyParams = env("bodyParams").asInstanceOf[CEnv.Params]
+    val request    = env.request
+    val pathInfo   = env.pathInfo
+    val uriParams  = env.uriParams
+    val bodyParams = env.bodyParams
 
     Routes.matchRoute(request.getMethod, pathInfo) match {
       case Some((method, actionClass, pathParams)) =>
         request.setMethod(method)  // Override
-        env("pathParams") = pathParams
+        env.pathParams = pathParams
 
         val action = actionClass.newInstance
         action(ctx, env)
@@ -124,7 +124,7 @@ class Dispatcher extends SimpleChannelUpstreamHandler with ClosedClientSilencer 
       case None =>
         val response = new DefaultHttpResponse(HTTP_1_1, NOT_FOUND)
         response.setHeader("X-Sendfile", System.getProperty("user.dir") + "/public/404.html")
-        env("response") = response
+        env.response = response
         ctx.getChannel.write(env)
     }
   }

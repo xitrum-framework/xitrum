@@ -26,14 +26,18 @@ trait Net {
     }
   }
 
-  // TODO
-  lazy val scheme = "http"
+  lazy val ssl =
+    henv.ssl ||
+    request.getHeader("HTTPS") == "on" ||
+    request.getHeader("HTTP_X_FORWARDED_PROTO") == "https"
+
+  lazy val scheme = if (ssl) "https" else "http"
 
   lazy val (serverName, serverPort) = {
-    val np = request.getHeader(HOST)  // Ex: localhost:3000
+    val np = request.getHeader(HOST)  // Ex: localhost, localhost:3000
     val xs = np.split(":")
     if (xs.length == 1) {
-      val port = if (scheme == "http") 80 else 443
+      val port = if (ssl) 443 else 80
       (xs(0), port)
     } else {
       (xs(0), xs(1).toInt)

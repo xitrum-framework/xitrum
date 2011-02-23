@@ -2,11 +2,10 @@ package xitrum.handler.up
 
 import org.jboss.netty.channel.{ChannelHandler, SimpleChannelUpstreamHandler, ChannelHandlerContext, MessageEvent, ExceptionEvent, Channels}
 import ChannelHandler.Sharable
-import org.jboss.netty.handler.codec.http.{HttpRequest, HttpMethod}
+import org.jboss.netty.handler.codec.http.HttpMethod
 import HttpMethod._
 
 import xitrum.handler.Env
-import xitrum.action.env.{Env => CEnv}
 
 /**
  * If the real request method is POST and "_method" param exists, the "_method"
@@ -24,9 +23,9 @@ class MethodOverrider extends SimpleChannelUpstreamHandler with ClosedClientSile
     }
 
     val env        = m.asInstanceOf[Env]
-    val request    = env("request").asInstanceOf[HttpRequest]
+    val request    = env.request
     val method     = request.getMethod
-    val bodyParams = env("bodyParams").asInstanceOf[CEnv.Params]
+    val bodyParams = env.bodyParams
     if (method == POST) {
       val _methods = bodyParams.get("_method")
       if (_methods != null && !_methods.isEmpty) {

@@ -22,7 +22,7 @@ class BodyParser extends SimpleChannelUpstreamHandler with ClosedClientSilencer 
     }
 
     val env     = m.asInstanceOf[Env]
-    val request = env("request").asInstanceOf[HttpRequest]
+    val request = env.request
 
     val bodyParams: CEnv.Params = if (request.getMethod != POST) {
       Collections.emptyMap[String, JList[String]]
@@ -44,7 +44,7 @@ class BodyParser extends SimpleChannelUpstreamHandler with ClosedClientSilencer 
       }
     }
 
-    env("bodyParams") = bodyParams
+    env.bodyParams = bodyParams
     Channels.fireMessageReceived(ctx, env)
   }
 }

@@ -2,11 +2,10 @@ package xitrum.handler.up
 
 import org.jboss.netty.channel.{ChannelHandler, SimpleChannelUpstreamHandler, ChannelHandlerContext, MessageEvent, ExceptionEvent, Channels}
 import ChannelHandler.Sharable
-import org.jboss.netty.handler.codec.http.{HttpRequest, QueryStringDecoder}
+import org.jboss.netty.handler.codec.http.QueryStringDecoder
 
 import xitrum.Config
 import xitrum.handler.Env
-import xitrum.action.env.{Env => CEnv}
 import xitrum.action.env.PathInfo
 
 @Sharable
@@ -19,12 +18,12 @@ class UriParser extends SimpleChannelUpstreamHandler with ClosedClientSilencer {
     }
 
     val env     = m.asInstanceOf[Env]
-    val request = env("request").asInstanceOf[HttpRequest]
+    val request = env.request
 
     try {
-      val decoder      = new QueryStringDecoder(request.getUri, Config.paramCharset)
-      env("pathInfo")  = new PathInfo(decoder.getPath)
-      env("uriParams") = decoder.getParameters
+      val decoder   = new QueryStringDecoder(request.getUri, Config.paramCharset)
+      env.pathInfo  = new PathInfo(decoder.getPath)
+      env.uriParams = decoder.getParameters
     } catch {
       case t =>
         val msg = "Could not parse URI: " + request.getUri

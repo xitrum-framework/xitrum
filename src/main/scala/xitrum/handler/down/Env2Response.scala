@@ -2,7 +2,7 @@ package xitrum.handler.down
 
 import org.jboss.netty.channel.{ChannelHandler, SimpleChannelDownstreamHandler, ChannelHandlerContext, MessageEvent, Channels, ChannelFutureListener}
 import ChannelHandler.Sharable
-import org.jboss.netty.handler.codec.http.{HttpHeaders, HttpRequest, HttpResponse}
+import org.jboss.netty.handler.codec.http.HttpHeaders
 
 import xitrum.handler.Env
 
@@ -16,8 +16,8 @@ class Env2Response extends SimpleChannelDownstreamHandler {
     }
 
     val env      = m.asInstanceOf[Env]
-    val request  = env("request").asInstanceOf[HttpRequest]
-    val response = env("response").asInstanceOf[HttpResponse]
+    val request  = env.request
+    val response = env.response
     val future   = e.getFuture
     Channels.write(ctx, future, response)
 
