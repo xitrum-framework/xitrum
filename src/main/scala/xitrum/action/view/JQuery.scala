@@ -1,17 +1,25 @@
 package xitrum.action.view
 
-import org.jboss.netty.handler.codec.http.HttpHeaders.Names._
+import org.jboss.netty.handler.codec.http.HttpHeaders.Names.CONTENT_TYPE
+
+import xitrum.Config
 import xitrum.action.Action
 
 trait JQuery {
   this: Action =>
 
-  lazy val xitrumHead = {
-    <link href="/resources/public/xitrum/xitrum.css" type="text/css" rel="stylesheet" media="all"></link>
-    <script type="text/javascript" src="/resources/public/xitrum/jquery-1.5.min.js"></script>
-    <script type="text/javascript" src="/resources/public/xitrum/validation-1.7.pack.js"></script>
-    <script type="text/javascript" src="/resources/public/xitrum/xitrum.js"></script>
-  }
+  lazy val xitrumHead =
+    if (Config.isProductionMode) {
+      <link href="/resources/public/xitrum/xitrum.css" type="text/css" rel="stylesheet" media="all"></link>
+      <script type="text/javascript" src="/resources/public/xitrum/jquery.min-1.5.js"></script>
+      <script type="text/javascript" src="/resources/public/xitrum/jquery.validate.pack-SNAPSHOT.js"></script>
+      <script type="text/javascript" src="/resources/public/xitrum/xitrum.js"></script>
+    } else {
+      <link href="/resources/public/xitrum/xitrum.css" type="text/css" rel="stylesheet" media="all"></link>
+      <script type="text/javascript" src="/resources/public/xitrum/jquery-1.5.js"></script>
+      <script type="text/javascript" src="/resources/public/xitrum/jquery.validate-SNAPSHOT.js"></script>
+      <script type="text/javascript" src="/resources/public/xitrum/xitrum.js"></script>
+    }
 
   /** See escape_javascript of Rails */
   def jsEscape(value: Any) = value.toString

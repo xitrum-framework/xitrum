@@ -1,5 +1,7 @@
 package xitrum.action.routing
 
+import org.jboss.netty.handler.codec.http.HttpHeaders
+
 import xitrum.action.Action
 import xitrum.action.annotation.POST
 import xitrum.action.env.PathInfo
@@ -33,7 +35,8 @@ class POST2Action extends Action {
       henv.bodyParams = bodyParams                         // Set decrypted params before forwarding
       forward(actionClass)
     } else {
-      // TODO: some validator may only has server side (no browser side), render the errors
+      // Flash the default error message if the response is empty (the validators did not respond anything)
+      if (HttpHeaders.getContentLength(response, 0) == 0) jsFlash("Please check your input.")
     }
   }
 }

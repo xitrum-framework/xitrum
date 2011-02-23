@@ -15,7 +15,9 @@ object ValidatorCaller {
     action.bodyParams = bodyParams
 
     for ((paramName, securedParamName, validators) <- name_securedParamName_validators) {
-      for (v <- validators) v.validate(action, paramName, securedParamName)
+      for (v <- validators) {
+        if (!v.validate(action, paramName, securedParamName)) return false
+      }
     }
 
     true

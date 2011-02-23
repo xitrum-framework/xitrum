@@ -14,6 +14,7 @@ class MinLength(length: Int) extends Validator {
   }
 
   def validate(action: Action, paramName: String, securedParamName: String): Boolean = {
-    true
+    val value = action.param(paramName).trim
+    value.length >= length
   }
 }
