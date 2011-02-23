@@ -51,7 +51,7 @@ object Dispatcher extends Logger {
           logAccess(beginTimestamp, action)
         }
 
-        action.henv.response = action.response
+        action.henv.response = response
         action.ctx.getChannel.write(action.henv)
     }
   }

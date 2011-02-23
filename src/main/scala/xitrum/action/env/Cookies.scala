@@ -31,7 +31,8 @@ class Cookies(request: HttpRequest) extends JTreeSet[Cookie] {
     // Server needs to SET_COOKIE multiple times
     while (iter.hasNext) {
       val encoder = new CookieEncoder(true)
-      encoder.addCookie(iter.next)
+      val cookie  = iter.next
+      encoder.addCookie(cookie)
       action.response.addHeader(SET_COOKIE, encoder.encode)
     }
   }

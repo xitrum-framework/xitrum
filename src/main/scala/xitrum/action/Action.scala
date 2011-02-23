@@ -20,7 +20,10 @@ trait Action extends ExtEnv with Logger with Net with Filter with BasicAuthentic
 
   //----------------------------------------------------------------------------
 
-  private[this] var _responded = false
+  private var _responded: Boolean = _
+  {
+    _responded = false
+  }
 
   def respond = synchronized {
     if (_responded) {

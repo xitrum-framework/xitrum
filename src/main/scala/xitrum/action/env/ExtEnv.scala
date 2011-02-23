@@ -30,21 +30,26 @@ trait ExtEnv extends Env with ParamAccess with CSRF {
     ret
   }
 
+  lazy val at = new At
+
+  //----------------------------------------------------------------------------
+
   // Avoid encoding, decoding when cookies/session is not touched by the application
-  private[this] var _cookiesTouched = false
-  private[this] var _sessionTouched = false
-
-  def isCookiesTouched = _cookiesTouched
-  def isSessionTouched = _sessionTouched
-
-  lazy val cookies = {
-    _cookiesTouched = true
-    new Cookies(request)
+  private var sessionTouched: Boolean = _
+  private var cookiesTouched: Boolean = _
+  {
+    sessionTouched = false
+    cookiesTouched = false
   }
 
   lazy val session = {
-    _sessionTouched = true
+    sessionTouched = true
     Config.sessionStore.restore(this)
+  }
+
+  lazy val cookies = {
+    cookiesTouched = true
+    new Cookies(request)
   }
 
   def sessiono[T](key: String): Option[T] = {
@@ -55,10 +60,8 @@ trait ExtEnv extends Env with ParamAccess with CSRF {
     }
   }
 
-  lazy val at = new At
-
   def prepareWhenRespond {
-    if (isSessionTouched) Config.sessionStore.store(session, this)
-    if (isCookiesTouched) cookies.setCookiesWhenRespond(this)
+    if (sessionTouched) Config.sessionStore.store(session, this)
+    if (cookiesTouched) cookies.setCookiesWhenRespond(this)
   }
 }
