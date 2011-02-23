@@ -5,6 +5,7 @@ import java.util.{Map => JMap, LinkedHashMap => JLinkedHashMap, List => JList}
 import org.jboss.netty.handler.codec.http.{DefaultHttpResponse, HttpResponseStatus, HttpVersion, HttpHeaders}
 import HttpResponseStatus._
 import HttpVersion._
+import HttpHeaders.Names._
 
 import xitrum.Config
 import xitrum.action.Action
@@ -57,13 +58,7 @@ trait ExtEnv extends Env with ParamAccess with CSRF {
   lazy val at = new At
 
   def prepareWhenRespond {
-    if (isSessionTouched) {
-      clearFlashWhenRespond
-      Config.sessionStore.store(session, this)
-    }
-
-    if (isCookiesTouched) {
-      cookies.setCookiesWhenRespond(this)
-    }
+    if (isSessionTouched) Config.sessionStore.store(session, this)
+    if (isCookiesTouched) cookies.setCookiesWhenRespond(this)
   }
 }

@@ -3,8 +3,7 @@ package xitrum.action.view
 import xitrum.action.Action
 
 object Flash {
-  val FLASH_KEY           = "_flash"
-  val FLASH_SAME_RESPONSE = "_flash_same_response"
+  val FLASH_KEY = "_flash"
 }
 
 trait Flash {
@@ -14,15 +13,21 @@ trait Flash {
 
   /** @see jsFlash(msg). */
   def flash(msg: Any) {
-    session(FLASH_KEY)           = msg
-    session(FLASH_SAME_RESPONSE) = true
+    session(FLASH_KEY) = msg
   }
 
-  /** Same as jsFlash, but for web 1.0. */
+  /**
+   * Same as jsFlash, but for web 1.0. The flash is clear right after this method
+   * is called.
+   */
   def flash = {
     sessiono(FLASH_KEY) match {
-      case None      => ""
-      case Some(msg) => msg
+      case None =>
+        ""
+
+      case Some(msg) =>
+        session.delete(FLASH_KEY)
+        msg
     }
   }
 
@@ -46,17 +51,6 @@ trait Flash {
     if (!msg.isEmpty) {
       val js = jsCall("xitrum.flash", "\"" + jsEscape(msg) + "\"")
       jsAddToView(js)
-    }
-  }
-
-  //----------------------------------------------------------------------------
-
-  /** Called in Action's respond method. */
-  def clearFlashWhenRespond {
-    if (session.contains(FLASH_SAME_RESPONSE)) {
-      session.delete(FLASH_SAME_RESPONSE)
-    } else {
-      session.delete(FLASH_KEY)
     }
   }
 }
