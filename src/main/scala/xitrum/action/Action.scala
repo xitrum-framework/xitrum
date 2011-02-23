@@ -75,9 +75,15 @@ trait Action extends ExtEnv with Logger with Net with Filter with BasicAuthentic
 
   //----------------------------------------------------------------------------
 
+  var isPost2: Boolean = _  // Set to true by POST2Action
+  {
+    isPost2 = false
+  }
+
   def forward(actionClass: Class[Action]) {
     val action = actionClass.newInstance
     action(ctx, henv)
+    action.isPost2 = isPost2
     Dispatcher.dispatchWithFailsafe(action)
   }
 }
