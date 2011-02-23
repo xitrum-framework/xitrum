@@ -19,11 +19,12 @@ class Env extends HashMap[String, Any] {
    */
   var ssl:        Boolean      = false
 
-  var request:    HttpRequest  = null
-  var response:   HttpResponse = null
+  var request:    HttpRequest  = null  // Set by Request2Env
+  var response:   HttpResponse = null  // Set before the response is sent to client
 
-  var pathInfo:   PathInfo     = null
+  var pathInfo:   PathInfo     = null  // Set by UriParser
   var uriParams:  CEnv.Params  = null
-  var bodyParams: CEnv.Params  = null
-  var pathParams: CEnv.Params  = null
+
+  var bodyParams: CEnv.Params  = null  // Set by BodyParser
+  var pathParams: CEnv.Params  = null  // Set by Dispatcher
 }
