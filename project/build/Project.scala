@@ -27,14 +27,22 @@ class Project(info: ProjectInfo) extends DefaultProject(info) {
     Set(
       // Log using SLF4J
       // Projects using Xitrum must provide a concrete implentation (Logback etc.).
-      "org.slf4j"       % "slf4j-api"   % "1.6.1" % "provided",
+      "org.slf4j"       % "slf4j-api"       % "1.6.1" % "provided",
 
       // Web server
-      "org.jboss.netty" % "netty"       % "3.2.4.Final",
+      "org.jboss.netty" % "netty"           % "3.2.4.Final",
 
       // For scanning all Controllers to build routes
-      "tv.cntt"         % "annovention" % "1.0-SNAPSHOT"
+      "tv.cntt"         % "annovention"     % "1.0-SNAPSHOT",
+
+      // For page, action, and object caching
+      "org.infinispan"  % "infinispan-core" % "4.2.1.CR3"
     ) ++ super.libraryDependencies
+
+  // Paths ---------------------------------------------------------------------
+
+  // For easier development (sbt console etc.)
+  override def unmanagedClasspath = super.unmanagedClasspath +++ "config"
 
   // Publish -------------------------------------------------------------------
 

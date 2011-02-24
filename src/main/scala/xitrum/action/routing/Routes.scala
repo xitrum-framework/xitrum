@@ -7,6 +7,7 @@ import org.jboss.netty.handler.codec.http.{HttpMethod, QueryStringEncoder}
 
 import xitrum.{Config, Logger}
 import xitrum.action.Action
+import xitrum.action.cache.Cache
 import xitrum.action.env.{Env, PathInfo}
 import xitrum.action.env.session.CSRF
 
@@ -15,8 +16,8 @@ object Routes extends Logger {
 
   type Pattern         = String
   type CompiledPattern = Array[(String, Boolean)]  // String: token, Boolean: true if the token is constant
-  type Route           = (HttpMethod, Pattern,         Class[Action])
-  type CompiledRoute   = (HttpMethod, CompiledPattern, Class[Action])
+  type Route           = (HttpMethod, Pattern,         Class[Action], Option[Cache])
+  type CompiledRoute   = (HttpMethod, CompiledPattern, Class[Action], Option[Cache])
 
   private var compiledRoutes: Iterable[CompiledRoute] = _
 
@@ -56,14 +57,14 @@ object Routes extends Logger {
    *
    * @return None if not matched
    */
-  def matchRoute(method: HttpMethod, pathInfo: PathInfo): Option[(HttpMethod, Class[Action], Env.Params)] = {
+  def matchRoute(method: HttpMethod, pathInfo: PathInfo): Option[(HttpMethod, Class[Action], Env.Params, Option[Any])] = {
     val tokens = pathInfo.tokens
     val max1   = tokens.size
 
     var pathParams: Env.Params = null
 
     def finder(cr: CompiledRoute): Boolean = {
-      val (om, compiledPattern, _action) = cr
+      val (om, compiledPattern, _action, _cacheo) = cr
 
       // Check method
       if (om != method) return false
@@ -135,15 +136,15 @@ object Routes extends Logger {
 
     compiledRoutes.find(finder) match {
       case Some(cr) =>
-        val (_m, _compiledPattern, action) = cr
-        Some((method, action, pathParams))
+        val (_m, _compiledPattern, action, cacheo) = cr
+        Some((method, action, pathParams, cacheo))
 
       case None => None
     }
   }
 
   def urlFor(csrf: CSRF, actionClass: Class[Action], params: (String, Any)*): String = {
-    val cpo = compiledRoutes.find { case (_, _, klass) => klass == actionClass }
+    val cpo = compiledRoutes.find { case (_, _, klass, _) => klass == actionClass }
     if (cpo.isEmpty) {
       urlForPostback(csrf, actionClass)
     } else {
@@ -155,9 +156,9 @@ object Routes extends Logger {
   //----------------------------------------------------------------------------
 
   private def compileRoute(route: Route): CompiledRoute = {
-    val (method, pattern, action) = route
+    val (method, pattern, action, cacheo) = route
     val cp = compilePattern(pattern)
-    (method, cp, action)
+    (method, cp, action, cacheo)
   }
 
   private def compilePattern(pattern: String): CompiledPattern = {
