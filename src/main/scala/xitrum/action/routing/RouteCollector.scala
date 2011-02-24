@@ -10,11 +10,10 @@ import com.impetus.annovention.listener.ClassAnnotationDiscoveryListener
 
 import xitrum.action.Action
 import xitrum.action.annotation._
-import xitrum.action.cache._
 
 /** Scan all classes to collect routes. */
 class RouteCollector extends ClassAnnotationDiscoveryListener {
-  type RouteMap = MHashMap[Class[Action], (HttpMethod, Array[Routes.Pattern], Option[Cache])]
+  type RouteMap = MHashMap[Class[Action], (HttpMethod, Array[Routes.Pattern], Option[CacheType])]
 
   private val firsts = new RouteMap
   private val lasts  = new RouteMap
@@ -98,8 +97,8 @@ class RouteCollector extends ClassAnnotationDiscoveryListener {
     ret
   }
 
-  private def collectCache(annotations: Array[JAnnotation]): Option[Cache] = {
-    var ret: Option[Cache] = None
+  private def collectCache(annotations: Array[JAnnotation]): Option[CacheType] = {
+    var ret: Option[CacheType] = None
     for (a <- annotations) {
       if (a.isInstanceOf[CacheActionDay]) {
         val a2 = a.asInstanceOf[CacheActionDay]

@@ -11,33 +11,23 @@ import ChannelHandler.Sharable
 import HttpResponseStatus._
 import HttpVersion._
 
-import xitrum.{Config, Logger}
+import xitrum.{Cache, Config, Logger}
 import xitrum.action.Action
 import xitrum.handler.Env
-import xitrum.action.cache.{CacheAction, CachePage, Manager}
+import xitrum.action.routing.{CacheAction, CachePage, CacheType}
 import xitrum.action.env.{Env => CEnv}
 import xitrum.action.exception.MissingParam
 import xitrum.action.routing.{Routes, POST2Action, Util}
 
 object Dispatcher extends Logger {
-  def tryCacheResponse(key: String, ctx: ChannelHandlerContext)(f: => Unit) {
-    val response = Manager.cache.get(key)
-    if (response == null) {
-      f
-      if ()
-    } else {
-      ctx.getChannel.write(response)
-    }
-  }
-
-  def dispatchWithFailsafe(action: Action, cacheActiono: Option[CacheAction]) {
+  def dispatchWithFailsafe(action: Action, cacheo: Option[CacheType] = None) {
     // Begin timestamp
     val beginTimestamp = System.currentTimeMillis
 
     try {
       val passed = action.callBeforeFilters
       if (passed) {
-        cacheActiono match {
+        cacheo match {
           case None =>
             action.execute
 
@@ -133,26 +123,12 @@ class Dispatcher extends SimpleChannelUpstreamHandler with ClosedClientSilencer 
 
     Routes.matchRoute(request.getMethod, pathInfo) match {
       case Some((method, actionClass, pathParams, cacheo)) =>
-        def f(cacheActiono: Option[CacheAction]) {
-          request.setMethod(method)  // Override
-          env.pathParams = pathParams
+        request.setMethod(method)  // Override
+        env.pathParams = pathParams
 
-          val action = actionClass.newInstance
-          action(ctx, env)
-          dispatchWithFailsafe(action, cacheActiono)
-        }
-
-        cacheo match {
-          case None => f(None)
-
-          case Some(cache) =>
-            if (cache.isInstanceOf[CachePage]) {
-              f(None)
-            } else {
-              val cacheAction = cache.asInstanceOf[CacheAction]
-              f(Some(cacheAction))
-            }
-        }
+        val action = actionClass.newInstance
+        action(ctx, env)
+        dispatchWithFailsafe(action, cacheo)
 
       case None =>
         val response = new DefaultHttpResponse(HTTP_1_1, NOT_FOUND)

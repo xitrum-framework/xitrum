@@ -7,7 +7,6 @@ import org.jboss.netty.handler.codec.http.{HttpMethod, QueryStringEncoder}
 
 import xitrum.{Config, Logger}
 import xitrum.action.Action
-import xitrum.action.cache.Cache
 import xitrum.action.env.{Env, PathInfo}
 import xitrum.action.env.session.CSRF
 
@@ -16,8 +15,8 @@ object Routes extends Logger {
 
   type Pattern         = String
   type CompiledPattern = Array[(String, Boolean)]  // String: token, Boolean: true if the token is constant
-  type Route           = (HttpMethod, Pattern,         Class[Action], Option[Cache])
-  type CompiledRoute   = (HttpMethod, CompiledPattern, Class[Action], Option[Cache])
+  type Route           = (HttpMethod, Pattern,         Class[Action], Option[CacheType])
+  type CompiledRoute   = (HttpMethod, CompiledPattern, Class[Action], Option[CacheType])
 
   private var compiledRoutes: Iterable[CompiledRoute] = _
 
@@ -57,7 +56,7 @@ object Routes extends Logger {
    *
    * @return None if not matched
    */
-  def matchRoute(method: HttpMethod, pathInfo: PathInfo): Option[(HttpMethod, Class[Action], Env.Params, Option[Any])] = {
+  def matchRoute(method: HttpMethod, pathInfo: PathInfo): Option[(HttpMethod, Class[Action], Env.Params, Option[CacheType])] = {
     val tokens = pathInfo.tokens
     val max1   = tokens.size
 
