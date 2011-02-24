@@ -14,25 +14,26 @@ import HttpVersion._
 import xitrum.{Cache, Config, Logger}
 import xitrum.action.Action
 import xitrum.handler.Env
-import xitrum.action.routing.{CacheAction, CachePage, CacheType}
 import xitrum.action.env.{Env => CEnv}
 import xitrum.action.exception.MissingParam
 import xitrum.action.routing.{Routes, POST2Action, Util}
 
 object Dispatcher extends Logger {
-  def dispatchWithFailsafe(action: Action, cacheo: Option[CacheType] = None) {
+  def dispatchWithFailsafe(action: Action, cacheSecs: Int = 0) {
     // Begin timestamp
     val beginTimestamp = System.currentTimeMillis
 
     try {
-      val passed = action.callBeforeFilters
-      if (passed) {
-        cacheo match {
-          case None =>
+      if (cacheSecs > 0) {  // Page cache
+        // TODO
+      } else {
+        val passed = action.callBeforeFilters
+        if (passed) {
+          if (cacheSecs == 0) {
             action.execute
-
-          case Some(cacheAction) =>
-            action.execute
+          } else if (cacheSecs < 0) {  // Action cache
+            action.execute  // TODO
+          }
         }
       }
       logAccess(beginTimestamp, action)
@@ -122,13 +123,13 @@ class Dispatcher extends SimpleChannelUpstreamHandler with ClosedClientSilencer 
     val bodyParams = env.bodyParams
 
     Routes.matchRoute(request.getMethod, pathInfo) match {
-      case Some((method, actionClass, pathParams, cacheo)) =>
+      case Some((method, actionClass, pathParams, cacheSecs)) =>
         request.setMethod(method)  // Override
         env.pathParams = pathParams
 
         val action = actionClass.newInstance
         action(ctx, env)
-        dispatchWithFailsafe(action, cacheo)
+        dispatchWithFailsafe(action, cacheSecs)
 
       case None =>
         val response = new DefaultHttpResponse(HTTP_1_1, NOT_FOUND)

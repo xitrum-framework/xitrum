@@ -13,7 +13,7 @@ import xitrum.action.annotation._
 
 /** Scan all classes to collect routes. */
 class RouteCollector extends ClassAnnotationDiscoveryListener {
-  type RouteMap = MHashMap[Class[Action], (HttpMethod, Array[Routes.Pattern], Option[CacheType])]
+  type RouteMap = MHashMap[Class[Action], (HttpMethod, Array[Routes.Pattern], Int)]
 
   private val firsts = new RouteMap
   private val lasts  = new RouteMap
@@ -27,16 +27,16 @@ class RouteCollector extends ClassAnnotationDiscoveryListener {
     val buffer = new ArrayBuffer[Routes.Route]
 
     // Make POST2Action the first route for quicker route matching
-    buffer.append((HttpMethod.POST, Routes.POST2_PREFIX + ":*", classOf[POST2Action].asInstanceOf[Class[Action]], None))
+    buffer.append((HttpMethod.POST, Routes.POST2_PREFIX + ":*", classOf[POST2Action].asInstanceOf[Class[Action]], 0))
 
     for (map <- Array(firsts, others, lasts)) {
       val sorted = map.toBuffer.sortWith { (a1, a2) =>
         a1.toString < a2.toString
       }
 
-      for ((actionClass, httpMethod_patterns_cacheo) <- sorted) {
-        val (httpMethod, patterns, cacheo) = httpMethod_patterns_cacheo
-        for (p <- patterns) buffer.append((httpMethod, p, actionClass, cacheo))
+      for ((actionClass, httpMethod_patterns_cacheSecs) <- sorted) {
+        val (httpMethod, patterns, cacheSecs) = httpMethod_patterns_cacheSecs
+        for (p <- patterns) buffer.append((httpMethod, p, actionClass, cacheSecs))
       }
     }
 
@@ -61,8 +61,8 @@ class RouteCollector extends ClassAnnotationDiscoveryListener {
       case None =>
 
       case Some((routeMap, httpMethod, routePatterns)) =>
-        val cacheo = collectCache(annotations)
-        routeMap(klass) = (httpMethod, routePatterns, cacheo)
+        val cacheSecs = collectCache(annotations)
+        routeMap(klass) = (httpMethod, routePatterns, cacheSecs)
     }
   }
 
@@ -97,35 +97,35 @@ class RouteCollector extends ClassAnnotationDiscoveryListener {
     ret
   }
 
-  private def collectCache(annotations: Array[JAnnotation]): Option[CacheType] = {
-    var ret: Option[CacheType] = None
+  private def collectCache(annotations: Array[JAnnotation]): Int = {
+    var ret = 0
     for (a <- annotations) {
       if (a.isInstanceOf[CacheActionDay]) {
         val a2 = a.asInstanceOf[CacheActionDay]
-        ret    = Some(new CacheAction(a2.value * 24 * 60 * 60))
+        ret    = - a2.value * 24 * 60 * 60
       } else if (a.isInstanceOf[CacheActionHour]) {
         val a2 = a.asInstanceOf[CacheActionHour]
-        ret    = Some(new CacheAction(a2.value      * 60 * 60))
+        ret    = - a2.value      * 60 * 60
       } else if (a.isInstanceOf[CacheActionMinute]) {
         val a2 = a.asInstanceOf[CacheActionMinute]
-        ret    = Some(new CacheAction(a2.value           * 60))
+        ret    = - a2.value           * 60
       } else if (a.isInstanceOf[CacheActionSecond]) {
         val a2 = a.asInstanceOf[CacheActionSecond]
-        ret    = Some(new CacheAction(a2.value))
+        ret    = - a2.value
       }
 
       else if (a.isInstanceOf[CachePageDay]) {
         val a2 = a.asInstanceOf[CachePageDay]
-        ret    = Some(new CachePage(a2.value * 24 * 60 * 60))
+        ret    = a2.value * 24 * 60 * 60
       } else if (a.isInstanceOf[CachePageHour]) {
         val a2 = a.asInstanceOf[CachePageHour]
-        ret    = Some(new CachePage(a2.value      * 60 * 60))
+        ret    = a2.value      * 60 * 60
       } else if (a.isInstanceOf[CachePageMinute]) {
         val a2 = a.asInstanceOf[CachePageMinute]
-        ret    = Some(new CachePage(a2.value           * 60))
+        ret    = a2.value           * 60
       } else if (a.isInstanceOf[CachePageSecond]) {
         val a2 = a.asInstanceOf[CachePageSecond]
-        ret    = Some(new CachePage(a2.value))
+        ret    = a2.value
       }
     }
     ret

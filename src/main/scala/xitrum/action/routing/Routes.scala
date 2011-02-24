@@ -15,8 +15,8 @@ object Routes extends Logger {
 
   type Pattern         = String
   type CompiledPattern = Array[(String, Boolean)]  // String: token, Boolean: true if the token is constant
-  type Route           = (HttpMethod, Pattern,         Class[Action], Option[CacheType])
-  type CompiledRoute   = (HttpMethod, CompiledPattern, Class[Action], Option[CacheType])
+  type Route           = (HttpMethod, Pattern,         Class[Action], Int)  // Int: 0 = no cache, < 0 = action, > 0 = page
+  type CompiledRoute   = (HttpMethod, CompiledPattern, Class[Action], Int)
 
   private var compiledRoutes: Iterable[CompiledRoute] = _
 
@@ -56,14 +56,14 @@ object Routes extends Logger {
    *
    * @return None if not matched
    */
-  def matchRoute(method: HttpMethod, pathInfo: PathInfo): Option[(HttpMethod, Class[Action], Env.Params, Option[CacheType])] = {
+  def matchRoute(method: HttpMethod, pathInfo: PathInfo): Option[(HttpMethod, Class[Action], Env.Params, Int)] = {
     val tokens = pathInfo.tokens
     val max1   = tokens.size
 
     var pathParams: Env.Params = null
 
     def finder(cr: CompiledRoute): Boolean = {
-      val (om, compiledPattern, _action, _cacheo) = cr
+      val (om, compiledPattern, _action, _cacheSecs) = cr
 
       // Check method
       if (om != method) return false
@@ -135,8 +135,8 @@ object Routes extends Logger {
 
     compiledRoutes.find(finder) match {
       case Some(cr) =>
-        val (_m, _compiledPattern, action, cacheo) = cr
-        Some((method, action, pathParams, cacheo))
+        val (_m, _compiledPattern, action, cacheSecs) = cr
+        Some((method, action, pathParams, cacheSecs))
 
       case None => None
     }
@@ -155,9 +155,9 @@ object Routes extends Logger {
   //----------------------------------------------------------------------------
 
   private def compileRoute(route: Route): CompiledRoute = {
-    val (method, pattern, action, cacheo) = route
+    val (method, pattern, action, cacheSecs) = route
     val cp = compilePattern(pattern)
-    (method, cp, action, cacheo)
+    (method, cp, action, cacheSecs)
   }
 
   private def compilePattern(pattern: String): CompiledPattern = {
