@@ -50,8 +50,7 @@ trait JQuery {
 
   def jsRender(values: String*) {
     val js = values.mkString(";\n")
-    response.setHeader(CONTENT_TYPE, "text/javascript")
-    renderText(js)
+    renderText(js, "text/javascript")
   }
 
   def jsRenderCall(function: String, args: String*) {

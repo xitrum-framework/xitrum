@@ -1,25 +1,39 @@
 package xitrum.action.view
 
 import java.io.File
+import scala.xml.{Elem, NodeBuffer}
+
 import org.jboss.netty.buffer.ChannelBuffers
 import org.jboss.netty.handler.codec.http.HttpHeaders
-import org.jboss.netty.util.CharsetUtil
+import HttpHeaders.Names.CONTENT_TYPE
 
+import xitrum.Config
 import xitrum.action.Action
 
 trait Renderer extends JQuery with JSCollector with Flash with I18n {
   this: Action =>
 
-  def renderText(text: Any): String = {
-    val s = text.toString
+  def renderText(text: Any, contentType: String = null): String = {
+    // Set content type automatically
+    if (contentType != null) {
+      response.setHeader(CONTENT_TYPE, contentType)
+    } else if (!request.containsHeader(CONTENT_TYPE)) {
+      if (text.isInstanceOf[Elem] || text.isInstanceOf[NodeBuffer]) {
+        response.setHeader(CONTENT_TYPE, "application/xml")
+      } else {
+        response.setHeader(CONTENT_TYPE, "text/plain")
+      }
+    }
 
-    // Content length is number of bytes, not Unicode characters!
-    val cb = ChannelBuffers.copiedBuffer(s, CharsetUtil.UTF_8)
+    val ret = text.toString
+
+    // Content length is number of bytes, not characters!
+    val cb = ChannelBuffers.copiedBuffer(ret, Config.paramCharset)
     HttpHeaders.setContentLength(response, cb.readableBytes)
     response.setContent(cb)
     respond
 
-    s
+    ret
   }
 
   //----------------------------------------------------------------------------
@@ -33,11 +47,11 @@ trait Renderer extends JQuery with JSCollector with Flash with I18n {
   def renderView(view: Any, layout: Option[Any]) {
     layout match {
       case None =>
-        renderText(view)
+        renderText(view, "text/html")
 
       case Some(function) =>
         at("contentForLayout") = view
-        renderText(function.asInstanceOf[() => Any].apply)
+        renderText(function.asInstanceOf[() => Any].apply, "text/html")
     }
   }
 

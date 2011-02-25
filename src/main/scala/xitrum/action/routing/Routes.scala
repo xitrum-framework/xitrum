@@ -15,16 +15,18 @@ object Routes extends Logger {
 
   type Pattern         = String
   type CompiledPattern = Array[(String, Boolean)]  // String: token, Boolean: true if the token is constant
-  type Route           = (HttpMethod, Pattern,         Class[Action], Int)  // Int: 0 = no cache, < 0 = action, > 0 = page
-  type CompiledRoute   = (HttpMethod, CompiledPattern, Class[Action], Int)
+  type Route           = (HttpMethod, Pattern,         Class[Action])
+  type CompiledRoute   = (HttpMethod, CompiledPattern, Class[Action])
 
   private var compiledRoutes: Iterable[CompiledRoute] = _
+  private var cacheSecs:      Map[Class[Action], Int] = _  // Int: 0 = no cache, < 0 = action, > 0 = page
 
   def collectAndCompile {
     // Avoid loading twice in some servlet containers
     if (compiledRoutes != null) return
 
-    val routes = (new RouteCollector).collect
+    val (routes, cacheSecs0) = (new RouteCollector).collect
+    cacheSecs = cacheSecs0
 
     // Compile and log routes at the same time because the compiled routes do
     // not contain the original URL pattern.
@@ -56,14 +58,14 @@ object Routes extends Logger {
    *
    * @return None if not matched
    */
-  def matchRoute(method: HttpMethod, pathInfo: PathInfo): Option[(HttpMethod, Class[Action], Env.Params, Int)] = {
+  def matchRoute(method: HttpMethod, pathInfo: PathInfo): Option[(HttpMethod, Class[Action], Env.Params)] = {
     val tokens = pathInfo.tokens
     val max1   = tokens.size
 
     var pathParams: Env.Params = null
 
     def finder(cr: CompiledRoute): Boolean = {
-      val (om, compiledPattern, _action, _cacheSecs) = cr
+      val (om, compiledPattern, _actionClass) = cr
 
       // Check method
       if (om != method) return false
@@ -135,15 +137,17 @@ object Routes extends Logger {
 
     compiledRoutes.find(finder) match {
       case Some(cr) =>
-        val (_m, _compiledPattern, action, cacheSecs) = cr
-        Some((method, action, pathParams, cacheSecs))
+        val (_m, _compiledPattern, actionClass) = cr
+        Some((method, actionClass, pathParams))
 
       case None => None
     }
   }
 
+  def getCacheSecs(actionClass: Class[Action]) = cacheSecs(actionClass)
+
   def urlFor(csrf: CSRF, actionClass: Class[Action], params: (String, Any)*): String = {
-    val cpo = compiledRoutes.find { case (_, _, klass, _) => klass == actionClass }
+    val cpo = compiledRoutes.find { case (_, _, klass) => klass == actionClass }
     if (cpo.isEmpty) {
       urlForPostback(csrf, actionClass)
     } else {
@@ -155,9 +159,9 @@ object Routes extends Logger {
   //----------------------------------------------------------------------------
 
   private def compileRoute(route: Route): CompiledRoute = {
-    val (method, pattern, action, cacheSecs) = route
+    val (method, pattern, actionClass) = route
     val cp = compilePattern(pattern)
-    (method, cp, action, cacheSecs)
+    (method, cp, actionClass)
   }
 
   private def compilePattern(pattern: String): CompiledPattern = {

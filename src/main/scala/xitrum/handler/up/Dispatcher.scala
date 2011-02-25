@@ -2,7 +2,7 @@ package xitrum.handler.up
 
 import java.lang.reflect.{Method, InvocationTargetException}
 import java.io.Serializable
-import java.util.{Map => JMap, List => JList, LinkedHashMap, TreeMap}
+import java.util.{Map => JMap, List => JList, LinkedHashMap}
 import java.util.concurrent.TimeUnit
 
 import org.jboss.netty.channel._
@@ -15,32 +15,30 @@ import HttpVersion._
 
 import xitrum.{Cache, Config, Logger}
 import xitrum.action.Action
-import xitrum.handler.Env
 import xitrum.action.env.{Env => AEnv}
 import xitrum.action.exception.MissingParam
 import xitrum.action.routing.{Routes, POST2Action, Util}
+import xitrum.handler.Env
+import xitrum.handler.down.ResponseCacher
 
 object Dispatcher extends Logger {
-  def dispatchWithFailsafe(action: Action, cacheSecs: Int = 0) {
+  def dispatchWithFailsafe(action: Action) {
     val beginTimestamp = System.currentTimeMillis
     var hit            = false
 
     try {
+      action.henv.action = action
+      val actionClass = action.getClass.asInstanceOf[Class[Action]]
+      val cacheSecs   = Routes.getCacheSecs(actionClass)
+
       def tryCache(f: => Unit) {
-        val key   = makeCacheKey(action)
+        val key   = ResponseCacher.makeCacheKey(action)
         val value = Cache.cache.get(key)
-        val actionClassName = action.getClass.getName
         if (value == null) {
-          f  // hit = false
-
-          val serializable = serializeResponse(action.response)
-          val secs = if (cacheSecs < 0) -cacheSecs else cacheSecs
-          Cache.cache.put(key, serializable, secs, TimeUnit.SECONDS)
-
-          action.ctx.getChannel.write(action.response)
+          f  // hit = false, the
         } else {
           hit = true
-          val response = deserializeToResponse(value.asInstanceOf[Serializable])
+          val response = ResponseCacher.deserializeToResponse(value.asInstanceOf[Serializable])
           action.ctx.getChannel.write(response)
         }
       }
@@ -89,54 +87,6 @@ object Dispatcher extends Logger {
         action.henv.response = response
         action.ctx.getChannel.write(action.henv)
     }
-  }
-
-  //----------------------------------------------------------------------------
-
-  def makeCacheKey(action: Action): String = {
-    val params    = action.allParams
-    val sortedMap = new TreeMap[String, JList[String]](params)
-    action.getClass.getName + "/" + sortedMap.toString
-  }
-
-  /**
-   * Response can be (re)constructed from (status, headers, content).
-   * To be stored in cache, these must be Serializable. We choose:
-   *   status:  Int
-   *   headers: Array[(String, String)]
-   *   content: Array[Byte]
-   */
-  private def serializeResponse(response: HttpResponse): Serializable = {
-    val status  = response.getStatus.getCode
-    val headers = {
-      val list = response.getHeaders  // JList[JMap.Entry[String, String]], JMap.Entry is not Serializable!
-      val size = list.size
-      val ret  = new Array[(String, String)](size)
-      for (i <- 0 until size) {
-        val m = list.get(i)
-        ret(i) = (m.getKey, m.getValue)
-      }
-      ret
-    }
-    val bytes   = {
-      val channelBuffer = response.getContent
-      val ret = new Array[Byte](channelBuffer.readableBytes)
-      channelBuffer.readBytes(ret)
-      channelBuffer.resetReaderIndex
-      ret
-    }
-    (status, headers, bytes).asInstanceOf[Serializable]
-  }
-
-  /** This is the reverse of serializeResponse. */
-  private def deserializeToResponse(serializable: Serializable): HttpResponse = {
-    val (status, headers, bytes) = serializable.asInstanceOf[(Int, Array[(String, String)], Array[Byte])]
-
-    val response = new DefaultHttpResponse(HTTP_1_1, HttpResponseStatus.valueOf(status))
-    for ((k, v) <- headers) response.addHeader(k, v)
-    response.setContent(ChannelBuffers.wrappedBuffer(bytes))
-
-    response
   }
 
   //----------------------------------------------------------------------------
@@ -203,13 +153,13 @@ class Dispatcher extends SimpleChannelUpstreamHandler with ClosedClientSilencer 
     val bodyParams = env.bodyParams
 
     Routes.matchRoute(request.getMethod, pathInfo) match {
-      case Some((method, actionClass, pathParams, cacheSecs)) =>
+      case Some((method, actionClass, pathParams)) =>
         request.setMethod(method)  // Override
-        env.pathParams = pathParams
+        env.pathParams  = pathParams
 
         val action = actionClass.newInstance
         action(ctx, env)
-        dispatchWithFailsafe(action, cacheSecs)
+        dispatchWithFailsafe(action)
 
       case None =>
         val response = new DefaultHttpResponse(HTTP_1_1, NOT_FOUND)

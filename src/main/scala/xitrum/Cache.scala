@@ -5,7 +5,7 @@ import java.util.concurrent.TimeUnit
 import com.hazelcast.core.Hazelcast
 import com.hazelcast.core.IMap
 
-object Cache {
+object Cache extends Logger {
   val cache = {
     // http://code.google.com/p/hazelcast/wiki/Config
     // http://code.google.com/p/hazelcast/source/browse/trunk/hazelcast/src/main/java/com/hazelcast/config/XmlConfigBuilder.java
@@ -19,12 +19,20 @@ object Cache {
     Hazelcast.getMap("xitrum").asInstanceOf[IMap[String, Any]]
   }
 
-  def tryCache(key: String, secs: Int)(f: => Any): Any = {
-    val value = cache.get(key)
-    if (value != null) return value
+  def tryCacheSecond[T](key: Any, secs: Int)(f: => T): T = {
+    val key2  = key.toString
+    val value = cache.get(key2)
+    if (value != null) return value.asInstanceOf[T]
 
     val value2 = f
-    cache.putIfAbsent(key, value2, secs, TimeUnit.SECONDS)
+
+    logger.debug("putIfAbsent: " + key2)
+    cache.putIfAbsent(key2, value2, secs, TimeUnit.SECONDS)
+
     value2
   }
+
+  def tryCacheDay[T]   (key: String, days:    Int)(f: => T): T = tryCacheSecond(key, days * 24 * 60 * 60)(f)
+  def tryCacheHour[T]  (key: String, hours:   Int)(f: => T): T = tryCacheSecond(key, hours     * 60 * 60)(f)
+  def tryCacheMinute[T](key: String, minutes: Int)(f: => T): T = tryCacheSecond(key, minutes        * 60)(f)
 }

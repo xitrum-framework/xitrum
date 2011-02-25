@@ -19,15 +19,16 @@ class RouteCollector extends ClassAnnotationDiscoveryListener {
   private val lasts  = new RouteMap
   private val others = new RouteMap
 
-  def collect: Array[Routes.Route]  = {
+  def collect: (Array[Routes.Route], Map[Class[Action], Int])  = {
     val discoverer = new ClasspathDiscoverer
     discoverer.addAnnotationListener(this)
     discoverer.discover
 
-    val buffer = new ArrayBuffer[Routes.Route]
+    val routeBuffer = new ArrayBuffer[Routes.Route]
+    val cacheBuffer = new MHashMap[Class[Action], Int]
 
     // Make POST2Action the first route for quicker route matching
-    buffer.append((HttpMethod.POST, Routes.POST2_PREFIX + ":*", classOf[POST2Action].asInstanceOf[Class[Action]], 0))
+    routeBuffer.append((HttpMethod.POST, Routes.POST2_PREFIX + ":*", classOf[POST2Action].asInstanceOf[Class[Action]]))
 
     for (map <- Array(firsts, others, lasts)) {
       val sorted = map.toBuffer.sortWith { (a1, a2) =>
@@ -36,11 +37,12 @@ class RouteCollector extends ClassAnnotationDiscoveryListener {
 
       for ((actionClass, httpMethod_patterns_cacheSecs) <- sorted) {
         val (httpMethod, patterns, cacheSecs) = httpMethod_patterns_cacheSecs
-        for (p <- patterns) buffer.append((httpMethod, p, actionClass, cacheSecs))
+        for (p <- patterns) routeBuffer.append((httpMethod, p, actionClass))
+        cacheBuffer(actionClass) = cacheSecs
       }
     }
 
-    buffer.toArray
+    (routeBuffer.toArray, cacheBuffer.toMap)
   }
 
   def supportedAnnotations = Array(

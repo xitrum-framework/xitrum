@@ -26,6 +26,7 @@ class ChannelPipelineFactory extends CPF {
       // Downstream, direction: last handler -> first handler
       new HttpResponseEncoder,
       new Env2Response,
-      new FileSender)
+      new FileSender,
+      new ResponseCacher)
   }
 }
