@@ -8,6 +8,9 @@ import HttpHeaders.Names._
 import HttpResponseStatus._
 import HttpVersion._
 
+import xitrum.{Config, MimeType}
+import xitrum.handler.SmallFileCache
+
 @Sharable
 class PublicResourceServer extends SimpleChannelUpstreamHandler with ClosedClientSilencer {
   override def messageReceived(ctx: ChannelHandlerContext, e: MessageEvent) {
@@ -33,17 +36,22 @@ class PublicResourceServer extends SimpleChannelUpstreamHandler with ClosedClien
         ctx.getChannel.write(response)
 
       case Some(bytes) =>
-        val len  = bytes.length
-        val lens = len.toString
-        val ims  = request.getHeader(IF_MODIFIED_SINCE)
-        if (ims != null && ims == lens) {  // Size comparison is good enough
+        // Size comparison is good enough
+        // Cannot use web server startup time, because there may be multiple
+        // web servers behind a load balancer!
+        val length       = bytes.length
+        val lastModified = SmallFileCache.lastModified(length * 100)  // Magnify the change in size
+        val ims          = request.getHeader(IF_MODIFIED_SINCE)
+        if (ims != null && ims == length) {
           val response = new DefaultHttpResponse(HTTP_1_1, NOT_MODIFIED)
           HttpHeaders.setContentLength(response, 0)
           ctx.getChannel.write(response)
         } else {
           val response = new DefaultHttpResponse(HTTP_1_1, OK)
-          HttpHeaders.setContentLength(response, len)
-          response.setHeader(LAST_MODIFIED, lens)
+          HttpHeaders.setContentLength(response, length)
+          response.setHeader(LAST_MODIFIED, lastModified)
+          val mimeo = MimeType.pathToMime(path)
+          if (mimeo.isDefined) response.setHeader(CONTENT_TYPE, mimeo.get)
           response.setContent(ChannelBuffers.wrappedBuffer(bytes))
           ctx.getChannel.write(response)
         }

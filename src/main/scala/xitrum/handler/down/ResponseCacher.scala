@@ -110,6 +110,13 @@ class ResponseCacher extends SimpleChannelDownstreamHandler {
     val env      = m.asInstanceOf[Env]
     val action   = env.action
 
+    // action may be null when the request could not go to Dispatcher, for
+    // example when the response is served from PublicResourceServer
+    if (action == null) {
+      ctx.sendDownstream(e)
+      return
+    }
+
     val actionClass = action.getClass.asInstanceOf[Class[Action]]
     val cacheSecs   = Routes.getCacheSecs(actionClass)
 

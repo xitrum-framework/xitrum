@@ -51,13 +51,14 @@ class FileSender extends SimpleChannelDownstreamHandler with Logger {
 
     // Try to serve from cache
     SmallFileCache.get(abs) match {
-      case SmallFileCache.Hit(bytes, lastModified) =>
+      case SmallFileCache.Hit(bytes, lastModified, mimeo) =>
         if (request.getHeader(IF_MODIFIED_SINCE) == lastModified) {
           response.setStatus(NOT_MODIFIED)
         } else {
           logger.debug("Serve " + abs + " from cache")
           HttpHeaders.setContentLength(response, bytes.length)
           response.setHeader(LAST_MODIFIED, lastModified)
+          if (mimeo.isDefined) response.setHeader(CONTENT_TYPE, mimeo.get)
           response.setContent(ChannelBuffers.wrappedBuffer(bytes))
         }
         ctx.sendDownstream(e)
@@ -67,7 +68,7 @@ class FileSender extends SimpleChannelDownstreamHandler with Logger {
         HttpHeaders.setContentLength(response, 0)
         ctx.sendDownstream(e)
 
-      case SmallFileCache.FileTooBig(raf, fileLength, lastModified) =>
+      case SmallFileCache.FileTooBig(raf, fileLength, lastModified, mimeo) =>
         if (request.getHeader(IF_MODIFIED_SINCE) == lastModified) {
           response.setStatus(NOT_MODIFIED)
           ctx.sendDownstream(e)
@@ -75,6 +76,7 @@ class FileSender extends SimpleChannelDownstreamHandler with Logger {
           // Write the initial line and the header
           HttpHeaders.setContentLength(response, fileLength)
           response.setHeader(LAST_MODIFIED, lastModified)
+          if (mimeo.isDefined) response.setHeader(CONTENT_TYPE, mimeo.get)
           ctx.sendDownstream(e)
 
           // Write the content

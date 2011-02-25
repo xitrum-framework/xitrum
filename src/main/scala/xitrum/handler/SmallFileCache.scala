@@ -4,26 +4,28 @@ import java.io.{File, RandomAccessFile}
 import java.text.SimpleDateFormat
 import scala.collection.mutable.HashMap
 
-import xitrum.Config
+import xitrum.{Config, MimeType}
 
 /** Cache is configureed by files_ehcache_name and files_max_size in xitrum.properties. */
 object SmallFileCache {
   /** lastModified: See http://en.wikipedia.org/wiki/List_of_HTTP_header_fields */
   class GetResult
-  case class  Hit(val bytes: Array[Byte], val lastModified: String)                                  extends GetResult
-  case object FileNotFound                                                                           extends GetResult
-  case class  FileTooBig(val file: RandomAccessFile, val fileLength: Long, val lastModified: String) extends GetResult
+  case class  Hit(val bytes: Array[Byte], val lastModified: String, val mimeo: Option[String])                                  extends GetResult
+  case object FileNotFound                                                                                                      extends GetResult
+  case class  FileTooBig(val file: RandomAccessFile, val fileLength: Long, val lastModified: String, val mimeo: Option[String]) extends GetResult
 
-  //                                                      lastModified
-  private val cache   = new HashMap[String, (Array[Byte], String)]
+  //                                                      lastModified  mime
+  private val cache   = new HashMap[String, (Array[Byte], String,       Option[String])]
   private val rfc2822 = new SimpleDateFormat("EEE, dd MMM yyyy HH:mm:ss Z")
+
+  def lastModified(timestamp: Long) = rfc2822.format(timestamp)
 
   /** abs: Absolute file path */
   def get(abs: String): GetResult = {
     val elem = cache.get(abs)
     if (elem != None) {
-      val (bytes, lastModified) = elem.get
-      return Hit(bytes, lastModified)
+      val (bytes, lastModified, mimeo) = elem.get
+      return Hit(bytes, lastModified, mimeo)
     }
 
     // For security do not return hidden file
@@ -37,8 +39,9 @@ object SmallFileCache {
       case _ => return FileNotFound
     }
 
-    val lastModifiedL = file.lastModified
-    val lastModified  = rfc2822.format(lastModifiedL)
+    val mimeo = MimeType.pathToMime(abs)
+
+    val lm = lastModified(file.lastModified)
 
     // Cache if the file is small
     val fileLength = raf.length
@@ -54,11 +57,11 @@ object SmallFileCache {
       }
 
       raf.close
-      cache(abs) = (bytes, lastModified)
-      return Hit(bytes, lastModified)
+      cache(abs) = (bytes, lm, mimeo)
+      return Hit(bytes, lm, mimeo)
     }
 
-    return FileTooBig(raf, fileLength, lastModified)
+    return FileTooBig(raf, fileLength, lm, mimeo)
   }
 
   /**
