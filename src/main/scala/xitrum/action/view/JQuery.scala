@@ -11,12 +11,12 @@ trait JQuery {
   lazy val xitrumHead =
     if (Config.isProductionMode) {
       <link href="/resources/public/xitrum/xitrum.css" type="text/css" rel="stylesheet" media="all"></link>
-      <script type="text/javascript" src="/resources/public/xitrum/jquery.min-1.5.js"></script>
+      <script type="text/javascript" src="/resources/public/xitrum/jquery.min-1.5.1.js"></script>
       <script type="text/javascript" src="/resources/public/xitrum/jquery.validate.pack-SNAPSHOT.js"></script>
       <script type="text/javascript" src="/resources/public/xitrum/xitrum.js"></script>
     } else {
       <link href="/resources/public/xitrum/xitrum.css" type="text/css" rel="stylesheet" media="all"></link>
-      <script type="text/javascript" src="/resources/public/xitrum/jquery-1.5.js"></script>
+      <script type="text/javascript" src="/resources/public/xitrum/jquery-1.5.1.js"></script>
       <script type="text/javascript" src="/resources/public/xitrum/jquery.validate-SNAPSHOT.js"></script>
       <script type="text/javascript" src="/resources/public/xitrum/xitrum.js"></script>
     }
