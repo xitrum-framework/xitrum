@@ -144,7 +144,7 @@ object Routes extends Logger {
     }
   }
 
-  def getCacheSecs(actionClass: Class[Action]) = cacheSecs(actionClass)
+  def getCacheSecs(actionClass: Class[Action]) = cacheSecs.getOrElse(actionClass, 0)
 
   def urlFor(csrf: CSRF, actionClass: Class[Action], params: (String, Any)*): String = {
     val cpo = compiledRoutes.find { case (_, _, klass) => klass == actionClass }

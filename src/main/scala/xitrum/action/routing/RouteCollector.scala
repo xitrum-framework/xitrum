@@ -95,6 +95,8 @@ class RouteCollector extends ClassAnnotationDiscoveryListener {
         val a2 = a.asInstanceOf[DELETE]
         ret    = Some((others, HttpMethod.DELETE, Array(a2.value)))
       }
+
+      if (ret.isDefined) return ret
     }
     ret
   }
@@ -129,6 +131,8 @@ class RouteCollector extends ClassAnnotationDiscoveryListener {
         val a2 = a.asInstanceOf[CachePageSecond]
         ret    = a2.value
       }
+
+      if (ret != 0) return ret
     }
     ret
   }

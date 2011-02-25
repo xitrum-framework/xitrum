@@ -78,7 +78,7 @@ object ResponseCacher {
     if (contentType == null) return (bytes, false)
 
     val lower   = contentType.toLowerCase();
-    val textual = (lower.indexOf("text") >= 0 || lower.indexOf("xml") >= 0)
+    val textual = (lower.indexOf("text") >= 0 || lower.indexOf("xml") >= 0 || lower.indexOf("javascript") >= 0 || lower.indexOf("json") >= 0)
     if (!textual) return (bytes, false)
 
     val big = bytes.length > GZIP_THRESHOLD_KB * 1024
