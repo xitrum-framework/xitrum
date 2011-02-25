@@ -33,13 +33,11 @@ package xitrum
 
 object MimeType {
   def pathToMime(path: String): Option[String] = {
-    val tokens = path.split(".")
-println(tokens)
+    val tokens = path.split("\\.")
     if (tokens.size < 2) {
       None
     } else {
       val extension = tokens.last
-println(extension)
       MimeType.extensionToMime.get(extension)
     }
   }

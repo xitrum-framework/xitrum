@@ -40,7 +40,7 @@ class PublicResourceServer extends SimpleChannelUpstreamHandler with ClosedClien
         // Cannot use web server startup time, because there may be multiple
         // web servers behind a load balancer!
         val length       = bytes.length
-        val lastModified = SmallFileCache.lastModified(length * 100)  // Magnify the change in size
+        val lastModified = SmallFileCache.lastModified(length * 10000)  // Magnify the change in size
         val ims          = request.getHeader(IF_MODIFIED_SINCE)
         if (ims != null && ims == length) {
           val response = new DefaultHttpResponse(HTTP_1_1, NOT_MODIFIED)
