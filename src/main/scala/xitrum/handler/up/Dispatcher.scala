@@ -1,7 +1,8 @@
 package xitrum.handler.up
 
 import java.lang.reflect.{Method, InvocationTargetException}
-import java.util.{Map => JMap, List => JList, LinkedHashMap}
+import java.util.{Map => JMap, List => JList, LinkedHashMap, TreeMap}
+import java.util.concurrent.TimeUnit
 
 import org.jboss.netty.channel._
 import org.jboss.netty.buffer.ChannelBuffers
@@ -14,7 +15,7 @@ import HttpVersion._
 import xitrum.{Cache, Config, Logger}
 import xitrum.action.Action
 import xitrum.handler.Env
-import xitrum.action.env.{Env => CEnv}
+import xitrum.action.env.{Env => AEnv}
 import xitrum.action.exception.MissingParam
 import xitrum.action.routing.{Routes, POST2Action, Util}
 
@@ -24,18 +25,41 @@ object Dispatcher extends Logger {
     val beginTimestamp = System.currentTimeMillis
 
     try {
-      if (cacheSecs > 0) {  // Page cache
-        // TODO
+      def tryCache(f: => Unit) {
+        val key   = paramsToKey(action.allParams)
+        val value = Cache.cache.get(key)
+        if (value == null) {
+          val msg = if (cacheSecs < 0) "Action cache miss" else "Page cache miss"
+          logger.debug(msg)
+
+          f
+
+          val secs = if (cacheSecs < 0) -cacheSecs else cacheSecs
+          Cache.cache.put(key, action.response, secs, TimeUnit.SECONDS)
+          action.ctx.getChannel.write(action.response)
+        } else {
+          val msg = if (cacheSecs < 0) "Action cache hit" else "Page cache hit"
+          logger.debug(msg)
+          action.ctx.getChannel.write(value)
+        }
+      }
+
+      if (cacheSecs > 0) {             // Page cache
+        tryCache {
+          val passed = action.callBeforeFilters
+          if (passed) action.execute
+        }
       } else {
         val passed = action.callBeforeFilters
         if (passed) {
-          if (cacheSecs == 0) {
+          if (cacheSecs == 0) {        // No cache
             action.execute
           } else if (cacheSecs < 0) {  // Action cache
-            action.execute  // TODO
+            tryCache { action.execute }
           }
         }
       }
+
       logAccess(beginTimestamp, action)
     } catch {
       case e =>
@@ -67,6 +91,11 @@ object Dispatcher extends Logger {
   }
 
   //----------------------------------------------------------------------------
+
+  def paramsToKey(params: AEnv.Params): String = {
+    val sortedMap = new TreeMap[String, JList[String]](params)
+    sortedMap.toString
+  }
 
   private def logAccess(beginTimestamp: Long, action: Action, e: Throwable = null) {
     // POST2Action is a gateway, skip it to avoid noisy log if there is no error
