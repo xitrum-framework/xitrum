@@ -32,7 +32,9 @@ trait Renderer extends JQuery with JSCollector with Flash with I18n {
 
   def renderView(view: Any, layout: Option[Any]) {
     layout match {
-      case None           => renderText(view)
+      case None =>
+        renderText(view)
+
       case Some(function) =>
         at("contentForLayout") = view
         renderText(function.asInstanceOf[() => Any].apply)
@@ -52,11 +54,7 @@ trait Renderer extends JQuery with JSCollector with Flash with I18n {
    * the current working directory (System.getProperty("user.dir"))
    */
   def renderFile(path: String) {
-    val abs = if (path.startsWith("/"))
-      path
-    else
-      System.getProperty("user.dir") + File.separator + path
-
+    val abs = if (path.startsWith("/")) path else  System.getProperty("user.dir") + File.separator + path
     response.setHeader("X-Sendfile", abs)
     respond
   }

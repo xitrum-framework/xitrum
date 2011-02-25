@@ -3,7 +3,7 @@
   <map name="xitrum">
     <backup-count>1</backup-count>
     <eviction-policy>LRU</eviction-policy>
-    <max-size>0</max-size>
+    <max-size>100000</max-size>
     <eviction-percentage>25</eviction-percentage>
   </map>
 </hazelcast>
