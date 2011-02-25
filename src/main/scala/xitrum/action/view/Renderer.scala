@@ -17,7 +17,7 @@ trait Renderer extends JQuery with JSCollector with Flash with I18n {
     // Set content type automatically
     if (contentType != null) {
       response.setHeader(CONTENT_TYPE, contentType)
-    } else if (!request.containsHeader(CONTENT_TYPE)) {
+    } else if (!response.containsHeader(CONTENT_TYPE)) {
       if (text.isInstanceOf[Elem] || text.isInstanceOf[NodeBuffer]) {
         response.setHeader(CONTENT_TYPE, "application/xml")
       } else {

@@ -1,13 +1,15 @@
 package xitrum.handler.down
 
-import java.io.Serializable
+import java.io.{ByteArrayOutputStream, Serializable}
 import java.util.{Map => JMap, List => JList, LinkedHashMap, TreeMap}
 import java.util.concurrent.TimeUnit
+import java.util.zip.GZIPOutputStream;
 
 import org.jboss.netty.channel.{ChannelHandler, SimpleChannelDownstreamHandler, ChannelHandlerContext, MessageEvent, Channels, ChannelFutureListener}
 import org.jboss.netty.buffer.ChannelBuffers
 import ChannelHandler.Sharable
 import org.jboss.netty.handler.codec.http.{DefaultHttpResponse, HttpHeaders, HttpResponse, HttpResponseStatus, HttpVersion}
+import HttpHeaders.Names.{CONTENT_ENCODING, CONTENT_TYPE}
 
 import xitrum.Cache
 import xitrum.action.Action
@@ -15,6 +17,8 @@ import xitrum.action.routing.Routes
 import xitrum.handler.Env
 
 object ResponseCacher {
+  private val GZIP_THRESHOLD_KB = 10
+
   def makeCacheKey(action: Action): String = {
     val params    = action.allParams
     val sortedMap = new TreeMap[String, JList[String]](params)
@@ -22,11 +26,12 @@ object ResponseCacher {
   }
 
     /**
-   * Response can be (re)constructed from (status, headers, content).
+   * Response can be (re)constructed from (status, headers, content, compressed).
    * To be stored in cache, these must be Serializable. We choose:
    *   status:  Int
    *   headers: Array[(String, String)]
    *   content: Array[Byte]
+   *   gzipped: Boolean  // Big textual content is gzipped to save memory
    */
   def serializeResponse(response: HttpResponse): Serializable = {
     val status  = response.getStatus.getCode
@@ -40,6 +45,25 @@ object ResponseCacher {
       }
       ret
     }
+    val (bytes, gzipped) = tryGZIPBigTextualContent(response)
+    (status, headers, bytes, gzipped).asInstanceOf[Serializable]
+  }
+
+  /** This is the reverse of serializeResponse. */
+  def deserializeToResponse(serializable: Serializable): HttpResponse = {
+    val (status, headers, bytes, gzipped) = serializable.asInstanceOf[(Int, Array[(String, String)], Array[Byte], Boolean)]
+
+    val response = new DefaultHttpResponse(HttpVersion.HTTP_1_1, HttpResponseStatus.valueOf(status))
+    for ((k, v) <- headers) response.addHeader(k, v)
+    response.setContent(ChannelBuffers.wrappedBuffer(bytes))
+    if (gzipped) response.setHeader(CONTENT_ENCODING , "gzip")
+
+    response
+  }
+
+  //----------------------------------------------------------------------------
+
+  private def tryGZIPBigTextualContent(response: HttpResponse): (Array[Byte], Boolean) = {
     val bytes   = {
       val channelBuffer = response.getContent
       val ret = new Array[Byte](channelBuffer.readableBytes)
@@ -47,20 +71,29 @@ object ResponseCacher {
       channelBuffer.resetReaderIndex
       ret
     }
-    (status, headers, bytes).asInstanceOf[Serializable]
+
+    val contentType = response.getHeader(CONTENT_TYPE)
+
+    // No content type, don't know if this the response is textual
+    if (contentType == null) return (bytes, false)
+
+    val lower   = contentType.toLowerCase();
+    val textual = (lower.indexOf("text") >= 0 || lower.indexOf("xml") >= 0)
+    if (!textual) return (bytes, false)
+
+    val big = bytes.length > GZIP_THRESHOLD_KB * 1024
+    if (!big) return (bytes, false)
+
+    // Compress
+    val b = new ByteArrayOutputStream
+    val g = new GZIPOutputStream(b)
+    g.write(bytes)
+    g.finish
+    val compressedBytes = b.toByteArray
+    g.close
+
+    (compressedBytes, true)
   }
-
-  /** This is the reverse of serializeResponse. */
-  def deserializeToResponse(serializable: Serializable): HttpResponse = {
-    val (status, headers, bytes) = serializable.asInstanceOf[(Int, Array[(String, String)], Array[Byte])]
-
-    val response = new DefaultHttpResponse(HttpVersion.HTTP_1_1, HttpResponseStatus.valueOf(status))
-    for ((k, v) <- headers) response.addHeader(k, v)
-    response.setContent(ChannelBuffers.wrappedBuffer(bytes))
-
-    response
-  }
-
 }
 
 @Sharable
