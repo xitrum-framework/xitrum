@@ -6,6 +6,25 @@ import org.jboss.netty.handler.codec.http.HttpHeaders.Names.HOST
 trait Net {
   this: Action =>
 
+/* Play
+        if (Play.configuration.containsKey("XForwardedSupport") && nettyRequest.getHeader("X-Forwarded-For") != null) {
+            if (!Arrays.asList(Play.configuration.getProperty("XForwardedSupport", "127.0.0.1").split(",")).contains(request.remoteAddress)) {
+                throw new RuntimeException("This proxy request is not authorized: " + request.remoteAddress);
+            } else {
+                request.secure = ("https".equals(Play.configuration.get("XForwardedProto")) || "https".equals(nettyRequest.getHeader("X-Forwarded-Proto")) || "on".equals(nettyRequest.getHeader("X-Forwarded-Ssl")));
+                if (Play.configuration.containsKey("XForwardedHost")) {
+                    request.host = (String) Play.configuration.get("XForwardedHost");
+                } else if (nettyRequest.getHeader("X-Forwarded-Host") != null) {
+                    request.host = nettyRequest.getHeader("X-Forwarded-Host");
+                }
+                if (nettyRequest.getHeader("X-Forwarded-For") != null) {
+                    request.remoteAddress = nettyRequest.getHeader("X-Forwarded-For");
+                }
+            }
+        }
+
+*/
+
   /**
    * @return IP of the HTTP client, X-Forwarded-For is supported
    *
