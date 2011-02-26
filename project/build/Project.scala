@@ -15,13 +15,14 @@ class Project(info: ProjectInfo) extends DefaultProject(info) {
 
   // Repos ---------------------------------------------------------------------
 
-  // For netty
-  val jboss = "JBoss" at
-    "https://repository.jboss.org/nexus/content/groups/public/"
+  // For Netty 3.2.4.Final
+  val jboss = "JBoss" at "https://repository.jboss.org/nexus/content/groups/public/"
 
-  // For annovention
-  val sonatypeSnapshot = "Sonatype Snapshot" at
-    "https://oss.sonatype.org/content/repositories/snapshots"
+  // For Netty 4.0.0.Alpha1-SNAPSHOT, which must be installed to local Maven repository manurally
+  val localMaven = "Local Maven Repository" at "file://" + Path.userHome + "/.m2/repository"
+
+  // For Annovention
+  val sonatypeSnapshot = "Sonatype Snapshot" at "https://oss.sonatype.org/content/repositories/snapshots"
 
   override def libraryDependencies =
     Set(
@@ -30,7 +31,9 @@ class Project(info: ProjectInfo) extends DefaultProject(info) {
       "org.slf4j"       % "slf4j-api"       % "1.6.1" % "provided",
 
       // Web server
-      "org.jboss.netty" % "netty"           % "3.2.4.Final",
+      // 3.2.4.Final is stable, but 4.0.0.Alpha1-SNAPSHOT provides POST decoder (including file upload)
+      //"org.jboss.netty" % "netty"           % "3.2.4.Final",
+      "org.jboss.netty" % "netty"           % "4.0.0.Alpha1-SNAPSHOT",
 
       // For scanning all Controllers to build routes
       "tv.cntt"         % "annovention"     % "1.0-SNAPSHOT",

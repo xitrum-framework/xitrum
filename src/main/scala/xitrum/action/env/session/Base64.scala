@@ -5,10 +5,25 @@ import org.jboss.netty.buffer.ChannelBuffers
 import org.jboss.netty.handler.codec.base64.{Base64 => B64, Base64Dialect}
 
 object Base64 {
+  /**
+   * The result contains no padding ("=" character) so that it can be used as
+   * request parameter name. (Netty POST body decoder prohibits "=" in parameter name.)
+   *
+   * See http://en.wikipedia.org/wiki/Base_64#Padding
+   */
+  def encode(bytes: Array[Byte]): String = {
+    // No line break because the result may be used in HTTP response header (cookie)
+    val buffer = B64.encode(ChannelBuffers.copiedBuffer(bytes), false)
+    val base64String = buffer.toString(Charset.forName("UTF-8"))
+    val withoutPadding = removePadding(base64String)
+    withoutPadding
+  }
+
   def decode(base64String: String): Option[Array[Byte]] = {
     try {
-      val buffer = B64.decode(ChannelBuffers.copiedBuffer(base64String, Charset.forName("UTF-8")))
-      val bytes  = new Array[Byte](buffer.readableBytes)
+      val withPadding = addPadding(base64String)
+      val buffer      = B64.decode(ChannelBuffers.copiedBuffer(withPadding, Charset.forName("UTF-8")))
+      val bytes       = new Array[Byte](buffer.readableBytes)
       buffer.readBytes(bytes)
       Some(bytes)
     } catch {
@@ -16,9 +31,13 @@ object Base64 {
     }
   }
 
-  def encode(bytes: Array[Byte]): String = {
-    // No line break because the result may be used in HTTP response header (cookie)
-    val buffer = B64.encode(ChannelBuffers.copiedBuffer(bytes), false)
-    buffer.toString(Charset.forName("UTF-8"))
+  // ---------------------------------------------------------------------------
+
+  def removePadding(base64String: String) = base64String.replace("=", "")
+
+  def addPadding(base64String: String) = {
+    val mod = base64String.length % 4
+    val padding = if (mod == 0) "" else if (mod == 1) "===" else if (mod == 2) "==" else if (mod == 3) "="
+    base64String + padding
   }
 }

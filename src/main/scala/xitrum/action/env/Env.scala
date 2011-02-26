@@ -3,7 +3,7 @@ package xitrum.action.env
 import java.util.{Map => JMap, List => JList}
 
 import org.jboss.netty.channel.ChannelHandlerContext
-import org.jboss.netty.handler.codec.http.HttpRequest
+import org.jboss.netty.handler.codec.http.{FileUpload, HttpRequest}
 
 import xitrum.handler.{Env => HEnv}
 
@@ -14,6 +14,8 @@ object Env {
    * and we want to avoid costly conversion from Java Map to Scala Map.
    */
   type Params = JMap[String, JList[String]]
+
+  type FileParams = JMap[String, JList[FileUpload]]
 }
 
 /**
@@ -21,15 +23,18 @@ object Env {
  * and Controller can be inferred from these variables.
  */
 class Env {
+  import Env._
+
   var ctx:        ChannelHandlerContext = _
   var henv:       HEnv                  = _
 
   // Shortcuts from henv for easy access for web developers
-  var request:    HttpRequest           = _
-  var pathInfo:   PathInfo              = _
-  var uriParams:  Env.Params            = _
-  var bodyParams: Env.Params            = _
-  var pathParams: Env.Params            = _
+  var request:    HttpRequest = _
+  var pathInfo:   PathInfo    = _
+  var uriParams:  Params      = _
+  var bodyParams: Params      = _
+  var fileParams: FileParams  = _
+  var pathParams: Params      = _
 
   def apply(ctx: ChannelHandlerContext, henv: HEnv) {
     this.ctx        = ctx
@@ -39,6 +44,7 @@ class Env {
     this.pathInfo   = henv.pathInfo
     this.uriParams  = henv.uriParams
     this.bodyParams = henv.bodyParams
+    this.fileParams = henv.fileParams
     this.pathParams = henv.pathParams
   }
 }

@@ -10,6 +10,11 @@ Xitrum is Scala web framework and server on top of Netty:
   win over servlet.
 * It does not try to abstract away from the underlying network layer, it lets
   you talk directly to Netty whenever you want.
+* Lightweight, the main dependencies are only 4:
+  1. Netty (web server)
+  2. Hazelcast (distributed page, action, object cache)
+  3. SLF4J (log)
+  4. Javassist (URL routing autodiscover)
 
 +-----------------+
 |    Your app     |
