@@ -8,8 +8,8 @@ import HttpMethod._
 import xitrum.handler.Env
 
 /**
- * If the real request method is POST and "_method" param exists, the "_method"
- * param will override the POST method.
+ * If the real request method is POST and "_method" param exists (taken out by BodyParser),
+ * the "_method" param will override the POST method.
  *
  * This middleware should be put behind BodyParser.
  */

@@ -131,7 +131,7 @@ object Dispatcher extends Logger {
   private def filterParams(params: java.util.Map[String, java.util.List[String]]): java.util.Map[String, java.util.List[String]] = {
     val ret = new java.util.LinkedHashMap[String, java.util.List[String]]()
     ret.putAll(params)
-    for (key <- Config.filterParams) {
+    for (key <- Config.filteredParams) {
       if (ret.containsKey(key)) ret.put(key, Util.toValues("*FILTERED*"))
     }
     ret

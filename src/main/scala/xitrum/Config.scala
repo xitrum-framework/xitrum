@@ -5,7 +5,6 @@ import java.nio.charset.Charset
 
 import xitrum.action.env.session.SessionStore
 
-// Use lazy to avoid scala.UninitializedFieldError
 object Config {
   def load(path: String): String = {
     val stream = getClass.getResourceAsStream(path)
@@ -35,23 +34,60 @@ object Config {
 
   val isProductionMode = (System.getProperty("xitrum.mode") == "production")
 
-  val properties       = loadProperties("xitrum.properties")
+  // See xitrum.properties
+  // Below are all "val"s
 
-  val httpPort         = properties.getProperty("http_port",          "8080").toInt
-  val maxContentLength = properties.getProperty("max_content_length", "1048576").toInt  // default: 10MB
+  val properties = loadProperties("xitrum.properties")
 
-  val paramCharsetName = properties.getProperty("param_charset",      "UTF-8")
-  val paramCharset     = Charset.forName(paramCharsetName)
+  val httpPort = properties.getProperty("http_port").toInt
 
-  val filterParams     = properties.getProperty("filter_params",      "password").split(", ")
+  /** None if Xitrum need not to process HTTPS */
+  val httpsPort: Option[Int] = {
+    val s = properties.getProperty("https_port")
+    if (s == null) None else Some(s.toInt)
+  }
 
-  val filesMaxSize     = properties.getProperty("files_max_size",     "102400").toInt
+  val compressResponse = {
+    val s = properties.getProperty("compress_response")
+    if (s == null || s == "false") false else true
+  }
 
-  val sessionMarker    = properties.getProperty("session_marker",     "_session")
-  val sessionStore     = {
-    val className = properties.getProperty("session_store", "xitrum.vc.env.session.CookieSessionStore")
+  val sessionMarker = properties.getProperty("session_marker")
+  val sessionStore  = {
+    val className = properties.getProperty("session_store")
     Class.forName(className).newInstance.asInstanceOf[SessionStore]
   }
 
-  val secureBase64Key  = properties.getProperty("secure_base64_key",  "1234567890123456")
+  val secureKey = properties.getProperty("secure_key")
+
+  //----------------------------------------------------------------------------
+
+  // Below are all "var"s so that application developers may change the defaults
+
+  var maxRequestContentLengthInMB = 10
+
+  /**
+   * Xitrum can serve static files (request URL in the form /public/...
+   * or /responses/public/... or there is X-Sendfile in the response header),
+   * and it caches small static files in memory.
+   */
+  var cacheSmallStaticFileMaxSizeInKB = 512
+
+  var paramCharsetName = "UTF-8"
+  var paramCharset     = Charset.forName(paramCharsetName)
+
+  /**
+   * Parameters are logged to access log
+   * Comma separated list of sensitive parameters that should not be logged
+   */
+  var filteredParams = Array("password")
+
+  /**
+   * Xitrum checks the response Content-Type header to test if the response is
+   * textual (text/html, text/plain etc.). If the response is big and gzip or
+   * deflate Accept-Encoding header is set in the request, Xitrum will gzip or
+   * deflate it. Xitrum compresses both static (see cacheSmallStaticFileMaxSizeInKB)
+   * and dynamic response.
+   */
+  var compressBigTextualResponseMinSizeInKB = 50
 }

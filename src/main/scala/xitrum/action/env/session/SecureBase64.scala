@@ -1,6 +1,6 @@
 package xitrum.action.env.session
 
-import java.security.SecureRandom
+import java.security.{MessageDigest, SecureRandom}
 import javax.crypto.{Cipher, Mac}
 import javax.crypto.spec.{SecretKeySpec, IvParameterSpec}
 
@@ -27,8 +27,6 @@ object SecureBase64 {
 
   //----------------------------------------------------------------------------
 
-  private def key = Config.secureBase64Key.getBytes("UTF-8")
-
   // Algorithm to seed random numbers
   private val SEED_ALGORITHM = "SHA1PRNG"
 
@@ -40,6 +38,15 @@ object SecureBase64 {
 
   // Full algorithm to encrypt data with
   private val CRYPT_ALGORITHM = "AES/CBC/PKCS5Padding"
+
+  /** AES compitable key computed from Config.secureKey */
+  private val key: Array[Byte] = {
+    // See http://stackoverflow.com/questions/992019/java-256bit-aes-encryption/992413
+    val messageDigest = MessageDigest.getInstance("SHA-256")
+    messageDigest.reset
+    messageDigest.update(Config.secureKey.getBytes("UTF-8"))
+    messageDigest.digest
+  }
 
   /** @return a random byte array of the specified size. */
   private def secureRandomBytes(size: Int): Array[Byte] = {

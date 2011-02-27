@@ -45,7 +45,7 @@ object SmallFileCache {
 
     // Cache if the file is small
     val fileLength = raf.length
-    if (Config.isProductionMode && fileLength <= Config.filesMaxSize) synchronized {
+    if (Config.isProductionMode && fileLength <= Config.cacheSmallStaticFileMaxSizeInKB * 1024) synchronized {
       val len = fileLength.toInt
       val bytes = new Array[Byte](len)
 

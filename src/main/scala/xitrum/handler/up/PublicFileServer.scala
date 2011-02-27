@@ -17,6 +17,8 @@ import xitrum.handler.Env
  * Special files:
  *    favicon.ico may be not at the root: http://en.wikipedia.org/wiki/Favicon
  *    robots.txt     must be at the root: http://en.wikipedia.org/wiki/Robots_exclusion_standard
+ *
+ * Uses pathInfo parsed at UriParser.
  */
 @Sharable
 class PublicFileServer extends SimpleChannelUpstreamHandler with ClosedClientSilencer {
