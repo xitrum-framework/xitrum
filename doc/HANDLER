@@ -1,0 +1,26 @@
+== Handler types
+
+In Netty, there are 2 types of handlers:
+* upstream:   the direction from request  client -> server
+* downstream: the direction from response server -> client
+
+See ChannelPipelineFactory.scala.
+
+                                                                       /robots.txt
+                                                                       /favicon.ico                   fileParams
+Request  /resources/public/...               Env            uriParams  /public/...                    bodyParams                                pathParams
+-------> PublicResourceServer -> Request2Env ---> UriParser ---------> PublicFileServer -> BodyParser ----------> MethodOverrider -> Dispatcher ----------> [Action]
+
+                                                                                                                                                                     Response                                               Env
+                                                                                                                                                                    <-------- Env2Response <- FileSender <- ResponseCacher <---
+
+
+
+
+                                                                                                                         /favicon.ico
+                                                                                                                         /robots.txt                                                                                   fileParams
+                                                      Request                                                            /public/...         /resources/public/...               Env            uriParams              bodyParams                                pathParams
+[upstream]  HttpRequestDecoder -> HttpChunkAggregator -------------------------------------------------> |FileSender| -> PublicFileServer -> PublicResourceServer -> Request2Env ---> UriParser --------->  BodyParser ----------> MethodOverrider -> Dispatcher ----------> [Action responds Env]
+                                                                                                         | (both up |
+                                                                                                Response | and down |                                                                                                                                                                     Response                                 Env
+[downstream                                           HttpResponseEncoder <----------------------------- | handler) | <--------------------------------------------------------------------------------------------------------------------------------------------------------------------------- Env2Response <- ResponseCacher <---

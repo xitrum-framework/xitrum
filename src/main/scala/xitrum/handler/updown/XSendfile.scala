@@ -1,4 +1,4 @@
-package xitrum.handler.down
+package xitrum.handler.updown
 
 import java.io.File
 import java.io.RandomAccessFile
@@ -26,7 +26,7 @@ object FileSender {
  * 2. If the file is small: cache in memory and use normal response
  */
 @Sharable
-class FileSender extends SimpleChannelDownstreamHandler with Logger {
+class XSendfile extends SimpleChannelDownstreamHandler with Logger {
   import FileSender._
 
   override def writeRequested(ctx: ChannelHandlerContext, e: MessageEvent) {

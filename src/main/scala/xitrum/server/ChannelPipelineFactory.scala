@@ -6,7 +6,9 @@ import org.jboss.netty.handler.codec.http.{HttpRequestDecoder, HttpChunkAggregat
 import xitrum.Config
 import xitrum.handler.up._
 import xitrum.handler.down._
+import xitrum.handler.updown._
 
+/** See doc/HANDLER */
 class ChannelPipelineFactory extends CPF {
   def getPipeline: ChannelPipeline = {
     // StaticChannelPipeline provides extreme performance at the cost of
@@ -20,20 +22,29 @@ class ChannelPipelineFactory extends CPF {
     val maxRequestContentLengthInB = Config.maxRequestContentLengthInMB * 1024 * 1024
     new StaticChannelPipeline(
       // Upstream, direction: first handler -> last handler
+      // Downstream, direction: last handler -> first handler
+
+      // Up
       new HttpRequestDecoder,
       new HttpChunkAggregator(maxRequestContentLengthInB),
+
+      // Down
+      new HttpResponseEncoder,
+
+      // Both up and down
+      new XSendfile,
+
+      // Up
       new PublicResourceServer,
       new Request2Env,
       new UriParser,
       new PublicFileServer,
       new BodyParser,
       new MethodOverrider,
-      new Dispatcher,  // Should be last
+      new Dispatcher,
 
-      // Downstream, direction: last handler -> first handler
-      new HttpResponseEncoder,
+      // Down
       new Env2Response,
-      new FileSender,
       new ResponseCacher)
   }
 }
