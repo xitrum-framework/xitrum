@@ -60,8 +60,8 @@ class BodyParser extends SimpleChannelUpstreamHandler with ClosedClientSilencer 
             putOrAppendToList(bodyParams, name, value)
           } else if (data.getHttpDataType == HttpDataType.FileUpload) {
             val fileUpload = data.asInstanceOf[FileUpload]
-            val name       = fileUpload.getName
-            if (fileUpload.isCompleted) {
+            if (fileUpload.isCompleted && fileUpload.length > 0) {  // Skip empty file
+              val name = fileUpload.getName
               putOrAppendToList(fileParams, name, fileUpload)
             }
           }

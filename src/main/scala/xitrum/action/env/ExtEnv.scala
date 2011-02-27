@@ -14,25 +14,18 @@ import xitrum.action.env.session.CSRF
 trait ExtEnv extends Env with ParamAccess with FileParamAccess with CSRF {
   this: Action =>
 
-  lazy val allParams = {
-    val ret = new JLinkedHashMap[String, JList[String]]()
-    // The order is important because we want the later to overwrite the former
-    ret.putAll(uriParams)
-    ret.putAll(bodyParams)
-    ret.putAll(pathParams)
-    ret
-  }
-
   /** The default response is empty 200 OK */
-  lazy val response = {
+  val response = {
     val ret = new DefaultHttpResponse(HTTP_1_1, OK)
     HttpHeaders.setContentLength(ret, 0)
     ret
   }
 
-  lazy val at = new At
-
   //----------------------------------------------------------------------------
+
+  // The below are not always accessed by framwork/application, thus set to lazy
+
+  lazy val at = new At
 
   // Avoid encoding, decoding when cookies/session is not touched by the application
   private var sessionTouched: Boolean = _

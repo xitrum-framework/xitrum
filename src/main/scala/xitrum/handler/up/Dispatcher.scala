@@ -2,7 +2,7 @@ package xitrum.handler.up
 
 import java.lang.reflect.{Method, InvocationTargetException}
 import java.io.Serializable
-import java.util.{Map => JMap, List => JList, LinkedHashMap}
+import java.util.{Map => JMap, List => JList, LinkedHashMap => JLinkedHashMap}
 import java.util.concurrent.TimeUnit
 
 import org.jboss.netty.channel._
@@ -99,10 +99,13 @@ object Dispatcher extends Logger {
       val endTimestamp = System.currentTimeMillis
       val dt           = endTimestamp - beginTimestamp
 
-      action.request.getMethod       + " " +
-      action.pathInfo.decoded        + " " +
-      filterParams(action.allParams) + " " +
-      dt + " [ms]"
+      action.request.getMethod                                                                    +
+      " " + action.pathInfo.decoded                                                               +
+      (if (!action.uriParams.isEmpty)  ", uriParams: "  + filterParams(action.uriParams)  else "") +
+      (if (!action.bodyParams.isEmpty) ", bodyParams: " + filterParams(action.bodyParams) else "") +
+      (if (!action.pathParams.isEmpty) ", pathParams: " + filterParams(action.pathParams) else "") +
+      (if (!action.fileParams.isEmpty) ", fileParams: " +              action.fileParams  else "") +
+      ", " + dt + " [ms]"
     }
 
     def extraInfo = {

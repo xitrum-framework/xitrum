@@ -1,6 +1,6 @@
 package xitrum.action.env
 
-import java.util.{Map => JMap, List => JList}
+import java.util.{Map => JMap, List => JList, LinkedHashMap => JLinkedHashMap}
 
 import org.jboss.netty.channel.ChannelHandlerContext
 import org.jboss.netty.handler.codec.http.{FileUpload, HttpRequest}
@@ -29,22 +29,44 @@ class Env {
   var henv:       HEnv                  = _
 
   // Shortcuts from henv for easy access for web developers
+
   var request:    HttpRequest = _
   var pathInfo:   PathInfo    = _
+
   var uriParams:  Params      = _
   var bodyParams: Params      = _
   var fileParams: FileParams  = _
   var pathParams: Params      = _
 
+  /**
+   * text (uriParams, bodyParams, pathParams)  vs file upload (fileParams)
+   *
+   * Lazily initialized, not initialized in "apply" so that bodyParams can be
+   * changed by ValidatorCaller. Because this is a lazy val, once this is accessed,
+   * the 3 params should not be changed, because the change will not be reflected
+   * by this val.
+   *
+   * Not a function ("def") so that the calculation is done only once.
+   */
+  lazy val textParams: Params = {
+    val ret = new JLinkedHashMap[String, JList[String]]
+    // The order is important because we want the later to overwrite the former
+    ret.putAll(uriParams)
+    ret.putAll(bodyParams)
+    ret.putAll(pathParams)
+    ret
+  }
+
   def apply(ctx: ChannelHandlerContext, henv: HEnv) {
     this.ctx        = ctx
     this.henv       = henv
 
-    this.request    = henv.request
-    this.pathInfo   = henv.pathInfo
-    this.uriParams  = henv.uriParams
-    this.bodyParams = henv.bodyParams
-    this.fileParams = henv.fileParams
-    this.pathParams = henv.pathParams
+    request    = henv.request
+    pathInfo   = henv.pathInfo
+
+    uriParams  = henv.uriParams
+    bodyParams = henv.bodyParams
+    fileParams = henv.fileParams
+    pathParams = henv.pathParams
   }
 }

@@ -20,7 +20,7 @@ object ResponseCacher {
   private val GZIP_THRESHOLD_KB = 10
 
   def makeCacheKey(action: Action): String = {
-    val params    = action.allParams
+    val params    = action.textParams
     val sortedMap = new TreeMap[String, JList[String]](params)
     "page/action cache/" + action.getClass.getName + "/" + sortedMap.toString
   }
