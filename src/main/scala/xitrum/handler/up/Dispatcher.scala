@@ -2,8 +2,8 @@ package xitrum.handler.up
 
 import java.lang.reflect.{Method, InvocationTargetException}
 import java.io.Serializable
-import java.util.{Map => JMap, List => JList, LinkedHashMap => JLinkedHashMap}
 import java.util.concurrent.TimeUnit
+import scala.collection.mutable.{HashMap => MHashMap}
 
 import org.jboss.netty.channel._
 import org.jboss.netty.buffer.ChannelBuffers
@@ -102,12 +102,12 @@ object Dispatcher extends Logger {
       val endTimestamp = System.currentTimeMillis
       val dt           = endTimestamp - beginTimestamp
 
-      action.request.getMethod                                                                    +
-      " " + action.pathInfo.decoded                                                               +
-      (if (!action.uriParams.isEmpty)  ", uriParams: "  + filterParams(action.uriParams)  else "") +
-      (if (!action.bodyParams.isEmpty) ", bodyParams: " + filterParams(action.bodyParams) else "") +
-      (if (!action.pathParams.isEmpty) ", pathParams: " + filterParams(action.pathParams) else "") +
-      (if (!action.fileParams.isEmpty) ", fileParams: " +              action.fileParams  else "") +
+      action.request.getMethod                                                                                       +
+      " " + action.pathInfo.decoded                                                                                  +
+      (if (!action.uriParams.isEmpty)        ", uriParams: "        + filterParams(action.uriParams)        else "") +
+      (if (!action.bodyParams.isEmpty)       ", bodyParams: "       + filterParams(action.bodyParams)       else "") +
+      (if (!action.pathParams.isEmpty)       ", pathParams: "       + filterParams(action.pathParams)       else "") +
+      (if (!action.fileUploadParams.isEmpty) ", fileUploadParams: " +              action.fileUploadParams  else "") +
       ", " + dt + " [ms]"
     }
 
@@ -131,11 +131,11 @@ object Dispatcher extends Logger {
   }
 
   // Same as Rails' config.filter_parameters
-  private def filterParams(params: java.util.Map[String, java.util.List[String]]): java.util.Map[String, java.util.List[String]] = {
-    val ret = new java.util.LinkedHashMap[String, java.util.List[String]]()
-    ret.putAll(params)
+  private def filterParams(params: AEnv.Params): AEnv.Params = {
+    val ret = new MHashMap[String, List[String]]
+    ret ++= params
     for (key <- Config.filteredParams) {
-      if (ret.containsKey(key)) ret.put(key, Util.toValues("*FILTERED*"))
+      if (ret.contains(key)) ret(key) = Util.toValues("*FILTERED*")
     }
     ret
   }

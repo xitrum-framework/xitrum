@@ -1,7 +1,6 @@
 package xitrum.action.validation
 
-import java.util.{ArrayList, List => JList, HashMap => JHashMap}
-import scala.collection.mutable.ArrayBuffer
+import scala.collection.mutable.{ArrayBuffer, HashMap => MHashMap}
 
 import xitrum.action.Action
 import xitrum.action.env.Env
@@ -30,11 +29,11 @@ object ValidatorCaller {
     val securedParamNames = securedBodyParams.keySet
     val i                 = securedParamNames.iterator
 
-    val bodyParams2                           = new JHashMap[String, JList[String]]
+    val bodyParams2                           = new MHashMap[String, List[String]]
     val paramName_securedParamName_validators = new ArrayBuffer[(String, String, Iterable[Validator])]
     while (i.hasNext) {
       val securedParamName = i.next
-      val value            = securedBodyParams.get(securedParamName).asInstanceOf[JList[String]]
+      val value            = securedBodyParams.get(securedParamName).asInstanceOf[List[String]]
 
       ValidatorInjector.takeOutFromName(securedParamName) match {
         case None =>

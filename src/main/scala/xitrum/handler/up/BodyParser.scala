@@ -1,7 +1,7 @@
 package xitrum.handler.up
 
-import java.util.{Collections, LinkedHashMap => JLinkedHashMap, List => JList, Map => JMap}
 import java.nio.charset.Charset
+import scala.collection.mutable.{HashMap => MHashMap}
 
 import org.jboss.netty.channel.{ChannelHandler, SimpleChannelUpstreamHandler, ChannelHandlerContext, MessageEvent, ExceptionEvent, Channels}
 import ChannelHandler.Sharable
@@ -46,12 +46,12 @@ class BodyParser extends SimpleChannelUpstreamHandler with ClosedClientSilencer 
     val env     = m.asInstanceOf[Env]
     val request = env.request
 
-    val (bodyParams, fileParams): (Params, FileParams) = if (request.getMethod != POST) {
-      (Collections.emptyMap[String, JList[String]], Collections.emptyMap[String, JList[FileUpload]])
+    val (bodyParams, fileUploadParams): (Params, FileUploadParams) = if (request.getMethod != POST) {
+      (new MHashMap[String, List[String]], new MHashMap[String, List[FileUpload]])
     } else {
       try {
-        val bodyParams = new JLinkedHashMap[String, JList[String]]
-        val fileParams = new JLinkedHashMap[String, JList[FileUpload]]
+        val bodyParams = new MHashMap[String, List[String]]
+        val fileParams = new MHashMap[String, List[FileUpload]]
 
         val decoder = new HttpPostRequestDecoder(factory, request)
         val datas   = decoder.getBodyHttpDatas
@@ -84,19 +84,19 @@ class BodyParser extends SimpleChannelUpstreamHandler with ClosedClientSilencer 
       }
     }
 
-    env.bodyParams = bodyParams
-    env.fileParams = fileParams
+    env.bodyParams       = bodyParams
+    env.fileUploadParams = fileUploadParams
     Channels.fireMessageReceived(ctx, env)
   }
 
   //----------------------------------------------------------------------------
 
-  private def putOrAppendToList[T](map: JMap[String, JList[T]], key: String, value: T) {
-    if (!map.containsKey(key)) {
-      map.put(key, Util.toValues(value))
+  private def putOrAppendToList[T](map: MHashMap[String, List[T]], key: String, value: T) {
+    if (!map.contains(key)) {
+      map(key) = Util.toValues(value)
     } else {
-      val values = map.get(key)
-      values.add(value)
+      val values = map(key)
+      map(key) = values:+(value)
     }
   }
 }

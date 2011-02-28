@@ -13,13 +13,13 @@ trait ParamAccess {
    */
   def param(key: String, coll: Env.Params = null): String = {
     val coll2 = if (coll == null) textParams else coll
-    if (coll2.containsKey(key)) coll2.get(key).get(0) else throw new MissingParam(key)
+    if (coll2.contains(key)) coll2.apply(key)(0) else throw new MissingParam(key)
   }
 
   def paramo(key: String, coll: Env.Params = null): Option[String] = {
     val coll2 = if (coll == null) textParams else coll
     val values = coll2.get(key)
-    if (values == null) None else Some(values.get(0))
+    if (values.isEmpty) None else Some((values.get)(0))
   }
 
   /**
@@ -27,16 +27,15 @@ trait ParamAccess {
    */
   def params(key: String, coll: Env.Params = null): List[String] = {
     val coll2 = if (coll == null) textParams else coll
-    if (coll2.containsKey(key))
-      JavaConversions.asScalaBuffer[String](coll2.get(key)).toList
+    if (coll2.contains(key))
+      coll2.apply(key)
     else
       throw new MissingParam(key)
   }
 
   def paramso(key: String, coll: Env.Params = null): Option[List[String]] = {
     val coll2 = if (coll == null) textParams else coll
-    val values = coll2.get(key)
-    if (values == null) None else Some(JavaConversions.asScalaBuffer[String](values).toList)
+    coll2.get(key)
   }
 
   //----------------------------------------------------------------------------

@@ -1,9 +1,9 @@
 package xitrum.handler.down
 
 import java.io.{ByteArrayOutputStream, Serializable}
-import java.util.{Map => JMap, List => JList, LinkedHashMap, TreeMap}
 import java.util.concurrent.TimeUnit
-import java.util.zip.GZIPOutputStream;
+import java.util.zip.GZIPOutputStream
+import scala.collection.immutable.TreeMap
 
 import org.jboss.netty.channel.{ChannelHandler, SimpleChannelDownstreamHandler, ChannelHandlerContext, MessageEvent, Channels, ChannelFutureListener}
 import org.jboss.netty.buffer.ChannelBuffers
@@ -13,6 +13,7 @@ import HttpHeaders.Names.{CONTENT_ENCODING, CONTENT_TYPE}
 
 import xitrum.Cache
 import xitrum.action.Action
+import xitrum.action.env.{Env => AEnv}
 import xitrum.action.routing.Routes
 import xitrum.handler.Env
 
@@ -21,7 +22,7 @@ object ResponseCacher {
 
   def makeCacheKey(action: Action): String = {
     val params    = action.textParams
-    val sortedMap = new TreeMap[String, JList[String]](params)
+    val sortedMap = (new TreeMap[String, List[String]]) ++ params
     "page/action cache/" + action.getClass.getName + "/" + sortedMap.toString
   }
 

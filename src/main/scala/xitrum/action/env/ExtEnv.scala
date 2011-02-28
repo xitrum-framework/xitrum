@@ -1,7 +1,5 @@
 package xitrum.action.env
 
-import java.util.{Map => JMap, LinkedHashMap => JLinkedHashMap, List => JList}
-
 import org.jboss.netty.handler.codec.http.{DefaultHttpResponse, HttpResponseStatus, HttpVersion, HttpHeaders}
 import HttpResponseStatus._
 import HttpVersion._

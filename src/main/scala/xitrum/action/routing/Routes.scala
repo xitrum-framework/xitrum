@@ -1,8 +1,7 @@
 package xitrum.action.routing
 
 import java.lang.reflect.Method
-import java.util.{Collections, LinkedHashMap => JLinkedHashMap, List => JList}
-import scala.collection.mutable.{ArrayBuffer, StringBuilder}
+import scala.collection.mutable.{ArrayBuffer, HashMap => MHashMap, StringBuilder}
 import org.jboss.netty.handler.codec.http.{HttpMethod, QueryStringEncoder}
 
 import xitrum.{Config, Logger}
@@ -62,7 +61,7 @@ object Routes extends Logger {
     val tokens = pathInfo.tokens
     val max1   = tokens.size
 
-    var pathParams: Env.Params = null
+    var pathParams: MHashMap[String, List[String]] = null
 
     def finder(cr: CompiledRoute): Boolean = {
       val (om, compiledPattern, _actionClass) = cr
@@ -89,7 +88,7 @@ object Routes extends Logger {
       // 0 = max2 <= max1
       if (max2 == 0) {
         if (max1 == 0) {
-          pathParams = new JLinkedHashMap[String, JList[String]]()
+          pathParams = new MHashMap[String, List[String]]
           return true
         }
 
@@ -98,7 +97,7 @@ object Routes extends Logger {
 
       // 0 < max2 <= max1
 
-      pathParams = new JLinkedHashMap[String, JList[String]]()
+      pathParams = new MHashMap[String, List[String]]
       var i = 0  // i will go from 0 until max1
 
       compiledPattern.forall { tc =>
@@ -110,13 +109,13 @@ object Routes extends Logger {
           if (i == max2 - 1) {  // The last token
             if (token == "*") {
               val value = tokens.slice(i, max1).mkString("/")
-              pathParams.put(token, Util.toValues(value))
+              pathParams(token) = Util.toValues(value)
               true
             } else {
               if (max2 < max1) {
                 false
               } else {  // max2 = max1
-                pathParams.put(token, Util.toValues(tokens(i)))
+                pathParams(token) = Util.toValues(tokens(i))
                 true
               }
             }
@@ -124,7 +123,7 @@ object Routes extends Logger {
             if (token == "*") {
               false
             } else {
-              pathParams.put(token, Util.toValues(tokens(i)))
+              pathParams(token) = Util.toValues(tokens(i))
               true
             }
           }

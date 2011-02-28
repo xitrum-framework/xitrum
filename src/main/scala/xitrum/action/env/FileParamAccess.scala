@@ -13,26 +13,25 @@ trait FileParamAccess {
    * Returns a singular element.
    */
   def fileParam(key: String): FileUpload = {
-    if (fileParams.containsKey(key)) fileParams.get(key).get(0) else throw new MissingParam(key)
+    if (fileUploadParams.contains(key)) fileUploadParams.apply(key)(0) else throw new MissingParam(key)
   }
 
   def fileParamo(key: String): Option[FileUpload] = {
-    val values = fileParams.get(key)
-    if (values == null) None else Some(values.get(0))
+    val values = fileUploadParams.get(key)
+    if (values.isEmpty) None else Some((values.get)(0))
   }
 
   /**
    * Returns a list of elements.
    */
   def fileParams(key: String): List[FileUpload] = {
-    if (fileParams.containsKey(key))
-      JavaConversions.asScalaBuffer[FileUpload](fileParams.get(key)).toList
+    if (fileUploadParams.contains(key))
+      fileUploadParams.apply(key)
     else
       throw new MissingParam(key)
   }
 
   def fileParamso(key: String): Option[List[FileUpload]] = {
-    val values = fileParams.get(key)
-    if (values == null) None else Some(JavaConversions.asScalaBuffer[FileUpload](values).toList)
+    fileUploadParams.get(key)
   }
 }
