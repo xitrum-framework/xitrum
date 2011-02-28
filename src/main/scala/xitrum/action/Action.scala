@@ -60,7 +60,8 @@ trait Action extends ExtEnv with Logger with Net with Filter with BasicAuthentic
    */
   def urlFor[T: Manifest]: String = urlFor[T]()
 
-  def urlForThis = Routes.urlFor(this, this.getClass.asInstanceOf[Class[Action]])
+  def urlForThis                         = Routes.urlFor(this, this.getClass.asInstanceOf[Class[Action]])
+  def urlForThis(params: (String, Any)*) = Routes.urlFor(this, this.getClass.asInstanceOf[Class[Action]], params:_*)
 
   //----------------------------------------------------------------------------
 

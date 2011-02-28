@@ -11,8 +11,7 @@ import InterfaceHttpData.HttpDataType
 
 import xitrum.Config
 import xitrum.handler.Env
-import xitrum.action.env.{Env => CEnv, PathInfo}
-import xitrum.action.routing.Util
+import xitrum.action.env.{Env => AEnv, PathInfo}
 
 object BodyParser {
   DiskAttribute.deleteOnExitTemporaryFile  = true  // Should delete file on exit (in normal exit)
@@ -33,7 +32,7 @@ object BodyParser {
 
 @Sharable
 class BodyParser extends SimpleChannelUpstreamHandler with ClosedClientSilencer {
-  import CEnv._
+  import AEnv._
   import BodyParser._
 
   override def messageReceived(ctx: ChannelHandlerContext, e: MessageEvent) {

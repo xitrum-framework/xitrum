@@ -17,7 +17,7 @@ import xitrum.{Cache, Config, Logger}
 import xitrum.action.Action
 import xitrum.action.env.{Env => AEnv}
 import xitrum.action.exception.MissingParam
-import xitrum.action.routing.{Routes, POST2Action, Util}
+import xitrum.action.routing.{Routes, POST2Action}
 import xitrum.handler.Env
 import xitrum.handler.down.ResponseCacher
 import xitrum.handler.updown.XSendfile
