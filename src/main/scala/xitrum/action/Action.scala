@@ -16,7 +16,8 @@ import xitrum.handler.up.Dispatcher
 trait Action extends ExtEnv with Logger with Net with Filter with BasicAuthentication with Renderer {
   implicit def elemToValidatorInjector(elem: Elem) = new ValidatorInjector(this, elem);
 
-  def execute
+  def execute {}
+  def postback {}
 
   //----------------------------------------------------------------------------
 
@@ -59,6 +60,8 @@ trait Action extends ExtEnv with Logger with Net with Filter with BasicAuthentic
    */
   def urlFor[T: Manifest]: String = urlFor[T]()
 
+  def urlForThis = Routes.urlFor(this, this.getClass.asInstanceOf[Class[Action]])
+
   //----------------------------------------------------------------------------
 
   def redirectTo(location: String, status: HttpResponseStatus = FOUND) {
@@ -80,10 +83,10 @@ trait Action extends ExtEnv with Logger with Net with Filter with BasicAuthentic
     isPost2 = false
   }
 
-  def forward(actionClass: Class[Action]) {
+  def forward(actionClass: Class[Action], postback: Boolean) {
     val action = actionClass.newInstance
     action(ctx, henv)
     action.isPost2 = isPost2
-    Dispatcher.dispatchWithFailsafe(action)
+    Dispatcher.dispatchWithFailsafe(action, postback)
   }
 }

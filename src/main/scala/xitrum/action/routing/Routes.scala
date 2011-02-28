@@ -61,7 +61,7 @@ object Routes extends Logger {
     val tokens = pathInfo.tokens
     val max1   = tokens.size
 
-    var pathParams: MHashMap[String, List[String]] = null
+    var pathParams: MHashMap[String, Array[String]] = null
 
     def finder(cr: CompiledRoute): Boolean = {
       val (om, compiledPattern, _actionClass) = cr
@@ -88,7 +88,7 @@ object Routes extends Logger {
       // 0 = max2 <= max1
       if (max2 == 0) {
         if (max1 == 0) {
-          pathParams = new MHashMap[String, List[String]]
+          pathParams = new MHashMap[String, Array[String]]
           return true
         }
 
@@ -97,7 +97,7 @@ object Routes extends Logger {
 
       // 0 < max2 <= max1
 
-      pathParams = new MHashMap[String, List[String]]
+      pathParams = new MHashMap[String, Array[String]]
       var i = 0  // i will go from 0 until max1
 
       compiledPattern.forall { tc =>
@@ -109,13 +109,13 @@ object Routes extends Logger {
           if (i == max2 - 1) {  // The last token
             if (token == "*") {
               val value = tokens.slice(i, max1).mkString("/")
-              pathParams(token) = Util.toValues(value)
+              pathParams(token) = Array(value)
               true
             } else {
               if (max2 < max1) {
                 false
               } else {  // max2 = max1
-                pathParams(token) = Util.toValues(tokens(i))
+                pathParams(token) = Array(tokens(i))
                 true
               }
             }
@@ -123,7 +123,7 @@ object Routes extends Logger {
             if (token == "*") {
               false
             } else {
-              pathParams(token) = Util.toValues(tokens(i))
+              pathParams(token) = Array(tokens(i))
               true
             }
           }

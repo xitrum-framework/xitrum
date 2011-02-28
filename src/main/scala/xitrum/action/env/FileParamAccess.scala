@@ -24,14 +24,14 @@ trait FileParamAccess {
   /**
    * Returns a list of elements.
    */
-  def fileParams(key: String): List[FileUpload] = {
+  def fileParams(key: String): Array[FileUpload] = {
     if (fileUploadParams.contains(key))
       fileUploadParams.apply(key)
     else
       throw new MissingParam(key)
   }
 
-  def fileParamso(key: String): Option[List[FileUpload]] = {
+  def fileParamso(key: String): Option[Array[FileUpload]] = {
     fileUploadParams.get(key)
   }
 }

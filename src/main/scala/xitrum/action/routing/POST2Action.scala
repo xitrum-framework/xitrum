@@ -10,7 +10,7 @@ import xitrum.action.validation.ValidatorCaller
 
 /** Route to this action is automatically added by RouteCollector. */
 class POST2Action extends Action {
-  def execute {
+  override def execute {
     isPost2 = true
 
     pathParams.remove("*")  // Remove noisy information
@@ -35,7 +35,7 @@ class POST2Action extends Action {
     if (ValidatorCaller.call(this)) {
       henv.pathInfo   = new PathInfo(actionClass.getName)  // /xitrum/post2/blahblah is meaningless => Use the destination class name
       henv.bodyParams = bodyParams                         // Set decrypted params before forwarding
-      forward(actionClass)
+      forward(actionClass, true)
     } else {
       // Flash the default error message if the response is empty (the validators did not respond anything)
       if (HttpHeaders.getContentLength(response, 0) == 0) jsFlash("Please check your input.")

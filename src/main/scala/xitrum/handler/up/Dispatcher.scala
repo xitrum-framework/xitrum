@@ -25,7 +25,7 @@ import xitrum.handler.updown.XSendfile
 object Dispatcher extends Logger {
 
 
-  def dispatchWithFailsafe(action: Action) {
+  def dispatchWithFailsafe(action: Action, postback: Boolean) {
     val beginTimestamp = System.currentTimeMillis
     var hit            = false
 
@@ -49,7 +49,9 @@ object Dispatcher extends Logger {
       if (cacheSecs > 0) {             // Page cache
         tryCache {
           val passed = action.callBeforeFilters
-          if (passed) action.execute
+          if (passed) {
+            if (postback) action.postback else action.execute
+          }
         }
       } else {
         val passed = action.callBeforeFilters
@@ -132,10 +134,10 @@ object Dispatcher extends Logger {
 
   // Same as Rails' config.filter_parameters
   private def filterParams(params: AEnv.Params): AEnv.Params = {
-    val ret = new MHashMap[String, List[String]]
+    val ret = new MHashMap[String, Array[String]]
     ret ++= params
     for (key <- Config.filteredParams) {
-      if (ret.contains(key)) ret(key) = Util.toValues("*FILTERED*")
+      if (ret.contains(key)) ret(key) = Array("*FILTERED*")
     }
     ret
   }
@@ -165,7 +167,7 @@ class Dispatcher extends SimpleChannelUpstreamHandler with ClosedClientSilencer 
 
         val action = actionClass.newInstance
         action(ctx, env)
-        dispatchWithFailsafe(action)
+        dispatchWithFailsafe(action, false)
 
       case None =>
         val response = new DefaultHttpResponse(HTTP_1_1, NOT_FOUND)

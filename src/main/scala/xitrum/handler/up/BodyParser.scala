@@ -47,11 +47,11 @@ class BodyParser extends SimpleChannelUpstreamHandler with ClosedClientSilencer 
     val request = env.request
 
     val (bodyParams, fileUploadParams): (Params, FileUploadParams) = if (request.getMethod != POST) {
-      (new MHashMap[String, List[String]], new MHashMap[String, List[FileUpload]])
+      (new MHashMap[String, Array[String]], new MHashMap[String, Array[FileUpload]])
     } else {
       try {
-        val bodyParams = new MHashMap[String, List[String]]
-        val fileParams = new MHashMap[String, List[FileUpload]]
+        val bodyParams = new MHashMap[String, Array[String]]
+        val fileParams = new MHashMap[String, Array[FileUpload]]
 
         val decoder = new HttpPostRequestDecoder(factory, request)
         val datas   = decoder.getBodyHttpDatas
@@ -63,12 +63,12 @@ class BodyParser extends SimpleChannelUpstreamHandler with ClosedClientSilencer 
             val attribute = data.asInstanceOf[Attribute]
             val name      = attribute.getName
             val value     = attribute.getValue
-            putOrAppendToList(bodyParams, name, value)
+            putOrAppendString(bodyParams, name, value)
           } else if (data.getHttpDataType == HttpDataType.FileUpload) {
             val fileUpload = data.asInstanceOf[FileUpload]
             if (fileUpload.isCompleted && fileUpload.length > 0) {  // Skip empty file
               val name = fileUpload.getName
-              putOrAppendToList(fileParams, name, fileUpload)
+              putOrAppendFileUpload(fileParams, name, fileUpload)
             }
           }
         }
@@ -91,12 +91,21 @@ class BodyParser extends SimpleChannelUpstreamHandler with ClosedClientSilencer 
 
   //----------------------------------------------------------------------------
 
-  private def putOrAppendToList[T](map: MHashMap[String, List[T]], key: String, value: T) {
+  private def putOrAppendString(map: MHashMap[String, Array[String]], key: String, value: String) {
     if (!map.contains(key)) {
-      map(key) = Util.toValues(value)
+      map(key) = Array(value)
     } else {
       val values = map(key)
-      map(key) = values:+(value)
+      map(key) = values.:+(value)
+    }
+  }
+
+  private def putOrAppendFileUpload(map: MHashMap[String, Array[FileUpload]], key: String, value: FileUpload) {
+    if (!map.contains(key)) {
+      map(key) = Array(value)
+    } else {
+      val values = map(key)
+      map(key) = values.:+(value)
     }
   }
 }

@@ -8,8 +8,8 @@ import org.jboss.netty.handler.codec.http.{FileUpload, HttpRequest}
 import xitrum.handler.{Env => HEnv}
 
 object Env {
-  type Params           = MMap[String, List[String]]
-  type FileUploadParams = MMap[String, List[FileUpload]]
+  type Params           = MMap[String, Array[String]]
+  type FileUploadParams = MMap[String, Array[FileUpload]]
 }
 
 /**
@@ -43,7 +43,7 @@ class Env {
    * Not a function ("def") so that the calculation is done only once.
    */
   lazy val textParams: Params = {
-    val ret = new MHashMap[String, List[String]]
+    val ret = new MHashMap[String, Array[String]]
     // The order is important because we want the later to overwrite the former
     ret ++= uriParams
     ret ++= bodyParams

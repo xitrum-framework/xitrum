@@ -25,7 +25,7 @@ trait ParamAccess {
   /**
    * Returns a list of elements.
    */
-  def params(key: String, coll: Env.Params = null): List[String] = {
+  def params(key: String, coll: Env.Params = null): Array[String] = {
     val coll2 = if (coll == null) textParams else coll
     if (coll2.contains(key))
       coll2.apply(key)
@@ -33,7 +33,7 @@ trait ParamAccess {
       throw new MissingParam(key)
   }
 
-  def paramso(key: String, coll: Env.Params = null): Option[List[String]] = {
+  def paramso(key: String, coll: Env.Params = null): Option[Array[String]] = {
     val coll2 = if (coll == null) textParams else coll
     coll2.get(key)
   }
@@ -50,12 +50,12 @@ trait ParamAccess {
     valueo.map(convert[T](_))
   }
 
-  def tparams[T](key: String, coll: Env.Params = null)(implicit m: Manifest[T]): List[T] = {
+  def tparams[T](key: String, coll: Env.Params = null)(implicit m: Manifest[T]): Array[T] = {
     val values = params(key, coll)
     values.map(convert[T](_))
   }
 
-  def tparamso[T](key: String, coll: Env.Params = null)(implicit m: Manifest[T]): Option[List[T]] = {
+  def tparamso[T](key: String, coll: Env.Params = null)(implicit m: Manifest[T]): Option[Array[T]] = {
     paramso(key, coll) match {
       case None         => None
       case Some(values) => Some(values.map(convert[T](_)))

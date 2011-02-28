@@ -26,14 +26,12 @@ object ValidatorCaller {
 
   //                                                             decrypted params      paramName  securedParamName
   private def takeoutValidators(securedBodyParams: Env.Params): (Env.Params, Iterable[(String,    String, Iterable[Validator])]) = {
-    val securedParamNames = securedBodyParams.keySet
-    val i                 = securedParamNames.iterator
+    val securedParamNames = securedBodyParams.keys
 
-    val bodyParams2                           = new MHashMap[String, List[String]]
+    val bodyParams2                           = new MHashMap[String, Array[String]]
     val paramName_securedParamName_validators = new ArrayBuffer[(String, String, Iterable[Validator])]
-    while (i.hasNext) {
-      val securedParamName = i.next
-      val value            = securedBodyParams.get(securedParamName).asInstanceOf[List[String]]
+    for (securedParamName <- securedParamNames) {
+      val value = securedBodyParams(securedParamName)
 
       ValidatorInjector.takeOutFromName(securedParamName) match {
         case None =>
