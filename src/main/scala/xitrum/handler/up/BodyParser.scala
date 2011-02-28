@@ -15,14 +15,20 @@ import xitrum.action.env.{Env => CEnv, PathInfo}
 import xitrum.action.routing.Util
 
 object BodyParser {
-  val factory = new DefaultHttpDataFactory(DefaultHttpDataFactory.MINSIZE)  // Disk if size exceed MINSIZE
-  {
-    DiskAttribute.deleteOnExitTemporaryFile  = true  // Should delete file on exit (in normal exit)
-    DiskAttribute.baseDirectory              = null  // System temp directory
+  DiskAttribute.deleteOnExitTemporaryFile  = true  // Should delete file on exit (in normal exit)
+  DiskAttribute.baseDirectory              = null  // System temp directory
 
-    DiskFileUpload.deleteOnExitTemporaryFile = true  // Should delete file on exit (in normal exit)
-    DiskFileUpload.baseDirectory             = null  // System temp directory
-  }
+  DiskFileUpload.deleteOnExitTemporaryFile = true  // Should delete file on exit (in normal exit)
+  DiskFileUpload.baseDirectory             = null  // System temp directory
+
+  // Creating factory should be after the above for the factory to take effect of the settings
+
+  // TODO: Use chunk mode, remove HttpChunkAggregator, see org.jboss.netty.example.http.upload.HttpRequestHandler
+  //val factory = new DefaultHttpDataFactory(DefaultHttpDataFactory.MINSIZE)  // Save to disk if size exceeds MINSIZE
+
+  // "Save to disk if size exceeds MINSIZE" only works in chunk mode, not compatible with HttpChunkAggregator
+  // When the file is too big, it will cause java.lang.NullPointerException: buffer (AbstractDiskHttpData.java:173)
+  val factory = new DefaultHttpDataFactory(Config.maxRequestContentLengthInMB * 1024 * 1024)
 }
 
 @Sharable
