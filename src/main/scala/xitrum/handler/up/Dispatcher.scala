@@ -20,8 +20,11 @@ import xitrum.action.exception.MissingParam
 import xitrum.action.routing.{Routes, POST2Action, Util}
 import xitrum.handler.Env
 import xitrum.handler.down.ResponseCacher
+import xitrum.handler.updown.XSendfile
 
 object Dispatcher extends Logger {
+
+
   def dispatchWithFailsafe(action: Action) {
     val beginTimestamp = System.currentTimeMillis
     var hit            = false
@@ -79,7 +82,7 @@ object Dispatcher extends Logger {
 
         if (response.getStatus != BAD_REQUEST) {  // MissingParam
           logAccess(action, beginTimestamp, 0, false, e)
-          response.setHeader("X-Sendfile", System.getProperty("user.dir") + "/public/500.html")
+          response.setHeader(XSendfile.XSENDFILE_HEADER, System.getProperty("user.dir") + "/public/500.html")
         } else {
           logAccess(action, beginTimestamp, 0, false)
         }
@@ -166,7 +169,7 @@ class Dispatcher extends SimpleChannelUpstreamHandler with ClosedClientSilencer 
 
       case None =>
         val response = new DefaultHttpResponse(HTTP_1_1, NOT_FOUND)
-        response.setHeader("X-Sendfile", System.getProperty("user.dir") + "/public/404.html")
+        response.setHeader(XSendfile.XSENDFILE_HEADER, System.getProperty("user.dir") + "/public/404.html")
         env.response = response
         ctx.getChannel.write(env)
     }

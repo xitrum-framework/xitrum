@@ -35,10 +35,10 @@ class ChannelPipelineFactory extends CPF {
       new XSendfile,
 
       // Up
+      new PublicFileServer,
       new PublicResourceServer,
       new Request2Env,
       new UriParser,
-      new PublicFileServer,
       new BodyParser,
       new MethodOverrider,
       new Dispatcher,

@@ -16,9 +16,30 @@ class Project(info: ProjectInfo) extends DefaultProject(info) {
   // Repos ---------------------------------------------------------------------
 
   // For Netty 3.2.4.Final
-  val jboss = "JBoss" at "https://repository.jboss.org/nexus/content/groups/public/"
+  //val jboss = "JBoss" at "https://repository.jboss.org/nexus/content/groups/public/"
 
-  // For Netty 4.0.0.Alpha1-SNAPSHOT, which must be installed to local Maven repository manurally
+  // 3.2.4.Final is stable, but 4.0.0.Alpha1-SNAPSHOT provides POST decoder (including file upload)
+  // 4.0.0.Alpha1-SNAPSHOT must be installed to local Maven repository manurally:
+  //
+  // 1. Add to pom.xml
+  //
+  // <repositories>
+  //   <repository>
+  //     <id>repository.jboss.org</id>
+  //     <name>JBoss Releases Repository</name>
+  //     <url>http://repository.jboss.org/maven2</url>
+  //   </repository>
+  // </repositories>
+  //
+  // <pluginRepositories>
+  //   <pluginRepository>
+  //     <id>repository.jboss.org</id>
+  //     <name>JBoss Releases Repository</name>
+  //     <url>http://repository.jboss.org/maven2</url>
+  //   </pluginRepository>
+  // </pluginRepositories>
+  //
+  // 2. $ MAVEN_OPTS=-Xmx512m mvn -Dmaven.test.skip=true install
   val localMaven = "Local Maven Repository" at "file://" + Path.userHome + "/.m2/repository"
 
   // For Annovention
@@ -31,7 +52,6 @@ class Project(info: ProjectInfo) extends DefaultProject(info) {
       "org.slf4j"       % "slf4j-api"       % "1.6.1" % "provided",
 
       // Web server
-      // 3.2.4.Final is stable, but 4.0.0.Alpha1-SNAPSHOT provides POST decoder (including file upload)
       //"org.jboss.netty" % "netty"           % "3.2.4.Final",
       "org.jboss.netty" % "netty"           % "4.0.0.Alpha1-SNAPSHOT",
 

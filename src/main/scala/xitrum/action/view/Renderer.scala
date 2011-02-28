@@ -9,6 +9,7 @@ import HttpHeaders.Names.CONTENT_TYPE
 
 import xitrum.Config
 import xitrum.action.Action
+import xitrum.handler.updown.XSendfile
 
 trait Renderer extends JQuery with JSCollector with Flash with I18n {
   this: Action =>
@@ -69,7 +70,7 @@ trait Renderer extends JQuery with JSCollector with Flash with I18n {
    */
   def renderFile(path: String) {
     val abs = if (path.startsWith("/")) path else  System.getProperty("user.dir") + File.separator + path
-    response.setHeader("X-Sendfile", abs)
+    response.setHeader(XSendfile.XSENDFILE_HEADER, abs)
     respond
   }
 }

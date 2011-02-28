@@ -3,13 +3,13 @@ package xitrum.handler.up
 import java.io.File
 
 import org.jboss.netty.channel.{ChannelHandler, SimpleChannelUpstreamHandler, ChannelHandlerContext, MessageEvent, ExceptionEvent, Channels}
-import org.jboss.netty.handler.codec.http.{HttpMethod, HttpResponseStatus, HttpVersion, DefaultHttpResponse, HttpHeaders}
+import org.jboss.netty.handler.codec.http.{HttpMethod, HttpResponseStatus, HttpRequest, DefaultHttpResponse, HttpHeaders, HttpVersion}
 import ChannelHandler.Sharable
 import HttpMethod._
 import HttpResponseStatus._
 import HttpVersion._
 
-import xitrum.handler.Env
+import xitrum.handler.updown.XSendfile
 
 /**
  * Serves special files or files in /public directory.
@@ -17,63 +17,54 @@ import xitrum.handler.Env
  * Special files:
  *    favicon.ico may be not at the root: http://en.wikipedia.org/wiki/Favicon
  *    robots.txt     must be at the root: http://en.wikipedia.org/wiki/Robots_exclusion_standard
- *
- * Uses pathInfo parsed at UriParser.
  */
 @Sharable
 class PublicFileServer extends SimpleChannelUpstreamHandler with ClosedClientSilencer {
   override def messageReceived(ctx: ChannelHandlerContext, e: MessageEvent) {
     val m = e.getMessage
-    if (!m.isInstanceOf[Env]) {
+    if (!m.isInstanceOf[HttpRequest]) {
       ctx.sendUpstream(e)
       return
     }
 
-    val env      = m.asInstanceOf[Env]
-    val request  = env.request
-    val pathInfo = env.pathInfo
-    val decoded  = pathInfo.decoded
+    val request = m.asInstanceOf[HttpRequest]
 
     if (request.getMethod != GET) {
-      Channels.fireMessageReceived(ctx, env)
+      ctx.sendUpstream(e)
       return
     }
 
-    val decoded2 = if (decoded == "/favicon.ico" || decoded == "/robots.txt")
-      "/public" + decoded
-    else
-      decoded
+    val pathInfo  = request.getUri.split("\\?")(0)
+    val pathInfo2 = if (pathInfo.startsWith("/favicon.ico") || pathInfo.startsWith("/robots.txt")) "/public" + pathInfo else pathInfo
 
-    if (!decoded2.startsWith("/public/")) {
-      Channels.fireMessageReceived(ctx, env)
+    if (!pathInfo2.startsWith("/public/")) {
+      ctx.sendUpstream(e)
       return
     }
 
     val response = new DefaultHttpResponse(HTTP_1_1, OK)
-    sanitizePathInfo(decoded2) match {
+    sanitizePathInfo(pathInfo2) match {
       case Some(abs) =>
-        response.setHeader("X-Sendfile", abs)
+        response.setHeader(XSendfile.XSENDFILE_HEADER, abs)
 
       case None =>
         response.setStatus(NOT_FOUND)
         HttpHeaders.setContentLength(response, 0)
-
     }
-    env.response = response
-    ctx.getChannel.write(env)
+    ctx.getChannel.write(response)
   }
 
   //----------------------------------------------------------------------------
 
   /**
-   * @return None if decodedPathInfo is invalid or the corresponding file is hidden,
+   * @return None if pathInfo is invalid or the corresponding file is hidden,
    *         otherwise Some(the absolute file path)
    */
-  private def sanitizePathInfo(decodedPathInfo: String): Option[String] = {
+  private def sanitizePathInfo(pathInfo: String): Option[String] = {
     // pathInfo starts with "/"
 
     // Convert file separators
-    val path = decodedPathInfo.replace('/', File.separatorChar)
+    val path = pathInfo.replace('/', File.separatorChar)
 
     // Simplistic dumb security check
     if (path.contains(File.separator + ".") ||

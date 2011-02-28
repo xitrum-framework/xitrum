@@ -3,9 +3,8 @@ package xitrum.handler.updown
 import java.io.File
 import java.io.RandomAccessFile
 
-import org.jboss.netty.channel.{ChannelHandler, SimpleChannelDownstreamHandler, Channels, ChannelHandlerContext, MessageEvent, ChannelFuture, DefaultFileRegion, ChannelFutureListener}
-import ChannelHandler.Sharable
-import org.jboss.netty.handler.codec.http.{HttpHeaders, HttpResponseStatus, HttpVersion}
+import org.jboss.netty.channel.{ChannelEvent, ChannelUpstreamHandler, ChannelDownstreamHandler, Channels, ChannelHandlerContext, DownstreamMessageEvent, UpstreamMessageEvent, ChannelFuture, DefaultFileRegion, ChannelFutureListener}
+import org.jboss.netty.handler.codec.http.{HttpHeaders, HttpRequest, HttpResponse, HttpResponseStatus, HttpVersion}
 import HttpResponseStatus._
 import HttpVersion._
 import HttpHeaders.Names._
@@ -16,8 +15,9 @@ import org.jboss.netty.buffer.ChannelBuffers
 import xitrum.{Config, Logger}
 import xitrum.handler.{Env, SmallFileCache}
 
-object FileSender {
-  val CHUNK_SIZE = 8192
+object XSendfile {
+  val XSENDFILE_HEADER = "X-Sendfile"
+  val CHUNK_SIZE       = 8192
 }
 
 /**
@@ -25,29 +25,49 @@ object FileSender {
  * 1. If the file is big: use zero-copy for HTTP or chunking for HTTPS
  * 2. If the file is small: cache in memory and use normal response
  */
-@Sharable
-class XSendfile extends SimpleChannelDownstreamHandler with Logger {
-  import FileSender._
+class XSendfile extends ChannelUpstreamHandler with ChannelDownstreamHandler with Logger {
+  import XSendfile._
 
-  override def writeRequested(ctx: ChannelHandlerContext, e: MessageEvent) {
-    val m = e.getMessage
-    if (!m.isInstanceOf[Env]) {
+  var request: HttpRequest = _
+
+  def handleUpstream(ctx: ChannelHandlerContext, e: ChannelEvent) {
+    if (!e.isInstanceOf[UpstreamMessageEvent]) {
+      ctx.sendUpstream(e)
+      return
+    }
+
+    val m = e.asInstanceOf[UpstreamMessageEvent].getMessage
+    if (!m.isInstanceOf[HttpRequest]) {
+      ctx.sendUpstream(e)
+      return
+    }
+
+    request = m.asInstanceOf[HttpRequest]
+    ctx.sendUpstream(e)
+  }
+
+  def handleDownstream(ctx: ChannelHandlerContext, e: ChannelEvent) {
+    if (!e.isInstanceOf[DownstreamMessageEvent]) {
       ctx.sendDownstream(e)
       return
     }
 
-    val env      = m.asInstanceOf[Env]
-    val request  = env.request
-    val response = env.response
-    if (!response.containsHeader("X-Sendfile")) {
+    val m = e.asInstanceOf[DownstreamMessageEvent].getMessage
+    if (!m.isInstanceOf[HttpResponse]) {
+      ctx.sendDownstream(e)
+      return
+    }
+
+    val response = m.asInstanceOf[HttpResponse]
+    if (!response.containsHeader(XSENDFILE_HEADER)) {
       ctx.sendDownstream(e)
       return
     }
 
     // X-Sendfile is not standard
     // To avoid leaking the information, we remove it
-    val abs = response.getHeader("X-Sendfile")
-    response.removeHeader("X-Sendfile")
+    val abs = response.getHeader(XSENDFILE_HEADER)
+    response.removeHeader(XSENDFILE_HEADER)
 
     // Try to serve from cache
     SmallFileCache.get(abs) match {
