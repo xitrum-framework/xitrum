@@ -7,7 +7,7 @@ trait JSCollector {
 
   def jsAddToView(js: Any) {
     buffer.append(js.toString)
-    buffer.append("\n")
+    buffer.append(";\n")
   }
 
   def jsForView =
