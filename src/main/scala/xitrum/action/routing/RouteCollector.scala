@@ -27,8 +27,8 @@ class RouteCollector extends ClassAnnotationDiscoveryListener {
     val routeBuffer = new ArrayBuffer[Routes.Route]
     val cacheBuffer = new MHashMap[Class[Action], Int]
 
-    // Make POST2Action the first route for quicker route matching
-    routeBuffer.append((HttpMethod.POST, Routes.POST2_PREFIX + ":*", classOf[POST2Action].asInstanceOf[Class[Action]]))
+    // Make PostbackAction the first route for quicker route matching
+    routeBuffer.append((HttpMethod.POST, PostbackAction.POSTBACK_PREFIX + ":*", classOf[PostbackAction].asInstanceOf[Class[Action]]))
 
     for (map <- Array(firsts, others, lasts)) {
       val sorted = map.toBuffer.sortWith { (a1, a2) =>

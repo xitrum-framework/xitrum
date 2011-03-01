@@ -9,15 +9,19 @@ import xitrum.action.env.session.CSRF
 import xitrum.action.exception.InvalidCSRFToken
 import xitrum.action.validation.ValidatorCaller
 
+object PostbackAction {
+  val POSTBACK_PREFIX  = "/xitrum/postback/"  // Postback URLs are in the form POSTBACK_PREFIX + encryptedActionClassName
+}
+
 /** Route to this action is automatically added by RouteCollector. */
-class POST2Action extends Action {
+class PostbackAction extends Action {
   override def execute {
-    isPost2 = true
+    isPostback = true
 
     pathParams.remove("*")  // Remove noisy information
 
     val encoded                = pathInfo.encoded
-    val securedActionClassName = encoded.substring(Routes.POST2_PREFIX.length)
+    val securedActionClassName = encoded.substring(PostbackAction.POSTBACK_PREFIX.length)
 
     var actionClassName: String = null
     try {
@@ -34,7 +38,7 @@ class POST2Action extends Action {
 
     val actionClass = Class.forName(actionClassName).asInstanceOf[Class[Action]]
     if (ValidatorCaller.call(this)) {
-      henv.pathInfo   = new PathInfo(actionClass.getName)  // /xitrum/post2/blahblah is meaningless => Use the destination class name
+      henv.pathInfo   = new PathInfo(actionClass.getName)  // /xitrum/postback/blahblah is meaningless => Use the destination class name
       henv.bodyParams = bodyParams                         // Set decrypted params before forwarding
       forward(actionClass, true)
     } else {

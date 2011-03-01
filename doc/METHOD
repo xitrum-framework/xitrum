@@ -1,3 +1,5 @@
+Please see POSTBACK.
+
 == For writing stateless RESTful API
 
 GET
@@ -19,44 +21,6 @@ class ArticleIndex extends Action {
 class ArticleShow extends Action {
   def execute {
     ...
-  }
-}
-
-== For writing Ajax form postback submit
-
-POST2
-
-If you are loyal to this style, you only need to annotate GET routes. You only
-need to do SEO on these routes because these are what search engines actually
-need.
-
-@GET(value="/articles/new", first=true)                        <-- first: This route will be matched before others
-class ArticleNew extends Action {
-  def execute {
-    renderView(
-      <form post2="submit" action={urlFor[ArticleCreate]}>  <-- The URL is encrypted, the encrypted URL acts like an anti CSRF token
-        Title:
-        {<input type="text" name="title" />.validate(new Required)}<br />
-
-        Body:
-        {textarea name="body"></textarea>.validate(new Required)}<br />
-
-        <input type="submit" value="OK" />
-      </form>
-    )
-  }
-}
-
-class ArticleCreate extends Action {                           <-- No route annotation is required
-  beforeFilters("authenticate") = () => session.contains("user")
-
-  def execute {
-    val title = param("title")
-    val body  = param("body")
-    val user  = session("user").asInstanceOf[User]
-
-    Article.save(user.id, title, body)
-    jsRedirectTo[ArticleIndex]
   }
 }
 

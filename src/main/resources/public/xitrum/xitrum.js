@@ -1,5 +1,5 @@
 var xitrum = {
-  post2: function(event) {
+  postback: function(event) {
     var e = $(event.target);
 
     var action1 = e.attr("action");
@@ -52,8 +52,8 @@ $(function() {
   // jQuery Validation plugin only works on forms and the form must be validated once
   $("form").validate();
 
-  $("[post2]").each(function(i, e) {
-    var eventType = $(e).attr("post2");
-    $(e).bind(eventType, xitrum.post2);
+  $("[postback]").each(function(i, e) {
+    var eventType = $(e).attr("postback");
+    $(e).bind(eventType, xitrum.postback);
   });
 });

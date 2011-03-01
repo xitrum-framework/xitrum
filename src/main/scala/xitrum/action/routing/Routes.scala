@@ -7,11 +7,8 @@ import org.jboss.netty.handler.codec.http.{HttpMethod, QueryStringEncoder}
 import xitrum.{Config, Logger}
 import xitrum.action.Action
 import xitrum.action.env.{Env, PathInfo}
-import xitrum.action.env.session.CSRF
 
 object Routes extends Logger {
-  val POST2_PREFIX  = "/xitrum/post2/"  // Postback URLs are in the form POSTBACK_PREFIX + encryptedActionClassName
-
   type Pattern         = String
   type CompiledPattern = Array[(String, Boolean)]  // String: token, Boolean: true if the token is constant
   type Route           = (HttpMethod, Pattern,         Class[Action])
@@ -42,7 +39,7 @@ object Routes extends Logger {
       val pattern     = r._2
       val actionClass = r._3
 
-      if (actionClass != classOf[POST2Action]) {  // Skip noisy information
+      if (actionClass != classOf[PostbackAction]) {  // Skip noisy information
         val format = "%-6s %-" + patternMaxLength + "s %s\n"
         builder.append(format.format(method, pattern, actionClass.getName))
       }
@@ -145,10 +142,10 @@ object Routes extends Logger {
 
   def getCacheSecs(actionClass: Class[Action]) = cacheSecs.getOrElse(actionClass, 0)
 
-  def urlFor(action: Action, actionClass: Class[Action], params: (String, Any)*): String = {
+  def urlFor(actionClass: Class[Action], params: (String, Any)*): String = {
     val cpo = compiledRoutes.find { case (_, _, klass) => klass == actionClass }
     if (cpo.isEmpty) {
-      urlForPostback(action, actionClass)
+      throw new Exception("Missing route for urlFor: " + actionClass.getName)
     } else {
       val compiledPattern = cpo.get._2
       urlForNonPostback(compiledPattern, params:_*)
@@ -170,12 +167,6 @@ object Routes extends Logger {
       val token    = if (constant) e else e.substring(1)
       (token, constant)
     }
-  }
-
-  private def urlForPostback(action: Action, actionClass: Class[Action]): String = {
-    val className        = actionClass.getName
-    val securedClassName = CSRF.encrypt(action, className)
-    POST2_PREFIX + securedClassName
   }
 
   private def urlForNonPostback(compiledPattern: CompiledPattern, params: (String, Any)*): String = {

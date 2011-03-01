@@ -9,7 +9,7 @@ import xitrum.Config
 import xitrum.action.Action
 import xitrum.action.env.session.CSRF
 
-trait ExtEnv extends Env with ParamAccess with FileParamAccess with CSRF {
+trait ExtEnv extends Env with ParamAccess with UploadParamAccess with CSRF {
   this: Action =>
 
   /** The default response is empty 200 OK */

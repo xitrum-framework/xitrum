@@ -1,4 +1,38 @@
-To know what postback is, please see: http://nitrogenproject.com/doc/tutorial.html
+For writing Ajax form postback submit. Please see:
+* http://nitrogenproject.com/doc/tutorial.html
+* http://en.wikipedia.org/wiki/Postback
+
+If you are loyal to this style, you only need to annotate GET routes. You only
+need to do SEO on these routes because these are what search engines actually
+need.
+
+@GET(value="/articles/new", first=true)                        <-- first: This route will be matched before others
+class ArticleNewCreate extends Action {
+  beforeFilters("authenticate") = () => session.contains("user")
+
+  override def execute {
+    renderView(
+      <form post2="submit" action={urlForPostback[ArticleCreate]}>  <-- The URL is encrypted, the encrypted URL acts like an anti CSRF token
+        Title:
+        {<input type="text" name="title" />.validate(new Required)}<br />
+
+        Body:
+        {textarea name="body"></textarea>.validate(new Required)}<br />
+
+        <input type="submit" value="OK" />
+      </form>
+    )
+  }
+
+  override def postback {
+    val title = param("title")
+    val body  = param("body")
+    val user  = session("user").asInstanceOf[User]
+
+    Article.save(user.id, title, body)
+    jsRedirectTo[ArticleIndex]
+  }
+}
 
 To make a postback, you need to know:
 * The event that triggers postback

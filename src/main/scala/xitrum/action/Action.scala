@@ -8,7 +8,8 @@ import HttpResponseStatus._
 import xitrum.{Config, Logger}
 import xitrum.action._
 import xitrum.action.env.ExtEnv
-import xitrum.action.routing.Routes
+import xitrum.action.env.session.CSRF
+import xitrum.action.routing.{PostbackAction, Routes}
 import xitrum.action.validation.ValidatorInjector
 import xitrum.action.view.Renderer
 import xitrum.handler.up.Dispatcher
@@ -51,7 +52,7 @@ trait Action extends ExtEnv with Logger with Net with Filter with BasicAuthentic
 
   def urlFor[T: Manifest](params: (String, Any)*) = {
     val actionClass = manifest[T].erasure.asInstanceOf[Class[Action]]
-    Routes.urlFor(this, actionClass, params:_*)
+    Routes.urlFor(actionClass, params:_*)
   }
 
   /**
@@ -60,8 +61,19 @@ trait Action extends ExtEnv with Logger with Net with Filter with BasicAuthentic
    */
   def urlFor[T: Manifest]: String = urlFor[T]()
 
-  def urlForThis                         = Routes.urlFor(this, this.getClass.asInstanceOf[Class[Action]])
-  def urlForThis(params: (String, Any)*) = Routes.urlFor(this, this.getClass.asInstanceOf[Class[Action]], params:_*)
+  def urlForThis                         = Routes.urlFor(this.getClass.asInstanceOf[Class[Action]])
+  def urlForThis(params: (String, Any)*) = Routes.urlFor(this.getClass.asInstanceOf[Class[Action]], params:_*)
+
+  //----------------------------------------------------------------------------
+
+  def urlForPostback[T: Manifest]: String = {
+    val actionClass      = manifest[T].erasure.asInstanceOf[Class[Action]]
+    val className        = actionClass.getName
+    val securedClassName = CSRF.encrypt(this, className)
+    PostbackAction.POSTBACK_PREFIX + securedClassName
+  }
+
+  def urlForPostbackThis: String = urlForPostback
 
   //----------------------------------------------------------------------------
 
@@ -79,15 +91,15 @@ trait Action extends ExtEnv with Logger with Net with Filter with BasicAuthentic
 
   //----------------------------------------------------------------------------
 
-  var isPost2: Boolean = _  // Set to true by POST2Action
+  var isPostback: Boolean = _  // Set to true by PostbackAction
   {
-    isPost2 = false
+    isPostback = false
   }
 
   def forward(actionClass: Class[Action], postback: Boolean) {
     val action = actionClass.newInstance
     action(ctx, henv)
-    action.isPost2 = isPost2
+    action.isPostback = isPostback
     Dispatcher.dispatchWithFailsafe(action, postback)
   }
 }

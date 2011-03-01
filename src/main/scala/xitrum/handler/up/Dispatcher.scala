@@ -17,7 +17,7 @@ import xitrum.{Cache, Config, Logger}
 import xitrum.action.Action
 import xitrum.action.env.{Env => AEnv}
 import xitrum.action.exception.MissingParam
-import xitrum.action.routing.{Routes, POST2Action}
+import xitrum.action.routing.{Routes, PostbackAction}
 import xitrum.handler.Env
 import xitrum.handler.down.ResponseCacher
 import xitrum.handler.updown.XSendfile
@@ -57,14 +57,14 @@ object Dispatcher extends Logger {
         val passed = action.callBeforeFilters
         if (passed) {
           if (cacheSecs == 0) {        // No cache
-            action.execute
+            if (postback) action.postback else action.execute
           } else if (cacheSecs < 0) {  // Action cache
-            tryCache { action.execute }
+            tryCache { if (postback) action.postback else action.execute }
           }
         }
       }
 
-      logAccess(action, beginTimestamp, cacheSecs, hit)
+      logAccess(action, postback, beginTimestamp, cacheSecs, hit)
     } catch {
       case e =>
         // End timestamp
@@ -83,10 +83,10 @@ object Dispatcher extends Logger {
         }
 
         if (response.getStatus != BAD_REQUEST) {  // MissingParam
-          logAccess(action, beginTimestamp, 0, false, e)
+          logAccess(action, postback, beginTimestamp, 0, false, e)
           response.setHeader(XSendfile.XSENDFILE_HEADER, System.getProperty("user.dir") + "/public/500.html")
         } else {
-          logAccess(action, beginTimestamp, 0, false)
+          logAccess(action, postback, beginTimestamp, 0, false)
         }
 
         action.henv.response = response
@@ -96,20 +96,19 @@ object Dispatcher extends Logger {
 
   //----------------------------------------------------------------------------
 
-  private def logAccess(action: Action, beginTimestamp: Long, cacheSecs: Int, hit: Boolean, e: Throwable = null) {
-    // POST2Action is a gateway, skip it to avoid noisy log if there is no error
-    if (action.isInstanceOf[POST2Action] && e == null) return
+  private def logAccess(action: Action, postback: Boolean, beginTimestamp: Long, cacheSecs: Int, hit: Boolean, e: Throwable = null) {
+    // PostbackAction is a gateway, skip it to avoid noisy log if there is no error
+    if (action.isInstanceOf[PostbackAction] && e == null) return
 
     def msgWithTime = {
       val endTimestamp = System.currentTimeMillis
       val dt           = endTimestamp - beginTimestamp
 
-      action.request.getMethod                                                                                       +
-      " " + action.pathInfo.decoded                                                                                  +
-      (if (!action.uriParams.isEmpty)        ", uriParams: "        + filterParams(action.uriParams)        else "") +
-      (if (!action.bodyParams.isEmpty)       ", bodyParams: "       + filterParams(action.bodyParams)       else "") +
-      (if (!action.pathParams.isEmpty)       ", pathParams: "       + filterParams(action.pathParams)       else "") +
-      (if (!action.fileUploadParams.isEmpty) ", fileUploadParams: " +              action.fileUploadParams  else "") +
+      (if (postback) "POSTBACK " + action.getClass.getName else action.request.getMethod + " " + action.pathInfo.decoded) +
+      (if (!action.uriParams.isEmpty)        ", uriParams: "        + filterParams(action.uriParams)        else "")      +
+      (if (!action.bodyParams.isEmpty)       ", bodyParams: "       + filterParams(action.bodyParams)       else "")      +
+      (if (!action.pathParams.isEmpty)       ", pathParams: "       + filterParams(action.pathParams)       else "")      +
+      (if (!action.fileUploadParams.isEmpty) ", fileUploadParams: " +              action.fileUploadParams  else "")      +
       ", " + dt + " [ms]"
     }
 

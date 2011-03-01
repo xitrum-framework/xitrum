@@ -3,6 +3,7 @@ package xitrum.action.view
 import java.io.File
 import java.util.UUID
 import scala.collection.mutable.ArrayBuffer
+import scala.xml.Elem
 import org.jboss.netty.handler.codec.http.FileUpload
 
 import xitrum.action.Action
@@ -10,8 +11,18 @@ import xitrum.action.annotation.GET
 import xitrum.action.env.session.CSRF
 import xitrum.handler.updown.XSendfile
 
-ten xau xi qua, co le nen gom lai thanh prefix uploadXXX
-=> neu vay thi thong nhat cai fileParams luon, thanh uploadParams
+
+object UploadAjax {
+  def ::(elem: Elem)(implicit action: Action) = {
+    val uuid = UUID.randomUUID.toString
+    ArrayBuffer(
+      <iframe id={uuid} name={uuid} src={action.urlForThis} style="display:none; width:1px; height:1px;"></iframe>,
+      <form method="post" enctype="multipart/form-data" target={uuid}>
+        {elem}
+        <input type="submit" value="Upload" />
+      </form>)
+  }
+}
 
 trait AjaxUpload {
   this: Action =>
