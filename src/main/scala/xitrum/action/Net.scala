@@ -8,7 +8,7 @@ trait Net {
 
 /* Play
         if (Play.configuration.containsKey("XForwardedSupport") && nettyRequest.getHeader("X-Forwarded-For") != null) {
-            if (!Arrays.asList(Play.configuration.getProperty("XForwardedSupport", "127.0.0.1").split(",")).contains(request.remoteAddress)) {
+            if (!Arrays.asList(Play.configuration.getProperty("XForwardedSupport", "127.0.0.1").split(',')).contains(request.remoteAddress)) {
                 throw new RuntimeException("This proxy request is not authorized: " + request.remoteAddress);
             } else {
                 request.secure = ("https".equals(Play.configuration.get("XForwardedProto")) || "https".equals(nettyRequest.getHeader("X-Forwarded-Proto")) || "on".equals(nettyRequest.getHeader("X-Forwarded-Ssl")));
@@ -54,7 +54,7 @@ trait Net {
 
   lazy val (serverName, serverPort) = {
     val np = request.getHeader(HOST)  // Ex: localhost, localhost:3000
-    val xs = np.split(":")
+    val xs = np.split(':')
     if (xs.length == 1) {
       val port = if (isSsl) 443 else 80
       (xs(0), port)

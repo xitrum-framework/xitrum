@@ -34,7 +34,7 @@ class PublicFileServer extends SimpleChannelUpstreamHandler with ClosedClientSil
       return
     }
 
-    val pathInfo  = request.getUri.split("\\?")(0)
+    val pathInfo  = request.getUri.split('?')(0)
     val pathInfo2 = if (pathInfo.startsWith("/favicon.ico") || pathInfo.startsWith("/robots.txt")) "/public" + pathInfo else pathInfo
 
     if (!pathInfo2.startsWith("/public/")) {

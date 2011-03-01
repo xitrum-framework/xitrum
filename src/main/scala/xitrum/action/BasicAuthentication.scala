@@ -19,7 +19,7 @@ trait BasicAuthentication {
 
         case Some(bytes) =>
           val username_password2 = new String(bytes)
-          val username_password3 = username_password2.split(":")
+          val username_password3 = username_password2.split(':')
 
           if (username_password3.length != 2) {
             None

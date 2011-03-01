@@ -37,8 +37,8 @@ package xitrum
 
 object Mime {
   def get(file: String): Option[String] = {
-    val tokens = file.split("\\.")
-    if (tokens.size < 2) {
+    val tokens = file.split('.')
+    if (tokens.size == 1) {
       None
     } else {
       val extension = tokens.last

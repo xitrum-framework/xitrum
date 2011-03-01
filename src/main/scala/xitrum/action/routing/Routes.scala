@@ -161,7 +161,7 @@ object Routes extends Logger {
   }
 
   private def compilePattern(pattern: String): CompiledPattern = {
-    val tokens = pattern.split("/").filter(_ != "")
+    val tokens = pattern.split('/').filter(_ != "")
     tokens.map { e: String =>
       val constant = !e.startsWith(":")
       val token    = if (constant) e else e.substring(1)

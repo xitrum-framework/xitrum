@@ -21,7 +21,9 @@ class Project(info: ProjectInfo) extends DefaultProject(info) {
   // 3.2.4.Final is stable, but 4.0.0.Alpha1-SNAPSHOT provides POST decoder (including file upload)
   // 4.0.0.Alpha1-SNAPSHOT must be installed to local Maven repository manurally:
   //
-  // 1. Add to pom.xml
+  // 1. Quick and dirty
+  //
+  // Add to Netty's pom.xml
   //
   // <repositories>
   //   <repository>
@@ -39,7 +41,9 @@ class Project(info: ProjectInfo) extends DefaultProject(info) {
   //   </pluginRepository>
   // </pluginRepositories>
   //
-  // 2. $ MAVEN_OPTS=-Xmx512m mvn -Dmaven.test.skip=true install
+  // $ MAVEN_OPTS=-Xmx512m mvn -Dmaven.test.skip=true install
+  //
+  // 2. Long answer: https://issues.jboss.org/browse/NETTY-387
   val localMaven = "Local Maven Repository" at "file://" + Path.userHome + "/.m2/repository"
 
   // For Annovention

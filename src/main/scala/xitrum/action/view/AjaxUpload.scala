@@ -131,7 +131,7 @@ trait AjaxUpload {
     // Please read the doc of File.createTempFile, or
     // http://www.rgagnon.com/javadetails/java-0484.html
     val (prefix, suffix) = {
-      val tokens = sanitizedFileName.split("\\.")
+      val tokens = sanitizedFileName.split('.')
       if (tokens.size == 1) {
         (sanitizedFileName, null)
       } else {
