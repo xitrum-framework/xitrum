@@ -12,7 +12,7 @@ class CookieSessionStore extends SessionStore {
       case Some(cookie) =>
         val base64String = cookie.getValue
         val ret          = new CookieSession
-        ret.deserialize(base64String)
+        ret.decrypt(base64String)
         ret
 
       case None =>
@@ -22,7 +22,7 @@ class CookieSessionStore extends SessionStore {
 
   def store(session: Session, extEnv: ExtEnv) {
     val cookieSession = session.asInstanceOf[CookieSession]
-    val s = cookieSession.serialize
+    val s = cookieSession.encrypt
 
     extEnv.cookies(Config.sessionMarker) match {
       case Some(cookie) =>

@@ -4,7 +4,7 @@ import java.io.{File, RandomAccessFile}
 import java.text.SimpleDateFormat
 import scala.collection.mutable.HashMap
 
-import xitrum.{Config, MimeType}
+import xitrum.{Config, Mime}
 
 /** Cache is configureed by files_ehcache_name and files_max_size in xitrum.properties. */
 object SmallFileCache {
@@ -39,7 +39,7 @@ object SmallFileCache {
       case _ => return FileNotFound
     }
 
-    val mimeo = MimeType.pathToMime(abs)
+    val mimeo = Mime.get(abs)
 
     val lm = lastModified(file.lastModified)
 

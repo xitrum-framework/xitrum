@@ -5,35 +5,33 @@ import java.util.UUID
 import xitrum.action.Action
 import xitrum.action.exception.InvalidCSRFToken
 
-object CSRF {
-  val TOKEN = "_csrf_token"
-}
-
 /**
  * SecureBase64 is for preventing a user to mess with his own data to cheat the server.
  * CSRF is for preventing a user to fake other user data.
  */
+object CSRF {
+  val TOKEN = "_csrf_token"
+
+  def encrypt(action: Action, value: Any): String = action.csrfToken + SecureBase64.encrypt(value)
+
+  def decrypt(action: Action, string: String): Any = {
+    val prefix = action.csrfToken
+    if (!string.startsWith(prefix)) throw new InvalidCSRFToken
+
+    val base64String = string.substring(prefix.length)
+    SecureBase64.decrypt(base64String) match {
+      case None       => throw new InvalidCSRFToken
+      case Some(data) => data
+    }
+  }
+}
+
 trait CSRF {
   this: Action =>
 
   import CSRF._
 
-  def serialize(value: Any): String = csrfToken + SecureBase64.serialize(value)
-
-  def deserialize(string: String): Any = {
-    val prefix = csrfToken
-    if (!string.startsWith(prefix)) throw new InvalidCSRFToken
-
-    val base64String = string.substring(prefix.length)
-    SecureBase64.deserialize(base64String) match {
-      case None       => throw new InvalidCSRFToken
-      case Some(data) => data
-    }
-  }
-
-  //----------------------------------------------------------------------------
-
-  private def csrfToken: String = {
+  def csrfToken: String = {
     sessiono(TOKEN) match {
       case Some(x) =>
         x.toString

@@ -35,14 +35,14 @@ for ((extension, mime) <- buffer) println(format.format("\"" + extension, mime))
 
 package xitrum
 
-object MimeType {
-  def pathToMime(path: String): Option[String] = {
-    val tokens = path.split("\\.")
+object Mime {
+  def get(file: String): Option[String] = {
+    val tokens = file.split("\\.")
     if (tokens.size < 2) {
       None
     } else {
       val extension = tokens.last
-      MimeType.extensionToMime.get(extension)
+      extensionToMime.get(extension)
     }
   }
 

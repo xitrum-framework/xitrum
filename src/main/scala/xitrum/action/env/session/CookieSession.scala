@@ -6,8 +6,8 @@ import scala.collection.mutable.{HashMap => MHashMap}
 class CookieSession extends Session {
   private var map = new MHashMap[String, Serializable]
 
-  def deserialize(base64String: String) {
-    map = SecureBase64.deserialize(base64String) match {
+  def decrypt(base64String: String) {
+    map = SecureBase64.decrypt(base64String) match {
       case None        => new MHashMap[String, Serializable]
       case Some(value) =>
         try {
@@ -23,11 +23,11 @@ class CookieSession extends Session {
     }
   }
 
-  def serialize: String = {
+  def encrypt: String = {
     // See deserialize method above
     // Convert to immutable because mutable cannot always be deserialize later!
     val immutableMap = map.toMap
-    SecureBase64.serialize(immutableMap)
+    SecureBase64.encrypt(immutableMap)
   }
 
   //----------------------------------------------------------------------------

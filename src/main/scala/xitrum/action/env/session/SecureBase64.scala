@@ -13,12 +13,12 @@ import xitrum.Config
  * CSRF is for preventing a user to fake other user data.
  */
 object SecureBase64 {
-  def serialize(value: Any): String = {
+  def encrypt(value: Any): String = {
     val bytes = SeriDeseri.serialize(value)
     seal(key, bytes)
   }
 
-  def deserialize(base64String: String): Option[Any] = {
+  def decrypt(base64String: String): Option[Any] = {
     unseal(key, base64String) match {
       case None        => None
       case Some(bytes) => SeriDeseri.deserialize(bytes)

@@ -5,6 +5,7 @@ import org.jboss.netty.handler.codec.http.HttpHeaders
 import xitrum.action.Action
 import xitrum.action.annotation.POST
 import xitrum.action.env.PathInfo
+import xitrum.action.env.session.CSRF
 import xitrum.action.exception.InvalidCSRFToken
 import xitrum.action.validation.ValidatorCaller
 
@@ -20,7 +21,7 @@ class POST2Action extends Action {
 
     var actionClassName: String = null
     try {
-      actionClassName = deserialize(securedActionClassName).asInstanceOf[String]
+      actionClassName = CSRF.decrypt(this, securedActionClassName).asInstanceOf[String]
     } catch {
       case e: InvalidCSRFToken =>
         session.reset

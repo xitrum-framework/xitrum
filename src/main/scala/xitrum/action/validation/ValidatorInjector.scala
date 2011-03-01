@@ -18,7 +18,7 @@ object ValidatorInjector {
     // validators is a WrappedArray
     // For smaller size, use Java array
     val jArray           = validators.+:(paramName).toArray  // +: prepend
-    val securedParamName = SecureBase64.serialize(jArray)
+    val securedParamName = SecureBase64.encrypt(jArray)
 
     val attr  = Attribute(None, "name", Text(securedParamName), Null)
     val elem2 = elem % attr
@@ -28,7 +28,7 @@ object ValidatorInjector {
 
   /** Take out the original param name and validators from secured param name. */
   def takeOutFromName(securedParamName: String): Option[(String, Iterable[Validator])] =
-    SecureBase64.deserialize(securedParamName) match {
+    SecureBase64.decrypt(securedParamName) match {
       case None => None
 
       case Some(array) =>

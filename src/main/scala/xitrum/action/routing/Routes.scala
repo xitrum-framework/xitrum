@@ -145,10 +145,10 @@ object Routes extends Logger {
 
   def getCacheSecs(actionClass: Class[Action]) = cacheSecs.getOrElse(actionClass, 0)
 
-  def urlFor(csrf: CSRF, actionClass: Class[Action], params: (String, Any)*): String = {
+  def urlFor(action: Action, actionClass: Class[Action], params: (String, Any)*): String = {
     val cpo = compiledRoutes.find { case (_, _, klass) => klass == actionClass }
     if (cpo.isEmpty) {
-      urlForPostback(csrf, actionClass)
+      urlForPostback(action, actionClass)
     } else {
       val compiledPattern = cpo.get._2
       urlForNonPostback(compiledPattern, params:_*)
@@ -172,9 +172,9 @@ object Routes extends Logger {
     }
   }
 
-  private def urlForPostback(csrf: CSRF, actionClass: Class[Action]): String = {
+  private def urlForPostback(action: Action, actionClass: Class[Action]): String = {
     val className        = actionClass.getName
-    val securedClassName = csrf.serialize(className)
+    val securedClassName = CSRF.encrypt(action, className)
     POST2_PREFIX + securedClassName
   }
 
