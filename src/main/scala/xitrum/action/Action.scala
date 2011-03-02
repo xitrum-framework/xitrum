@@ -66,14 +66,18 @@ trait Action extends ExtEnv with Logger with Net with Filter with BasicAuthentic
 
   //----------------------------------------------------------------------------
 
-  def urlForPostback[T: Manifest]: String = {
-    val actionClass      = manifest[T].erasure.asInstanceOf[Class[Action]]
+  protected def urlForPostbackAction(actionClass: Class[Action]): String = {
     val className        = actionClass.getName
     val securedClassName = CSRF.encrypt(this, className)
     PostbackAction.POSTBACK_PREFIX + securedClassName
   }
 
-  def urlForPostbackThis: String = urlForPostback
+  def urlForPostback[T: Manifest]: String = {
+    val actionClass = manifest[T].erasure.asInstanceOf[Class[Action]]
+    urlForPostbackAction(actionClass)
+  }
+
+  def urlForPostbackThis = urlForPostbackAction(this.getClass.asInstanceOf[Class[Action]])
 
   //----------------------------------------------------------------------------
 
