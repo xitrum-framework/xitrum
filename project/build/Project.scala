@@ -24,23 +24,23 @@ class Project(info: ProjectInfo) extends DefaultProject(info) {
   // 1. Quick and dirty
   //
   // Add to Netty's pom.xml
-  //
-  // <repositories>
-  //   <repository>
-  //     <id>repository.jboss.org</id>
-  //     <name>JBoss Releases Repository</name>
-  //     <url>http://repository.jboss.org/maven2</url>
-  //   </repository>
-  // </repositories>
-  //
-  // <pluginRepositories>
-  //   <pluginRepository>
-  //     <id>repository.jboss.org</id>
-  //     <name>JBoss Releases Repository</name>
-  //     <url>http://repository.jboss.org/maven2</url>
-  //   </pluginRepository>
-  // </pluginRepositories>
-  //
+/*
+  <repositories>
+     <repository>
+       <id>repository.jboss.org</id>
+       <name>JBoss Releases Repository</name>
+       <url>http://repository.jboss.org/maven2</url>
+     </repository>
+   </repositories>
+
+   <pluginRepositories>
+     <pluginRepository>
+       <id>repository.jboss.org</id>
+       <name>JBoss Releases Repository</name>
+       <url>http://repository.jboss.org/maven2</url>
+     </pluginRepository>
+   </pluginRepositories>
+*/
   // $ MAVEN_OPTS=-Xmx512m mvn -Dmaven.test.skip=true install
   //
   // 2. Long answer: https://issues.jboss.org/browse/NETTY-387
