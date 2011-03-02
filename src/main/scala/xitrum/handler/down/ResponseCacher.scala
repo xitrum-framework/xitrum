@@ -3,7 +3,7 @@ package xitrum.handler.down
 import java.io.{ByteArrayOutputStream, Serializable}
 import java.util.concurrent.TimeUnit
 import java.util.zip.GZIPOutputStream
-import scala.collection.immutable.TreeMap
+import scala.collection.immutable.{SortedMap, TreeMap}
 
 import org.jboss.netty.channel.{ChannelHandler, SimpleChannelDownstreamHandler, ChannelHandlerContext, MessageEvent, Channels, ChannelFutureListener}
 import org.jboss.netty.buffer.ChannelBuffers
@@ -22,8 +22,10 @@ object ResponseCacher {
 
   def makeCacheKey(action: Action): String = {
     val params    = action.textParams
-    val sortedMap = (new TreeMap[String, List[String]]) ++ params
-    "page/action cache/" + action.getClass.getName + "/" + sortedMap.toString
+    val sortedMap =
+      (new TreeMap[String, Array[String]]) ++  // See xitrum.action.env.Env.Params
+      params
+    "page/action cache/" + action.getClass.getName + "/" + inspectSortedParams(sortedMap)
   }
 
     /**
@@ -63,6 +65,37 @@ object ResponseCacher {
   }
 
   //----------------------------------------------------------------------------
+
+  // See xitrum.action.env.Env.inspectParams
+  private def inspectSortedParams(params: SortedMap[String, Array[String]]) {
+    val sb = new StringBuilder
+    sb.append("{")
+
+    val keys = params.keys.toArray
+    val size = keys.size
+    for (i <- 0 until size) {
+      val key    = keys(i)
+      val values = params(key)
+
+      sb.append(key)
+      sb.append(": ")
+
+      if (values.length == 0) {
+        sb.append("[EMPTY]")
+      } else if (values.length == 1) {
+        sb.append(values(0))
+      } else {
+        sb.append("[")
+        sb.append(values.mkString(", "))
+        sb.append("]")
+      }
+
+      if (i < size - 1) sb.append(", ")
+    }
+
+    sb.append("}")
+    sb.toString
+  }
 
   private def tryGZIPBigTextualContent(response: HttpResponse): (Array[Byte], Boolean) = {
     val bytes   = {

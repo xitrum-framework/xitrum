@@ -1,8 +1,6 @@
 package xitrum.handler.up
 
-import java.lang.reflect.{Method, InvocationTargetException}
 import java.io.Serializable
-import java.util.concurrent.TimeUnit
 import scala.collection.mutable.{Map => MMap}
 
 import org.jboss.netty.channel._
@@ -23,8 +21,6 @@ import xitrum.handler.down.ResponseCacher
 import xitrum.handler.updown.XSendfile
 
 object Dispatcher extends Logger {
-
-
   def dispatchWithFailsafe(action: Action, postback: Boolean) {
     val beginTimestamp = System.currentTimeMillis
     var hit            = false
@@ -38,7 +34,7 @@ object Dispatcher extends Logger {
         val key   = ResponseCacher.makeCacheKey(action)
         val value = Cache.cache.get(key)
         if (value == null) {
-          f  // hit = false, the
+          f  // hit has already been initialized to false
         } else {
           hit = true
           val response = ResponseCacher.deserializeToResponse(value.asInstanceOf[Serializable])
@@ -104,11 +100,11 @@ object Dispatcher extends Logger {
       val endTimestamp = System.currentTimeMillis
       val dt           = endTimestamp - beginTimestamp
 
-      (if (postback) "POSTBACK " + action.getClass.getName else action.request.getMethod + " " + action.pathInfo.decoded) +
-      (if (!action.uriParams.isEmpty)        ", uriParams: "        + printParams(action.uriParams.asInstanceOf[MMap[String, Array[Any]]])        else "")      +
-      (if (!action.bodyParams.isEmpty)       ", bodyParams: "       + printParams(action.bodyParams.asInstanceOf[MMap[String, Array[Any]]])       else "")      +
-      (if (!action.pathParams.isEmpty)       ", pathParams: "       + printParams(action.pathParams.asInstanceOf[MMap[String, Array[Any]]])       else "")      +
-      (if (!action.fileUploadParams.isEmpty) ", fileUploadParams: " + printParams(action.fileUploadParams.asInstanceOf[MMap[String, Array[Any]]]) else "")      +
+      (if (postback) "POSTBACK " + action.getClass.getName else action.request.getMethod + " " + action.pathInfo.decoded)                                               +
+      (if (!action.uriParams.isEmpty)        ", uriParams: "        + AEnv.inspectParams(action.uriParams       .asInstanceOf[MMap[String, Array[Any]]]) else "") +
+      (if (!action.bodyParams.isEmpty)       ", bodyParams: "       + AEnv.inspectParams(action.bodyParams      .asInstanceOf[MMap[String, Array[Any]]]) else "") +
+      (if (!action.pathParams.isEmpty)       ", pathParams: "       + AEnv.inspectParams(action.pathParams      .asInstanceOf[MMap[String, Array[Any]]]) else "") +
+      (if (!action.fileUploadParams.isEmpty) ", fileUploadParams: " + AEnv.inspectParams(action.fileUploadParams.asInstanceOf[MMap[String, Array[Any]]]) else "") +
       ", " + dt + " [ms]"
     }
 
@@ -129,41 +125,6 @@ object Dispatcher extends Logger {
     } else {
       if (logger.isErrorEnabled) logger.error("Dispatching error " + msgWithTime + extraInfo, e)
     }
-  }
-
-  // Same as Rails' config.filter_parameters
-  private def printParams(params: MMap[String, Array[Any]]): String = {
-    val sb = new StringBuilder
-    sb.append("{")
-
-    val keys = params.keys.toArray
-    val size = keys.size
-    for (i <- 0 until size) {
-      val key    = keys(i)
-      val values = params(key)
-
-      sb.append(key)
-      sb.append(": ")
-
-      if (Config.filteredParams.contains(key)) {
-        sb.append("[FILTERED]")
-      }
-
-      if (values.length == 0) {
-        sb.append("[EMPTY]")
-      } else if (values.length == 1) {
-        sb.append(values(0))
-      } else {
-        sb.append("[")
-        sb.append(values.mkString(", "))
-        sb.append("]")
-      }
-
-      if (i < size - 1) sb.append(", ")
-    }
-
-    sb.append("}")
-    sb.toString
   }
 }
 
