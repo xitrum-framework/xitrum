@@ -124,10 +124,10 @@ object Dispatcher extends Logger {
       }
     }
 
-    if (e == null && logger.isDebugEnabled) {
-      logger.debug(msgWithTime + extraInfo)
-    } else if (logger.isErrorEnabled){
-      logger.error("Dispatching error " + msgWithTime + extraInfo, e)
+    if (e == null) {
+      if (logger.isDebugEnabled) logger.debug(msgWithTime + extraInfo)
+    } else {
+      if (logger.isErrorEnabled) logger.error("Dispatching error " + msgWithTime + extraInfo, e)
     }
   }
 
