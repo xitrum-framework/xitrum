@@ -3,7 +3,7 @@ package xitrum.handler.up
 import java.lang.reflect.{Method, InvocationTargetException}
 import java.io.Serializable
 import java.util.concurrent.TimeUnit
-import scala.collection.mutable.{HashMap => MHashMap}
+import scala.collection.mutable.{Map => MMap}
 
 import org.jboss.netty.channel._
 import org.jboss.netty.buffer.ChannelBuffers
@@ -105,10 +105,10 @@ object Dispatcher extends Logger {
       val dt           = endTimestamp - beginTimestamp
 
       (if (postback) "POSTBACK " + action.getClass.getName else action.request.getMethod + " " + action.pathInfo.decoded) +
-      (if (!action.uriParams.isEmpty)        ", uriParams: "        + filterParams(action.uriParams)        else "")      +
-      (if (!action.bodyParams.isEmpty)       ", bodyParams: "       + filterParams(action.bodyParams)       else "")      +
-      (if (!action.pathParams.isEmpty)       ", pathParams: "       + filterParams(action.pathParams)       else "")      +
-      (if (!action.fileUploadParams.isEmpty) ", fileUploadParams: " +              action.fileUploadParams  else "")      +
+      (if (!action.uriParams.isEmpty)        ", uriParams: "        + printParams(action.uriParams.asInstanceOf[MMap[String, Array[Any]]])        else "")      +
+      (if (!action.bodyParams.isEmpty)       ", bodyParams: "       + printParams(action.bodyParams.asInstanceOf[MMap[String, Array[Any]]])       else "")      +
+      (if (!action.pathParams.isEmpty)       ", pathParams: "       + printParams(action.pathParams.asInstanceOf[MMap[String, Array[Any]]])       else "")      +
+      (if (!action.fileUploadParams.isEmpty) ", fileUploadParams: " + printParams(action.fileUploadParams.asInstanceOf[MMap[String, Array[Any]]]) else "")      +
       ", " + dt + " [ms]"
     }
 
@@ -132,13 +132,38 @@ object Dispatcher extends Logger {
   }
 
   // Same as Rails' config.filter_parameters
-  private def filterParams(params: AEnv.Params): AEnv.Params = {
-    val ret = new MHashMap[String, Array[String]]
-    ret ++= params
-    for (key <- Config.filteredParams) {
-      if (ret.contains(key)) ret(key) = Array("*FILTERED*")
+  private def printParams(params: MMap[String, Array[Any]]): String = {
+    val sb = new StringBuilder
+    sb.append("{")
+
+    val keys = params.keys.toArray
+    val size = keys.size
+    for (i <- 0 until size) {
+      val key    = keys(i)
+      val values = params(key)
+
+      sb.append(key)
+      sb.append(": ")
+
+      if (Config.filteredParams.contains(key)) {
+        sb.append("[FILTERED]")
+      }
+
+      if (values.length == 0) {
+        sb.append("[EMPTY]")
+      } else if (values.length == 1) {
+        sb.append(values(0))
+      } else {
+        sb.append("[")
+        sb.append(values.mkString(", "))
+        sb.append("]")
+      }
+
+      if (i < size - 1) sb.append(", ")
     }
-    ret
+
+    sb.append("}")
+    sb.toString
   }
 }
 
