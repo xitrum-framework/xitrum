@@ -41,8 +41,10 @@ object SecureBase64 {
 
   /** AES compitable key computed from Config.secureKey */
   private val key: Array[Byte] = {
-    // See http://stackoverflow.com/questions/992019/java-256bit-aes-encryption/992413
-    val messageDigest = MessageDigest.getInstance("SHA-256")
+    // We need 16 bytes array for AES
+    // MD5 => 16 bytes, SHA-256 => 32 bytes
+    // Idea: http://stackoverflow.com/questions/992019/java-256bit-aes-encryption/992413
+    val messageDigest = MessageDigest.getInstance("MD5")
     messageDigest.reset
     messageDigest.update(Config.secureKey.getBytes("UTF-8"))
     messageDigest.digest
