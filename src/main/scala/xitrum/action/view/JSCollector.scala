@@ -14,6 +14,6 @@ trait JSCollector {
     <script>{Unparsed(
       "$(function() {\n" +
         buffer.toString +
-      "})"
+      "});"
     )}</script>
 }

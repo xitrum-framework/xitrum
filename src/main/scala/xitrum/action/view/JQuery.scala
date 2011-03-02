@@ -42,14 +42,29 @@ trait JQuery {
 
   def jsChain(jsCalls: String*) = jsCalls.mkString(".")
 
-  def jsUpdate(id: String, value: Any) =
+  def jsHtml(selector: String, value: Any) =
     jsChain(
-      jsById(id),
+      selector,
       jsCall("html", "\"" + jsEscape(value.toString) + "\"")
     )
 
+  def jsVal(selector: String, value: Any) =
+    jsChain(
+      selector,
+      jsCall("val", "\"" + jsEscape(value.toString) + "\"")
+    )
+
+  def jsBefore(selector: String, value: Any) = {
+    jsChain(
+      selector,
+      jsCall("before", "\"" + jsEscape(value.toString) + "\"")
+    )
+  }
+
+  //----------------------------------------------------------------------------
+
   def jsRender(values: String*) {
-    val js = values.mkString(";\n")
+    val js = values.mkString(";\n") + ";\n"
     renderText(js, "text/javascript")
   }
 
@@ -58,9 +73,11 @@ trait JQuery {
     jsRender(js)
   }
 
-  def jsRenderUpdate(id: String, value: Any) {
-    jsRender(jsUpdate(id, value))
+  def jsRenderHtml(selector: String, value: Any) {
+    jsRender(jsHtml(selector, value))
   }
+
+  //----------------------------------------------------------------------------
 
   /** See http://stackoverflow.com/questions/503093/how-can-i-make-a-redirect-page-in-jquery */
   def jsRedirectTo(location: String) {
