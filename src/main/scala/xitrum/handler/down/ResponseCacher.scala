@@ -169,8 +169,9 @@ class ResponseCacher extends SimpleChannelDownstreamHandler with Logger {
           if (response.getStatus == HttpResponseStatus.OK) {
             cs
           } else {
-            logger.debug("Response is not OK: " + key)
-            if (cs < Config.non200ResponseCacheTTLInSecs) cs else Config.non200ResponseCacheTTLInSecs
+            val ret = if (cs < Config.non200ResponseCacheTTLInSecs) cs else Config.non200ResponseCacheTTLInSecs
+            logger.debug("Log non 200 response for {} secs, key: {}", ret, key)
+            ret
           }
         }
 
