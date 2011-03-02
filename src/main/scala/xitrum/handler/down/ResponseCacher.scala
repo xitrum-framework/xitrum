@@ -11,7 +11,7 @@ import ChannelHandler.Sharable
 import org.jboss.netty.handler.codec.http.{DefaultHttpResponse, HttpHeaders, HttpResponse, HttpResponseStatus, HttpVersion}
 import HttpHeaders.Names.{CONTENT_ENCODING, CONTENT_TYPE}
 
-import xitrum.Cache
+import xitrum.{Config, Cache}
 import xitrum.action.Action
 import xitrum.action.env.{Env => AEnv}
 import xitrum.action.routing.Routes
@@ -141,8 +141,8 @@ class ResponseCacher extends SimpleChannelDownstreamHandler {
       return
     }
 
-    val env      = m.asInstanceOf[Env]
-    val action   = env.action
+    val env    = m.asInstanceOf[Env]
+    val action = env.action
 
     // action may be null when the request could not go to Dispatcher, for
     // example when the response is served from PublicResourceServer
@@ -159,7 +159,17 @@ class ResponseCacher extends SimpleChannelDownstreamHandler {
       if (!Cache.cache.containsKey(key)) {  // Check to avoid the cost of serializing
         val response     = env.response
         val serializable = serializeResponse(response)
-        val secs         = if (cacheSecs < 0) -cacheSecs else cacheSecs
+
+        // See Config.non200ResponseCacheTTLInSecs
+        val secs         = {
+          val cs = if (cacheSecs < 0) -cacheSecs else cacheSecs
+          if (response.getStatus == HttpResponseStatus.OK) {
+            cs
+          } else {
+            if (cs < Config.non200ResponseCacheTTLInSecs) cs else Config.non200ResponseCacheTTLInSecs
+          }
+        }
+
         Cache.cache.putIfAbsent(key, serializable, secs, TimeUnit.SECONDS)
       }
     }

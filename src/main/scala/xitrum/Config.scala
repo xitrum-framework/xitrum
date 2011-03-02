@@ -89,5 +89,12 @@ object Config {
    * deflate it. Xitrum compresses both static (see cacheSmallStaticFileMaxSizeInKB)
    * and dynamic response.
    */
-  var compressBigTextualResponseMinSizeInKB = 50
+  var compressBigTextualResponseMinSizeInKB = 10
+
+  /**
+   * When there is trouble (high load on startup ect.), the response may not be
+   * good. If the response is specified to be cached, we should only cache it
+   * for a short time.
+   */
+  var non200ResponseCacheTTLInSecs = 30
 }
