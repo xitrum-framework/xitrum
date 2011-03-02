@@ -11,7 +11,7 @@ import ChannelHandler.Sharable
 import org.jboss.netty.handler.codec.http.{DefaultHttpResponse, HttpHeaders, HttpResponse, HttpResponseStatus, HttpVersion}
 import HttpHeaders.Names.{CONTENT_ENCODING, CONTENT_TYPE}
 
-import xitrum.{Config, Cache}
+import xitrum.{Config, Cache, Logger}
 import xitrum.action.Action
 import xitrum.action.env.{Env => AEnv}
 import xitrum.action.routing.Routes
@@ -111,9 +111,7 @@ object ResponseCacher {
     // No content type, don't know if this the response is textual
     if (contentType == null) return (bytes, false)
 
-    val lower   = contentType.toLowerCase();
-    val textual = (lower.indexOf("text") >= 0 || lower.indexOf("xml") >= 0 || lower.indexOf("javascript") >= 0 || lower.indexOf("json") >= 0)
-    if (!textual) return (bytes, false)
+    if (!isTextual(contentType)) return (bytes, false)
 
     val big = bytes.length > GZIP_THRESHOLD_KB * 1024
     if (!big) return (bytes, false)
@@ -128,10 +126,15 @@ object ResponseCacher {
 
     (compressedBytes, true)
   }
+
+  private def isTextual(contentType: String) = {
+    val lower   = contentType.toLowerCase();
+    (lower.indexOf("text") >= 0 || lower.indexOf("xml") >= 0 || lower.indexOf("javascript") >= 0 || lower.indexOf("json") >= 0)
+  }
 }
 
 @Sharable
-class ResponseCacher extends SimpleChannelDownstreamHandler {
+class ResponseCacher extends SimpleChannelDownstreamHandler with Logger {
   import ResponseCacher._
 
   override def writeRequested(ctx: ChannelHandlerContext, e: MessageEvent) {
@@ -166,6 +169,7 @@ class ResponseCacher extends SimpleChannelDownstreamHandler {
           if (response.getStatus == HttpResponseStatus.OK) {
             cs
           } else {
+            logger.debug("Response is not OK: " + key)
             if (cs < Config.non200ResponseCacheTTLInSecs) cs else Config.non200ResponseCacheTTLInSecs
           }
         }

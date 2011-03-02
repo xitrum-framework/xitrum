@@ -93,7 +93,7 @@ object Config {
 
   /**
    * When there is trouble (high load on startup ect.), the response may not be
-   * good. If the response is specified to be cached, we should only cache it
+   * OK. If the response is specified to be cached, we should only cache it
    * for a short time.
    */
   var non200ResponseCacheTTLInSecs = 30
