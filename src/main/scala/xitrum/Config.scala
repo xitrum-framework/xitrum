@@ -1,24 +1,27 @@
 package xitrum
 
+import java.io.InputStream
 import java.util.Properties
 import java.nio.charset.Charset
 
 import xitrum.action.env.session.SessionStore
 
 object Config {
-  def load(path: String): String = {
-    val stream = getClass.getResourceAsStream(path)
-    val len    = stream.available
-    val bytes  = new Array[Byte](len)
-
-    // Read whole file
+  def bytesFromStreamAndClose(stream: InputStream): Array[Byte] = {
+    val len   = stream.available
+    val bytes = new Array[Byte](len)
     var total = 0
     while (total < len) {
       val bytesRead = stream.read(bytes, total, len - total)
       total += bytesRead
     }
-
     stream.close
+    bytes
+  }
+
+  def load(path: String): String = {
+    val stream = getClass.getResourceAsStream(path)
+    val bytes  = bytesFromStreamAndClose(stream)
     new String(bytes, "UTF-8")
   }
 

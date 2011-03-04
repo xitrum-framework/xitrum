@@ -86,17 +86,7 @@ class PublicResourceServer extends SimpleChannelUpstreamHandler with ClosedClien
       if (stream == null) {
         None
       } else {
-        val len   = stream.available
-        val bytes = new Array[Byte](len)
-
-        // Read whole file
-        var total = 0
-        while (total < len) {
-          val bytesRead = stream.read(bytes, total, len - total)
-          total += bytesRead
-        }
-
-        stream.close
+        val bytes = Config.bytesFromStreamAndClose(stream)
         Some(bytes)
       }
     }
