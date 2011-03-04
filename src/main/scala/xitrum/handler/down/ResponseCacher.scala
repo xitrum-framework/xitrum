@@ -1,8 +1,5 @@
 package xitrum.handler.down
 
-import java.io.{ByteArrayOutputStream, Serializable}
-import java.util.concurrent.TimeUnit
-import java.util.zip.GZIPOutputStream
 import scala.collection.immutable.{SortedMap, TreeMap}
 
 import org.jboss.netty.channel.{ChannelHandler, SimpleChannelDownstreamHandler, ChannelHandlerContext, MessageEvent, Channels, ChannelFutureListener}
@@ -11,14 +8,17 @@ import ChannelHandler.Sharable
 import org.jboss.netty.handler.codec.http.{DefaultHttpResponse, HttpHeaders, HttpResponse, HttpResponseStatus, HttpVersion}
 import HttpHeaders.Names.{CONTENT_ENCODING, CONTENT_TYPE}
 
-import xitrum.{Config, Cache, Logger}
+import xitrum.{Cache, Config, Gzip, Logger, Mime}
 import xitrum.action.Action
 import xitrum.action.env.{Env => AEnv}
 import xitrum.action.routing.Routes
-import xitrum.handler.Env
+import xitrum.handler.{Env, SmallFileCache}
 
 object ResponseCacher extends Logger {
   private val GZIP_THRESHOLD_KB = 10
+
+  //                             statusCode  headers                  content
+  private type CachedResponse = (Int,        Array[(String, String)], Array[Byte])
 
   def cacheResponse(action: Action) {
     val actionClass = action.getClass.asInstanceOf[Class[Action]]
@@ -26,25 +26,10 @@ object ResponseCacher extends Logger {
     if (cacheSecs == 0) return
 
     val key = makeCacheKey(action)
-
-    // FIXME
-    // Sometimes Hazelcast 1.9.2.1 has problem with calling containsKey:
-    //   java.lang.RuntimeException: java.lang.reflect.InvocationTargetException
-    //     at com.hazelcast.impl.FactoryImpl$MProxyImpl$DynamicInvoker.invoke(FactoryImpl.java:1900) ~[hazelcast-1.9.2.1.jar:na]
-    //     at $Proxy0.containsKey(Unknown Source) ~[na:na]
-    //     at com.hazelcast.impl.FactoryImpl$MProxyImpl.containsKey(FactoryImpl.java:2100) ~[hazelcast-1.9.2.1.jar:na]
-    val cached = try {
-      Cache.cache.containsKey(key)
-    } catch {
-      case e =>
-        logger.warn("containsKey error", e)
-        false
-    }
-
-    if (!cached) {  // Check to avoid the cost of serializing
-      val response     = action.response
-      val serializable = serializeResponse(response)
-      val secs         = {  // See Config.non200ResponseCacheTTLInSecs
+    if (!Cache.cache.containsKey(key)) {  // Check to avoid the cost of serializing
+      val response       = action.response
+      val cachedResponse = serializeResponse(response)
+      val secs           = {  // See Config.non200ResponseCacheTTLInSecs
         val cs = if (cacheSecs < 0) -cacheSecs else cacheSecs
         if (response.getStatus == HttpResponseStatus.OK) {
           cs
@@ -55,28 +40,13 @@ object ResponseCacher extends Logger {
         }
       }
 
-      Cache.cache.putIfAbsent(key, serializable, secs, TimeUnit.SECONDS)
+      Cache.putIfAbsentSecond(key, cachedResponse, secs)
     }
   }
 
   def getCachedResponse(action: Action): Option[HttpResponse] = {
-    val key   = ResponseCacher.makeCacheKey(action)
-    val value = Cache.cache.get(key)
-    if (value == null) {
-      None
-    } else {
-      // Application version up etc. may cause cache restoring to be failed.
-      // In this case, we remove the cache.
-      deserializeToResponse(value.asInstanceOf[Serializable]) match {
-        case None =>
-          logger.warn("Response cache restore failed, will now remove it, key: {}", key)
-          Cache.cache.remove(key)
-          None
-
-        case someResponse =>
-          someResponse
-      }
-    }
+    val key = ResponseCacher.makeCacheKey(action)
+    Cache.getAs[CachedResponse](key).map(deserializeToResponse)
   }
 
   //----------------------------------------------------------------------------
@@ -89,7 +59,7 @@ object ResponseCacher extends Logger {
    *   content: Array[Byte]
    *   gzipped: Boolean  // Big textual content is gzipped to save memory
    */
-  private def serializeResponse(response: HttpResponse): Serializable = {
+  private def serializeResponse(response: HttpResponse): CachedResponse = {
     val status = response.getStatus.getCode
 
     // Should be before extracting headers, because the CONTENT_LENGTH header
@@ -107,20 +77,15 @@ object ResponseCacher extends Logger {
       ret
     }
 
-    (status, headers, bytes).asInstanceOf[Serializable]
+    (status, headers, bytes)
   }
 
-  private def deserializeToResponse(serializable: Serializable): Option[HttpResponse] = {
-    try {
-      val (status, headers, bytes) = serializable.asInstanceOf[(Int, Array[(String, String)], Array[Byte])]
-      val response = new DefaultHttpResponse(HttpVersion.HTTP_1_1, HttpResponseStatus.valueOf(status))
-      for ((k, v) <- headers) response.addHeader(k, v)
-      response.setContent(ChannelBuffers.wrappedBuffer(bytes))
-
-      Some(response)
-    } catch {
-      case _ => None
-    }
+  private def deserializeToResponse(cachedResponse: CachedResponse): HttpResponse = {
+    val (status, headers, bytes) = cachedResponse
+    val response = new DefaultHttpResponse(HttpVersion.HTTP_1_1, HttpResponseStatus.valueOf(status))
+    for ((k, v) <- headers) response.addHeader(k, v)
+    response.setContent(ChannelBuffers.wrappedBuffer(bytes))
+    response
   }
 
   // uploadParams is not included in the key, only textParams is
@@ -173,35 +138,19 @@ object ResponseCacher extends Logger {
       ret
     }
 
-    if (!isTextualResponse(response)) return bytes
+    if (!Mime.isTextual(response.getHeader(CONTENT_TYPE))) return bytes
 
     val big = bytes.length > GZIP_THRESHOLD_KB * 1024
     if (!big) return bytes
 
-    // Compress
-    val b = new ByteArrayOutputStream
-    val g = new GZIPOutputStream(b)
-    g.write(bytes)
-    g.finish
-    val compressedBytes = b.toByteArray
-    g.close
+    val gzippedBytes = Gzip.compress(bytes)
 
     // Update CONTENT_LENGTH and set CONTENT_ENCODING
-    HttpHeaders.setContentLength(response, compressedBytes.length)
+    HttpHeaders.setContentLength(response, gzippedBytes.length)
     response.setHeader(CONTENT_ENCODING, "gzip")
 
-    response.setContent(ChannelBuffers.wrappedBuffer(compressedBytes))
-    compressedBytes
-  }
-
-  private def isTextualResponse(response: HttpResponse) = {
-    val contentType = response.getHeader(CONTENT_TYPE)
-    if (contentType == null) {
-      false
-    } else {
-      val lower = contentType.toLowerCase
-      (lower.indexOf("text") >= 0 || lower.indexOf("xml") >= 0 || lower.indexOf("javascript") >= 0 || lower.indexOf("json") >= 0)
-    }
+    response.setContent(ChannelBuffers.wrappedBuffer(gzippedBytes))
+    gzippedBytes
   }
 }
 

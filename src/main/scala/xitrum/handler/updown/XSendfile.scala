@@ -71,15 +71,16 @@ class XSendfile extends ChannelUpstreamHandler with ChannelDownstreamHandler wit
 
     // Try to serve from cache
     SmallFileCache.get(abs) match {
-      case SmallFileCache.Hit(bytes, lastModified, mimeo) =>
+      case SmallFileCache.Hit(bytes, gzipped, lastModified, mimeo) =>
         if (request.getHeader(IF_MODIFIED_SINCE) == lastModified) {
           response.setStatus(NOT_MODIFIED)
         } else {
           logger.debug("Serve " + abs + " from cache")
+          response.setContent(ChannelBuffers.wrappedBuffer(bytes))
           HttpHeaders.setContentLength(response, bytes.length)
+          if (gzipped) response.setHeader(CONTENT_ENCODING, "gzip")
           response.setHeader(LAST_MODIFIED, lastModified)
           if (mimeo.isDefined) response.setHeader(CONTENT_TYPE, mimeo.get)
-          response.setContent(ChannelBuffers.wrappedBuffer(bytes))
         }
         ctx.sendDownstream(e)
 

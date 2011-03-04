@@ -4,28 +4,33 @@ import java.io.{File, RandomAccessFile}
 import java.text.SimpleDateFormat
 import scala.collection.mutable.HashMap
 
-import xitrum.{Config, Mime}
+import xitrum.{Cache, Config, Gzip, Mime}
 
 /** Cache is configureed by files_ehcache_name and files_max_size in xitrum.properties. */
 object SmallFileCache {
   /** lastModified: See http://en.wikipedia.org/wiki/List_of_HTTP_header_fields */
   class GetResult
-  case class  Hit(val bytes: Array[Byte], val lastModified: String, val mimeo: Option[String])                                  extends GetResult
+  case class  Hit(val bytes: Array[Byte], val gzipped: Boolean, val lastModified: String, val mimeo: Option[String])            extends GetResult
   case object FileNotFound                                                                                                      extends GetResult
   case class  FileTooBig(val file: RandomAccessFile, val fileLength: Long, val lastModified: String, val mimeo: Option[String]) extends GetResult
 
-  //                                                      lastModified  mime
-  private val cache   = new HashMap[String, (Array[Byte], String,       Option[String])]
+  private val TTL_IN_MINUTES = 10
+
+  //                         body         gzipped  lastModified  MIME
+  private type CachedFile = (Array[Byte], Boolean, String,       Option[String])
+
   private val rfc2822 = new SimpleDateFormat("EEE, dd MMM yyyy HH:mm:ss Z")
 
   def lastModified(timestamp: Long) = rfc2822.format(timestamp)
 
   /** abs: Absolute file path */
   def get(abs: String): GetResult = {
-    val elem = cache.get(abs)
-    if (elem != None) {
-      val (bytes, lastModified, mimeo) = elem.get
-      return Hit(bytes, lastModified, mimeo)
+    Cache.getAs[CachedFile](abs) match {
+      case None =>
+
+      case Some(cachedFile) =>
+        val (bytes, gzipped, lastModified, mimeo) = cachedFile
+        return Hit(bytes, gzipped, lastModified, mimeo)
     }
 
     // For security do not return hidden file
@@ -39,36 +44,34 @@ object SmallFileCache {
       case _ => return FileNotFound
     }
 
+    val lm    = lastModified(file.lastModified)
     val mimeo = Mime.get(abs)
-
-    val lm = lastModified(file.lastModified)
 
     // Cache if the file is small
     val fileLength = raf.length
     if (Config.isProductionMode && fileLength <= Config.cacheSmallStaticFileMaxSizeInKB * 1024) synchronized {
-      val len = fileLength.toInt
-      val bytes = new Array[Byte](len)
-
       // Read whole file
+      val len   = fileLength.toInt
+      val bytes = new Array[Byte](len)
       var total = 0
       while (total < len) {
         val bytesRead = raf.read(bytes, total, len - total)
         total += bytesRead
       }
-
       raf.close
-      cache(abs) = (bytes, lm, mimeo)
-      return Hit(bytes, lm, mimeo)
+
+      val (bytes2, gzipped) =
+        if (mimeo.isDefined && Mime.isTextual(mimeo.get)) {
+          (Gzip.compress(bytes), true)
+        } else {
+          (bytes, false)
+        }
+      val cachedFile = (bytes, gzipped, lm, mimeo)
+
+      Cache.putIfAbsentMinute(abs, cachedFile, TTL_IN_MINUTES)
+      return Hit(bytes2, gzipped, lm, mimeo)
     }
 
     return FileTooBig(raf, fileLength, lm, mimeo)
-  }
-
-  /**
-   * You may use https://github.com/djpowell/liverepl to attach to a running
-   * Xitrum process to clear the cache.
-   */
-  def clear {
-    cache.clear
   }
 }

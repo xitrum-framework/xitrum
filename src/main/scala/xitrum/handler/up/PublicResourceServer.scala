@@ -8,7 +8,7 @@ import HttpHeaders.Names._
 import HttpResponseStatus._
 import HttpVersion._
 
-import xitrum.{Config, Mime}
+import xitrum.{Config, Gzip, Mime}
 import xitrum.handler.SmallFileCache
 
 @Sharable
@@ -48,11 +48,25 @@ class PublicResourceServer extends SimpleChannelUpstreamHandler with ClosedClien
           ctx.getChannel.write(response)
         } else {
           val response = new DefaultHttpResponse(HTTP_1_1, OK)
-          HttpHeaders.setContentLength(response, length)
           response.setHeader(LAST_MODIFIED, lastModified)
           val mimeo = Mime.get(path)
-          if (mimeo.isDefined) response.setHeader(CONTENT_TYPE, mimeo.get)
-          response.setContent(ChannelBuffers.wrappedBuffer(bytes))
+          val bytes2 =
+            if (mimeo.isDefined) {
+              val mime = mimeo.get
+              response.setHeader(CONTENT_TYPE, mime)
+
+              if (Mime.isTextual(mime)) {
+                val ret = Gzip.compress(bytes)
+                response.setHeader(CONTENT_ENCODING, "gzip")
+                ret
+              } else {
+                bytes
+              }
+            } else {
+              bytes
+            }
+          HttpHeaders.setContentLength(response, bytes2.length)
+          response.setContent(ChannelBuffers.wrappedBuffer(bytes2))
           ctx.getChannel.write(response)
         }
     }
