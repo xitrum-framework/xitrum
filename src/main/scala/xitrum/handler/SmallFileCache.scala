@@ -2,6 +2,7 @@ package xitrum.handler
 
 import java.io.{File, RandomAccessFile}
 import java.text.SimpleDateFormat
+import java.util.Locale
 import scala.collection.mutable.HashMap
 
 import xitrum.{Cache, Config, Gzip, Mime}
@@ -19,7 +20,9 @@ object SmallFileCache {
   //                         body         gzipped  lastModified  MIME
   private type CachedFile = (Array[Byte], Boolean, String,       Option[String])
 
-  private val rfc2822 = new SimpleDateFormat("EEE, dd MMM yyyy HH:mm:ss Z")
+  // SimpleDateFormat is locale dependent
+  // Avoid the case when Xitrum is run on for example Japanese platform
+  private val rfc2822 = new SimpleDateFormat("EEE, dd MMM yyyy HH:mm:ss Z", Locale.ENGLISH)
 
   def lastModified(timestamp: Long) = rfc2822.format(timestamp)
 
