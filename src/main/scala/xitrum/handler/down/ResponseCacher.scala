@@ -35,7 +35,7 @@ object ResponseCacher extends Logger {
           cs
         } else {
           val ret = if (cs < Config.non200ResponseCacheTTLInSecs) cs else Config.non200ResponseCacheTTLInSecs
-          logger.info("Cache non 200 response for {} secs, key: {}", ret, key)
+          logger.debug("Cache non 200 response for {} secs, key: {}", ret, key)
           ret
         }
       }
