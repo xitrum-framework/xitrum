@@ -40,7 +40,7 @@ class PublicResourceServer extends SimpleChannelUpstreamHandler with ClosedClien
         // Cannot use web server startup time, because there may be multiple
         // web servers behind a load balancer!
         val length       = bytes.length
-        val lastModified = SmallFileCache.lastModified(length * 1000000)  // Magnify the change in size
+        val lastModified = SmallFileCache.lastModified(length * 10000000)  // Magnify the change in size
         val ims          = request.getHeader(IF_MODIFIED_SINCE)
         if (ims != null && ims == lastModified) {
           val response = new DefaultHttpResponse(HTTP_1_1, NOT_MODIFIED)
@@ -55,7 +55,8 @@ class PublicResourceServer extends SimpleChannelUpstreamHandler with ClosedClien
               val mime = mimeo.get
               response.setHeader(CONTENT_TYPE, mime)
 
-              if (Mime.isTextual(mime)) {
+              val bl = bytes.length
+              if (bl > Config.compressBigTextualResponseMinSizeInKB * 1024 && Mime.isTextual(mime)) {
                 val ret = Gzip.compress(bytes)
                 response.setHeader(CONTENT_ENCODING, "gzip")
                 ret

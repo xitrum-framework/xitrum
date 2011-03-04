@@ -76,15 +76,6 @@ object Config {
    */
   var cacheSmallStaticFileMaxSizeInKB = 512
 
-  var paramCharsetName = "UTF-8"
-  var paramCharset     = Charset.forName(paramCharsetName)
-
-  /**
-   * Parameters are logged to access log
-   * Comma separated list of sensitive parameters that should not be logged
-   */
-  var filteredParams = Array("password")
-
   /**
    * Xitrum checks the response Content-Type header to test if the response is
    * textual (text/html, text/plain etc.). If the response is big and gzip or
@@ -93,6 +84,15 @@ object Config {
    * and dynamic response.
    */
   var compressBigTextualResponseMinSizeInKB = 10
+
+  var paramCharsetName = "UTF-8"
+  var paramCharset     = Charset.forName(paramCharsetName)
+
+  /**
+   * Parameters are logged to access log
+   * Comma separated list of sensitive parameters that should not be logged
+   */
+  var filteredParams = Array("password")
 
   /**
    * When there is trouble (high load on startup ect.), the response may not be

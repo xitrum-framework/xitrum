@@ -61,12 +61,12 @@ object SmallFileCache {
       raf.close
 
       val (bytes2, gzipped) =
-        if (mimeo.isDefined && Mime.isTextual(mimeo.get)) {
+        if (fileLength > Config.compressBigTextualResponseMinSizeInKB * 1024 && mimeo.isDefined && Mime.isTextual(mimeo.get)) {
           (Gzip.compress(bytes), true)
         } else {
           (bytes, false)
         }
-      val cachedFile = (bytes, gzipped, lm, mimeo)
+      val cachedFile = (bytes2, gzipped, lm, mimeo)
 
       Cache.putIfAbsentMinute(abs, cachedFile, TTL_IN_MINUTES)
       return Hit(bytes2, gzipped, lm, mimeo)
