@@ -31,14 +31,13 @@ object Dispatcher extends Logger {
       val cacheSecs   = Routes.getCacheSecs(actionClass)
 
       def tryCache(f: => Unit) {
-        val key   = ResponseCacher.makeCacheKey(action)
-        val value = Cache.cache.get(key)
-        if (value == null) {
-          f  // hit has already been initialized to false
-        } else {
-          hit = true
-          val response = ResponseCacher.deserializeToResponse(value.asInstanceOf[Serializable])
-          action.ctx.getChannel.write(response)
+        ResponseCacher.getCachedResponse(action) match {
+          case None =>
+            f  // hit has already been initialized to false
+
+          case Some(response) =>
+            hit = true
+            action.ctx.getChannel.write(response)
         }
       }
 
