@@ -15,10 +15,13 @@ import xitrum.action.view.Renderer
 import xitrum.handler.up.Dispatcher
 
 trait Action extends ExtEnv with Logger with Net with Filter with BasicAuthentication with Renderer {
-  implicit def elemToValidatorInjector(elem: Elem) = new ValidatorInjector(this, elem);
-
   def execute {}
   def postback {}
+
+  //----------------------------------------------------------------------------
+
+  // For Validate to use
+  implicit val action: Action = this
 
   //----------------------------------------------------------------------------
 

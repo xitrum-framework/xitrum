@@ -2,7 +2,7 @@ package xitrum.action.validation
 
 import xitrum.action.Action
 
-class URL extends Validator {
+object URL extends Validator {
   def render(action: Action, paramName: String, securedParamName: String) {
     import action._
 

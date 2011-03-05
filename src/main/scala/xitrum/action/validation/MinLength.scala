@@ -2,6 +2,10 @@ package xitrum.action.validation
 
 import xitrum.action.Action
 
+object MinLength {
+  def apply(length: Int) = new MinLength(length)
+}
+
 class MinLength(length: Int) extends Validator {
   def render(action: Action, paramName: String, securedParamName: String) {
     import action._

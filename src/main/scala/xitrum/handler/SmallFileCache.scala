@@ -22,7 +22,7 @@ object SmallFileCache {
 
   // SimpleDateFormat is locale dependent
   // Avoid the case when Xitrum is run on for example Japanese platform
-  private val rfc2822 = new SimpleDateFormat("EEE, dd MMM yyyy HH:mm:ss Z", Locale.ENGLISH)
+  private val rfc2822 = new SimpleDateFormat("EEE, dd MMM yyyy HH:mm:ss Z", Locale.US)
 
   def lastModified(timestamp: Long) = rfc2822.format(timestamp)
 

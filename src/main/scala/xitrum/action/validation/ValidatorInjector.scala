@@ -46,13 +46,3 @@ object ValidatorInjector {
         }
     }
 }
-
-class ValidatorInjector(action: Action, elem: Elem) {
-  import ValidatorInjector._
-
-  def validate(validators: Validator*): Elem = {
-    val (elem2, paramName, securedParamName) = injectToParamName(elem, validators:_*)
-    for (v <- validators) v.render(action, paramName, securedParamName)
-    elem2
-  }
-}

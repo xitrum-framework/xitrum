@@ -26,7 +26,17 @@ object ResponseCacher extends Logger {
     if (cacheSecs == 0) return
 
     val key = makeCacheKey(action)
-    if (!Cache.cache.containsKey(key)) {  // Check to avoid the cost of serializing
+
+    // http://groups.google.com/group/hazelcast/browse_thread/thread/4ba36ed398ea9664
+    val contained = try {
+      Cache.cache.containsKey(key)
+    } catch {
+      case _ =>
+        logger.warn("Error when calling Hazelcast containsKey")
+        false
+    }
+
+    if (!contained) {  // Check to avoid the cost of serializing
       val response       = action.response
       val cachedResponse = serializeResponse(response)
       val secs           = {  // See Config.non200ResponseCacheTTLInSecs
