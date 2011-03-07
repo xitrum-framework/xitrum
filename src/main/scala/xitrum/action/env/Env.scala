@@ -64,10 +64,10 @@ class Env {
   var request:    HttpRequest = _
   var pathInfo:   PathInfo    = _
 
-  var uriParams:        Params = _
-  var bodyParams:       Params = _
-  var fileUploadParams: FileUploadParams = _
-  var pathParams:       Params = _
+  var uriParams:        Params           = _
+  var bodyParams:       Params           = _
+  var fileUploadParams: FileUploadParams = _  // The filename has been sanitized for insecured character. You don't have to do it again.
+  var pathParams:       Params           = _
 
   /**
    * text (uriParams, bodyParams, pathParams)  vs file upload (fileParams)

@@ -11,12 +11,11 @@ import xitrum.action.annotation.GET
 import xitrum.action.env.session.CSRF
 import xitrum.handler.updown.XSendfile
 
-
 object UploadAjax {
   def ::(elem: Elem)(implicit action: Action) = {
     val uuid = UUID.randomUUID.toString
     ArrayBuffer(
-      <iframe id={uuid} name={uuid} src={action.urlForThis} style="display:none; width:1px; height:1px;"></iframe>,
+      <iframe id={uuid} name={uuid} src={action.urlForPostbackThis} style="display:none; width:1px; height:1px;"></iframe>,
       <form method="post" enctype="multipart/form-data" target={uuid}>
         {elem}
         <input type="submit" value="Upload" />
@@ -24,7 +23,7 @@ object UploadAjax {
   }
 }
 
-trait AjaxUpload {
+trait UploadAjax {
   this: Action =>
 
   /**
@@ -46,45 +45,43 @@ trait AjaxUpload {
    *   class ProductNewCreateAction {
    *     override def execute {
    *       renderView(
-   *         <form postback="submit" action={urlForThis}>
+   *         {<form>
    *           Product name:<br />
    *           <input type="text" name="name" /><br />
    *
    *           <div id="image"></div>
    *
    *           Product image:<br />
-   *           {ajaxUpload}
+   *           {<input type="file" name="upload" /> :: UploadAjax}
    *
    *           <input type="submit" name="Create" />
-   *         </form>)
+   *         </form> :: Postback("submit")})
    *     }
    *
    *     override def postback {
-   *       if (fileParamo("file").isDefined) previewProductImage else createProduct
+   *       if (fileParamo("upload").isDefined) previewProduct else createProduct
    *     }
    *
-   *     private def previewProductImage {
-   *       val x = saveUploadToTempFile(fileParam("file"))
-   *       val src = urlFor[AjaxUploadTempFileServer]("x" -> x)
+   *     private def previewProduct {
+   *       val encyptedFileName = TempFileServer.saveUpload(uploadParam("file"))
+   *       val src              = urlFor[TempFileServer]("encyptedFileName" -> encyptedFileName)
    *
-   *       jsRenderUpdate("image",
-   *         <input type="hidden" name="tempFile" value={x} />
+   *       jsRenderHtml(jsById("image"),
+   *         <input type="hidden" name="encyptedFileName" value={encyptedFileName} />
    *         <img src={src} />)
    *     }
    *
    *     private def createProduct {
    *       val name = param("name")
-   *       val tempFile = param("tempFile")
+   *       val id   = Product.create(name)
    *
-   *       val id = Product.create(name)
-   *       val path = System.getProperty("user.dir") + "/public/products/" + id + extension
-   *       saveTempFile(...)
+   *       val encyptedFileName = param("encyptedFileName")
+   *       val path             = System.getProperty("user.dir") + "/public/products/" + id + extension
+   *       TempFileServer.renameTo(encyptedFileName, path)
    *
    *       redirectTo[ProductIndexAction]
    *     }
    *   }
-   *
-   *
    *
    * You may also use the above trick to collect files one by one, before submiting
    * the whole form.

@@ -67,6 +67,7 @@ class BodyParser extends SimpleChannelUpstreamHandler with ClosedClientSilencer 
             val fileUpload = data.asInstanceOf[FileUpload]
             if (fileUpload.isCompleted && fileUpload.length > 0) {  // Skip empty file
               val name = fileUpload.getName
+              sanitizeFileUploadFilename(fileUpload)
               putOrAppendFileUpload(fileParams, name, fileUpload)
             }
           }
@@ -89,6 +90,13 @@ class BodyParser extends SimpleChannelUpstreamHandler with ClosedClientSilencer 
   }
 
   //----------------------------------------------------------------------------
+
+  private def sanitizeFileUploadFilename(fileUpload: FileUpload) {
+    val filename1 = fileUpload.getFilename
+    val filename2 = filename1.split('/').last.split('\\').last.trim.replaceAll("^\\.+", "")
+    val filename3 = if (filename2.isEmpty) "filename" else filename2
+    fileUpload.setFilename(filename3)
+  }
 
   private def putOrAppendString(map: MHashMap[String, Array[String]], key: String, value: String) {
     if (!map.contains(key)) {
