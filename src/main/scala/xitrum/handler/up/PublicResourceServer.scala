@@ -9,7 +9,7 @@ import HttpResponseStatus._
 import HttpVersion._
 
 import xitrum.{Config, Gzip, Mime}
-import xitrum.handler.SmallFileCache
+import xitrum.handler.NotModified
 
 @Sharable
 class PublicResourceServer extends SimpleChannelUpstreamHandler with ClosedClientSilencer {
@@ -40,7 +40,7 @@ class PublicResourceServer extends SimpleChannelUpstreamHandler with ClosedClien
         // Cannot use web server startup time, because there may be multiple
         // web servers behind a load balancer!
         val length       = bytes.length
-        val lastModified = SmallFileCache.lastModified(length * 10000000)  // Magnify the change in size
+        val lastModified = NotModified.formatRfc2822(length * 10000000)  // Magnify the change in size
         val ims          = request.getHeader(IF_MODIFIED_SINCE)
         if (ims != null && ims == lastModified) {
           val response = new DefaultHttpResponse(HTTP_1_1, NOT_MODIFIED)

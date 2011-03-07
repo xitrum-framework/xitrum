@@ -1,13 +1,10 @@
 package xitrum.handler
 
 import java.io.{File, RandomAccessFile}
-import java.text.SimpleDateFormat
-import java.util.Locale
 import scala.collection.mutable.HashMap
 
 import xitrum.{Cache, Config, Gzip, Mime}
 
-/** Cache is configureed by files_ehcache_name and files_max_size in xitrum.properties. */
 object SmallFileCache {
   /** lastModified: See http://en.wikipedia.org/wiki/List_of_HTTP_header_fields */
   class GetResult
@@ -15,16 +12,8 @@ object SmallFileCache {
   case object FileNotFound                                                                                                      extends GetResult
   case class  FileTooBig(val file: RandomAccessFile, val fileLength: Long, val lastModified: String, val mimeo: Option[String]) extends GetResult
 
-  private val TTL_IN_MINUTES = 10
-
   //                         body         gzipped  lastModified  MIME
   private type CachedFile = (Array[Byte], Boolean, String,       Option[String])
-
-  // SimpleDateFormat is locale dependent
-  // Avoid the case when Xitrum is run on for example Japanese platform
-  private val rfc2822 = new SimpleDateFormat("EEE, dd MMM yyyy HH:mm:ss Z", Locale.US)
-
-  def lastModified(timestamp: Long) = rfc2822.format(timestamp)
 
   /** abs: Absolute file path */
   def get(abs: String): GetResult = {
@@ -47,7 +36,7 @@ object SmallFileCache {
       case _ => return FileNotFound
     }
 
-    val lm    = lastModified(file.lastModified)
+    val lm    = NotModified.formatRfc2822(file.lastModified)
     val mimeo = Mime.get(abs)
 
     // Cache if the file is small
@@ -71,7 +60,7 @@ object SmallFileCache {
         }
       val cachedFile = (bytes2, gzipped, lm, mimeo)
 
-      Cache.putIfAbsentMinute(abs, cachedFile, TTL_IN_MINUTES)
+      Cache.putIfAbsentMinute(abs, cachedFile, NotModified.TTL_IN_MINUTES)
       return Hit(bytes2, gzipped, lm, mimeo)
     }
 
