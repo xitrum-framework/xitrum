@@ -79,7 +79,7 @@ object Dispatcher extends Logger {
 
         if (response.getStatus != BAD_REQUEST) {  // MissingParam
           logAccess(action, postback, beginTimestamp, 0, false, e)
-          response.setHeader(XSendfile.XSENDFILE_HEADER, System.getProperty("user.dir") + "/public/500.html")
+          XSendfile.set500Page(response)
         } else {
           logAccess(action, postback, beginTimestamp, 0, false)
         }
@@ -112,7 +112,7 @@ object Dispatcher extends Logger {
         if (action.responded) "" else " (async)"
       } else {
         if (hit) {
-          if (cacheSecs < 0) " (action cache hit)" else " (page cache hit)"
+          if (cacheSecs < 0) " (action cache hit)"  else " (page cache hit)"
         } else {
           if (cacheSecs < 0) " (action cache miss)" else " (page cache miss)"
         }
@@ -155,7 +155,7 @@ class Dispatcher extends SimpleChannelUpstreamHandler with ClosedClientSilencer 
 
       case None =>
         val response = new DefaultHttpResponse(HTTP_1_1, NOT_FOUND)
-        response.setHeader(XSendfile.XSENDFILE_HEADER, System.getProperty("user.dir") + "/public/404.html")
+        XSendfile.set404Page(response)
         env.response = response
         ctx.getChannel.write(env)
     }

@@ -81,19 +81,21 @@ class Env {
    */
   lazy val textParams: Params = {
     val ret = new MHashMap[String, Array[String]]
+
     // The order is important because we want the later to overwrite the former
     ret ++= uriParams
     ret ++= bodyParams
     ret ++= pathParams
+
     ret
   }
 
   def apply(ctx: ChannelHandlerContext, henv: HEnv) {
-    this.ctx        = ctx
-    this.henv       = henv
+    this.ctx  = ctx
+    this.henv = henv
 
-    request    = henv.request
-    pathInfo   = henv.pathInfo
+    request  = henv.request
+    pathInfo = henv.pathInfo
 
     uriParams        = henv.uriParams
     bodyParams       = henv.bodyParams

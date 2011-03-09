@@ -8,8 +8,9 @@ import HttpHeaders.Names._
 import HttpResponseStatus._
 import HttpVersion._
 
-import xitrum.{Config, Gzip, Mime}
+import xitrum.{Config, Gzip, Mime, PathSanitizer}
 import xitrum.handler.NotModified
+import xitrum.handler.updown.XSendfile
 
 @Sharable
 class PublicResourceServer extends SimpleChannelUpstreamHandler with ClosedClientSilencer {
@@ -32,7 +33,7 @@ class PublicResourceServer extends SimpleChannelUpstreamHandler with ClosedClien
     loadFromResource(path) match {
       case None =>
         val response = new DefaultHttpResponse(HTTP_1_1, NOT_FOUND)
-        HttpHeaders.setContentLength(response, 0)
+        XSendfile.set404Page(response)
         ctx.getChannel.write(response)
 
       case Some(bytes) =>
@@ -80,16 +81,18 @@ class PublicResourceServer extends SimpleChannelUpstreamHandler with ClosedClien
    * No one is stupid enough to store large files in resources.
    */
   private def loadFromResource(path: String): Option[Array[Byte]] = {
-    if (path.contains("/.")) {  // Simple sanitize
-      None
-    } else {
-      val stream = getClass.getResourceAsStream(path)
-      if (stream == null) {
+    PathSanitizer.sanitize(path) match {
+      case None =>
         None
-      } else {
-        val bytes = Config.bytesFromStreamAndClose(stream)
-        Some(bytes)
-      }
+
+      case Some(path2) =>
+        val stream = getClass.getResourceAsStream(path2)
+        if (stream == null) {
+          None
+        } else {
+          val bytes = Config.bytesFromStreamAndClose(stream)
+          Some(bytes)
+        }
     }
   }
 }

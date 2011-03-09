@@ -15,60 +15,29 @@ import org.jboss.netty.buffer.ChannelBuffers
 import xitrum.{Config, Logger}
 import xitrum.handler.{Env, SmallFileCache}
 
-object XSendfile {
-  val XSENDFILE_HEADER = "X-Sendfile"
-  val CHUNK_SIZE       = 8192
-}
+object XSendfile extends Logger {
+  val CHUNK_SIZE = 8192
 
-/**
- * This handler send file to client using various strategies:
- * 1. If the file is big: use zero-copy for HTTP or chunking for HTTPS
- * 2. If the file is small: cache in memory and use normal response
- */
-class XSendfile extends ChannelUpstreamHandler with ChannelDownstreamHandler with Logger {
-  import XSendfile._
+  private val XSENDFILE_HEADER = "X-Sendfile"
 
-  var request: HttpRequest = _
+  val abs404 = System.getProperty("user.dir") + "/public/404.html"
+  val abs500 = System.getProperty("user.dir") + "/public/500.html"
 
-  def handleUpstream(ctx: ChannelHandlerContext, e: ChannelEvent) {
-    if (!e.isInstanceOf[UpstreamMessageEvent]) {
-      ctx.sendUpstream(e)
-      return
-    }
-
-    val m = e.asInstanceOf[UpstreamMessageEvent].getMessage
-    if (!m.isInstanceOf[HttpRequest]) {
-      ctx.sendUpstream(e)
-      return
-    }
-
-    request = m.asInstanceOf[HttpRequest]
-    ctx.sendUpstream(e)
+  def setHeader(response: HttpResponse, abs: String) {
+    response.setHeader(XSENDFILE_HEADER, abs)
   }
 
-  def handleDownstream(ctx: ChannelHandlerContext, e: ChannelEvent) {
-    if (!e.isInstanceOf[DownstreamMessageEvent]) {
-      ctx.sendDownstream(e)
-      return
-    }
+  def set404Page(response: HttpResponse) {
+    response.setStatus(NOT_FOUND)
+    setHeader(response, abs404)
+  }
 
-    val m = e.asInstanceOf[DownstreamMessageEvent].getMessage
-    if (!m.isInstanceOf[HttpResponse]) {
-      ctx.sendDownstream(e)
-      return
-    }
+  def set500Page(response: HttpResponse) {
+    response.setStatus(INTERNAL_SERVER_ERROR)
+    setHeader(response, abs500)
+  }
 
-    val response = m.asInstanceOf[HttpResponse]
-    if (!response.containsHeader(XSENDFILE_HEADER)) {
-      ctx.sendDownstream(e)
-      return
-    }
-
-    // X-Sendfile is not standard
-    // To avoid leaking the information, we remove it
-    val abs = response.getHeader(XSENDFILE_HEADER)
-    response.removeHeader(XSENDFILE_HEADER)
-
+  def sendFile(ctx: ChannelHandlerContext, e: ChannelEvent, request: HttpRequest, response: HttpResponse, abs: String) {
     // Try to serve from cache
     SmallFileCache.get(abs) match {
       case SmallFileCache.Hit(bytes, gzipped, lastModified, mimeo) =>
@@ -85,9 +54,13 @@ class XSendfile extends ChannelUpstreamHandler with ChannelDownstreamHandler wit
         ctx.sendDownstream(e)
 
       case SmallFileCache.FileNotFound =>
-        response.setStatus(NOT_FOUND)
-        HttpHeaders.setContentLength(response, 0)
-        ctx.sendDownstream(e)
+        if (abs.startsWith(abs404)) {
+          response.setStatus(NOT_FOUND)
+          HttpHeaders.setContentLength(response, 0)
+          ctx.sendDownstream(e)
+        } else {
+          sendFile(ctx, e, request, response, abs404)
+        }
 
       case SmallFileCache.FileTooBig(raf, fileLength, lastModified, mimeo) =>
         if (request.getHeader(IF_MODIFIED_SINCE) == lastModified) {
@@ -136,5 +109,58 @@ class XSendfile extends ChannelUpstreamHandler with ChannelDownstreamHandler wit
           }
         }
     }
+  }
+}
+
+/**
+ * This handler send file to client using various strategies:
+ * 1. If the file is big: use zero-copy for HTTP or chunking for HTTPS
+ * 2. If the file is small: cache in memory and use normal response
+ */
+class XSendfile extends ChannelUpstreamHandler with ChannelDownstreamHandler {
+  import XSendfile._
+
+  var request: HttpRequest = _
+
+  def handleUpstream(ctx: ChannelHandlerContext, e: ChannelEvent) {
+    if (!e.isInstanceOf[UpstreamMessageEvent]) {
+      ctx.sendUpstream(e)
+      return
+    }
+
+    val m = e.asInstanceOf[UpstreamMessageEvent].getMessage
+    if (!m.isInstanceOf[HttpRequest]) {
+      ctx.sendUpstream(e)
+      return
+    }
+
+    request = m.asInstanceOf[HttpRequest]
+    ctx.sendUpstream(e)
+  }
+
+  def handleDownstream(ctx: ChannelHandlerContext, e: ChannelEvent) {
+    if (!e.isInstanceOf[DownstreamMessageEvent]) {
+      ctx.sendDownstream(e)
+      return
+    }
+
+    val m = e.asInstanceOf[DownstreamMessageEvent].getMessage
+    if (!m.isInstanceOf[HttpResponse]) {
+      ctx.sendDownstream(e)
+      return
+    }
+
+    val response = m.asInstanceOf[HttpResponse]
+    if (!response.containsHeader(XSENDFILE_HEADER)) {
+      ctx.sendDownstream(e)
+      return
+    }
+
+    // X-Sendfile is not standard
+    // To avoid leaking the information, we remove it
+    val abs = response.getHeader(XSENDFILE_HEADER)
+    response.removeHeader(XSENDFILE_HEADER)
+
+    sendFile(ctx, e, request, response, abs)
   }
 }

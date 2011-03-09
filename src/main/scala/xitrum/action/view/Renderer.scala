@@ -65,12 +65,20 @@ trait Renderer extends JQuery with JSCollector with Flash with I18n {
   }
 
   /**
+   * Sends a file using X-Sendfile.
+   *
    * @param path Starts with "/" for absolute path, otherwise it is relative to
-   * the current working directory (System.getProperty("user.dir"))
+   * the current working directory (System.getProperty("user.dir")).
+   * path is not sanitized. To sanitize, use xitrum.Sanitizer.
    */
   def renderFile(path: String) {
-    val abs = if (path.startsWith("/")) path else  System.getProperty("user.dir") + File.separator + path
-    response.setHeader(XSendfile.XSENDFILE_HEADER, abs)
+    val abs = if (path.startsWith("/")) path else System.getProperty("user.dir") + File.separator + path
+    XSendfile.setHeader(response, abs)
+    respond
+  }
+
+  def render404Page {
+    XSendfile.set404Page(response)
     respond
   }
 }

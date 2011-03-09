@@ -12,10 +12,14 @@ object SmallFileCache {
   case object FileNotFound                                                                                                      extends GetResult
   case class  FileTooBig(val file: RandomAccessFile, val fileLength: Long, val lastModified: String, val mimeo: Option[String]) extends GetResult
 
-  //                         body         gzipped  lastModified  MIME
+  //                         body         gzipped  lastModified         MIME
   private type CachedFile = (Array[Byte], Boolean, String,       Option[String])
 
-  /** abs: Absolute file path */
+  /**
+   * If abs points to a hidden file, this method returns FileNotFound.
+   *
+   * @param abs Absolute file path
+   */
   def get(abs: String): GetResult = {
     Cache.getAs[CachedFile](abs) match {
       case None =>

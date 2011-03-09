@@ -156,9 +156,9 @@ trait UploadAjax {
 class AjaxUploadTempFileServer extends Action {
   override def execute {
     val encryptedTempFilePath = param("encryptedTempFilePath")
-    val tempFilePath          = CSRF.decrypt(this, encryptedTempFilePath)
+    val tempFilePath          = CSRF.decrypt(this, encryptedTempFilePath).toString
 
-    response.setHeader(XSendfile.XSENDFILE_HEADER, tempFilePath)
+    XSendfile.setHeader(response, tempFilePath)
     respond
   }
 }
