@@ -54,8 +54,9 @@ object XSendfile extends Logger {
         ctx.sendDownstream(e)
 
       case SmallFileCache.FileNotFound =>
+        response.setStatus(NOT_FOUND)
         if (abs.startsWith(abs404)) {
-          response.setStatus(NOT_FOUND)
+          // Event 404.html is not found!
           HttpHeaders.setContentLength(response, 0)
           ctx.sendDownstream(e)
         } else {
