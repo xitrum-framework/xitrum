@@ -36,9 +36,9 @@ object Cache extends Logger {
   def getAs[T](key: Any): Option[T] = {
     try {
       val value = cache.get(key)
-      if (value != null) return Some(value.asInstanceOf[T]) else return None
+      if (value != null) Some(value.asInstanceOf[T]) else None
     } catch {
-      case e =>
+      case _ =>
         logger.warn("Cache data restoring failed, will now remove it, key: {}", key)
         cache.remove(key)
         None
