@@ -41,7 +41,7 @@ object XSendfile extends Logger {
     // Try to serve from cache
     SmallFileCache.get(abs) match {
       case SmallFileCache.Hit(bytes, gzipped, lastModified, mimeo) =>
-        if (request.getHeader(IF_MODIFIED_SINCE) == lastModified) {
+        if (response.getStatus == OK && request.getHeader(IF_MODIFIED_SINCE) == lastModified) {
           response.setStatus(NOT_MODIFIED)
         } else {
           logger.debug("Serve " + abs + " from cache")
@@ -64,7 +64,7 @@ object XSendfile extends Logger {
         }
 
       case SmallFileCache.FileTooBig(raf, fileLength, lastModified, mimeo) =>
-        if (request.getHeader(IF_MODIFIED_SINCE) == lastModified) {
+        if (response.getStatus == OK && request.getHeader(IF_MODIFIED_SINCE) == lastModified) {
           response.setStatus(NOT_MODIFIED)
           ctx.sendDownstream(e)
         } else {
