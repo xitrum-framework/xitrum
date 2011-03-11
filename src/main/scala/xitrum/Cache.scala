@@ -19,14 +19,16 @@ object Cache extends Logger {
     Hazelcast.getMap("xitrum").asInstanceOf[IMap[Any, Any]]
   }
 
-  def putIfAbsentSecond(key: Any, value: Any, seconds: Int) = {
-    logger.debug("putIfAbsent: " + key)
-    cache.putIfAbsent(key, value, seconds, TimeUnit.SECONDS)
+  def putIfAbsentSecond(key: Any, value: Any, seconds: Int) {
+    if (Config.isProductionMode) {
+      logger.debug("putIfAbsent: " + key)
+      cache.putIfAbsent(key, value, seconds, TimeUnit.SECONDS)
+    }
   }
 
-  def putIfAbsentMinute(key: Any, value: Any, minutes: Int) = putIfAbsentSecond(key, value, minutes * 60)
-  def putIfAbsentHour  (key: Any, value: Any, hours:   Int) = putIfAbsentMinute(key, value, hours   * 60)
-  def putIfAbsentDay   (key: Any, value: Any, days:    Int) = putIfAbsentHour  (key, value, days    * 24)
+  def putIfAbsentMinute(key: Any, value: Any, minutes: Int) { putIfAbsentSecond(key, value, minutes * 60) }
+  def putIfAbsentHour  (key: Any, value: Any, hours:   Int) { putIfAbsentMinute(key, value, hours   * 60) }
+  def putIfAbsentDay   (key: Any, value: Any, days:    Int) { putIfAbsentHour  (key, value, days    * 24) }
 
   /**
    * Gets data from cache with type cast.
@@ -34,6 +36,8 @@ object Cache extends Logger {
    * In this case, we remove the cache.
    */
   def getAs[T](key: Any): Option[T] = {
+    if (!Config.isProductionMode) return None
+
     try {
       val value = cache.get(key)
       if (value != null) Some(value.asInstanceOf[T]) else None
