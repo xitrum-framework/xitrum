@@ -41,7 +41,9 @@ class Project(info: ProjectInfo) extends DefaultProject(info) {
      </pluginRepository>
    </pluginRepositories>
 */
-  // $ MAVEN_OPTS=-Xmx512m mvn -Dmaven.test.skip=true install
+  // wget https://repository.jboss.org/nexus/content/repositories/releases/org/jboss/logging/jboss-logging-spi/2.1.2.GA/jboss-logging-spi-2.1.2.GA.jar
+  // mvn install:install-file -DgroupId=org.jboss.logging -DartifactId=jboss-logging-spi -Dpackaging=jar -Dversion=2.1.2.GA -Dfile=jboss-logging-spi-2.1.2.GA.jar -DgeneratePom=true
+  // MAVEN_OPTS=-Xmx512m mvn -Dmaven.test.skip=true install
   //
   // 2. Long answer: https://issues.jboss.org/browse/NETTY-387
   val localMaven = "Local Maven Repository" at "file://" + Path.userHome + "/.m2/repository"
