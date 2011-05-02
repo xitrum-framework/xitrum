@@ -37,6 +37,56 @@ trait AjaxUpload {
    * To guess MIME: Mime.get(fileName)
    *
    * To save: saveUpload(fileParam("file"), directory, fileName)
+   *
+   * When the file is an image, to let the user preview the image, without you
+   * having to save it to the final destination:
+   *
+   * {{{
+   * @GET(value="/products/new", first=true)
+   * class ProductNewCreateAction {
+   *   override def execute {
+   *     renderView(
+   *       {<form>
+   *         Product name:<br />
+   *         <input type="text" name="name" /><br />
+   *
+   *         <span id="image"></span>
+   *
+   *         Product image:<br />
+   *         {<input type="file" name="upload" /> :: AjaxUpload}
+   *
+   *         <input type="submit" name="Create" />
+   *       </form> :: Postback("submit")})
+   *   }
+   *
+   *   override def postback {
+   *     if (fileParamo("upload").isDefined) previewProduct else createProduct
+   *   }
+   *
+   *   private def previewProduct {
+   *     val encyptedFileName = TempFileServer.saveUpload(uploadParam("file"))
+   *     val src              = urlFor[TempFileServer]("encyptedFileName" -> encyptedFileName)
+   *
+   *     jsRenderHtml(jsById("image"),
+   *       <input type="hidden" name="encyptedFileName" value={encyptedFileName} />
+   *       <img src={src} />)
+   *   }
+   *
+   *   private def createProduct {
+   *     val name = param("name")
+   *     val id   = Product.create(name)
+   *
+   *     val encyptedFileName = param("encyptedFileName")
+   *     val path             = System.getProperty("user.dir") + "/public/products/" + id + extension
+   *     TempFileServer.renameTo(encyptedFileName, path)
+   *
+   *     redirectTo[ProductIndexAction]
+   *   }
+   * }
+   * }}}
+   *
+   * You may also use the above trick to collect files one by one, before submiting
+   * the whole form.
    */
   def ajaxUpload = {
     val uuid = UUID.randomUUID.toString
