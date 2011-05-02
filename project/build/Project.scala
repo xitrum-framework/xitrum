@@ -67,7 +67,7 @@ class Project(info: ProjectInfo) extends DefaultProject(info) {
       // For page, action, and object caching
       // Infinispan is good but much heavier, and the logging is bad:
       // https://github.com/infinispan/infinispan/blob/master/core/src/main/java/org/infinispan/util/logging/LogFactory.java
-      "com.hazelcast"   % "hazelcast"       % "1.9.2.1"
+      "com.hazelcast"   % "hazelcast"       % "1.9.2.3"
     ) ++ super.libraryDependencies
 
   // Paths ---------------------------------------------------------------------

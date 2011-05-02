@@ -22,7 +22,7 @@
 
   <!-- For page, action, object cache -->
   <map name="xitrum">
-    <backup-count>1</backup-count>
+    <backup-count>0</backup-count>
     <eviction-policy>LRU</eviction-policy>
     <max-size>100000</max-size>
     <eviction-percentage>25</eviction-percentage>
