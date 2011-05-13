@@ -7,7 +7,6 @@ class Project(info: ProjectInfo) extends DefaultProject(info) {
     Seq("-deprecation",
         "-Xmigration",
         "-Xcheckinit",
-        "-Xwarninit",
         "-encoding", "utf8")
         .map(x => CompileOption(x))
 
