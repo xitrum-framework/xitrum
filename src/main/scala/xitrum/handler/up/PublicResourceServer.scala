@@ -28,9 +28,9 @@ class PublicResourceServer extends SimpleChannelUpstreamHandler with ClosedClien
       return
     }
 
-    val path = uri.substring("/resources".length)  // Remove /resources prefix
+    val path = uri.substring("/resources/".length)  // Remove "/resources/" leading
 
-    loadFromResource(path) match {
+    loadResource(path) match {
       case None =>
         val response = new DefaultHttpResponse(HTTP_1_1, NOT_FOUND)
         XSendfile.set404Page(response)
@@ -79,14 +79,18 @@ class PublicResourceServer extends SimpleChannelUpstreamHandler with ClosedClien
   /**
    * Read whole file to memory. It's OK because the files are normally small.
    * No one is stupid enough to store large files in resources.
+   *
+   * @param path Relative from CLASSPATH, without leading "/"
    */
-  private def loadFromResource(path: String): Option[Array[Byte]] = {
+  private def loadResource(path: String): Option[Array[Byte]] = {
     PathSanitizer.sanitize(path) match {
       case None =>
         None
 
       case Some(path2) =>
-        val stream = getClass.getResourceAsStream(path2)
+        // http://www.javaworld.com/javaworld/javaqa/2003-08/01-qa-0808-property.html?page=2
+        val stream = getClass.getClassLoader.getResourceAsStream(path2)
+
         if (stream == null) {
           None
         } else {

@@ -19,15 +19,23 @@ object Config {
     bytes
   }
 
-  def load(path: String): String = {
-    val stream = getClass.getResourceAsStream(path)
+  /**
+   * @param path Relative from CLASSPATH, without leading "/"
+   */
+  def loadStringFromClasspath(path: String): String = {
+    val stream = getClass.getClassLoader.getResourceAsStream(path)
     val bytes  = bytesFromStreamAndClose(stream)
     new String(bytes, "UTF-8")
   }
 
-  def loadProperties(path: String): Properties = {
-    val ret    = new Properties
+  /**
+   * @param path Relative from CLASSPATH, without leading "/"
+   */
+  def loadPropertiesFromClasspath(path: String): Properties = {
+    // http://www.javaworld.com/javaworld/javaqa/2003-08/01-qa-0808-property.html?page=2
     val stream = getClass.getClassLoader.getResourceAsStream(path)
+
+    val ret = new Properties
     ret.load(stream)
     stream.close
     ret
@@ -40,7 +48,7 @@ object Config {
   // See xitrum.properties
   // Below are all "val"s
 
-  val properties = loadProperties("xitrum.properties")
+  val properties = loadPropertiesFromClasspath("xitrum.properties")
 
   val httpPort = properties.getProperty("http_port").toInt
 
