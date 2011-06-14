@@ -33,7 +33,7 @@ libraryDependencies += "tv.cntt" % "annovention" % "1.0-SNAPSHOT"
 libraryDependencies += "com.hazelcast" % "hazelcast" % "1.9.3"
 
 // For easier development (sbt console etc.)
-//unmanagedClasspath += Attributed(file("config"))(AttributeMap.empty) //"config"
+unmanagedBase in Runtime <<= baseDirectory { base => base / "config" }
 
 // Publish ---------------------------------------------------------------------
 
