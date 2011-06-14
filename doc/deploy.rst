@@ -1,5 +1,5 @@
-Deployed directory layout
-=========================
+Distribution directory layout
+=============================
 
 .. image:: http://www.bdoubliees.com/journalspirou/sfigures6/schtroumpfs/s8.jpg
 

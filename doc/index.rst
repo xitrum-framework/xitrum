@@ -8,6 +8,9 @@ Xitrum's documentation
 
 .. image:: http://www.bdoubliees.com/journalspirou/sfigures6/schtroumpfs/s14.jpg
 
+Xitrum is open source. Its source code is at:
+https://github.com/ngocdaothanh/xitrum
+
 Contents:
 
 .. toctree::

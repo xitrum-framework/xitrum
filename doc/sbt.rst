@@ -112,7 +112,7 @@ A full example of Build.scala:
 
     // Task "dist" ---------------------------------------------------------------
 
-    val dist = TaskKey[Unit]("dist", "Prepare target/dist directory ready for production distribution")
+    val dist = TaskKey[Unit]("dist", "Prepare target/dist directory, ready for production distribution")
 
     lazy val distTask = dist <<= (externalDependencyClasspath in Runtime, baseDirectory, target, scalaVersion) map { (libs, baseDir, target, scalaVersion) =>
       val distDir = new File(target,  "dist")
@@ -149,10 +149,13 @@ A full example of Build.scala:
     }
   }
 
-With the above, you can:
+With the above, you can run these tasks:
 
-* Run `sbt run` to run `my.project.boot.Klass`
-* Run `sbt dist` to prepare target/dist directory ready for production distribution
+* `sbt update`: Download dependencies
+* `sbt compile`: Compile .java and .scala files to `target` directory
+* `sbt run`: Run `my.project.boot.Klass`
+* `sbt package`: Package the project to a .jar file
+* `sbt dist`: Prepare `target/dist` directory, ready for production distribution
 
 You may want to modify dist task above to suit your project.
 
