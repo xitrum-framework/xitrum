@@ -3,10 +3,7 @@ SBT
 
 .. image:: http://www.bdoubliees.com/journalspirou/sfigures6/schtroumpfs/s13.jpg
 
-Please use SBT 0.7.7:
-http://code.google.com/p/simple-build-tool/
-
-SBT 0.10.0+ does not work well yet:
+Please use SBT 0.10.0+:
 https://github.com/harrah/xsbt
 
 This section discusses your web application structure when you use SBT.
@@ -19,7 +16,7 @@ A typical blog application will have this directory layout:
 ::
 
   config
-    blog.properties
+    my_project.properties
     logback.properties
     xitrum.properties
     i18n
@@ -32,9 +29,7 @@ A typical blog application will have this directory layout:
     jrebel.jar
   lib_managed
   project
-    build.properties
-    build
-      Project.scala
+    Build.scala
   public
     upload
   src
@@ -57,22 +52,109 @@ A typical blog application will have this directory layout:
             js
   README
 
-SBT project dependency
-----------------------
-
-To add Xitrum to project dependencies:
-
-::
-
-  "tv.cntt" %% "xitrum" % "1.0-SNAPSHOT"
+Build.scala example
+-------------------
 
 Xitrum uses SLF4J 1.6.1. You must provide an SLF4J implentation that compatible
-with SLF4J 1.6.1, like logback-classic 0.9.27:
+with SLF4J 1.6.1, like logback-classic 0.9.28. So basically, you need these 2
+dependencies:
 
 ::
 
-  "ch.qos.logback" % "logback-classic" % "0.9.27"
+  "tv.cntt"        %% "xitrum"          % "1.1-SNAPSHOT"
 
+and
+
+::
+
+  "ch.qos.logback" %  "logback-classic" % "0.9.28"
+
+A full example of Build.scala:
+
+::
+
+  import sbt._
+  import Keys._
+
+  object MyBuild extends Build {
+    val mySettings = Defaults.defaultSettings ++ Seq(
+      organization := "my.organization",
+      name         := "project_name",
+      version      := "1.0-SNAPSHOT",
+      scalaVersion := "2.9.0-1"
+    )
+
+    val myResolvers = Seq(
+      // For Xitrum
+      "Sonatype Snapshot Repository" at "https://oss.sonatype.org/content/repositories/snapshots",
+
+      // For Netty 4, remove this when Netty 4 is released
+      "Local Maven Repository"       at "file://" + Path.userHome.absolutePath + "/.m2/repository"
+    )
+
+    val myLibraryDependencies = Seq(
+      "tv.cntt"        %% "xitrum"          % "1.1-SNAPSHOT",
+      "ch.qos.logback" %  "logback-classic" % "0.9.28"
+    )
+
+    lazy val project = Project (
+      "project",
+      file ("."),
+      settings = mySettings ++ Seq(
+        resolvers           := myResolvers,
+        libraryDependencies := myLibraryDependencies,
+
+        mainClass           := Some("my.project.boot.Klass"),
+        distTask,
+        unmanagedBase in Runtime <<= baseDirectory { base => base / "config" }
+      )
+    )
+
+    // Task "dist" ---------------------------------------------------------------
+
+    val dist = TaskKey[Unit]("dist", "Prepare target/dist directory ready for production distribution")
+
+    lazy val distTask = dist <<= (externalDependencyClasspath in Runtime, baseDirectory, target, scalaVersion) map { (libs, baseDir, target, scalaVersion) =>
+      val distDir = new File(target,  "dist")
+
+      // Copy bin directory
+      val binDir1 = new File(baseDir, "bin")
+      val binDir2 = new File(distDir, "bin")
+      IO.copyDirectory(binDir1, binDir2)
+      for (file <- binDir2.listFiles)
+        if (file.isFile && file.name.endsWith("sh"))
+          file.setExecutable(true)
+
+      // Copy config directory
+      val configDir1 = new File(baseDir, "config")
+      val configDir2 = new File(distDir, "config")
+      IO.copyDirectory(configDir1, configDir2)
+
+      // Copy public directory
+      val publicDir1 = new File(baseDir, "public")
+      val publicDir2 = new File(distDir, "public")
+      IO.copyDirectory(publicDir1, publicDir2)
+
+      // Copy lib directory
+      val libDir = new File(distDir, "lib")
+
+      // Copy dependencies
+      libs.foreach { lib => IO.copyFile(lib.data, new File(libDir + "/%s".format(lib.data.getName))) }
+
+      // Copy .jar files are created after running "sbt package"
+      val jarDir = new File(target, "scala-" + scalaVersion.replace('-', '.'))
+      for (file <- jarDir.listFiles)
+        if (file.isFile && file.name.endsWith("jar"))
+          IO.copyFile(file, new File(libDir + "/%s".format(file.getName)))
+    }
+  }
+
+With the above, you can:
+
+* Run `sbt run` to run `my.project.boot.Klass`
+* Run `sbt dist` to prepare target/dist directory ready for production distribution
+
+You may want to modify dist task above to suit your project.
 
 Netty 4
 -------
