@@ -24,10 +24,11 @@ server on top of Netty:
   | +-------------+ |
   | | Middlewares | |
   | +-------------+ |
-  | | HTTP Server | |
-  | +-------------+ |
   +-----------------+
   |      Netty      |
+  | +-------------+ |
+  | | HTTP Server | |
+  | +-------------+ |
   +-----------------+
 
 .. image:: http://www.bdoubliees.com/journalspirou/sfigures6/schtroumpfs/s7.jpg
