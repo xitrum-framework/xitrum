@@ -106,6 +106,7 @@ A full example of Build.scala:
 
         mainClass           := Some("my.project.boot.Klass"),
         distTask,
+        distNeedsPackageBin,  // Must be after distTask
         unmanagedBase in Runtime <<= baseDirectory { base => base / "config" }
       )
     )
@@ -146,6 +147,8 @@ A full example of Build.scala:
       val jarDir = new File(target, "scala-" + scalaVersion.replace('-', '.'))
       (jarDir * "*.jar").get.foreach { file => IO.copyFile(file, libDir / file.name) }
     }
+
+    val distNeedsPackageBin = dist <<= dist.dependsOn(packageBin in Compile)
   }
 
 With the above, you can run these tasks:
