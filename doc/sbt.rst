@@ -113,42 +113,38 @@ A full example of Build.scala:
     // Task "dist" ---------------------------------------------------------------
 
     val dist = TaskKey[Unit]("dist", "Prepare target/dist directory, ready for production distribution")
-
+  
     lazy val distTask = dist <<=
         (externalDependencyClasspath in Runtime, baseDirectory, target, scalaVersion) map {
         (libs,                                   baseDir,       target, scalaVersion) =>
-
-      val distDir = new File(target,  "dist")
-
+  
+      val distDir = target / "dist"
+  
       // Copy bin directory
-      val binDir1 = new File(baseDir, "bin")
-      val binDir2 = new File(distDir, "bin")
+      val binDir1 = baseDir / "bin"
+      val binDir2 = distDir / "bin"
       IO.copyDirectory(binDir1, binDir2)
-      for (file <- binDir2.listFiles)
-        if (file.isFile && file.name.endsWith("sh"))
-          file.setExecutable(true)
-
+      binDir2.listFiles.foreach { _.setExecutable(true) }
+  
       // Copy config directory
-      val configDir1 = new File(baseDir, "config")
-      val configDir2 = new File(distDir, "config")
+      val configDir1 = baseDir / "config"
+      val configDir2 = distDir / "config"
       IO.copyDirectory(configDir1, configDir2)
-
+  
       // Copy public directory
-      val publicDir1 = new File(baseDir, "public")
-      val publicDir2 = new File(distDir, "public")
+      val publicDir1 = baseDir / "public"
+      val publicDir2 = distDir / "public"
       IO.copyDirectory(publicDir1, publicDir2)
-
+  
       // Copy lib directory
-      val libDir = new File(distDir, "lib")
-
+      val libDir = distDir / "lib"
+  
       // Copy dependencies
-      libs.foreach { lib => IO.copyFile(lib.data, new File(libDir + "/%s".format(lib.data.getName))) }
-
+      libs.foreach { lib => IO.copyFile(lib.data, libDir / lib.data.name) }
+  
       // Copy .jar files are created after running "sbt package"
       val jarDir = new File(target, "scala-" + scalaVersion.replace('-', '.'))
-      for (file <- jarDir.listFiles)
-        if (file.isFile && file.name.endsWith("jar"))
-          IO.copyFile(file, new File(libDir + "/%s".format(file.getName)))
+      (jarDir * "*.jar").get.foreach { file => IO.copyFile(file, libDir / file.name) }
     }
   }
 
