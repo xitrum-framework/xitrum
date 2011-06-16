@@ -21,6 +21,7 @@ Contents:
    action_view
    restful
    postback
+   var
    validation
    upload
    cache
