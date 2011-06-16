@@ -3,4 +3,5 @@ lib_managed
 project/boot
 target
 tmp
+plugin/project/boot
 .*
