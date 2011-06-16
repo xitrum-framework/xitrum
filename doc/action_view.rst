@@ -54,7 +54,7 @@ TODO
 Layout
 ------
 
-You typically do like this:
+You typically create a parent class which has a common layout for many views, like this:
 
 ``ParentAction.scala``
 
@@ -67,13 +67,10 @@ You typically do like this:
     override def layout = Some(() => DocType.xhtmlTransitional(
       <html>
         <body>
-          {at("contentForLayout")}
+          {renderedView}
         </body>
       </html>
     ))
-
-``at`` is a utility map to pass things around. ``at("contentForLayout")`` is special,
-it contains the rendered view.
 
 ``Index.scala``
 

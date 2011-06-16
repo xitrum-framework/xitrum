@@ -39,6 +39,8 @@ trait Renderer extends JQuery with JSCollector with Flash with I18n {
 
   //----------------------------------------------------------------------------
 
+  var renderedView: Any = null
+
   def layout: Option[() => Any] = None
 
   def renderView(view: Any) {
@@ -51,7 +53,7 @@ trait Renderer extends JQuery with JSCollector with Flash with I18n {
         renderText(view, "text/html")
 
       case Some(function) =>
-        at("contentForLayout") = view
+        renderedView = view
         renderText(function.asInstanceOf[() => Any].apply, "text/html")
     }
   }
