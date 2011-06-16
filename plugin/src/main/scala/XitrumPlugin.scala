@@ -1,17 +1,49 @@
+import java.io.FileOutputStream
+
 import sbt._
 import Keys._
 
 object XitrumPlugin extends Plugin {
   // settings must be lazy to avoid null error
   // distNeedsPackageBin must be after distTask
-  override lazy val settings = Seq(distTask, distNeedsPackageBin)
+  override lazy val settings = Seq(newTask, distTask, distNeedsPackageBin)
+
+  //----------------------------------------------------------------------------
+
+  def copyResourceFile(destDir: File, relativePath: String) {
+    val fromPath = "xitrum_resources/" + relativePath
+    val toPath   = destDir + "/" + relativePath
+
+    val inputStream = getClass.getClassLoader.getResourceAsStream(fromPath)
+    val f = new File(toPath)
+    val ouputStream = new FileOutputStream(f)
+    val buf = new Array[Byte](1024)
+    var len = inputStream.read(buf)
+    while (len > 0) {
+      ouputStream.write(buf, 0, len)
+      len = inputStream.read(buf)
+    }
+    ouputStream.close
+    inputStream.close
+  }
+
+  // Task "new" ----------------------------------------------------------------
+
+  val newKey = TaskKey[Unit]("xitrum-new", "Prepares files for a new SBT project, ready for development")
+
+  lazy val newTask = newKey <<= baseDirectory map { baseDir =>
+    (baseDir / "config").mkdir
+    copyResourceFile(baseDir, "config/hazelcast.xml")
+    copyResourceFile(baseDir, "config/logback.xml")
+    copyResourceFile(baseDir, "config/xitrum.properties")
+  }
 
   // Task "dist" ---------------------------------------------------------------
 
-  val dist = TaskKey[Unit]("xitrum-dist", "Prepares target/dist directory, ready for production distribution")
+  val distKey = TaskKey[Unit]("xitrum-dist", "Prepares target/dist directory, ready for production distribution")
 
   // distTask must be lazy to avoid null error
-  lazy val distTask = dist <<=
+  lazy val distTask = distKey <<=
       (externalDependencyClasspath in Runtime, baseDirectory, target, scalaVersion) map {
       (libs,                                   baseDir,       target, scalaVersion) =>
 
@@ -20,6 +52,7 @@ object XitrumPlugin extends Plugin {
     // Copy bin directory
     val binDir1 = baseDir / "bin"
     val binDir2 = distDir / "bin"
+    copyResourceFile(distDir, "bin/runner.sh")
     IO.copyDirectory(binDir1, binDir2)
     binDir2.listFiles.foreach { _.setExecutable(true) }
 
@@ -44,5 +77,5 @@ object XitrumPlugin extends Plugin {
     (jarDir * "*.jar").get.foreach { file => IO.copyFile(file, libDir / file.name) }
   }
 
-  val distNeedsPackageBin = dist <<= dist.dependsOn(packageBin in Compile)
+  val distNeedsPackageBin = distKey <<= distKey.dependsOn(packageBin in Compile)
 }
