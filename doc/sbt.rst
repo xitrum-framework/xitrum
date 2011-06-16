@@ -114,35 +114,35 @@ A full example of Build.scala:
     // Task "dist" ---------------------------------------------------------------
 
     val dist = TaskKey[Unit]("dist", "Prepare target/dist directory, ready for production distribution")
-  
+
     lazy val distTask = dist <<=
         (externalDependencyClasspath in Runtime, baseDirectory, target, scalaVersion) map {
         (libs,                                   baseDir,       target, scalaVersion) =>
-  
+
       val distDir = target / "dist"
-  
+
       // Copy bin directory
       val binDir1 = baseDir / "bin"
       val binDir2 = distDir / "bin"
       IO.copyDirectory(binDir1, binDir2)
       binDir2.listFiles.foreach { _.setExecutable(true) }
-  
+
       // Copy config directory
       val configDir1 = baseDir / "config"
       val configDir2 = distDir / "config"
       IO.copyDirectory(configDir1, configDir2)
-  
+
       // Copy public directory
       val publicDir1 = baseDir / "public"
       val publicDir2 = distDir / "public"
       IO.copyDirectory(publicDir1, publicDir2)
-  
+
       // Copy lib directory
       val libDir = distDir / "lib"
-  
+
       // Copy dependencies
       libs.foreach { lib => IO.copyFile(lib.data, libDir / lib.data.name) }
-  
+
       // Copy .jar files are created after running "sbt package"
       val jarDir = new File(target, "scala-" + scalaVersion.replace('-', '.'))
       (jarDir * "*.jar").get.foreach { file => IO.copyFile(file, libDir / file.name) }
@@ -153,13 +153,22 @@ A full example of Build.scala:
 
 With the above, you can run these tasks:
 
-* `sbt update`: Download dependencies
-* `sbt compile`: Compile .java and .scala files to `target` directory
-* `sbt run`: Run `my.project.boot.Klass`
-* `sbt package`: Package the project to a .jar file
-* `sbt dist`: Prepare `target/dist` directory, ready for production distribution
+* ``sbt update``: Download dependencies
+* ``sbt compile``: Compile .java and .scala files to ``target`` directory
+* ``sbt run``: Run ``my.project.boot.Klass``
+* ``sbt package``: Package the project to a .jar file
+* ``sbt dist``: Prepare ``target/dist`` directory, ready for production distribution
 
 You may want to modify dist task above to suit your project.
+
+Create Eclipse project
+----------------------
+
+To create .project file so that your project becomes an Eclipse project:
+
+1. Create directory ``~/.sbt/plugins``
+2. Inside that directory, create file build.sbt, with the contents as described at https://github.com/typesafehub/sbteclipse
+3. At your SBT project directory, run ``sbt eclipse``
 
 Netty 4
 -------

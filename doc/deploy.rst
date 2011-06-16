@@ -5,7 +5,7 @@ Distribution directory layout
 
 Please see the SBT section.
 
-Using the the dist task as in the example, after running `sbt dist` you will have
+Using the the dist task as in the example, after running ``sbt dist`` you will have
 "dist" directory inside "target" directory. Its structure is typically:
 
 ::

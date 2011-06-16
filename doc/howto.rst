@@ -23,7 +23,7 @@ Then in the web page, refer to it like this:
 Link to an action
 -----------------
 
-Xitrum tries to be type-safe.
+Xitrum tries to be typesafe.
 
 Don't write URL manually, use urlFor like this:
 

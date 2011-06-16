@@ -10,7 +10,7 @@ server on top of Netty:
   More powerful than Scalatra but less complex than Lift.
   You can easily define URL routings (Scalatra style) and POSTbacks (Lift style).
 * Asynchronous, in the spirit of Netty.
-* Type-safe, in the spirit of Scala.
+* Typesafe, in the spirit of Scala.
 * Stateless, by default session is stored in cookie.
 
 ::

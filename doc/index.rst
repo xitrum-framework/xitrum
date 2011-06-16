@@ -18,6 +18,7 @@ Contents:
 
    intro
    sbt
+   action_view
    restful
    postback
    validation

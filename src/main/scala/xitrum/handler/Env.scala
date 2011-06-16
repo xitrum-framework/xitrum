@@ -8,7 +8,7 @@ import xitrum.action.env.{Env => CEnv, PathInfo}
 
 /**
  * Env is basically a map for sharing data between handlers. But for more
- * type-safe, fixed data variables are put inside.
+ * typesafe, fixed data variables are put inside.
  */
 class Env extends HashMap[String, Any] {
   import CEnv._
