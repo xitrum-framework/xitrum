@@ -36,6 +36,12 @@ object XitrumPlugin extends Plugin {
     copyResourceFile(baseDir, "config/hazelcast.xml")
     copyResourceFile(baseDir, "config/logback.xml")
     copyResourceFile(baseDir, "config/xitrum.properties")
+
+    (baseDir / "public").mkdir
+    copyResourceFile(baseDir, "public/404.html")
+    copyResourceFile(baseDir, "public/500.html")
+    copyResourceFile(baseDir, "public/favicon.ico")
+    copyResourceFile(baseDir, "public/robots.txt")
   }
 
   // Task "dist" ---------------------------------------------------------------
