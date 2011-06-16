@@ -72,7 +72,7 @@ You typically do like this:
       </html>
     ))
 
-``at`` is a utility map to pass things around. at("contentForLayout") is special,
+``at`` is a utility map to pass things around. ``at("contentForLayout")`` is special,
 it contains the rendered view.
 
 ``Index.scala``

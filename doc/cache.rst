@@ -3,7 +3,7 @@ Cache
 
 .. image:: http://www.bdoubliees.com/journalspirou/sfigures6/schtroumpfs/s15.jpg
 
-`Hazelcast http://www.hazelcast.com/`_
+`Hazelcast <http://www.hazelcast.com/>`_
 is integrated for page, action, and object cache. Of course you can
 use it for other things (distributed processing etc) in your application.
 
