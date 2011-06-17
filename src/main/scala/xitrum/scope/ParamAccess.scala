@@ -2,8 +2,8 @@ package xitrum.scope
 
 import scala.collection.JavaConversions
 
-import xitrum.action.Action
-import xitrum.action.exception.MissingParam
+import xitrum.Action
+import xitrum.exception.MissingParam
 
 trait ParamAccess {
   this: Action =>

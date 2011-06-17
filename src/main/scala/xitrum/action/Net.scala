@@ -3,6 +3,8 @@ package xitrum.action
 import java.net.InetSocketAddress
 import org.jboss.netty.handler.codec.http.HttpHeaders.Names.HOST
 
+import xitrum.Action
+
 trait Net {
   this: Action =>
 

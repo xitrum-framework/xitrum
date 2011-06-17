@@ -4,9 +4,8 @@ import java.lang.reflect.Method
 import scala.collection.mutable.{ArrayBuffer, HashMap => MHashMap, StringBuilder}
 import org.jboss.netty.handler.codec.http.{HttpMethod, QueryStringEncoder}
 
-import xitrum.{Config, Logger}
-import xitrum.action.Action
-import xitrum.action.env.{Env, PathInfo}
+import xitrum.{Action, Config, Logger}
+import xitrum.scope.{Env, PathInfo}
 
 object Routes extends Logger {
   type Pattern         = String

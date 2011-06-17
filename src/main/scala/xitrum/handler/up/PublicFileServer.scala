@@ -9,8 +9,8 @@ import HttpMethod._
 import HttpResponseStatus._
 import HttpVersion._
 
-import xitrum.PathSanitizer
 import xitrum.handler.updown.XSendfile
+import xitrum.util.PathSanitizer
 
 /**
  * Serves special files or files in /public directory.

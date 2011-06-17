@@ -8,11 +8,12 @@ import ChannelHandler.Sharable
 import org.jboss.netty.handler.codec.http.{DefaultHttpResponse, HttpHeaders, HttpResponse, HttpResponseStatus, HttpVersion}
 import HttpHeaders.Names.{CONTENT_ENCODING, CONTENT_TYPE}
 
-import xitrum.{Cache, Config, Gzip, Logger, Mime}
-import xitrum.action.Action
-import xitrum.action.env.{Env => AEnv}
+import xitrum.{Cache, Config, Logger}
+import xitrum.Action
 import xitrum.action.routing.Routes
+import xitrum.scope.{Env => AEnv}
 import xitrum.handler.{Env, SmallFileCache}
+import xitrum.util.{Gzip, Mime}
 
 object ResponseCacher extends Logger {
   private val GZIP_THRESHOLD_KB = 10

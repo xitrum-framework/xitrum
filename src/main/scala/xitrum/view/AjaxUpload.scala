@@ -6,9 +6,9 @@ import scala.collection.mutable.ArrayBuffer
 import scala.xml.Elem
 import org.jboss.netty.handler.codec.http.FileUpload
 
-import xitrum.action.Action
-import xitrum.action.annotation.GET
-import xitrum.action.env.session.CSRF
+import xitrum.Action
+import xitrum.annotation.GET
+import xitrum.scope.session.CSRF
 import xitrum.handler.updown.XSendfile
 
 object AjaxUpload {

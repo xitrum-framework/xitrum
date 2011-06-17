@@ -1,6 +1,6 @@
 package xitrum.validation
 
-import xitrum.action.Action
+import xitrum.Action
 
 object Required extends Validator {
   def render(action: Action, paramName: String, securedParamName: String) {

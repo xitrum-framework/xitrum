@@ -11,11 +11,10 @@ import ChannelHandler.Sharable
 import HttpResponseStatus._
 import HttpVersion._
 
-import xitrum.{Cache, Config, Logger}
-import xitrum.action.Action
-import xitrum.action.env.{Env => AEnv}
-import xitrum.action.exception.MissingParam
+import xitrum.{Action, Cache, Config, Logger}
+import xitrum.scope.{Env => AEnv}
 import xitrum.action.routing.{Routes, PostbackAction}
+import xitrum.exception.MissingParam
 import xitrum.handler.Env
 import xitrum.handler.down.ResponseCacher
 import xitrum.handler.updown.XSendfile

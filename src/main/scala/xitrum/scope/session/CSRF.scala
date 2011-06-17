@@ -2,8 +2,8 @@ package xitrum.scope.session
 
 import java.util.UUID
 
-import xitrum.action.Action
-import xitrum.action.exception.InvalidCSRFToken
+import xitrum.Action
+import xitrum.exception.InvalidCSRFToken
 
 /**
  * SecureBase64 is for preventing a user to mess with his own data to cheat the server.

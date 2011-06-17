@@ -5,7 +5,7 @@ import java.util.{TreeSet => JTreeSet}
 import org.jboss.netty.handler.codec.http.{HttpRequest, Cookie, CookieDecoder, CookieEncoder, HttpHeaders}
 import HttpHeaders.Names._
 
-import xitrum.action.Action
+import xitrum.Action
 
 class Cookies(request: HttpRequest) extends JTreeSet[Cookie] {
   {

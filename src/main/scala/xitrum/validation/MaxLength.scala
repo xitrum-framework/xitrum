@@ -1,6 +1,6 @@
 package xitrum.validation
 
-import xitrum.action.Action
+import xitrum.Action
 
 object MaxLength {
   def apply(length: Int) = new MaxLength(length)

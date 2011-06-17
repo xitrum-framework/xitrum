@@ -5,13 +5,12 @@ import org.jboss.netty.handler.codec.http._
 import HttpHeaders.Names._
 import HttpResponseStatus._
 
-import xitrum.{Config, Logger}
 import xitrum.action._
-import xitrum.action.env.ExtEnv
-import xitrum.action.env.session.CSRF
+import xitrum.scope.ExtEnv
+import xitrum.scope.session.CSRF
 import xitrum.action.routing.{PostbackAction, Routes}
-import xitrum.action.validation.ValidatorInjector
-import xitrum.action.view.Renderer
+import xitrum.validation.ValidatorInjector
+import xitrum.view.Renderer
 import xitrum.handler.up.Dispatcher
 
 trait Action extends ExtEnv with Logger with Net with Filter with BasicAuthentication with Renderer {

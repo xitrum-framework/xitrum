@@ -3,8 +3,8 @@ package xitrum.validation
 import scala.collection.mutable.ArrayBuffer
 import scala.xml.{Attribute, Elem, Text, Null}
 
-import xitrum.action.Action
-import xitrum.action.env.session.SecureBase64
+import xitrum.Action
+import xitrum.scope.session.SecureBase64
 
 object ValidatorInjector {
   /** Replace the original param name with the serialized validators. */

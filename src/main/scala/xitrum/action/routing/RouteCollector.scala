@@ -8,8 +8,8 @@ import org.jboss.netty.handler.codec.http.HttpMethod
 import com.impetus.annovention.{Discoverer, ClasspathDiscoverer}
 import com.impetus.annovention.listener.ClassAnnotationDiscoveryListener
 
-import xitrum.action.Action
-import xitrum.action.annotation._
+import xitrum.Action
+import xitrum.annotation._
 
 /** Scan all classes to collect routes. */
 class RouteCollector extends ClassAnnotationDiscoveryListener {

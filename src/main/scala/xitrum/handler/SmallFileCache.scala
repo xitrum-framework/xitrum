@@ -3,7 +3,8 @@ package xitrum.handler
 import java.io.{File, RandomAccessFile}
 import scala.collection.mutable.HashMap
 
-import xitrum.{Cache, Config, Gzip, Mime}
+import xitrum.{Cache, Config}
+import xitrum.util.{Gzip, Mime}
 
 object SmallFileCache {
   /** lastModified: See http://en.wikipedia.org/wiki/List_of_HTTP_header_fields */

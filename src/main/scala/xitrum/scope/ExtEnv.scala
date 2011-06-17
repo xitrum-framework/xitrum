@@ -6,8 +6,8 @@ import HttpVersion._
 import HttpHeaders.Names._
 
 import xitrum.Config
-import xitrum.action.Action
-import xitrum.action.env.session.CSRF
+import xitrum.Action
+import xitrum.scope.session.CSRF
 
 trait ExtEnv extends Env with ParamAccess with UploadParamAccess with CSRF {
   this: Action =>

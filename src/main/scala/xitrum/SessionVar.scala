@@ -1,6 +1,4 @@
-package xitrum.action
-
-import xitrum.action.Action
+package xitrum
 
 class SessionVar[T] {
   def get(implicit action: Action) = {

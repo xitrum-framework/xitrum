@@ -8,9 +8,10 @@ import HttpHeaders.Names._
 import HttpResponseStatus._
 import HttpVersion._
 
-import xitrum.{Config, Gzip, Mime, PathSanitizer}
+import xitrum.Config
 import xitrum.handler.NotModified
 import xitrum.handler.updown.XSendfile
+import xitrum.util.{Gzip, Mime, PathSanitizer}
 
 @Sharable
 class PublicResourceServer extends SimpleChannelUpstreamHandler with ClosedClientSilencer {

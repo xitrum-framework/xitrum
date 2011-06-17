@@ -1,7 +1,7 @@
 package xitrum.view
 
 import scala.xml.{Attribute, Elem, Null, Text}
-import xitrum.action.Action
+import xitrum.Action
 
 class PostbackInjector(event: String, actionUrl: String) {
   def ::(elem: Elem) = {

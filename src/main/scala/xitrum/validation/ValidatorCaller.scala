@@ -2,8 +2,8 @@ package xitrum.validation
 
 import scala.collection.mutable.{ArrayBuffer, HashMap => MHashMap}
 
-import xitrum.action.Action
-import xitrum.action.env.Env
+import xitrum.Action
+import xitrum.scope.Env
 
 object ValidatorCaller {
   def call(action: Action): Boolean = {

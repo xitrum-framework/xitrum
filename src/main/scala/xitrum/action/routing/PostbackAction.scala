@@ -2,12 +2,12 @@ package xitrum.action.routing
 
 import org.jboss.netty.handler.codec.http.HttpHeaders
 
-import xitrum.action.Action
-import xitrum.action.annotation.POST
-import xitrum.action.env.PathInfo
-import xitrum.action.env.session.CSRF
-import xitrum.action.exception.InvalidCSRFToken
-import xitrum.action.validation.ValidatorCaller
+import xitrum.Action
+import xitrum.annotation.POST
+import xitrum.scope.PathInfo
+import xitrum.scope.session.CSRF
+import xitrum.exception.InvalidCSRFToken
+import xitrum.validation.ValidatorCaller
 
 object PostbackAction {
   val POSTBACK_PREFIX  = "/xitrum/postback/"  // Postback URLs are in the form POSTBACK_PREFIX + encryptedActionClassName

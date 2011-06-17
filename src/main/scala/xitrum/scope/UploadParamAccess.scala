@@ -3,8 +3,8 @@ package xitrum.scope
 import scala.collection.JavaConversions
 import org.jboss.netty.handler.codec.http.FileUpload
 
-import xitrum.action.Action
-import xitrum.action.exception.MissingParam
+import xitrum.Action
+import xitrum.exception.MissingParam
 
 trait UploadParamAccess {
   this: Action =>

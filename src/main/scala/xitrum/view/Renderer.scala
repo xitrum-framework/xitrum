@@ -7,8 +7,7 @@ import org.jboss.netty.buffer.ChannelBuffers
 import org.jboss.netty.handler.codec.http.HttpHeaders
 import HttpHeaders.Names.CONTENT_TYPE
 
-import xitrum.Config
-import xitrum.action.Action
+import xitrum.{Action, Config}
 import xitrum.handler.updown.XSendfile
 
 trait Renderer extends JQuery with JSCollector with Flash with I18n {

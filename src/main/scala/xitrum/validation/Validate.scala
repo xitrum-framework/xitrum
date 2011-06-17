@@ -1,7 +1,7 @@
 package xitrum.validation
 
 import scala.xml.Elem
-import xitrum.action.Action
+import xitrum.Action
 
 class Validate(action: Action, validators: Validator*) {
   import ValidatorInjector._

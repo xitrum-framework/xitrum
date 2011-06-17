@@ -4,7 +4,7 @@ import java.io.{InputStream, FileInputStream}
 import java.util.Properties
 import java.nio.charset.Charset
 
-import xitrum.action.env.session.SessionStore
+import xitrum.scope.session.SessionStore
 
 object Config extends Logger {
   def bytesFromStreamAndClose(stream: InputStream): Array[Byte] = {

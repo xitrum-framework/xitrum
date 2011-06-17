@@ -2,7 +2,8 @@ package xitrum.action
 
 import org.jboss.netty.handler.codec.http.{HttpHeaders, HttpResponseStatus}
 
-import xitrum.action.env.session.Base64
+import xitrum.Action
+import xitrum.scope.session.Base64
 
 trait BasicAuthentication {
   this: Action =>

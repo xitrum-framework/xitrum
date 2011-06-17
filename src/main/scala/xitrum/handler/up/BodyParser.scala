@@ -11,7 +11,7 @@ import InterfaceHttpData.HttpDataType
 
 import xitrum.Config
 import xitrum.handler.Env
-import xitrum.action.env.{Env => AEnv, PathInfo}
+import xitrum.scope.{Env => AEnv, PathInfo}
 
 object BodyParser {
   DiskAttribute.deleteOnExitTemporaryFile  = true  // Should delete file on exit (in normal exit)

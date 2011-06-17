@@ -1,6 +1,6 @@
 package xitrum.validation
 
-import xitrum.action.Action
+import xitrum.Action
 
 object MinLength {
   def apply(length: Int) = new MinLength(length)

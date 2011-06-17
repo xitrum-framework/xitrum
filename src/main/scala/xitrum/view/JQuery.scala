@@ -2,8 +2,7 @@ package xitrum.view
 
 import org.jboss.netty.handler.codec.http.HttpHeaders.Names.CONTENT_TYPE
 
-import xitrum.Config
-import xitrum.action.Action
+import xitrum.{Action, Config}
 
 trait JQuery {
   this: Action =>

@@ -1,6 +1,6 @@
 package xitrum.view
 
-import xitrum.action.Action
+import xitrum.Action
 
 object Flash {
   val FLASH_KEY = "_flash"

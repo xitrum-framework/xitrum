@@ -3,8 +3,8 @@ package xitrum.handler
 import scala.collection.mutable.HashMap
 import org.jboss.netty.handler.codec.http.{HttpRequest, HttpResponse}
 
-import xitrum.action.Action
-import xitrum.action.env.{Env => CEnv, PathInfo}
+import xitrum.Action
+import xitrum.scope.{Env => CEnv, PathInfo}
 
 /**
  * Env is basically a map for sharing data between handlers. But for more
