@@ -1,0 +1,302 @@
+<html>
+  <head>
+    <title>Xitrum</title>
+    <!-- Framework CSS -->
+    <link rel="stylesheet" href="css/blueprint/screen.css" type="text/css" media="screen, projection">
+    <link rel="stylesheet" href="css/blueprint/plugins/fancy-type/screen.css" type="text/css" media="screen, projection">
+    <link rel="stylesheet" href="css/blueprint/print.css" type="text/css" media="print">
+    <!--[if lt IE 8]><link rel="stylesheet" href="css/blueprint/ie.css" type="text/css" media="screen, projection"><![endif]-->
+    <link href="assets/css/bootstrap.css" rel="stylesheet">
+
+    <link rel="stylesheet" href="css/style.css" type="text/css" media="all">
+
+    <script type="text/javascript">
+      var _gaq = _gaq || [];
+      _gaq.push(['_setAccount', 'UA-34582032-1']);
+      _gaq.push(['_trackPageview']);
+
+      (function() {
+        var ga = document.createElement('script'); ga.type = 'text/javascript'; ga.async = true;
+        ga.src = ('https:' == document.location.protocol ? 'https://ssl' : 'http://www') + '.google-analytics.com/ga.js';
+        var s = document.getElementsByTagName('script')[0]; s.parentNode.insertBefore(ga, s);
+      })();
+    </script>
+  </head>
+  <body>
+    <div class="container">
+      <div id="top_links" class="span-18 prepend-6 last">
+          <ul class="menu">
+            <li class="span-3"><a href="http://cntt.tv:8000/">&nbsp;&nbsp;Demos</a></li>
+            <li class="span-3"><a href="guide/index.html">&nbsp;&nbsp;&nbsp;Guide</a></li>
+            <li class="span-3 last"><a href="https://github.com/ngocdaothanh/xitrum-new/archive/master.zip">Download</a></li>
+            <li class="span-3"><a href="api/index.html">API doc</a></li>
+            <li class="span-3"><a href="https://groups.google.com/group/xitrum-framework">&nbsp;&nbsp;&nbsp;Group</a></li>
+            <li class="span-3"><a href="consulting.html">Consulting</a></li>
+          </ul>
+      </div> <!-- End of div#top_links -->
+      
+      <div class="clearfix"></div>
+
+      <div id="header">
+        <div class="span-8">
+          <img src="parts/whale.png" alt="xitrum"/>
+        </div>
+        <div id="balloon" class="span-16 last">
+          <div class="span-11 prepend-3 append-1 last">
+            <h2><a class="reference" href="http://ngocdaothanh.github.com/xitrum">Xitrum</a>
+is an async and clustered Scala web framework
+and HTTP(S) server fusion<span class="small"> on top of <a class="reference external" href="http://netty.io/">Netty</a>, <a class="reference external" href="http://akka.io/">Akka</a>, and <a class="reference external" href="http://www.hazelcast.com/">Hazelcast</a></span></h2>
+          </div>
+          <div class="quote push-2 span-13 last">
+            <p>Wow, this is a really impressive body of work, arguably the most complete Scala framework outside of Lift (but much easier to use).
+
+            Xitrum is truly a full stack web framework, all the bases are covered, including wtf-am-I-on-the-moon extras like ETags, static file cache identifiers & auto-gzip compression. Tack on built-in JSON converter, before/around/after interceptors, request/session/cookie/flash scopes, integrated validation (server & client-side, nice), built-in cache layer (Hazelcast), i18n a la GNU gettext, Netty (with Nginx, hello blazing fast), etc. and you have, wow.</p>
+            <div class="alt large right append-1">from <a class="reference external" href="https://groups.google.com/group/xitrum-framework/msg/d6de4865a8576d39">a user</a></div>
+
+          </div> <!-- End of div.quote -->
+          <div class="clearfix"></div>
+        </div> <!-- End of div#balloon -->
+
+        <div class="clearfix"></div>
+      </div> <!-- End of div#header -->
+
+      <div class="content prepend-1 append-1 span-22">
+
+        <br/>
+        <br/>
+
+        <div class="span-22">
+          <div class="span-11">
+            <h2 class="title">Hello World sample</h2>
+            <pre><code>import xitrum.Action
+import xitrum.annotation.GET
+
+@GET("url/to/HelloAction")
+class HelloAction extends Action {
+  def execute() {
+    val urlToHelloActor = url[HelloActor]
+    respondHtml(
+      &lt;xml:group&gt;
+        &lt;p&gt;Hello {remoteIp}!&lt;/p&gt;
+        &lt;a href={urlToHelloActor}&gt;Actor sample&lt;/a&gt;
+      &lt;/xml:group&gt;
+    )
+  }
+}
+            </code></pre>
+          </div>
+
+          <div class="span-10">
+            <h2 class="title">Actor sample</h2>
+            <p>Just annotate your actors and they will be accessible from web!</p>
+            <pre><code>import scala.concurrent.duration._
+import akka.actor.ReceiveTimeout
+import xitrum.{ActionActor, Config}
+import xitrum.annotation.GET
+
+@GET("url/to/HelloActor")
+class HelloActor extends ActionActor {
+  def execute() {
+    logger.info("Actor started, remoteIp: " + remoteIp)
+
+    val anotherActorRef = actorFor("someService")
+    anotherActorRef ! "someRequest"
+
+    context.setReceiveTimeout(5.seconds)
+    context.become {
+      case someResponse =>
+        respondText("Response: " + someResponse)
+
+      case ReceiveTimeout =>
+        respondText("Timeout")
+    }
+  }
+
+  override def postStop() {
+    logger.info("Actor stopped")
+    super.postStop()
+  }
+}
+            </code></pre>
+          </div>
+          <div class="clearfix"></div>
+        </div>
+
+        <div class="span-22">
+          <div class="span-11">
+            <h2 class="title">WebSocket sample</h2>
+            <pre><code>import xitrum.{
+  Action, WebSocketActor,
+  WebSocketText, WebSocketBinary,
+  WebSocketPing, WebSocketPong
+}
+import xitrum.annotation.WEBSOCKET
+
+@WEBSOCKET("url/to/EchoWebSocketActor")
+class EchoWebSocketActor extends WebSocketActor {
+  def execute() {
+    logger.info("onOpen, remoteIp: " + remoteIp)
+
+    context.become {
+      case WebSocketText(text) =>
+        respondWebSocketText(text)
+
+      case WebSocketBinary(bytes) =>
+        respondWebSocketBinary(bytes)
+
+      case WebSocketPing =>
+        // Xitrum automatically sends pong for you,
+        // you don't have to send pong yourself
+
+      case WebSocketPong =>
+        // Client has received your ping
+    }
+  }
+
+  override def postStop() {
+    logger.info("onStop")
+    super.postStop()
+  }
+}
+            </code></pre>
+          </div>
+
+          <div class="span-10">
+            <h2 class="title">SockJS sample</h2>
+            <pre><code>import xitrum.{Action, SockJsActor, SockJsText}
+import xitrum.annotation.SOCKJS
+
+@SOCKJS("url/to/EchoSockJsActor")
+class EchoSockJsActor extends SockJsActor {
+  def execute() {
+    logger.info("onOpen, remoteIp: " + remoteIp)
+
+    context.become {
+      case SockJsText(text) =>
+        respondSockJsText(text)
+    }
+  }
+
+  override def postStop() {
+    logger.info("onStop")
+    super.postStop()
+  }
+}
+            </code></pre>
+          </div>
+
+          <div class="clearfix"></div>
+        </div>
+
+        <div class="clearfix"></div>
+
+        <h2 class="title">Features</h2>
+
+<ul class="simple">
+<li>Typesafe, in the spirit of Scala. All the APIs try to be as typesafe as possible.</li>
+<li>Async, in the spirit of Netty. Your request proccessing action does not have
+to respond immediately. Long polling, chunked response (streaming), WebSocket,
+and SockJS are supported.</li>
+<li>Fast built-in HTTP and HTTPS web server based on <a class="reference external" href="http://netty.io/">Netty</a>.
+Xitrum&#8217;s static file serving speed is <a class="reference external" href="https://gist.github.com/3293596">similar to that of Nginx</a>.</li>
+<li>Extensive client-side and server-side caching for faster responding.
+At the web server layer, small files are cached in memory, big files are sent
+using NIO&#8217;s zero copy.
+At the web framework layer you have can declare page, action, and object cache
+in the Rails style.
+<a class="reference external" href="http://code.google.com/speed/page-speed/docs/rules_intro.html">All Google&#8217;s best practices</a>
+like conditional GET are applied for client-side caching.
+You can also force browsers to always send request to server to revalidate cache before using.</li>
+<li>Routes are automatically collected in the spirit of JAX-RS
+and Rails Engines. You don&#8217;t have to declare all routes in a single place.
+Think of this feature as distributed routes. You can plug an app into another app.
+If you have a blog engine, you can package it as a JAR file, then you can put
+that JAR file into another app and that app automatically has blog feature!
+Routing is also two-way: you can recreate URLs (reverse routing) in a typesafe way.
+You can document routes using <a class="reference external" href="http://swagger.wordnik.com/">Swagger Doc</a>.</li>
+<li>Views can be written in a separate <a class="reference external" href="http://scalate.fusesource.org/">Scalate</a>
+template file or Scala inline XML. Both are typesafe.</li>
+<li>Sessions can be stored in cookies (more scalable) or clustered <a class="reference external" href="http://www.hazelcast.com/">Hazelcast</a> (more secure).
+Hazelcast is recommended when using continuations-based Actions, since serialized
+continuations are usually too big to store in cookies. Hazelcast also gives
+in-process (thus faster and simpler to use) distribued cache and pubsub, you
+don&#8217;t need separate cache and pubsub servers.</li>
+<li><a class="reference external" href="http://docs.jquery.com/Plugins/validation">jQuery Validation</a> is integrated
+for browser side and server side validation.</li>
+<li>i18n using <a class="reference external" href="http://en.wikipedia.org/wiki/GNU_gettext">GNU gettext</a>.
+Translation text extraction is done automatically.
+You don&#8217;t have to manually mess with properties files.
+You can use powerful tools like <a class="reference external" href="http://www.poedit.net/screenshots.php">Poedit</a>
+for translating and merging translations.
+gettext is unlike most other solutions, both singular and plural forms are supported.</li>
+<li>Xitrum tries to fill the spectrum between <a class="reference external" href="https://github.com/scalatra/scalatra">Scalatra</a>
+and <a class="reference external" href="http://liftweb.net/">Lift</a>: more powerful than Scalatra and easier to
+use than Lift. You can easily create both RESTful APIs and postbacks. <a class="reference external" href="http://ngocdaothanh.github.com/xitrum">Xitrum</a>
+is controller-first like Scalatra, not
+<a class="reference external" href="http://www.assembla.com/wiki/show/liftweb/View_First">view-first</a> like Lift.
+Most people are familliar with controller-first style.</li>
+</ul>
+
+        <p>Scalibility is easy, just throw more nodes to the pool.</p>
+        <img src="parts/whale_pool.png" alt="Scalability"/>
+        <br /><br />
+
+        <div class="section" id="create-new-empty-xitrum-project">
+          <h2 class="title">Create a new empty web project based on Xitrum</h2>
+
+          <p>Download
+          <a class="reference external" href="https://github.com/ngocdaothanh/xitrum-new/archive/master.zip">xitrum-new.zip</a>, unzip, then run:</p>
+          <div class="highlight-python"><pre>sbt/sbt run</pre></div>
+          <p>Now you have a new empty project running at <a class="reference external" href="http://localhost:8000/">http://localhost:8000/</a>
+          and <a class="reference external" href="https://localhost:4430/">https://localhost:4430/</a></p>
+        </div>
+
+        <div class="section" id="samples">
+          <h2 class="title">News</h2>
+
+          <p><a href=https://github.com/ngocdaothanh/xitrum/blob/master/CHANGELOG>CHANGELOG</a></p>
+
+          <ul>
+            <li><a href="https://groups.google.com/forum/#!topic/xitrum-framework/-0c2wIHSSGg">Xitrum 2.10</a> <em>Oct 7 2013</em></li>
+            <li><a href="https://groups.google.com/forum/#!topic/xitrum-framework/5tLlg1FUo7M">Xitrum 2.9</a> <em>Sep 12 2013</em></li>
+            <li><a href="https://groups.google.com/forum/#!topic/xitrum-framework/vEn_ZkezlRI">Xitrum 2.8</a> <em>Sep 3 2013</em></li>
+            <li><a href="https://groups.google.com/forum/#!topic/xitrum-framework/HP-7VRCrWPg">Xitrum 2.7</a> <em>Jul 31 2013</em></li>
+            <li><a href="http://groups.google.com/group/xitrum-framework/browse_thread/thread/6ce9e2f2f1e8945e">Xitrum 2.6</a> <em>May 29 2013</em></li>
+            <li><a href="http://groups.google.com/group/xitrum-framework/browse_thread/thread/4a2e4ce69c8aeb38">Xitrum 2.5</a> <em>May 7 2013</em></li>
+            <li><a href="https://groups.google.com/group/xitrum-framework/browse_thread/thread/3919eb4f563485b9">Xitrum 2.4</a> <em>April 28 2013</em></li>
+            <li><a href="https://groups.google.com/group/xitrum-framework/browse_thread/thread/5bd171881179b5ef">Xitrum 2.3</a> <em>April 21 2013</em></li>
+          </ul>
+        </div>
+      </div>
+
+      <div class="clearfix"></div>
+
+      <div class="dark-panel">
+        <div class="span-7 prepend-1">
+          <h2 class="title">Xitrum on Github</h2>
+          <p>Find more about <a class="reference external" href="https://github.com/ngocdaothanh/xitrum">Xitrum source code</a></p>
+        </div>
+        <div class="span-7 prepend-1">
+          <h2 class="title">Project template</h2>
+          <p><a class="reference external" href="https://github.com/ngocdaothanh/xitrum-new">Create a new project with ease</a></p>
+        </div>
+        <div class="span-7 prepend-1 last">
+          <h2 class="title">Demo Projects</h2>
+          <p>
+            <a class="reference external" href="https://github.com/ngocdaothanh/xitrum-demos">Xitrum Demos</a></br>
+            <a class="reference external" href="https://github.com/ngocdaothanh/xitrum-modularized-demo">Xitrum Modulized Demo</a></br>
+            <a class="reference external" href="https://github.com/georgeOsdDev/xitrum-placeholder">Placeholder</a></br>
+            <a class="reference external" href="https://github.com/ngocdaothanh/comy">Simple URL shortener</a>
+          </p>
+        </div>
+        <div class="clearfix"></div>
+      </div>
+      
+    </div> <!-- End of div.container -->
+
+    <!-- Placed at the end of the document so the pages load faster -->
+    <script type="text/javascript" src="http://platform.twitter.com/widgets.js"></script>
+    <script src="assets/js/jquery-1.8.0.js"></script>
+    <script src="assets/js/bootstrap.min.js"></script>
+  </body>
+</html>

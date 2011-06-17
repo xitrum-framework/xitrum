@@ -1,0 +1,375 @@
+
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
+  "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+
+
+<html xmlns="http://www.w3.org/1999/xhtml">
+  <head>
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+    
+    <title>Async response &mdash; Xitrum 2.10 documentation</title>
+    
+    <link rel="stylesheet" href="_static/nature.css" type="text/css" />
+    <link rel="stylesheet" href="_static/pygments.css" type="text/css" />
+    
+    <script type="text/javascript">
+      var DOCUMENTATION_OPTIONS = {
+        URL_ROOT:    '',
+        VERSION:     '2.10',
+        COLLAPSE_INDEX: false,
+        FILE_SUFFIX: '.html',
+        HAS_SOURCE:  true
+      };
+    </script>
+    <script type="text/javascript" src="_static/jquery.js"></script>
+    <script type="text/javascript" src="_static/underscore.js"></script>
+    <script type="text/javascript" src="_static/doctools.js"></script>
+    <link rel="top" title="Xitrum 2.10 documentation" href="index.html" />
+    <link rel="next" title="Static files" href="static.html" />
+    <link rel="prev" title="JavaScript and JSON" href="js.html" /> 
+  </head>
+  <body>
+    <div class="related">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="genindex.html" title="General Index"
+             accesskey="I">index</a></li>
+        <li class="right" >
+          <a href="static.html" title="Static files"
+             accesskey="N">next</a> |</li>
+        <li class="right" >
+          <a href="js.html" title="JavaScript and JSON"
+             accesskey="P">previous</a> |</li>
+        <li><a href="index.html">Xitrum 2.10 documentation</a> &raquo;</li> 
+      </ul>
+    </div>  
+
+    <div class="document">
+      <div class="documentwrapper">
+        <div class="bodywrapper">
+          <div class="body">
+            
+  <div class="section" id="async-response">
+<h1>Async response<a class="headerlink" href="#async-response" title="Permalink to this headline">¶</a></h1>
+<p>List of normal responding methods:</p>
+<ul class="simple">
+<li><tt class="docutils literal"><span class="pre">respondView</span></tt>: responds view template with or without layout</li>
+<li><tt class="docutils literal"><span class="pre">respondInlineView</span></tt>: responds with or without layout</li>
+<li><tt class="docutils literal"><span class="pre">respondText(&quot;hello&quot;)</span></tt>: responds a string without layout</li>
+<li><tt class="docutils literal"><span class="pre">respondHtml(&quot;&lt;html&gt;...&lt;/html&gt;&quot;)</span></tt>: same as above, with content type set to &#8220;text/html&#8221;</li>
+<li><tt class="docutils literal"><span class="pre">respondJson(List(1,</span> <span class="pre">2,</span> <span class="pre">3))</span></tt>: converts Scala object to JSON object then responds</li>
+<li><tt class="docutils literal"><span class="pre">respondJs(&quot;myFunction([1,</span> <span class="pre">2,</span> <span class="pre">3])&quot;)</span></tt></li>
+<li><tt class="docutils literal"><span class="pre">respondJsonP(List(1,</span> <span class="pre">2,</span> <span class="pre">3),</span> <span class="pre">&quot;myFunction&quot;)</span></tt>: combination of the above two</li>
+<li><tt class="docutils literal"><span class="pre">respondJsonText(&quot;[1,</span> <span class="pre">2,</span> <span class="pre">3]&quot;)</span></tt></li>
+<li><tt class="docutils literal"><span class="pre">respondJsonPText(&quot;[1,</span> <span class="pre">2,</span> <span class="pre">3]&quot;,</span> <span class="pre">&quot;myFunction&quot;)</span></tt></li>
+<li><tt class="docutils literal"><span class="pre">respondBinary</span></tt>: responds an array of bytes</li>
+<li><tt class="docutils literal"><span class="pre">respondFile</span></tt>: sends a file directly from disk, very fast
+because <a class="reference external" href="http://www.ibm.com/developerworks/library/j-zerocopy/">zero-copy</a>
+(aka send-file) is used</li>
+<li><tt class="docutils literal"><span class="pre">respondEventSource(&quot;data&quot;,</span> <span class="pre">&quot;event&quot;)</span></tt></li>
+</ul>
+<p>Xitrum does not automatically send any default response.
+You must explicitly call respondXXX methods above to send response.
+If you don&#8217;t call respondXXX, Xitrum will keep the HTTP connection for you,
+and you can call respondXXX later.</p>
+<p>To check if the connection is still open, call <tt class="docutils literal"><span class="pre">channel.isOpen</span></tt>.
+You can also use <tt class="docutils literal"><span class="pre">addConnectionClosedListener</span></tt>:</p>
+<div class="highlight-python"><pre>addConnectionClosedListener {
+  // The connection has been closed
+  // Unsubscribe from events, release resources etc.
+}</pre>
+</div>
+<p>Because of the async nature, the response is not sent right away.
+respondXXX returns
+<a class="reference external" href="http://netty.io/3.6/api/org/jboss/netty/channel/ChannelFuture.html">ChannelFuture</a>.
+You can use it to perform actions when the response has actually been sent.</p>
+<p>For example, if you want to close the connection after the response has been sent:</p>
+<div class="highlight-python"><pre>import org.jboss.netty.channel.{ChannelFuture, ChannelFutureListener}
+
+val future = respondText("Hello")
+future.addListener(new ChannelFutureListener {
+  def operationComplete(future: ChannelFuture) {
+    future.getChannel.close()
+  }
+})</pre>
+</div>
+<p>Or shorter:</p>
+<div class="highlight-python"><div class="highlight"><pre><span class="n">respondText</span><span class="p">(</span><span class="s">&quot;Hello&quot;</span><span class="p">)</span><span class="o">.</span><span class="n">addListener</span><span class="p">(</span><span class="n">ChannelFutureListener</span><span class="o">.</span><span class="n">CLOSE</span><span class="p">)</span>
+</pre></div>
+</div>
+<div class="section" id="websocket">
+<h2>WebSocket<a class="headerlink" href="#websocket" title="Permalink to this headline">¶</a></h2>
+<div class="highlight-python"><pre>import xitrum.WebSocketActor
+import xitrum.annotation.WEBSOCKET
+
+@WEBSOCKET("echo")
+class EchoWebSocketActor extends WebSocketActor {
+  /**
+   * The current action is the one just before switching to this WebSocket actor.
+   * You can extract session data, request headers etc. from it, but do not use
+   * respondText, respondView etc.
+   */
+  def execute() {
+    logger.debug("onOpen")
+
+    context.become {
+      case WebSocketText(text) =&gt;
+        logger.info("onTextMessage: " + text)
+        respondWebSocketText(text.toUpperCase)
+
+      case WebSocketBinary(bytes) {
+        logger.info("onBinaryMessage: " + bytes)
+        respondWebSocketBinary(bytes)
+
+      case WebSocketPing =&gt;
+        logger.debug("onPing")
+
+      case WebSocketPong =&gt;
+        logger.debug("onPong")
+    }
+  }
+
+  override def postStop() {
+    logger.debug("onClose")
+    super.postStop()
+  }
+}</pre>
+</div>
+<p>An actor will be created when there&#8217;s request. It will be stopped when:</p>
+<ul class="simple">
+<li>The connection is closed</li>
+<li>WebSocket close frame is received or sent</li>
+</ul>
+<p>Use these to send WebSocket frames:</p>
+<ul class="simple">
+<li>respondWebSocketText</li>
+<li>respondWebSocketBinary</li>
+<li>respondWebSocketPing</li>
+<li>respondWebSocketClose</li>
+</ul>
+<p>There&#8217;s no respondWebSocketPong, because pong is automatically sent by Xitrum for you.</p>
+<p>To get URL to the above WebSocket action:</p>
+<div class="highlight-python"><pre>// Probably you want to use this in Scalate view etc.
+val url = webSocketAbsUrl[EchoWebSocketActor]</pre>
+</div>
+</div>
+<div class="section" id="sockjs">
+<h2>SockJS<a class="headerlink" href="#sockjs" title="Permalink to this headline">¶</a></h2>
+<p><a class="reference external" href="https://github.com/sockjs/sockjs-client">SockJS</a> is a browser JavaScript
+library that provides a WebSocket-like object.
+SockJS tries to use WebSocket first. If that fails it can use a variety
+of ways but still presents them through the WebSocket-like object.</p>
+<p>If you want to work with WebSocket API on all kind of browsers, you should use
+SockJS and avoid using WebSocket directly.</p>
+<div class="highlight-python"><pre>&lt;script&gt;
+  var sock = new SockJS('http://mydomain.com/path_prefix');
+  sock.onopen = function() {
+    console.log('open');
+  };
+  sock.onmessage = function(e) {
+    console.log('message', e.data);
+  };
+  sock.onclose = function() {
+    console.log('close');
+  };
+&lt;/script&gt;</pre>
+</div>
+<p>Xitrum includes the JavaScript file of SockJS.
+In your view template, just write like this:</p>
+<div class="highlight-python"><pre>...
+html
+  head
+    != jsDefaults
+...</pre>
+</div>
+<p>SockJS does require a <a class="reference external" href="https://github.com/sockjs/sockjs-protocol">server counterpart</a>.
+Xitrum automatically does it for you.</p>
+<div class="highlight-python"><pre>import xitrum.{Action, SockJsActor, SockJsText}
+import xitrum.annotation.SOCKJS
+
+@SOCKJS("echo")
+class EchoSockJsActor extends SockJsActor {
+  /**
+   * The current action is the one just before switching to this SockJS actor.
+   * You can extract session data, request headers etc. from it, but do not use
+   * respondText, respondView etc.
+   */
+  def execute() {
+    logger.info("onOpen")
+
+    context.become {
+      case SockJsText(text) =&gt;
+        logger.info("onMessage: " + text)
+        respondSockJsText(text)
+    }
+  }
+
+  override def postStop() {
+    logger.info("onClose")
+    super.postStop()
+  }
+}</pre>
+</div>
+<p>An actor will be created when there&#8217;s new SockJS session. It will be stopped when
+the SockJS session is closed.</p>
+<p>Use these to send SockJS frames:</p>
+<ul class="simple">
+<li>respondSockJsText</li>
+<li>respondSockJsClose</li>
+</ul>
+<p>See <a class="reference external" href="https://github.com/sockjs/sockjs-node#various-issues-and-design-considerations">Various issues and design considerations</a>:</p>
+<div class="highlight-python"><pre>Basically cookies are not suited for SockJS model. If you want to authorize a
+session, provide a unique token on a page, send it as a first thing over SockJS
+connection and validate it on the server side. In essence, this is how cookies
+work.</pre>
+</div>
+<p>To config SockJS clustering, see <a class="reference internal" href="cluster.html"><em>Clustering with Akka</em></a>.</p>
+</div>
+<div class="section" id="chunked-response">
+<h2>Chunked response<a class="headerlink" href="#chunked-response" title="Permalink to this headline">¶</a></h2>
+<ol class="arabic simple">
+<li>Call <tt class="docutils literal"><span class="pre">response.setChunked(true)</span></tt></li>
+<li>Call respondXXX as many times as you want</li>
+<li>Lastly, call <tt class="docutils literal"><span class="pre">respondLastChunk</span></tt></li>
+</ol>
+<p><a class="reference external" href="http://en.wikipedia.org/wiki/Chunked_transfer_encoding">Chunked response</a>
+has many use cases. For example, when you need to generate a very large CSV
+file that does may not fit memory.</p>
+<div class="highlight-python"><pre>// "Cache-Control" header will be automatically set to:
+// "no-store, no-cache, must-revalidate, max-age=0"
+// Note that "Pragma: no-cache" is linked to requests, not responses:
+// http://palizine.plynt.com/issues/2008Jul/cache-control-attributes/
+response.setChunked(true)
+
+val generator = new MyCsvGenerator
+val header = generator.getHeader
+respondText(header, "text/csv")
+
+while (generator.hasNextLine) {
+  val line = generator.nextLine
+  respondText(line)
+}
+
+respondLastChunk()</pre>
+</div>
+<p>Notes:</p>
+<ul class="simple">
+<li>Headers are only sent on the first respondXXX call.</li>
+<li><a class="reference internal" href="cache.html"><em>Page and action cache</em></a> cannot be used with chunked response.</li>
+</ul>
+<p>Using chunked response together with ActionActor, you can easily implement
+<a class="reference external" href="http://www.cubrid.org/blog/dev-platform/faster-web-page-loading-with-facebook-bigpipe/">Facebook BigPipe</a>.</p>
+<div class="section" id="forever-iframe">
+<h3>Forever iframe<a class="headerlink" href="#forever-iframe" title="Permalink to this headline">¶</a></h3>
+<p>Chunked response <a class="reference external" href="http://www.shanison.com/2010/05/10/stop-the-browser-%E2%80%9Cthrobber-of-doom%E2%80%9D-while-loading-comet-forever-iframe/">can be used</a>
+for <a class="reference external" href="http://en.wikipedia.org/wiki/Comet_(programming)/">Comet</a>.</p>
+<p>The page that embeds the iframe:</p>
+<div class="highlight-python"><pre>...
+&lt;script&gt;
+  var functionForForeverIframeSnippetsToCall = function() {...}
+&lt;/script&gt;
+...
+&lt;iframe width="1" height="1" src="path/to/forever/iframe"&gt;&lt;/iframe&gt;
+...</pre>
+</div>
+<p>The action that responds &lt;script&gt; snippets forever:</p>
+<div class="highlight-python"><pre>response.setChunked(true)
+
+// Need something like "123" for Firefox to work
+respondText("&lt;html&gt;&lt;body&gt;123", "text/html")
+
+// Most clients (even curl!) do not execute &lt;script&gt; snippets right away,
+// we need to send about 2KB dummy data to bypass this problem
+for (i &lt;- 1 to 100) respondText("&lt;script&gt;&lt;/script&gt;\n")</pre>
+</div>
+<p>Later, whenever you want to pass data to the browser, just send a snippet:</p>
+<div class="highlight-python"><pre>if (channel.isOpen)
+  respondText("&lt;script&gt;parent.functionForForeverIframeSnippetsToCall()&lt;/script&gt;\n")
+else
+  // The connection has been closed, unsubscribe from events etc.
+  // You can also use ``addConnectionClosedListener``.</pre>
+</div>
+</div>
+<div class="section" id="event-source">
+<h3>Event Source<a class="headerlink" href="#event-source" title="Permalink to this headline">¶</a></h3>
+<p>See <a class="reference external" href="http://dev.w3.org/html5/eventsource/">http://dev.w3.org/html5/eventsource/</a></p>
+<p>Event Source response is a special kind of chunked response.
+Data must be Must be  UTF-8.</p>
+<p>To respond event source, call <tt class="docutils literal"><span class="pre">respondEventSource</span></tt> as many time as you want.</p>
+<div class="highlight-python"><pre>respondEventSource("data1", "event1")
+respondEventSource("data2")  // Event name defaults to "message"</pre>
+</div>
+</div>
+</div>
+</div>
+
+
+          </div>
+        </div>
+      </div>
+      <div class="sphinxsidebar">
+        <div class="sphinxsidebarwrapper">
+  <h3><a href="index.html">Table Of Contents</a></h3>
+  <ul>
+<li><a class="reference internal" href="#">Async response</a><ul>
+<li><a class="reference internal" href="#websocket">WebSocket</a></li>
+<li><a class="reference internal" href="#sockjs">SockJS</a></li>
+<li><a class="reference internal" href="#chunked-response">Chunked response</a><ul>
+<li><a class="reference internal" href="#forever-iframe">Forever iframe</a></li>
+<li><a class="reference internal" href="#event-source">Event Source</a></li>
+</ul>
+</li>
+</ul>
+</li>
+</ul>
+
+  <h4>Previous topic</h4>
+  <p class="topless"><a href="js.html"
+                        title="previous chapter">JavaScript and JSON</a></p>
+  <h4>Next topic</h4>
+  <p class="topless"><a href="static.html"
+                        title="next chapter">Static files</a></p>
+  <h3>This Page</h3>
+  <ul class="this-page-menu">
+    <li><a href="_sources/async.txt"
+           rel="nofollow">Show Source</a></li>
+  </ul>
+<div id="searchbox" style="display: none">
+  <h3>Quick search</h3>
+    <form class="search" action="search.html" method="get">
+      <input type="text" name="q" />
+      <input type="submit" value="Go" />
+      <input type="hidden" name="check_keywords" value="yes" />
+      <input type="hidden" name="area" value="default" />
+    </form>
+    <p class="searchtip" style="font-size: 90%">
+    Enter search terms or a module, class or function name.
+    </p>
+</div>
+<script type="text/javascript">$('#searchbox').show(0);</script>
+        </div>
+      </div>
+      <div class="clearer"></div>
+    </div>
+    <div class="related">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="genindex.html" title="General Index"
+             >index</a></li>
+        <li class="right" >
+          <a href="static.html" title="Static files"
+             >next</a> |</li>
+        <li class="right" >
+          <a href="js.html" title="JavaScript and JSON"
+             >previous</a> |</li>
+        <li><a href="index.html">Xitrum 2.10 documentation</a> &raquo;</li> 
+      </ul>
+    </div>
+    <div class="footer">
+        &copy; Copyright 2010, Ngoc Dao.
+      Created using <a href="http://sphinx.pocoo.org/">Sphinx</a> 1.1.3.
+    </div>
+  </body>
+</html>

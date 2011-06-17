@@ -1,0 +1,387 @@
+<?xml version='1.0' encoding='UTF-8'?>
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.1//EN" "http://www.w3.org/TR/xhtml11/DTD/xhtml11.dtd">
+<html>
+        <head>
+          <title>routing - xitrum.routing</title>
+          <meta name="description" content="routing - xitrum.routing" />
+          <meta name="keywords" content="routing xitrum.routing" />
+          <meta http-equiv="content-type" content="text/html; charset=UTF-8" />
+          
+      <link href="../../lib/template.css" media="screen" type="text/css" rel="stylesheet" />
+      <link href="../../lib/diagrams.css" media="screen" type="text/css" rel="stylesheet" id="diagrams-css" />
+      <script type="text/javascript">
+         if(top === self) {
+            var url = '../../index.html';
+            var hash = 'xitrum.routing.package';
+            var anchor = window.location.hash;
+            var anchor_opt = '';
+            if (anchor.length >= 1)
+              anchor_opt = '@' + anchor.substring(1);
+            window.location.href = url + '#' + hash + anchor_opt;
+         }
+   	  </script>
+    
+        </head>
+        <body class="value">
+      <div id="definition">
+        <img src="../../lib/package_big.png" />
+        <p id="owner"><a href="../package.html" class="extype" name="xitrum">xitrum</a></p>
+        <h1>routing</h1>
+      </div>
+
+      <h4 id="signature" class="signature">
+      <span class="modifier_kind">
+        <span class="modifier"></span>
+        <span class="kind">package</span>
+      </span>
+      <span class="symbol">
+        <span class="name">routing</span>
+      </span>
+      </h4>
+      
+          <div id="comment" class="fullcommenttop"></div>
+        
+
+      <div id="mbrsel">
+        <div id="textfilter"><span class="pre"></span><span class="input"><input id="mbrsel-input" type="text" accesskey="/" /></span><span class="post"></span></div>
+        
+        
+        <div id="visbl">
+            <span class="filtertype">Visibility</span>
+            <ol><li class="public in"><span>Public</span></li><li class="all out"><span>All</span></li></ol>
+          </div>
+      </div>
+
+      <div id="template">
+        <div id="allMembers">
+        
+
+        <div id="types" class="types members">
+              <h3>Type Members</h3>
+              <ol><li name="xitrum.routing.ApiMethod" visbl="pub" data-isabs="false" fullComment="no" group="Ungrouped">
+      <a id="ApiMethodextendsProductwithSerializable"></a>
+      <a id="ApiMethod:ApiMethod"></a>
+      <h4 class="signature">
+      <span class="modifier_kind">
+        <span class="modifier"></span>
+        <span class="kind">case class</span>
+      </span>
+      <span class="symbol">
+        <a href="ApiMethod.html"><span class="name">ApiMethod</span></a><span class="params">(<span name="method">method: <span class="extype" name="scala.Predef.String">String</span></span>, <span name="route">route: <span class="extype" name="scala.Predef.String">String</span></span>)</span><span class="result"> extends <span class="extype" name="scala.Product">Product</span> with <span class="extype" name="scala.Serializable">Serializable</span></span>
+      </span>
+      </h4>
+      
+    </li><li name="xitrum.routing.DiscoveredAcc" visbl="pub" data-isabs="false" fullComment="no" group="Ungrouped">
+      <a id="DiscoveredAccextendsProductwithSerializable"></a>
+      <a id="DiscoveredAcc:DiscoveredAcc"></a>
+      <h4 class="signature">
+      <span class="modifier_kind">
+        <span class="modifier"></span>
+        <span class="kind">case class</span>
+      </span>
+      <span class="symbol">
+        <a href="DiscoveredAcc.html"><span class="name">DiscoveredAcc</span></a><span class="params">(<span name="normalRoutes">normalRoutes: <a href="SerializableRouteCollection.html" class="extype" name="xitrum.routing.SerializableRouteCollection">SerializableRouteCollection</a></span>, <span name="sockJsWithoutPrefixRoutes">sockJsWithoutPrefixRoutes: <a href="SerializableRouteCollection.html" class="extype" name="xitrum.routing.SerializableRouteCollection">SerializableRouteCollection</a></span>, <span name="sockJsMap">sockJsMap: <span class="extype" name="scala.Predef.Map">Map</span>[<span class="extype" name="scala.Predef.String">String</span>, <a href="SockJsClassAndOptions.html" class="extype" name="xitrum.routing.SockJsClassAndOptions">SockJsClassAndOptions</a>]</span>, <span name="swaggerMap">swaggerMap: <span class="extype" name="scala.Predef.Map">Map</span>[<span class="extype" name="scala.Predef.Class">Class</span>[_ &lt;: <a href="../Action.html" class="extype" name="xitrum.Action">Action</a>], <a href="../annotation/Swagger.html" class="extype" name="xitrum.annotation.Swagger">Swagger</a>]</span>)</span><span class="result"> extends <span class="extype" name="scala.Product">Product</span> with <span class="extype" name="scala.Serializable">Serializable</span></span>
+      </span>
+      </h4>
+      
+    </li><li name="xitrum.routing.JsRoutesAction" visbl="pub" data-isabs="false" fullComment="yes" group="Ungrouped">
+      <a id="JsRoutesActionextendsAction"></a>
+      <a id="JsRoutesAction:JsRoutesAction"></a>
+      <h4 class="signature">
+      <span class="modifier_kind">
+        <span class="modifier"></span>
+        <span class="kind">class</span>
+      </span>
+      <span class="symbol">
+        <a href="JsRoutesAction.html"><span class="name">JsRoutesAction</span></a><span class="result"> extends <a href="../Action.html" class="extype" name="xitrum.Action">Action</a></span>
+      </span>
+      </h4>
+      <div class="fullcomment"><dl class="attributes block"> <dt>Annotations</dt><dd>
+                <span class="name">@<a href="../annotation/First.html" class="extype" name="xitrum.annotation.First">First</a></span><span class="args">()</span>
+              
+                <span class="name">@<a href="../annotation/GET.html" class="extype" name="xitrum.annotation.GET">GET</a></span><span class="args">(<span>
+      paths = 
+      <span class="symbol">&quot;xitrum/routes.js&quot;</span>
+    </span>)</span>
+              
+        </dd></dl></div>
+    </li><li name="xitrum.routing.ReverseRoute" visbl="pub" data-isabs="false" fullComment="no" group="Ungrouped">
+      <a id="ReverseRouteextendsAnyRef"></a>
+      <a id="ReverseRoute:ReverseRoute"></a>
+      <h4 class="signature">
+      <span class="modifier_kind">
+        <span class="modifier"></span>
+        <span class="kind">class</span>
+      </span>
+      <span class="symbol">
+        <a href="ReverseRoute.html"><span class="name">ReverseRoute</span></a><span class="result"> extends <span class="extype" name="scala.AnyRef">AnyRef</span></span>
+      </span>
+      </h4>
+      <p class="comment cmt">Routes are sorted reveresly by the number of placeholders because we want to
+fill as many placeholders as possible.</p>
+    </li><li name="xitrum.routing.Route" visbl="pub" data-isabs="false" fullComment="no" group="Ungrouped">
+      <a id="RouteextendsAnyRef"></a>
+      <a id="Route:Route"></a>
+      <h4 class="signature">
+      <span class="modifier_kind">
+        <span class="modifier"></span>
+        <span class="kind">class</span>
+      </span>
+      <span class="symbol">
+        <a href="Route.html"><span class="name">Route</span></a><span class="result"> extends <span class="extype" name="scala.AnyRef">AnyRef</span></span>
+      </span>
+      </h4>
+      <p class="comment cmt"></p>
+    </li><li name="xitrum.routing.RouteCollection" visbl="pub" data-isabs="false" fullComment="no" group="Ungrouped">
+      <a id="RouteCollectionextendsLogger"></a>
+      <a id="RouteCollection:RouteCollection"></a>
+      <h4 class="signature">
+      <span class="modifier_kind">
+        <span class="modifier"></span>
+        <span class="kind">class</span>
+      </span>
+      <span class="symbol">
+        <a href="RouteCollection.html"><span class="name">RouteCollection</span></a><span class="result"> extends <a href="../Logger.html" class="extype" name="xitrum.Logger">Logger</a></span>
+      </span>
+      </h4>
+      <p class="comment cmt">Direct listing is used, map is not used, so that route matching is faster.</p>
+    </li><li name="xitrum.routing.RouteCollector" visbl="pub" data-isabs="false" fullComment="no" group="Ungrouped">
+      <a id="RouteCollectorextendsLogger"></a>
+      <a id="RouteCollector:RouteCollector"></a>
+      <h4 class="signature">
+      <span class="modifier_kind">
+        <span class="modifier"></span>
+        <span class="kind">class</span>
+      </span>
+      <span class="symbol">
+        <a href="RouteCollector.html"><span class="name">RouteCollector</span></a><span class="result"> extends <a href="../Logger.html" class="extype" name="xitrum.Logger">Logger</a></span>
+      </span>
+      </h4>
+      <p class="comment cmt">Scan all classes to collect routes from actions.</p>
+    </li><li name="xitrum.routing.RouteToken" visbl="pub" data-isabs="false" fullComment="no" group="Ungrouped">
+      <a id="RouteTokenextendsProductwithSerializable"></a>
+      <a id="RouteToken:RouteToken"></a>
+      <h4 class="signature">
+      <span class="modifier_kind">
+        <span class="modifier"></span>
+        <span class="kind">case class</span>
+      </span>
+      <span class="symbol">
+        <a href="RouteToken.html"><span class="name">RouteToken</span></a><span class="params">(<span name="value">value: <span class="extype" name="scala.Predef.String">String</span></span>, <span name="isPlaceholder">isPlaceholder: <span class="extype" name="scala.Boolean">Boolean</span></span>, <span name="regex">regex: <span class="extype" name="scala.Option">Option</span>[<span class="extype" name="scala.util.matching.Regex">Regex</span>]</span>)</span><span class="result"> extends <span class="extype" name="scala.Product">Product</span> with <span class="extype" name="scala.Serializable">Serializable</span></span>
+      </span>
+      </h4>
+      <p class="comment cmt">&quot;/articles/:id&lt;[0-9]+&gt;&quot; gives 2 tokens:
+RouteToken(&quot;articles&quot;, true, None) and
+RouteToken(&quot;id&quot;, false, Some(&quot;[0-9]+&quot;.</p>
+    </li><li name="xitrum.routing.SerializableRoute" visbl="pub" data-isabs="false" fullComment="no" group="Ungrouped">
+      <a id="SerializableRouteextendsSerializable"></a>
+      <a id="SerializableRoute:SerializableRoute"></a>
+      <h4 class="signature">
+      <span class="modifier_kind">
+        <span class="modifier"></span>
+        <span class="kind">class</span>
+      </span>
+      <span class="symbol">
+        <a href="SerializableRoute.html"><span class="name">SerializableRoute</span></a><span class="result"> extends <span class="extype" name="java.io.Serializable">Serializable</span></span>
+      </span>
+      </h4>
+      
+    </li><li name="xitrum.routing.SerializableRouteCollection" visbl="pub" data-isabs="false" fullComment="no" group="Ungrouped">
+      <a id="SerializableRouteCollectionextendsSerializable"></a>
+      <a id="SerializableRouteCollection:SerializableRouteCollection"></a>
+      <h4 class="signature">
+      <span class="modifier_kind">
+        <span class="modifier"></span>
+        <span class="kind">class</span>
+      </span>
+      <span class="symbol">
+        <a href="SerializableRouteCollection.html"><span class="name">SerializableRouteCollection</span></a><span class="result"> extends <span class="extype" name="java.io.Serializable">Serializable</span></span>
+      </span>
+      </h4>
+      
+    </li><li name="xitrum.routing.SockJsClassAndOptions" visbl="pub" data-isabs="false" fullComment="no" group="Ungrouped">
+      <a id="SockJsClassAndOptionsextendsSerializable"></a>
+      <a id="SockJsClassAndOptions:SockJsClassAndOptions"></a>
+      <h4 class="signature">
+      <span class="modifier_kind">
+        <span class="modifier"></span>
+        <span class="kind">class</span>
+      </span>
+      <span class="symbol">
+        <a href="SockJsClassAndOptions.html"><span class="name">SockJsClassAndOptions</span></a><span class="result"> extends <span class="extype" name="scala.Serializable">Serializable</span></span>
+      </span>
+      </h4>
+      
+    </li><li name="xitrum.routing.SockJsRouteMap" visbl="pub" data-isabs="false" fullComment="no" group="Ungrouped">
+      <a id="SockJsRouteMapextendsLogger"></a>
+      <a id="SockJsRouteMap:SockJsRouteMap"></a>
+      <h4 class="signature">
+      <span class="modifier_kind">
+        <span class="modifier"></span>
+        <span class="kind">class</span>
+      </span>
+      <span class="symbol">
+        <a href="SockJsRouteMap.html"><span class="name">SockJsRouteMap</span></a><span class="result"> extends <a href="../Logger.html" class="extype" name="xitrum.Logger">Logger</a></span>
+      </span>
+      </h4>
+      
+    </li><li name="xitrum.routing.SwaggerIndexAction" visbl="pub" data-isabs="false" fullComment="yes" group="Ungrouped">
+      <a id="SwaggerIndexActionextendsAction"></a>
+      <a id="SwaggerIndexAction:SwaggerIndexAction"></a>
+      <h4 class="signature">
+      <span class="modifier_kind">
+        <span class="modifier"></span>
+        <span class="kind">class</span>
+      </span>
+      <span class="symbol">
+        <a href="SwaggerIndexAction.html"><span class="name">SwaggerIndexAction</span></a><span class="result"> extends <a href="../Action.html" class="extype" name="xitrum.Action">Action</a></span>
+      </span>
+      </h4>
+      <div class="fullcomment"><dl class="attributes block"> <dt>Annotations</dt><dd>
+                <span class="name">@<a href="../annotation/First.html" class="extype" name="xitrum.annotation.First">First</a></span><span class="args">()</span>
+              
+                <span class="name">@<a href="../annotation/GET.html" class="extype" name="xitrum.annotation.GET">GET</a></span><span class="args">(<span>
+      paths = 
+      <span class="symbol">&quot;xitrum/swagger&quot;</span>
+    </span>)</span>
+              
+        </dd></dl></div>
+    </li><li name="xitrum.routing.SwaggerJsonAction" visbl="pub" data-isabs="false" fullComment="yes" group="Ungrouped">
+      <a id="SwaggerJsonActionextendsAction"></a>
+      <a id="SwaggerJsonAction:SwaggerJsonAction"></a>
+      <h4 class="signature">
+      <span class="modifier_kind">
+        <span class="modifier"></span>
+        <span class="kind">class</span>
+      </span>
+      <span class="symbol">
+        <a href="SwaggerJsonAction.html"><span class="name">SwaggerJsonAction</span></a><span class="result"> extends <a href="../Action.html" class="extype" name="xitrum.Action">Action</a></span>
+      </span>
+      </h4>
+      <div class="fullcomment"><dl class="attributes block"> <dt>Annotations</dt><dd>
+                <span class="name">@<a href="../annotation/First.html" class="extype" name="xitrum.annotation.First">First</a></span><span class="args">()</span>
+              
+                <span class="name">@<a href="../annotation/GET.html" class="extype" name="xitrum.annotation.GET">GET</a></span><span class="args">(<span>
+      paths = 
+      <span class="symbol">&quot;xitrum/swagger.json&quot;</span>
+    </span>)</span>
+              
+                <span class="name">@<a href="../annotation/Swagger.html" class="extype" name="xitrum.annotation.Swagger">Swagger</a></span><span class="args">(<span>
+      desc = 
+      <span class="defval" name="&quot;JSON for Swagger Doc. Use this route in Swagger UI to see API doc of this whole project.&quot;">...</span>
+    </span>)</span>
+              
+        </dd></dl></div>
+    </li></ol>
+            </div>
+
+        
+
+        <div id="values" class="values members">
+              <h3>Value Members</h3>
+              <ol><li name="xitrum.routing.HttpMethodWebSocket" visbl="pub" data-isabs="false" fullComment="no" group="Ungrouped">
+      <a id="HttpMethodWebSocket"></a>
+      <a id="HttpMethodWebSocket:HttpMethodWebSocket"></a>
+      <h4 class="signature">
+      <span class="modifier_kind">
+        <span class="modifier"></span>
+        <span class="kind">object</span>
+      </span>
+      <span class="symbol">
+        <a href="HttpMethodWebSocket$.html"><span class="name">HttpMethodWebSocket</span></a><span class="result"> extends <span class="extype" name="org.jboss.netty.handler.codec.http.HttpMethod">HttpMethod</span></span>
+      </span>
+      </h4>
+      
+    </li><li name="xitrum.routing.JsRoutesCache" visbl="pub" data-isabs="false" fullComment="no" group="Ungrouped">
+      <a id="JsRoutesCache"></a>
+      <a id="JsRoutesCache:JsRoutesCache"></a>
+      <h4 class="signature">
+      <span class="modifier_kind">
+        <span class="modifier"></span>
+        <span class="kind">object</span>
+      </span>
+      <span class="symbol">
+        <a href="JsRoutesCache$.html"><span class="name">JsRoutesCache</span></a>
+      </span>
+      </h4>
+      
+    </li><li name="xitrum.routing.ReverseRoute" visbl="pub" data-isabs="false" fullComment="no" group="Ungrouped">
+      <a id="ReverseRoute"></a>
+      <a id="ReverseRoute:ReverseRoute"></a>
+      <h4 class="signature">
+      <span class="modifier_kind">
+        <span class="modifier"></span>
+        <span class="kind">object</span>
+      </span>
+      <span class="symbol">
+        <a href="ReverseRoute$.html"><span class="name">ReverseRoute</span></a>
+      </span>
+      </h4>
+      
+    </li><li name="xitrum.routing.RouteCollection" visbl="pub" data-isabs="false" fullComment="no" group="Ungrouped">
+      <a id="RouteCollection"></a>
+      <a id="RouteCollection:RouteCollection"></a>
+      <h4 class="signature">
+      <span class="modifier_kind">
+        <span class="modifier"></span>
+        <span class="kind">object</span>
+      </span>
+      <span class="symbol">
+        <a href="RouteCollection$.html"><span class="name">RouteCollection</span></a>
+      </span>
+      </h4>
+      
+    </li><li name="xitrum.routing.RouteCompiler" visbl="pub" data-isabs="false" fullComment="no" group="Ungrouped">
+      <a id="RouteCompiler"></a>
+      <a id="RouteCompiler:RouteCompiler"></a>
+      <h4 class="signature">
+      <span class="modifier_kind">
+        <span class="modifier"></span>
+        <span class="kind">object</span>
+      </span>
+      <span class="symbol">
+        <a href="RouteCompiler$.html"><span class="name">RouteCompiler</span></a>
+      </span>
+      </h4>
+      
+    </li><li name="xitrum.routing.SwaggerJsonAction" visbl="pub" data-isabs="false" fullComment="no" group="Ungrouped">
+      <a id="SwaggerJsonAction"></a>
+      <a id="SwaggerJsonAction:SwaggerJsonAction"></a>
+      <h4 class="signature">
+      <span class="modifier_kind">
+        <span class="modifier"></span>
+        <span class="kind">object</span>
+      </span>
+      <span class="symbol">
+        <a href="SwaggerJsonAction$.html"><span class="name">SwaggerJsonAction</span></a>
+      </span>
+      </h4>
+      
+    </li></ol>
+            </div>
+
+        
+
+        
+        </div>
+
+        <div id="inheritedMembers">
+        
+        
+        </div>
+
+        <div id="groupedMembers">
+        <div class="group" name="Ungrouped">
+              <h3>Ungrouped</h3>
+              
+            </div>
+        </div>
+
+      </div>
+
+      <div id="tooltip"></div>
+
+      <div id="footer">  </div>
+      <script defer="defer" type="text/javascript" id="jquery-js" src="../../lib/jquery.js"></script><script defer="defer" type="text/javascript" id="jquery-ui-js" src="../../lib/jquery-ui.js"></script><script defer="defer" type="text/javascript" id="tools-tooltip-js" src="../../lib/tools.tooltip.js"></script><script defer="defer" type="text/javascript" id="template-js" src="../../lib/template.js"></script><script defer="defer" type="text/javascript" id="modernizr-custom-js" src="../../lib/modernizr.custom.js"></script><script defer="defer" type="text/javascript" id="diagrams-js" src="../../lib/diagrams.js"></script>
+    </body>
+      </html>

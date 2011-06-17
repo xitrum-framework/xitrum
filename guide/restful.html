@@ -1,0 +1,387 @@
+
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
+  "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+
+
+<html xmlns="http://www.w3.org/1999/xhtml">
+  <head>
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+    
+    <title>RESTful APIs &mdash; Xitrum 2.10 documentation</title>
+    
+    <link rel="stylesheet" href="_static/nature.css" type="text/css" />
+    <link rel="stylesheet" href="_static/pygments.css" type="text/css" />
+    
+    <script type="text/javascript">
+      var DOCUMENTATION_OPTIONS = {
+        URL_ROOT:    '',
+        VERSION:     '2.10',
+        COLLAPSE_INDEX: false,
+        FILE_SUFFIX: '.html',
+        HAS_SOURCE:  true
+      };
+    </script>
+    <script type="text/javascript" src="_static/jquery.js"></script>
+    <script type="text/javascript" src="_static/underscore.js"></script>
+    <script type="text/javascript" src="_static/doctools.js"></script>
+    <link rel="top" title="Xitrum 2.10 documentation" href="index.html" />
+    <link rel="next" title="Template engines" href="template_engines.html" />
+    <link rel="prev" title="Action and view" href="action_view.html" /> 
+  </head>
+  <body>
+    <div class="related">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="genindex.html" title="General Index"
+             accesskey="I">index</a></li>
+        <li class="right" >
+          <a href="template_engines.html" title="Template engines"
+             accesskey="N">next</a> |</li>
+        <li class="right" >
+          <a href="action_view.html" title="Action and view"
+             accesskey="P">previous</a> |</li>
+        <li><a href="index.html">Xitrum 2.10 documentation</a> &raquo;</li> 
+      </ul>
+    </div>  
+
+    <div class="document">
+      <div class="documentwrapper">
+        <div class="bodywrapper">
+          <div class="body">
+            
+  <div class="section" id="restful-apis">
+<h1>RESTful APIs<a class="headerlink" href="#restful-apis" title="Permalink to this headline">¶</a></h1>
+<p>You can write RESTful APIs for iPhone, Android applications etc. very easily.</p>
+<div class="highlight-python"><pre>import xitrum.Action
+import xitrum.annotation.GET
+
+@GET("articles")
+class ArticlesIndex extends Action {
+  def execute() {...}
+}
+
+@GET("articles/:id")
+class ArticlesShow extends Action {
+  def execute() {...}
+}</pre>
+</div>
+<p>The same for POST, PUT, PATCH, DELETE, and OPTIONS.
+HEAD is automatically handled by Xitrum as GET.</p>
+<p>For HTTP clients that do not support PUT and DELETE (like normal browsers), to
+simulate PUT and DELETE, send a POST with _method=put or _method=delete in the
+request body.</p>
+<p>On web application startup, Xitrum will scan all those annotations, build the
+routing table and print it out for you so that you know what APIs your
+application has, like this:</p>
+<div class="highlight-python"><pre>[INFO] Routes:
+GET /articles     quickstart.action.ArticlesIndex
+GET /articles/:id quickstart.action.ArticlesShow</pre>
+</div>
+<p>Routes are automatically collected in the spirit of JAX-RS
+and Rails Engines. You don&#8217;t have to declare all routes in a single place.
+Think of this feature as distributed routes. You can plug an app into another app.
+If you have a blog engine, you can package it as a JAR file, then you can put
+that JAR file into another app and that app automatically has blog feature!
+Routing is also two-way: you can recreate URLs (reverse routing) in a typesafe way.</p>
+<div class="section" id="route-cache">
+<h2>Route cache<a class="headerlink" href="#route-cache" title="Permalink to this headline">¶</a></h2>
+<p>For better startup speed, routes are cached to file <tt class="docutils literal"><span class="pre">routes.cache</span></tt>.
+While developing, routes in .class files in the <tt class="docutils literal"><span class="pre">target</span></tt> directory are not
+cached. If you change library dependencies that contain routes, you may need to
+delete <tt class="docutils literal"><span class="pre">routes.cache</span></tt>. This file should not be committed to your project
+source code repository.</p>
+</div>
+<div class="section" id="route-order-with-first-and-last">
+<h2>Route order with first and last<a class="headerlink" href="#route-order-with-first-and-last" title="Permalink to this headline">¶</a></h2>
+<p>When you want to route like this:</p>
+<div class="highlight-python"><pre>/articles/:id --&gt; ArticlesShow
+/articles/new --&gt; ArticlesNew</pre>
+</div>
+<p>You must make sure the second route be checked first. <tt class="docutils literal"><span class="pre">First</span></tt> is for this purpose:</p>
+<div class="highlight-python"><pre>import xitrum.annotation.{GET, First}
+
+@First
+@GET("articles/:id")
+class ArticlesShow extends Action {
+  def execute() {...}
+}
+
+@GET("articles/new")
+class ArticlesNew extends Action {
+  def execute() {...}
+}</pre>
+</div>
+<p><tt class="docutils literal"><span class="pre">Last</span></tt> is similar.</p>
+</div>
+<div class="section" id="multiple-paths-for-one-action">
+<h2>Multiple paths for one action<a class="headerlink" href="#multiple-paths-for-one-action" title="Permalink to this headline">¶</a></h2>
+<div class="highlight-python"><pre>@GET("image", "image/:format")
+class Image extends Action {
+  def execute() {
+    val format = paramo("format").getOrElse("png")
+    // ...
+  }
+}</pre>
+</div>
+</div>
+<div class="section" id="regex-in-route">
+<h2>Regex in route<a class="headerlink" href="#regex-in-route" title="Permalink to this headline">¶</a></h2>
+<p>Regex can be used in routes to specify requirements:</p>
+<div class="highlight-python"><pre>def show = GET("/articles/:id&lt;[0-9]+&gt;") { ... }</pre>
+</div>
+</div>
+<div class="section" id="anti-csrf">
+<h2>Anti-CSRF<a class="headerlink" href="#anti-csrf" title="Permalink to this headline">¶</a></h2>
+<p>For non-GET requests, Xitrum protects your web application from
+<a class="reference external" href="http://en.wikipedia.org/wiki/CSRF">Cross-site request forgery</a> by default.</p>
+<p>When you include <tt class="docutils literal"><span class="pre">antiCSRFMeta</span></tt> in your layout:</p>
+<div class="highlight-python"><pre>import xitrum.Action
+import xitrum.view.DocType
+
+trait AppAction extends Action {
+  override def layout = DocType.html5(
+    &lt;html&gt;
+      &lt;head&gt;
+        {antiCSRFMeta}
+        {xitrumCSS}
+        {jsDefaults}
+        &lt;title&gt;Welcome to Xitrum&lt;/title&gt;
+      &lt;/head&gt;
+      &lt;body&gt;
+        {renderedView}
+        {jsForView}
+      &lt;/body&gt;
+    &lt;/html&gt;
+  )
+}</pre>
+</div>
+<p>The <tt class="docutils literal"><span class="pre">&lt;head&gt;</span></tt> part will include something like this:</p>
+<div class="highlight-python"><pre>&lt;!DOCTYPE html&gt;
+&lt;html&gt;
+  &lt;head&gt;
+    ...
+    &lt;meta name="csrf-token" content="5402330e-9916-40d8-a3f4-16b271d583be" /&gt;
+    ...
+  &lt;/head&gt;
+  ...
+&lt;/html&gt;</pre>
+</div>
+<p>The token will be automatically included in all non-GET Ajax requests sent by
+jQuery.</p>
+</div>
+<div class="section" id="anticsrfinput">
+<h2>antiCSRFInput<a class="headerlink" href="#anticsrfinput" title="Permalink to this headline">¶</a></h2>
+<p>If you manually write form in Scalate template, use <tt class="docutils literal"><span class="pre">antiCSRFInput</span></tt>:</p>
+<div class="highlight-python"><pre>form(method="post" action={url[AdminAddGroup]})
+  != antiCSRFInput
+
+  label Group name *
+  input.required(type="text" name="name" placeholder="Required")
+  br
+
+  label Group description
+  input(type="text" name="desc")
+  br
+
+  input(type="submit" value="Add")</pre>
+</div>
+</div>
+<div class="section" id="skipcsrfcheck">
+<h2>SkipCsrfCheck<a class="headerlink" href="#skipcsrfcheck" title="Permalink to this headline">¶</a></h2>
+<p>When you create APIs for machines, e.g. smartphones, you may want to skip this
+automatic CSRF check. Add the trait xitrum.SkipCsrfCheck to you action:</p>
+<div class="highlight-python"><pre>import xitrum.{Action, SkipCsrfCheck}
+import xitrum.annotatin.POST
+
+trait Api extends Action with SkipCsrfCheck
+
+@POST("api/positions")
+class LogPositionAPI extends Api {
+  def execute() {...}
+}
+
+@POST("api/todos")
+class CreateTodoAPI extends Api {
+  def execute() {...}
+}</pre>
+</div>
+</div>
+<div class="section" id="getting-entire-request-body">
+<h2>Getting entire request body<a class="headerlink" href="#getting-entire-request-body" title="Permalink to this headline">¶</a></h2>
+<p>To get the entire request body, use <a class="reference external" href="http://netty.io/3.6/api/org/jboss/netty/handler/codec/http/HttpRequest.html">request.getContent</a>.
+It returns <a class="reference external" href="http://netty.io/3.6/api/org/jboss/netty/buffer/ChannelBuffer.html">ChannelBuffer</a>,
+which has <tt class="docutils literal"><span class="pre">toString(Charset)</span></tt> method.</p>
+<div class="highlight-python"><pre>val body = request.getContent.toString(io.netty.util.CharsetUtil.UTF_8)</pre>
+</div>
+</div>
+<div class="section" id="documenting-api">
+<h2>Documenting API<a class="headerlink" href="#documenting-api" title="Permalink to this headline">¶</a></h2>
+<p>You can document your API with <a class="reference external" href="https://developers.helloreverb.com/swagger/">Swagger</a>
+out of the box. Add <tt class="docutils literal"><span class="pre">&#64;Swagger</span></tt> annotation on actions that need to be documented.
+Xitrum will generate <a class="reference external" href="https://github.com/wordnik/swagger-core/wiki/API-Declaration">/xitrum/swagger.json</a>.
+This file can be used with <a class="reference external" href="https://github.com/wordnik/swagger-ui">Swagger UI</a>
+to generate interactive API documentation.</p>
+<p>Xitrum includes Swagger UI. Access it at the path <tt class="docutils literal"><span class="pre">/xitrum/swagger</span></tt> of your program.</p>
+<img alt="_images/swagger.png" src="_images/swagger.png" />
+<p>Let&#8217;s see <a class="reference external" href="https://github.com/georgeOsdDev/xitrum-placeholder">an example</a>:</p>
+<div class="highlight-python"><pre>import xitrum.{Action, SkipCsrfCheck}
+import xitrum.annotation.{GET, Swagger}
+
+trait Api extends Action with SkipCsrfCheck
+
+@GET("image/:width/:height")
+@Swagger(
+  "Generate image",
+  Swagger.IntPath("width",  "Image width, should not be bigger than 2000"),
+  Swagger.IntPath("height", "Image height, should not be bigger than 2000"),
+  Swagger.OptionalStringQuery("text",  "Text to render on the image"),
+  Swagger.Response(200, "PNG image"),
+  Swagger.Response(400, "Width or height is invalid or too big")
+)
+class ImageApi extends Api {
+  def execute {
+    val width  = param[Int]("width")
+    val height = param[Int]("height")
+    val text   = paramo("text").getOrElse("Dummy text")
+    // ...
+  }
+}</pre>
+</div>
+<p>Read more about <a class="reference external" href="https://github.com/wordnik/swagger-core/wiki/Parameters">paramType</a>
+and <a class="reference external" href="https://github.com/wordnik/swagger-core/wiki/Datatypes">valueType</a>.</p>
+<p>/xitrum/swagger.json will look like this:</p>
+<div class="highlight-python"><div class="highlight"><pre><span class="p">{</span>
+  <span class="s">&quot;basePath&quot;</span><span class="p">:</span><span class="s">&quot;http://localhost:8000&quot;</span><span class="p">,</span>
+  <span class="s">&quot;swaggerVersion&quot;</span><span class="p">:</span><span class="s">&quot;1.2&quot;</span><span class="p">,</span>
+  <span class="s">&quot;resourcePath&quot;</span><span class="p">:</span><span class="s">&quot;/xitrum/swagger.json&quot;</span><span class="p">,</span>
+  <span class="s">&quot;apis&quot;</span><span class="p">:[{</span>
+    <span class="s">&quot;path&quot;</span><span class="p">:</span><span class="s">&quot;/xitrum/swagger.json&quot;</span><span class="p">,</span>
+    <span class="s">&quot;operations&quot;</span><span class="p">:[{</span>
+      <span class="s">&quot;httpMethod&quot;</span><span class="p">:</span><span class="s">&quot;GET&quot;</span><span class="p">,</span>
+      <span class="s">&quot;summary&quot;</span><span class="p">:</span><span class="s">&quot;API doc&quot;</span><span class="p">,</span>
+      <span class="s">&quot;notes&quot;</span><span class="p">:</span><span class="s">&quot;Use this route in Swagger UI to see the doc&quot;</span><span class="p">,</span>
+      <span class="s">&quot;nickname&quot;</span><span class="p">:</span><span class="s">&quot;SwaggerAction&quot;</span><span class="p">,</span>
+      <span class="s">&quot;parameters&quot;</span><span class="p">:[],</span>
+      <span class="s">&quot;responseMessages&quot;</span><span class="p">:[]</span>
+    <span class="p">}]</span>
+  <span class="p">},{</span>
+    <span class="s">&quot;path&quot;</span><span class="p">:</span><span class="s">&quot;/image/{width}&quot;</span><span class="p">,</span>
+    <span class="s">&quot;operations&quot;</span><span class="p">:[{</span>
+      <span class="s">&quot;httpMethod&quot;</span><span class="p">:</span><span class="s">&quot;GET&quot;</span><span class="p">,</span>
+      <span class="s">&quot;summary&quot;</span><span class="p">:</span><span class="s">&quot;Generate image&quot;</span><span class="p">,</span>
+      <span class="s">&quot;nickname&quot;</span><span class="p">:</span><span class="s">&quot;ImageAPI&quot;</span><span class="p">,</span>
+      <span class="s">&quot;parameters&quot;</span><span class="p">:[{</span>
+        <span class="s">&quot;name&quot;</span><span class="p">:</span><span class="s">&quot;width&quot;</span><span class="p">,</span>
+        <span class="s">&quot;paramType&quot;</span><span class="p">:</span><span class="s">&quot;path&quot;</span><span class="p">,</span>
+        <span class="s">&quot;type&quot;</span><span class="p">:</span><span class="s">&quot;integer&quot;</span><span class="p">,</span>
+        <span class="s">&quot;description&quot;</span><span class="p">:</span><span class="s">&quot;Image width, should not be bigger than 2000&quot;</span><span class="p">,</span>
+        <span class="s">&quot;required&quot;</span><span class="p">:</span><span class="n">true</span>
+      <span class="p">},{</span>
+        <span class="s">&quot;name&quot;</span><span class="p">:</span><span class="s">&quot;height&quot;</span><span class="p">,</span>
+        <span class="s">&quot;paramType&quot;</span><span class="p">:</span><span class="s">&quot;path&quot;</span><span class="p">,</span>
+        <span class="s">&quot;type&quot;</span><span class="p">:</span><span class="s">&quot;integer&quot;</span><span class="p">,</span>
+        <span class="s">&quot;description&quot;</span><span class="p">:</span><span class="s">&quot;Image height, should not be bigger than 2000&quot;</span><span class="p">,</span>
+        <span class="s">&quot;required&quot;</span><span class="p">:</span><span class="n">true</span>
+      <span class="p">},{</span>
+        <span class="s">&quot;name&quot;</span><span class="p">:</span><span class="s">&quot;text&quot;</span><span class="p">,</span>
+        <span class="s">&quot;paramType&quot;</span><span class="p">:</span><span class="s">&quot;query&quot;</span><span class="p">,</span>
+        <span class="s">&quot;type&quot;</span><span class="p">:</span><span class="s">&quot;string&quot;</span><span class="p">,</span>
+        <span class="s">&quot;description&quot;</span><span class="p">:</span><span class="s">&quot;Text to render on the image&quot;</span><span class="p">,</span>
+        <span class="s">&quot;required&quot;</span><span class="p">:</span><span class="n">false</span>
+      <span class="p">}],</span>
+      <span class="s">&quot;responseMessages&quot;</span><span class="p">:[{</span>
+        <span class="s">&quot;code&quot;</span><span class="p">:</span><span class="s">&quot;200&quot;</span><span class="p">,</span>
+        <span class="s">&quot;message&quot;</span><span class="p">:</span><span class="s">&quot;PNG image&quot;</span>
+      <span class="p">},{</span>
+        <span class="s">&quot;code&quot;</span><span class="p">:</span><span class="s">&quot;400&quot;</span><span class="p">,</span>
+        <span class="s">&quot;message&quot;</span><span class="p">:</span><span class="s">&quot;Width is invalid or too big&quot;</span>
+      <span class="p">}]</span>
+    <span class="p">}]</span>
+  <span class="p">}]</span>
+<span class="p">}</span>
+</pre></div>
+</div>
+<p>Swagger UI uses the above information to generate interactive API doc.</p>
+<p>Params other than Swagger.IntPath and Swagger.OptionalStringQuery above: BytePath, IntQuery, OptionalStringForm etc.
+They are in the form:</p>
+<ul class="simple">
+<li>&lt;Value type&gt;&lt;Param type&gt;</li>
+<li>Optional&lt;Value type&gt;&lt;Param type&gt;</li>
+</ul>
+<p>Value type: Byte, Int, Int32, Int64, Long, Number, Float, Double, String, Boolean, Date DateTime</p>
+<p>Param type: Path, Query, Body, Header, Form</p>
+</div>
+</div>
+
+
+          </div>
+        </div>
+      </div>
+      <div class="sphinxsidebar">
+        <div class="sphinxsidebarwrapper">
+  <h3><a href="index.html">Table Of Contents</a></h3>
+  <ul>
+<li><a class="reference internal" href="#">RESTful APIs</a><ul>
+<li><a class="reference internal" href="#route-cache">Route cache</a></li>
+<li><a class="reference internal" href="#route-order-with-first-and-last">Route order with first and last</a></li>
+<li><a class="reference internal" href="#multiple-paths-for-one-action">Multiple paths for one action</a></li>
+<li><a class="reference internal" href="#regex-in-route">Regex in route</a></li>
+<li><a class="reference internal" href="#anti-csrf">Anti-CSRF</a></li>
+<li><a class="reference internal" href="#anticsrfinput">antiCSRFInput</a></li>
+<li><a class="reference internal" href="#skipcsrfcheck">SkipCsrfCheck</a></li>
+<li><a class="reference internal" href="#getting-entire-request-body">Getting entire request body</a></li>
+<li><a class="reference internal" href="#documenting-api">Documenting API</a></li>
+</ul>
+</li>
+</ul>
+
+  <h4>Previous topic</h4>
+  <p class="topless"><a href="action_view.html"
+                        title="previous chapter">Action and view</a></p>
+  <h4>Next topic</h4>
+  <p class="topless"><a href="template_engines.html"
+                        title="next chapter">Template engines</a></p>
+  <h3>This Page</h3>
+  <ul class="this-page-menu">
+    <li><a href="_sources/restful.txt"
+           rel="nofollow">Show Source</a></li>
+  </ul>
+<div id="searchbox" style="display: none">
+  <h3>Quick search</h3>
+    <form class="search" action="search.html" method="get">
+      <input type="text" name="q" />
+      <input type="submit" value="Go" />
+      <input type="hidden" name="check_keywords" value="yes" />
+      <input type="hidden" name="area" value="default" />
+    </form>
+    <p class="searchtip" style="font-size: 90%">
+    Enter search terms or a module, class or function name.
+    </p>
+</div>
+<script type="text/javascript">$('#searchbox').show(0);</script>
+        </div>
+      </div>
+      <div class="clearer"></div>
+    </div>
+    <div class="related">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="genindex.html" title="General Index"
+             >index</a></li>
+        <li class="right" >
+          <a href="template_engines.html" title="Template engines"
+             >next</a> |</li>
+        <li class="right" >
+          <a href="action_view.html" title="Action and view"
+             >previous</a> |</li>
+        <li><a href="index.html">Xitrum 2.10 documentation</a> &raquo;</li> 
+      </ul>
+    </div>
+    <div class="footer">
+        &copy; Copyright 2010, Ngoc Dao.
+      Created using <a href="http://sphinx.pocoo.org/">Sphinx</a> 1.1.3.
+    </div>
+  </body>
+</html>

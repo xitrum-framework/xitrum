@@ -1,0 +1,204 @@
+
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
+  "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+
+
+<html xmlns="http://www.w3.org/1999/xhtml">
+  <head>
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+    
+    <title>Filters &mdash; Xitrum 2.10 documentation</title>
+    
+    <link rel="stylesheet" href="_static/nature.css" type="text/css" />
+    <link rel="stylesheet" href="_static/pygments.css" type="text/css" />
+    
+    <script type="text/javascript">
+      var DOCUMENTATION_OPTIONS = {
+        URL_ROOT:    '',
+        VERSION:     '2.10',
+        COLLAPSE_INDEX: false,
+        FILE_SUFFIX: '.html',
+        HAS_SOURCE:  true
+      };
+    </script>
+    <script type="text/javascript" src="_static/jquery.js"></script>
+    <script type="text/javascript" src="_static/underscore.js"></script>
+    <script type="text/javascript" src="_static/doctools.js"></script>
+    <link rel="top" title="Xitrum 2.10 documentation" href="index.html" />
+    <link rel="next" title="Server-side cache" href="cache.html" />
+    <link rel="prev" title="Upload" href="upload.html" /> 
+  </head>
+  <body>
+    <div class="related">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="genindex.html" title="General Index"
+             accesskey="I">index</a></li>
+        <li class="right" >
+          <a href="cache.html" title="Server-side cache"
+             accesskey="N">next</a> |</li>
+        <li class="right" >
+          <a href="upload.html" title="Upload"
+             accesskey="P">previous</a> |</li>
+        <li><a href="index.html">Xitrum 2.10 documentation</a> &raquo;</li> 
+      </ul>
+    </div>  
+
+    <div class="document">
+      <div class="documentwrapper">
+        <div class="bodywrapper">
+          <div class="body">
+            
+  <div class="section" id="filters">
+<h1>Filters<a class="headerlink" href="#filters" title="Permalink to this headline">¶</a></h1>
+<div class="section" id="before-filters">
+<h2>Before filters<a class="headerlink" href="#before-filters" title="Permalink to this headline">¶</a></h2>
+<p>Before filters are run before an action is run.
+They are funtions that take no argument and returns true or false.
+If a before filter returns false, all filters after it and the action will
+not be run.</p>
+<div class="highlight-python"><pre>import xitrum.Action
+import xitrum.annotation.GET
+
+@GET("before_filter")
+class MyAction extends Action {
+  beforeFilter {
+    logger.info("I run therefore I am")
+    true
+  }
+
+  // This method is run after the above filters
+  def execute() {
+    respondInlineView("Before filters should have been run, please check the log")
+  }
+}</pre>
+</div>
+</div>
+<div class="section" id="after-filters">
+<h2>After filters<a class="headerlink" href="#after-filters" title="Permalink to this headline">¶</a></h2>
+<p>After filters are run after an action is run.
+They are functions that take no argument. Their return value will be ignored.</p>
+<div class="highlight-python"><pre>import xitrum.Action
+import xitrum.annotation.GET
+
+@GET("after_filter")
+class MyAction extends Action {
+  afterFilter {
+    logger.info("Run at " + System.currentTimeMillis())
+  }
+
+  def execute() {
+    respondText("After filter should have been run, please check the log")
+  }
+}</pre>
+</div>
+</div>
+<div class="section" id="around-filters">
+<h2>Around filters<a class="headerlink" href="#around-filters" title="Permalink to this headline">¶</a></h2>
+<div class="highlight-python"><pre>import xitrum.Action
+import xitrum.annotation.GET
+
+@GET("around_filter")
+class MyAction extends Action {
+  aroundFilter { action =&gt;
+    val begin = System.currentTimeMillis()
+    action()
+    val end   = System.currentTimeMillis()
+    logger.info("The action took " + (end - begin) + " [ms]")
+  }
+
+  def execute() {
+    respondText("Around filter should have been run, please check the log")
+  }
+}</pre>
+</div>
+<p>If there are many around filters, they will be nested.</p>
+</div>
+<div class="section" id="priority">
+<h2>Priority<a class="headerlink" href="#priority" title="Permalink to this headline">¶</a></h2>
+<ul class="simple">
+<li>Before filters are run first, then around filters, then after filters</li>
+<li>If one of the before filters returns false, the rest (including around and
+after filters) will not be run</li>
+<li>After filters are always run if at least an around filter is run</li>
+<li>If an around filter decide not to call <tt class="docutils literal"><span class="pre">action</span></tt>, the inner nested
+around filters will not be run</li>
+</ul>
+<div class="highlight-python"><pre>before1 -true-&gt; before2 -true-&gt; +--------------------+ --&gt; after1 --&gt; after2
+                                | around1 (1 of 2)   |
+                                |   around2 (1 of 2) |
+                                |     action         |
+                                |   around2 (2 of 2) |
+                                | around1 (2 of 2)   |
+                                +--------------------+</pre>
+</div>
+</div>
+</div>
+
+
+          </div>
+        </div>
+      </div>
+      <div class="sphinxsidebar">
+        <div class="sphinxsidebarwrapper">
+  <h3><a href="index.html">Table Of Contents</a></h3>
+  <ul>
+<li><a class="reference internal" href="#">Filters</a><ul>
+<li><a class="reference internal" href="#before-filters">Before filters</a></li>
+<li><a class="reference internal" href="#after-filters">After filters</a></li>
+<li><a class="reference internal" href="#around-filters">Around filters</a></li>
+<li><a class="reference internal" href="#priority">Priority</a></li>
+</ul>
+</li>
+</ul>
+
+  <h4>Previous topic</h4>
+  <p class="topless"><a href="upload.html"
+                        title="previous chapter">Upload</a></p>
+  <h4>Next topic</h4>
+  <p class="topless"><a href="cache.html"
+                        title="next chapter">Server-side cache</a></p>
+  <h3>This Page</h3>
+  <ul class="this-page-menu">
+    <li><a href="_sources/filter.txt"
+           rel="nofollow">Show Source</a></li>
+  </ul>
+<div id="searchbox" style="display: none">
+  <h3>Quick search</h3>
+    <form class="search" action="search.html" method="get">
+      <input type="text" name="q" />
+      <input type="submit" value="Go" />
+      <input type="hidden" name="check_keywords" value="yes" />
+      <input type="hidden" name="area" value="default" />
+    </form>
+    <p class="searchtip" style="font-size: 90%">
+    Enter search terms or a module, class or function name.
+    </p>
+</div>
+<script type="text/javascript">$('#searchbox').show(0);</script>
+        </div>
+      </div>
+      <div class="clearer"></div>
+    </div>
+    <div class="related">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="genindex.html" title="General Index"
+             >index</a></li>
+        <li class="right" >
+          <a href="cache.html" title="Server-side cache"
+             >next</a> |</li>
+        <li class="right" >
+          <a href="upload.html" title="Upload"
+             >previous</a> |</li>
+        <li><a href="index.html">Xitrum 2.10 documentation</a> &raquo;</li> 
+      </ul>
+    </div>
+    <div class="footer">
+        &copy; Copyright 2010, Ngoc Dao.
+      Created using <a href="http://sphinx.pocoo.org/">Sphinx</a> 1.1.3.
+    </div>
+  </body>
+</html>

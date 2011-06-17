@@ -1,0 +1,399 @@
+
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
+  "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+
+
+<html xmlns="http://www.w3.org/1999/xhtml">
+  <head>
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+    
+    <title>Scopes &mdash; Xitrum 2.10 documentation</title>
+    
+    <link rel="stylesheet" href="_static/nature.css" type="text/css" />
+    <link rel="stylesheet" href="_static/pygments.css" type="text/css" />
+    
+    <script type="text/javascript">
+      var DOCUMENTATION_OPTIONS = {
+        URL_ROOT:    '',
+        VERSION:     '2.10',
+        COLLAPSE_INDEX: false,
+        FILE_SUFFIX: '.html',
+        HAS_SOURCE:  true
+      };
+    </script>
+    <script type="text/javascript" src="_static/jquery.js"></script>
+    <script type="text/javascript" src="_static/underscore.js"></script>
+    <script type="text/javascript" src="_static/doctools.js"></script>
+    <link rel="top" title="Xitrum 2.10 documentation" href="index.html" />
+    <link rel="next" title="Validation" href="validation.html" />
+    <link rel="prev" title="Serve flash socket policy file" href="flash.html" /> 
+  </head>
+  <body>
+    <div class="related">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="genindex.html" title="General Index"
+             accesskey="I">index</a></li>
+        <li class="right" >
+          <a href="validation.html" title="Validation"
+             accesskey="N">next</a> |</li>
+        <li class="right" >
+          <a href="flash.html" title="Serve flash socket policy file"
+             accesskey="P">previous</a> |</li>
+        <li><a href="index.html">Xitrum 2.10 documentation</a> &raquo;</li> 
+      </ul>
+    </div>  
+
+    <div class="document">
+      <div class="documentwrapper">
+        <div class="bodywrapper">
+          <div class="body">
+            
+  <div class="section" id="scopes">
+<h1>Scopes<a class="headerlink" href="#scopes" title="Permalink to this headline">¶</a></h1>
+<div class="section" id="request">
+<h2>Request<a class="headerlink" href="#request" title="Permalink to this headline">¶</a></h2>
+<div class="section" id="kinds-of-params">
+<h3>Kinds of params<a class="headerlink" href="#kinds-of-params" title="Permalink to this headline">¶</a></h3>
+<p>There are 2 kinds of request params: textual params and file upload params (binary).</p>
+<p>There are 3 kinds of textual params, of type <tt class="docutils literal"><span class="pre">scala.collection.mutable.Map[String,</span> <span class="pre">List[String]]</span></tt>:</p>
+<ol class="arabic simple">
+<li><tt class="docutils literal"><span class="pre">uriParams</span></tt>: params after the ? mark in the URL, example: <a class="reference external" href="http://example.com/blah?x=1&amp;y=2">http://example.com/blah?x=1&amp;y=2</a></li>
+<li><tt class="docutils literal"><span class="pre">bodyParams</span></tt>: params in POST request body</li>
+<li><tt class="docutils literal"><span class="pre">pathParams</span></tt>: params embedded in the URL, example: <tt class="docutils literal"><span class="pre">GET(&quot;articles/:id/:title&quot;)</span></tt></li>
+</ol>
+<p>These params are merged in the above order as <tt class="docutils literal"><span class="pre">textParams</span></tt>
+(from 1 to 3, the latter will override the former).</p>
+<p><tt class="docutils literal"><span class="pre">fileUploadParams</span></tt> is of type scala.collection.mutable.Map[String, List[<a class="reference external" href="http://netty.io/3.6/api/org/jboss/netty/handler/codec/http/multipart/FileUpload.html">FileUpload</a>]].</p>
+</div>
+<div class="section" id="accesing-params">
+<h3>Accesing params<a class="headerlink" href="#accesing-params" title="Permalink to this headline">¶</a></h3>
+<p>From an action, you can access the above params directly, or you can use
+accessor methods.</p>
+<p>To access <tt class="docutils literal"><span class="pre">textParams</span></tt>:</p>
+<ul class="simple">
+<li><tt class="docutils literal"><span class="pre">param(&quot;x&quot;)</span></tt>: returns <tt class="docutils literal"><span class="pre">String</span></tt>, throws exception if x does not exist</li>
+<li><tt class="docutils literal"><span class="pre">params(&quot;x&quot;)</span></tt>: returns <tt class="docutils literal"><span class="pre">List[String]</span></tt>, throws exception if x does not exist</li>
+<li><tt class="docutils literal"><span class="pre">paramo(&quot;x&quot;)</span></tt>: returns <tt class="docutils literal"><span class="pre">Option[String]</span></tt></li>
+<li><tt class="docutils literal"><span class="pre">paramso(&quot;x&quot;)</span></tt>: returns <tt class="docutils literal"><span class="pre">Option[List[String]]</span></tt></li>
+</ul>
+<p>You can convert text params to other types (Int, Long, Fload, Double) automatically
+by using <tt class="docutils literal"><span class="pre">param[Int](&quot;x&quot;)</span></tt>, <tt class="docutils literal"><span class="pre">params[Int](&quot;x&quot;)</span></tt> etc. To convert text params to more types,
+override <a class="reference external" href="https://github.com/ngocdaothanh/xitrum/blob/master/src/main/scala/xitrum/scope/request/ParamAccess.scala">convertText</a>.</p>
+<p>For file upload: <tt class="docutils literal"><span class="pre">param[FileUpload](&quot;x&quot;)</span></tt>, <tt class="docutils literal"><span class="pre">params[FileUpload](&quot;x&quot;)</span></tt> etc.
+For more details, see <a class="reference internal" href="upload.html"><em>Upload chapter</em></a>.</p>
+</div>
+<div class="section" id="at">
+<h3>&#8220;at&#8221;<a class="headerlink" href="#at" title="Permalink to this headline">¶</a></h3>
+<p>To pass things around when processing a request (e.g. from action to view or layout)
+you can use <tt class="docutils literal"><span class="pre">at</span></tt>. <tt class="docutils literal"><span class="pre">at</span></tt> type is <tt class="docutils literal"><span class="pre">scala.collection.mutable.HashMap[String,</span> <span class="pre">Any]</span></tt>.
+If you know Rails, you&#8217;ll see <tt class="docutils literal"><span class="pre">at</span></tt> is a clone of <tt class="docutils literal"><span class="pre">&#64;</span></tt> of Rails.</p>
+<p>Articles.scala</p>
+<div class="highlight-python"><pre>@GET("articles/:id")
+class ArticlesShow extends AppAction {
+  def execute() {
+    val (title, body) = ...  // Get from DB
+    at("title") = title
+    respondInlineView(body)
+  }
+}</pre>
+</div>
+<p>AppAction.scala</p>
+<div class="highlight-python"><pre>import xitrum.Action
+import xitrum.view.DocType
+
+trait AppAction extends Action {
+  override def layout = DocType.html5(
+    &lt;html&gt;
+      &lt;head&gt;
+        {antiCSRFMeta}
+        {xitrumCSS}
+        {jsDefaults}
+        &lt;title&gt;{if (at.isDefinedAt("title")) "My Site - " + at("title") else "My Site"}&lt;/title&gt;
+      &lt;/head&gt;
+      &lt;body&gt;
+        {renderedView}
+        {jsForView}
+      &lt;/body&gt;
+    &lt;/html&gt;
+  )
+}</pre>
+</div>
+</div>
+<div class="section" id="requestvar">
+<h3>RequestVar<a class="headerlink" href="#requestvar" title="Permalink to this headline">¶</a></h3>
+<p><tt class="docutils literal"><span class="pre">at</span></tt> in the above section is not typesafe because you can set anything to the
+map. To be more typesafe, you should use RequestVar, which is a wrapper arround
+<tt class="docutils literal"><span class="pre">at</span></tt>.</p>
+<p>RVar.scala</p>
+<div class="highlight-python"><pre>import xitrum.RequestVar
+
+object RVar {
+  object title extends RequestVar[String]
+}</pre>
+</div>
+<p>Articles.scala</p>
+<div class="highlight-python"><pre>@GET("articles/:id")
+class ArticlesShow extends AppAction {
+  def execute() {
+    val (title, body) = ...  // Get from DB
+    RVar.title.set(title)
+    respondInlineView(body)
+  }
+}</pre>
+</div>
+<p>AppAction.scala</p>
+<div class="highlight-python"><pre>import xitrum.Action
+import xitrum.view.DocType
+
+trait AppAction extends Action {
+  override def layout = DocType.html5(
+    &lt;html&gt;
+      &lt;head&gt;
+        {antiCSRFMeta}
+        {xitrumCSS}
+        {jsDefaults}
+        &lt;title&gt;{if (RVar.title.isDefined) "My Site - " + RVar.title.get else "My Site"}&lt;/title&gt;
+      &lt;/head&gt;
+      &lt;body&gt;
+        {renderedView}
+        {jsForView}
+      &lt;/body&gt;
+    &lt;/html&gt;
+  )
+}</pre>
+</div>
+</div>
+</div>
+<div class="section" id="cookie">
+<h2>Cookie<a class="headerlink" href="#cookie" title="Permalink to this headline">¶</a></h2>
+<p><a class="reference external" href="http://en.wikipedia.org/wiki/HTTP_cookie#Domain_and_Path">Read Wikipedia about cookie path etc.</a></p>
+<p>Inside an action, use <tt class="docutils literal"><span class="pre">requestCookies</span></tt>, a <tt class="docutils literal"><span class="pre">Map[String,</span> <span class="pre">String]</span></tt>, to read cookies sent by browser.</p>
+<div class="highlight-python"><pre>requestCookies.get("myCookie") match {
+  case None         =&gt; ...
+  case Some(string) =&gt; ...
+}</pre>
+</div>
+<p>To send cookie to browser, create an instance of <a class="reference external" href="http://netty.io/3.6/api/org/jboss/netty/handler/codec/http/DefaultCookie.html">DefaultCookie</a>
+and append it to <tt class="docutils literal"><span class="pre">responseCookies</span></tt>, an <tt class="docutils literal"><span class="pre">ArrayBuffer</span></tt> that contains <a class="reference external" href="http://netty.io/3.6/api/org/jboss/netty/handler/codec/http/Cookie.html">Cookie</a>.</p>
+<div class="highlight-python"><pre>val cookie = new DefaultCookie("name", "value")
+cookie.setHttpOnly(true)  // true: JavaScript cannot access this cookie
+responseCookies.append(cookie)</pre>
+</div>
+<p>If you don&#8217;t set cookie&#8217;s path by calling <tt class="docutils literal"><span class="pre">cookie.setPath(cookiePath)</span></tt>, its
+path will be set to the site&#8217;s root path (<tt class="docutils literal"><span class="pre">xitrum.Config.withBaseUrl(&quot;/&quot;)</span></tt>).
+This avoids accidental duplicate cookies.</p>
+<p>To delete a cookie sent by browser, send a cookie with the same name and set
+its max age to 0. The browser will expire it immediately. To tell browser to
+delete cookie when the browser closes windows, set max age to <tt class="docutils literal"><span class="pre">Integer.MIN_VALUE</span></tt>:</p>
+<div class="highlight-python"><div class="highlight"><pre><span class="n">cookie</span><span class="o">.</span><span class="n">setMaxAge</span><span class="p">(</span><span class="n">Integer</span><span class="o">.</span><span class="n">MIN_VALUE</span><span class="p">)</span>
+</pre></div>
+</div>
+<p>Note that <a class="reference external" href="http://mrcoles.com/blog/cookies-max-age-vs-expires/">Internet Explorer does not support &#8220;max-age&#8221;</a>,
+but Netty detects and outputs either &#8220;max-age&#8221; or &#8220;expires&#8221; properly. Don&#8217;t worry!</p>
+<p>If you want to sign your cookie value to prevent user from tampering, use
+<tt class="docutils literal"><span class="pre">xitrum.util.SecureUrlSafeBase64.encrypt</span></tt> and <tt class="docutils literal"><span class="pre">xitrum.util.SecureUrlSafeBase64.encrypt</span></tt>.
+For more information, see <a class="reference internal" href="howto.html"><em>How to encrypt data</em></a>.</p>
+</div>
+<div class="section" id="session">
+<h2>Session<a class="headerlink" href="#session" title="Permalink to this headline">¶</a></h2>
+<p>Session storing, restoring, encrypting etc. is done automatically by Xitrum.
+You don&#8217;t have to mess with them.</p>
+<p>In your actions, you can use <tt class="docutils literal"><span class="pre">session</span></tt>. It is an instance of
+<tt class="docutils literal"><span class="pre">scala.collection.mutable.Map[String,</span> <span class="pre">Any]</span></tt>. Things in <tt class="docutils literal"><span class="pre">session</span></tt> must be
+serializable.</p>
+<p>For example, to mark that a user has logged in, you can set his username into the
+session:</p>
+<div class="highlight-python"><div class="highlight"><pre><span class="n">session</span><span class="p">(</span><span class="s">&quot;userId&quot;</span><span class="p">)</span> <span class="o">=</span> <span class="n">userId</span>
+</pre></div>
+</div>
+<p>Later, if you want to check if a user has logged in or not, just check if
+there&#8217;s a username in his session:</p>
+<div class="highlight-python"><pre>if (session.isDefinedAt("userId")) println("This user has logged in")</pre>
+</div>
+<p>Storing user ID and pull the user from database on each access is usually a good
+practice. That way changes to the user are updated on each access (including
+changes to user roles/authorizations).</p>
+<div class="section" id="session-clear">
+<h3>session.clear()<a class="headerlink" href="#session-clear" title="Permalink to this headline">¶</a></h3>
+<p><a class="reference external" href="http://guides.rubyonrails.org/security.html#session-fixation">One line of code will protect you from session fixation</a>.</p>
+<p>Read the link above to know about session fixation. To prevent session fixation
+attack, in the action that lets users login, call <tt class="docutils literal"><span class="pre">session.clear()</span></tt>.</p>
+<div class="highlight-python"><pre>@GET("login")
+class LoginAction extends Action {
+  def execute() {
+    ...
+    session.clear()  // Reset first before doing anything else with the session
+    session("userId") = userId
+  }
+}</pre>
+</div>
+<p>To log users out, also call <tt class="docutils literal"><span class="pre">session.clear()</span></tt>.</p>
+</div>
+<div class="section" id="sessionvar">
+<h3>SessionVar<a class="headerlink" href="#sessionvar" title="Permalink to this headline">¶</a></h3>
+<p>SessionVar, like RequestVar, is a way to make your session more typesafe.</p>
+<p>For example, you want save username to session after the user has logged in:</p>
+<p>Declare the session var:</p>
+<div class="highlight-python"><pre>import xitrum.SessionVar
+
+object SVar {
+  object username extends SessionVar[String]
+}</pre>
+</div>
+<p>After login success:</p>
+<div class="highlight-python"><div class="highlight"><pre><span class="n">SVar</span><span class="o">.</span><span class="n">username</span><span class="o">.</span><span class="n">set</span><span class="p">(</span><span class="n">username</span><span class="p">)</span>
+</pre></div>
+</div>
+<p>Display the username:</p>
+<div class="highlight-python"><pre>if (SVar.username.isDefined)
+  &lt;em&gt;{SVar.username.get}&lt;/em&gt;
+else
+  &lt;a href={url[LoginAction]}&gt;Login&lt;/a&gt;</pre>
+</div>
+<ul class="simple">
+<li>To delete the session var: <tt class="docutils literal"><span class="pre">SVar.username.delete()</span></tt></li>
+<li>To reset the whole session: <tt class="docutils literal"><span class="pre">session.clear()</span></tt></li>
+</ul>
+</div>
+<div class="section" id="session-store">
+<h3>Session store<a class="headerlink" href="#session-store" title="Permalink to this headline">¶</a></h3>
+<p>In config/xitrum.conf (<a class="reference external" href="https://github.com/ngocdaothanh/xitrum/blob/master/plugin/src/main/resources/xitrum_resources/config/xitrum.conf">example</a>),
+you can config the session store:</p>
+<div class="highlight-python"><pre>...
+session {
+  # Store sessions on client side
+  store = xitrum.scope.session.CookieSessionStore
+
+  # Store sessions on server side
+  #store = xitrum.scope.session.HazelcastSessionStore
+  #store = xitrum.scope.session.UnserializableSessionStore
+
+  # If you run multiple sites on the same domain, make sure that there's no
+  # cookie name conflict between sites
+  cookieName = _session
+
+  # Key to encrypt session cookie etc.
+  # Do not use the example below! Use your own!
+  # If you deploy your application to several instances be sure to use the same key!
+  secureKey = ajconghoaofuxahoi92chunghiaujivietnamlasdoclapjfltudoil98hanhphucup8
+}
+...</pre>
+</div>
+<p>Server side session store is recommended when using continuations-based actions,
+since serialized continuations are usually too big to store in cookies.</p>
+<p>HazelcastSessionStore is cluster-aware, but things you store in it must be serializable.</p>
+<p>If you must store unserializable things, use UnserializableSessionStore.
+If you use UnserializableSessionStore and still want to run a Xitrum cluster,
+you must use a load balancer with sticky sessions configured.</p>
+<p>The three default session stores above are enough for normal cases.
+But if you have a special case and want to implement your own session store,
+extend
+<a class="reference external" href="https://github.com/ngocdaothanh/xitrum/blob/master/src/main/scala/xitrum/session/SessionStore.scala">SessionStore</a>
+or
+<a class="reference external" href="https://github.com/ngocdaothanh/xitrum/blob/master/src/main/scala/xitrum/session/ServerSessionStore.scala">ServerSessionStore</a>
+and implement the abstract methods.</p>
+<p>Then to tell Xitrum to use your session store, set its class name to xitrum.conf.</p>
+<p>Good read:
+<a class="reference external" href="http://www.technicalinfo.net/papers/WebBasedSessionManagement.html">Web Based Session Management - Best practices in managing HTTP-based client sessions</a>.</p>
+</div>
+</div>
+<div class="section" id="object-vs-val">
+<h2>object vs. val<a class="headerlink" href="#object-vs-val" title="Permalink to this headline">¶</a></h2>
+<p>Please use <tt class="docutils literal"><span class="pre">object</span></tt> instead of <tt class="docutils literal"><span class="pre">val</span></tt>.</p>
+<p><strong>Do not do like this</strong>:</p>
+<div class="highlight-python"><pre>object RVar {
+  val title    = new RequestVar[String]
+  val category = new RequestVar[String]
+}
+
+object SVar {
+  val username = new SessionVar[String]
+  val isAdmin  = new SessionVar[Boolean]
+}</pre>
+</div>
+<p>The above code compiles but does not work correctly, because the Vars internally
+use class names to do look up. When using <tt class="docutils literal"><span class="pre">val</span></tt>, <tt class="docutils literal"><span class="pre">title</span></tt> and <tt class="docutils literal"><span class="pre">category</span></tt>
+will have the same class name &#8220;xitrum.RequestVar&#8221;. The same for <tt class="docutils literal"><span class="pre">username</span></tt>
+and <tt class="docutils literal"><span class="pre">isAdmin</span></tt>.</p>
+</div>
+</div>
+
+
+          </div>
+        </div>
+      </div>
+      <div class="sphinxsidebar">
+        <div class="sphinxsidebarwrapper">
+  <h3><a href="index.html">Table Of Contents</a></h3>
+  <ul>
+<li><a class="reference internal" href="#">Scopes</a><ul>
+<li><a class="reference internal" href="#request">Request</a><ul>
+<li><a class="reference internal" href="#kinds-of-params">Kinds of params</a></li>
+<li><a class="reference internal" href="#accesing-params">Accesing params</a></li>
+<li><a class="reference internal" href="#at">&#8220;at&#8221;</a></li>
+<li><a class="reference internal" href="#requestvar">RequestVar</a></li>
+</ul>
+</li>
+<li><a class="reference internal" href="#cookie">Cookie</a></li>
+<li><a class="reference internal" href="#session">Session</a><ul>
+<li><a class="reference internal" href="#session-clear">session.clear()</a></li>
+<li><a class="reference internal" href="#sessionvar">SessionVar</a></li>
+<li><a class="reference internal" href="#session-store">Session store</a></li>
+</ul>
+</li>
+<li><a class="reference internal" href="#object-vs-val">object vs. val</a></li>
+</ul>
+</li>
+</ul>
+
+  <h4>Previous topic</h4>
+  <p class="topless"><a href="flash.html"
+                        title="previous chapter">Serve flash socket policy file</a></p>
+  <h4>Next topic</h4>
+  <p class="topless"><a href="validation.html"
+                        title="next chapter">Validation</a></p>
+  <h3>This Page</h3>
+  <ul class="this-page-menu">
+    <li><a href="_sources/scopes.txt"
+           rel="nofollow">Show Source</a></li>
+  </ul>
+<div id="searchbox" style="display: none">
+  <h3>Quick search</h3>
+    <form class="search" action="search.html" method="get">
+      <input type="text" name="q" />
+      <input type="submit" value="Go" />
+      <input type="hidden" name="check_keywords" value="yes" />
+      <input type="hidden" name="area" value="default" />
+    </form>
+    <p class="searchtip" style="font-size: 90%">
+    Enter search terms or a module, class or function name.
+    </p>
+</div>
+<script type="text/javascript">$('#searchbox').show(0);</script>
+        </div>
+      </div>
+      <div class="clearer"></div>
+    </div>
+    <div class="related">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="genindex.html" title="General Index"
+             >index</a></li>
+        <li class="right" >
+          <a href="validation.html" title="Validation"
+             >next</a> |</li>
+        <li class="right" >
+          <a href="flash.html" title="Serve flash socket policy file"
+             >previous</a> |</li>
+        <li><a href="index.html">Xitrum 2.10 documentation</a> &raquo;</li> 
+      </ul>
+    </div>
+    <div class="footer">
+        &copy; Copyright 2010, Ngoc Dao.
+      Created using <a href="http://sphinx.pocoo.org/">Sphinx</a> 1.1.3.
+    </div>
+  </body>
+</html>

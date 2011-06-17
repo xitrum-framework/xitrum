@@ -1,0 +1,192 @@
+
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
+  "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+
+
+<html xmlns="http://www.w3.org/1999/xhtml">
+  <head>
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+    
+    <title>Development flow with SBT, Eclipse/IntelliJ IDEA, and JRebel &mdash; Xitrum 2.10 documentation</title>
+    
+    <link rel="stylesheet" href="_static/nature.css" type="text/css" />
+    <link rel="stylesheet" href="_static/pygments.css" type="text/css" />
+    
+    <script type="text/javascript">
+      var DOCUMENTATION_OPTIONS = {
+        URL_ROOT:    '',
+        VERSION:     '2.10',
+        COLLAPSE_INDEX: false,
+        FILE_SUFFIX: '.html',
+        HAS_SOURCE:  true
+      };
+    </script>
+    <script type="text/javascript" src="_static/jquery.js"></script>
+    <script type="text/javascript" src="_static/underscore.js"></script>
+    <script type="text/javascript" src="_static/doctools.js"></script>
+    <link rel="top" title="Xitrum 2.10 documentation" href="index.html" />
+    <link rel="next" title="Action and view" href="action_view.html" />
+    <link rel="prev" title="Tutorial" href="tutorial.html" /> 
+  </head>
+  <body>
+    <div class="related">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="genindex.html" title="General Index"
+             accesskey="I">index</a></li>
+        <li class="right" >
+          <a href="action_view.html" title="Action and view"
+             accesskey="N">next</a> |</li>
+        <li class="right" >
+          <a href="tutorial.html" title="Tutorial"
+             accesskey="P">previous</a> |</li>
+        <li><a href="index.html">Xitrum 2.10 documentation</a> &raquo;</li> 
+      </ul>
+    </div>  
+
+    <div class="document">
+      <div class="documentwrapper">
+        <div class="bodywrapper">
+          <div class="body">
+            
+  <div class="section" id="development-flow-with-sbt-eclipse-intellij-idea-and-jrebel">
+<h1>Development flow with SBT, Eclipse/IntelliJ IDEA, and JRebel<a class="headerlink" href="#development-flow-with-sbt-eclipse-intellij-idea-and-jrebel" title="Permalink to this headline">¶</a></h1>
+<div class="section" id="import-the-project-to-eclipse">
+<h2>Import the project to Eclipse<a class="headerlink" href="#import-the-project-to-eclipse" title="Permalink to this headline">¶</a></h2>
+<p>You can <a class="reference external" href="http://scala-ide.org/">use Eclipse to write Scala code</a>.</p>
+<p>From the project directory, run:</p>
+<div class="highlight-python"><pre>sbt/sbt eclipse</pre>
+</div>
+<p><tt class="docutils literal"><span class="pre">.project</span></tt> file for Eclipse will be created from definitions in <tt class="docutils literal"><span class="pre">build.sbt</span></tt>.
+Now open Eclipse, and import the project.</p>
+</div>
+<div class="section" id="import-the-project-to-intellij-idea">
+<h2>Import the project to IntelliJ IDEA<a class="headerlink" href="#import-the-project-to-intellij-idea" title="Permalink to this headline">¶</a></h2>
+<p>You can also use <a class="reference external" href="http://www.jetbrains.com/idea/">IntelliJ IDEA</a>, which also
+has very good support for Scala.</p>
+<p>To generate project files for IDEA, run:</p>
+<div class="highlight-python"><pre>sbt/sbt gen-idea</pre>
+</div>
+</div>
+<div class="section" id="ignore-files">
+<h2>Ignore files<a class="headerlink" href="#ignore-files" title="Permalink to this headline">¶</a></h2>
+<p>Create a new project as described at the <a class="reference internal" href="tutorial.html"><em>tutorial</em></a>.
+These should be <a class="reference external" href="https://github.com/ngocdaothanh/xitrum-new/blob/master/.gitignore">ignored</a>:</p>
+<div class="highlight-python"><pre>.*
+log
+project/project
+project/target
+routes.cache
+target</pre>
+</div>
+</div>
+<div class="section" id="install-jrebel">
+<h2>Install JRebel<a class="headerlink" href="#install-jrebel" title="Permalink to this headline">¶</a></h2>
+<p>In development mode, you start the web server with <tt class="docutils literal"><span class="pre">sbt/sbt</span> <span class="pre">run</span></tt>. Normally, when
+you change your source code, you have to press CTRL+C to stop, then run <tt class="docutils literal"><span class="pre">sbt/sbt</span> <span class="pre">run</span></tt>
+again. This may take tens of seconds everytime.</p>
+<p>With <a class="reference external" href="http://www.zeroturnaround.com/jrebel/">JRebel</a> you can avoid that. JRebel
+provides free license for Scala developers!</p>
+<p>Install:</p>
+<ol class="arabic simple">
+<li>Apply for a <a class="reference external" href="http://sales.zeroturnaround.com/">free license for Scala</a></li>
+<li>Download and install JRebel using the license above</li>
+<li>Add <tt class="docutils literal"><span class="pre">-noverify</span> <span class="pre">-javaagent:/path/to/jrebel/jrebel.jar</span></tt> to the <tt class="docutils literal"><span class="pre">sbt/sbt</span></tt> command line</li>
+</ol>
+<p>Example:</p>
+<div class="highlight-python"><pre>java -noverify -javaagent:"$HOME/opt/jrebel/jrebel.jar" \
+     -Xmx1024m -XX:MaxPermSize=128m -Dsbt.boot.directory="$HOME/.sbt/boot" \
+     -jar `dirname $0`/sbt-launch.jar "$@"</pre>
+</div>
+</div>
+<div class="section" id="use-jrebel">
+<h2>Use JRebel<a class="headerlink" href="#use-jrebel" title="Permalink to this headline">¶</a></h2>
+<ol class="arabic simple">
+<li>Run <tt class="docutils literal"><span class="pre">sbt/sbt</span> <span class="pre">run</span></tt></li>
+<li>In Eclipse, try editing a Scala file, then save it</li>
+</ol>
+<p>The Scala plugin for Eclipse will automatically recompile the file. And JRebel will
+automatically reload the generated .class files.</p>
+<p>If you use a plain text editor, not Eclipse:</p>
+<ol class="arabic simple">
+<li>Run <tt class="docutils literal"><span class="pre">sbt/sbt</span> <span class="pre">run</span></tt></li>
+<li>Run <tt class="docutils literal"><span class="pre">sbt/sbt</span> <span class="pre">~compile</span></tt> in another console to compile in continuous/incremental mode</li>
+<li>In the editor, try editing a Scala file, and save</li>
+</ol>
+<p>The <tt class="docutils literal"><span class="pre">sbt/sbt</span> <span class="pre">~compile</span></tt> process will automatically recompile the file, and JRebel will
+automatically reload the generated .class files.</p>
+<p><tt class="docutils literal"><span class="pre">sbt/sbt</span> <span class="pre">~compile</span></tt> works fine in bash and sh shell. In zsh shell, you need to use
+<tt class="docutils literal"><span class="pre">sbt/sbt</span> <span class="pre">&quot;~compile&quot;</span></tt>, or it will complain &#8220;no such user or named directory: compile&#8221;.</p>
+<p>Currently routes are not reloaded, even in development mode with JRebel.</p>
+<p>To use JRebel in Eclipse, see <a class="reference external" href="http://zeroturnaround.com/software/jrebel/eclipse-jrebel-tutorial/">this tutorial</a>.</p>
+</div>
+</div>
+
+
+          </div>
+        </div>
+      </div>
+      <div class="sphinxsidebar">
+        <div class="sphinxsidebarwrapper">
+  <h3><a href="index.html">Table Of Contents</a></h3>
+  <ul>
+<li><a class="reference internal" href="#">Development flow with SBT, Eclipse/IntelliJ IDEA, and JRebel</a><ul>
+<li><a class="reference internal" href="#import-the-project-to-eclipse">Import the project to Eclipse</a></li>
+<li><a class="reference internal" href="#import-the-project-to-intellij-idea">Import the project to IntelliJ IDEA</a></li>
+<li><a class="reference internal" href="#ignore-files">Ignore files</a></li>
+<li><a class="reference internal" href="#install-jrebel">Install JRebel</a></li>
+<li><a class="reference internal" href="#use-jrebel">Use JRebel</a></li>
+</ul>
+</li>
+</ul>
+
+  <h4>Previous topic</h4>
+  <p class="topless"><a href="tutorial.html"
+                        title="previous chapter">Tutorial</a></p>
+  <h4>Next topic</h4>
+  <p class="topless"><a href="action_view.html"
+                        title="next chapter">Action and view</a></p>
+  <h3>This Page</h3>
+  <ul class="this-page-menu">
+    <li><a href="_sources/dev.txt"
+           rel="nofollow">Show Source</a></li>
+  </ul>
+<div id="searchbox" style="display: none">
+  <h3>Quick search</h3>
+    <form class="search" action="search.html" method="get">
+      <input type="text" name="q" />
+      <input type="submit" value="Go" />
+      <input type="hidden" name="check_keywords" value="yes" />
+      <input type="hidden" name="area" value="default" />
+    </form>
+    <p class="searchtip" style="font-size: 90%">
+    Enter search terms or a module, class or function name.
+    </p>
+</div>
+<script type="text/javascript">$('#searchbox').show(0);</script>
+        </div>
+      </div>
+      <div class="clearer"></div>
+    </div>
+    <div class="related">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="genindex.html" title="General Index"
+             >index</a></li>
+        <li class="right" >
+          <a href="action_view.html" title="Action and view"
+             >next</a> |</li>
+        <li class="right" >
+          <a href="tutorial.html" title="Tutorial"
+             >previous</a> |</li>
+        <li><a href="index.html">Xitrum 2.10 documentation</a> &raquo;</li> 
+      </ul>
+    </div>
+    <div class="footer">
+        &copy; Copyright 2010, Ngoc Dao.
+      Created using <a href="http://sphinx.pocoo.org/">Sphinx</a> 1.1.3.
+    </div>
+  </body>
+</html>

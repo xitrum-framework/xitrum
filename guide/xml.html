@@ -1,0 +1,182 @@
+
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
+  "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+
+
+<html xmlns="http://www.w3.org/1999/xhtml">
+  <head>
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+    
+    <title>XML &mdash; Xitrum 2.10 documentation</title>
+    
+    <link rel="stylesheet" href="_static/nature.css" type="text/css" />
+    <link rel="stylesheet" href="_static/pygments.css" type="text/css" />
+    
+    <script type="text/javascript">
+      var DOCUMENTATION_OPTIONS = {
+        URL_ROOT:    '',
+        VERSION:     '2.10',
+        COLLAPSE_INDEX: false,
+        FILE_SUFFIX: '.html',
+        HAS_SOURCE:  true
+      };
+    </script>
+    <script type="text/javascript" src="_static/jquery.js"></script>
+    <script type="text/javascript" src="_static/underscore.js"></script>
+    <script type="text/javascript" src="_static/doctools.js"></script>
+    <link rel="top" title="Xitrum 2.10 documentation" href="index.html" />
+    <link rel="next" title="JavaScript and JSON" href="js.html" />
+    <link rel="prev" title="Postbacks" href="postback.html" /> 
+  </head>
+  <body>
+    <div class="related">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="genindex.html" title="General Index"
+             accesskey="I">index</a></li>
+        <li class="right" >
+          <a href="js.html" title="JavaScript and JSON"
+             accesskey="N">next</a> |</li>
+        <li class="right" >
+          <a href="postback.html" title="Postbacks"
+             accesskey="P">previous</a> |</li>
+        <li><a href="index.html">Xitrum 2.10 documentation</a> &raquo;</li> 
+      </ul>
+    </div>  
+
+    <div class="document">
+      <div class="documentwrapper">
+        <div class="bodywrapper">
+          <div class="body">
+            
+  <div class="section" id="xml">
+<h1>XML<a class="headerlink" href="#xml" title="Permalink to this headline">¶</a></h1>
+<p>Scala allow wrting literal XML. Xitrum uses this feature as its &#8220;template engine&#8221;:</p>
+<ul class="simple">
+<li>Scala checks XML syntax at compile time: Views are typesafe.</li>
+<li>Scala automatically escapes XML: Views are <a class="reference external" href="http://en.wikipedia.org/wiki/Cross-site_scripting">XSS</a>-free by default.</li>
+</ul>
+<p>Below are some tips.</p>
+<div class="section" id="unescape-xml">
+<h2>Unescape XML<a class="headerlink" href="#unescape-xml" title="Permalink to this headline">¶</a></h2>
+<p>Use <tt class="docutils literal"><span class="pre">scala.xml.Unparsed</span></tt>:</p>
+<div class="highlight-python"><pre>import scala.xml.Unparsed
+
+&lt;script&gt;
+  {Unparsed("if (1 &lt; 2) alert('Xitrum rocks');")}
+&lt;/script&gt;</pre>
+</div>
+<p>Or use <tt class="docutils literal"><span class="pre">&lt;xml:unparsed&gt;</span></tt>:</p>
+<div class="highlight-python"><pre>&lt;script&gt;
+  &lt;xml:unparsed&gt;
+    if (1 &lt; 2) alert('Xitrum rocks');
+  &lt;/xml:unparsed&gt;
+&lt;/script&gt;</pre>
+</div>
+<p><tt class="docutils literal"><span class="pre">&lt;xml:unparsed&gt;</span></tt> will be hidden in the output:</p>
+<div class="highlight-python"><pre>&lt;script&gt;
+  if (1 &lt; 2) alert('Xitrum rocks');
+&lt;/script&gt;</pre>
+</div>
+</div>
+<div class="section" id="group-xml-elements">
+<h2>Group XML elements<a class="headerlink" href="#group-xml-elements" title="Permalink to this headline">¶</a></h2>
+<div class="highlight-python"><pre>&lt;div id="header"&gt;
+  {if (loggedIn)
+    &lt;xml:group&gt;
+      &lt;b&gt;{username}&lt;/b&gt;
+      &lt;a href={url[LogoutAction]}&gt;Logout&lt;/a&gt;
+    &lt;/xml:group&gt;
+  else
+    &lt;xml:group&gt;
+      &lt;a href={url[LoginAction]}&gt;Login&lt;/a&gt;
+      &lt;a href={url[RegisterAction]}&gt;Register&lt;/a&gt;
+    &lt;/xml:group&gt;}
+&lt;/div&gt;</pre>
+</div>
+<p><tt class="docutils literal"><span class="pre">&lt;xml:group&gt;</span></tt> will be hidden in the output, for example when the use has logged in:</p>
+<div class="highlight-python"><pre>&lt;div id="header"&gt;
+  &lt;b&gt;My username&lt;/b&gt;
+  &lt;a href="/login"&gt;Logout&lt;/a&gt;
+&lt;/div&gt;</pre>
+</div>
+</div>
+<div class="section" id="render-xhtml">
+<h2>Render XHTML<a class="headerlink" href="#render-xhtml" title="Permalink to this headline">¶</a></h2>
+<p>Xitrum renders views and layouts as XHTML automatically.
+If you want to render it yourself (rarely), pay attention to the code below.</p>
+<div class="highlight-python"><pre>import scala.xml.Xhtml
+
+val br = &lt;br /&gt;
+br.toString            // =&gt; &lt;br&gt;&lt;/br&gt;, some browsers will render this as 2 &lt;br /&gt;s
+Xhtml.toXhtml(&lt;br /&gt;)  // =&gt; "&lt;br /&gt;"</pre>
+</div>
+</div>
+</div>
+
+
+          </div>
+        </div>
+      </div>
+      <div class="sphinxsidebar">
+        <div class="sphinxsidebarwrapper">
+  <h3><a href="index.html">Table Of Contents</a></h3>
+  <ul>
+<li><a class="reference internal" href="#">XML</a><ul>
+<li><a class="reference internal" href="#unescape-xml">Unescape XML</a></li>
+<li><a class="reference internal" href="#group-xml-elements">Group XML elements</a></li>
+<li><a class="reference internal" href="#render-xhtml">Render XHTML</a></li>
+</ul>
+</li>
+</ul>
+
+  <h4>Previous topic</h4>
+  <p class="topless"><a href="postback.html"
+                        title="previous chapter">Postbacks</a></p>
+  <h4>Next topic</h4>
+  <p class="topless"><a href="js.html"
+                        title="next chapter">JavaScript and JSON</a></p>
+  <h3>This Page</h3>
+  <ul class="this-page-menu">
+    <li><a href="_sources/xml.txt"
+           rel="nofollow">Show Source</a></li>
+  </ul>
+<div id="searchbox" style="display: none">
+  <h3>Quick search</h3>
+    <form class="search" action="search.html" method="get">
+      <input type="text" name="q" />
+      <input type="submit" value="Go" />
+      <input type="hidden" name="check_keywords" value="yes" />
+      <input type="hidden" name="area" value="default" />
+    </form>
+    <p class="searchtip" style="font-size: 90%">
+    Enter search terms or a module, class or function name.
+    </p>
+</div>
+<script type="text/javascript">$('#searchbox').show(0);</script>
+        </div>
+      </div>
+      <div class="clearer"></div>
+    </div>
+    <div class="related">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="genindex.html" title="General Index"
+             >index</a></li>
+        <li class="right" >
+          <a href="js.html" title="JavaScript and JSON"
+             >next</a> |</li>
+        <li class="right" >
+          <a href="postback.html" title="Postbacks"
+             >previous</a> |</li>
+        <li><a href="index.html">Xitrum 2.10 documentation</a> &raquo;</li> 
+      </ul>
+    </div>
+    <div class="footer">
+        &copy; Copyright 2010, Ngoc Dao.
+      Created using <a href="http://sphinx.pocoo.org/">Sphinx</a> 1.1.3.
+    </div>
+  </body>
+</html>

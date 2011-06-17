@@ -1,0 +1,343 @@
+
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
+  "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+
+
+<html xmlns="http://www.w3.org/1999/xhtml">
+  <head>
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+    
+    <title>HOWTO &mdash; Xitrum 2.10 documentation</title>
+    
+    <link rel="stylesheet" href="_static/nature.css" type="text/css" />
+    <link rel="stylesheet" href="_static/pygments.css" type="text/css" />
+    
+    <script type="text/javascript">
+      var DOCUMENTATION_OPTIONS = {
+        URL_ROOT:    '',
+        VERSION:     '2.10',
+        COLLAPSE_INDEX: false,
+        FILE_SUFFIX: '.html',
+        HAS_SOURCE:  true
+      };
+    </script>
+    <script type="text/javascript" src="_static/jquery.js"></script>
+    <script type="text/javascript" src="_static/underscore.js"></script>
+    <script type="text/javascript" src="_static/doctools.js"></script>
+    <link rel="top" title="Xitrum 2.10 documentation" href="index.html" />
+    <link rel="next" title="Netty handlers" href="handler.html" />
+    <link rel="prev" title="Clustering with Akka" href="cluster.html" /> 
+  </head>
+  <body>
+    <div class="related">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="genindex.html" title="General Index"
+             accesskey="I">index</a></li>
+        <li class="right" >
+          <a href="handler.html" title="Netty handlers"
+             accesskey="N">next</a> |</li>
+        <li class="right" >
+          <a href="cluster.html" title="Clustering with Akka"
+             accesskey="P">previous</a> |</li>
+        <li><a href="index.html">Xitrum 2.10 documentation</a> &raquo;</li> 
+      </ul>
+    </div>  
+
+    <div class="document">
+      <div class="documentwrapper">
+        <div class="bodywrapper">
+          <div class="body">
+            
+  <div class="section" id="howto">
+<h1>HOWTO<a class="headerlink" href="#howto" title="Permalink to this headline">¶</a></h1>
+<p>This chapter contains various small tips. Each tip is too small to have its own
+chapter.</p>
+<div class="section" id="link-to-an-action">
+<h2>Link to an action<a class="headerlink" href="#link-to-an-action" title="Permalink to this headline">¶</a></h2>
+<p>Xitrum tries to be typesafe. Don&#8217;t write URL manually. Do like this:</p>
+<div class="highlight-python"><pre>&lt;a href={url[ArticlesShow]("id" -&gt; myArticle.id)}&gt;{myArticle.title}&lt;/a&gt;</pre>
+</div>
+</div>
+<div class="section" id="redirect-to-another-action">
+<h2>Redirect to another action<a class="headerlink" href="#redirect-to-another-action" title="Permalink to this headline">¶</a></h2>
+<p>Read to know <a class="reference external" href="http://en.wikipedia.org/wiki/URL_redirection">what redirection is</a>.</p>
+<div class="highlight-python"><pre>import xitrum.Action
+import xitrum.annotation.{GET, POST}
+
+@GET("login")
+class LoginInput extends Action {
+  def execute() {...}
+}
+
+@POST("login")
+class DoLogin extends Action {
+  def execute() {
+    ...
+    // After login success
+    redirectTo[AdminIndex]()
+  }
+}
+
+GET("admin")
+class AdminIndex extends Action {
+  def execute() {
+    ...
+    // Check if the user has not logged in, redirect him to the login page
+    redirectTo[LoginInput]()
+  }
+}</pre>
+</div>
+<p>You can also redirect to the current action with <tt class="docutils literal"><span class="pre">redirecToThis()</span></tt>.</p>
+</div>
+<div class="section" id="forward-to-another-action">
+<h2>Forward to another action<a class="headerlink" href="#forward-to-another-action" title="Permalink to this headline">¶</a></h2>
+<p>Use <tt class="docutils literal"><span class="pre">forwardTo[AnotherAction]()</span></tt>. While <tt class="docutils literal"><span class="pre">redirectTo</span></tt> above causes the browser to
+make another request, <tt class="docutils literal"><span class="pre">forwardTo</span></tt> does not.</p>
+</div>
+<div class="section" id="determine-is-the-request-is-ajax-request">
+<h2>Determine is the request is Ajax request<a class="headerlink" href="#determine-is-the-request-is-ajax-request" title="Permalink to this headline">¶</a></h2>
+<p>Use <tt class="docutils literal"><span class="pre">isAjax</span></tt>.</p>
+<div class="highlight-python"><pre>// In an action
+val msg = "A message"
+if (isAjax)
+  jsRender("alert(" + jsEscape(msg) + ")")
+else
+  respondText(msg)</pre>
+</div>
+</div>
+<div class="section" id="basic-authentication">
+<h2>Basic authentication<a class="headerlink" href="#basic-authentication" title="Permalink to this headline">¶</a></h2>
+<div class="section" id="config-basic-authentication-for-the-whole-site">
+<h3>Config basic authentication for the whole site<a class="headerlink" href="#config-basic-authentication-for-the-whole-site" title="Permalink to this headline">¶</a></h3>
+<p>In config/xitrum.conf:</p>
+<div class="highlight-python"><pre>"basicAuth": {
+  "realm":    "xitrum",
+  "username": "xitrum",
+  "password": "xitrum"
+}</pre>
+</div>
+</div>
+<div class="section" id="add-basic-authentication-to-an-action">
+<h3>Add basic authentication to an action<a class="headerlink" href="#add-basic-authentication-to-an-action" title="Permalink to this headline">¶</a></h3>
+<div class="highlight-python"><pre>import xitrum.Action
+
+class MyAction extends Action {
+  beforeFilter {
+    basicAuth("Realm") { (username, password) =&gt;
+      username == "username" &amp;&amp; password == "password"
+    }
+  }
+}</pre>
+</div>
+</div>
+</div>
+<div class="section" id="log">
+<h2>Log<a class="headerlink" href="#log" title="Permalink to this headline">¶</a></h2>
+<p>Xitrum actions extend trait xitrum.Logger, which provides <tt class="docutils literal"><span class="pre">logger</span></tt>.
+In any action, you can do like this:</p>
+<div class="highlight-python"><div class="highlight"><pre><span class="n">logger</span><span class="o">.</span><span class="n">debug</span><span class="p">(</span><span class="s">&quot;Hello World&quot;</span><span class="p">)</span>
+</pre></div>
+</div>
+<p>Of course you can extend xitrum.Logger any time you want:</p>
+<div class="highlight-python"><pre>object MyModel extends xitrum.Logger {
+  ...
+}</pre>
+</div>
+<p>In build.sbt, notice this line:</p>
+<div class="highlight-python"><div class="highlight"><pre><span class="n">libraryDependencies</span> <span class="o">+=</span> <span class="s">&quot;ch.qos.logback&quot;</span> <span class="o">%</span> <span class="s">&quot;logback-classic&quot;</span> <span class="o">%</span> <span class="s">&quot;1.0.9&quot;</span>
+</pre></div>
+</div>
+<p>This means that <a class="reference external" href="http://logback.qos.ch/">Logback</a> is used by default.
+Logback config file is at <tt class="docutils literal"><span class="pre">config/logback.xml</span></tt>.
+You may replace Logback with any implementation of SLF4J.</p>
+</div>
+<div class="section" id="load-config-files">
+<h2>Load config files<a class="headerlink" href="#load-config-files" title="Permalink to this headline">¶</a></h2>
+<div class="section" id="json-file">
+<h3>JSON file<a class="headerlink" href="#json-file" title="Permalink to this headline">¶</a></h3>
+<p>JSON is neat for config files that need nested structures.</p>
+<p>Save your own config files in &#8220;config&#8221; directory. This directory is put into
+classpath in development mode by build.sbt and in production mode by bin/runner (and bin/runner.bat).</p>
+<p>myconfig.json:</p>
+<div class="highlight-python"><div class="highlight"><pre><span class="p">{</span>
+  <span class="s">&quot;username&quot;</span><span class="p">:</span> <span class="s">&quot;God&quot;</span><span class="p">,</span>
+  <span class="s">&quot;password&quot;</span><span class="p">:</span> <span class="s">&quot;Does God need a password?&quot;</span><span class="p">,</span>
+  <span class="s">&quot;children&quot;</span><span class="p">:</span> <span class="p">[</span><span class="s">&quot;Adam&quot;</span><span class="p">,</span> <span class="s">&quot;Eva&quot;</span><span class="p">]</span>
+<span class="p">}</span>
+</pre></div>
+</div>
+<p>Load it:</p>
+<div class="highlight-python"><pre>import xitrum.util.Loader
+
+case class MyConfig(username: String, password: String, children: List[String])
+val myConfig = Loader.jsonFromClasspath[MyConfig]("myconfig.json")</pre>
+</div>
+<p>Notes:</p>
+<ul class="simple">
+<li>Keys and strings must be quoted with double quotes</li>
+<li>Currently, you cannot write comment in JSON file</li>
+</ul>
+</div>
+<div class="section" id="properties-file">
+<h3>Properties file<a class="headerlink" href="#properties-file" title="Permalink to this headline">¶</a></h3>
+<p>You can also use properties files, but you should use JSON whenever possible
+because it&#8217;s much better. Properties files are not typesafe, do not support UTF-8
+and nested structures etc.</p>
+<p>myconfig.properties:</p>
+<div class="highlight-python"><pre>username = God
+password = Does God need a password?
+children = Adam, Eva</pre>
+</div>
+<p>Load it:</p>
+<div class="highlight-python"><pre>import xitrum.util.Loader
+
+// Here you get an instance of java.util.Properties
+val properties = Loader.propertiesFromClasspath("myconfig.properties")</pre>
+</div>
+</div>
+<div class="section" id="typesafe-config-file">
+<h3>Typesafe config file<a class="headerlink" href="#typesafe-config-file" title="Permalink to this headline">¶</a></h3>
+<p>Xitrum also includes Akka, which includes the
+<a class="reference external" href="https://github.com/typesafehub/config">config library</a> created by the
+<a class="reference external" href="http://typesafe.com/company">company called Typesafe</a>.
+It may be a better way to load config files.</p>
+<p>myconfig.conf:</p>
+<div class="highlight-python"><pre>username = God
+password = Does God need a password?
+children = ["Adam", "Eva"]</pre>
+</div>
+<p>Load it:</p>
+<div class="highlight-python"><pre>import com.typesafe.config.{Config, ConfigFactory}
+
+val config   = ConfigFactory.load("myconfig.conf")
+val username = config.getString("username")
+val password = config.getString("password")
+val children = config.getStringList("children")</pre>
+</div>
+</div>
+</div>
+<div class="section" id="encrypt-data">
+<h2>Encrypt data<a class="headerlink" href="#encrypt-data" title="Permalink to this headline">¶</a></h2>
+<p>To encrypt data that you don&#8217;t need to decrypt later (one way encryption),
+you can use MD5 or something like that.</p>
+<p>If you want to decrypt later, you can use the utility Xitrum provides:</p>
+<div class="highlight-python"><pre>import xitrum.util.Secure
+
+val encrypted: Array[Byte]         = Secure.encrypt("my data".getBytes)
+val decrypted: Option[Array[Byte]] = Secure.decrypt(encrypted)</pre>
+</div>
+<p>You can use <tt class="docutils literal"><span class="pre">xitrum.util.UrlSafeBase64</span></tt> to encode and decode the binary data to
+normal string (to embed to HTML for response etc.).</p>
+<p>If you can combine the above operations in one step:</p>
+<div class="highlight-python"><pre>import xitrum.util.SecureUrlSafeBase64
+
+val encrypted = SecureUrlSafeBase64.encrypt(mySerializableObject)  // A String
+val decrypted = SecureUrlSafeBase64.decrypt(encrypted).asInstanceOf[Option[mySerializableClass]]</pre>
+</div>
+<p><tt class="docutils literal"><span class="pre">SecureUrlSafeBase64</span></tt> uses <a class="reference external" href="https://github.com/twitter/chill">Twitter Chill</a>
+to serialize and deserialize. Your data must be serializable.</p>
+<p>You can specify a key for encryption:</p>
+<div class="highlight-python"><pre>val encrypted = Secure.encrypt("my data".getBytes, "my key")
+val decrypted = Secure.decrypt(encrypted, "my key")
+
+val encrypted = SecureUrlSafeBase64.encrypt(mySerializableObject, "my key")
+val decrypted = SecureUrlSafeBase64.decrypt(encrypted, "my key").asInstanceOf[Option[mySerializableClass]]</pre>
+</div>
+<p>If no key is specified, <tt class="docutils literal"><span class="pre">secureKey</span></tt> in xitrum.conf file in config directory
+is used.</p>
+</div>
+<div class="section" id="convert-markdown-text-to-html">
+<h2>Convert Markdown text to HTML<a class="headerlink" href="#convert-markdown-text-to-html" title="Permalink to this headline">¶</a></h2>
+<p>If you have already configured your project to use <a class="reference internal" href="template_engines.html"><em>Scalate template engine</em></a>,
+you only have to do like this:</p>
+<div class="highlight-python"><pre>import org.fusesource.scalamd.Markdown
+val html = Markdown("input")</pre>
+</div>
+<p>Otherwise, you need to add this dependency to your project&#8217;s build.sbt:</p>
+<div class="highlight-python"><pre>libraryDependencies += "org.fusesource.scalamd" %% "scalamd" % "1.6"</pre>
+</div>
+</div>
+</div>
+
+
+          </div>
+        </div>
+      </div>
+      <div class="sphinxsidebar">
+        <div class="sphinxsidebarwrapper">
+  <h3><a href="index.html">Table Of Contents</a></h3>
+  <ul>
+<li><a class="reference internal" href="#">HOWTO</a><ul>
+<li><a class="reference internal" href="#link-to-an-action">Link to an action</a></li>
+<li><a class="reference internal" href="#redirect-to-another-action">Redirect to another action</a></li>
+<li><a class="reference internal" href="#forward-to-another-action">Forward to another action</a></li>
+<li><a class="reference internal" href="#determine-is-the-request-is-ajax-request">Determine is the request is Ajax request</a></li>
+<li><a class="reference internal" href="#basic-authentication">Basic authentication</a><ul>
+<li><a class="reference internal" href="#config-basic-authentication-for-the-whole-site">Config basic authentication for the whole site</a></li>
+<li><a class="reference internal" href="#add-basic-authentication-to-an-action">Add basic authentication to an action</a></li>
+</ul>
+</li>
+<li><a class="reference internal" href="#log">Log</a></li>
+<li><a class="reference internal" href="#load-config-files">Load config files</a><ul>
+<li><a class="reference internal" href="#json-file">JSON file</a></li>
+<li><a class="reference internal" href="#properties-file">Properties file</a></li>
+<li><a class="reference internal" href="#typesafe-config-file">Typesafe config file</a></li>
+</ul>
+</li>
+<li><a class="reference internal" href="#encrypt-data">Encrypt data</a></li>
+<li><a class="reference internal" href="#convert-markdown-text-to-html">Convert Markdown text to HTML</a></li>
+</ul>
+</li>
+</ul>
+
+  <h4>Previous topic</h4>
+  <p class="topless"><a href="cluster.html"
+                        title="previous chapter">Clustering with Akka</a></p>
+  <h4>Next topic</h4>
+  <p class="topless"><a href="handler.html"
+                        title="next chapter">Netty handlers</a></p>
+  <h3>This Page</h3>
+  <ul class="this-page-menu">
+    <li><a href="_sources/howto.txt"
+           rel="nofollow">Show Source</a></li>
+  </ul>
+<div id="searchbox" style="display: none">
+  <h3>Quick search</h3>
+    <form class="search" action="search.html" method="get">
+      <input type="text" name="q" />
+      <input type="submit" value="Go" />
+      <input type="hidden" name="check_keywords" value="yes" />
+      <input type="hidden" name="area" value="default" />
+    </form>
+    <p class="searchtip" style="font-size: 90%">
+    Enter search terms or a module, class or function name.
+    </p>
+</div>
+<script type="text/javascript">$('#searchbox').show(0);</script>
+        </div>
+      </div>
+      <div class="clearer"></div>
+    </div>
+    <div class="related">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="genindex.html" title="General Index"
+             >index</a></li>
+        <li class="right" >
+          <a href="handler.html" title="Netty handlers"
+             >next</a> |</li>
+        <li class="right" >
+          <a href="cluster.html" title="Clustering with Akka"
+             >previous</a> |</li>
+        <li><a href="index.html">Xitrum 2.10 documentation</a> &raquo;</li> 
+      </ul>
+    </div>
+    <div class="footer">
+        &copy; Copyright 2010, Ngoc Dao.
+      Created using <a href="http://sphinx.pocoo.org/">Sphinx</a> 1.1.3.
+    </div>
+  </body>
+</html>

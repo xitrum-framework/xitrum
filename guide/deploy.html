@@ -1,0 +1,336 @@
+
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
+  "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+
+
+<html xmlns="http://www.w3.org/1999/xhtml">
+  <head>
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+    
+    <title>Deploy to production server &mdash; Xitrum 2.10 documentation</title>
+    
+    <link rel="stylesheet" href="_static/nature.css" type="text/css" />
+    <link rel="stylesheet" href="_static/pygments.css" type="text/css" />
+    
+    <script type="text/javascript">
+      var DOCUMENTATION_OPTIONS = {
+        URL_ROOT:    '',
+        VERSION:     '2.10',
+        COLLAPSE_INDEX: false,
+        FILE_SUFFIX: '.html',
+        HAS_SOURCE:  true
+      };
+    </script>
+    <script type="text/javascript" src="_static/jquery.js"></script>
+    <script type="text/javascript" src="_static/underscore.js"></script>
+    <script type="text/javascript" src="_static/doctools.js"></script>
+    <link rel="top" title="Xitrum 2.10 documentation" href="index.html" />
+    <link rel="next" title="Clustering with Akka" href="cluster.html" />
+    <link rel="prev" title="I18n" href="i18n.html" /> 
+  </head>
+  <body>
+    <div class="related">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="genindex.html" title="General Index"
+             accesskey="I">index</a></li>
+        <li class="right" >
+          <a href="cluster.html" title="Clustering with Akka"
+             accesskey="N">next</a> |</li>
+        <li class="right" >
+          <a href="i18n.html" title="I18n"
+             accesskey="P">previous</a> |</li>
+        <li><a href="index.html">Xitrum 2.10 documentation</a> &raquo;</li> 
+      </ul>
+    </div>  
+
+    <div class="document">
+      <div class="documentwrapper">
+        <div class="bodywrapper">
+          <div class="body">
+            
+  <div class="section" id="deploy-to-production-server">
+<h1>Deploy to production server<a class="headerlink" href="#deploy-to-production-server" title="Permalink to this headline">¶</a></h1>
+<p>You may run Xitrum directly:</p>
+<div class="highlight-python"><pre>Browser ------ Xitrum instance</pre>
+</div>
+<p>Or behind a load balancer like HAProxy, or reverse proxy like Nginx:</p>
+<div class="highlight-python"><pre>Browser ------ Load balancer/Reverse proxy -+---- Xitrum instance1
+                                            +---- Xitrum instance2</pre>
+</div>
+<p>If you use WebSocket or SockJS feature in Xitrum and want to run Xitrum behind
+Nginx 1.2, you must install additional module like
+<a class="reference external" href="https://github.com/yaoweibin/nginx_tcp_proxy_module">nginx_tcp_proxy_module</a>.
+Nginx 1.3+ supports WebSocket natively.</p>
+<p>HAProxy is much easier to use. It suits Xitrum because as mentioned in
+<a class="reference internal" href="cache.html"><em>the section about caching</em></a>, Xitrum serves static files
+<a class="reference external" href="https://gist.github.com/3293596">very fast</a>. You don&#8217;t need to use static file
+serving feature in Nginx.</p>
+<div class="section" id="haproxy">
+<h2>HAProxy<a class="headerlink" href="#haproxy" title="Permalink to this headline">¶</a></h2>
+<p>To config HAProxy for SockJS, see <a class="reference external" href="https://github.com/sockjs/sockjs-node/blob/master/examples/haproxy.cfg">this example</a>.</p>
+<p>To have HAProxy reload config file without restarting, see <a class="reference external" href="http://serverfault.com/questions/165883/is-there-a-way-to-add-more-backend-server-to-haproxy-without-restarting-haproxy">this discussion</a>.</p>
+</div>
+<div class="section" id="package-directory">
+<h2>Package directory<a class="headerlink" href="#package-directory" title="Permalink to this headline">¶</a></h2>
+<p>Run <tt class="docutils literal"><span class="pre">sbt/sbt</span> <span class="pre">xitrum-package</span></tt> to prepare <tt class="docutils literal"><span class="pre">target/xitrum</span></tt> directory, ready to
+deploy to production server:</p>
+<div class="highlight-python"><pre>target/xitrum
+  bin
+    runner
+    runner.bat
+  config
+    [config files]
+  public
+    [static public files]
+  lib
+    [dependencies and packaged project file]</pre>
+</div>
+</div>
+<div class="section" id="customize-xitrum-package">
+<h2>Customize xitrum-package<a class="headerlink" href="#customize-xitrum-package" title="Permalink to this headline">¶</a></h2>
+<p>By default <tt class="docutils literal"><span class="pre">sbt/sbt</span> <span class="pre">xitrum-package</span></tt> command simply copies <tt class="docutils literal"><span class="pre">config</span></tt> and <tt class="docutils literal"><span class="pre">public</span></tt>
+directories to <tt class="docutils literal"><span class="pre">target/xitrum</span></tt>. If you want it to copy additional files
+and directories (README, INSTALL, doc etc.), config <tt class="docutils literal"><span class="pre">build.sbt</span></tt> like this:</p>
+<div class="highlight-python"><div class="highlight"><pre><span class="n">TODO</span>
+</pre></div>
+</div>
+</div>
+<div class="section" id="start-xitrum-in-production-mode">
+<h2>Start Xitrum in production mode<a class="headerlink" href="#start-xitrum-in-production-mode" title="Permalink to this headline">¶</a></h2>
+<p><tt class="docutils literal"><span class="pre">bin/runner</span></tt> (for <a href="#id1"><span class="problematic" id="id2">*</span></a>nix) and <tt class="docutils literal"><span class="pre">bin/runner.bat</span></tt> (for Windows) are the script to
+run any object with <tt class="docutils literal"><span class="pre">main</span></tt> method. Use it to start the web server in production
+environment.</p>
+<div class="highlight-python"><pre>bin/runner quickstart.Boot</pre>
+</div>
+<p>You may want to modify <tt class="docutils literal"><span class="pre">runner</span></tt> and <tt class="docutils literal"><span class="pre">runner.bat</span></tt> to tune JVM settings. Also see <tt class="docutils literal"><span class="pre">config/xitrum.conf</span></tt>.</p>
+<p>To start Xitrum in background when the system starts, <a class="reference external" href="http://cr.yp.to/daemontools.html">daemontools</a>
+is a very good tool. To install it on CentOS, see
+<a class="reference external" href="http://whomwah.com/2008/11/04/installing-daemontools-on-centos5-x86_64/">this instruction</a>.</p>
+</div>
+<div class="section" id="tune-linux-for-many-connections">
+<h2>Tune Linux for many connections<a class="headerlink" href="#tune-linux-for-many-connections" title="Permalink to this headline">¶</a></h2>
+<p>Note that on Mac, <a class="reference external" href="https://groups.google.com/forum/#!topic/spray-user/S-SNR2m0BWU">JDKs suffer from a serious problem with IO (NIO) performance</a>.</p>
+<p>Good read:</p>
+<ul class="simple">
+<li><a class="reference external" href="http://www.frozentux.net/ipsysctl-tutorial/chunkyhtml/">Ipsysctl tutorial</a></li>
+<li><a class="reference external" href="http://www.frozentux.net/iptables-tutorial/chunkyhtml/">Iptables tutorial</a></li>
+<li><a class="reference external" href="http://www.frozentux.net/ipsysctl-tutorial/chunkyhtml/tcpvariables.html">TCP variables</a></li>
+</ul>
+<div class="section" id="increase-open-file-limit">
+<h3>Increase open file limit<a class="headerlink" href="#increase-open-file-limit" title="Permalink to this headline">¶</a></h3>
+<p>Each connection is seen by Linux as an open file.
+The default maximum number of open file is 1024.
+To increase this limit, modify /etc/security/limits.conf:</p>
+<div class="highlight-python"><pre>*  soft  nofile  1024000
+*  hard  nofile  1024000</pre>
+</div>
+<p>You need to logout and login again for the above config to take effect.
+To confirm, run <tt class="docutils literal"><span class="pre">ulimit</span> <span class="pre">-n</span></tt>.</p>
+</div>
+<div class="section" id="tune-kernel">
+<h3>Tune kernel<a class="headerlink" href="#tune-kernel" title="Permalink to this headline">¶</a></h3>
+<p>As instructed in the article
+<a class="reference external" href="http://www.metabrew.com/article/a-million-user-comet-application-with-mochiweb-part-1">A Million-user Comet Application with Mochiweb</a>,
+modify /etc/sysctl.conf:</p>
+<div class="highlight-python"><pre># General gigabit tuning
+net.core.rmem_max = 16777216
+net.core.wmem_max = 16777216
+net.ipv4.tcp_rmem = 4096 87380 16777216
+net.ipv4.tcp_wmem = 4096 65536 16777216
+
+# This gives the kernel more memory for TCP
+# which you need with many (100k+) open socket connections
+net.ipv4.tcp_mem = 50576 64768 98152
+
+# Backlog
+net.core.netdev_max_backlog = 2048
+net.core.somaxconn = 1024
+net.ipv4.tcp_max_syn_backlog = 2048
+net.ipv4.tcp_syncookies = 1</pre>
+</div>
+<p>Run <tt class="docutils literal"><span class="pre">sudo</span> <span class="pre">sysctl</span> <span class="pre">-p</span></tt> to apply.
+No need to reboot, now your kernel should be able to handle a lot more open connections.</p>
+</div>
+<div class="section" id="note-about-backlog">
+<h3>Note about backlog<a class="headerlink" href="#note-about-backlog" title="Permalink to this headline">¶</a></h3>
+<p>TCP does the 3-way handshake for making a connection.
+When a remote client connects to the server,
+it sends SYN packet, and the server OS replies with SYN-ACK packet,
+then again that remote client sends ACK packet and the connection is established.
+Xitrum gets the connection when it is completely established.</p>
+<p>According to the article
+<a class="reference external" href="https://sites.google.com/site/beingroot/articles/apache/socket-backlog-tuning-for-apache">Socket backlog tuning for Apache</a>,
+connection timeout happens because of SYN packet loss which happens because
+backlog queue for the web server is filled up with connections sending SYN-ACK
+to slow clients.</p>
+<p>According to the
+<a class="reference external" href="http://www.freebsd.org/doc/en_US.ISO8859-1/books/handbook/configtuning-kernel-limits.html">FreeBSD Handbook</a>,
+the default value of 128 is typically too low for robust handling of new
+connections in a heavily loaded web server environment. For such environments,
+it is recommended to increase this value to 1024 or higher.
+Large listen queues also do a better job of avoiding Denial of Service (DoS) attacks.</p>
+<p>The backlog size of Xitrum is set to 1024 (memcached also uses this value),
+but you also need to tune the kernel as above.</p>
+<p>To check the backlog config:</p>
+<div class="highlight-python"><div class="highlight"><pre><span class="n">cat</span> <span class="o">/</span><span class="n">proc</span><span class="o">/</span><span class="n">sys</span><span class="o">/</span><span class="n">net</span><span class="o">/</span><span class="n">core</span><span class="o">/</span><span class="n">somaxconn</span>
+</pre></div>
+</div>
+<p>Or:</p>
+<div class="highlight-python"><pre>sysctl net.core.somaxconn</pre>
+</div>
+<p>To tune temporarily, you can do like this:</p>
+<div class="highlight-python"><pre>sudo sysctl -w net.core.somaxconn=1024</pre>
+</div>
+</div>
+</div>
+<div class="section" id="deploy-to-heroku">
+<h2>Deploy to Heroku<a class="headerlink" href="#deploy-to-heroku" title="Permalink to this headline">¶</a></h2>
+<p>You may run Xitrum at <a class="reference external" href="https://www.heroku.com/">Heroku</a>.</p>
+<div class="section" id="sign-up-and-create-repository">
+<h3>Sign up and create repository<a class="headerlink" href="#sign-up-and-create-repository" title="Permalink to this headline">¶</a></h3>
+<p>Following the <a class="reference external" href="https://devcenter.heroku.com/articles/quickstart">Official Document</a>,
+sign up and create git repository.</p>
+</div>
+<div class="section" id="create-procfile">
+<h3>Create Procfile<a class="headerlink" href="#create-procfile" title="Permalink to this headline">¶</a></h3>
+<p>Create Procfile and save it at project root directory. Heroku reads this file and
+executes on start. Port number is ginven by Heroku automatically as <tt class="docutils literal"><span class="pre">$PORT</span></tt>.</p>
+<div class="highlight-python"><pre>web: target/xitrum/bin/runner &lt;YOUR_PACKAGE.YOUR_MAIN_CLASS&gt; $PORT</pre>
+</div>
+</div>
+<div class="section" id="change-port-setting">
+<h3>Change port setting<a class="headerlink" href="#change-port-setting" title="Permalink to this headline">¶</a></h3>
+<p>Because Heroku assigns port automatically, you need to do like this:</p>
+<p>Main (boot) class:</p>
+<div class="highlight-python"><pre>import util.Properties
+
+object Boot {
+  def main(args: Array[String]) {
+    val port = Properties.envOrElse("PORT", "8000")
+    System.setProperty("xitrum.port.http", port)
+    Server.start()
+  }
+}</pre>
+</div>
+<p>config/xitrum.conf:</p>
+<div class="highlight-python"><pre>port {
+  http              = 8000
+  # https             = 4430
+  # flashSocketPolicy = 8430  # flash_socket_policy.xml will be returned
+}</pre>
+</div>
+<p>If you want to use SSL, you need <a class="reference external" href="https://addons.heroku.com/ssl">add on</a>.</p>
+</div>
+<div class="section" id="see-log-level">
+<h3>See log level<a class="headerlink" href="#see-log-level" title="Permalink to this headline">¶</a></h3>
+<p>config/logback.xml:</p>
+<div class="highlight-python"><pre>&lt;root level="INFO"&gt;
+  &lt;appender-ref ref="CONSOLE"/&gt;
+&lt;/root&gt;</pre>
+</div>
+<p>Tail log from Heroku command:</p>
+<div class="highlight-python"><pre>heroku logs -tail</pre>
+</div>
+</div>
+<div class="section" id="create-alias-for-xitrum-package">
+<h3>Create alias for <tt class="docutils literal"><span class="pre">xitrum-package</span></tt><a class="headerlink" href="#create-alias-for-xitrum-package" title="Permalink to this headline">¶</a></h3>
+<p>At deploy time, Heroku runs <tt class="docutils literal"><span class="pre">sbt</span> <span class="pre">clean</span> <span class="pre">compile</span> <span class="pre">stage</span></tt>. So you need to add alias
+for <tt class="docutils literal"><span class="pre">xitrum-package</span></tt>.</p>
+<p>build.sbt:</p>
+<div class="highlight-python"><div class="highlight"><pre><span class="n">addCommandAlias</span><span class="p">(</span><span class="s">&quot;stage&quot;</span><span class="p">,</span> <span class="s">&quot;;xitrum-package&quot;</span><span class="p">)</span>
+</pre></div>
+</div>
+</div>
+<div class="section" id="push-to-heroku">
+<h3>Push to Heroku<a class="headerlink" href="#push-to-heroku" title="Permalink to this headline">¶</a></h3>
+<p>Deploy process is hooked by git push.</p>
+<div class="highlight-python"><pre>git push heroku master</pre>
+</div>
+<p>See also <a class="reference external" href="https://devcenter.heroku.com/articles/getting-started-with-scala">Official document for Scala</a>.</p>
+</div>
+</div>
+</div>
+
+
+          </div>
+        </div>
+      </div>
+      <div class="sphinxsidebar">
+        <div class="sphinxsidebarwrapper">
+  <h3><a href="index.html">Table Of Contents</a></h3>
+  <ul>
+<li><a class="reference internal" href="#">Deploy to production server</a><ul>
+<li><a class="reference internal" href="#haproxy">HAProxy</a></li>
+<li><a class="reference internal" href="#package-directory">Package directory</a></li>
+<li><a class="reference internal" href="#customize-xitrum-package">Customize xitrum-package</a></li>
+<li><a class="reference internal" href="#start-xitrum-in-production-mode">Start Xitrum in production mode</a></li>
+<li><a class="reference internal" href="#tune-linux-for-many-connections">Tune Linux for many connections</a><ul>
+<li><a class="reference internal" href="#increase-open-file-limit">Increase open file limit</a></li>
+<li><a class="reference internal" href="#tune-kernel">Tune kernel</a></li>
+<li><a class="reference internal" href="#note-about-backlog">Note about backlog</a></li>
+</ul>
+</li>
+<li><a class="reference internal" href="#deploy-to-heroku">Deploy to Heroku</a><ul>
+<li><a class="reference internal" href="#sign-up-and-create-repository">Sign up and create repository</a></li>
+<li><a class="reference internal" href="#create-procfile">Create Procfile</a></li>
+<li><a class="reference internal" href="#change-port-setting">Change port setting</a></li>
+<li><a class="reference internal" href="#see-log-level">See log level</a></li>
+<li><a class="reference internal" href="#create-alias-for-xitrum-package">Create alias for <tt class="docutils literal"><span class="pre">xitrum-package</span></tt></a></li>
+<li><a class="reference internal" href="#push-to-heroku">Push to Heroku</a></li>
+</ul>
+</li>
+</ul>
+</li>
+</ul>
+
+  <h4>Previous topic</h4>
+  <p class="topless"><a href="i18n.html"
+                        title="previous chapter">I18n</a></p>
+  <h4>Next topic</h4>
+  <p class="topless"><a href="cluster.html"
+                        title="next chapter">Clustering with Akka</a></p>
+  <h3>This Page</h3>
+  <ul class="this-page-menu">
+    <li><a href="_sources/deploy.txt"
+           rel="nofollow">Show Source</a></li>
+  </ul>
+<div id="searchbox" style="display: none">
+  <h3>Quick search</h3>
+    <form class="search" action="search.html" method="get">
+      <input type="text" name="q" />
+      <input type="submit" value="Go" />
+      <input type="hidden" name="check_keywords" value="yes" />
+      <input type="hidden" name="area" value="default" />
+    </form>
+    <p class="searchtip" style="font-size: 90%">
+    Enter search terms or a module, class or function name.
+    </p>
+</div>
+<script type="text/javascript">$('#searchbox').show(0);</script>
+        </div>
+      </div>
+      <div class="clearer"></div>
+    </div>
+    <div class="related">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="genindex.html" title="General Index"
+             >index</a></li>
+        <li class="right" >
+          <a href="cluster.html" title="Clustering with Akka"
+             >next</a> |</li>
+        <li class="right" >
+          <a href="i18n.html" title="I18n"
+             >previous</a> |</li>
+        <li><a href="index.html">Xitrum 2.10 documentation</a> &raquo;</li> 
+      </ul>
+    </div>
+    <div class="footer">
+        &copy; Copyright 2010, Ngoc Dao.
+      Created using <a href="http://sphinx.pocoo.org/">Sphinx</a> 1.1.3.
+    </div>
+  </body>
+</html>

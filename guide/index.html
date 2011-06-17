@@ -1,0 +1,310 @@
+
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
+  "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+
+
+<html xmlns="http://www.w3.org/1999/xhtml">
+  <head>
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+    
+    <title>Xitrum Guide &mdash; Xitrum 2.10 documentation</title>
+    
+    <link rel="stylesheet" href="_static/nature.css" type="text/css" />
+    <link rel="stylesheet" href="_static/pygments.css" type="text/css" />
+    
+    <script type="text/javascript">
+      var DOCUMENTATION_OPTIONS = {
+        URL_ROOT:    '',
+        VERSION:     '2.10',
+        COLLAPSE_INDEX: false,
+        FILE_SUFFIX: '.html',
+        HAS_SOURCE:  true
+      };
+    </script>
+    <script type="text/javascript" src="_static/jquery.js"></script>
+    <script type="text/javascript" src="_static/underscore.js"></script>
+    <script type="text/javascript" src="_static/doctools.js"></script>
+    <link rel="top" title="Xitrum 2.10 documentation" href="#" />
+    <link rel="next" title="Introduction" href="intro.html" /> 
+  </head>
+  <body>
+    <div class="related">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="genindex.html" title="General Index"
+             accesskey="I">index</a></li>
+        <li class="right" >
+          <a href="intro.html" title="Introduction"
+             accesskey="N">next</a> |</li>
+        <li><a href="#">Xitrum 2.10 documentation</a> &raquo;</li> 
+      </ul>
+    </div>  
+
+    <div class="document">
+      <div class="documentwrapper">
+        <div class="bodywrapper">
+          <div class="body">
+            
+  <div class="section" id="xitrum-guide">
+<h1>Xitrum Guide<a class="headerlink" href="#xitrum-guide" title="Permalink to this headline">¶</a></h1>
+<p><a href="xitrum.pdf" title="PDF"><img src="xitrum-pdf.png"/></a></p>
+<div class="toctree-wrapper compound">
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="intro.html">Introduction</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="intro.html#features">Features</a></li>
+<li class="toctree-l2"><a class="reference internal" href="intro.html#samples">Samples</a></li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="tutorial.html">Tutorial</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="tutorial.html#create-a-new-empty-xitrum-project">Create a new empty Xitrum project</a></li>
+<li class="toctree-l2"><a class="reference internal" href="tutorial.html#run">Run</a></li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="dev.html">Development flow with SBT, Eclipse/IntelliJ IDEA, and JRebel</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="dev.html#import-the-project-to-eclipse">Import the project to Eclipse</a></li>
+<li class="toctree-l2"><a class="reference internal" href="dev.html#import-the-project-to-intellij-idea">Import the project to IntelliJ IDEA</a></li>
+<li class="toctree-l2"><a class="reference internal" href="dev.html#ignore-files">Ignore files</a></li>
+<li class="toctree-l2"><a class="reference internal" href="dev.html#install-jrebel">Install JRebel</a></li>
+<li class="toctree-l2"><a class="reference internal" href="dev.html#use-jrebel">Use JRebel</a></li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="action_view.html">Action and view</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="action_view.html#normal-action">Normal action</a></li>
+<li class="toctree-l2"><a class="reference internal" href="action_view.html#actor-action">Actor action</a></li>
+<li class="toctree-l2"><a class="reference internal" href="action_view.html#respond-to-client">Respond to client</a></li>
+<li class="toctree-l2"><a class="reference internal" href="action_view.html#respond-template-view-file">Respond template view file</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="action_view.html#id1">Mustache</a></li>
+<li class="toctree-l3"><a class="reference internal" href="action_view.html#coffeescript">CoffeeScript</a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="action_view.html#layout">Layout</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="action_view.html#without-separate-layout-file">Without separate layout file</a></li>
+<li class="toctree-l3"><a class="reference internal" href="action_view.html#pass-layout-directly-in-respondview">Pass layout directly in respondView</a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="action_view.html#inline-view">Inline view</a></li>
+<li class="toctree-l2"><a class="reference internal" href="action_view.html#render-fragment">Render fragment</a></li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="restful.html">RESTful APIs</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="restful.html#route-cache">Route cache</a></li>
+<li class="toctree-l2"><a class="reference internal" href="restful.html#route-order-with-first-and-last">Route order with first and last</a></li>
+<li class="toctree-l2"><a class="reference internal" href="restful.html#multiple-paths-for-one-action">Multiple paths for one action</a></li>
+<li class="toctree-l2"><a class="reference internal" href="restful.html#regex-in-route">Regex in route</a></li>
+<li class="toctree-l2"><a class="reference internal" href="restful.html#anti-csrf">Anti-CSRF</a></li>
+<li class="toctree-l2"><a class="reference internal" href="restful.html#anticsrfinput">antiCSRFInput</a></li>
+<li class="toctree-l2"><a class="reference internal" href="restful.html#skipcsrfcheck">SkipCsrfCheck</a></li>
+<li class="toctree-l2"><a class="reference internal" href="restful.html#getting-entire-request-body">Getting entire request body</a></li>
+<li class="toctree-l2"><a class="reference internal" href="restful.html#documenting-api">Documenting API</a></li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="template_engines.html">Template engines</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="template_engines.html#config-template-engine">Config template engine</a></li>
+<li class="toctree-l2"><a class="reference internal" href="template_engines.html#remove-template-engine">Remove template engine</a></li>
+<li class="toctree-l2"><a class="reference internal" href="template_engines.html#create-your-own-template-engine">Create your own template engine</a></li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="postback.html">Postbacks</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="postback.html#layout">Layout</a></li>
+<li class="toctree-l2"><a class="reference internal" href="postback.html#form">Form</a></li>
+<li class="toctree-l2"><a class="reference internal" href="postback.html#non-form">Non-form</a></li>
+<li class="toctree-l2"><a class="reference internal" href="postback.html#confirmation-dialog">Confirmation dialog</a></li>
+<li class="toctree-l2"><a class="reference internal" href="postback.html#extra-params">Extra params</a></li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="xml.html">XML</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="xml.html#unescape-xml">Unescape XML</a></li>
+<li class="toctree-l2"><a class="reference internal" href="xml.html#group-xml-elements">Group XML elements</a></li>
+<li class="toctree-l2"><a class="reference internal" href="xml.html#render-xhtml">Render XHTML</a></li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="js.html">JavaScript and JSON</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="js.html#javascript">JavaScript</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="js.html#add-javascript-fragments-to-view">Add JavaScript fragments to view</a></li>
+<li class="toctree-l3"><a class="reference internal" href="js.html#respond-javascript-directly-without-view">Respond JavaScript directly without view</a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="js.html#json">JSON</a></li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="async.html">Async response</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="async.html#websocket">WebSocket</a></li>
+<li class="toctree-l2"><a class="reference internal" href="async.html#sockjs">SockJS</a></li>
+<li class="toctree-l2"><a class="reference internal" href="async.html#chunked-response">Chunked response</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="async.html#forever-iframe">Forever iframe</a></li>
+<li class="toctree-l3"><a class="reference internal" href="async.html#event-source">Event Source</a></li>
+</ul>
+</li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="static.html">Static files</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="static.html#serve-static-files-on-disk">Serve static files on disk</a></li>
+<li class="toctree-l2"><a class="reference internal" href="static.html#and-500">404 and 500</a></li>
+<li class="toctree-l2"><a class="reference internal" href="static.html#serve-resource-files-in-classpath">Serve resource files in classpath</a></li>
+<li class="toctree-l2"><a class="reference internal" href="static.html#client-side-cache-with-etag-and-max-age">Client side cache with ETag and max-age</a></li>
+<li class="toctree-l2"><a class="reference internal" href="static.html#gzip">GZIP</a></li>
+<li class="toctree-l2"><a class="reference internal" href="static.html#server-side-cache">Server side cache</a></li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="flash.html">Serve flash socket policy file</a></li>
+<li class="toctree-l1"><a class="reference internal" href="scopes.html">Scopes</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="scopes.html#request">Request</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="scopes.html#kinds-of-params">Kinds of params</a></li>
+<li class="toctree-l3"><a class="reference internal" href="scopes.html#accesing-params">Accesing params</a></li>
+<li class="toctree-l3"><a class="reference internal" href="scopes.html#at">&#8220;at&#8221;</a></li>
+<li class="toctree-l3"><a class="reference internal" href="scopes.html#requestvar">RequestVar</a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="scopes.html#cookie">Cookie</a></li>
+<li class="toctree-l2"><a class="reference internal" href="scopes.html#session">Session</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="scopes.html#session-clear">session.clear()</a></li>
+<li class="toctree-l3"><a class="reference internal" href="scopes.html#sessionvar">SessionVar</a></li>
+<li class="toctree-l3"><a class="reference internal" href="scopes.html#session-store">Session store</a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="scopes.html#object-vs-val">object vs. val</a></li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="validation.html">Validation</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="validation.html#default-validators">Default validators</a></li>
+<li class="toctree-l2"><a class="reference internal" href="validation.html#write-custom-validators">Write custom validators</a></li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="upload.html">Upload</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="upload.html#ajax-style-upload">Ajax style upload</a></li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="filter.html">Filters</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="filter.html#before-filters">Before filters</a></li>
+<li class="toctree-l2"><a class="reference internal" href="filter.html#after-filters">After filters</a></li>
+<li class="toctree-l2"><a class="reference internal" href="filter.html#around-filters">Around filters</a></li>
+<li class="toctree-l2"><a class="reference internal" href="filter.html#priority">Priority</a></li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="cache.html">Server-side cache</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="cache.html#cache-page-or-action">Cache page or action</a></li>
+<li class="toctree-l2"><a class="reference internal" href="cache.html#cache-object">Cache object</a></li>
+<li class="toctree-l2"><a class="reference internal" href="cache.html#remove-cache">Remove cache</a></li>
+<li class="toctree-l2"><a class="reference internal" href="cache.html#config">Config</a></li>
+<li class="toctree-l2"><a class="reference internal" href="cache.html#how-cache-works">How cache works</a></li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="i18n.html">I18n</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="i18n.html#write-internationalized-messages-in-source-code">Write internationalized messages in source code</a></li>
+<li class="toctree-l2"><a class="reference internal" href="i18n.html#extract-messages-to-pot-files">Extract messages to pot files</a></li>
+<li class="toctree-l2"><a class="reference internal" href="i18n.html#where-to-save-po-files">Where to save po files</a></li>
+<li class="toctree-l2"><a class="reference internal" href="i18n.html#set-language">Set language</a></li>
+<li class="toctree-l2"><a class="reference internal" href="i18n.html#validation-messages">Validation messages</a></li>
+<li class="toctree-l2"><a class="reference internal" href="i18n.html#plural-forms">Plural forms</a></li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="deploy.html">Deploy to production server</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="deploy.html#haproxy">HAProxy</a></li>
+<li class="toctree-l2"><a class="reference internal" href="deploy.html#package-directory">Package directory</a></li>
+<li class="toctree-l2"><a class="reference internal" href="deploy.html#customize-xitrum-package">Customize xitrum-package</a></li>
+<li class="toctree-l2"><a class="reference internal" href="deploy.html#start-xitrum-in-production-mode">Start Xitrum in production mode</a></li>
+<li class="toctree-l2"><a class="reference internal" href="deploy.html#tune-linux-for-many-connections">Tune Linux for many connections</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="deploy.html#increase-open-file-limit">Increase open file limit</a></li>
+<li class="toctree-l3"><a class="reference internal" href="deploy.html#tune-kernel">Tune kernel</a></li>
+<li class="toctree-l3"><a class="reference internal" href="deploy.html#note-about-backlog">Note about backlog</a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="deploy.html#deploy-to-heroku">Deploy to Heroku</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="deploy.html#sign-up-and-create-repository">Sign up and create repository</a></li>
+<li class="toctree-l3"><a class="reference internal" href="deploy.html#create-procfile">Create Procfile</a></li>
+<li class="toctree-l3"><a class="reference internal" href="deploy.html#change-port-setting">Change port setting</a></li>
+<li class="toctree-l3"><a class="reference internal" href="deploy.html#see-log-level">See log level</a></li>
+<li class="toctree-l3"><a class="reference internal" href="deploy.html#create-alias-for-xitrum-package">Create alias for <tt class="docutils literal"><span class="pre">xitrum-package</span></tt></a></li>
+<li class="toctree-l3"><a class="reference internal" href="deploy.html#push-to-heroku">Push to Heroku</a></li>
+</ul>
+</li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="cluster.html">Clustering with Akka</a></li>
+<li class="toctree-l1"><a class="reference internal" href="howto.html">HOWTO</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="howto.html#link-to-an-action">Link to an action</a></li>
+<li class="toctree-l2"><a class="reference internal" href="howto.html#redirect-to-another-action">Redirect to another action</a></li>
+<li class="toctree-l2"><a class="reference internal" href="howto.html#forward-to-another-action">Forward to another action</a></li>
+<li class="toctree-l2"><a class="reference internal" href="howto.html#determine-is-the-request-is-ajax-request">Determine is the request is Ajax request</a></li>
+<li class="toctree-l2"><a class="reference internal" href="howto.html#basic-authentication">Basic authentication</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="howto.html#config-basic-authentication-for-the-whole-site">Config basic authentication for the whole site</a></li>
+<li class="toctree-l3"><a class="reference internal" href="howto.html#add-basic-authentication-to-an-action">Add basic authentication to an action</a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="howto.html#log">Log</a></li>
+<li class="toctree-l2"><a class="reference internal" href="howto.html#load-config-files">Load config files</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="howto.html#json-file">JSON file</a></li>
+<li class="toctree-l3"><a class="reference internal" href="howto.html#properties-file">Properties file</a></li>
+<li class="toctree-l3"><a class="reference internal" href="howto.html#typesafe-config-file">Typesafe config file</a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="howto.html#encrypt-data">Encrypt data</a></li>
+<li class="toctree-l2"><a class="reference internal" href="howto.html#convert-markdown-text-to-html">Convert Markdown text to HTML</a></li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="handler.html">Netty handlers</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="handler.html#netty-handler-architecture">Netty handler architecture</a></li>
+<li class="toctree-l2"><a class="reference internal" href="handler.html#custom-handlers">Custom handlers</a></li>
+<li class="toctree-l2"><a class="reference internal" href="handler.html#xitrum-default-handlers">Xitrum default handlers</a></li>
+<li class="toctree-l2"><a class="reference internal" href="handler.html#tips">Tips</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="handler.html#channel-attachment">Channel attachment</a></li>
+<li class="toctree-l3"><a class="reference internal" href="handler.html#channel-close-event">Channel close event</a></li>
+</ul>
+</li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="deps.html">Dependencies</a></li>
+</ul>
+</div>
+</div>
+
+
+          </div>
+        </div>
+      </div>
+      <div class="sphinxsidebar">
+        <div class="sphinxsidebarwrapper">
+  <h4>Next topic</h4>
+  <p class="topless"><a href="intro.html"
+                        title="next chapter">Introduction</a></p>
+  <h3>This Page</h3>
+  <ul class="this-page-menu">
+    <li><a href="_sources/index.txt"
+           rel="nofollow">Show Source</a></li>
+  </ul>
+<div id="searchbox" style="display: none">
+  <h3>Quick search</h3>
+    <form class="search" action="search.html" method="get">
+      <input type="text" name="q" />
+      <input type="submit" value="Go" />
+      <input type="hidden" name="check_keywords" value="yes" />
+      <input type="hidden" name="area" value="default" />
+    </form>
+    <p class="searchtip" style="font-size: 90%">
+    Enter search terms or a module, class or function name.
+    </p>
+</div>
+<script type="text/javascript">$('#searchbox').show(0);</script>
+        </div>
+      </div>
+      <div class="clearer"></div>
+    </div>
+    <div class="related">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="genindex.html" title="General Index"
+             >index</a></li>
+        <li class="right" >
+          <a href="intro.html" title="Introduction"
+             >next</a> |</li>
+        <li><a href="#">Xitrum 2.10 documentation</a> &raquo;</li> 
+      </ul>
+    </div>
+    <div class="footer">
+        &copy; Copyright 2010, Ngoc Dao.
+      Created using <a href="http://sphinx.pocoo.org/">Sphinx</a> 1.1.3.
+    </div>
+  </body>
+</html>

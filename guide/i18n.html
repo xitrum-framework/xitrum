@@ -1,0 +1,258 @@
+
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
+  "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+
+
+<html xmlns="http://www.w3.org/1999/xhtml">
+  <head>
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+    
+    <title>I18n &mdash; Xitrum 2.10 documentation</title>
+    
+    <link rel="stylesheet" href="_static/nature.css" type="text/css" />
+    <link rel="stylesheet" href="_static/pygments.css" type="text/css" />
+    
+    <script type="text/javascript">
+      var DOCUMENTATION_OPTIONS = {
+        URL_ROOT:    '',
+        VERSION:     '2.10',
+        COLLAPSE_INDEX: false,
+        FILE_SUFFIX: '.html',
+        HAS_SOURCE:  true
+      };
+    </script>
+    <script type="text/javascript" src="_static/jquery.js"></script>
+    <script type="text/javascript" src="_static/underscore.js"></script>
+    <script type="text/javascript" src="_static/doctools.js"></script>
+    <link rel="top" title="Xitrum 2.10 documentation" href="index.html" />
+    <link rel="next" title="Deploy to production server" href="deploy.html" />
+    <link rel="prev" title="Server-side cache" href="cache.html" /> 
+  </head>
+  <body>
+    <div class="related">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="genindex.html" title="General Index"
+             accesskey="I">index</a></li>
+        <li class="right" >
+          <a href="deploy.html" title="Deploy to production server"
+             accesskey="N">next</a> |</li>
+        <li class="right" >
+          <a href="cache.html" title="Server-side cache"
+             accesskey="P">previous</a> |</li>
+        <li><a href="index.html">Xitrum 2.10 documentation</a> &raquo;</li> 
+      </ul>
+    </div>  
+
+    <div class="document">
+      <div class="documentwrapper">
+        <div class="bodywrapper">
+          <div class="body">
+            
+  <div class="section" id="i18n">
+<h1>I18n<a class="headerlink" href="#i18n" title="Permalink to this headline">¶</a></h1>
+<p>GNU gettext is used. Unlike many other i18n methods, gettext supports plural forms.</p>
+<img alt="http://www.poedit.net/screenshots/osx.png" src="http://www.poedit.net/screenshots/osx.png" />
+<div class="section" id="write-internationalized-messages-in-source-code">
+<h2>Write internationalized messages in source code<a class="headerlink" href="#write-internationalized-messages-in-source-code" title="Permalink to this headline">¶</a></h2>
+<p><tt class="docutils literal"><span class="pre">xitrum.Action</span></tt> extends <tt class="docutils literal"><span class="pre">xitrum.I18n</span></tt>, which has these methods:</p>
+<div class="highlight-python"><div class="highlight"><pre><span class="n">t</span><span class="p">(</span><span class="s">&quot;Message&quot;</span><span class="p">)</span>
+<span class="n">tc</span><span class="p">(</span><span class="s">&quot;Context&quot;</span><span class="p">,</span> <span class="s">&quot;Message&quot;</span><span class="p">)</span>
+</pre></div>
+</div>
+<p>In a action or action, just call them.
+In other places like models, you need to pass the current action to them and
+call <tt class="docutils literal"><span class="pre">t</span></tt> and <tt class="docutils literal"><span class="pre">tc</span></tt> on it:</p>
+<div class="highlight-python"><pre>// In an action
+respondText(MyModel.hello(this))
+
+// In the model
+import xitrum.I18n
+object MyModel {
+  def hello(i18n: I18n) = i18n.t("Hello World")
+}</pre>
+</div>
+</div>
+<div class="section" id="extract-messages-to-pot-files">
+<h2>Extract messages to pot files<a class="headerlink" href="#extract-messages-to-pot-files" title="Permalink to this headline">¶</a></h2>
+<p>Create an empty i18n.pot file in your project&#8217;s root directory, then recompile
+the whole project.</p>
+<div class="highlight-python"><pre>sbt/sbt clean
+rm i18n.pot
+touch i18n.pot
+sbt/sbt compile</pre>
+</div>
+<p><tt class="docutils literal"><span class="pre">sbt/sbt</span> <span class="pre">clean</span></tt> is to delete all .class files, forcing SBT to recompile the whole
+project. Because after <tt class="docutils literal"><span class="pre">sbt/sbt</span> <span class="pre">clean</span></tt>, SBT will try to redownload all <a class="reference internal" href="deps.html"><em>dependencies</em></a>,
+you can do a little faster with the command <tt class="docutils literal"><span class="pre">find</span> <span class="pre">target</span> <span class="pre">-name</span> <span class="pre">*.class</span> <span class="pre">-delete</span></tt>,
+which deletes all .class files in the <tt class="docutils literal"><span class="pre">target</span></tt> directory.</p>
+<p>After the recompilation, i18n.pot will be filled with gettext messages extracted
+from the source code. To do this magic, <a class="reference external" href="http://www.scala-lang.org/node/140">Scala compiler plugin technique</a>
+is used.</p>
+<p>One caveat of this method is that only gettext messages in Scala source code
+files are extracted. If you have Java files, you may want to extract manually
+using <tt class="docutils literal"><span class="pre">xgettext</span></tt> command line:</p>
+<div class="highlight-python"><pre>xgettext -kt -ktc:1c,2 -ktn:1,2 -ktcn:1c,2,3 -o i18n_java.pot --from-code=UTF-8 $(find src/main/java -name "*.java")</pre>
+</div>
+<p>Then you manually merge i18n_java.pot to i18n.pot.</p>
+</div>
+<div class="section" id="where-to-save-po-files">
+<h2>Where to save po files<a class="headerlink" href="#where-to-save-po-files" title="Permalink to this headline">¶</a></h2>
+<p>i18n.pot is the template file. You need to copy it to &lt;language&gt;.po files and
+translate.</p>
+<div class="highlight-python"><pre>src
+  main
+    scala
+    view
+    resources
+      i18n
+        ja.po
+        vi.po
+        ...</pre>
+</div>
+<p>Use a tool like <a class="reference external" href="http://www.poedit.net/">Poedit</a> to edit po files.
+You can use it to merge newly created pot file to existing po files.</p>
+<p>You can package po files in multiple JAR files. Xitrum will automatically merge
+them when running.</p>
+<div class="highlight-python"><pre>mylib.jar
+  i18n
+    ja.po
+    vi.po
+        ...
+
+another.jar
+  i18n
+    ja.po
+    vi.po
+        ...</pre>
+</div>
+</div>
+<div class="section" id="set-language">
+<h2>Set language<a class="headerlink" href="#set-language" title="Permalink to this headline">¶</a></h2>
+<ul class="simple">
+<li>To get languages set in the <tt class="docutils literal"><span class="pre">Accept-Language</span></tt> request header by the browser,
+call <tt class="docutils literal"><span class="pre">browserLanguages</span></tt>. The result is sorted by priority set by the brower,
+from high to low.</li>
+<li>The default current language is &#8220;en&#8221;. To set the current language, call
+<tt class="docutils literal"><span class="pre">setLanguage(&quot;ja,</span> <span class="pre">vi</span> <span class="pre">etc.&quot;)</span></tt>.</li>
+<li>To autoset the most suitable language in resources, call
+<tt class="docutils literal"><span class="pre">autosetLanguage(resourceLanguages)</span></tt>, where
+<tt class="docutils literal"><span class="pre">resourceLanguages</span></tt> is a list of available languages in
+<tt class="docutils literal"><span class="pre">resources/i18n</span></tt> directory and JAR files.
+If there&#8217;s no suitable language, the language is still the default &#8220;en&#8221;.</li>
+<li>To get the current language set above, call <tt class="docutils literal"><span class="pre">getLanguage</span></tt>.</li>
+</ul>
+<p>In your action, typically in a before filter, to set language:</p>
+<div class="highlight-python"><pre>beforeFilter {
+  val lango: Option[String] = yourMethodToGetUserPreferenceLanguageInSession()
+  lango match {
+    case None       =&gt; autosetLanguage("ja", "vi")
+    case Some(lang) =&gt; setLanguage(lang)
+  }
+  true
+}</pre>
+</div>
+</div>
+<div class="section" id="validation-messages">
+<h2>Validation messages<a class="headerlink" href="#validation-messages" title="Permalink to this headline">¶</a></h2>
+<p>jQuery Validation plugin provides <a class="reference external" href="https://github.com/jzaefferer/jquery-validation/tree/master/localization">i18n error messages</a>.
+Xitrum automatically include the message file corresponding to the current language.</p>
+<p>For server side default validators in <tt class="docutils literal"><span class="pre">xitrum.validator</span></tt> package, Xitrum also
+provide translation for them.</p>
+</div>
+<div class="section" id="plural-forms">
+<h2>Plural forms<a class="headerlink" href="#plural-forms" title="Permalink to this headline">¶</a></h2>
+<div class="highlight-python"><div class="highlight"><pre><span class="n">tn</span><span class="p">(</span><span class="s">&quot;Message&quot;</span><span class="p">,</span> <span class="s">&quot;Plural form&quot;</span><span class="p">,</span> <span class="n">n</span><span class="p">)</span>
+<span class="n">tcn</span><span class="p">(</span><span class="s">&quot;Context&quot;</span><span class="p">,</span> <span class="s">&quot;Message&quot;</span><span class="p">,</span> <span class="s">&quot;Plural form&quot;</span><span class="p">,</span> <span class="n">n</span><span class="p">)</span>
+</pre></div>
+</div>
+<p>Xitrum can only work correctly with Plural-Forms exactly listed at:</p>
+<ul class="simple">
+<li><a class="reference external" href="http://www.gnu.org/software/gettext/manual/html_node/Plural-forms.html#Plural-forms">What are plural forms</a></li>
+<li><a class="reference external" href="http://www.gnu.org/software/gettext/manual/html_node/Translating-plural-forms.html#Translating-plural-forms">Translating plural forms</a></li>
+</ul>
+<p>Your plural forms must be exactly one of the following:</p>
+<div class="highlight-python"><pre>nplurals=1; plural=0
+nplurals=2; plural=n != 1
+nplurals=2; plural=n&gt;1
+nplurals=3; plural=n%10==1 &amp;&amp; n%100!=11 ? 0 : n != 0 ? 1 : 2
+nplurals=3; plural=n==1 ? 0 : n==2 ? 1 : 2
+nplurals=3; plural=n==1 ? 0 : (n==0 || (n%100 &gt; 0 &amp;&amp; n%100 &lt; 20)) ? 1 : 2
+nplurals=3; plural=n%10==1 &amp;&amp; n%100!=11 ? 0 : n%10&gt;=2 &amp;&amp; (n%100&lt;10 || n%100&gt;=20) ? 1 : 2
+nplurals=3; plural=n%10==1 &amp;&amp; n%100!=11 ? 0 : n%10&gt;=2 &amp;&amp; n%10&lt;=4 &amp;&amp; (n%100&lt;10 || n%100&gt;=20) ? 1 : 2
+nplurals=3; plural=(n==1) ? 0 : (n&gt;=2 &amp;&amp; n&lt;=4) ? 1 : 2
+nplurals=3; plural=n==1 ? 0 : n%10&gt;=2 &amp;&amp; n%10&lt;=4 &amp;&amp; (n%100&lt;10 || n%100&gt;=20) ? 1 : 2
+nplurals=4; plural=n%100==1 ? 0 : n%100==2 ? 1 : n%100==3 || n%100==4 ? 2 : 3</pre>
+</div>
+</div>
+</div>
+
+
+          </div>
+        </div>
+      </div>
+      <div class="sphinxsidebar">
+        <div class="sphinxsidebarwrapper">
+  <h3><a href="index.html">Table Of Contents</a></h3>
+  <ul>
+<li><a class="reference internal" href="#">I18n</a><ul>
+<li><a class="reference internal" href="#write-internationalized-messages-in-source-code">Write internationalized messages in source code</a></li>
+<li><a class="reference internal" href="#extract-messages-to-pot-files">Extract messages to pot files</a></li>
+<li><a class="reference internal" href="#where-to-save-po-files">Where to save po files</a></li>
+<li><a class="reference internal" href="#set-language">Set language</a></li>
+<li><a class="reference internal" href="#validation-messages">Validation messages</a></li>
+<li><a class="reference internal" href="#plural-forms">Plural forms</a></li>
+</ul>
+</li>
+</ul>
+
+  <h4>Previous topic</h4>
+  <p class="topless"><a href="cache.html"
+                        title="previous chapter">Server-side cache</a></p>
+  <h4>Next topic</h4>
+  <p class="topless"><a href="deploy.html"
+                        title="next chapter">Deploy to production server</a></p>
+  <h3>This Page</h3>
+  <ul class="this-page-menu">
+    <li><a href="_sources/i18n.txt"
+           rel="nofollow">Show Source</a></li>
+  </ul>
+<div id="searchbox" style="display: none">
+  <h3>Quick search</h3>
+    <form class="search" action="search.html" method="get">
+      <input type="text" name="q" />
+      <input type="submit" value="Go" />
+      <input type="hidden" name="check_keywords" value="yes" />
+      <input type="hidden" name="area" value="default" />
+    </form>
+    <p class="searchtip" style="font-size: 90%">
+    Enter search terms or a module, class or function name.
+    </p>
+</div>
+<script type="text/javascript">$('#searchbox').show(0);</script>
+        </div>
+      </div>
+      <div class="clearer"></div>
+    </div>
+    <div class="related">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="genindex.html" title="General Index"
+             >index</a></li>
+        <li class="right" >
+          <a href="deploy.html" title="Deploy to production server"
+             >next</a> |</li>
+        <li class="right" >
+          <a href="cache.html" title="Server-side cache"
+             >previous</a> |</li>
+        <li><a href="index.html">Xitrum 2.10 documentation</a> &raquo;</li> 
+      </ul>
+    </div>
+    <div class="footer">
+        &copy; Copyright 2010, Ngoc Dao.
+      Created using <a href="http://sphinx.pocoo.org/">Sphinx</a> 1.1.3.
+    </div>
+  </body>
+</html>

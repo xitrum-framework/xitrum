@@ -1,0 +1,179 @@
+
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
+  "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+
+
+<html xmlns="http://www.w3.org/1999/xhtml">
+  <head>
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+    
+    <title>Template engines &mdash; Xitrum 2.10 documentation</title>
+    
+    <link rel="stylesheet" href="_static/nature.css" type="text/css" />
+    <link rel="stylesheet" href="_static/pygments.css" type="text/css" />
+    
+    <script type="text/javascript">
+      var DOCUMENTATION_OPTIONS = {
+        URL_ROOT:    '',
+        VERSION:     '2.10',
+        COLLAPSE_INDEX: false,
+        FILE_SUFFIX: '.html',
+        HAS_SOURCE:  true
+      };
+    </script>
+    <script type="text/javascript" src="_static/jquery.js"></script>
+    <script type="text/javascript" src="_static/underscore.js"></script>
+    <script type="text/javascript" src="_static/doctools.js"></script>
+    <link rel="top" title="Xitrum 2.10 documentation" href="index.html" />
+    <link rel="next" title="Postbacks" href="postback.html" />
+    <link rel="prev" title="RESTful APIs" href="restful.html" /> 
+  </head>
+  <body>
+    <div class="related">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="genindex.html" title="General Index"
+             accesskey="I">index</a></li>
+        <li class="right" >
+          <a href="postback.html" title="Postbacks"
+             accesskey="N">next</a> |</li>
+        <li class="right" >
+          <a href="restful.html" title="RESTful APIs"
+             accesskey="P">previous</a> |</li>
+        <li><a href="index.html">Xitrum 2.10 documentation</a> &raquo;</li> 
+      </ul>
+    </div>  
+
+    <div class="document">
+      <div class="documentwrapper">
+        <div class="bodywrapper">
+          <div class="body">
+            
+  <div class="section" id="template-engines">
+<h1>Template engines<a class="headerlink" href="#template-engines" title="Permalink to this headline">¶</a></h1>
+<p>The configured template engine will be called when renderView, renderFragment,
+or respondView is called.</p>
+<div class="section" id="config-template-engine">
+<h2>Config template engine<a class="headerlink" href="#config-template-engine" title="Permalink to this headline">¶</a></h2>
+<p>The default template engine is <a class="reference external" href="https://github.com/ngocdaothanh/xitrum-scalate">xitrum-scalate</a>.</p>
+<p>config/xitrum.conf:</p>
+<div class="highlight-python"><div class="highlight"><pre><span class="n">templateEngine</span> <span class="o">=</span> <span class="n">xitrum</span><span class="o">.</span><span class="n">view</span><span class="o">.</span><span class="n">Scalate</span>
+</pre></div>
+</div>
+<p>You can change <tt class="docutils literal"><span class="pre">templateEngine</span></tt> to another one. Note that each template engine
+may require its own config. In the case of Scalate:</p>
+<p>project/plugins.sbt:</p>
+<div class="highlight-python"><pre>// For compiling Scalate templates in the compile phase of SBT
+addSbtPlugin("com.mojolly.scalate" % "xsbt-scalate-generator" % "0.4.2")</pre>
+</div>
+<p>build.sbt:</p>
+<div class="highlight-python"><pre>// Import xsbt-scalate-generator keys; this must be at top of build.sbt, or SBT will complain
+import ScalateKeys._
+
+...
+...
+
+libraryDependencies += "tv.cntt" %% "xitrum-scalate" % "1.2"
+
+// Precompile Scalate
+seq(scalateSettings:_*)
+
+scalateTemplateConfig in Compile := Seq(TemplateConfig(
+  file("src") / "main" / "scalate",  // See config/scalate.conf
+  Seq(),
+  Seq(Binding("helper", "xitrum.Action", true))
+))</pre>
+</div>
+<p>config/scalate.conf (included in application.conf):</p>
+<div class="highlight-python"><pre>scalate {
+  defaultType = jade              # jade, mustache, scaml, or ssp
+  dir         = src/main/scalate  # Only used in development mode
+}</pre>
+</div>
+</div>
+<div class="section" id="remove-template-engine">
+<h2>Remove template engine<a class="headerlink" href="#remove-template-engine" title="Permalink to this headline">¶</a></h2>
+<p>If you create only RESTful APIs in your project, normally you don&#8217;t call
+renderView, renderFragment, or respondView. In this case, you can even remove
+template engine from your project to make it lighter. Just comment out like this:</p>
+<p>config/xitrum.conf:</p>
+<div class="highlight-python"><div class="highlight"><pre><span class="c">#templateEngine = xitrum.view.Scalate</span>
+</pre></div>
+</div>
+<p>Then remove template related configs from your project.</p>
+</div>
+<div class="section" id="create-your-own-template-engine">
+<h2>Create your own template engine<a class="headerlink" href="#create-your-own-template-engine" title="Permalink to this headline">¶</a></h2>
+<p>To create your own template engine, create a class that implements
+<a class="reference external" href="https://github.com/ngocdaothanh/xitrum/blob/master/src/main/scala/xitrum/view/TemplateEngine.scala">xitrum.view.TemplateEngine</a>.
+Then set your class in config/xitrum.conf.</p>
+<p>For an example, see <a class="reference external" href="https://github.com/ngocdaothanh/xitrum-scalate">xitrum-scalate</a>.</p>
+</div>
+</div>
+
+
+          </div>
+        </div>
+      </div>
+      <div class="sphinxsidebar">
+        <div class="sphinxsidebarwrapper">
+  <h3><a href="index.html">Table Of Contents</a></h3>
+  <ul>
+<li><a class="reference internal" href="#">Template engines</a><ul>
+<li><a class="reference internal" href="#config-template-engine">Config template engine</a></li>
+<li><a class="reference internal" href="#remove-template-engine">Remove template engine</a></li>
+<li><a class="reference internal" href="#create-your-own-template-engine">Create your own template engine</a></li>
+</ul>
+</li>
+</ul>
+
+  <h4>Previous topic</h4>
+  <p class="topless"><a href="restful.html"
+                        title="previous chapter">RESTful APIs</a></p>
+  <h4>Next topic</h4>
+  <p class="topless"><a href="postback.html"
+                        title="next chapter">Postbacks</a></p>
+  <h3>This Page</h3>
+  <ul class="this-page-menu">
+    <li><a href="_sources/template_engines.txt"
+           rel="nofollow">Show Source</a></li>
+  </ul>
+<div id="searchbox" style="display: none">
+  <h3>Quick search</h3>
+    <form class="search" action="search.html" method="get">
+      <input type="text" name="q" />
+      <input type="submit" value="Go" />
+      <input type="hidden" name="check_keywords" value="yes" />
+      <input type="hidden" name="area" value="default" />
+    </form>
+    <p class="searchtip" style="font-size: 90%">
+    Enter search terms or a module, class or function name.
+    </p>
+</div>
+<script type="text/javascript">$('#searchbox').show(0);</script>
+        </div>
+      </div>
+      <div class="clearer"></div>
+    </div>
+    <div class="related">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="genindex.html" title="General Index"
+             >index</a></li>
+        <li class="right" >
+          <a href="postback.html" title="Postbacks"
+             >next</a> |</li>
+        <li class="right" >
+          <a href="restful.html" title="RESTful APIs"
+             >previous</a> |</li>
+        <li><a href="index.html">Xitrum 2.10 documentation</a> &raquo;</li> 
+      </ul>
+    </div>
+    <div class="footer">
+        &copy; Copyright 2010, Ngoc Dao.
+      Created using <a href="http://sphinx.pocoo.org/">Sphinx</a> 1.1.3.
+    </div>
+  </body>
+</html>

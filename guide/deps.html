@@ -1,0 +1,134 @@
+
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
+  "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+
+
+<html xmlns="http://www.w3.org/1999/xhtml">
+  <head>
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+    
+    <title>Dependencies &mdash; Xitrum 2.10 documentation</title>
+    
+    <link rel="stylesheet" href="_static/nature.css" type="text/css" />
+    <link rel="stylesheet" href="_static/pygments.css" type="text/css" />
+    
+    <script type="text/javascript">
+      var DOCUMENTATION_OPTIONS = {
+        URL_ROOT:    '',
+        VERSION:     '2.10',
+        COLLAPSE_INDEX: false,
+        FILE_SUFFIX: '.html',
+        HAS_SOURCE:  true
+      };
+    </script>
+    <script type="text/javascript" src="_static/jquery.js"></script>
+    <script type="text/javascript" src="_static/underscore.js"></script>
+    <script type="text/javascript" src="_static/doctools.js"></script>
+    <link rel="top" title="Xitrum 2.10 documentation" href="index.html" />
+    <link rel="prev" title="Netty handlers" href="handler.html" /> 
+  </head>
+  <body>
+    <div class="related">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="genindex.html" title="General Index"
+             accesskey="I">index</a></li>
+        <li class="right" >
+          <a href="handler.html" title="Netty handlers"
+             accesskey="P">previous</a> |</li>
+        <li><a href="index.html">Xitrum 2.10 documentation</a> &raquo;</li> 
+      </ul>
+    </div>  
+
+    <div class="document">
+      <div class="documentwrapper">
+        <div class="bodywrapper">
+          <div class="body">
+            
+  <div class="section" id="dependencies">
+<h1>Dependencies<a class="headerlink" href="#dependencies" title="Permalink to this headline">¶</a></h1>
+<p>This chapter lists all dependency libraries that Xitrum uses so that in
+your Xitrum project, you can use them directly if you want.</p>
+<img alt="_images/deps.png" src="_images/deps.png" />
+<ul class="simple">
+<li><a class="reference external" href="http://www.scala-lang.org/">Scala</a>:
+Xitrum is written in Scala language.</li>
+<li><a class="reference external" href="https://netty.io/">Netty</a>:
+For async HTTP(S) server. Many features in Xitrum are based on those in Netty,
+like WebSocket and zero copy file serving.</li>
+<li><a class="reference external" href="http://akka.io/">Akka</a>:
+For SockJS. Akka depends on <a class="reference external" href="https://github.com/typesafehub/config">Typesafe Config</a>,
+which is also used by Xitrum.</li>
+<li><a class="reference external" href="http://www.hazelcast.com/">Hazelcast</a>:
+For distributing caches and server side sessions.</li>
+<li><a class="reference external" href="https://developer.mozilla.org/en-US/docs/Rhino">Rhino</a>:
+For Scalate to compile CoffeeScript to JavaScript.</li>
+<li><a class="reference external" href="https://github.com/json4s/json4s">JSON4S</a>:
+For parsing and generating JSON data. JSON4S depends on
+<a class="reference external" href="http://paranamer.codehaus.org/">Paranamer</a>.</li>
+<li><a class="reference external" href="https://github.com/ngocdaothanh/sclasner">Sclasner</a>:
+For scanning HTTP routes in action classes in .class and .jar files.</li>
+<li><a class="reference external" href="https://github.com/ngocdaothanh/scaposer">Scaposer</a>:
+For i18n.</li>
+<li><a class="reference external" href="http://commons.apache.org/lang/">Commons Lang</a>:
+For escaping JSON data.</li>
+<li><a class="reference external" href="https://github.com/twitter/chill">Twitter Chill</a>:
+For serializing and deserializing cookies and sessions.
+Chill is based on <a class="reference external" href="http://code.google.com/p/kryo/">Kryo</a>.</li>
+<li><a class="reference external" href="http://www.slf4j.org/">SLF4J</a>, <a class="reference external" href="http://logback.qos.ch/">Logback</a>:
+For logging.</li>
+</ul>
+<p>The default template engine in Xitrum is <a class="reference external" href="https://github.com/ngocdaothanh/xitrum-scalate">xitrum-scalate</a>.
+It depends on <a class="reference external" href="http://scalate.fusesource.org/">Scalate</a> and <a class="reference external" href="https://github.com/chirino/scalamd">Scalamd</a>.</p>
+</div>
+
+
+          </div>
+        </div>
+      </div>
+      <div class="sphinxsidebar">
+        <div class="sphinxsidebarwrapper">
+  <h4>Previous topic</h4>
+  <p class="topless"><a href="handler.html"
+                        title="previous chapter">Netty handlers</a></p>
+  <h3>This Page</h3>
+  <ul class="this-page-menu">
+    <li><a href="_sources/deps.txt"
+           rel="nofollow">Show Source</a></li>
+  </ul>
+<div id="searchbox" style="display: none">
+  <h3>Quick search</h3>
+    <form class="search" action="search.html" method="get">
+      <input type="text" name="q" />
+      <input type="submit" value="Go" />
+      <input type="hidden" name="check_keywords" value="yes" />
+      <input type="hidden" name="area" value="default" />
+    </form>
+    <p class="searchtip" style="font-size: 90%">
+    Enter search terms or a module, class or function name.
+    </p>
+</div>
+<script type="text/javascript">$('#searchbox').show(0);</script>
+        </div>
+      </div>
+      <div class="clearer"></div>
+    </div>
+    <div class="related">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="genindex.html" title="General Index"
+             >index</a></li>
+        <li class="right" >
+          <a href="handler.html" title="Netty handlers"
+             >previous</a> |</li>
+        <li><a href="index.html">Xitrum 2.10 documentation</a> &raquo;</li> 
+      </ul>
+    </div>
+    <div class="footer">
+        &copy; Copyright 2010, Ngoc Dao.
+      Created using <a href="http://sphinx.pocoo.org/">Sphinx</a> 1.1.3.
+    </div>
+  </body>
+</html>

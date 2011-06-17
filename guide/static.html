@@ -1,0 +1,243 @@
+
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
+  "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+
+
+<html xmlns="http://www.w3.org/1999/xhtml">
+  <head>
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+    
+    <title>Static files &mdash; Xitrum 2.10 documentation</title>
+    
+    <link rel="stylesheet" href="_static/nature.css" type="text/css" />
+    <link rel="stylesheet" href="_static/pygments.css" type="text/css" />
+    
+    <script type="text/javascript">
+      var DOCUMENTATION_OPTIONS = {
+        URL_ROOT:    '',
+        VERSION:     '2.10',
+        COLLAPSE_INDEX: false,
+        FILE_SUFFIX: '.html',
+        HAS_SOURCE:  true
+      };
+    </script>
+    <script type="text/javascript" src="_static/jquery.js"></script>
+    <script type="text/javascript" src="_static/underscore.js"></script>
+    <script type="text/javascript" src="_static/doctools.js"></script>
+    <link rel="top" title="Xitrum 2.10 documentation" href="index.html" />
+    <link rel="next" title="Serve flash socket policy file" href="flash.html" />
+    <link rel="prev" title="Async response" href="async.html" /> 
+  </head>
+  <body>
+    <div class="related">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="genindex.html" title="General Index"
+             accesskey="I">index</a></li>
+        <li class="right" >
+          <a href="flash.html" title="Serve flash socket policy file"
+             accesskey="N">next</a> |</li>
+        <li class="right" >
+          <a href="async.html" title="Async response"
+             accesskey="P">previous</a> |</li>
+        <li><a href="index.html">Xitrum 2.10 documentation</a> &raquo;</li> 
+      </ul>
+    </div>  
+
+    <div class="document">
+      <div class="documentwrapper">
+        <div class="bodywrapper">
+          <div class="body">
+            
+  <div class="section" id="static-files">
+<h1>Static files<a class="headerlink" href="#static-files" title="Permalink to this headline">¶</a></h1>
+<div class="section" id="serve-static-files-on-disk">
+<h2>Serve static files on disk<a class="headerlink" href="#serve-static-files-on-disk" title="Permalink to this headline">¶</a></h2>
+<p>Project directory layout:</p>
+<div class="highlight-python"><pre>config
+public
+  favicon.ico
+  robots.txt
+  404.html
+  500.html
+  img
+    myimage.png
+  css
+    mystyle.css
+  js
+    myscript.js
+src
+build.sbt</pre>
+</div>
+<p>Xitrum automatically serves static files inside <tt class="docutils literal"><span class="pre">public</span></tt> directory.
+URLs to them are in the form:</p>
+<div class="highlight-python"><pre>/img/myimage.png
+/css/mystyle.css</pre>
+</div>
+<p>To refer to them:</p>
+<div class="highlight-python"><pre>&lt;img src={publicUrl("img/myimage.png")} /&gt;</pre>
+</div>
+<p>To send a static file on disk from your action, use <tt class="docutils literal"><span class="pre">respondFile</span></tt>.</p>
+<div class="highlight-python"><div class="highlight"><pre><span class="n">respondFile</span><span class="p">(</span><span class="s">&quot;/absolute/path&quot;</span><span class="p">)</span>
+<span class="n">respondFile</span><span class="p">(</span><span class="s">&quot;path/relative/to/the/current/working/directory&quot;</span><span class="p">)</span>
+</pre></div>
+</div>
+</div>
+<div class="section" id="and-500">
+<h2>404 and 500<a class="headerlink" href="#and-500" title="Permalink to this headline">¶</a></h2>
+<p>404.html and 500.html in <tt class="docutils literal"><span class="pre">public</span></tt> directory are used when there&#8217;s no matching
+route and there&#8217;s error processing request, respectively. If you want to use
+your own error handler:</p>
+<div class="highlight-python"><pre>import xitrum.Action
+import xitrum.annotation.{Error404, Error500}
+
+@Error404
+class My404ErrorHandlerAction extends Action {
+  def execute() {
+    if (isAjax)
+      jsRespond("alert(" + jsEscape("Not Found") + ")")
+    else
+      renderInlineView("Not Found")
+  }
+}
+
+@Error500
+class My500ErrorHandlerAction extends Action {
+  def execute() {
+    if (isAjax)
+      jsRespond("alert(" + jsEscape("Internal Server Error") + ")")
+    else
+      renderInlineView("Internal Server Error")
+  }
+}</pre>
+</div>
+<p>Response status is set to 404 or 500 before the actions are executed, so you
+don&#8217;t have to set yourself.</p>
+</div>
+<div class="section" id="serve-resource-files-in-classpath">
+<h2>Serve resource files in classpath<a class="headerlink" href="#serve-resource-files-in-classpath" title="Permalink to this headline">¶</a></h2>
+<p>If you are a library developer and want to serve myimage.png from your library,
+which is a .jar file in classpath:</p>
+<p>Save the file in your .jar under <tt class="docutils literal"><span class="pre">public</span></tt> directory:</p>
+<div class="highlight-python"><div class="highlight"><pre><span class="n">public</span><span class="o">/</span><span class="n">my_lib</span><span class="o">/</span><span class="n">img</span><span class="o">/</span><span class="n">myimage</span><span class="o">.</span><span class="n">png</span>
+</pre></div>
+</div>
+<p>To refer to them in your source code:</p>
+<div class="highlight-python"><pre>&lt;img src={resourceUrl("my_lib/img/myimage.png")} /&gt;</pre>
+</div>
+<p>It will become:</p>
+<div class="highlight-python"><pre>&lt;img src="/resources/public/my_lib/img/myimage.png" /&gt;</pre>
+</div>
+<p>To send a static file inside an element (a .jar file or a directory) in classpath:</p>
+<div class="highlight-python"><div class="highlight"><pre><span class="n">respondResource</span><span class="p">(</span><span class="s">&quot;path/relative/to/the/element&quot;</span><span class="p">)</span>
+</pre></div>
+</div>
+</div>
+<div class="section" id="client-side-cache-with-etag-and-max-age">
+<h2>Client side cache with ETag and max-age<a class="headerlink" href="#client-side-cache-with-etag-and-max-age" title="Permalink to this headline">¶</a></h2>
+<p>Xitrum automatically adds <a class="reference external" href="http://en.wikipedia.org/wiki/HTTP_ETag">Etag</a> for
+static files on disk and in classpath.</p>
+<p>ETags for small files are MD5 of file content. They are cached for later use.
+Keys of cache entries are <tt class="docutils literal"><span class="pre">(file</span> <span class="pre">path,</span> <span class="pre">modified</span> <span class="pre">time)</span></tt>. Because modified time
+on different servers may differ, each web server in a cluster has its own local
+ETag cache, not based on Hazelcast.</p>
+<p>For big files, only modified time is used as ETag. This is not perfect because not
+identical file on different servers may have different ETag, but it is still better
+than no ETag at all.</p>
+<p><tt class="docutils literal"><span class="pre">publicUrl</span></tt> and <tt class="docutils literal"><span class="pre">resourceUrl</span></tt> automatically add ETag to the URLs they
+generate. For example:</p>
+<div class="highlight-python"><pre>resourceUrl("xitrum/jquery-1.6.4.js")
+=&gt; /resources/public/xitrum/jquery-1.6.4.js?xndGJVH0zA8q8ZJJe1Dz9Q</pre>
+</div>
+<p>Xitrum also sets <tt class="docutils literal"><span class="pre">max-age</span></tt> and <tt class="docutils literal"><span class="pre">Expires</span></tt> header to
+<a class="reference external" href="http://code.google.com/intl/en/speed/page-speed/docs/caching.html">one year</a>.
+Don&#8217;t worry that browsers do not pickup a latest file when you change it.
+Because when a file on disk changes, its <tt class="docutils literal"><span class="pre">modified</span> <span class="pre">time</span></tt> changes, thus the URLs
+generated by <tt class="docutils literal"><span class="pre">publicUrl</span></tt> and <tt class="docutils literal"><span class="pre">resourceUrl</span></tt> also change. Its ETag cache
+is also updated because the cache key changes.</p>
+</div>
+<div class="section" id="gzip">
+<h2>GZIP<a class="headerlink" href="#gzip" title="Permalink to this headline">¶</a></h2>
+<p>Xitrum automatically gzips textual responses. It checks the <tt class="docutils literal"><span class="pre">Content-Type</span></tt>
+header to determine if a response is textual: <tt class="docutils literal"><span class="pre">text/html</span></tt>, <tt class="docutils literal"><span class="pre">xml/application</span></tt> etc.</p>
+<p>Xitrum always gzips static textual files, but for dynamic textual responses,
+for overall performance reason it does not gzips response smaller than 1 KB.</p>
+</div>
+<div class="section" id="server-side-cache">
+<h2>Server side cache<a class="headerlink" href="#server-side-cache" title="Permalink to this headline">¶</a></h2>
+<p>To avoid loading files from disk, Xitrum caches small static files
+(not only textual) in memory with LRU (Least Recently Used) expiration.
+See <tt class="docutils literal"><span class="pre">small_static_file_size_in_kb</span></tt> and <tt class="docutils literal"><span class="pre">max_cached_small_static_files</span></tt>
+in <tt class="docutils literal"><span class="pre">config/xitrum.conf</span></tt>.</p>
+</div>
+</div>
+
+
+          </div>
+        </div>
+      </div>
+      <div class="sphinxsidebar">
+        <div class="sphinxsidebarwrapper">
+  <h3><a href="index.html">Table Of Contents</a></h3>
+  <ul>
+<li><a class="reference internal" href="#">Static files</a><ul>
+<li><a class="reference internal" href="#serve-static-files-on-disk">Serve static files on disk</a></li>
+<li><a class="reference internal" href="#and-500">404 and 500</a></li>
+<li><a class="reference internal" href="#serve-resource-files-in-classpath">Serve resource files in classpath</a></li>
+<li><a class="reference internal" href="#client-side-cache-with-etag-and-max-age">Client side cache with ETag and max-age</a></li>
+<li><a class="reference internal" href="#gzip">GZIP</a></li>
+<li><a class="reference internal" href="#server-side-cache">Server side cache</a></li>
+</ul>
+</li>
+</ul>
+
+  <h4>Previous topic</h4>
+  <p class="topless"><a href="async.html"
+                        title="previous chapter">Async response</a></p>
+  <h4>Next topic</h4>
+  <p class="topless"><a href="flash.html"
+                        title="next chapter">Serve flash socket policy file</a></p>
+  <h3>This Page</h3>
+  <ul class="this-page-menu">
+    <li><a href="_sources/static.txt"
+           rel="nofollow">Show Source</a></li>
+  </ul>
+<div id="searchbox" style="display: none">
+  <h3>Quick search</h3>
+    <form class="search" action="search.html" method="get">
+      <input type="text" name="q" />
+      <input type="submit" value="Go" />
+      <input type="hidden" name="check_keywords" value="yes" />
+      <input type="hidden" name="area" value="default" />
+    </form>
+    <p class="searchtip" style="font-size: 90%">
+    Enter search terms or a module, class or function name.
+    </p>
+</div>
+<script type="text/javascript">$('#searchbox').show(0);</script>
+        </div>
+      </div>
+      <div class="clearer"></div>
+    </div>
+    <div class="related">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="genindex.html" title="General Index"
+             >index</a></li>
+        <li class="right" >
+          <a href="flash.html" title="Serve flash socket policy file"
+             >next</a> |</li>
+        <li class="right" >
+          <a href="async.html" title="Async response"
+             >previous</a> |</li>
+        <li><a href="index.html">Xitrum 2.10 documentation</a> &raquo;</li> 
+      </ul>
+    </div>
+    <div class="footer">
+        &copy; Copyright 2010, Ngoc Dao.
+      Created using <a href="http://sphinx.pocoo.org/">Sphinx</a> 1.1.3.
+    </div>
+  </body>
+</html>

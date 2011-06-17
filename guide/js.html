@@ -1,0 +1,193 @@
+
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
+  "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+
+
+<html xmlns="http://www.w3.org/1999/xhtml">
+  <head>
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+    
+    <title>JavaScript and JSON &mdash; Xitrum 2.10 documentation</title>
+    
+    <link rel="stylesheet" href="_static/nature.css" type="text/css" />
+    <link rel="stylesheet" href="_static/pygments.css" type="text/css" />
+    
+    <script type="text/javascript">
+      var DOCUMENTATION_OPTIONS = {
+        URL_ROOT:    '',
+        VERSION:     '2.10',
+        COLLAPSE_INDEX: false,
+        FILE_SUFFIX: '.html',
+        HAS_SOURCE:  true
+      };
+    </script>
+    <script type="text/javascript" src="_static/jquery.js"></script>
+    <script type="text/javascript" src="_static/underscore.js"></script>
+    <script type="text/javascript" src="_static/doctools.js"></script>
+    <link rel="top" title="Xitrum 2.10 documentation" href="index.html" />
+    <link rel="next" title="Async response" href="async.html" />
+    <link rel="prev" title="XML" href="xml.html" /> 
+  </head>
+  <body>
+    <div class="related">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="genindex.html" title="General Index"
+             accesskey="I">index</a></li>
+        <li class="right" >
+          <a href="async.html" title="Async response"
+             accesskey="N">next</a> |</li>
+        <li class="right" >
+          <a href="xml.html" title="XML"
+             accesskey="P">previous</a> |</li>
+        <li><a href="index.html">Xitrum 2.10 documentation</a> &raquo;</li> 
+      </ul>
+    </div>  
+
+    <div class="document">
+      <div class="documentwrapper">
+        <div class="bodywrapper">
+          <div class="body">
+            
+  <div class="section" id="javascript-and-json">
+<h1>JavaScript and JSON<a class="headerlink" href="#javascript-and-json" title="Permalink to this headline">¶</a></h1>
+<div class="section" id="javascript">
+<h2>JavaScript<a class="headerlink" href="#javascript" title="Permalink to this headline">¶</a></h2>
+<p>Xitrum includes jQuery. There are some jsXXX helpers.</p>
+<div class="section" id="add-javascript-fragments-to-view">
+<h3>Add JavaScript fragments to view<a class="headerlink" href="#add-javascript-fragments-to-view" title="Permalink to this headline">¶</a></h3>
+<p>In your action, call <tt class="docutils literal"><span class="pre">jsAddToView</span></tt> (multiple times if you need):</p>
+<div class="highlight-python"><pre>class MyAction extends AppAction {
+  def execute() {
+    ...
+    jsAddToView("alert('Hello')")
+    ...
+    jsAddToView("alert('Hello again')")
+    ...
+    respondView(&lt;p&gt;My view&lt;/p&gt;)
+  }
+}</pre>
+</div>
+<p>In your layout, call <tt class="docutils literal"><span class="pre">jsForView</span></tt>:</p>
+<div class="highlight-python"><pre>import xitrum.Action
+import xitrum.view.DocType
+
+trait AppAction extends Action {
+  override def layout = DocType.html5(
+    &lt;html&gt;
+      &lt;head&gt;
+        {antiCSRFMeta}
+        {xitrumCSS}
+        {jsDefaults}
+      &lt;/head&gt;
+      &lt;body&gt;
+        &lt;div id="flash"&gt;{jsFlash}&lt;/div&gt;
+        {renderedView}
+        {jsForView}
+      &lt;/body&gt;
+    &lt;/html&gt;
+  )</pre>
+</div>
+</div>
+<div class="section" id="respond-javascript-directly-without-view">
+<h3>Respond JavaScript directly without view<a class="headerlink" href="#respond-javascript-directly-without-view" title="Permalink to this headline">¶</a></h3>
+<p>To respond JavaScript:</p>
+<div class="highlight-python"><pre>jsRespond("$('#error').html(%s)".format(jsEscape(&lt;p class="error"&gt;Could not login.&lt;/p&gt;)))</pre>
+</div>
+<p>To redirect:</p>
+<div class="highlight-python"><div class="highlight"><pre><span class="n">jsRedirectTo</span><span class="p">(</span><span class="s">&quot;http://cntt.tv/&quot;</span><span class="p">)</span>
+<span class="n">jsRedirectTo</span><span class="p">[</span><span class="n">LoginAction</span><span class="p">]()</span>
+</pre></div>
+</div>
+</div>
+</div>
+<div class="section" id="json">
+<h2>JSON<a class="headerlink" href="#json" title="Permalink to this headline">¶</a></h2>
+<p>Xitrum includes <a class="reference external" href="https://github.com/json4s/json4s">JSON4S</a>.
+Please read about it to know how to parse and generate JSON.</p>
+<p>To convert between Scala case object and JSON string:</p>
+<div class="highlight-python"><pre>import xitrum.util.Json
+
+case class Person(name: String, age: Int, phone: Option[String])
+val person1 = Person("Jack", 20, None)
+val json    = Json.generate(person)
+val person2 = Json.parse(json)</pre>
+</div>
+<p>To respond JSON:</p>
+<div class="highlight-python"><pre>val scalaData = List(1, 2, 3)  // An example
+respondJson(scalaData)</pre>
+</div>
+<p>JSON is also neat for config files that need nested structures.
+See <a class="reference internal" href="howto.html"><em>Load config files</em></a>.</p>
+</div>
+</div>
+
+
+          </div>
+        </div>
+      </div>
+      <div class="sphinxsidebar">
+        <div class="sphinxsidebarwrapper">
+  <h3><a href="index.html">Table Of Contents</a></h3>
+  <ul>
+<li><a class="reference internal" href="#">JavaScript and JSON</a><ul>
+<li><a class="reference internal" href="#javascript">JavaScript</a><ul>
+<li><a class="reference internal" href="#add-javascript-fragments-to-view">Add JavaScript fragments to view</a></li>
+<li><a class="reference internal" href="#respond-javascript-directly-without-view">Respond JavaScript directly without view</a></li>
+</ul>
+</li>
+<li><a class="reference internal" href="#json">JSON</a></li>
+</ul>
+</li>
+</ul>
+
+  <h4>Previous topic</h4>
+  <p class="topless"><a href="xml.html"
+                        title="previous chapter">XML</a></p>
+  <h4>Next topic</h4>
+  <p class="topless"><a href="async.html"
+                        title="next chapter">Async response</a></p>
+  <h3>This Page</h3>
+  <ul class="this-page-menu">
+    <li><a href="_sources/js.txt"
+           rel="nofollow">Show Source</a></li>
+  </ul>
+<div id="searchbox" style="display: none">
+  <h3>Quick search</h3>
+    <form class="search" action="search.html" method="get">
+      <input type="text" name="q" />
+      <input type="submit" value="Go" />
+      <input type="hidden" name="check_keywords" value="yes" />
+      <input type="hidden" name="area" value="default" />
+    </form>
+    <p class="searchtip" style="font-size: 90%">
+    Enter search terms or a module, class or function name.
+    </p>
+</div>
+<script type="text/javascript">$('#searchbox').show(0);</script>
+        </div>
+      </div>
+      <div class="clearer"></div>
+    </div>
+    <div class="related">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="genindex.html" title="General Index"
+             >index</a></li>
+        <li class="right" >
+          <a href="async.html" title="Async response"
+             >next</a> |</li>
+        <li class="right" >
+          <a href="xml.html" title="XML"
+             >previous</a> |</li>
+        <li><a href="index.html">Xitrum 2.10 documentation</a> &raquo;</li> 
+      </ul>
+    </div>
+    <div class="footer">
+        &copy; Copyright 2010, Ngoc Dao.
+      Created using <a href="http://sphinx.pocoo.org/">Sphinx</a> 1.1.3.
+    </div>
+  </body>
+</html>

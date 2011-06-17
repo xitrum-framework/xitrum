@@ -1,0 +1,283 @@
+
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
+  "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+
+
+<html xmlns="http://www.w3.org/1999/xhtml">
+  <head>
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+    
+    <title>Server-side cache &mdash; Xitrum 2.10 documentation</title>
+    
+    <link rel="stylesheet" href="_static/nature.css" type="text/css" />
+    <link rel="stylesheet" href="_static/pygments.css" type="text/css" />
+    
+    <script type="text/javascript">
+      var DOCUMENTATION_OPTIONS = {
+        URL_ROOT:    '',
+        VERSION:     '2.10',
+        COLLAPSE_INDEX: false,
+        FILE_SUFFIX: '.html',
+        HAS_SOURCE:  true
+      };
+    </script>
+    <script type="text/javascript" src="_static/jquery.js"></script>
+    <script type="text/javascript" src="_static/underscore.js"></script>
+    <script type="text/javascript" src="_static/doctools.js"></script>
+    <link rel="top" title="Xitrum 2.10 documentation" href="index.html" />
+    <link rel="next" title="I18n" href="i18n.html" />
+    <link rel="prev" title="Filters" href="filter.html" /> 
+  </head>
+  <body>
+    <div class="related">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="genindex.html" title="General Index"
+             accesskey="I">index</a></li>
+        <li class="right" >
+          <a href="i18n.html" title="I18n"
+             accesskey="N">next</a> |</li>
+        <li class="right" >
+          <a href="filter.html" title="Filters"
+             accesskey="P">previous</a> |</li>
+        <li><a href="index.html">Xitrum 2.10 documentation</a> &raquo;</li> 
+      </ul>
+    </div>  
+
+    <div class="document">
+      <div class="documentwrapper">
+        <div class="bodywrapper">
+          <div class="body">
+            
+  <div class="section" id="server-side-cache">
+<h1>Server-side cache<a class="headerlink" href="#server-side-cache" title="Permalink to this headline">¶</a></h1>
+<p>Xitrum provides extensive client-side and server-side caching for faster responding.
+At the web server layer, small files are cached in memory, big files are sent
+using NIO&#8217;s zero copy. Xitrum&#8217;s static file serving speed is
+<a class="reference external" href="https://gist.github.com/3293596">similar to that of Nginx</a>.
+At the web framework layer you have can declare page, action, and object cache
+in the Rails style.
+<a class="reference external" href="http://code.google.com/speed/page-speed/docs/rules_intro.html">All Google&#8217;s best practices</a>
+like conditional GET are applied for client-side caching.</p>
+<p>For dynamic content, if the content does not change after created (as if it is
+a static file), you may set headers for clients to cache aggressively.
+In that case, call <tt class="docutils literal"><span class="pre">setClientCacheAggressively()</span></tt> in your action.</p>
+<p>Sometimes you may want to prevent client-side caching.
+In that case, call <tt class="docutils literal"><span class="pre">setNoClientCache()</span></tt> in your action.</p>
+<p>Cache in the following section refers to server-side cache.</p>
+<p><a class="reference external" href="http://www.hazelcast.com/">Hazelcast</a>
+is integrated for page, action, and object cache. Of course you can
+use it for other things (distributed processing etc.) in your application.</p>
+<p>With Hazelcast, Xitrum instances become in-process memory cache servers. You don&#8217;t
+need seperate things like Memcache. Please see the chaper about <a class="reference internal" href="cluster.html"><em>clustering</em></a>.</p>
+<div class="highlight-python"><pre>                              / Xitrum/memory cache instance 1
+Load balancer/proxy server ---- Xitrum/memory cache instance 2
+                              \ Xitrum/memory cache instance 3</pre>
+</div>
+<p>Cache works with async response.</p>
+<div class="section" id="cache-page-or-action">
+<h2>Cache page or action<a class="headerlink" href="#cache-page-or-action" title="Permalink to this headline">¶</a></h2>
+<div class="highlight-python"><pre>import xitrum.Action
+import xitrum.annotation.{GET, CacheActionMinute, CachePageMinute}
+
+@GET("articles")
+@CachePageMinute(1)
+class ArticlesIndex extends Action {
+  def execute() {
+    ...
+  }
+}
+
+@GET("articles/:id")
+@CacheActionMinute(1)
+class ArticlesShow extends Action {
+  def execute() {
+    ...
+  }
+}</pre>
+</div>
+</div>
+<div class="section" id="cache-object">
+<h2>Cache object<a class="headerlink" href="#cache-object" title="Permalink to this headline">¶</a></h2>
+<p>You use methods in <tt class="docutils literal"><span class="pre">xitrum.Cache</span></tt>.</p>
+<p>Without an explicit TTL (time to live):</p>
+<ul class="simple">
+<li>put(key, value)</li>
+</ul>
+<p>Without an explicit TTL:</p>
+<ul class="simple">
+<li>putSecond(key, value, seconds)</li>
+<li>putMinute(key, value, minutes)</li>
+<li>putHour(key, value, hours)</li>
+<li>putDay(key, value, days)</li>
+</ul>
+<p>Only if absent:</p>
+<ul class="simple">
+<li>putIfAbsent(key, value)</li>
+<li>putIfAbsentSecond(key, value, seconds)</li>
+<li>putIfAbsentMinute(key, value, minutes)</li>
+<li>putIfAbsentHour(key, value, hours)</li>
+<li>putIfAbsentDay(key, value, days)</li>
+</ul>
+</div>
+<div class="section" id="remove-cache">
+<h2>Remove cache<a class="headerlink" href="#remove-cache" title="Permalink to this headline">¶</a></h2>
+<p>Remove page or action cache:</p>
+<div class="highlight-python"><div class="highlight"><pre><span class="n">removeAction</span><span class="p">[</span><span class="n">MyAction</span><span class="p">]</span>
+</pre></div>
+</div>
+<p>Remove object cache:</p>
+<div class="highlight-python"><div class="highlight"><pre><span class="n">remove</span><span class="p">(</span><span class="n">key</span><span class="p">)</span>
+</pre></div>
+</div>
+<p>Remove all keys that start with a prefix:</p>
+<div class="highlight-python"><div class="highlight"><pre><span class="n">removePrefix</span><span class="p">(</span><span class="n">keyPrefix</span><span class="p">)</span>
+</pre></div>
+</div>
+<p>With <tt class="docutils literal"><span class="pre">removePrefix</span></tt>, you have the power to form hierarchical cache based on prefix.
+For example you want to cache things related to an article, then when the article
+changes, you want to remove all those things.</p>
+<div class="highlight-python"><pre>import xitrum.Cache
+
+// Cache with a prefix
+val prefix = "articles/" + article.id
+Cache.put(prefix + "/likes", likes)
+Cache.put(prefix + "/comments", comments)
+
+// Later, when something happens and you want to remove all cache related to the article
+Cache.remove(prefix)</pre>
+</div>
+</div>
+<div class="section" id="config">
+<h2>Config<a class="headerlink" href="#config" title="Permalink to this headline">¶</a></h2>
+<p>Hazelcast is powerful. It supports distributed cache. Please see its documentation.</p>
+<p><tt class="docutils literal"><span class="pre">config/hazelcast.xml</span></tt> sample:</p>
+<div class="highlight-python"><pre>&lt;?xml version="1.0" encoding="UTF-8"?&gt;
+&lt;hazelcast xsi:schemaLocation="http://www.hazelcast.com/schema/config hazelcast-basic.xsd"
+           xmlns="http://www.hazelcast.com/schema/config"
+           xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"&gt;
+  &lt;group&gt;
+    &lt;name&gt;myapp&lt;/name&gt;
+    &lt;password&gt;dev-pass&lt;/password&gt;
+  &lt;/group&gt;
+
+  &lt;network&gt;
+    &lt;port auto-increment="true"&gt;5701&lt;/port&gt;
+    &lt;join&gt;
+      &lt;multicast enabled="true"&gt;
+        &lt;multicast-group&gt;224.2.2.3&lt;/multicast-group&gt;
+        &lt;multicast-port&gt;54327&lt;/multicast-port&gt;
+      &lt;/multicast&gt;
+      &lt;tcp-ip enabled="true"&gt;
+        &lt;interface&gt;127.0.0.1&lt;/interface&gt;
+      &lt;/tcp-ip&gt;
+    &lt;/join&gt;
+  &lt;/network&gt;
+
+  &lt;!-- For page, action, object cache --&gt;
+  &lt;map name="xitrum"&gt;
+    &lt;backup-count&gt;0&lt;/backup-count&gt;
+    &lt;eviction-policy&gt;LRU&lt;/eviction-policy&gt;
+    &lt;max-size&gt;100000&lt;/max-size&gt;
+    &lt;eviction-percentage&gt;25&lt;/eviction-percentage&gt;
+  &lt;/map&gt;
+&lt;/hazelcast&gt;</pre>
+</div>
+<p>Note that Xitrum instances of the same group (cluster) should have the same
+<tt class="docutils literal"><span class="pre">&lt;group&gt;/&lt;name&gt;</span></tt>. Hazelcast provides a monitor tool, <tt class="docutils literal"><span class="pre">&lt;group&gt;/&lt;password&gt;</span></tt>
+is the password for the tool to connect to the group.</p>
+<img alt="http://www.hazelcast.com/resources/monitor-screen.png" src="http://www.hazelcast.com/resources/monitor-screen.png" />
+<p>Please see <a class="reference external" href="http://www.hazelcast.com/docs/2.5/manual/multi_html/ch12.html">Hazelcast&#8217;s documentation</a>
+for more information how to config <tt class="docutils literal"><span class="pre">config/hazelcast.xml</span></tt>.</p>
+</div>
+<div class="section" id="how-cache-works">
+<h2>How cache works<a class="headerlink" href="#how-cache-works" title="Permalink to this headline">¶</a></h2>
+<p>Upstream</p>
+<div class="highlight-python"><pre>               the action response
+               should be cached and
+request        the cache already exists?
+-------------------------+---------------NO---------------&gt;
+                         |
+&lt;---------YES------------+
+  respond from cache</pre>
+</div>
+<p>Downstream</p>
+<div class="highlight-python"><pre>               the action response
+               should be cached and
+               the cache does not exist?           response
+&lt;---------NO-------------+---------------------------------
+                         |
+&lt;---------YES------------+
+  store response to cache</pre>
+</div>
+</div>
+</div>
+
+
+          </div>
+        </div>
+      </div>
+      <div class="sphinxsidebar">
+        <div class="sphinxsidebarwrapper">
+  <h3><a href="index.html">Table Of Contents</a></h3>
+  <ul>
+<li><a class="reference internal" href="#">Server-side cache</a><ul>
+<li><a class="reference internal" href="#cache-page-or-action">Cache page or action</a></li>
+<li><a class="reference internal" href="#cache-object">Cache object</a></li>
+<li><a class="reference internal" href="#remove-cache">Remove cache</a></li>
+<li><a class="reference internal" href="#config">Config</a></li>
+<li><a class="reference internal" href="#how-cache-works">How cache works</a></li>
+</ul>
+</li>
+</ul>
+
+  <h4>Previous topic</h4>
+  <p class="topless"><a href="filter.html"
+                        title="previous chapter">Filters</a></p>
+  <h4>Next topic</h4>
+  <p class="topless"><a href="i18n.html"
+                        title="next chapter">I18n</a></p>
+  <h3>This Page</h3>
+  <ul class="this-page-menu">
+    <li><a href="_sources/cache.txt"
+           rel="nofollow">Show Source</a></li>
+  </ul>
+<div id="searchbox" style="display: none">
+  <h3>Quick search</h3>
+    <form class="search" action="search.html" method="get">
+      <input type="text" name="q" />
+      <input type="submit" value="Go" />
+      <input type="hidden" name="check_keywords" value="yes" />
+      <input type="hidden" name="area" value="default" />
+    </form>
+    <p class="searchtip" style="font-size: 90%">
+    Enter search terms or a module, class or function name.
+    </p>
+</div>
+<script type="text/javascript">$('#searchbox').show(0);</script>
+        </div>
+      </div>
+      <div class="clearer"></div>
+    </div>
+    <div class="related">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="genindex.html" title="General Index"
+             >index</a></li>
+        <li class="right" >
+          <a href="i18n.html" title="I18n"
+             >next</a> |</li>
+        <li class="right" >
+          <a href="filter.html" title="Filters"
+             >previous</a> |</li>
+        <li><a href="index.html">Xitrum 2.10 documentation</a> &raquo;</li> 
+      </ul>
+    </div>
+    <div class="footer">
+        &copy; Copyright 2010, Ngoc Dao.
+      Created using <a href="http://sphinx.pocoo.org/">Sphinx</a> 1.1.3.
+    </div>
+  </body>
+</html>
