@@ -1,9 +1,9 @@
-package xitrum.action.annotation;
+package xitrum.annotation;
 
 import java.lang.annotation.Retention;
 import java.lang.annotation.RetentionPolicy;
 
 @Retention(RetentionPolicy.RUNTIME)
-public @interface CacheActionMinute {
+public @interface CachePageMinute {
   int value();
 }
