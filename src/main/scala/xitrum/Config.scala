@@ -1,12 +1,12 @@
 package xitrum
 
-import java.io.InputStream
+import java.io.{InputStream, FileInputStream}
 import java.util.Properties
 import java.nio.charset.Charset
 
 import xitrum.action.env.session.SessionStore
 
-object Config {
+object Config extends Logger {
   def bytesFromStreamAndClose(stream: InputStream): Array[Byte] = {
     val len   = stream.available
     val bytes = new Array[Byte](len)
@@ -20,7 +20,7 @@ object Config {
   }
 
   /**
-   * @param path Relative from CLASSPATH, without leading "/"
+   * @param path Relative to one of the elements in CLASSPATH, without leading "/"
    */
   def loadStringFromClasspath(path: String): String = {
     val stream = getClass.getClassLoader.getResourceAsStream(path)
@@ -29,12 +29,20 @@ object Config {
   }
 
   /**
-   * @param path Relative from CLASSPATH, without leading "/"
+   * @param path Relative to one of the elements in CLASSPATH, without leading "/"
    */
   def loadPropertiesFromClasspath(path: String): Properties = {
     // http://www.javaworld.com/javaworld/javaqa/2003-08/01-qa-0808-property.html?page=2
     val stream = getClass.getClassLoader.getResourceAsStream(path)
 
+    val ret = new Properties
+    ret.load(stream)
+    stream.close
+    ret
+  }
+
+  def loadPropertiesFromFile(path: String): Properties = {
+    val stream = new FileInputStream(path)
     val ret = new Properties
     ret.load(stream)
     stream.close
@@ -48,7 +56,21 @@ object Config {
   // See xitrum.properties
   // Below are all "val"s
 
-  val properties = loadPropertiesFromClasspath("xitrum.properties")
+  val properties = {
+    try {
+      loadPropertiesFromClasspath("xitrum.properties")
+    } catch {
+      case _ =>
+        try {
+          loadPropertiesFromFile("config/xitrum.properties")
+        } catch {
+          case _ =>
+            logger.error("Could not load xitrum.properties from CLASSPATH or from config/xitrum.properties")
+            System.exit(-1)
+            null
+        }
+    }
+  }
 
   val httpPort = properties.getProperty("http_port").toInt
 

@@ -80,7 +80,7 @@ class PublicResourceServer extends SimpleChannelUpstreamHandler with ClosedClien
    * Read whole file to memory. It's OK because the files are normally small.
    * No one is stupid enough to store large files in resources.
    *
-   * @param path Relative from CLASSPATH, without leading "/"
+   * @param path Relative to one of the elements in CLASSPATH, without leading "/"
    */
   private def loadResource(path: String): Option[Array[Byte]] = {
     PathSanitizer.sanitize(path) match {
