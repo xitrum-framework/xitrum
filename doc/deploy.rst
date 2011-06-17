@@ -3,34 +3,40 @@ Distribution directory layout
 
 .. image:: http://www.bdoubliees.com/journalspirou/sfigures6/schtroumpfs/s8.jpg
 
-Please see the SBT section.
+Please see the :doc:`SBT section </sbt>`.
 
-Using the the dist task as in the example, after running ``sbt dist`` you will have
-"dist" directory inside "target" directory. Its structure is typically:
+xitrum-dist
+-----------
 
-::
-
-  bin
-    runner.sh               <-- Script to start the web server
-  config                    <-- Config files are outside .jar files, edit any time you want
-    my_project.properties             They are put in classpath by runner.sh
-    logback.properties
-    xitrum.properties
-    i18n
-      en.po
-      ja.po
-      mylib
-        en.po
-        ja.po
-  lib
-    blog.jar                <-- css/img/js are concrete thus packaged here
-    ...
-  public
-    upload                  <-- Directory to store user uploaded files
-  README                        It may be a symlink
-
-You run by:
+Run ``sbt xitrum-dist`` to prepare ``target/dist`` directory, ready for production distribution:
 
 ::
 
-  bin/runner.sh my.project.boot.Klass
+  target/dist
+    bin
+      runner.sh
+    config
+      [config files]
+    public
+      [web static files]
+    lib
+      [dependencies and packaged project file]
+
+runner.sh is the script to start the web server in production environment.
+You may want to modify runner.sh to tune JVM settings.
+
+::
+
+  $ bin/runner.sh my_package.BootClass
+
+You may need to write the above command line to INSTALL file, for example, so
+that the user of your project know how to start the web server.
+
+Copy additional files to target/dist
+------------------------------------
+
+``sbt xitrum-dist`` command line simply copies ``config`` and ``public``
+directories to ``target/dist``. If you want it to copy additional files and
+directories (README, INSTALL, doc etc.)
+
+TODO

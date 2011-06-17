@@ -42,6 +42,12 @@ object XitrumPlugin extends Plugin {
     copyResourceFile(baseDir, "public/500.html")
     copyResourceFile(baseDir, "public/favicon.ico")
     copyResourceFile(baseDir, "public/robots.txt")
+
+    (baseDir / "src" / "main" / "scala" / "my_package").mkdirs
+    copyResourceFile(baseDir, "src/main/scala/my_package/BootClass.scala")
+    copyResourceFile(baseDir, "src/main/scala/my_package/IndexAction.scala")
+
+    copyResourceFile(baseDir, "build.sbt")
   }
 
   // Task "dist" ---------------------------------------------------------------
