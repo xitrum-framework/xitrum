@@ -64,6 +64,7 @@ object XitrumPlugin extends Plugin {
     // Copy bin directory
     val binDir1 = baseDir / "bin"
     val binDir2 = distDir / "bin"
+    binDir2.mkdirs
     copyResourceFile(distDir, "bin/runner.sh")
     IO.copyDirectory(binDir1, binDir2)
     binDir2.listFiles.foreach { _.setExecutable(true) }
