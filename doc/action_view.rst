@@ -1,6 +1,8 @@
 Action and View
 ===============
 
+.. image:: http://www.bdoubliees.com/journalspirou/sfigures6/schtroumpfs/s7.jpg
+
 Scala has XML feature built-in. Xitrum uses this feature as its "template engine":
 
 * You don't have to learn another template engine syntax.

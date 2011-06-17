@@ -31,7 +31,6 @@ server on top of Netty:
   | +-------------+ |
   +-----------------+
 
-.. image:: http://www.bdoubliees.com/journalspirou/sfigures6/schtroumpfs/s7.jpg
 .. image:: http://www.bdoubliees.com/journalspirou/sfigures6/schtroumpfs/s9.jpg
 .. image:: http://www.bdoubliees.com/journalspirou/sfigures6/schtroumpfs/s12.jpg
 .. image:: http://www.bdoubliees.com/journalspirou/sfigures6/schtroumpfs/s11.jpg

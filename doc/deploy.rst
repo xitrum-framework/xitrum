@@ -1,5 +1,5 @@
-Distribution directory layout
-=============================
+Prepare for distribution
+========================
 
 .. image:: http://www.bdoubliees.com/journalspirou/sfigures6/schtroumpfs/s8.jpg
 
