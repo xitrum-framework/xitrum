@@ -1,4 +1,4 @@
-package xitrum.server
+package xitrum
 
 import java.net.InetSocketAddress
 import java.util.concurrent.Executors
@@ -6,15 +6,11 @@ import java.util.concurrent.Executors
 import org.jboss.netty.bootstrap.ServerBootstrap
 import org.jboss.netty.channel.socket.nio.NioServerSocketChannelFactory
 
-import xitrum.{Cache, Config, Logger}
 import xitrum.action.routing.Routes
+import xitrum.handler.ChannelPipelineFactory
 
 class Server extends Logger {
   def start {
-    // TODO: remove this when this problem is solved
-    // http://groups.google.com/group/simple-build-tool/browse_thread/thread/75a3d90e382a8b94
-    System.setProperty("logback.configurationFile", "config/logback.xml")
-
     // Because Hazelcast takes serveral seconds to start, we force it to
     // start before the web server begin receiving requests, instead of
     // letting it start lazily
