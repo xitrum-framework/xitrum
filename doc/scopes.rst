@@ -22,25 +22,28 @@ Declare the session var:
 
 ::
 
-  import xitrum.action.env.session.SessionVar
-  object svUsername extends SessionVar[String]
+  import xitrum.scope.session.SessionVar
+
+  object Session {
+    val username = new SessionVar[String]
+  }
 
 After login success:
 
 ::
 
-  svUsername.set(username)
+  Session.username.set(username)
 
 Display the username:
 
 ::
 
-  if (svUsername.isDefined)
+  if (Session.username.isDefined)
     <em>{svUsername.get}</em>
   else
     <a href={urlFor[LoginAction]}>Login</a>
 
-* To delete the session var: ``svUsername.delete``
+* To delete the session var: ``Session.username.delete``
 * To reset the whole session: ``session.reset``
 
 FlashVar

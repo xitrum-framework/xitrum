@@ -15,8 +15,8 @@ Normally, you write view directly in its action.
 
 ::
 
-  import xitrum.action.Action
-  import xitrum.action.annotation.GET
+  import xitrum.Action
+  import xitrum.annotation.GET
 
   @GET("/")
   class Index extends Action {
@@ -58,14 +58,14 @@ Layout
 
 You typically create a parent class which has a common layout for many views, like this:
 
-``ParentAction.scala``
+``AppAction.scala``
 
 ::
 
-  import xitrum.action.Action
-  import xitrum.action.view.DocType
+  import xitrum.Action
+  import xitrum.view.DocType
 
-  trait ParentAction extends Action {
+  trait AppAction extends Action {
     override def layout = Some(() => DocType.xhtmlTransitional(
       <html>
         <body>
@@ -78,11 +78,11 @@ You typically create a parent class which has a common layout for many views, li
 
 ::
 
-  import xitrum.action.Action
-  import xitrum.action.annotation.GET
+  import xitrum.Action
+  import xitrum.annotation.GET
 
   @GET("/")
-  class Index extends ParentAction {
+  class Index extends AppAction {
     def override execute {
       val s = "World"  // Will be automatically escaped
       renderView(<p>Hello <em>{s}</em>!</p>)

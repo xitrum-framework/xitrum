@@ -7,8 +7,8 @@ You can write RESTful APIs for iPhone, Android applications etc. very easily.
 
 ::
 
-  import xitrum.action.Action
-  import xitrum.action.annotation.{GET, GETs}
+  import xitrum.Action
+  import xitrum.annotation.{GET, GETs}
 
   @GETs("/", "/articles")
   class ArticleIndex extends Action {

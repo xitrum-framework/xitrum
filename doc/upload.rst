@@ -9,4 +9,4 @@ Normal upload
 Ajax upload
 -----------
 
-See xitrum.action.view.AjaxUpload.
+See xitrum.view.AjaxUpload.
