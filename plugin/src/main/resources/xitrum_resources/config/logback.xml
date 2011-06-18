@@ -1,19 +1,29 @@
 <?xml version="1.0" encoding="UTF-8"?>
-
-<configuration scan="false" debug="false">
-  <appender name="R" class="ch.qos.logback.core.rolling.RollingFileAppender">
-    <File>./log/xitrum.log</File>
+<!-- http://logback.qos.ch/manual/configuration.html -->
+<configuration scan="true" scanPeriod="30 seconds">
+  <appender name="CONSOLE" class="ch.qos.logback.core.ConsoleAppender">
     <encoder>
-      <pattern>[%t] [%4p] [%d{ISO8601}] %c{1}: %m%n</pattern>
+      <pattern>[%level] %c{1}: %m%n</pattern>
+    </encoder>
+  </appender>
+
+  <appender name="FILE" class="ch.qos.logback.core.rolling.RollingFileAppender">
+    <file>./log/xitrum.log</file>
+    <encoder>
+      <pattern>[%level] [%d{yy-MM-dd HH:mm:ss}] %c{1}: %m%n</pattern>
     </encoder>
     <rollingPolicy class="ch.qos.logback.core.rolling.TimeBasedRollingPolicy">
       <fileNamePattern>./log/xitrum.log.%d{yyyy-MM-dd-HH}</fileNamePattern>
     </rollingPolicy>
   </appender>
 
-  <logger name="xitrum" level="INFO"/>
+  <!-- Should be commented out for speed when running in production mode -->
+  <logger name="xitrum" level="DEBUG"/>
 
   <root level="INFO">
-    <appender-ref ref="R"/>
+    <!-- Should be commented out for speed when running in production mode -->
+    <appender-ref ref="CONSOLE"/>
+
+    <appender-ref ref="FILE"/>
   </root>
 </configuration>

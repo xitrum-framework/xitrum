@@ -11,8 +11,13 @@ import xitrum.action.routing.Routes
 
 class Server extends Logger {
   def start {
-    // Because Hazelcast startup takes serveral seconds, we force Hazelcast startup
-    // before web server startup, instead of starting it lazily
+    // TODO: remove this when this problem is solved
+    // http://groups.google.com/group/simple-build-tool/browse_thread/thread/75a3d90e382a8b94
+    System.setProperty("logback.configurationFile", "config/logback.xml")
+
+    // Because Hazelcast takes serveral seconds to start, we force it to
+    // start before the web server begin receiving requests, instead of
+    // letting it start lazily
     Cache.cache.size
 
     Routes.collectAndCompile
