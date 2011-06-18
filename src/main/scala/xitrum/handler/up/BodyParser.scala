@@ -103,7 +103,7 @@ class BodyParser extends SimpleChannelUpstreamHandler with ClosedClientSilencer 
       map(key) = Array(value)
     } else {
       val values = map(key)
-      map(key) = values.:+(value)
+      map(key) = values :+ value
     }
   }
 
@@ -112,7 +112,7 @@ class BodyParser extends SimpleChannelUpstreamHandler with ClosedClientSilencer 
       map(key) = Array(value)
     } else {
       val values = map(key)
-      map(key) = values.:+(value)
+      map(key) = values :+ value
     }
   }
 }

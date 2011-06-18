@@ -18,4 +18,4 @@ libraryDependencies += "ch.qos.logback" %  "logback-classic" % "0.9.29"
 
 mainClass := Some("my_package.BootClass")
 
-unmanagedClasspath in Runtime <<= (unmanagedClasspath in Runtime, baseDirectory) map { (cp, bd) => cp.:+(new Attributed(bd / "config")(AttributeMap.empty)) }
+unmanagedClasspath in Runtime <<= (unmanagedClasspath in Runtime, baseDirectory) map { (cp, bd) => cp :+ Attributed.blank(bd / "config") }
