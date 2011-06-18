@@ -13,7 +13,7 @@
       <pattern>[%level] [%d{yy-MM-dd HH:mm:ss}] %c{1}: %m%n</pattern>
     </encoder>
     <rollingPolicy class="ch.qos.logback.core.rolling.TimeBasedRollingPolicy">
-      <fileNamePattern>./log/xitrum.log.%d{yyyy-MM-dd-HH}</fileNamePattern>
+      <fileNamePattern>./log/xitrum.log.%d{yy-MM-dd-HH}</fileNamePattern>
     </rollingPolicy>
   </appender>
 
