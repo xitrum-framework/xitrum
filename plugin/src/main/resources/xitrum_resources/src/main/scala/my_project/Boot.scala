@@ -1,8 +1,8 @@
-package my_package
+package my_project
 
 import xitrum.Server
 
-object BootClass {
+object Boot {
   def main(args: Array[String]) {
     val server = new Server
     server.start
