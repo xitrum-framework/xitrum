@@ -76,7 +76,6 @@ Create a new project:
 
   $ mkdir my_project
   $ cd my_project
-  $ sbt
   $ sbt xitrum-new
 
 This skeleton will be created:
@@ -108,9 +107,8 @@ Then browse to ``http://localhost:8000/`` to see the web site.
 In build.sbt, you will see that logback-classic is a dependency. It is because
 Xitrum uses SLF4J. You must provide an SLF4J implentation.
 
-Other SBT tasks:
+Other common SBT tasks:
 
-* ``sbt update``: Download dependencies
 * ``sbt compile``: Compile .java and .scala files to ``target`` directory
 * ``sbt package``: Package compiled .class files to a .jar file
 
