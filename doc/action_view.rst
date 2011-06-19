@@ -79,6 +79,10 @@ You typically create a parent class which has a common layout for many views, li
     ))
   }
 
+``xitrumHead`` includes jQuery, jQuery Validate plugin, default CSS etc.
+In ``<head>``, it should be the first line, the following lines may override
+things it includes if needed.
+
 ``Index.scala``
 
 ::
