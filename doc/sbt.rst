@@ -115,7 +115,36 @@ Other common SBT tasks:
 Create Eclipse project
 ----------------------
 
+If you use Eclipse, there is `Scala plugin for Eclipse <http://www.scala-ide.org/>`_.
+
 To create .project file so that your project becomes an Eclipse project:
 
 1. Add to ``~/.sbt/plugins/build.sbt`` the contents as described at https://github.com/typesafehub/sbteclipse
 2. At your SBT project directory, run ``sbt eclipse``
+
+See `SBT plugins list <https://github.com/harrah/xsbt/wiki/sbt-0.10-plugins-list>`_
+for plugins for other IDEs.
+
+JRebel
+------
+
+In development mode, you start the web server with ``sbt run``. Normally, when
+you change your source code, you need to rerun ``sbt run`` again and again.
+With `JRebel <http://www.zeroturnaround.com/jrebel/>`_ you can avoid that.
+
+To setup JRebel with SBT:
+
+1. Download JRebel
+2. Apply for a `free license for Scala <http://sales.zeroturnaround.com/>`_
+3. Save ``jrebel.lic`` (the free license above) to the same directory with ``jrebel.jar``
+4. Add ``-noverify -javaagent:/path/to/jrebel/jrebel.jar`` to the ``sbt`` command line
+
+Now:
+
+1. Run ``sbt run`` in one console
+2. Run ``sbt ~compile`` in another console to compile in continuous/incremental mode
+
+If you use IDE like Eclipse with Scala plugin, you don't need to run ``sbt ~compile``,
+just save the source code, and the IDE will automatically compile for you, and
+the ``sbt run`` process will automatically load the new source code, thanks to
+JRebel.
