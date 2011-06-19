@@ -16,6 +16,6 @@ libraryDependencies += "tv.cntt"        %% "xitrum"          % "1.1-SNAPSHOT"
 
 libraryDependencies += "ch.qos.logback" %  "logback-classic" % "0.9.29"
 
-mainClass := Some("my_package.BootClass")
+mainClass := Some("my_project.Boot")
 
 unmanagedClasspath in Runtime <+= (baseDirectory) map { bd => Attributed.blank(bd / "config") }

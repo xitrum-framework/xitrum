@@ -27,7 +27,7 @@ You may want to modify runner.sh to tune JVM settings.
 
 ::
 
-  $ bin/runner.sh my_package.BootClass
+  $ bin/runner.sh my_project.Boot
 
 You may need to write the above command line to INSTALL file, for example, so
 that the user of your project know how to start the web server.

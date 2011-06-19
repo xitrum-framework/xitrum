@@ -95,12 +95,14 @@ This skeleton will be created:
   src
     main
       scala
-        my_package
-          BootClass.scala
-          IndexAction.scala
+        my_project
+          Boot.scala
+          action
+            AppAction.scala
+            IndexAction.scala
   build.sbt
 
-Run ``sbt run`` to run my_package.BootClass, which starts the web server.
+Run ``sbt run`` to run my_project.Boot, which starts the web server.
 Then browse to ``http://localhost:8000/`` to see the web site.
 
 In build.sbt, you will see that logback-classic is a dependency. It is because

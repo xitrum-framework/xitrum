@@ -73,6 +73,7 @@ You typically create a parent class which has a common layout for many views, li
         </body>
       </html>
     ))
+  }
 
 ``Index.scala``
 

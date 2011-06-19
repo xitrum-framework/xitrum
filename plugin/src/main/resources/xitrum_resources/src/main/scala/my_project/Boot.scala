@@ -1,6 +1,6 @@
 package my_package
 
-import xitrum.server.Server
+import xitrum.Server
 
 object BootClass {
   def main(args: Array[String]) {
