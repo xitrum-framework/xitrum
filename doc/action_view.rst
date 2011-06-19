@@ -68,6 +68,10 @@ You typically create a parent class which has a common layout for many views, li
   trait AppAction extends Action {
     override def layout = Some(() => DocType.xhtmlTransitional(
       <html>
+        <head>
+          {xitrumHead}
+          <title>Welcome to Xitrum</title>
+        </head>
         <body>
           {renderedView}
         </body>
