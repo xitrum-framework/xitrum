@@ -16,4 +16,8 @@ libraryDependencies += "tv.cntt"        %% "xitrum"          % "1.1-SNAPSHOT"
 
 libraryDependencies += "ch.qos.logback" %  "logback-classic" % "0.9.29"
 
+// For "sbt console"
+unmanagedClasspath in Compile <+= (baseDirectory) map { bd => Attributed.blank(bd / "config") }
+
+// For "sbt run"
 unmanagedClasspath in Runtime <+= (baseDirectory) map { bd => Attributed.blank(bd / "config") }
