@@ -36,7 +36,7 @@ class CookieSession extends Session {
 
   def get[T](key: String): T = map(key).asInstanceOf[T]
 
-  def contains(key: String) = map.contains(key)
+  def isDefinedAt(key: String) = map.isDefinedAt(key)
 
   def delete(key: String) { map.remove(key) }
 

@@ -44,7 +44,7 @@ trait ExtEnv extends Env with ParamAccess with UploadParamAccess with CSRF {
   }
 
   def sessiono[T](key: String): Option[T] = {
-    if (session.contains(key)) {
+    if (session.isDefinedAt(key)) {
       Some(session[T](key))
     } else {
       None

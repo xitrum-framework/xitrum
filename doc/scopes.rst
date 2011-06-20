@@ -1,7 +1,8 @@
 Scopes
 ======
 
-To pass things around, there are 3 scopes: request, session, and flash.
+To pass things around, there are 2 scopes: request and session. Xitrum tries to
+be typesafe. RequestVar and SessionVar is a way to achieve that goal.
 
 RequestVar
 ----------
@@ -9,12 +10,53 @@ RequestVar
 To pass things around when processing a request (e.g. from action to view or layout)
 in the typesafe way, you should use RequestVar.
 
-TODO
+Example:
+
+``Var.scala``
+
+::
+
+  import xitrum.RequestVar
+
+  object Var {
+    object rTitle extends RequestVar[String]
+  }
+
+``AppAction.scala``
+
+::
+
+  import xitrum.Action
+  import xitrum.view.DocType
+
+  trait AppAction extends Action {
+    override def layout = Some(() => DocType.xhtmlTransitional(
+      <html>
+        <head>
+          {xitrumHead}
+          <title>{if (Var.rTitle.isDefined) "My Site - " + Var.rTitle.get else "My Site"}</title>
+        </head>
+        <body>
+          {renderedView}
+        </body>
+      </html>
+    ))
+  }
+
+``ShowAction.scala``
+
+::
+
+  class ShowAction extends AppAction {
+    override def execute {
+      val (title, body) = ...  // Get from DB
+      Var.rTitle.set(title)
+      renderView(body)
+    }
+  }
 
 SessionVar
 ----------
-
-Xitrum tries to be typesafe. SessionVar is a way to make your session more typesafe.
 
 For example, you want save username to session after the user has logged in:
 
@@ -22,29 +64,26 @@ Declare the session var:
 
 ::
 
-  import xitrum.scope.session.SessionVar
+  import xitrum.SessionVar
 
-  object Session {
-    val username = new SessionVar[String]
+  object Var {
+    object sUsername extends SessionVar[String]
   }
 
 After login success:
 
 ::
 
-  Session.username.set(username)
+  Var.sUsername.set(username)
 
 Display the username:
 
 ::
 
-  if (Session.username.isDefined)
-    <em>{svUsername.get}</em>
+  if (Var.sUsername.isDefined)
+    <em>{Var.sUsername.get}</em>
   else
     <a href={urlFor[LoginAction]}>Login</a>
 
-* To delete the session var: ``Session.username.delete``
+* To delete the session var: ``Var.sUsername.delete``
 * To reset the whole session: ``session.reset``
-
-FlashVar
---------
