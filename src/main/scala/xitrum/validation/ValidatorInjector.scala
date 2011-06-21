@@ -17,7 +17,12 @@ object ValidatorInjector {
 
     // validators is a WrappedArray
     // For smaller size, use Java array
-    val jArray           = (validators +: paramName).toArray  // +: prepend
+    //
+    // +: is for prepending, but it's strange that
+    // Array(1, 2) +: "hello" is different from
+    // Array(1, 2).+:("hello")
+    val jArray = (validators.+:(paramName)).toArray
+
     val securedParamName = SecureBase64.encrypt(jArray)
 
     val attr  = Attribute(None, "name", Text(securedParamName), Null)
