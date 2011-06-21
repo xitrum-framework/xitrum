@@ -8,19 +8,22 @@ trait JQuery {
   this: Action =>
 
   lazy val xitrumHead =
-    if (Config.isProductionMode) {
-      <link href={urlForResource("xitrum/xitrum.css")} type="text/css" rel="stylesheet" media="all"></link>
-      <script type="text/javascript" src={urlForResource("xitrum/jquery-1.6.1.min.js")}></script>
-      <script type="text/javascript" src={urlForResource("xitrum/jquery.validate-1.8.1/jquery.validate.min.js")}></script>
-      <script type="text/javascript" src={urlForResource("xitrum/jquery.validate-1.8.1/additional-methods.min.js")}></script>
-      <script type="text/javascript" src={urlForResource("xitrum/xitrum.js")}></script>
-    } else {
-      <link href={urlForResource("xitrum/xitrum.css")} type="text/css" rel="stylesheet" media="all"></link>
-      <script type="text/javascript" src={urlForResource("xitrum/jquery-1.6.1.js")}></script>
-      <script type="text/javascript" src={urlForResource("xitrum/jquery.validate-1.8.1/jquery.validate.js")}></script>
-      <script type="text/javascript" src={urlForResource("xitrum/jquery.validate-1.8.1/additional-methods.js")}></script>
-      <script type="text/javascript" src={urlForResource("xitrum/xitrum.js")}></script>
-    }
+    if (Config.isProductionMode)
+      <xml:group>
+        <link href={urlForResource("xitrum/xitrum.css")} type="text/css" rel="stylesheet" media="all"></link>
+        <script type="text/javascript" src={urlForResource("xitrum/jquery-1.6.1.min.js")}></script>
+        <script type="text/javascript" src={urlForResource("xitrum/jquery.validate-1.8.1/jquery.validate.min.js")}></script>
+        <script type="text/javascript" src={urlForResource("xitrum/jquery.validate-1.8.1/additional-methods.min.js")}></script>
+        <script type="text/javascript" src={urlForResource("xitrum/xitrum.js")}></script>
+      </xml:group>
+    else
+      <xml:group>
+        <link href={urlForResource("xitrum/xitrum.css")} type="text/css" rel="stylesheet" media="all"></link>
+        <script type="text/javascript" src={urlForResource("xitrum/jquery-1.6.1.js")}></script>
+        <script type="text/javascript" src={urlForResource("xitrum/jquery.validate-1.8.1/jquery.validate.js")}></script>
+        <script type="text/javascript" src={urlForResource("xitrum/jquery.validate-1.8.1/additional-methods.js")}></script>
+        <script type="text/javascript" src={urlForResource("xitrum/xitrum.js")}></script>
+      </xml:group>
 
   /** See escape_javascript of Rails */
   def jsEscape(value: Any) = value.toString

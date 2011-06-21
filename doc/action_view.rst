@@ -120,3 +120,33 @@ Or use ``<xml:unparsed>``:
       if (1 < 2) alert('Xitrum rocks');
     </xml:unparsed>
   </script>
+
+Group XML elements
+------------------
+
+::
+
+  if (loggedIn)
+    <xml:group>
+      <b>{username}</b>
+      <a href={urlFor[LogoutAction]}>Logout</a>
+    </xml:group>
+  else
+    <xml:group>
+      <a href={urlFor[LoginAction]}>Login</a>
+      <a href={urlFor[RegisterAction]}>Register</a>
+    </xml:group>
+
+Render XHTML
+------------
+
+Xitrum renders views and layouts as XHTML automatically.
+If you want to render it yourself (rarely), pay attention to the code below.
+
+::
+
+  import scala.xml.Xhtml
+
+  val br = <br />
+  br.toStirng            // => <br></br>, some browsers will render this as 2 <br />s
+  Xhtml.toXhtml(<br />)  // => "<br />"

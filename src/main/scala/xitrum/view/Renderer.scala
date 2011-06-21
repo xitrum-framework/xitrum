@@ -1,7 +1,7 @@
 package xitrum.view
 
 import java.io.File
-import scala.xml.{Elem, NodeBuffer}
+import scala.xml.{Node, NodeSeq, Xhtml}
 
 import org.jboss.netty.buffer.ChannelBuffers
 import org.jboss.netty.handler.codec.http.HttpHeaders
@@ -14,18 +14,29 @@ trait Renderer extends JQuery with JSCollector with Flash with I18n {
   this: Action =>
 
   def renderText(text: Any, contentType: String = null): String = {
+    val textIsXml = text.isInstanceOf[Node] || text.isInstanceOf[NodeSeq]
+
     // Set content type automatically
-    if (contentType != null) {
+    if (contentType != null)
       response.setHeader(CONTENT_TYPE, contentType)
-    } else if (!response.containsHeader(CONTENT_TYPE)) {
-      if (text.isInstanceOf[Elem] || text.isInstanceOf[NodeBuffer]) {
+    else if (!response.containsHeader(CONTENT_TYPE)) {
+      if (textIsXml)
         response.setHeader(CONTENT_TYPE, "application/xml")
-      } else {
+      else
         response.setHeader(CONTENT_TYPE, "text/plain")
-      }
     }
 
-    val ret = text.toString
+    // <br />.toString will create <br></br> which renders as 2 <br /> on some browsers!
+    // http://www.scala-lang.org/node/492
+    // http://www.ne.jp/asahi/hishidama/home/tech/scala/xml.html
+    val ret =
+      if (textIsXml) {
+        if (text.isInstanceOf[Node])
+          Xhtml.toXhtml(text.asInstanceOf[Node])
+        else
+          Xhtml.toXhtml(text.asInstanceOf[NodeSeq])
+      } else
+        text.toString
 
     // Content length is number of bytes, not characters!
     val cb = ChannelBuffers.copiedBuffer(ret, Config.paramCharset)
@@ -47,12 +58,12 @@ trait Renderer extends JQuery with JSCollector with Flash with I18n {
   }
 
   def renderView(view: Any, layout: Option[Any]) {
+    renderedView = view
     layout match {
       case None =>
-        renderText(view, "text/html")
+        renderText(renderedView, "text/html")
 
       case Some(function) =>
-        renderedView = view
         renderText(function.asInstanceOf[() => Any].apply, "text/html")
     }
   }

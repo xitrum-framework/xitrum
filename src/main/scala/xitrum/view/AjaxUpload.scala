@@ -2,8 +2,7 @@ package xitrum.view
 
 import java.io.File
 import java.util.UUID
-import scala.collection.mutable.ArrayBuffer
-import scala.xml.Elem
+import scala.xml.Node
 import org.jboss.netty.handler.codec.http.FileUpload
 
 import xitrum.Action
@@ -12,14 +11,15 @@ import xitrum.scope.session.CSRF
 import xitrum.handler.updown.XSendfile
 
 object AjaxUpload {
-  def ::(elem: Elem)(implicit action: Action) = {
+  def ::(elem: Node)(implicit action: Action) = {
     val uuid = UUID.randomUUID.toString
-    ArrayBuffer(
-      <iframe id={uuid} name={uuid} src={action.urlForPostbackThis} style="display:none; width:1px; height:1px;"></iframe>,
+    <xml:group>
+      <iframe id={uuid} name={uuid} src={action.urlForPostbackThis} style="display:none; width:1px; height:1px;"></iframe>
       <form method="post" enctype="multipart/form-data" target={uuid}>
         {elem}
         <input type="submit" value="Upload" />
-      </form>)
+      </form>
+    </xml:group>
   }
 }
 
@@ -90,12 +90,13 @@ trait AjaxUpload {
    */
   def ajaxUpload = {
     val uuid = UUID.randomUUID.toString
-    ArrayBuffer(
-      <iframe id={uuid} name={uuid} src={urlForThis} style="display:none; width:1px; height:1px;"></iframe>,
+    <xml:group>
+      <iframe id={uuid} name={uuid} src={urlForThis} style="display:none; width:1px; height:1px;"></iframe>
       <form method="post" enctype="multipart/form-data" target={uuid}>
         <input type="file" name="file" />
         <input type="submit" value="Upload" />
-      </form>)
+      </form>
+    </xml:group>
   }
 
   /**
