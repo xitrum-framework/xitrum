@@ -74,10 +74,9 @@ object Config extends Logger {
 
   val httpPort = properties.getProperty("http_port").toInt
 
-  /** None if Xitrum need not to process HTTPS */
-  val httpsPort: Option[Int] = {
-    val s = properties.getProperty("https_port")
-    if (s == null) None else Some(s.toInt)
+  val proxyIpso: Option[Array[String]] = {
+    val s = properties.getProperty("proxy_ips")
+    if (s == null) None else Some(s.split(",").map(_.trim))
   }
 
   val baseUri = properties.getProperty("base_uri", "")
@@ -87,11 +86,12 @@ object Config extends Logger {
     if (s == null || s == "false") false else true
   }
 
-  val sessionMarker = properties.getProperty("session_marker")
   val sessionStore  = {
     val className = properties.getProperty("session_store")
     Class.forName(className).newInstance.asInstanceOf[SessionStore]
   }
+
+  val cookieName = properties.getProperty("cookie_name")
 
   val secureKey = properties.getProperty("secure_key")
 

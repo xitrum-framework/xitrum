@@ -13,16 +13,6 @@ import xitrum.scope.{Env => CEnv, PathInfo}
 class Env extends HashMap[String, Any] {
   import CEnv._
 
-  // FIXME: calculate when SSL handling feature is added to Xitrum.
-  /**
-   * Xitrum is not only a web framework, but also a web server. This value is
-   * true if the request Xitrum web server handles is HTTPS.
-   *
-   * If the original request is HTTPS, but has been handled by load balancers or
-   * reverse proxy servers like Nginx, this value is still false.
-   */
-  var ssl:              Boolean          = false
-
   var request:          HttpRequest      = null  // Set by Request2Env
   var response:         HttpResponse     = null  // Set before the response is sent to client
 
