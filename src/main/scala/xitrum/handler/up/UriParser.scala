@@ -8,7 +8,7 @@ import ChannelHandler.Sharable
 import org.jboss.netty.handler.codec.http.QueryStringDecoder
 
 import xitrum.Config
-import xitrum.handler.Env
+import xitrum.handler.{BaseUri, Env}
 import xitrum.scope.PathInfo
 
 @Sharable
@@ -24,7 +24,8 @@ class UriParser extends SimpleChannelUpstreamHandler with ClosedClientSilencer {
     val request = env.request
 
     try {
-      val decoder   = new QueryStringDecoder(request.getUri, Config.paramCharset)
+      val uri = BaseUri.remove(request.getUri).get  // None has been checked at PublicFileServer
+      val decoder   = new QueryStringDecoder(uri, Config.paramCharset)
       env.pathInfo  = new PathInfo(decoder.getPath)
       env.uriParams = jParamsToParams(decoder.getParameters)
     } catch {

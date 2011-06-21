@@ -9,7 +9,7 @@ import HttpResponseStatus._
 import HttpVersion._
 
 import xitrum.Config
-import xitrum.handler.NotModified
+import xitrum.handler.{BaseUri, NotModified}
 import xitrum.handler.updown.XSendfile
 import xitrum.util.{Gzip, Mime, PathSanitizer}
 
@@ -23,14 +23,16 @@ class PublicResourceServer extends SimpleChannelUpstreamHandler with ClosedClien
     }
 
     val request = m.asInstanceOf[HttpRequest]
-    val uri     = request.getUri
-    if (!uri.startsWith("/resources/public/")) {
+
+    val pathInfo0 = request.getUri.split('?')(0)
+    val pathInfo1 = BaseUri.remove(pathInfo0).get  // None has been checked at PublicFileServer
+
+    if (!pathInfo1.startsWith("/resources/public/")) {
       ctx.sendUpstream(e)
       return
     }
 
-    val path = uri.substring("/resources/".length)  // Remove "/resources/" leading
-
+    val path = pathInfo1.substring("/resources/".length)  // Remove "/resources/" leading
     loadResource(path) match {
       case None =>
         val response = new DefaultHttpResponse(HTTP_1_1, NOT_FOUND)

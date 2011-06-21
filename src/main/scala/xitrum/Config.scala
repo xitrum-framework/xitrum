@@ -80,6 +80,8 @@ object Config extends Logger {
     if (s == null) None else Some(s.toInt)
   }
 
+  val baseUri = properties.getProperty("base_uri", "")
+
   val compressResponse = {
     val s = properties.getProperty("compress_response")
     if (s == null || s == "false") false else true

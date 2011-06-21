@@ -9,6 +9,7 @@ import HttpMethod._
 import HttpResponseStatus._
 import HttpVersion._
 
+import xitrum.handler.BaseUri
 import xitrum.handler.updown.XSendfile
 import xitrum.util.PathSanitizer
 
@@ -35,20 +36,31 @@ class PublicFileServer extends SimpleChannelUpstreamHandler with ClosedClientSil
       return
     }
 
-    val pathInfo  = request.getUri.split('?')(0)
-    val pathInfo2 = if (pathInfo.startsWith("/favicon.ico") || pathInfo.startsWith("/robots.txt")) "/public" + pathInfo else pathInfo
+    val pathInfo0 = request.getUri.split('?')(0)
 
-    if (!pathInfo2.startsWith("/public/")) {
-      ctx.sendUpstream(e)
-      return
-    }
+    // See ChannelPipelineFactory, this handler is put after only XSendfile
+    // We check baseUri here
+    BaseUri.remove(pathInfo0) match {
+      case None =>
+        val response = new DefaultHttpResponse(HTTP_1_1, NOT_FOUND)
+        XSendfile.set404Page(response)
+        ctx.getChannel.write(response)
+        return
 
-    val response = new DefaultHttpResponse(HTTP_1_1, OK)
-    toAbsPath(pathInfo2) match {
-      case None      => XSendfile.set404Page(response)
-      case Some(abs) => XSendfile.setHeader(response, abs)
+      case Some(pathInfo1) =>
+        val pathInfo2 = if (pathInfo1.startsWith("/favicon.ico") || pathInfo1.startsWith("/robots.txt")) "/public" + pathInfo1 else pathInfo1
+        if (!pathInfo2.startsWith("/public/")) {
+          ctx.sendUpstream(e)
+          return
+        }
+
+        val response = new DefaultHttpResponse(HTTP_1_1, OK)
+        toAbsPath(pathInfo2) match {
+          case None      => XSendfile.set404Page(response)
+          case Some(abs) => XSendfile.setHeader(response, abs)
+        }
+        ctx.getChannel.write(response)
     }
-    ctx.getChannel.write(response)
   }
 
   //----------------------------------------------------------------------------

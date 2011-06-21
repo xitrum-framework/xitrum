@@ -179,7 +179,7 @@ object Routes extends Logger {
         ret
       }
     }
-    val url = "/" + tokens.mkString("/")
+    val url = Config.baseUri + "/" + tokens.mkString("/")
 
     val qse = new QueryStringEncoder(url, Config.paramCharset)
     for ((k, v) <- map) qse.addParam(k, v.toString)

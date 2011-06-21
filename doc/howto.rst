@@ -3,6 +3,26 @@ HOWTO
 
 .. image:: http://www.bdoubliees.com/journalspirou/sfigures6/schtroumpfs/s10.jpg
 
+Serve static file
+-----------------
+
+Layout your project directory:
+
+::
+
+  config
+  public
+    img
+      myimage.png
+  src
+  build.sbt
+
+In your source code:
+
+::
+
+  <img src={urlForPublic("img/myimage.png")} />
+
 Serve static file from classpath resource (in .jar file)
 --------------------------------------------------------
 
@@ -12,13 +32,13 @@ Save the file in your .jar under:
 
 ::
 
-  /public/path/to/myimage.png
+  public/my_lib/img/myimage.png
 
 Then in the web page, refer to it like this:
 
 ::
 
-  <img src="/resources/public/path/to/myimage.png" />
+  <img src={urlForResource("my_lib/img/myimage.png")} />
 
 Link to an action
 -----------------

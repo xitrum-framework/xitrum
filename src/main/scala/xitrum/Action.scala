@@ -71,7 +71,8 @@ trait Action extends ExtEnv with Logger with Net with Filter with BasicAuthentic
   protected def urlForPostbackAction(actionClass: Class[Action]): String = {
     val className        = actionClass.getName
     val securedClassName = CSRF.encrypt(this, className)
-    PostbackAction.POSTBACK_PREFIX + securedClassName
+    val url = PostbackAction.POSTBACK_PREFIX + securedClassName
+    if (Config.baseUri.isEmpty) url else Config.baseUri + "/" + url
   }
 
   def urlForPostback[T: Manifest]: String = {
@@ -80,6 +81,12 @@ trait Action extends ExtEnv with Logger with Net with Filter with BasicAuthentic
   }
 
   def urlForPostbackThis = urlForPostbackAction(this.getClass.asInstanceOf[Class[Action]])
+
+  //----------------------------------------------------------------------------
+
+  def urlForPublic(path: String) = Config.baseUri + "/public/" + path
+
+  def urlForResource(path: String) = Config.baseUri + "/resources/public/" + path
 
   //----------------------------------------------------------------------------
 

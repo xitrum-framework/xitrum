@@ -64,6 +64,4 @@ trait Net {
       (xs(0), xs(1).toInt)
     }
   }
-
-  lazy val contextPath = ""
 }
