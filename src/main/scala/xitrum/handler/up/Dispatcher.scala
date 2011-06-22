@@ -98,7 +98,7 @@ object Dispatcher extends Logger {
       val endTimestamp = System.currentTimeMillis
       val dt           = endTimestamp - beginTimestamp
 
-      (if (postback) "POSTBACK " + action.getClass.getName else action.request.getMethod + " " + action.pathInfo.decoded)                                               +
+      (if (postback) "POSTBACK" else action.request.getMethod) + " " + action.getClass.getName                                                                    +
       (if (!action.uriParams.isEmpty)        ", uriParams: "        + AEnv.inspectParams(action.uriParams       .asInstanceOf[MMap[String, Array[Any]]]) else "") +
       (if (!action.bodyParams.isEmpty)       ", bodyParams: "       + AEnv.inspectParams(action.bodyParams      .asInstanceOf[MMap[String, Array[Any]]]) else "") +
       (if (!action.pathParams.isEmpty)       ", pathParams: "       + AEnv.inspectParams(action.pathParams      .asInstanceOf[MMap[String, Array[Any]]]) else "") +
