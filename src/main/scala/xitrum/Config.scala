@@ -7,15 +7,15 @@ import java.nio.charset.Charset
 import xitrum.scope.session.SessionStore
 
 object Config extends Logger {
-  def bytesFromStreamAndClose(stream: InputStream): Array[Byte] = {
-    val len   = stream.available
+  def bytesFromInputStream(is: InputStream): Array[Byte] = {
+    val len   = is.available
     val bytes = new Array[Byte](len)
     var total = 0
     while (total < len) {
-      val bytesRead = stream.read(bytes, total, len - total)
+      val bytesRead = is.read(bytes, total, len - total)
       total += bytesRead
     }
-    stream.close
+    is.close
     bytes
   }
 
@@ -24,7 +24,7 @@ object Config extends Logger {
    */
   def loadStringFromClasspath(path: String): String = {
     val stream = getClass.getClassLoader.getResourceAsStream(path)
-    val bytes  = bytesFromStreamAndClose(stream)
+    val bytes  = bytesFromInputStream(stream)
     new String(bytes, "UTF-8")
   }
 

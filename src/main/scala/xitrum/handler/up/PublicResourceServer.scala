@@ -97,7 +97,7 @@ class PublicResourceServer extends SimpleChannelUpstreamHandler with ClosedClien
         if (stream == null) {
           None
         } else {
-          val bytes = Config.bytesFromStreamAndClose(stream)
+          val bytes = Config.bytesFromInputStream(stream)
           Some(bytes)
         }
     }
