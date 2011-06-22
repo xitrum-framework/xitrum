@@ -56,15 +56,20 @@ trait Action extends ExtEnv with Logger with Net with Filter with BasicAuthentic
     val actionClass = manifest[T].erasure.asInstanceOf[Class[Action]]
     Routes.urlFor(actionClass, params:_*)
   }
+  def absoluteUrlFor[T: Manifest](params: (String, Any)*) = absoluteUrlPrefix + urlFor[T](params:_*)
 
   /**
    * When there are no params, the application developer can write
    * urlFor[MyAction], instead of urlFor[MyAction]().
    */
   def urlFor[T: Manifest]: String = urlFor[T]()
+  def absoluteUrlFor[T: Manifest]: String = absoluteUrlPrefix + urlFor[T]()
 
-  def urlForThis                         = Routes.urlFor(this.getClass.asInstanceOf[Class[Action]])
+  def urlForThis         = Routes.urlFor(this.getClass.asInstanceOf[Class[Action]])
+  def absoluteUrlForThis = absoluteUrlPrefix + urlForThis
+
   def urlForThis(params: (String, Any)*) = Routes.urlFor(this.getClass.asInstanceOf[Class[Action]], params:_*)
+  def absoluteUrlForThis(params: (String, Any)*) = absoluteUrlPrefix + urlForThis(params:_*)
 
   //----------------------------------------------------------------------------
 
