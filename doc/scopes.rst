@@ -87,3 +87,23 @@ Display the username:
 
 * To delete the session var: ``Var.sUsername.delete``
 * To reset the whole session: ``session.reset``
+
+object vs. val
+--------------
+
+Please use ``object`` instead of ``val``. *Do not do like this*:
+
+::
+
+  object Var {
+    val rTitle    = new RequestVar[String]
+    val rCategory = new RequestVar[String]
+
+    val sUsername = new SessionVar[String]
+    val sIsAdmin  = new SessionVar[Boolean]
+  }
+
+The above code compiles but does not work correctly, because the Vars internally
+use class names to do look up. When using ``val``, ``rTitle`` and ``rCategory``
+will have the same class name ("xitrum.RequestVar"). The same for ``sUsername``
+and ``sIsAdmin``.
