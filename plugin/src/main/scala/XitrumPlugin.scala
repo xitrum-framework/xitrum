@@ -84,7 +84,12 @@ object XitrumPlugin extends Plugin {
     val libDir = distDir / "lib"
 
     // Copy dependencies
-    libs.foreach { lib => IO.copyFile(lib.data, libDir / lib.data.name) }
+    libs.foreach { lib =>
+      val file = lib.data
+
+      // Prevent copying directories in classpath, e.g. "config" directory
+      if (!file.isDirectory) IO.copyFile(file, libDir / file.name)
+    }
 
     // Copy .jar files are created after running "sbt package"
     val jarDir = new File(target, "scala-" + scalaVersion.replace('-', '.'))
