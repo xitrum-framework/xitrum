@@ -51,21 +51,19 @@ trait Renderer extends JQuery with JSCollector with Flash with I18n {
 
   var renderedView: Any = null
 
-  def layout: Option[() => Any] = None
+  def layout = renderedView
 
   def renderView(view: Any) {
-    renderView(view, layout)
+    renderView(view, layout _)
   }
 
-  def renderView(view: Any, layout: Option[Any]) {
+  def renderView(view: Any, customLayout: () => Any) {
     renderedView = view
-    layout match {
-      case None =>
-        renderText(renderedView, "text/html")
-
-      case Some(function) =>
-        renderText(function.asInstanceOf[() => Any].apply, "text/html")
-    }
+    val renderedLayout = customLayout.apply
+    if (renderedLayout == null)
+      renderText(renderedView, "text/html")
+    else
+      renderText(renderedLayout, "text/html")
   }
 
   //----------------------------------------------------------------------------

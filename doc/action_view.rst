@@ -66,7 +66,7 @@ You typically create a parent class which has a common layout for many views, li
   import xitrum.view.DocType
 
   trait AppAction extends Action {
-    override def layout = Some(() => DocType.xhtmlTransitional(
+    override def layout = DocType.xhtmlTransitional(
       <html>
         <head>
           {xitrumHead}
@@ -76,7 +76,7 @@ You typically create a parent class which has a common layout for many views, li
           {renderedView}
         </body>
       </html>
-    ))
+    )
   }
 
 ``xitrumHead`` includes jQuery, jQuery Validate plugin, default CSS etc.

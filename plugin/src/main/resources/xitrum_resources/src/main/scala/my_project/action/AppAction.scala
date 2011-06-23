@@ -4,7 +4,7 @@ import xitrum.Action
 import xitrum.view.DocType
 
 trait AppAction extends Action {
-  override def layout = Some(() => DocType.xhtmlTransitional(
+  override def layout = DocType.xhtmlTransitional(
     <html>
       <head>
         {xitrumHead}
@@ -14,5 +14,5 @@ trait AppAction extends Action {
         {renderedView}
       </body>
     </html>
-  ))
+  )
 }
