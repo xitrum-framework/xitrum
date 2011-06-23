@@ -35,28 +35,19 @@ Normally, you write view directly in its action.
 
 Of course you can refactor the view into a separate Scala file.
 
-There are many other methods for rendering things other than views:
+There are methods for rendering things other than views:
 
-* renderText
-* renderBinary
-* renderFile
-
-Async response
---------------
-
-There is no default response. You must call renderXXX explicitly to send response
-to the client. If you don't call renderXXX, the HTTP connection is kept for you,
-and you can call renderXXX later.
-
-Chunked response
-----------------
-
-TODO
+* ``renderText``: render a string without layout (see the following section)
+* ``renderBinary``: render an array of bytes
+* ``renderFile``: send a file directly from disk, very fast because `zero-copy <http://www.ibm.com/developerworks/library/j-zerocopy/>`_ (send-file) is used
 
 Layout
 ------
 
-You typically create a parent class which has a common layout for many views, like this:
+With ``renderView``, layout is rendered. By default the layout is what passed to
+``renderView``. You can customize the layout by overriding the ``layout`` method.
+
+Typically, you create a parent class which has a common layout for many views, like this:
 
 ``AppAction.scala``
 
@@ -93,10 +84,36 @@ things it includes if needed.
   @GET("/")
   class Index extends AppAction {
     def override execute {
-      val s = "World"  // Will be automatically escaped
+      val s = "World"
       renderView(<p>Hello <em>{s}</em>!</p>)
     }
   }
+
+You can pass the layout directly to ``renderView``:
+
+::
+
+  val specialLayout = () =>
+    <html>
+      <body>
+        {renderedView}
+      </body>
+    </html>
+
+  val s = "World"
+  renderView(<p>Hello <em>{s}</em>!</p>, specialLayout _)
+
+Async response
+--------------
+
+There is no default response. You must call renderXXX explicitly to send response
+to the client. If you don't call renderXXX, the HTTP connection is kept for you,
+and you can call renderXXX later.
+
+Chunked response
+----------------
+
+TODO
 
 Unescape XML
 ------------
