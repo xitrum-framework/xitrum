@@ -7,6 +7,15 @@ Cache
 is integrated for page, action, and object cache. Of course you can
 use it for other things (distributed processing etc) in your application.
 
+With Hazelcast, Xitrum instances become in-process memory cache servers. You don't
+need seperate things like Memcache.
+
+::
+
+                                / Xitrum/memory cache instance 1
+  Load balancer/proxy server ---- Xitrum/memory cache instance 2
+                                \ Xitrum/memory cache instance 3
+
 Cache works with async response.
 
 Page cache
@@ -65,8 +74,17 @@ Hazelcast is powerful. It supports distributed cache. Please see its documentati
     </map>
   </hazelcast>
 
-Internal
---------
+Note that Xitrum instances of the same group (cluster) should have the same
+``<group>/<name>``. Hazelcast provides a monitor tool, ``<group>/<password>``
+is the password for the tool to connect to the group.
+
+.. image:: http://www.hazelcast.com/resources/monitor-screen.png
+
+Please see `Hazelcast's documentation <http://www.hazelcast.com/documentation.jsp#Monitoring>`_
+for more information how to config ``config/hazelcast.xml``.
+
+Internals
+---------
 
 Upstream
 
