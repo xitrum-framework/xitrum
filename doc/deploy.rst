@@ -1,5 +1,5 @@
-Prepare for distribution
-========================
+Deploy to production server
+===========================
 
 .. image:: http://www.bdoubliees.com/journalspirou/sfigures6/schtroumpfs/s8.jpg
 
@@ -12,22 +12,23 @@ behind a proxy server or load balancer:
   Load balancer/proxy server ---- Xitrum instance 2
                                 \ Xitrum instance 3
 
-Prepare directory for distribution
-----------------------------------
+Package directory
+-----------------
 
-Please see the :doc:`SBT section </sbt>` about ``xitrum-dist``.
+Please see the :doc:`SBT section </sbt>` about ``xitrum-package``.
 
-Run ``sbt xitrum-dist`` to prepare ``target/dist`` directory, ready for production distribution:
+Run ``sbt xitrum-package`` to prepare ``target/xitrum_package`` directory,
+ready to deploy to production server:
 
 ::
 
-  target/dist
+  target/xitrum_package
     bin
       runner.sh
     config
       [config files]
     public
-      [web static files]
+      [static files, accessible from browsers]
     lib
       [dependencies and packaged project file]
 
@@ -41,11 +42,15 @@ You may want to modify runner.sh to tune JVM settings.
 You may need to write the above command line to INSTALL file, for example, so
 that the user of your project know how to start the web server.
 
-Config to copy additional files to target/dist
+Copy additional files to target/xitrum_package
 ----------------------------------------------
 
-``sbt xitrum-dist`` command line simply copies ``config`` and ``public``
-directories to ``target/dist``. If you want it to copy additional files and
-directories (README, INSTALL, doc etc.)
+``sbt xitrum-package`` command simply copies ``config`` and ``public``
+directories to ``target/xitrum_package``. If you want it to copy additional files
+and directories (README, INSTALL, doc etc.), config ``build.sbt`` like this:
 
-TODO
+::
+
+  TODO
+
+Now run ``sbt xitrum-package`` and check ``target/xitrum_package`` directory.

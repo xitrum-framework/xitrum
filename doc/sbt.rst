@@ -65,7 +65,7 @@ Add to file ``~/.sbt/plugins/build.sbt`` (or create it):
 
   libraryDependencies += "tv.cntt" %% "xitrum-plugin" % "1.1-SNAPSHOT"
 
-Now you have 2 commands: ``sbt xitrum-new`` and :doc:`sbt xitrum-dist </deploy>`.
+Now you have 2 commands: ``sbt xitrum-new`` and :doc:`sbt xitrum-package </deploy>`.
 
 xitrum-new
 ----------

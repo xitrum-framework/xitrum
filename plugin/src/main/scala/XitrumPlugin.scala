@@ -4,9 +4,9 @@ import sbt._
 import Keys._
 
 object XitrumPlugin extends Plugin {
-  // settings must be lazy to avoid null error
-  // distNeedsPackageBin must be after distTask
-  override lazy val settings = Seq(newTask, distTask, distNeedsPackageBin)
+  // Must be lazy to avoid null error
+  // xitrumPackageNeedsPackageBin must be after xitrumPackageImpl
+  override lazy val settings = Seq(newTask, xitrumPackageImpl, xitrumPackageNeedsPackageBin)
 
   //----------------------------------------------------------------------------
 
@@ -27,7 +27,7 @@ object XitrumPlugin extends Plugin {
     inputStream.close
   }
 
-  // Task "new" ----------------------------------------------------------------
+  // --------------------------------------------------------------------------
 
   val newKey = TaskKey[Unit]("xitrum-new", "Prepares files for a new SBT project, ready for development")
 
@@ -51,37 +51,37 @@ object XitrumPlugin extends Plugin {
     copyResourceFile(baseDir, "build.sbt")
   }
 
-  // Task "dist" ---------------------------------------------------------------
+  // --------------------------------------------------------------------------
 
-  val distKey = TaskKey[Unit]("xitrum-dist", "Prepares target/dist directory, ready for production distribution")
+  val xitrumPackage = TaskKey[Unit]("xitrum-package", "Package to target/xitrum_package directory, ready to deploy to production server")
 
-  // distTask must be lazy to avoid null error
-  lazy val distTask = distKey <<=
+  // Must be lazy to avoid null error
+  lazy val xitrumPackageImpl = xitrumPackage <<=
       (externalDependencyClasspath in Runtime, baseDirectory, target, scalaVersion) map {
       (libs,                                   baseDir,       target, scalaVersion) =>
 
-    val distDir = target / "dist"
+    val packageDir = target / "xitrum_package"
 
     // Copy bin directory
-    val binDir1 = baseDir / "bin"
-    val binDir2 = distDir / "bin"
+    val binDir1 = baseDir    / "bin"
+    val binDir2 = packageDir / "bin"
     binDir2.mkdirs
-    copyResourceFile(distDir, "bin/runner.sh")
+    copyResourceFile(packageDir, "bin/runner.sh")
     IO.copyDirectory(binDir1, binDir2)
     binDir2.listFiles.foreach { _.setExecutable(true) }
 
     // Copy config directory
-    val configDir1 = baseDir / "config"
-    val configDir2 = distDir / "config"
+    val configDir1 = baseDir    / "config"
+    val configDir2 = packageDir / "config"
     IO.copyDirectory(configDir1, configDir2)
 
     // Copy public directory
-    val publicDir1 = baseDir / "public"
-    val publicDir2 = distDir / "public"
+    val publicDir1 = baseDir    / "public"
+    val publicDir2 = packageDir / "public"
     IO.copyDirectory(publicDir1, publicDir2)
 
     // Copy lib directory
-    val libDir = distDir / "lib"
+    val libDir = packageDir / "lib"
 
     // Copy dependencies
     libs.foreach { lib =>
@@ -96,5 +96,5 @@ object XitrumPlugin extends Plugin {
     (jarDir * "*.jar").get.foreach { file => IO.copyFile(file, libDir / file.name) }
   }
 
-  val distNeedsPackageBin = distKey <<= distKey.dependsOn(packageBin in Compile)
+  val xitrumPackageNeedsPackageBin = xitrumPackage <<= xitrumPackage.dependsOn(packageBin in Compile)
 }
