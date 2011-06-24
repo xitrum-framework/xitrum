@@ -15,8 +15,6 @@ behind a proxy server or load balancer:
 Package directory
 -----------------
 
-Please see the :doc:`SBT section </sbt>` about ``xitrum-package``.
-
 Run ``sbt xitrum-package`` to prepare ``target/xitrum_package`` directory,
 ready to deploy to production server:
 

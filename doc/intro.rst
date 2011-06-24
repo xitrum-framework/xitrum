@@ -36,6 +36,5 @@ Xitrum is inspired by `Nitrogen <http://nitrogenproject.com/>`_.
   | +-------------+ |
   +-----------------+
 
-.. image:: http://www.bdoubliees.com/journalspirou/sfigures6/schtroumpfs/s12.jpg
 .. image:: http://www.bdoubliees.com/journalspirou/sfigures6/schtroumpfs/s11.jpg
 

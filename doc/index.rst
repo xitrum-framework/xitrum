@@ -16,7 +16,8 @@ Contents:
    :maxdepth: 2
 
    intro
-   sbt
+   tutorial
+   dev
    action_view
    xml
    restful
