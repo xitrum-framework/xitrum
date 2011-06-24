@@ -18,11 +18,17 @@ class Server extends Logger {
 
     Routes.collectAndCompile
 
+    Runtime.getRuntime.availableProcessors * 2 + 1
+
+    val bossExecutor   = Executors.newCachedThreadPool
+    val workerExecutor = Executors.newCachedThreadPool
+    val channelFactory = new NioServerSocketChannelFactory(bossExecutor, workerExecutor)
+
+    val bootstrap = new ServerBootstrap(channelFactory)
+
     val pipelineFactory = new ChannelPipelineFactory
-    val bootstrap =
-      new ServerBootstrap(new NioServerSocketChannelFactory(
-        Executors.newCachedThreadPool, Executors.newCachedThreadPool))
     bootstrap.setPipelineFactory(pipelineFactory)
+
     bootstrap.setOption("reuseAddress",     true)
     bootstrap.setOption("child.tcpNoDelay", true)
     bootstrap.setOption("child.keepAlive",  true)
