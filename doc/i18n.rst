@@ -37,3 +37,9 @@ po files in config/i18n directory.
       mylib
         en.po
         ja.po
+
+Validation messages
+-------------------
+
+jQuery Validation plugin provides `i18n error messages <https://github.com/jzaefferer/jquery-validation/tree/master/localization>`_.
+Xitrum automatically include the message file corresponding to the current locale.

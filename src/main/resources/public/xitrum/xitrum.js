@@ -2,6 +2,9 @@ var xitrum = {
   postback: function(event) {
     var e = $(event.target);
 
+    var confirmMsg = e.attr("confirm");
+    if (confirmMsg && !confirm(confirmMsg)) return false;
+
     var action1 = e.attr("action");
     var action2 = (!action1) ? window.location.href : action1;
 
@@ -35,10 +38,10 @@ var xitrum = {
 
   flash: function(msg) {
     var div =
-      "<div class='flash'>" +
-        "<a class='flash_close' href='javascript:'>Ｘ</a>" +
-        "<div class='flash_msg'>" + msg + "</div>" +
-      "</div>";
+      '<div class="flash">' +
+        '<a class="flash_close" href="javascript:">Ｘ</a>' +
+        '<div class="flash_msg">' + msg + '</div>' +
+      '</div>';
     $("#flash").append($(div).hide().fadeIn(1000));
   }
 };
