@@ -3,7 +3,7 @@ Action and View
 
 .. image:: http://www.bdoubliees.com/journalspirou/sfigures6/schtroumpfs/s7.jpg
 
-There are 2 kinds of actions: :doc:`RESTful actions </restful>` and :doc:`POSTback actions </postback>`.
+There are 2 kinds of actions: :doc:`RESTful actions </restful>` and :doc:`postback actions </postback>`.
 
 Normally, you write view directly in its action.
 
@@ -43,7 +43,7 @@ With ``renderView``, layout is rendered. By default the layout is what passed to
 
 Typically, you create a parent class which has a common layout for many views, like this:
 
-``AppAction.scala``
+AppAction.scala
 
 ::
 
@@ -68,7 +68,7 @@ Typically, you create a parent class which has a common layout for many views, l
 In ``<head>``, it should be the first line, the following lines may override
 things it includes if needed.
 
-``Index.scala``
+Index.scala
 
 ::
 

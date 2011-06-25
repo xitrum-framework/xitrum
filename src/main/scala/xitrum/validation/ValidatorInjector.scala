@@ -7,31 +7,20 @@ import xitrum.Action
 import xitrum.scope.session.SecureBase64
 
 object ValidatorInjector {
-  /** Replace the original param name with the serialized validators. */
-  def injectToParamName(elem: Elem, validators: Validator*): (Elem, String, String) = {
-    val nodeSeq = elem \ "@name"
-    if (nodeSeq.isEmpty) {
-      throw new Exception("The element must have \"name\" attribute")
-    }
-    val paramName = nodeSeq.head.text  // String
-
+  /** @return Param name that has been encrypted to include serialized validators */
+  def injectToParamName(paramName: String, validators: Validator*): String = {
     // validators is a WrappedArray
     // For smaller size, use Java array
     //
     // +: http://groups.google.com/group/scala-user/browse_thread/thread/d38dcf5b9e6e3c94
     val jArray = (paramName +: validators).toArray
 
-    val securedParamName = SecureBase64.encrypt(jArray)
-
-    val attr  = Attribute(None, "name", Text(securedParamName), Null)
-    val elem2 = elem % attr
-
-    (elem2, paramName, securedParamName)
+    SecureBase64.encrypt(jArray)
   }
 
-  /** Take out the original param name and validators from secured param name. */
-  def takeOutFromName(securedParamName: String): Option[(String, Iterable[Validator])] =
-    SecureBase64.decrypt(securedParamName) match {
+  /** Take out the original param name and validators from secure param name. */
+  def takeOutFromName(secureParamName: String): Option[(String, Iterable[Validator])] =
+    SecureBase64.decrypt(secureParamName) match {
       case None => None
 
       case Some(array) =>

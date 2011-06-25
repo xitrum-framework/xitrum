@@ -1,4 +1,4 @@
-Writing POSTbacks
+Writing postbacks
 =================
 
 .. image:: http://www.bdoubliees.com/journalspirou/sfigures6/schtroumpfs/s2.jpg
@@ -8,32 +8,44 @@ Please see the following links for the idea about POSTback:
 * http://en.wikipedia.org/wiki/Postback
 * http://nitrogenproject.com/doc/tutorial.html
 
-Xitrum supports Ajax form postback with additional features:
+Xitrum supports Ajax form postback, with additional features:
 
-* Anti CSRF token, as in Rails
-* Validation, as in Nitrogen
+* Anti-CSRF
+* :doc:`Validation </validation>`
 
-If you are loyal to this style, for web sites without APIs, you only need to
-annotate GET routes. You only need to do SEO on GET routes because these are
-the only pages that search engines follow.
+ArticleShow.scala
 
 ::
 
-  // first: This route will be matched before others, like /articles/:id
-  @GET(value="/articles/new", first=true)
-  class ArticleNewCreate extends Action {
-    beforeFilters("authenticate") = () => session.contains("user")
+  @GET("/articles/:id")
+  class ArticleShow {
+    override def execute {
+      val id = param("id")
+      val article = Article.find(id)
+      renderView(
+        <h1>{article.title}</h1>
+        {article.body}
+      )
+    }
+  }
 
+ArticleNew.scala
+
+::
+
+  // first=true: force this route to be matched before "/articles/:id"
+  @GET(value="/articles/new", first=true)
+  class ArticleNew extends Action {
     override def execute {
       renderView(
-        <form post2="submit" action={urlForPostback[ArticleCreate]}>  <-- The URL is encrypted, the encrypted URL acts like an anti CSRF token
+        <form postback="submit" action={urlForPostbackThis}>
           Title:
-          {<input type="text" name="title" />.validate(new Required)}<br />
+          <input type="text" name="title" /><br />
 
           Body:
-          {textarea name="body"></textarea>.validate(new Required)}<br />
+          textarea name="body"></textarea><br />
 
-          <input type="submit" value="OK" />
+          <input type="submit" value="Save" />
         </form>
       )
     }
@@ -41,58 +53,22 @@ the only pages that search engines follow.
     override def postback {
       val title = param("title")
       val body  = param("body")
-      val user  = session("user").asInstanceOf[User]
+      val article = Article.save(title, body)
 
-      Article.save(user.id, title, body)
-      jsRedirectTo[ArticleIndex]
+      flash("Article has been saved.")
+      jsRedirectTo[ArticleShow]("id" -> article.id)
     }
   }
 
-To make a postback, you need to know:
+When ``submit`` JavaScript event of the form is triggered, the form will be posted back
+to the current Xitrum action.
 
-* The event that triggers postback
-* The element where the event occurs
-* The action destination on the server
-* Parameters to send with the postback
+``action`` attribute of ``<form>`` is encrypted. The encrypted URL acts like the anti-CSRF token.
 
-General case
-------------
+An example without form:
 
 ::
 
-  <tag1 id="form">
-    <!-- form elements in this tag will be posted back -->
-  </tag1>
+  <a href="#" postback="click" action={urlForPostback[LogoutAction]}>Logout</a>
 
-  <tag2 postback="event" action="/url/to/action" form="form" />
-
-Special case 1: action is the same with the current page URL
-------------------------------------------------------------
-
-You can leave out "action".
-
-::
-
-  <tag1 id="form">
-    <!-- form elements in this tag will be posted back -->
-  </tag1>
-
-  <tag2 postback="event" form ="form" />
-
-Special case 2: tag1 and tag2 are the same
-------------------------------------------
-
-::
-
-  <tag1 postback="event" action="/url/to/action">
-    <!-- form elements in this tag will be posted back -->
-  </tag1>
-
-Special case 3: combination of the above
-----------------------------------------
-
-::
-
-  <tag1 postback="event">
-    <!-- form elements in this tag will be posted back -->
-  </tag1>
+Clicking the link above will trigger the postback to LogoutAction.

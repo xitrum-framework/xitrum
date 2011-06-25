@@ -33,21 +33,40 @@ Or use ``<xml:unparsed>``:
     </xml:unparsed>
   </script>
 
+``<xml:unparsed>`` will be hidden in the output:
+
+::
+
+  <script>
+    if (1 < 2) alert('Xitrum rocks');
+  </script>
+
 Group XML elements
 ------------------
 
 ::
 
-  if (loggedIn)
-    <xml:group>
-      <b>{username}</b>
-      <a href={urlFor[LogoutAction]}>Logout</a>
-    </xml:group>
-  else
-    <xml:group>
-      <a href={urlFor[LoginAction]}>Login</a>
-      <a href={urlFor[RegisterAction]}>Register</a>
-    </xml:group>
+  <div id="header">
+    {if (loggedIn)
+      <xml:group>
+        <b>{username}</b>
+        <a href={urlFor[LogoutAction]}>Logout</a>
+      </xml:group>
+    else
+      <xml:group>
+        <a href={urlFor[LoginAction]}>Login</a>
+        <a href={urlFor[RegisterAction]}>Register</a>
+      </xml:group>}
+  </div>
+
+``<xml:group>`` will be hidden in the output, for example when the use has logged in:
+
+::
+
+  <div id="header">
+    <b>My username</b>
+    <a href="/login">Logout</a>
+  </div>
 
 Render XHTML
 ------------

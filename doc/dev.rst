@@ -3,7 +3,7 @@ Development flow with SBT, Eclipse, and JRebel
 
 .. image:: http://www.bdoubliees.com/journalspirou/sfigures6/schtroumpfs/s12.jpg
 
-This section assumes that you have installed Eclipse and
+This chapter assumes that you have installed Eclipse and
 `Scala plugin for Eclipse <http://www.scala-ide.org/>`_.
 
 Install plugins for SBT

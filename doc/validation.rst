@@ -18,26 +18,47 @@ Validation is performed at both browser side and server side.
                             FAILED                                    FAILED
                        <------+                                  <------+
 
-
-Xitrum provides a lot of default validators. You can also write your own custom
-validators very easily.
-
 Default validators
 ------------------
+
+Xitrum provides a lot of default validators. You can use them right away.
 
 ::
 
   // See this package for a complete list of avaiable default validators
+  // https://github.com/ngocdaothanh/xitrum/tree/master/src/main/scala/xitrum/validation
   import xitrum.validation._
 
-  <form postback="submit">
-    {<input type="text" name="username" />.validate(new Required, new MinLength(5), new MaxLength(10)}
-    {<input type="password" name="password" />.validate(new Required)}
-    {<input type="passord_confirm" name="password_confirm" />.validate(new PasswordConfirm("password"))}
+  <form postback="submit" action={urlForPostbackThis}>
+    Username:
+    <input type="text" name={validate("username", MinLength(5), MaxLength(10)} /><br />
+
+    Password:
+    <input type="password" name={validate("password", Required)} /><br />
+
+    Password confirmation:
+    <input type="passord" name={validate("password_confirm", EqualTo("password"))} /><br />
+
+    Memo:
+    <textarea name={validate("memo")}></textarea><br />
+
+    <input type="submit" value="Register" />
   </form>
+
+Names of inputs will be encrypted to include the serialized validators. They will
+be automatically decrypted when the form is posted back to the server.
+
+**Note**
+
+  Technically, for the server side to ensure that hackers cannot bypass validators,
+  all input names must be encrypted. This means that even inputs that do not need
+  validation must be marked with ``validate``. See ``validate("memo")`` above.
+  We will try to remove this is inconvenience in the next version of Xitrum.
 
 Write custom validators
 -----------------------
+
+You can also write your own custom validators very easily.
 
 ::
 

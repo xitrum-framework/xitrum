@@ -102,6 +102,15 @@ object Config extends Logger {
   var maxRequestContentLengthInMB = 10
 
   /**
+   * For speed, to avoid checking file existance on every request, public files
+   * should have URL pattern /public/...
+   *
+   * favicon.ico: http://en.wikipedia.org/wiki/Favicon
+   * robots.txt:  http://en.wikipedia.org/wiki/Robots_exclusion_standard
+   */
+  var publicFilesNotBehindPublicUrl = List("/favicon.ico", "/robots.txt")
+
+  /**
    * Xitrum can serve static files (request URL in the form /public/...
    * or /responses/public/... or there is X-Sendfile in the response header),
    * and it caches small static files in memory.

@@ -99,10 +99,10 @@ object Dispatcher extends Logger {
       val dt           = endTimestamp - beginTimestamp
 
       (if (postback) "POSTBACK" else action.request.getMethod) + " " + action.getClass.getName                                                                    +
-      (if (!action.uriParams.isEmpty)        ", uriParams: "        + AEnv.inspectParams(action.uriParams       .asInstanceOf[MMap[String, Array[Any]]]) else "") +
-      (if (!action.bodyParams.isEmpty)       ", bodyParams: "       + AEnv.inspectParams(action.bodyParams      .asInstanceOf[MMap[String, Array[Any]]]) else "") +
-      (if (!action.pathParams.isEmpty)       ", pathParams: "       + AEnv.inspectParams(action.pathParams      .asInstanceOf[MMap[String, Array[Any]]]) else "") +
-      (if (!action.fileUploadParams.isEmpty) ", fileUploadParams: " + AEnv.inspectParams(action.fileUploadParams.asInstanceOf[MMap[String, Array[Any]]]) else "") +
+      (if (!action.henv.uriParams.isEmpty)        ", uriParams: "        + AEnv.inspectParams(action.henv.uriParams       .asInstanceOf[MMap[String, Array[Any]]]) else "") +
+      (if (!action.henv.bodyParams.isEmpty)       ", bodyParams: "       + AEnv.inspectParams(action.henv.bodyParams      .asInstanceOf[MMap[String, Array[Any]]]) else "") +
+      (if (!action.henv.pathParams.isEmpty)       ", pathParams: "       + AEnv.inspectParams(action.henv.pathParams      .asInstanceOf[MMap[String, Array[Any]]]) else "") +
+      (if (!action.henv.fileUploadParams.isEmpty) ", fileUploadParams: " + AEnv.inspectParams(action.henv.fileUploadParams.asInstanceOf[MMap[String, Array[Any]]]) else "") +
       ", " + dt + " [ms]"
     }
 

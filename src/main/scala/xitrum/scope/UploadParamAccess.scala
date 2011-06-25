@@ -11,7 +11,7 @@ trait UploadParamAccess {
 
   /**
    * Returns a singular element.
-   * The filename has been sanitized for insecured character. You don't have to
+   * The filename has been sanitized for insecure character. You don't have to
    * do it again.
    */
   def uploadParam(key: String): FileUpload = {
@@ -26,7 +26,7 @@ trait UploadParamAccess {
 
   /**
    * Returns a list of elements.
-   * The filename has been sanitized for insecured character. You don't have to
+   * The filename has been sanitized for insecure character. You don't have to
    * do it again.
    */
   def uploadParams(key: String): Array[FileUpload] = {

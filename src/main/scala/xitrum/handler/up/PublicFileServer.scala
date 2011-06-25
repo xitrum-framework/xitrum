@@ -9,17 +9,12 @@ import HttpMethod._
 import HttpResponseStatus._
 import HttpVersion._
 
+import xitrum.Config
 import xitrum.handler.BaseUri
 import xitrum.handler.updown.XSendfile
 import xitrum.util.PathSanitizer
 
-/**
- * Serves special files or files in /public directory.
- *
- * Special files:
- *    favicon.ico may be not at the root: http://en.wikipedia.org/wiki/Favicon
- *    robots.txt     must be at the root: http://en.wikipedia.org/wiki/Robots_exclusion_standard
- */
+/** Serves files in "public" directory. */
 @Sharable
 class PublicFileServer extends SimpleChannelUpstreamHandler with ClosedClientSilencer {
   override def messageReceived(ctx: ChannelHandlerContext, e: MessageEvent) {
@@ -48,7 +43,8 @@ class PublicFileServer extends SimpleChannelUpstreamHandler with ClosedClientSil
         return
 
       case Some(pathInfo1) =>
-        val pathInfo2 = if (pathInfo1.startsWith("/favicon.ico") || pathInfo1.startsWith("/robots.txt")) "/public" + pathInfo1 else pathInfo1
+        val isSpecialPublicFile = Config.publicFilesNotBehindPublicUrl.contains(pathInfo1)
+        val pathInfo2 = if (isSpecialPublicFile) "/public" + pathInfo1 else pathInfo1
         if (!pathInfo2.startsWith("/public/")) {
           ctx.sendUpstream(e)
           return

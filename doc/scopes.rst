@@ -1,6 +1,8 @@
 Scopes
 ======
 
+.. image:: http://www.bdoubliees.com/journalspirou/sfigures6/schtroumpfs/s11.jpg
+
 To pass things around, there are 2 scopes: request and session. Xitrum tries to
 be typesafe. RequestVar and SessionVar is a way to achieve that goal.
 
@@ -12,7 +14,7 @@ in the typesafe way, you should use RequestVar.
 
 Example:
 
-``Var.scala``
+Var.scala
 
 ::
 
@@ -22,7 +24,7 @@ Example:
     object rTitle extends RequestVar[String]
   }
 
-``AppAction.scala``
+AppAction.scala
 
 ::
 
@@ -43,7 +45,7 @@ Example:
     )
   }
 
-``ShowAction.scala``
+ShowAction.scala
 
 ::
 
@@ -91,7 +93,9 @@ Display the username:
 object vs. val
 --------------
 
-Please use ``object`` instead of ``val``. *Do not do like this*:
+Please use ``object`` instead of ``val``.
+
+**Do not do like this**:
 
 ::
 

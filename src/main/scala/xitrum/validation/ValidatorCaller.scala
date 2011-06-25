@@ -7,15 +7,18 @@ import xitrum.scope.Env
 
 object ValidatorCaller {
   def call(action: Action): Boolean = {
-    // bodyParams:  The name of parameters has been encrypted
-    // bodyParams2: The name of parameters has been decrypted to normal, normal as the application developers see them
-    val securedBodyParams = action.bodyParams
-    val (bodyParams, name_securedParamName_validators) = takeoutValidators(securedBodyParams)
-    action.bodyParams = bodyParams
+    // Params in URL are not allowed for security because we only check bodyParams
+    action.henv.uriParams.clear
+    action.henv.pathParams.clear
 
-    for ((paramName, securedParamName, validators) <- name_securedParamName_validators) {
+    val (bodyParams, name_secureParamName_validators) = takeoutValidators(action.henv.bodyParams)
+
+    action.henv.bodyParams.clear
+    action.henv.bodyParams ++= bodyParams
+
+    for ((paramName, secureParamName, validators) <- name_secureParamName_validators) {
       for (v <- validators) {
-        if (!v.validate(action, paramName, securedParamName)) return false
+        if (!v.validate(action, paramName, secureParamName)) return false
       }
     }
 
@@ -24,25 +27,25 @@ object ValidatorCaller {
 
   //----------------------------------------------------------------------------
 
-  //                                                             decrypted params      paramName  securedParamName
-  private def takeoutValidators(securedBodyParams: Env.Params): (Env.Params, Iterable[(String,    String, Iterable[Validator])]) = {
-    val securedParamNames = securedBodyParams.keys
+  //                                                            decrypted params      paramName  secureParamName
+  private def takeoutValidators(secureBodyParams: Env.Params): (Env.Params, Iterable[(String,    String, Iterable[Validator])]) = {
+    val secureParamNames = secureBodyParams.keys
 
-    val bodyParams2                           = new MHashMap[String, Array[String]]
-    val paramName_securedParamName_validators = new ArrayBuffer[(String, String, Iterable[Validator])]
-    for (securedParamName <- securedParamNames) {
-      val value = securedBodyParams(securedParamName)
+    val bodyParams2                          = new MHashMap[String, Array[String]]
+    val paramName_secureParamName_validators = new ArrayBuffer[(String, String, Iterable[Validator])]
+    for (secureParamName <- secureParamNames) {
+      val value = secureBodyParams(secureParamName)
 
-      ValidatorInjector.takeOutFromName(securedParamName) match {
+      ValidatorInjector.takeOutFromName(secureParamName) match {
         case None =>
           throw new Exception("Request contains invalid parameter name")
 
         case Some(paramName_validators) =>
           val (paramName, validators) = paramName_validators
           bodyParams2.put(paramName, value)
-          paramName_securedParamName_validators.append((paramName, securedParamName, validators))
+          paramName_secureParamName_validators.append((paramName, secureParamName, validators))
       }
     }
-    (bodyParams2, paramName_securedParamName_validators)
+    (bodyParams2, paramName_secureParamName_validators)
   }
 }

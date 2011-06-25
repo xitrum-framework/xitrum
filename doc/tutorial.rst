@@ -17,7 +17,7 @@ Follow `instructions <https://github.com/harrah/xsbt/wiki/Setup>`_ to install.
 Netty 4
 -------
 
-*This part will be removed when Netty 4 is officially released.*
+**This part will be removed when Netty 4 is officially released.**
 
 File upload feature in Xitrum needs `Netty <https://github.com/netty/netty>`_ 4,
 which has not been released. You must download and build it yourself.

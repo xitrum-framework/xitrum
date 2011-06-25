@@ -18,14 +18,12 @@ class PostbackAction extends Action {
   override def execute {
     isPostback = true
 
-    pathParams.remove("*")  // Remove noisy information
-
-    val encoded                = pathInfo.encoded
-    val securedActionClassName = encoded.substring(PostbackAction.POSTBACK_PREFIX.length)
+    val encoded               = pathInfo.encoded
+    val secureActionClassName = encoded.substring(PostbackAction.POSTBACK_PREFIX.length)
 
     var actionClassName: String = null
     try {
-      actionClassName = CSRF.decrypt(this, securedActionClassName).asInstanceOf[String]
+      actionClassName = CSRF.decrypt(this, secureActionClassName).asInstanceOf[String]
     } catch {
       case e: InvalidCSRFToken =>
         session.reset
@@ -36,10 +34,9 @@ class PostbackAction extends Action {
         throw other
     }
 
-    val actionClass = Class.forName(actionClassName).asInstanceOf[Class[Action]]
     if (ValidatorCaller.call(this)) {
+      val actionClass = Class.forName(actionClassName).asInstanceOf[Class[Action]]
       henv.pathInfo   = new PathInfo(actionClass.getName)  // /xitrum/postback/blahblah is meaningless => Use the destination class name
-      henv.bodyParams = bodyParams                         // Set decrypted params before forwarding
       forward(actionClass, true)
     } else {
       // Flash the default error message if the response is empty (the validators did not respond anything)

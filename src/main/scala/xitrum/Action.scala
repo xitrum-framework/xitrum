@@ -9,7 +9,7 @@ import xitrum.action._
 import xitrum.scope.ExtEnv
 import xitrum.scope.session.CSRF
 import xitrum.action.routing.{PostbackAction, Routes}
-import xitrum.validation.ValidatorInjector
+import xitrum.validation.{Validator, ValidatorInjector}
 import xitrum.view.Renderer
 import xitrum.handler.up.Dispatcher
 
@@ -74,9 +74,9 @@ trait Action extends ExtEnv with Logger with Net with Filter with BasicAuthentic
   //----------------------------------------------------------------------------
 
   protected def urlForPostbackAction(actionClass: Class[Action]): String = {
-    val className        = actionClass.getName
-    val securedClassName = CSRF.encrypt(this, className)
-    val url = PostbackAction.POSTBACK_PREFIX + securedClassName
+    val className       = actionClass.getName
+    val secureClassName = CSRF.encrypt(this, className)
+    val url = PostbackAction.POSTBACK_PREFIX + secureClassName
     if (Config.baseUri.isEmpty) url else Config.baseUri + "/" + url
   }
 
@@ -119,5 +119,26 @@ trait Action extends ExtEnv with Logger with Net with Filter with BasicAuthentic
     action(ctx, henv)
     action.isPostback = isPostback
     Dispatcher.dispatchWithFailsafe(action, postback)
+  }
+
+  //----------------------------------------------------------------------------
+
+  /** @return Param name that has been encrypted to include serialized validators */
+  def validate(paramName: String, validators: Validator*): String = {
+    /* Design decision:
+    App developers would write:
+      <input type="text" name={validate("username", MinLength(5), MaxLength(10)} />
+
+    This is easier to read and simpler than:
+      {<input type="text" name="username" /> +: Validate(MinLength(5), MaxLength(10))}
+    and he know that the resulting name may not be "username".
+
+    This is faster than:
+      {<input type="text" name="username" /> +: MinLength(5) +: MaxLength(10)}
+    */
+
+    val secureParamName = ValidatorInjector.injectToParamName(paramName, validators:_*)
+    validators.foreach { v => v.render(this, paramName, secureParamName) }
+    secureParamName
   }
 }

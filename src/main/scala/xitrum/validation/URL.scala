@@ -3,17 +3,17 @@ package xitrum.validation
 import xitrum.Action
 
 object URL extends Validator {
-  def render(action: Action, paramName: String, securedParamName: String) {
+  def render(action: Action, paramName: String, secureParamName: String) {
     import action._
 
     val js = jsChain(
-      jsByName(securedParamName),
+      jsByName(secureParamName),
       jsCall("rules", "\"add\"", "{url: true}")
     )
     jsAddToView(js)
   }
 
-  def validate(action: Action, paramName: String, securedParamName: String): Boolean = {
+  def validate(action: Action, paramName: String, secureParamName: String): Boolean = {
     val value = action.param(paramName).trim
     value.contains("://")
   }
