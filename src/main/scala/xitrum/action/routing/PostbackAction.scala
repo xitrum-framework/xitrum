@@ -36,7 +36,6 @@ class PostbackAction extends Action {
 
     if (ValidatorCaller.call(this)) {
       val actionClass = Class.forName(actionClassName).asInstanceOf[Class[Action]]
-      henv.pathInfo   = new PathInfo(actionClass.getName)  // /xitrum/postback/blahblah is meaningless => Use the destination class name
       forward(actionClass, true)
     } else {
       // Flash the default error message if the response is empty (the validators did not respond anything)
