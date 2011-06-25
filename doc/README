@@ -4,7 +4,7 @@ http://en.wikipedia.org/wiki/Sphinx_%28documentation_generator%29
 To generate the HTML documentation, install Sphinx, then run:
 make html
 
-The created HTML files will be put in _build directory.
+The generated HTML files will be put in _build directory.
 
 To generate the HTML documentation, run:
 make latexpdf
