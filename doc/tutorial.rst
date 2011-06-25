@@ -48,8 +48,9 @@ Build with `Maven <http://maven.apache.org/>`_:
 
 ::
 
-  $ wget https://repository.jboss.org/nexus/content/repositories/releases/org/jboss/logging/jboss-logging-spi/2.1.2.GA/jboss-logging-spi-2.1.2.GA.jar
-  $ mvn install:install-file -DgroupId=org.jboss.logging -DartifactId=jboss-logging-spi -Dpackaging=jar -Dversion=2.1.2.GA -Dfile=jboss-logging-spi-2.1.2.GA.jar -DgeneratePom=true
+  $ wget http://bit.ly/jebzNn
+  $ mvn install:install-file -DgroupId=org.jboss.logging -DartifactId=jboss-logging-spi \
+    -Dpackaging=jar -Dversion=2.1.2.GA -Dfile=jboss-logging-spi-2.1.2.GA.jar -DgeneratePom=true
   $ MAVEN_OPTS=-Xmx512m mvn -Dmaven.test.skip=true install
 
 Above is the quick and dirty way. For long way: https://issues.jboss.org/browse/NETTY-387.

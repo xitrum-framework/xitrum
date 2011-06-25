@@ -5,8 +5,8 @@ XML tips
 
 Scala allow wrting literal XML. Xitrum uses this feature as its "template engine":
 
-* Scala checks XML syntax at compile time => Views are typesafe.
-* Scala automatically escapes XML => Views are `XSS <http://en.wikipedia.org/wiki/Cross-site_scripting>`_-free by default.
+* Scala checks XML syntax at compile time: Views are typesafe.
+* Scala automatically escapes XML: Views are `XSS <http://en.wikipedia.org/wiki/Cross-site_scripting>`_-free by default.
 
 Below are some tips.
 

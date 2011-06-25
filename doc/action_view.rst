@@ -3,7 +3,8 @@ Action and View
 
 .. image:: http://www.bdoubliees.com/journalspirou/sfigures6/schtroumpfs/s7.jpg
 
-There are 2 kinds of actions: :doc:`RESTful actions </restful>` and :doc:`postback actions </postback>`.
+There are 2 kinds of actions: :doc:`RESTful actions </restful>` and
+:doc:`postback actions </postback>`.
 
 Normally, you write view directly in its action.
 
@@ -33,7 +34,9 @@ There are methods for rendering things other than views:
 
 * ``renderText``: render a string without layout (see the following section)
 * ``renderBinary``: render an array of bytes
-* ``renderFile``: send a file directly from disk, very fast because `zero-copy <http://www.ibm.com/developerworks/library/j-zerocopy/>`_ (send-file) is used
+* ``renderFile``: send a file directly from disk, very fast
+  because `zero-copy <http://www.ibm.com/developerworks/library/j-zerocopy/>`_
+  (send-file) is used
 
 Layout
 ------
@@ -41,7 +44,8 @@ Layout
 With ``renderView``, layout is rendered. By default the layout is what passed to
 ``renderView``. You can customize the layout by overriding the ``layout`` method.
 
-Typically, you create a parent class which has a common layout for many views, like this:
+Typically, you create a parent class which has a common layout for many views,
+like this:
 
 AppAction.scala
 
