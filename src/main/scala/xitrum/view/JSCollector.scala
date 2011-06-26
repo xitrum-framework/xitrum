@@ -1,6 +1,7 @@
 package xitrum.view
 
 import scala.xml.Unparsed
+import xitrum.Config
 
 trait JSCollector {
   private val buffer = new StringBuilder
@@ -12,8 +13,7 @@ trait JSCollector {
 
   def jsForView =
     <script>{Unparsed(
-      "$(function() {\n" +
-        buffer.toString +
-      "});"
+      "var XITRUM_BASE_URI = '" + Config.baseUri + "';\n" +
+      "$(function() {\n" + buffer.toString + "});"
     )}</script>
 }

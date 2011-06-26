@@ -28,7 +28,7 @@ var xitrum = {
     }
 
     target1.hide();
-    target1.after('<img src="/resources/public/xitrum/ajax-loader.gif" />');
+    target1.after('<img src="' + XITRUM_BASE_URI + '/resources/public/xitrum/ajax-loader.gif" />');
 
     $.ajax({
       type: "POST",
