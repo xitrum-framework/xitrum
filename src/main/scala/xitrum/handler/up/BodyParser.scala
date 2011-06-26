@@ -45,7 +45,7 @@ class BodyParser extends SimpleChannelUpstreamHandler with ClosedClientSilencer 
     val env     = m.asInstanceOf[Env]
     val request = env.request
 
-    val (bodyParams, fileUploadParams): (Params, FileUploadParams) = if (request.getMethod != POST) {
+    val (bodyParams, fileUploadParams) = if (request.getMethod != POST) {
       (new MHashMap[String, Array[String]], new MHashMap[String, Array[FileUpload]])
     } else {
       try {

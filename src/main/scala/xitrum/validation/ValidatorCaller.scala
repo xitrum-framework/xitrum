@@ -34,7 +34,7 @@ object ValidatorCaller {
     val bodyParams2                          = new MHashMap[String, Array[String]]
     val paramName_secureParamName_validators = new ArrayBuffer[(String, String, Iterable[Validator])]
     for (secureParamName <- secureParamNames) {
-      val value = secureBodyParams(secureParamName)
+      val params = secureBodyParams(secureParamName)
 
       ValidatorInjector.takeOutFromName(secureParamName) match {
         case None =>
@@ -42,7 +42,13 @@ object ValidatorCaller {
 
         case Some(paramName_validators) =>
           val (paramName, validators) = paramName_validators
-          bodyParams2.put(paramName, value)
+
+          if (bodyParams2.contains(paramName)) {
+            val array = bodyParams2(paramName)
+            bodyParams2.put(paramName, array ++ params)
+          } else
+            bodyParams2.put(paramName, params)
+
           paramName_secureParamName_validators.append((paramName, secureParamName, validators))
       }
     }
