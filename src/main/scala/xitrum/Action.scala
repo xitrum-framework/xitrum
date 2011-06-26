@@ -65,27 +65,46 @@ trait Action extends ExtEnv with Logger with Net with Filter with BasicAuthentic
   def urlFor[T: Manifest]: String = urlFor[T]()
   def absoluteUrlFor[T: Manifest]: String = absoluteUrlPrefix + urlFor[T]()
 
-  def urlForThis         = Routes.urlFor(this.getClass.asInstanceOf[Class[Action]])
-  def absoluteUrlForThis = absoluteUrlPrefix + urlForThis
-
   def urlForThis(params: (String, Any)*) = Routes.urlFor(this.getClass.asInstanceOf[Class[Action]], params:_*)
   def absoluteUrlForThis(params: (String, Any)*) = absoluteUrlPrefix + urlForThis(params:_*)
 
+  def urlForThis: String = urlForThis()
+  def absoluteUrlForThis = absoluteUrlPrefix + urlForThis
+
   //----------------------------------------------------------------------------
 
-  protected def urlForPostbackAction(actionClass: Class[Action]): String = {
+  private def urlForPostbackAction(actionClass: Class[Action]): String = {
     val className       = actionClass.getName
     val secureClassName = CSRF.encrypt(this, className)
     val url = PostbackAction.POSTBACK_PREFIX + secureClassName
     if (Config.baseUri.isEmpty) url else Config.baseUri + "/" + url
   }
 
-  def urlForPostback[T: Manifest]: String = {
-    val actionClass = manifest[T].erasure.asInstanceOf[Class[Action]]
-    urlForPostbackAction(actionClass)
+  private def embedAdditionalParams(url: String, params: Iterable[(String, Any)]) {
+  /*
+    // bien thanh json
+    select elem theo action = url
+    set vao data theo key "additionalParams"
+    trong xitrum.js, check neu co key nay, thi add them vao postback
+    */
   }
 
-  def urlForPostbackThis = urlForPostbackAction(this.getClass.asInstanceOf[Class[Action]])
+  def urlForPostback[T: Manifest](params: (String, Any)*): String = {
+    val actionClass = manifest[T].erasure.asInstanceOf[Class[Action]]
+    val url = urlForPostbackAction(actionClass)
+    embedAdditionalParams(url, params)
+    url
+  }
+
+  def urlForPostbackThis(params: (String, Any)*) = {
+    val actionClass = this.getClass.asInstanceOf[Class[Action]]
+    val url = urlForPostbackAction(actionClass)
+    embedAdditionalParams(url, params)
+    url
+  }
+
+  def urlForPostback[T: Manifest]: String = urlForPostback[T]()
+  def urlForPostbackThis: String          = urlForPostbackThis()
 
   //----------------------------------------------------------------------------
 

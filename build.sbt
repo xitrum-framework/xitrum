@@ -4,7 +4,13 @@ name := "xitrum"
 
 version := "1.1-SNAPSHOT"
 
-scalaVersion := "2.9.0-1"
+// https://github.com/harrah/xsbt/wiki/Cross-Build
+crossScalaVersions := Seq("2.8.0", "2.8.1", "2.9.0", "2.9.0-1")
+
+scalacOptions ++= Seq(
+  "-deprecation",
+  "-unchecked"
+)
 
 // Dependencies ----------------------------------------------------------------
 
