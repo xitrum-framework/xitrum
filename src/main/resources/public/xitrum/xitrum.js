@@ -1,35 +1,45 @@
 var xitrum = {
   postback: function(event) {
-    var e = $(event.target);
+    var target1 = $(event.target);
 
-    var confirmMsg = e.attr("confirm");
+    var confirmMsg = target1.attr("confirm");
     if (confirmMsg && !confirm(confirmMsg)) return false;
 
-    var action1 = e.attr("action");
-    var action2 = (!action1) ? window.location.href : action1;
+    var action = target1.attr("action");
+    var data   = "";
 
-    var form1 = e.attr("form");
-    var form2 = (!form1) ? e : $("#" + form1);
+    // data may come from "extra" data
+    // http://api.jquery.com/data/
+    var extraParams = target1.data("extra");
+    if (extraParams) data = extraParams + "&";
 
-    var data = ""
-    if (form2[0].tagName == "FORM") {
-       if (!form2.valid()) return false;
-       data += form2.serialize();
+    // or come from extra form
+    var extraFormSelector = target1.attr("extra");
+    if (extraFormSelector) {
+      var extraForm = $(extraFormSelector);
+      if (extraForm && extraForm[0].tagName == "FORM" && extraForm.valid())
+        data = data + extraForm.serialize() + "&";
     }
 
-    $(form2).hide();
-    $(form2).after('<img src="/resources/public/xitrum/ajax-loader.gif" />');
+    // or come from this element itself
+    if (target1[0].tagName == "FORM") {
+       if (!target1.valid()) return false;
+       data = data + target1.serialize();
+    }
+
+    target1.hide();
+    target1.after('<img src="/resources/public/xitrum/ajax-loader.gif" />');
 
     $.ajax({
       type: "POST",
-      url:  action2,
+      url:  action,
       data: data,
       error: function(xhr) {
         alert("Could not connect to server or server error.");
       },
       complete: function(xhr) {
-        $(form2).show();
-        $(form2).next().remove();
+        target1.show();
+        target1.next().remove();
       }
     });
 

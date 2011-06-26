@@ -94,16 +94,34 @@ If you want to display a confirmation dialog:
 
 If the user clicks "Cancel", the postback will not be sent.
 
-Additional params
------------------
+Extra params
+------------
 
-In case of form, you can add ``<input type="hidden"...`` elements to send
-additional params with the postback.
+In case of form element, you can add ``<input type="hidden"...`` to send
+extra params with the postback.
 
 For other elements, you do like this:
 
 ::
 
-  <a href="#" postback="click"
-              action={urlForPostbackThis("itemId" -> item.id)}
-              confirm={"Do you want to delete %s?".format(item.name)}>Delete</a>
+  <a href="#"
+     postback="click"
+     action={urlForPostbackThis("itemId" -> item.id)}
+     confirm={"Do you want to delete %s?".format(item.name)}>Delete</a>
+
+You may also put extra params in a separate form:
+
+::
+
+  <form id="myform" postback="submit" action={urlForPostbackThis}>
+    Search:
+    <input type="text" name={validate("keyword")} />
+
+    <a class="pagination"
+       href="#"
+       postback="click"
+       extra="#myform"
+       action={urlForPostbackThis("page" -> page)}>{page}</a>
+  </form>
+
+``#myform`` is the jQuery selector to select the form that contains extra params.
