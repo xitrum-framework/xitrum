@@ -42,6 +42,8 @@ file that does may not fit memory.
 2. Call renderXXX as many times as you want
 3. Lastly, call ``renderLastChunk``
 
+Headers are only sent on the first renderXXX call.
+
 Comet
 -----
 

@@ -16,6 +16,8 @@ import xitrum.handler.updown.XSendfile
  * 1. Call ``response.setChunked(true)``
  * 2. Call renderXXX as many times as you want
  * 3. Lastly, call ``renderLastChunk``
+ *
+ * Headers are only sent on the first renderXXX call.
  */
 trait Renderer extends JQuery with JSCollector with Flash with I18n {
   this: Action =>
