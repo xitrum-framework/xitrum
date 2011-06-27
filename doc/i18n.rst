@@ -3,6 +3,8 @@ I18n
 
 .. image:: http://www.bdoubliees.com/journalspirou/sfigures6/schtroumpfs/s16.jpg
 
+TODO
+
 GNU Gettext is used.
 
 Mo rong them tu cai nay la tot nhat:
@@ -20,7 +22,7 @@ Extracting messages to po files
 
 ::
 
-  xgettext -ktrc:1c,2 -ktrnc:1c,2,3 -ktr -kmarktr -ktrn:1,2 -o po/keys.pot src/*.java
+  xgettext -ktrc:1c,2 -ktrnc:1c,2,3 -ktr -kmarktr -ktrn:1,2 -o po/keys.pot src/*.scala
 
 po files
 --------

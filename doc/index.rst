@@ -20,9 +20,11 @@ Xitrum is open source:
    tutorial
    dev
    action_view
-   xml
    restful
    postback
+   xml
+   json
+   async
    static
    scopes
    validation

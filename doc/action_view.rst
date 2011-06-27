@@ -32,7 +32,7 @@ Of course you can refactor the view into a separate Scala file.
 
 There are methods for rendering things other than views:
 
-* ``renderText``: render a string without layout (see the following section)
+* ``renderText``: render a string without layout
 * ``renderBinary``: render an array of bytes
 * ``renderFile``: send a file directly from disk, very fast
   because `zero-copy <http://www.ibm.com/developerworks/library/j-zerocopy/>`_
@@ -100,15 +100,3 @@ You can pass the layout directly to ``renderView``:
 
   val s = "World"
   renderView(<p>Hello <em>{s}</em>!</p>, specialLayout _)
-
-Async response
---------------
-
-There is no default response. You must call renderXXX explicitly to send response
-to the client. If you don't call renderXXX, the HTTP connection is kept for you,
-and you can call renderXXX later.
-
-Chunked response
-----------------
-
-TODO
