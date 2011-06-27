@@ -47,7 +47,6 @@ trait Action extends ExtEnv with Logger with Net with Filter with BasicAuthentic
     }
   }
 
-  // Called by Dispatcher
   def responded = _responded
 
   //----------------------------------------------------------------------------

@@ -19,7 +19,28 @@ and you can call renderXXX later.
 Chunked response
 ----------------
 
-TODO
+`Chunked response <http://en.wikipedia.org/wiki/Chunked_transfer_encoding>`_
+has many use cases. For example, when you need to generate a very large CSV
+file that does may not fit memory.
+
+::
+
+  response.setChunked(true)
+
+  val generator = new MyCsvGenerator
+  val header = generator.getHeader
+  renderText(header, "text/csv")
+
+  while (generator.hasNextLine) {
+    val line = generator.nextLine
+    renderText(line)
+  }
+
+  renderLastChunk
+
+1. Call ``response.setChunked(true)``
+2. Call renderXXX as many times as you want
+3. Lastly, call ``renderLastChunk``
 
 Comet
 -----

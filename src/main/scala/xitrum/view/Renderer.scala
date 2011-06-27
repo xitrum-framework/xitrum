@@ -4,26 +4,46 @@ import java.io.File
 import scala.xml.{Node, NodeSeq, Xhtml}
 
 import org.jboss.netty.buffer.ChannelBuffers
-import org.jboss.netty.handler.codec.http.HttpHeaders
-import HttpHeaders.Names.CONTENT_TYPE
+import org.jboss.netty.handler.codec.http.{DefaultHttpChunk, HttpChunk, HttpHeaders}
+import HttpHeaders.Names.{CONTENT_TYPE, TRANSFER_ENCODING}
+import HttpHeaders.Values.CHUNKED
 
 import xitrum.{Action, Config}
 import xitrum.handler.updown.XSendfile
 
+/**
+ * To respond chunks (http://en.wikipedia.org/wiki/Chunked_transfer_encoding):
+ * 1. Call ``response.setChunked(true)``
+ * 2. Call renderXXX as many times as you want
+ * 3. Lastly, call ``renderLastChunk``
+ */
 trait Renderer extends JQuery with JSCollector with Flash with I18n {
   this: Action =>
+
+  private def writeHeaderOnFirstChunk {
+    if (!responded) {
+      response.setHeader(TRANSFER_ENCODING, CHUNKED)
+      respond
+    }
+  }
+
+  def renderLastChunk {
+    ctx.getChannel.write(HttpChunk.LAST_CHUNK)
+  }
 
   def renderText(text: Any, contentType: String = null): String = {
     val textIsXml = text.isInstanceOf[Node] || text.isInstanceOf[NodeSeq]
 
-    // Set content type automatically
-    if (contentType != null)
-      response.setHeader(CONTENT_TYPE, contentType)
-    else if (!response.containsHeader(CONTENT_TYPE)) {
-      if (textIsXml)
-        response.setHeader(CONTENT_TYPE, "application/xml")
-      else
-        response.setHeader(CONTENT_TYPE, "text/plain")
+    if (!responded) {
+      // Set content type automatically
+      if (contentType != null)
+        response.setHeader(CONTENT_TYPE, contentType)
+      else if (!response.containsHeader(CONTENT_TYPE)) {
+        if (textIsXml)
+          response.setHeader(CONTENT_TYPE, "application/xml")
+        else
+          response.setHeader(CONTENT_TYPE, "text/plain")
+      }
     }
 
     // <br />.toString will create <br></br> which renders as 2 <br /> on some browsers!
@@ -38,11 +58,17 @@ trait Renderer extends JQuery with JSCollector with Flash with I18n {
       } else
         text.toString
 
-    // Content length is number of bytes, not characters!
     val cb = ChannelBuffers.copiedBuffer(ret, Config.paramCharset)
-    HttpHeaders.setContentLength(response, cb.readableBytes)
-    response.setContent(cb)
-    respond
+    if (response.isChunked) {
+      writeHeaderOnFirstChunk
+      val chunk = new DefaultHttpChunk(cb)
+      ctx.getChannel.write(chunk)
+    } else {
+      // Content length is number of bytes, not characters!
+      HttpHeaders.setContentLength(response, cb.readableBytes)
+      response.setContent(cb)
+      respond
+    }
 
     ret
   }
@@ -69,9 +95,16 @@ trait Renderer extends JQuery with JSCollector with Flash with I18n {
   //----------------------------------------------------------------------------
 
   def renderBinary(bytes: Array[Byte]) {
-    HttpHeaders.setContentLength(response, bytes.length)
-    response.setContent(ChannelBuffers.wrappedBuffer(bytes))
-    respond
+    val cb = ChannelBuffers.wrappedBuffer(bytes)
+    if (response.isChunked) {
+      writeHeaderOnFirstChunk
+      val chunk = new DefaultHttpChunk(cb)
+      ctx.getChannel.write(chunk)
+    } else {
+      HttpHeaders.setContentLength(response, bytes.length)
+      response.setContent(cb)
+      respond
+    }
   }
 
   /**
