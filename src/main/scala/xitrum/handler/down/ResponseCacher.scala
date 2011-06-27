@@ -186,7 +186,7 @@ class ResponseCacher extends SimpleChannelDownstreamHandler with Logger {
       return
     }
 
-    cacheResponse(action)
+    if (!action.response.isChunked) cacheResponse(action)
     ctx.sendDownstream(e)
   }
 }

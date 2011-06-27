@@ -42,11 +42,19 @@ file that does may not fit memory.
 2. Call renderXXX as many times as you want
 3. Lastly, call ``renderLastChunk``
 
-Headers are only sent on the first renderXXX call.
+Notes:
+
+* Headers are only sent on the first renderXXX call.
+* Chunks cannot be used with :doc:`page or action cache </cache>`.
 
 Comet
 -----
 
-WebSocket and long polling Ajax
+Do not use chunked response above for `Comet <http://en.wikipedia.org/wiki/Comet_(programming)/>`_,
+it's ugly (browser loading icon spins forever) and not reliable (browser may
+merge chunks together).
+
+Xitrum currently implements Comet by using Ajax long polling. WebSocket may be
+supported in the future when all major browsers have supported it.
 
 TODO

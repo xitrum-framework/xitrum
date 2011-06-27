@@ -1,9 +1,8 @@
 package xitrum.scope
 
 import org.jboss.netty.handler.codec.http.{DefaultHttpResponse, HttpResponseStatus, HttpVersion, HttpHeaders}
-import HttpResponseStatus._
-import HttpVersion._
-import HttpHeaders.Names._
+import HttpVersion.HTTP_1_1
+import HttpResponseStatus.OK
 
 import xitrum.Config
 import xitrum.Action
@@ -14,6 +13,8 @@ trait ExtEnv extends Env with ParamAccess with UploadParamAccess with CSRF {
 
   /** The default response is empty 200 OK */
   val response = {
+    // http://en.wikipedia.org/wiki/HTTP_persistent_connection
+    // In HTTP 1.1 all connections are considered persistent unless declared otherwise
     val ret = new DefaultHttpResponse(HTTP_1_1, OK)
     HttpHeaders.setContentLength(ret, 0)
     ret

@@ -14,7 +14,7 @@ import xitrum.handler.Env
  * This middleware should be put behind BodyParser.
  */
 @Sharable
-class MethodOverrider extends SimpleChannelUpstreamHandler with ClosedClientSilencer {
+class MethodOverrider extends SimpleChannelUpstreamHandler with BadClientSilencer {
   override def messageReceived(ctx: ChannelHandlerContext, e: MessageEvent) {
     val m = e.getMessage
     if (!m.isInstanceOf[Env]) {

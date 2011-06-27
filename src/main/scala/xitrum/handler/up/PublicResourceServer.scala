@@ -14,7 +14,7 @@ import xitrum.handler.updown.XSendfile
 import xitrum.util.{Gzip, Mime, PathSanitizer}
 
 @Sharable
-class PublicResourceServer extends SimpleChannelUpstreamHandler with ClosedClientSilencer {
+class PublicResourceServer extends SimpleChannelUpstreamHandler with BadClientSilencer {
   override def messageReceived(ctx: ChannelHandlerContext, e: MessageEvent) {
     val m = e.getMessage
     if (!m.isInstanceOf[HttpRequest]) {

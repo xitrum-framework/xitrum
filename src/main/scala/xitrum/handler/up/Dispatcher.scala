@@ -127,7 +127,7 @@ object Dispatcher extends Logger {
 }
 
 @Sharable
-class Dispatcher extends SimpleChannelUpstreamHandler with ClosedClientSilencer {
+class Dispatcher extends SimpleChannelUpstreamHandler with BadClientSilencer {
   import Dispatcher._
 
   override def messageReceived(ctx: ChannelHandlerContext, e: MessageEvent) {

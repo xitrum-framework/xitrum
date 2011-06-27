@@ -31,7 +31,7 @@ object BodyParser {
 }
 
 @Sharable
-class BodyParser extends SimpleChannelUpstreamHandler with ClosedClientSilencer {
+class BodyParser extends SimpleChannelUpstreamHandler with BadClientSilencer {
   import AEnv._
   import BodyParser._
 

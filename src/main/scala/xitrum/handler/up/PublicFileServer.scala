@@ -16,7 +16,7 @@ import xitrum.util.PathSanitizer
 
 /** Serves files in "public" directory. */
 @Sharable
-class PublicFileServer extends SimpleChannelUpstreamHandler with ClosedClientSilencer {
+class PublicFileServer extends SimpleChannelUpstreamHandler with BadClientSilencer {
   override def messageReceived(ctx: ChannelHandlerContext, e: MessageEvent) {
     val m = e.getMessage
     if (!m.isInstanceOf[HttpRequest]) {

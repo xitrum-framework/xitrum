@@ -12,7 +12,7 @@ import xitrum.handler.{BaseUri, Env}
 import xitrum.scope.PathInfo
 
 @Sharable
-class UriParser extends SimpleChannelUpstreamHandler with ClosedClientSilencer {
+class UriParser extends SimpleChannelUpstreamHandler with BadClientSilencer {
   override def messageReceived(ctx: ChannelHandlerContext, e: MessageEvent) {
     val m = e.getMessage
     if (!m.isInstanceOf[Env]) {

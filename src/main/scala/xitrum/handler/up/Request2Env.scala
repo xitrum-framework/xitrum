@@ -7,7 +7,7 @@ import org.jboss.netty.handler.codec.http.HttpRequest
 import xitrum.handler.Env
 
 @Sharable
-class Request2Env extends SimpleChannelUpstreamHandler with ClosedClientSilencer {
+class Request2Env extends SimpleChannelUpstreamHandler with BadClientSilencer {
   override def messageReceived(ctx: ChannelHandlerContext, e: MessageEvent) {
     val m = e.getMessage
     if (!m.isInstanceOf[HttpRequest]) {

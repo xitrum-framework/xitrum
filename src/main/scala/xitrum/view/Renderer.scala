@@ -5,7 +5,7 @@ import scala.xml.{Node, NodeSeq, Xhtml}
 
 import org.jboss.netty.buffer.ChannelBuffers
 import org.jboss.netty.handler.codec.http.{DefaultHttpChunk, HttpChunk, HttpHeaders}
-import HttpHeaders.Names.{CONTENT_TYPE, TRANSFER_ENCODING}
+import HttpHeaders.Names.{CONTENT_TYPE, CONTENT_LENGTH, TRANSFER_ENCODING}
 import HttpHeaders.Values.CHUNKED
 
 import xitrum.{Action, Config}
@@ -24,6 +24,7 @@ trait Renderer extends JQuery with JSCollector with Flash with I18n {
 
   private def writeHeaderOnFirstChunk {
     if (!responded) {
+      response.removeHeader(CONTENT_LENGTH)
       response.setHeader(TRANSFER_ENCODING, CHUNKED)
       respond
     }
