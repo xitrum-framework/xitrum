@@ -4,9 +4,6 @@ name := "xitrum"
 
 version := "1.1-SNAPSHOT"
 
-// https://github.com/harrah/xsbt/wiki/Cross-Build
-crossScalaVersions := Seq("2.8.0", "2.8.1", "2.9.0", "2.9.0-1")
-
 scalacOptions ++= Seq(
   "-deprecation",
   "-unchecked"
@@ -42,6 +39,10 @@ libraryDependencies += "com.hazelcast" % "hazelcast" % "1.9.3"
 unmanagedBase in Runtime <<= baseDirectory { base => base / "config" }
 
 // Publish ---------------------------------------------------------------------
+
+// https://github.com/harrah/xsbt/wiki/Cross-Build
+// Lastest version of 2.8.x is 2.8.1, of 2.9.x is 2.9.0-1
+crossScalaVersions := Seq("2.8.1", "2.9.0-1")
 
 publishTo := Some("Sonatype Snapshot Repository" at "https://oss.sonatype.org/content/repositories/snapshots")
 
