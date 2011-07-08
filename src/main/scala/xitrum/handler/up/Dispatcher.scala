@@ -13,7 +13,7 @@ import HttpVersion._
 
 import xitrum.{Action, Cache, Config, Logger}
 import xitrum.scope.{Env => AEnv}
-import xitrum.action.routing.{Routes, PostbackAction}
+import xitrum.routing.{Routes, PostbackAction}
 import xitrum.exception.MissingParam
 import xitrum.handler.Env
 import xitrum.handler.down.ResponseCacher

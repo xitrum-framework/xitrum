@@ -1,4 +1,4 @@
-package xitrum.action.routing
+package xitrum.routing
 
 import java.lang.annotation.{Annotation => JAnnotation}
 import scala.collection.mutable.{ArrayBuffer, HashMap => MHashMap}

@@ -8,7 +8,7 @@ import HttpResponseStatus._
 import xitrum.action._
 import xitrum.scope.ExtEnv
 import xitrum.scope.session.CSRF
-import xitrum.action.routing.{PostbackAction, Routes}
+import xitrum.routing.{PostbackAction, Routes}
 import xitrum.validation.{Validator, ValidatorInjector}
 import xitrum.view.Renderer
 import xitrum.handler.up.Dispatcher

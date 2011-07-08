@@ -1,4 +1,4 @@
-package xitrum.action.routing
+package xitrum.routing
 
 import org.jboss.netty.handler.codec.http.HttpHeaders
 

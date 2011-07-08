@@ -10,7 +10,7 @@ import HttpHeaders.Names.{CONTENT_ENCODING, CONTENT_TYPE}
 
 import xitrum.{Cache, Config, Logger}
 import xitrum.Action
-import xitrum.action.routing.Routes
+import xitrum.routing.Routes
 import xitrum.scope.{Env => AEnv}
 import xitrum.handler.{Env, SmallFileCache}
 import xitrum.util.{Gzip, Mime}

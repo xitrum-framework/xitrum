@@ -50,11 +50,9 @@ Notes:
 Comet
 -----
 
-Do not use chunked response above for `Comet <http://en.wikipedia.org/wiki/Comet_(programming)/>`_,
-it's ugly (browser loading icon spins forever) and not reliable (browser may
-merge chunks together).
+Chunked response is `not very good <http://www.shanison.com/2010/05/10/stop-the-browser-%E2%80%9Cthrobber-of-doom%E2%80%9D-while-loading-comet-forever-iframe/>`_
+for `Comet <http://en.wikipedia.org/wiki/Comet_(programming)/>`_.
 
-Xitrum currently implements Comet by using Ajax long polling. WebSocket may be
-supported in the future when all major browsers have supported it.
+Xitrum uses Ajax long polling. WebSocket may be supported in the future when all major browsers have supported it.
 
 TODO

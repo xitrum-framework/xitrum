@@ -6,13 +6,13 @@ import java.util.concurrent.Executors
 import org.jboss.netty.bootstrap.ServerBootstrap
 import org.jboss.netty.channel.socket.nio.NioServerSocketChannelFactory
 
-import xitrum.action.routing.Routes
+import xitrum.routing.Routes
 import xitrum.handler.ChannelPipelineFactory
 
 class Server extends Logger {
   def start {
     // Because Hazelcast takes serveral seconds to start, we force it to
-    // start before the web server begin receiving requests, instead of
+    // start before the web server begins receiving requests, instead of
     // letting it start lazily
     Cache.cache.size
 
