@@ -32,6 +32,7 @@ Xitrum is open source:
    cache
    i18n
    deploy
+   cluster
    howto
    handler
 

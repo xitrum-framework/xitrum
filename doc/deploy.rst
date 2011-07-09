@@ -3,14 +3,15 @@ Deploy to production server
 
 .. image:: http://www.bdoubliees.com/journalspirou/sfigures6/schtroumpfs/s8.jpg
 
-Xitrum is designed in mind to run in production environment as multiple instances
-behind a proxy server or load balancer:
+You may run Xitrum directly:
 
 ::
 
-                                / Xitrum instance 1
-  Load balancer/proxy server ---- Xitrum instance 2
-                                \ Xitrum instance 3
+  Browser ------ Xitrum instance
+
+Or behind a proxy server like Apache or Nginx:
+
+  Browser ------ Proxy ------ Xitrum instance
 
 Package directory
 -----------------
@@ -30,16 +31,6 @@ ready to deploy to production server:
     lib
       [dependencies and packaged project file]
 
-runner.sh is the script to start the web server in production environment.
-You may want to modify runner.sh to tune JVM settings.
-
-::
-
-  $ bin/runner.sh my_project.Boot
-
-You may need to write the above command line to INSTALL file, for example, so
-that the user of your project know how to start the web server.
-
 Copy additional files to target/xitrum_package
 ----------------------------------------------
 
@@ -53,6 +44,20 @@ and directories (README, INSTALL, doc etc.), config ``build.sbt`` like this:
 
 Now run ``sbt xitrum-package`` and check ``target/xitrum_package`` directory.
 
+Starting Xitrum in production mode
+----------------------------------
+
+runner.sh is the script to start the web server in production environment.
+You may want to modify runner.sh to tune JVM settings.
+
+::
+
+  $ bin/runner.sh my_project.Boot
+
+You may need to write the above command line to INSTALL file, for example, so
+that the user of your project know how to start the web server.
+
+To change the port of the web server, change ``http_port `` in ``config/xitrum.properties``.
 
 Base URI
 --------

@@ -50,9 +50,72 @@ Notes:
 Comet
 -----
 
+Comet messages may be clustered. Please see the chaper about :doc:`clustering </cluster>`.
+
 Chunked response is `not very good <http://www.shanison.com/2010/05/10/stop-the-browser-%E2%80%9Cthrobber-of-doom%E2%80%9D-while-loading-comet-forever-iframe/>`_
 for `Comet <http://en.wikipedia.org/wiki/Comet_(programming)/>`_.
 
-Xitrum uses Ajax long polling. WebSocket may be supported in the future when all major browsers have supported it.
+Xitrum uses Ajax long polling. `WebSocket <http://en.wikipedia.org/wiki/WebSocket>`
+will be supported in the future when all major browsers support it.
 
-TODO
+Below is a chat example:
+
+Server side:
+
+::
+
+  import xitrum.Action  
+  import xitrum.annotation.GET
+  import xitrum.comet.Comet
+  import xitrum.validation.Required
+
+  @GET("/chat")
+  class ChatIndexAction {
+    override def execute {
+      renderView(
+        <div id="messages"></div>
+        {jsAjaxGet(urlFor[ChatPollMessagesAction]("lastTimestamp" -> 0))}
+
+        <input type="text" name={validate("message", Required)} postback="keypress" action={urlForPostbackThis} />
+      )
+    }
+
+    override def postback {
+      val message = param("message")
+      Comet.publish("chat", message)
+      renderText("")
+    }
+  }
+
+::
+
+  import xitrum.Action
+  import xitrum.annotation.GET
+  import xitrum.comet.Comet
+
+  @GET("/chat/:lastTimestamp")
+  class ChatPollMessagesAction extends Action {
+    override def execute {
+      val lastTimestamp = tparam[Long]("lastTimestamp")
+
+      // messages: Iterable[xitrum.comet.CometMessage]
+      val messages = Comet.getMessages("chat", lastTimestamp)
+
+      if (messages.isEmpty) {
+        Comet.addMessageListener("chat", message => {
+          jsRender(
+            "#('messages').append('" + <p><b>{message.timestamp}:</b> {message.body}</p> + "');" +
+            jsAjaxGet(urlFor[ChatPollMessagesAction]("lastTimestamp" -> message.timestamp))
+          )
+          
+          // Returns true to remove this listener
+          true
+        })
+      } else {
+          jsRender(
+            messages.map("#('messages').append('" + <p><b>{message.timestamp}:</b> {message.body}</p> + "')").mkString(";") +
+            jsAjaxGet(urlForThis("lastTimestamp" -> message.timestamp))
+          )       
+      }
+    }
+  }

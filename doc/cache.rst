@@ -5,10 +5,10 @@ Cache
 
 `Hazelcast <http://www.hazelcast.com/>`_
 is integrated for page, action, and object cache. Of course you can
-use it for other things (distributed processing etc) in your application.
+use it for other things (distributed processing etc.) in your application.
 
 With Hazelcast, Xitrum instances become in-process memory cache servers. You don't
-need seperate things like Memcache.
+need seperate things like Memcache. Please see the chaper about :doc:`clustering </cluster>`.
 
 ::
 
