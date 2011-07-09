@@ -1,7 +1,7 @@
 package xitrum.routing
 
 import java.lang.reflect.Method
-import scala.collection.mutable.{ArrayBuffer, HashMap => MHashMap, StringBuilder}
+import scala.collection.mutable.{ArrayBuffer, Map => MMap, StringBuilder}
 import org.jboss.netty.handler.codec.http.{HttpMethod, QueryStringEncoder}
 
 import xitrum.{Action, Config, Logger}
@@ -57,7 +57,7 @@ object Routes extends Logger {
     val tokens = pathInfo.tokens
     val max1   = tokens.size
 
-    var pathParams: MHashMap[String, Array[String]] = null
+    var pathParams: MMap[String, Array[String]] = null
 
     def finder(cr: CompiledRoute): Boolean = {
       val (om, compiledPattern, _actionClass) = cr
@@ -84,7 +84,7 @@ object Routes extends Logger {
       // 0 = max2 <= max1
       if (max2 == 0) {
         if (max1 == 0) {
-          pathParams = new MHashMap[String, Array[String]]
+          pathParams = MMap[String, Array[String]]()
           return true
         }
 
@@ -93,7 +93,7 @@ object Routes extends Logger {
 
       // 0 < max2 <= max1
 
-      pathParams = new MHashMap[String, Array[String]]
+      pathParams = MMap[String, Array[String]]()
       var i = 0  // i will go from 0 until max1
 
       compiledPattern.forall { tc =>

@@ -1,24 +1,24 @@
 package xitrum.scope.session
 
 import java.io.Serializable
-import scala.collection.mutable.{HashMap => MHashMap}
+import scala.collection.mutable.{Map => MMap}
 
 class CookieSession extends Session {
-  private var map = new MHashMap[String, Serializable]
+  private var map = MMap[String, Serializable]()
 
   def decrypt(base64String: String) {
     map = SecureBase64.decrypt(base64String) match {
-      case None        => new MHashMap[String, Serializable]
+      case None        => MMap[String, Serializable]()
       case Some(value) =>
         try {
           // See serialize method below
           val immutableMap = value.asInstanceOf[Map[String, Serializable]]
-          val ret = new MHashMap[String, Serializable]
+          val ret = MMap[String, Serializable]()
           ret ++= immutableMap
         } catch {
           case _ =>
             // Cannot always deserialize and type casting due to program changes etc.
-            new MHashMap[String, Serializable]
+            MMap[String, Serializable]()
         }
     }
   }

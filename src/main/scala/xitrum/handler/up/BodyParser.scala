@@ -1,7 +1,7 @@
 package xitrum.handler.up
 
 import java.nio.charset.Charset
-import scala.collection.mutable.{HashMap => MHashMap}
+import scala.collection.mutable.{Map => MMap}
 
 import org.jboss.netty.channel.{ChannelHandler, SimpleChannelUpstreamHandler, ChannelHandlerContext, MessageEvent, ExceptionEvent, Channels}
 import ChannelHandler.Sharable
@@ -46,11 +46,11 @@ class BodyParser extends SimpleChannelUpstreamHandler with BadClientSilencer {
     val request = env.request
 
     val (bodyParams, fileUploadParams) = if (request.getMethod != POST) {
-      (new MHashMap[String, Array[String]], new MHashMap[String, Array[FileUpload]])
+      (MMap[String, Array[String]](), MMap[String, Array[FileUpload]]())
     } else {
       try {
-        val bodyParams = new MHashMap[String, Array[String]]
-        val fileParams = new MHashMap[String, Array[FileUpload]]
+        val bodyParams = MMap[String, Array[String]]()
+        val fileParams = MMap[String, Array[FileUpload]]()
 
         val decoder = new HttpPostRequestDecoder(factory, request)
         val datas   = decoder.getBodyHttpDatas
@@ -98,7 +98,7 @@ class BodyParser extends SimpleChannelUpstreamHandler with BadClientSilencer {
     fileUpload.setFilename(filename3)
   }
 
-  private def putOrAppendString(map: MHashMap[String, Array[String]], key: String, value: String) {
+  private def putOrAppendString(map: MMap[String, Array[String]], key: String, value: String) {
     if (!map.contains(key)) {
       map(key) = Array(value)
     } else {
@@ -107,7 +107,7 @@ class BodyParser extends SimpleChannelUpstreamHandler with BadClientSilencer {
     }
   }
 
-  private def putOrAppendFileUpload(map: MHashMap[String, Array[FileUpload]], key: String, value: FileUpload) {
+  private def putOrAppendFileUpload(map: MMap[String, Array[FileUpload]], key: String, value: FileUpload) {
     if (!map.contains(key)) {
       map(key) = Array(value)
     } else {

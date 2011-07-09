@@ -1,7 +1,7 @@
 package xitrum.scope
 
 import scala.collection.JavaConversions
-import scala.collection.mutable.{Map => MMap, HashMap => MHashMap}
+import scala.collection.mutable.{Map => MMap}
 
 import xitrum.Action
 import xitrum.exception.MissingParam
@@ -22,7 +22,7 @@ trait ParamAccess {
    * Not a function ("def") so that the calculation is done only once.
    */
   lazy val textParams: Params = {
-    val ret = new MHashMap[String, Array[String]]
+    val ret = MMap[String, Array[String]]()
 
     // The order is important because we want the later to overwrite the former
     ret ++= henv.uriParams

@@ -28,7 +28,7 @@ object ValidatorInjector {
           val array2    = array.asInstanceOf[Array[Any]]
           val paramName = array2(0).asInstanceOf[String]
 
-          val validators = new ArrayBuffer[Validator]
+          val validators = ArrayBuffer[Validator]()
           for (i <- 1 until array2.length) {
             validators.append(array2(i).asInstanceOf[Validator])
           }

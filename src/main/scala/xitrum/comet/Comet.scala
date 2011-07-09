@@ -1,7 +1,9 @@
+package xitrum.comet
+
 import java.util.concurrent.TimeUnit
 
 import scala.collection.JavaConverters._
-import scala.collection.mutable.ArrayBuffer
+import scala.collection.mutable.{ArrayBuffer, Map => MMap}
 
 import com.hazelcast.core.{EntryEvent, EntryListener, Hazelcast, IMap}
 import com.hazelcast.query.PredicateBuilder
@@ -16,7 +18,7 @@ object Comet {
   /** The listener returns true if it wants itself to be removed. */
   type MessageListener = (CometMessage) => Boolean
 
-  private val messageListeners = new ArrayBuffer[MessageListener]()
+  private val messageListeners = MMap[String, ArrayBuffer[MessageListener]]()
 
   //----------------------------------------------------------------------------
 
@@ -26,24 +28,25 @@ object Comet {
   map.addEntryListener(new EntryListener[Long, CometMessage] {
     def entryAdded(event: EntryEvent[Long, CometMessage]) {
       messageListeners.synchronized {
-        val tobeRemoved = new ArrayBuffer[MessageListener]()
+        val cm = event.getValue
+        messageListeners.get(cm.channel) match {
+          case None =>
 
-        messageListeners.foreach { listener =>
-          if (listener.apply(event.getValue)) tobeRemoved.append(listener)
+          case Some(arrayBuffer) =>
+            val tobeRemoved = ArrayBuffer[MessageListener]()
+
+            arrayBuffer.foreach { listener =>
+              if (listener.apply(cm)) tobeRemoved.append(listener)
+            }
+
+            arrayBuffer --= tobeRemoved
         }
-
-        messageListeners --= tobeRemoved
       }
     }
     
-    def entryEvicted(event: EntryEvent[Long, CometMessage]) {
-    }
-    
-    def entryRemoved(event: EntryEvent[Long, CometMessage]) {
-    }
-    
-    def entryUpdated(event: EntryEvent[Long, CometMessage]) {
-    }
+    def entryEvicted(event: EntryEvent[Long, CometMessage]) {}
+    def entryRemoved(event: EntryEvent[Long, CometMessage]) {}
+    def entryUpdated(event: EntryEvent[Long, CometMessage]) {}
   }, true)
 
   //----------------------------------------------------------------------------
@@ -57,13 +60,34 @@ object Comet {
   def getMessages(channel: String, lastTimestamp: Long): Iterable[CometMessage] = {
     val pb = new PredicateBuilder
     val eo = pb.getEntryObject
-    val p  = eo.get("channel").equal(channel).and(eo.get("timestamp").greaterThan(lastTimestamp))
+    val p  = eo.get("channel").equal(channel).and(eo.get("timestamp").greaterThan(long2Long(lastTimestamp)))
 
     val javaCollection = map.values(p)
     javaCollection.asScala.toList.sortBy(_.timestamp)
   }
 
+  //----------------------------------------------------------------------------
+
   def addMessageListener(channel: String, listener: MessageListener) {
-    messageListeners.synchronized { messageListeners.append(listener) }
+    messageListeners.synchronized { 
+      messageListeners.get(channel) match {
+        case None              => messageListeners(channel) = ArrayBuffer(listener)
+        case Some(arrayBuffer) => arrayBuffer.append(listener)
+      }
+    }
+  }
+
+  def removeMessageListener(channel: String, listener: MessageListener) {
+    messageListeners.synchronized { 
+      messageListeners.get(channel) match {
+        case None =>
+
+        case Some(arrayBuffer) =>
+          arrayBuffer -= listener
+
+          // Avoid memory leak when there are too many empty entries
+          if (arrayBuffer.isEmpty) messageListeners -= channel  
+      }
+    }
   }
 }

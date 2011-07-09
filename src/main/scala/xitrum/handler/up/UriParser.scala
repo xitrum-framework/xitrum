@@ -1,7 +1,7 @@
 package xitrum.handler.up
 
 import java.util.{Map => JMap, List => JList, LinkedHashMap => JLinkedHashMap}
-import scala.collection.mutable.{ArrayBuffer, HashMap => MHashMap}
+import scala.collection.mutable.{ArrayBuffer, Map => MMap}
 
 import org.jboss.netty.channel.{ChannelHandler, SimpleChannelUpstreamHandler, ChannelHandlerContext, MessageEvent, ExceptionEvent, Channels}
 import ChannelHandler.Sharable
@@ -42,17 +42,17 @@ class UriParser extends SimpleChannelUpstreamHandler with BadClientSilencer {
 
   //----------------------------------------------------------------------------
 
-  private def jParamsToParams(params: JMap[String, JList[String]]): MHashMap[String, Array[String]] = {
+  private def jParamsToParams(params: JMap[String, JList[String]]): MMap[String, Array[String]] = {
     val keySet = params.keySet
 
     val it  = keySet.iterator
-    val ret = new MHashMap[String, Array[String]]
+    val ret = MMap[String, Array[String]]()
     while (it.hasNext) {
       val key    = it.next
       val values = params.get(key)
 
       val it2  = values.iterator
-      val ret2 = new ArrayBuffer[String]
+      val ret2 = ArrayBuffer[String]()
       while (it2.hasNext) {
         val value = it2.next
         ret2.append(value)

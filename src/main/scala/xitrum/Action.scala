@@ -39,11 +39,11 @@ trait Action extends ExtEnv with Logger with Net with Filter with BasicAuthentic
       }
     } else {
       _responded = true
-
-      prepareWhenRespond
-
-      henv.response = response
-      ctx.getChannel.write(henv)
+      if (ctx.getChannel.isOpen) {      
+        prepareWhenRespond
+        henv.response = response
+        ctx.getChannel.write(henv)
+      }
     }
   }
 
@@ -119,6 +119,8 @@ trait Action extends ExtEnv with Logger with Net with Filter with BasicAuthentic
   //----------------------------------------------------------------------------
 
   def redirectTo(location: String, status: HttpResponseStatus = FOUND) {
+    if (!ctx.getChannel.isOpen) return
+
     response.setStatus(status)
 
     HttpHeaders.setContentLength(response, 0)
@@ -163,5 +165,12 @@ trait Action extends ExtEnv with Logger with Net with Filter with BasicAuthentic
     val secureParamName = ValidatorInjector.injectToParamName(paramName, validators:_*)
     validators.foreach { v => v.render(this, paramName, secureParamName) }
     secureParamName
+  }
+
+  //----------------------------------------------------------------------------
+
+  def addConnectionClosedListener(listener: () => Unit) {
+    val dispatcher = ctx.getPipeline.get(classOf[Dispatcher])
+    dispatcher.addConnectionClosedListener(listener)
   }
 }

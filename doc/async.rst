@@ -58,9 +58,13 @@ for `Comet <http://en.wikipedia.org/wiki/Comet_(programming)/>`_.
 Xitrum uses Ajax long polling. `WebSocket <http://en.wikipedia.org/wiki/WebSocket>`
 will be supported in the future when all major browsers support it.
 
-Below is a chat example:
+Below is a chat example.
 
-Server side:
+ChatIndexAction.scala:
+
+* ``execute``: renders a page for the user to read and type in chat messages;
+  in the background it uses Ajax to poll published messages.
+* ``postback``: publishes chat messages.
 
 ::
 
@@ -87,35 +91,49 @@ Server side:
     }
   }
 
+ChatPollMessagesAction.scala: fills ``<div id="messages"></div>`` with published
+chat messages.
+
 ::
 
   import xitrum.Action
   import xitrum.annotation.GET
-  import xitrum.comet.Comet
+  import xitrum.comet.{Comet, CometMessage}
 
   @GET("/chat/:lastTimestamp")
   class ChatPollMessagesAction extends Action {
     override def execute {
       val lastTimestamp = tparam[Long]("lastTimestamp")
+      val messages      = Comet.getMessages("chat", lastTimestamp)
 
-      // messages: Iterable[xitrum.comet.CometMessage]
-      val messages = Comet.getMessages("chat", lastTimestamp)
+      // When there is no message, the connection is kept and the response will
+      // be sent as soon as there a message arrives
+
+      val updateMessagesDiv = (messages: Iterable[CometMessage]) {
+        jsRender(
+          messages.map("#('messages').append('" + <p><b>{message.timestamp}:</b> {message.body}</p> + "')").mkString(";") +
+          jsAjaxGet(urlForThis("lastTimestamp" -> message.timestamp))
+        )
+      }
 
       if (messages.isEmpty) {
-        Comet.addMessageListener("chat", message => {
-          jsRender(
-            "#('messages').append('" + <p><b>{message.timestamp}:</b> {message.body}</p> + "');" +
-            jsAjaxGet(urlFor[ChatPollMessagesAction]("lastTimestamp" -> message.timestamp))
-          )
-          
-          // Returns true to remove this listener
+        val messagePublished = (message: CometMessage) => {
+          updateMessagesDiv(Array(message))
+
+          // Return true for Comet to automatically remove this listener.
+          //
+          // You return true most of the cases, because with HTTP the reponse can only
+          // be sent once. In this chat program, after the response is sent by
+          // updateMessagesDiv, the job of this listener is over.
           true
-        })
+        }
+        
+        Comet.addMessagePublishedListener("chat", messagePublished)
+
+        // Avoid memory leak when messagePublished is never removed, e.g. no message is published
+        addConnectionClosedListener({ Comet.removeMessageListener("chat", messagePublished) })
       } else {
-          jsRender(
-            messages.map("#('messages').append('" + <p><b>{message.timestamp}:</b> {message.body}</p> + "')").mkString(";") +
-            jsAjaxGet(urlForThis("lastTimestamp" -> message.timestamp))
-          )       
+        updateMessagesDiv(messages)
       }
     }
   }

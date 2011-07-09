@@ -1,7 +1,7 @@
 package xitrum.handler.up
 
 import java.io.Serializable
-import scala.collection.mutable.{Map => MMap}
+import scala.collection.mutable.{ArrayBuffer, Map => MMap}
 
 import org.jboss.netty.channel._
 import org.jboss.netty.buffer.ChannelBuffers
@@ -160,8 +160,17 @@ class Dispatcher extends SimpleChannelUpstreamHandler with BadClientSilencer {
     }
   }
 
-  override def exceptionCaught(ctx: ChannelHandlerContext, e: ExceptionEvent) {
-    logger.error("Dispatcher", e.getCause)
-    e.getChannel.close
+  //----------------------------------------------------------------------------
+
+  private val closedListeners = ArrayBuffer[() => Unit]()
+
+  def addConnectionClosedListener(listener: () => Unit) {
+    closedListeners.synchronized { closedListeners.append(listener) }
+  }
+
+  override def channelClosed(ctx: ChannelHandlerContext, e: ChannelStateEvent) {
+    closedListeners.synchronized {
+      closedListeners.foreach { listener => listener() }
+    }
   }
 }

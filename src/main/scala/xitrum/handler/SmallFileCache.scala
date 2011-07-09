@@ -1,7 +1,6 @@
 package xitrum.handler
 
 import java.io.{File, RandomAccessFile}
-import scala.collection.mutable.HashMap
 
 import xitrum.{Cache, Config}
 import xitrum.util.{Gzip, Mime}

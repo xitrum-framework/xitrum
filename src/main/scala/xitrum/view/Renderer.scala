@@ -31,23 +31,11 @@ trait Renderer extends JQuery with JSCollector with Flash with I18n {
   }
 
   def renderLastChunk {
-    ctx.getChannel.write(HttpChunk.LAST_CHUNK)
+    if (ctx.getChannel.isOpen) ctx.getChannel.write(HttpChunk.LAST_CHUNK)
   }
 
   def renderText(text: Any, contentType: String = null): String = {
     val textIsXml = text.isInstanceOf[Node] || text.isInstanceOf[NodeSeq]
-
-    if (!responded) {
-      // Set content type automatically
-      if (contentType != null)
-        response.setHeader(CONTENT_TYPE, contentType)
-      else if (!response.containsHeader(CONTENT_TYPE)) {
-        if (textIsXml)
-          response.setHeader(CONTENT_TYPE, "application/xml")
-        else
-          response.setHeader(CONTENT_TYPE, "text/plain")
-      }
-    }
 
     // <br />.toString will create <br></br> which renders as 2 <br /> on some browsers!
     // http://www.scala-lang.org/node/492
@@ -60,6 +48,21 @@ trait Renderer extends JQuery with JSCollector with Flash with I18n {
           Xhtml.toXhtml(text.asInstanceOf[NodeSeq])
       } else
         text.toString
+
+    if (!ctx.getChannel.isOpen) return ret
+
+
+    if (!responded) {
+      // Set content type automatically
+      if (contentType != null)
+        response.setHeader(CONTENT_TYPE, contentType)
+      else if (!response.containsHeader(CONTENT_TYPE)) {
+        if (textIsXml)
+          response.setHeader(CONTENT_TYPE, "application/xml")
+        else
+          response.setHeader(CONTENT_TYPE, "text/plain")
+      }
+    }
 
     val cb = ChannelBuffers.copiedBuffer(ret, Config.paramCharset)
     if (response.isChunked) {
@@ -83,10 +86,12 @@ trait Renderer extends JQuery with JSCollector with Flash with I18n {
   def layout = renderedView
 
   def renderView(view: Any) {
-    renderView(view, layout _)
+    if (ctx.getChannel.isOpen) renderView(view, layout _)
   }
 
   def renderView(view: Any, customLayout: () => Any) {
+    if (!ctx.getChannel.isOpen) return
+
     renderedView = view
     val renderedLayout = customLayout.apply
     if (renderedLayout == null)
@@ -98,6 +103,8 @@ trait Renderer extends JQuery with JSCollector with Flash with I18n {
   //----------------------------------------------------------------------------
 
   def renderBinary(bytes: Array[Byte]) {
+    if (!ctx.getChannel.isOpen) return
+
     val cb = ChannelBuffers.wrappedBuffer(bytes)
     if (response.isChunked) {
       writeHeaderOnFirstChunk
@@ -118,12 +125,16 @@ trait Renderer extends JQuery with JSCollector with Flash with I18n {
    * path is not sanitized. To sanitize, use xitrum.Sanitizer.
    */
   def renderFile(path: String) {
+    if (!ctx.getChannel.isOpen) return
+
     val abs = if (path.startsWith("/")) path else System.getProperty("user.dir") + File.separator + path
     XSendfile.setHeader(response, abs)
     respond
   }
 
   def render404Page {
+    if (!ctx.getChannel.isOpen) return
+
     XSendfile.set404Page(response)
     respond
   }

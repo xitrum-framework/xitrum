@@ -1,6 +1,6 @@
 package xitrum.validation
 
-import scala.collection.mutable.{ArrayBuffer, HashMap => MHashMap}
+import scala.collection.mutable.{ArrayBuffer, Map => MMap}
 
 import xitrum.Action
 import xitrum.scope.Env
@@ -31,8 +31,8 @@ object ValidatorCaller {
   private def takeoutValidators(secureBodyParams: Env.Params): (Env.Params, Iterable[(String,    String, Iterable[Validator])]) = {
     val secureParamNames = secureBodyParams.keys
 
-    val bodyParams2                          = new MHashMap[String, Array[String]]
-    val paramName_secureParamName_validators = new ArrayBuffer[(String, String, Iterable[Validator])]
+    val bodyParams2                          = MMap[String, Array[String]]()
+    val paramName_secureParamName_validators = ArrayBuffer[(String, String, Iterable[Validator])]()
     for (secureParamName <- secureParamNames) {
       val params = secureBodyParams(secureParamName)
 

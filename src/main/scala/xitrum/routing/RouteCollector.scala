@@ -1,7 +1,7 @@
 package xitrum.routing
 
 import java.lang.annotation.{Annotation => JAnnotation}
-import scala.collection.mutable.{ArrayBuffer, HashMap => MHashMap}
+import scala.collection.mutable.{ArrayBuffer, Map => MMap}
 
 import org.jboss.netty.handler.codec.http.HttpMethod
 
@@ -13,19 +13,19 @@ import xitrum.annotation._
 
 /** Scan all classes to collect routes. */
 class RouteCollector extends ClassAnnotationDiscoveryListener {
-  type RouteMap = MHashMap[Class[Action], (HttpMethod, Array[Routes.Pattern], Int)]
+  type RouteMap = MMap[Class[Action], (HttpMethod, Array[Routes.Pattern], Int)]
 
-  private val firsts = new RouteMap
-  private val lasts  = new RouteMap
-  private val others = new RouteMap
+  private val firsts = MMap[Class[Action], (HttpMethod, Array[Routes.Pattern], Int)]()
+  private val lasts  = MMap[Class[Action], (HttpMethod, Array[Routes.Pattern], Int)]()
+  private val others = MMap[Class[Action], (HttpMethod, Array[Routes.Pattern], Int)]()
 
   def collect: (Array[Routes.Route], Map[Class[Action], Int])  = {
     val discoverer = new ClasspathDiscoverer
     discoverer.addAnnotationListener(this)
     discoverer.discover
 
-    val routeBuffer = new ArrayBuffer[Routes.Route]
-    val cacheBuffer = new MHashMap[Class[Action], Int]
+    val routeBuffer = ArrayBuffer[Routes.Route]()
+    val cacheBuffer = MMap[Class[Action], Int]()
 
     // Make PostbackAction the first route for quicker route matching
     routeBuffer.append((HttpMethod.POST, PostbackAction.POSTBACK_PREFIX + ":*", classOf[PostbackAction].asInstanceOf[Class[Action]]))

@@ -1,6 +1,6 @@
 package xitrum.handler
 
-import scala.collection.mutable.HashMap
+import scala.collection.mutable.{HashMap => MHashMap}
 import org.jboss.netty.handler.codec.http.{HttpRequest, HttpResponse}
 
 import xitrum.Action
@@ -10,7 +10,7 @@ import xitrum.scope.{Env => AEnv, PathInfo}
  * Env is basically a map for sharing data between handlers. But for more
  * typesafe, fixed data variables are put inside.
  */
-class Env extends HashMap[String, Any] {
+class Env extends MHashMap[String, Any] {
   import AEnv._
 
   var request:          HttpRequest      = null  // Set by Request2Env

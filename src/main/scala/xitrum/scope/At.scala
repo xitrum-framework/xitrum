@@ -1,10 +1,10 @@
 package xitrum.scope
 
-import scala.collection.mutable.HashMap
+import scala.collection.mutable.{Map => MMap}
 
 /** Equivalent to @xxx variables of Rails */
 class At {
-  private val map = new HashMap[String, Any]()
+  private val map = MMap[String, Any]()
 
   def apply[T](key: String) = map(key).asInstanceOf[T]
 
