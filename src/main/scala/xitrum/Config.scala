@@ -108,7 +108,7 @@ object Config extends Logger {
    * favicon.ico: http://en.wikipedia.org/wiki/Favicon
    * robots.txt:  http://en.wikipedia.org/wiki/Robots_exclusion_standard
    */
-  var publicFilesNotBehindPublicUrl = List("/favicon.ico", "/robots.txt")
+  var publicFilesNotBehindPublicUrl = List("favicon.ico", "robots.txt")
 
   /**
    * Xitrum can serve static files (request URL in the form /public/...

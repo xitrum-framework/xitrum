@@ -14,8 +14,8 @@ Install Xitrum plugin as in the :doc:`tutorial </tutorial>`.
 Install Eclipse plugin by adding to file ``~/.sbt/plugins/build.sbt``
 the content as described at https://github.com/typesafehub/sbteclipse.
 
-Create a new project
---------------------
+Create a new Xitrum project
+---------------------------
 
 ::
 
@@ -67,5 +67,12 @@ If you use a plain text editor, not Eclipse:
 2. Run ``sbt ~compile`` in another console to compile in continuous/incremental mode
 3. In the editor, try editing a Scala file, and save
 
-The ``sbt ~compile`` process will automatically recompile the file. And JRebel will
+The ``sbt ~compile`` process will automatically recompile the file, and JRebel will
 automatically reload the generated .class files.
+
+Routes are not reloaded
+~~~~~~~~~~~~~~~~~~~~~~~
+
+Routes like ``@GET("/")`` are not reloaded when you change them. Routes are only
+scanned when the web server starts. It it because it takes several seconds to
+rescan all routes.

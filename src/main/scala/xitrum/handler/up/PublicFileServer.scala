@@ -14,7 +14,7 @@ import xitrum.handler.BaseUri
 import xitrum.handler.updown.XSendfile
 import xitrum.util.PathSanitizer
 
-/** Serves files in "public" directory. */
+/** Serves files in "static/public" directory. */
 @Sharable
 class PublicFileServer extends SimpleChannelUpstreamHandler with BadClientSilencer {
   override def messageReceived(ctx: ChannelHandlerContext, e: MessageEvent) {
@@ -43,15 +43,16 @@ class PublicFileServer extends SimpleChannelUpstreamHandler with BadClientSilenc
         return
 
       case Some(pathInfo1) =>
-        val isSpecialPublicFile = Config.publicFilesNotBehindPublicUrl.contains(pathInfo1)
-        val pathInfo2 = if (isSpecialPublicFile) "/public" + pathInfo1 else pathInfo1
-        if (!pathInfo2.startsWith("/public/")) {
+        val withoutSlashPrefix  = pathInfo1.substring(1)
+        val isSpecialPublicFile = Config.publicFilesNotBehindPublicUrl.contains(withoutSlashPrefix)
+
+        if (!isSpecialPublicFile && !pathInfo1.startsWith("/public/")) {
           ctx.sendUpstream(e)
           return
         }
 
         val response = new DefaultHttpResponse(HTTP_1_1, OK)
-        toAbsPath(pathInfo2) match {
+        absStaticPath(pathInfo1) match {
           case None      => XSendfile.set404Page(response)
           case Some(abs) => XSendfile.setHeader(response, abs)
         }
@@ -62,7 +63,7 @@ class PublicFileServer extends SimpleChannelUpstreamHandler with BadClientSilenc
   //----------------------------------------------------------------------------
 
   /** Sanitizes and returns absolute path. */
-  private def toAbsPath(pathInfo: String): Option[String] = {
+  private def absStaticPath(pathInfo: String): Option[String] = {
     // pathInfo starts with "/"
 
     PathSanitizer.sanitize(pathInfo) match {
@@ -73,7 +74,7 @@ class PublicFileServer extends SimpleChannelUpstreamHandler with BadClientSilenc
         // Convert to absolute path
         // user.dir: current working directory
         // See: http://www.java2s.com/Tutorial/Java/0120__Development/Javasystemproperties.htm
-        Some(System.getProperty("user.dir") + path)
+        Some(System.getProperty("user.dir") + "/static" + path)
     }
   }
 }

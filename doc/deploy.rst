@@ -25,8 +25,8 @@ ready to deploy to production server:
       runner.sh
     config
       [config files]
-    public
-      [static files, accessible from browsers]
+    static
+      [static public files]
     lib
       [dependencies and packaged project file]
 
@@ -52,3 +52,11 @@ and directories (README, INSTALL, doc etc.), config ``build.sbt`` like this:
   TODO
 
 Now run ``sbt xitrum-package`` and check ``target/xitrum_package`` directory.
+
+
+Base URI
+--------
+
+Virtual host is ususally used when running behind a proxy server. But if you
+don't want to use virtual host, you want to use base URI, see ``base_uri`` option
+in the file ``config/xitrum.properties``.

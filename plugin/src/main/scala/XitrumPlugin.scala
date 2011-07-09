@@ -37,11 +37,11 @@ object XitrumPlugin extends Plugin {
     copyResourceFile(baseDir, "config/logback.xml")
     copyResourceFile(baseDir, "config/xitrum.properties")
 
-    (baseDir / "public").mkdir
-    copyResourceFile(baseDir, "public/404.html")
-    copyResourceFile(baseDir, "public/500.html")
-    copyResourceFile(baseDir, "public/favicon.ico")
-    copyResourceFile(baseDir, "public/robots.txt")
+    (baseDir / "static").mkdir
+    copyResourceFile(baseDir, "static/404.html")
+    copyResourceFile(baseDir, "static/500.html")
+    copyResourceFile(baseDir, "static/favicon.ico")
+    copyResourceFile(baseDir, "static/robots.txt")
 
     (baseDir / "src" / "main" / "scala" / "my_project" / "action").mkdirs
     copyResourceFile(baseDir, "src/main/scala/my_project/Boot.scala")
