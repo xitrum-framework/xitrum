@@ -32,7 +32,7 @@ var xitrum = {
 
     $.ajax({
       type: "POST",
-      url:  action,
+      url: action,
       data: data,
       error: function(xhr) {
         alert("Could not connect to server or server error.");
