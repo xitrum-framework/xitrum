@@ -36,7 +36,7 @@ libraryDependencies += "tv.cntt" % "annovention" % "1.0-SNAPSHOT"
 libraryDependencies += "com.hazelcast" % "hazelcast" % "1.9.3"
 
 // https://github.com/lift/framework/tree/2.4-M1-release/core/json
-libraryDependencies += "net.liftweb" %% "lift-json" % "2.4-M1"
+libraryDependencies += "net.liftweb" %% "lift-json" % "2.4-M2"
 
 // For easier development (sbt console etc.)
 unmanagedBase in Runtime <<= baseDirectory { base => base / "config" }
