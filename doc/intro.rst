@@ -15,24 +15,9 @@ server on top of `Netty <http://www.jboss.org/netty>`_:
 * Asynchronous, in the spirit of Netty.
 * Stateless, by default sessions are not stored on server.
 * In-process and distribued cache using `Hazelcast <http://www.hazelcast.com/>`_,
-  you don't need separate Memcache servers.
+  you don't need separate cache servers.
 * Scalable `Comet <http://en.wikipedia.org/wiki/Comet_(programming)>`_,
   you can scale Comet to multiple servers.
-
-What do you create web applications for? There are 2 main use cases:
-
-* To serve machines: you need to create RESTful APIs for smartphones, web services
-  for other web sites.
-* To serve human users: you need to create interactive web pages.
-
-As a web framework, Xitrum aims to support you to solve these use cases easily.
-
-Xitrum is not a full-stack web framework like `Rails <http://rubyonrails.org/>`_
-because it does not provide M (in MVC). However, it does provide :doc:`validation </validation>`
-feature at Action (Controller) and View. You can use any database access library
-you want, while still can validate user input easily.
-
-Xitrum is inspired by `Nitrogen <http://nitrogenproject.com/>`_.
 
 ::
 
@@ -50,7 +35,15 @@ Xitrum is inspired by `Nitrogen <http://nitrogenproject.com/>`_.
   | +-------------+ |
   +-----------------+
 
-Xitrum is open source:
+What do you create web applications for? There are 2 main use cases:
+
+* To serve machines: you need to create RESTful APIs for smartphones, web services
+  for other web sites.
+* To serve human users: you need to create interactive web pages.
+
+As a web framework, Xitrum aims to support you to solve these use cases easily.
+
+Xitrum is inspired by `Nitrogen <http://nitrogenproject.com/>`_:
 
 * Source code: https://github.com/ngocdaothanh/xitrum
 * Documentation: http://ngocdaothanh.github.com/xitrum
