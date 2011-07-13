@@ -132,6 +132,8 @@ trait Renderer extends JQuery with JSCollector with Flash with I18n {
     respond
   }
 
+  //----------------------------------------------------------------------------
+
   def render404Page {
     if (!ctx.getChannel.isOpen) return
 

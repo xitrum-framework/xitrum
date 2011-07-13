@@ -34,10 +34,10 @@ var xitrum = {
       type: "POST",
       url: action,
       data: data,
-      error: function(xhr) {
+      error: function() {
         alert("Could not connect to server or server error.");
       },
-      complete: function(xhr) {
+      complete: function() {
         target1.show();
         target1.next().remove();
       }

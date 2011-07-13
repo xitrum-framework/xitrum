@@ -30,10 +30,13 @@ resolvers += "Sonatype Snapshot Repository" at "https://oss.sonatype.org/content
 
 libraryDependencies += "tv.cntt" % "annovention" % "1.0-SNAPSHOT"
 
-// For page, action, and object caching
+// For distributed cache and Comet
 // Infinispan is good but much heavier, and the logging is bad:
 // https://github.com/infinispan/infinispan/blob/master/core/src/main/java/org/infinispan/util/logging/LogFactory.java
 libraryDependencies += "com.hazelcast" % "hazelcast" % "1.9.3"
+
+// https://github.com/lift/framework/tree/2.4-M1-release/core/json
+libraryDependencies += "net.liftweb" %% "lift-json" % "2.4-M1"
 
 // For easier development (sbt console etc.)
 unmanagedBase in Runtime <<= baseDirectory { base => base / "config" }

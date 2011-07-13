@@ -58,82 +58,61 @@ for `Comet <http://en.wikipedia.org/wiki/Comet_(programming)/>`_.
 Xitrum uses Ajax long polling. `WebSocket <http://en.wikipedia.org/wiki/WebSocket>`
 will be supported in the future when all major browsers support it.
 
-Below is a chat example.
-
-ChatIndexAction.scala:
-
-* ``execute``: renders a page for the user to read and type in chat messages;
-  in the background it uses Ajax to poll published messages.
-* ``postback``: publishes chat messages.
-
-::
-
-  import xitrum.Action  
-  import xitrum.annotation.GET
-  import xitrum.comet.Comet
-  import xitrum.validation.Required
-
-  @GET("/chat")
-  class ChatIndexAction {
-    override def execute {
-      renderView(
-        <div id="messages"></div>
-        {jsAjaxGet(urlFor[ChatPollMessagesAction]("lastTimestamp" -> 0))}
-
-        <input type="text" name={validate("message", Required)} postback="keypress" action={urlForPostbackThis} />
-      )
-    }
-
-    override def postback {
-      val message = param("message")
-      Comet.publish("chat", message)
-      renderText("")
-    }
-  }
-
-ChatPollMessagesAction.scala: fills ``<div id="messages"></div>`` with published
-chat messages.
+Chat example
+~~~~~~~~~~~~
 
 ::
 
   import xitrum.Action
   import xitrum.annotation.GET
-  import xitrum.comet.{Comet, CometMessage}
+  import xitrum.comet.CometPublishAction
+  import xitrum.validation.Required
 
-  @GET("/chat/:lastTimestamp")
-  class ChatPollMessagesAction extends Action {
+  @GET("/chat")
+  class ChatAction {
     override def execute {
-      val lastTimestamp = tparam[Long]("lastTimestamp")
-      val messages      = Comet.getMessages("chat", lastTimestamp)
+      renderView(
+        <div id="messages"></div>
+        {jsCometGet("chat", "function(message) { #('messages').append(message.body) }"}
 
-      // When there is no message, the connection is kept and the response will
-      // be sent as soon as there a message arrives
+        <form postback="submit" action={urlForPostback[CometPublishAction]}>
+          <input type="hidden" name={validate("channel")} value="chat" />
+          <input type="text" name={validate("body", Required)} />
+        </form>
+      )
+    }
+  }
 
-      val updateMessagesDiv = (messages: Iterable[CometMessage]) {
-        jsRender(
-          messages.map("#('messages').append('" + <p><b>{message.timestamp}:</b> {message.body}</p> + "')").mkString(";") +
-          jsAjaxGet(urlForThis("lastTimestamp" -> message.timestamp))
-        )
-      }
+``jsCometGet`` will send long polling Ajax requests, get published messages,
+and call your defined function.
 
-      if (messages.isEmpty) {
-        val messagePublished = (message: CometMessage) => {
-          updateMessagesDiv(Array(message))
+Publish message
+~~~~~~~~~~~~~~~
 
-          // Return true for Comet to automatically remove this listener.
-          //
-          // You return true most of the cases, because with HTTP the reponse can only
-          // be sent once. In this chat program, after the response is sent by
-          // updateMessagesDiv, the job of this listener is over.
-          true
-        }
-        
-        Comet.addMessagePublishedListener("chat", messagePublished)
+In the example above, ``CometPublishAction`` will receive form post and publish
+the message for you. If you want to publish the message yourself, call ``Comet.publish``:
 
-        // Avoid memory leak when messagePublished is never removed, e.g. no message is published
-        addConnectionClosedListener({ Comet.removeMessageListener("chat", messagePublished) })
-      } else {
-        updateMessagesDiv(messages)
-      }
+::
+
+  import xitrum.Action
+  import xitrum.annotation.GET
+  import xitrum.comet.Comet
+  import xitrum.validation.Required
+
+  @GET("/admin")
+  class AdminAction extends Action {
+    override def execute {
+      renderView(
+        <form postback="submit" action={urlForPostbackThis}>
+          Message from admin:
+          <input type="text" name={validate("body", Required)} />
+        </form>
+      )
+    }
+
+    override def postback {
+      val body = param("body")
+      Comet.publish("chat", "[From admin]: " + body)
+      renderText("")
     }
   }
