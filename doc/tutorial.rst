@@ -109,6 +109,20 @@ Run
 ---
 
 Run ``sbt run``. This command will download dependencies, compile the project,
-and run the class my_project.Boot, which starts the web server.
+and run the class ``my_project.Boot``, which starts the web server.
 
 Open http://localhost:8000/ in your browser.
+
+In the console, you will see all the routes and request information:
+
+::
+
+  [INFO] x.r.Routes$: Routes:
+  GET / my_project.action.IndexAction
+
+  [INFO] x.Server: Xitrum started on port 8000 in development mode
+  [DEBUG] x.h.u.Dispatcher$: GET my_project.action.IndexAction, 1 [ms]
+
+On startup, all routes will be collected and output to log. It is very
+convenient for you to have a list of routes if you want to write documentation
+for 3rd parties about the RESTful APIs in your web application.
