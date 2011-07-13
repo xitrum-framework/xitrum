@@ -8,11 +8,6 @@ Xitrum's documentation
 
 .. image:: http://www.bdoubliees.com/journalspirou/sfigures6/schtroumpfs/s14.jpg
 
-Xitrum is open source:
-
-* Source code: https://github.com/ngocdaothanh/xitrum
-* Google group: http://groups.google.com/group/xitrum-framework
-
 .. toctree::
    :maxdepth: 2
 

@@ -1,5 +1,5 @@
-Writing postbacks
-=================
+Postbacks
+=========
 
 .. image:: http://www.bdoubliees.com/journalspirou/sfigures6/schtroumpfs/s2.jpg
 

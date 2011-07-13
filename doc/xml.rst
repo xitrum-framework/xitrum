@@ -1,5 +1,5 @@
-XML tips
-========
+XML
+===
 
 .. image:: http://www.bdoubliees.com/journalspirou/sfigures6/schtroumpfs/s9.jpg
 

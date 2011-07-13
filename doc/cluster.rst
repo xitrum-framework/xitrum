@@ -1,7 +1,7 @@
 Clustering with Hazelcast
 =========================
 
-.. image:: img/meo_azrael_azrael.jpg
+.. image:: http://www.bdoubliees.com/journalspirou/sfigures6/schtroumpfs/s1.jpg
 
 Xitrum is designed in mind to run in production environment as multiple instances
 behind a proxy server or load balancer:

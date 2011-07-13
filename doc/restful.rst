@@ -1,5 +1,5 @@
-Writing RESTful APIs
-====================
+RESTful APIs
+============
 
 .. image:: http://www.bdoubliees.com/journalspirou/sfigures6/schtroumpfs/s4.jpg
 
