@@ -21,7 +21,7 @@ libraryDependencies += "org.slf4j" % "slf4j-api" % "1.6.1" % "provided"
 //resolvers += "JBoss Repository" at "https://repository.jboss.org/nexus/content/groups/public/"
 //"org.jboss.netty" % "netty" % "3.2.4.Final"
 
-resolvers += "Local Maven Repository" at "file://" + Path.userHome.absolutePath + "/.m2/repository"
+resolvers += "Local Maven Repository" at "file://" + System.getProperty("user.home") + "/.m2/repository"
 
 libraryDependencies += "org.jboss.netty" % "netty" % "4.0.0.Alpha1-SNAPSHOT"
 
@@ -49,7 +49,7 @@ crossScalaVersions := Seq("2.8.1", "2.9.0-1")
 
 publishTo := Some("Sonatype Snapshot Repository" at "https://oss.sonatype.org/content/repositories/snapshots")
 
-credentials += Credentials(Path.userHome / ".ivy2" / ".credentials")
+credentials += Credentials(new File(System.getProperty("user.home") + "/.ivy2/.credentials"))
 
 // There is error with sbt doc
 publishArtifact in (Compile, packageDoc) := false

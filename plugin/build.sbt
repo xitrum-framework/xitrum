@@ -17,4 +17,4 @@ crossScalaVersions := Seq("2.8.1")
 
 publishTo := Some("Sonatype Snapshot Repository" at "https://oss.sonatype.org/content/repositories/snapshots")
 
-credentials += Credentials(Path.userHome / ".ivy2" / ".credentials")
+credentials += Credentials(new File(System.getProperty("user.home") + "/.ivy2/.credentials"))
