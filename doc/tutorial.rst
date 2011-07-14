@@ -10,7 +10,7 @@ Install SBT
 -----------
 
 Scala projects use `SBT <https://github.com/harrah/xsbt>`_ as the de facto build tool.
-Xitrum needs SBT 0.10.0+.
+Xitrum needs SBT 0.10.1+.
 
 Follow `instructions <https://github.com/harrah/xsbt/wiki/Setup>`_ to install.
 

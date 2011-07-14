@@ -48,9 +48,9 @@ Example:
 
 ::
 
-  java -noverify -javaagent:"$HOME/opt/jrebel-4.0.2/jrebel.jar" \
+  java -noverify -javaagent:"$HOME/opt/jrebel/jrebel.jar" \
        -Xmx1024m -XX:MaxPermSize=128m -Dsbt.boot.directory="$HOME/.sbt/boot" \
-       -jar `dirname $0`/sbt-launch-0.10.0.jar "$@"
+       -jar `dirname $0`/sbt-launch.jar "$@"
 
 Use JRebel
 ----------
