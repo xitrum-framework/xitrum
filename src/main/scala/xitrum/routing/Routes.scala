@@ -35,6 +35,7 @@ object Routes extends Logger {
       val mlen = method.getName.length
       val plen = pattern.length
 
+      // actionClass != classOf[PostbackAction]: see below
       val mmax2 = if (actionClass != classOf[PostbackAction] && mmax < mlen) mlen else mmax
       val pmax2 = if (pmax < plen) plen else pmax
       (mmax2, pmax2)
