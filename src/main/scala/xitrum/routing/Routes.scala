@@ -20,16 +20,26 @@ object Routes extends Logger {
     // Avoid loading twice in some servlet containers
     if (compiledRoutes != null) return
 
+    logger.info("Collect routes...")
     val (routes, cacheSecs0) = (new RouteCollector).collect
     cacheSecs = cacheSecs0
 
-    // Compile and log routes at the same time because the compiled routes do
-    // not contain the original URL pattern.
+    // Compile and log routes
+    // The compiled routes do not contain the original URL pattern
 
-    val patternMaxLength = routes.foldLeft(0) { (max, r) =>
-      val len = r._2.length
-      if (max < len) len else max
+    val (methodMaxLength, patternMaxLength) = routes.foldLeft((0, 0)) { case ((mmax, pmax), r) =>
+      val method      = r._1
+      val pattern     = r._2
+      val actionClass = r._3
+
+      val mlen = method.getName.length
+      val plen = pattern.length
+
+      val mmax2 = if (actionClass != classOf[PostbackAction] && mmax < mlen) mlen else mmax
+      val pmax2 = if (pmax < plen) plen else pmax
+      (mmax2, pmax2)
     }
+    val logFormat = "%-" + methodMaxLength + "s %-" + patternMaxLength + "s %s\n"
 
     val builder = new StringBuilder
     builder.append("Routes:\n")
@@ -38,10 +48,8 @@ object Routes extends Logger {
       val pattern     = r._2
       val actionClass = r._3
 
-      if (actionClass != classOf[PostbackAction]) {  // Skip noisy information
-        val format = "%-6s %-" + patternMaxLength + "s %s\n"
-        builder.append(format.format(method, pattern, actionClass.getName))
-      }
+      if (actionClass != classOf[PostbackAction])  // Skip noisy information        
+        builder.append(logFormat.format(method.getName, pattern, actionClass.getName))
 
       compileRoute(r)
     }
