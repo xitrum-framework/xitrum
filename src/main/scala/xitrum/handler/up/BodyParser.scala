@@ -10,8 +10,8 @@ import HttpMethod._
 import InterfaceHttpData.HttpDataType
 
 import xitrum.Config
-import xitrum.handler.Env
-import xitrum.scope.{Env => AEnv, PathInfo}
+import xitrum.handler.HandlerEnv
+import xitrum.scope.request.{FileUploadParams, Params, PathInfo}
 
 object BodyParser {
   DiskAttribute.deleteOnExitTemporaryFile  = true  // Should delete file on exit (in normal exit)
@@ -32,25 +32,24 @@ object BodyParser {
 
 @Sharable
 class BodyParser extends SimpleChannelUpstreamHandler with BadClientSilencer {
-  import AEnv._
   import BodyParser._
 
   override def messageReceived(ctx: ChannelHandlerContext, e: MessageEvent) {
     val m = e.getMessage
-    if (!m.isInstanceOf[Env]) {
+    if (!m.isInstanceOf[HandlerEnv]) {
       ctx.sendUpstream(e)
       return
     }
 
-    val env     = m.asInstanceOf[Env]
-    val request = env.request
+    val handlerEnv = m.asInstanceOf[HandlerEnv]
+    val request    = handlerEnv.request
 
     val (bodyParams, fileUploadParams) = if (request.getMethod != POST) {
-      (MMap[String, Array[String]](), MMap[String, Array[FileUpload]]())
+      (MMap[String, List[String]](), MMap[String, List[FileUpload]]())
     } else {
       try {
-        val bodyParams = MMap[String, Array[String]]()
-        val fileParams = MMap[String, Array[FileUpload]]()
+        val bodyParams = MMap[String, List[String]]()
+        val fileParams = MMap[String, List[FileUpload]]()
 
         val decoder = new HttpPostRequestDecoder(factory, request)
         val datas   = decoder.getBodyHttpDatas
@@ -84,9 +83,9 @@ class BodyParser extends SimpleChannelUpstreamHandler with BadClientSilencer {
       }
     }
 
-    env.bodyParams       = bodyParams
-    env.fileUploadParams = fileUploadParams
-    Channels.fireMessageReceived(ctx, env)
+    handlerEnv.bodyParams       = bodyParams
+    handlerEnv.fileUploadParams = fileUploadParams
+    Channels.fireMessageReceived(ctx, handlerEnv)
   }
 
   //----------------------------------------------------------------------------
@@ -98,18 +97,18 @@ class BodyParser extends SimpleChannelUpstreamHandler with BadClientSilencer {
     fileUpload.setFilename(filename3)
   }
 
-  private def putOrAppendString(map: MMap[String, Array[String]], key: String, value: String) {
+  private def putOrAppendString(map: Params, key: String, value: String) {
     if (!map.contains(key)) {
-      map(key) = Array(value)
+      map(key) = List(value)
     } else {
       val values = map(key)
       map(key) = values :+ value
     }
   }
 
-  private def putOrAppendFileUpload(map: MMap[String, Array[FileUpload]], key: String, value: FileUpload) {
+  private def putOrAppendFileUpload(map: FileUploadParams, key: String, value: FileUpload) {
     if (!map.contains(key)) {
-      map(key) = Array(value)
+      map(key) = List(value)
     } else {
       val values = map(key)
       map(key) = values :+ value

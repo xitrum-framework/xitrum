@@ -99,7 +99,7 @@ object Config extends Logger {
 
   // Below are all "var"s so that application developers may change the defaults
 
-  var maxRequestContentLengthInMB = 10
+  var maxRequestContentLengthInMB = 32  // Same as GAE
 
   /**
    * For speed, to avoid checking file existance on every request, public files

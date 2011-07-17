@@ -1,26 +1,20 @@
-package xitrum.scope
+package xitrum.scope.request
 
 import scala.collection.mutable.{Map => MMap}
-
 import org.jboss.netty.channel.ChannelHandlerContext
-import org.jboss.netty.handler.codec.http.{FileUpload, HttpRequest}
 
 import xitrum.Config
-import xitrum.handler.{Env => HEnv}
+import xitrum.handler.HandlerEnv
 
-object Env {
-  type Params           = MMap[String, Array[String]]
-  type FileUploadParams = MMap[String, Array[FileUpload]]
-
-  /** Array[String].toString becomes somthing like [Ljava.lang.String;@29fb6448, which is meaningless */
-  def inspectParams(params: MMap[String, Array[Any]]): String = {
+object RequestEnv {
+  def inspectParamsWithFilter(params: MMap[String, List[Any]]): String = {
     val sb = new StringBuilder
     sb.append("{")
 
     val keys = params.keys.toArray
     val size = keys.size
     for (i <- 0 until size) {
-      val key    = keys(i)
+      val key = keys(i)
 
       sb.append(key)
       sb.append(": ")
@@ -53,18 +47,17 @@ object Env {
  * All core state variables for a request are here. All other variables in Helper
  * and Controller can be inferred from these variables.
  */
-class Env {
-  var ctx:  ChannelHandlerContext = _
-  var henv: HEnv                  = _
+class RequestEnv {
+  var ctx:        ChannelHandlerContext = _
+  var handlerEnv: HandlerEnv            = _
 
-  def apply(ctx: ChannelHandlerContext, henv: HEnv) {
-    this.ctx  = ctx
-    this.henv = henv
+  def apply(ctx: ChannelHandlerContext, handlerEnv: HandlerEnv) {
+    this.ctx        = ctx
+    this.handlerEnv = handlerEnv
   }
 
-  // Shortcuts to henv for easy access for app developers
-  // "def" is used instead of "val" or "var" to to synchronize with henv
-  def request          = henv.request
-  def pathInfo         = henv.pathInfo
-  def fileUploadParams = henv.fileUploadParams
+  // Shortcuts to handlerEnv for easy access for app developers
+  def request          = handlerEnv.request
+  def pathInfo         = handlerEnv.pathInfo
+  def fileUploadParams = handlerEnv.fileUploadParams
 }

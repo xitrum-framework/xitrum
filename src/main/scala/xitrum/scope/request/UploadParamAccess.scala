@@ -1,4 +1,4 @@
-package xitrum.scope
+package xitrum.scope.request
 
 import scala.collection.JavaConversions
 import org.jboss.netty.handler.codec.http.FileUpload
@@ -29,7 +29,7 @@ trait UploadParamAccess {
    * The filename has been sanitized for insecure character. You don't have to
    * do it again.
    */
-  def uploadParams(key: String): Array[FileUpload] = {
+  def uploadParams(key: String): List[FileUpload] = {
     if (fileUploadParams.contains(key))
       fileUploadParams.apply(key)
     else
@@ -37,7 +37,7 @@ trait UploadParamAccess {
   }
 
   /** See uploadParams. */
-  def uploadParamso(key: String): Option[Array[FileUpload]] = {
+  def uploadParamso(key: String): Option[List[FileUpload]] = {
     fileUploadParams.get(key)
   }
 }

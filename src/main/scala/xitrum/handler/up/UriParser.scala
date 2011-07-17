@@ -8,19 +8,19 @@ import ChannelHandler.Sharable
 import org.jboss.netty.handler.codec.http.QueryStringDecoder
 
 import xitrum.Config
-import xitrum.handler.{BaseUri, Env}
-import xitrum.scope.PathInfo
+import xitrum.handler.{BaseUri, HandlerEnv}
+import xitrum.scope.request.{Params, PathInfo}
 
 @Sharable
 class UriParser extends SimpleChannelUpstreamHandler with BadClientSilencer {
   override def messageReceived(ctx: ChannelHandlerContext, e: MessageEvent) {
     val m = e.getMessage
-    if (!m.isInstanceOf[Env]) {
+    if (!m.isInstanceOf[HandlerEnv]) {
       ctx.sendUpstream(e)
       return
     }
 
-    val env     = m.asInstanceOf[Env]
+    val env     = m.asInstanceOf[HandlerEnv]
     val request = env.request
 
     try {
@@ -42,11 +42,11 @@ class UriParser extends SimpleChannelUpstreamHandler with BadClientSilencer {
 
   //----------------------------------------------------------------------------
 
-  private def jParamsToParams(params: JMap[String, JList[String]]): MMap[String, Array[String]] = {
+  private def jParamsToParams(params: JMap[String, JList[String]]): Params = {
     val keySet = params.keySet
 
     val it  = keySet.iterator
-    val ret = MMap[String, Array[String]]()
+    val ret = MMap[String, List[String]]()
     while (it.hasNext) {
       val key    = it.next
       val values = params.get(key)
@@ -57,7 +57,7 @@ class UriParser extends SimpleChannelUpstreamHandler with BadClientSilencer {
         val value = it2.next
         ret2.append(value)
       }
-      ret(key) = ret2.toArray
+      ret(key) = ret2.toList
     }
 
     ret

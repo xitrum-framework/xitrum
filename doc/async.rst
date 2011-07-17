@@ -75,9 +75,9 @@ Chat example
         <div id="messages"></div>
         {jsCometGet("chat", "function(message) { #('messages').append(message.body) }"}
 
-        <form postback="submit" action={urlForPostback[CometPublishAction]}>
+        <form postback="submit" action={urlForPostback[CometPublishAction]} after="function() { $('#chat_input').html('') }">
           <input type="hidden" name={validate("channel")} value="chat" />
-          <input type="text" name={validate("body", Required)} />
+          <input type="text" id="chat_input" name={validate("body", Required)} />
         </form>
       )
     }

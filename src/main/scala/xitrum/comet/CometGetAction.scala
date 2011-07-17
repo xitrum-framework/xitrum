@@ -5,6 +5,7 @@ import net.liftweb.json._
 import net.liftweb.json.JsonDSL._
 
 import xitrum.Action
+import xitrum.scope.request.Params
 
 class CometGetAction extends Action {
   override def postback {
@@ -37,7 +38,7 @@ class CometGetAction extends Action {
   //----------------------------------------------------------------------------
 
   private def respondMessages(messages: Iterable[CometMessage]) {
-    val (timestamps, bodies) = messages.foldLeft((ListBuffer[Long](), ListBuffer[String]())) { case ((ts, bs), m) =>
+    val (timestamps, bodies) = messages.foldLeft((ListBuffer[Long](), ListBuffer[Params]())) { case ((ts, bs), m) =>
       ts.append(m.timestamp)
       bs.append(m.body)
       (ts, bs)

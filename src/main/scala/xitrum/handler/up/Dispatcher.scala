@@ -12,10 +12,10 @@ import HttpResponseStatus._
 import HttpVersion._
 
 import xitrum.{Action, Cache, Config, Logger}
-import xitrum.scope.{Env => AEnv}
+import xitrum.scope.request.RequestEnv
 import xitrum.routing.{Routes, PostbackAction}
 import xitrum.exception.MissingParam
-import xitrum.handler.Env
+import xitrum.handler.HandlerEnv
 import xitrum.handler.down.ResponseCacher
 import xitrum.handler.updown.XSendfile
 
@@ -25,7 +25,7 @@ object Dispatcher extends Logger {
     var hit            = false
 
     try {
-      action.henv.action = action
+      action.handlerEnv.action = action
       val actionClass = action.getClass.asInstanceOf[Class[Action]]
       val cacheSecs   = Routes.getCacheSecs(actionClass)
 
@@ -83,8 +83,8 @@ object Dispatcher extends Logger {
           logAccess(action, postback, beginTimestamp, 0, false)
         }
 
-        action.henv.response = response
-        action.ctx.getChannel.write(action.henv)
+        action.handlerEnv.response = response
+        action.ctx.getChannel.write(action.handlerEnv)
     }
   }
 
@@ -98,11 +98,11 @@ object Dispatcher extends Logger {
       val endTimestamp = System.currentTimeMillis
       val dt           = endTimestamp - beginTimestamp
 
-      (if (postback) "POSTBACK" else action.request.getMethod) + " " + action.getClass.getName                                                                    +
-      (if (!action.henv.uriParams.isEmpty)        ", uriParams: "        + AEnv.inspectParams(action.henv.uriParams       .asInstanceOf[MMap[String, Array[Any]]]) else "") +
-      (if (!action.henv.bodyParams.isEmpty)       ", bodyParams: "       + AEnv.inspectParams(action.henv.bodyParams      .asInstanceOf[MMap[String, Array[Any]]]) else "") +
-      (if (!action.henv.pathParams.isEmpty)       ", pathParams: "       + AEnv.inspectParams(action.henv.pathParams      .asInstanceOf[MMap[String, Array[Any]]]) else "") +
-      (if (!action.henv.fileUploadParams.isEmpty) ", fileUploadParams: " + AEnv.inspectParams(action.henv.fileUploadParams.asInstanceOf[MMap[String, Array[Any]]]) else "") +
+      (if (postback) "POSTBACK" else action.request.getMethod) + " " + action.getClass.getName                                                                                                         +
+      (if (!action.handlerEnv.uriParams.isEmpty)        ", uriParams: "        + RequestEnv.inspectParamsWithFilter(action.handlerEnv.uriParams.asInstanceOf[MMap[String, List[Any]]])        else "") +
+      (if (!action.handlerEnv.bodyParams.isEmpty)       ", bodyParams: "       + RequestEnv.inspectParamsWithFilter(action.handlerEnv.bodyParams.asInstanceOf[MMap[String, List[Any]]])       else "") +
+      (if (!action.handlerEnv.pathParams.isEmpty)       ", pathParams: "       + RequestEnv.inspectParamsWithFilter(action.handlerEnv.pathParams.asInstanceOf[MMap[String, List[Any]]])       else "") +
+      (if (!action.handlerEnv.fileUploadParams.isEmpty) ", fileUploadParams: " + RequestEnv.inspectParamsWithFilter(action.handlerEnv.fileUploadParams.asInstanceOf[MMap[String, List[Any]]]) else "") +
       ", " + dt + " [ms]"
     }
 
@@ -132,12 +132,12 @@ class Dispatcher extends SimpleChannelUpstreamHandler with BadClientSilencer {
 
   override def messageReceived(ctx: ChannelHandlerContext, e: MessageEvent) {
     val m = e.getMessage
-    if (!m.isInstanceOf[Env]) {
+    if (!m.isInstanceOf[HandlerEnv]) {
       ctx.sendUpstream(e)
       return
     }
 
-    val env        = m.asInstanceOf[Env]
+    val env        = m.asInstanceOf[HandlerEnv]
     val request    = env.request
     val pathInfo   = env.pathInfo
     val uriParams  = env.uriParams

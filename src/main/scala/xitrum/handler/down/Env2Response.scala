@@ -4,18 +4,18 @@ import org.jboss.netty.channel.{ChannelHandler, SimpleChannelDownstreamHandler, 
 import ChannelHandler.Sharable
 import org.jboss.netty.handler.codec.http.HttpHeaders
 
-import xitrum.handler.Env
+import xitrum.handler.HandlerEnv
 
 @Sharable
 class Env2Response extends SimpleChannelDownstreamHandler {
   override def writeRequested(ctx: ChannelHandlerContext, e: MessageEvent) {
     val m = e.getMessage
-    if (!m.isInstanceOf[Env]) {
+    if (!m.isInstanceOf[HandlerEnv]) {
       ctx.sendDownstream(e)
       return
     }
 
-    val env      = m.asInstanceOf[Env]
+    val env      = m.asInstanceOf[HandlerEnv]
     val request  = env.request
     val response = env.response
     val future   = e.getFuture

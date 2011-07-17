@@ -11,8 +11,8 @@ import HttpHeaders.Names.{CONTENT_ENCODING, CONTENT_TYPE}
 import xitrum.{Cache, Config, Logger}
 import xitrum.Action
 import xitrum.routing.Routes
-import xitrum.scope.{Env => AEnv}
-import xitrum.handler.{Env, SmallFileCache}
+import xitrum.scope.request.RequestEnv
+import xitrum.handler.{HandlerEnv, SmallFileCache}
 import xitrum.util.{Gzip, Mime}
 
 object ResponseCacher extends Logger {
@@ -103,13 +103,13 @@ object ResponseCacher extends Logger {
   private def makeCacheKey(action: Action): String = {
     val textParams = action.textParams
     val sortedMap =
-      (new TreeMap[String, Array[String]]) ++  // See xitrum.action.env.Env.Params
+      (new TreeMap[String, List[String]]) ++  // See xitrum.action.env.Env.Params
       textParams
     "xitrum/page-action/" + action.request.getMethod + "/" + action.getClass.getName + "/" + inspectSortedParams(sortedMap)
   }
 
-  // See xitrum.action.env.Env.inspectParams
-  private def inspectSortedParams(params: SortedMap[String, Array[String]]) = {
+  // See RequestEnv.inspectParamsWithFilter
+  private def inspectSortedParams(params: SortedMap[String, List[String]]) = {
     val sb = new StringBuilder
     sb.append("{")
 
@@ -171,12 +171,12 @@ class ResponseCacher extends SimpleChannelDownstreamHandler with Logger {
 
   override def writeRequested(ctx: ChannelHandlerContext, e: MessageEvent) {
     val m = e.getMessage
-    if (!m.isInstanceOf[Env]) {
+    if (!m.isInstanceOf[HandlerEnv]) {
       ctx.sendDownstream(e)
       return
     }
 
-    val env    = m.asInstanceOf[Env]
+    val env    = m.asInstanceOf[HandlerEnv]
     val action = env.action
 
     // action may be null when the request could not go to Dispatcher, for

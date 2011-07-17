@@ -13,7 +13,7 @@ import org.jboss.netty.handler.stream.ChunkedFile
 import org.jboss.netty.buffer.ChannelBuffers
 
 import xitrum.{Config, Logger}
-import xitrum.handler.{Env, SmallFileCache}
+import xitrum.handler.SmallFileCache
 
 object XSendfile extends Logger {
   val CHUNK_SIZE = 8192

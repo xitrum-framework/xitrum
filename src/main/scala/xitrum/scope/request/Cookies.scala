@@ -1,4 +1,4 @@
-package xitrum.scope
+package xitrum.scope.request
 
 import java.util.{TreeSet => JTreeSet}
 

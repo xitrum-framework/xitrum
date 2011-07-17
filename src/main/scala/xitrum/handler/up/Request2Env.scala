@@ -4,7 +4,7 @@ import org.jboss.netty.channel.{ChannelHandler, SimpleChannelUpstreamHandler, Ch
 import ChannelHandler.Sharable
 import org.jboss.netty.handler.codec.http.HttpRequest
 
-import xitrum.handler.Env
+import xitrum.handler.HandlerEnv
 
 @Sharable
 class Request2Env extends SimpleChannelUpstreamHandler with BadClientSilencer {
@@ -15,7 +15,7 @@ class Request2Env extends SimpleChannelUpstreamHandler with BadClientSilencer {
       return
     }
 
-    val env = new Env
+    val env = new HandlerEnv
     env.request = m.asInstanceOf[HttpRequest]
     Channels.fireMessageReceived(ctx, env)
   }

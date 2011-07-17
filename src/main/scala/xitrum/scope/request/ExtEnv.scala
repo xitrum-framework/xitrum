@@ -1,4 +1,4 @@
-package xitrum.scope
+package xitrum.scope.request
 
 import org.jboss.netty.handler.codec.http.{DefaultHttpResponse, HttpResponseStatus, HttpVersion, HttpHeaders}
 import HttpVersion.HTTP_1_1
@@ -8,7 +8,7 @@ import xitrum.Config
 import xitrum.Action
 import xitrum.scope.session.CSRF
 
-trait ExtEnv extends Env with ParamAccess with UploadParamAccess with CSRF {
+trait ExtEnv extends RequestEnv with ParamAccess with UploadParamAccess with CSRF {
   this: Action =>
 
   /** The default response is empty 200 OK */

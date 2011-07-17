@@ -3,18 +3,18 @@ package xitrum.validation
 import scala.collection.mutable.{ArrayBuffer, Map => MMap}
 
 import xitrum.Action
-import xitrum.scope.Env
+import xitrum.scope.request.Params
 
 object ValidatorCaller {
   def call(action: Action): Boolean = {
     // Params in URL are not allowed for security because we only check bodyParams
-    action.henv.uriParams.clear
-    action.henv.pathParams.clear
+    action.handlerEnv.uriParams.clear
+    action.handlerEnv.pathParams.clear
 
-    val (bodyParams, name_secureParamName_validators) = takeoutValidators(action.henv.bodyParams)
+    val (bodyParams, name_secureParamName_validators) = takeoutValidators(action.handlerEnv.bodyParams)
 
-    action.henv.bodyParams.clear
-    action.henv.bodyParams ++= bodyParams
+    action.handlerEnv.bodyParams.clear
+    action.handlerEnv.bodyParams ++= bodyParams
 
     for ((paramName, secureParamName, validators) <- name_secureParamName_validators) {
       for (v <- validators) {
@@ -27,11 +27,11 @@ object ValidatorCaller {
 
   //----------------------------------------------------------------------------
 
-  //                                                            decrypted params      paramName  secureParamName
-  private def takeoutValidators(secureBodyParams: Env.Params): (Env.Params, Iterable[(String,    String, Iterable[Validator])]) = {
+  //                                                       decrypted params   paramName  secureParamName
+  private def takeoutValidators(secureBodyParams: Params): (Params, Iterable[(String,    String, Iterable[Validator])]) = {
     val secureParamNames = secureBodyParams.keys
 
-    val bodyParams2                          = MMap[String, Array[String]]()
+    val bodyParams2                          = MMap[String, List[String]]()
     val paramName_secureParamName_validators = ArrayBuffer[(String, String, Iterable[Validator])]()
     for (secureParamName <- secureParamNames) {
       val params = secureBodyParams(secureParamName)

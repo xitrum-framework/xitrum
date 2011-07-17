@@ -6,7 +6,7 @@ import HttpHeaders.Names._
 import HttpResponseStatus._
 
 import xitrum.action._
-import xitrum.scope.ExtEnv
+import xitrum.scope.request.ExtEnv
 import xitrum.scope.session.CSRF
 import xitrum.routing.{PostbackAction, Routes}
 import xitrum.validation.{Validator, ValidatorInjector}
@@ -39,10 +39,10 @@ trait Action extends ExtEnv with Logger with Net with Filter with BasicAuthentic
       }
     } else {
       _responded = true
-      if (ctx.getChannel.isOpen) {      
+      if (ctx.getChannel.isOpen) {
         prepareWhenRespond
-        henv.response = response
-        ctx.getChannel.write(henv)
+        handlerEnv.response = response
+        ctx.getChannel.write(handlerEnv)
       }
     }
   }
@@ -141,7 +141,7 @@ trait Action extends ExtEnv with Logger with Net with Filter with BasicAuthentic
 
   def forward(actionClass: Class[Action], postback: Boolean) {
     val action = actionClass.newInstance
-    action(ctx, henv)
+    action(ctx, handlerEnv)
     action.isPostback = isPostback
     Dispatcher.dispatchWithFailsafe(action, postback)
   }

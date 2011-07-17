@@ -1,4 +1,4 @@
-package xitrum.scope
+package xitrum.scope.request
 
 import scala.collection.JavaConversions
 import scala.collection.mutable.{Map => MMap}
@@ -8,8 +8,6 @@ import xitrum.exception.MissingParam
 
 trait ParamAccess {
   this: Action =>
-
-  import Env.Params
 
   /**
    * text (uriParams, bodyParams, pathParams) vs file upload (fileParams)
@@ -22,12 +20,12 @@ trait ParamAccess {
    * Not a function ("def") so that the calculation is done only once.
    */
   lazy val textParams: Params = {
-    val ret = MMap[String, Array[String]]()
+    val ret = MMap[String, List[String]]()
 
     // The order is important because we want the later to overwrite the former
-    ret ++= henv.uriParams
-    ret ++= henv.bodyParams
-    ret ++= henv.pathParams
+    ret ++= handlerEnv.uriParams
+    ret ++= handlerEnv.bodyParams
+    ret ++= handlerEnv.pathParams
 
     ret
   }
@@ -49,7 +47,7 @@ trait ParamAccess {
   /**
    * Returns a list of elements.
    */
-  def params(key: String, coll: Params = null): Array[String] = {
+  def params(key: String, coll: Params = null): List[String] = {
     val coll2 = if (coll == null) textParams else coll
     if (coll2.contains(key))
       coll2.apply(key)
@@ -57,7 +55,7 @@ trait ParamAccess {
       throw new MissingParam(key)
   }
 
-  def paramso(key: String, coll: Params = null): Option[Array[String]] = {
+  def paramso(key: String, coll: Params = null): Option[List[String]] = {
     val coll2 = if (coll == null) textParams else coll
     coll2.get(key)
   }
@@ -74,12 +72,12 @@ trait ParamAccess {
     valueo.map(convert[T](_))
   }
 
-  def tparams[T](key: String, coll: Params = null)(implicit m: Manifest[T]): Array[T] = {
+  def tparams[T](key: String, coll: Params = null)(implicit m: Manifest[T]): List[T] = {
     val values = params(key, coll)
     values.map(convert[T](_))
   }
 
-  def tparamso[T](key: String, coll: Params = null)(implicit m: Manifest[T]): Option[Array[T]] = {
+  def tparamso[T](key: String, coll: Params = null)(implicit m: Manifest[T]): Option[List[T]] = {
     paramso(key, coll) match {
       case None         => None
       case Some(values) => Some(values.map(convert[T](_)))

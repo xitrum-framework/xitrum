@@ -5,7 +5,7 @@ import scala.collection.mutable.{ArrayBuffer, Map => MMap, StringBuilder}
 import org.jboss.netty.handler.codec.http.{HttpMethod, QueryStringEncoder}
 
 import xitrum.{Action, Config, Logger}
-import xitrum.scope.{Env, PathInfo}
+import xitrum.scope.request.{Params, PathInfo}
 
 object Routes extends Logger {
   type Pattern         = String
@@ -49,7 +49,7 @@ object Routes extends Logger {
       val pattern     = r._2
       val actionClass = r._3
 
-      if (actionClass != classOf[PostbackAction])  // Skip noisy information        
+      if (actionClass != classOf[PostbackAction])  // Skip noisy information
         builder.append(logFormat.format(method.getName, pattern, actionClass.getName))
 
       compileRoute(r)
@@ -62,11 +62,11 @@ object Routes extends Logger {
    *
    * @return None if not matched
    */
-  def matchRoute(method: HttpMethod, pathInfo: PathInfo): Option[(HttpMethod, Class[Action], Env.Params)] = {
+  def matchRoute(method: HttpMethod, pathInfo: PathInfo): Option[(HttpMethod, Class[Action], Params)] = {
     val tokens = pathInfo.tokens
     val max1   = tokens.size
 
-    var pathParams: MMap[String, Array[String]] = null
+    var pathParams: Params = null
 
     def finder(cr: CompiledRoute): Boolean = {
       val (om, compiledPattern, _actionClass) = cr
@@ -93,7 +93,7 @@ object Routes extends Logger {
       // 0 = max2 <= max1
       if (max2 == 0) {
         if (max1 == 0) {
-          pathParams = MMap[String, Array[String]]()
+          pathParams = MMap[String, List[String]]()
           return true
         }
 
@@ -102,7 +102,7 @@ object Routes extends Logger {
 
       // 0 < max2 <= max1
 
-      pathParams = MMap[String, Array[String]]()
+      pathParams = MMap[String, List[String]]()
       var i = 0  // i will go from 0 until max1
 
       compiledPattern.forall { tc =>
@@ -114,13 +114,13 @@ object Routes extends Logger {
           if (i == max2 - 1) {  // The last token
             if (token == "*") {
               val value = tokens.slice(i, max1).mkString("/")
-              pathParams(token) = Array(value)
+              pathParams(token) = List(value)
               true
             } else {
               if (max2 < max1) {
                 false
               } else {  // max2 = max1
-                pathParams(token) = Array(tokens(i))
+                pathParams(token) = List(tokens(i))
                 true
               }
             }
@@ -128,7 +128,7 @@ object Routes extends Logger {
             if (token == "*") {
               false
             } else {
-              pathParams(token) = Array(tokens(i))
+              pathParams(token) = List(tokens(i))
               true
             }
           }

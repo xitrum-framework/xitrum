@@ -5,7 +5,7 @@ import ChannelHandler.Sharable
 import org.jboss.netty.handler.codec.http.HttpMethod
 import HttpMethod._
 
-import xitrum.handler.Env
+import xitrum.handler.HandlerEnv
 
 /**
  * If the real request method is POST and "_method" param exists (taken out by BodyParser),
@@ -17,12 +17,12 @@ import xitrum.handler.Env
 class MethodOverrider extends SimpleChannelUpstreamHandler with BadClientSilencer {
   override def messageReceived(ctx: ChannelHandlerContext, e: MessageEvent) {
     val m = e.getMessage
-    if (!m.isInstanceOf[Env]) {
+    if (!m.isInstanceOf[HandlerEnv]) {
       ctx.sendUpstream(e)
       return
     }
 
-    val env        = m.asInstanceOf[Env]
+    val env        = m.asInstanceOf[HandlerEnv]
     val request    = env.request
     val method     = request.getMethod
     val bodyParams = env.bodyParams

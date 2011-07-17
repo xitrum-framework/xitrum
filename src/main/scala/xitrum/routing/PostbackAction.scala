@@ -4,7 +4,7 @@ import org.jboss.netty.handler.codec.http.HttpHeaders
 
 import xitrum.Action
 import xitrum.annotation.POST
-import xitrum.scope.PathInfo
+import xitrum.scope.request.PathInfo
 import xitrum.scope.session.CSRF
 import xitrum.exception.InvalidCSRFToken
 import xitrum.validation.ValidatorCaller
