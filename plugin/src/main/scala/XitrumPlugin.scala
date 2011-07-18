@@ -33,7 +33,8 @@ object XitrumPlugin extends Plugin {
 
   lazy val newTask = newKey <<= baseDirectory map { baseDir =>
     (baseDir / "config").mkdir
-    copyResourceFile(baseDir, "config/hazelcast.xml")
+    copyResourceFile(baseDir, "config/hazelcast_cluster_member_or_super_client.xml")
+    copyResourceFile(baseDir, "config/hazelcast_java_client.properties")
     copyResourceFile(baseDir, "config/logback.xml")
     copyResourceFile(baseDir, "config/xitrum.properties")
 
