@@ -23,6 +23,8 @@ trait AppAction extends Action {
       </head>
       <body>
         <div class="container_12">
+          <h1><a href={urlFor[IndexAction]}>Welcome to Xitrum</a></h1>
+
           <div class="grid_8">
             <div id="flash">{jsFlash}</div>
             {renderedView}

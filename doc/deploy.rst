@@ -11,6 +11,8 @@ You may run Xitrum directly:
 
 Or behind a proxy server like Apache or Nginx:
 
+::
+
   Browser ------ Proxy ------ Xitrum instance
 
 Package directory
@@ -57,7 +59,7 @@ You may want to modify runner.sh to tune JVM settings.
 You may need to write the above command line to INSTALL file, for example, so
 that the user of your project know how to start the web server.
 
-To change the port of the web server, change ``http_port `` in ``config/xitrum.properties``.
+To change the port of the web server, change ``http_port`` in ``config/xitrum.properties``.
 
 Base URI
 --------

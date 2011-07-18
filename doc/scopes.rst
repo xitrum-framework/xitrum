@@ -37,17 +37,17 @@ To access ``textParams``:
 
 You can convert String to other types (Int, Long, Fload, Double) automatically:
 
-* ``tparam[Int]("x")``: returns a ``Int``, throws exception if x does not exist
+* ``tparam[Int]("x")``: returns ``Int``, throws exception if x does not exist
 * ``tparams[Int]("x")``: returns ``List[Int]``, throws exception if x does not exist
 * ``tparamo[Int]("x")``: returns ``Option[Int]``
 * ``tparamso[Int]("x")``: returns ``Option[List[Int]]``
 
 For file upload:
 
-* uploadParam("x"): returns ``FileUpload``, throws exception if x does not exist
-* uploadParams("x"): returns ``List[FileUpload]``, throws exception if x does not exist
-* uploadParamo("x"): returns ``Option[FileUpload]``
-* uploadParamso("x"): returns ``Option[List[FileUpload]]``
+* ``uploadParam("x")``: returns ``FileUpload``, throws exception if x does not exist
+* ``uploadParams("x")``: returns ``List[FileUpload]``, throws exception if x does not exist
+* ``uploadParamo("x")``: returns ``Option[FileUpload]``
+* ``uploadParamso("x")``: returns ``Option[List[FileUpload]]``
 
 RequestVar
 ~~~~~~~~~~
