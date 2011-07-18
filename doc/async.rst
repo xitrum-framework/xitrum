@@ -71,20 +71,31 @@ Chat example
   @GET("/chat")
   class ChatAction {
     override def execute {
-      renderView(
-        <div id="chat_output"></div>
-        {jsCometGet("chat", "function(message) { $('#chat_output').append(message.body) }")}
+      jsCometGet("chat", """
+        function(channel, timestamp, body) {
+          var wasScrollAtBottom = xitrum.isScrollAtBottom('#chatOutput');
 
-        <form postback="submit" action={urlForPostback[CometPublishAction]} after="function() { $('#chat_input').html('') }">
+          var escaped = $('<div/>').text(body.chatInput[0]).html();
+          $('#chatOutput').append('- ' + escaped + '<br />');
+
+          if (wasScrollAtBottom) xitrum.scrollToBottom('#chatOutput');
+        }
+      """)
+
+      renderView(
+        <div id="chatOutput"></div>
+
+        <form postback="submit" action={urlForPostback[CometPublishAction]} after="function() { $('#chatInput').attr('value', '') }">
           <input type="hidden" name={validate("channel")} value="chat" />
-          <input type="text" id="chat_input" name={validate("body", Required)} />
+          <input type="text" id="chatInput" name={validate("chatInput", Required)} />
         </form>
       )
     }
   }
 
 ``jsCometGet`` will send long polling Ajax requests, get published messages,
-and call your defined function.
+and call your callback function. The 3rd argument ``body`` is a hash
+containing everything inside the form commited to ``CometPublishAction``.
 
 Publish message
 ~~~~~~~~~~~~~~~

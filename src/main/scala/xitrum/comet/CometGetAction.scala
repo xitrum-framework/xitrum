@@ -17,7 +17,7 @@ class CometGetAction extends Action {
 
     if (messages.isEmpty) {
       val messagePublished = (message: CometMessage) => {
-        respondMessages(List(message))
+        respondMessages(channel, List(message))
 
         // Return true for Comet to automatically remove this listener.
         // With HTTP the reponse can only be sent once.
@@ -29,18 +29,18 @@ class CometGetAction extends Action {
       // Avoid memory leak when messagePublished is never removed, e.g. no message is published
       addConnectionClosedListener(() => Comet.removeMessageListener(channel, messagePublished))
     } else {
-      respondMessages(messages)
+      respondMessages(channel, messages)
     }
   }
 
   //----------------------------------------------------------------------------
 
-  private def respondMessages(messages: Iterable[CometMessage]) {
+  private def respondMessages(channel: String, messages: Iterable[CometMessage]) {
     val (timestamps, bodies) = messages.foldLeft((ListBuffer[Long](), ListBuffer[Params]())) { case ((ts, bs), m) =>
       ts.append(m.timestamp)
       bs.append(m.body)
       (ts, bs)
     }
-    renderJson(Map("timestamps" -> timestamps.toList, "bodies" -> bodies.toList))
+    renderJson(Map("channel" -> channel, "timestamps" -> timestamps.toList, "bodies" -> bodies.toList))
   }
 }

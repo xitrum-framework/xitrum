@@ -6,7 +6,7 @@ import xitrum.annotation.GET
 class CometPublishAction extends Action {
   override def postback {
     val channel = param("channel")
-    Comet.publish(channel, textParams)
+    Comet.publish(channel, textParams - "channel")  // Save some space
     renderText("")
   }
 }

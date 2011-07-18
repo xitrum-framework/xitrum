@@ -73,16 +73,24 @@ var xitrum = {
         // Wait for some time before the next retry
         setTimeout(function() { xitrum.cometGet(encryptedChannel, channel, encryptedLastTimestamp, lastTimestamp, callback) }, 3000);
       },
-      success: function(data) {
-        var timestamps = data.timestamps;
-        var bodies     = data.bodies;
+      success: function(message) {
+        var timestamps = message.timestamps;
+        var bodies     = message.bodies;
         var length     = timestamps.length;
         for (var i = 0; i < length; i++) {
-          callback(timestamps[i], bodies[i]);
+          callback(channel, timestamps[i], bodies[i]);
         }
         xitrum.cometGet(encryptedChannel, channel, encryptedLastTimestamp, timestamps[length - 1], callback);
       }
     });
+  },
+
+  isScrollAtBottom: function(selector) {
+    return ($(selector).scrollTop() + $(selector).height() == $(selector)[0].scrollHeight);
+  },
+
+  scrollToBottom: function(selector) {
+    $(selector).scrollTop($(selector)[0].scrollHeight);
   }
 };
 
