@@ -87,7 +87,14 @@ A new project skeleton will be created:
       hazelcast.xml
       logback.xml
       xitrum.properties
-    public
+    static
+      public
+        css
+          960
+            reset.css
+            text.css
+            960.css
+          app.css
       404.html
       500.html
       favicon.ico

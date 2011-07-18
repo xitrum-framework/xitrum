@@ -59,5 +59,8 @@ class RequestEnv {
   // Shortcuts to handlerEnv for easy access for app developers
   def request          = handlerEnv.request
   def pathInfo         = handlerEnv.pathInfo
+  def uriParams        = handlerEnv.uriParams
+  def bodyParams       = handlerEnv.bodyParams
+  def pathParams       = handlerEnv.pathParams
   def fileUploadParams = handlerEnv.fileUploadParams
 }

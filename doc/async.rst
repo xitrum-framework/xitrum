@@ -1,16 +1,17 @@
 Async response
 ==============
 
-.. image:: img/lao_gamen_gargamel.jpg
+.. image:: img/xitrum/lao_gamen_gargamel.jpg
 
 renderXXX:
 
-* ``renderView``: render HTML with or without layout
-* ``renderText``: render a string without layout
-* ``renderBinary``: render an array of bytes
-* ``renderFile``: send a file directly from disk, very fast
+* ``renderView``: renders HTML with or without layout
+* ``renderText``: renders a string without layout
+* ``renderJson``: renderss JSON
+* ``renderBinary``: renders an array of bytes
+* ``renderFile``: sends a file directly from disk, very fast
   because `zero-copy <http://www.ibm.com/developerworks/library/j-zerocopy/>`_
-  (send-file) is used
+  (aka send-file) is used
 
 There is no default response. You must call renderXXX explicitly to send response
 to the client. If you don't call renderXXX, the HTTP connection is kept for you,

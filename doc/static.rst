@@ -1,7 +1,7 @@
 Static files
 ============
 
-.. image:: img/be_ti_xitrum_baby_smurf.jpg
+.. image:: img/xitrum/be_ti_xitrum_baby_smurf.jpg
 
 Serve file from public directory
 --------------------------------

@@ -3,11 +3,54 @@ Scopes
 
 .. image:: http://www.bdoubliees.com/journalspirou/sfigures6/schtroumpfs/s11.jpg
 
-To pass things around, there are 2 scopes: request and session. Xitrum tries to
-be typesafe. RequestVar and SessionVar is a way to achieve that goal.
+Request
+-------
+
+Kinds of params
+~~~~~~~~~~~~~~~
+
+There are 2 kinds of request params: textual params and file upload params (binary).
+
+There are 3 kinds of textual params, of type ``scala.collection.mutable.Map[String, List[String]]``:
+
+1. ``uriParams``: params after the ? mark in the URL, example: http://example.com/blah?x=1&y=2
+2. ``bodyParams``: params in POST request body
+3. ``pathParams``: params embedded in the URL, example: ``@GET("/articles/:id/:title")``
+
+These params are merged in the above order (from 1 to 3, the latter will
+override the former), as ``textParams``.
+
+``fileUploadParams`` is of type ``scala.collection.mutable.Map[String, List[org.jboss.netty.handler.codec.http.FileUpload]]``.
+
+Accesing params
+~~~~~~~~~~~~~~~
+
+From an action, you can access the above params directly, or you can use
+accessor methods.
+
+To access ``textParams``:
+
+* ``param("x")``: returns ``String``, throws exception if x does not exist
+* ``params("x")``: returns ``List[String]``, throws exception if x does not exist
+* ``paramo("x")``: returns ``Option[String]``
+* ``paramso("x")``: returns ``Option[List[String]]``
+
+You can convert String to other types (Int, Long, Fload, Double) automatically:
+
+* ``tparam[Int]("x")``: returns a ``Int``, throws exception if x does not exist
+* ``tparams[Int]("x")``: returns ``List[Int]``, throws exception if x does not exist
+* ``tparamo[Int]("x")``: returns ``Option[Int]``
+* ``tparamso[Int]("x")``: returns ``Option[List[Int]]``
+
+For file upload:
+
+* uploadParam("x"): returns ``FileUpload``, throws exception if x does not exist
+* uploadParams("x"): returns ``List[FileUpload]``, throws exception if x does not exist
+* uploadParamo("x"): returns ``Option[FileUpload]``
+* uploadParamso("x"): returns ``Option[List[FileUpload]]``
 
 RequestVar
-----------
+~~~~~~~~~~
 
 To pass things around when processing a request (e.g. from action to view or layout)
 in the typesafe way, you should use RequestVar.
@@ -57,8 +100,16 @@ ShowAction.scala
     }
   }
 
+Cookie
+------
+
+TODO
+
+Session
+-------
+
 SessionVar
-----------
+~~~~~~~~~~
 
 For example, you want save username to session after the user has logged in:
 

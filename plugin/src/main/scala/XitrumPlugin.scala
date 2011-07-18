@@ -43,6 +43,12 @@ object XitrumPlugin extends Plugin {
     copyResourceFile(baseDir, "static/favicon.ico")
     copyResourceFile(baseDir, "static/robots.txt")
 
+    (baseDir / "static" / "public" / "css" / "960").mkdirs
+    copyResourceFile(baseDir, "static/public/css/app.css")
+    copyResourceFile(baseDir, "static/public/css/960/reset.css")
+    copyResourceFile(baseDir, "static/public/css/960/text.css")
+    copyResourceFile(baseDir, "static/public/css/960/960.css")
+
     (baseDir / "src" / "main" / "scala" / "my_project" / "action").mkdirs
     copyResourceFile(baseDir, "src/main/scala/my_project/Boot.scala")
     copyResourceFile(baseDir, "src/main/scala/my_project/action/AppAction.scala")

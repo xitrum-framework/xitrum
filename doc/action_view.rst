@@ -32,9 +32,10 @@ Of course you can refactor the view into a separate Scala file.
 
 There are methods for rendering things other than views:
 
-* ``renderText``: render a string without layout
-* ``renderBinary``: render an array of bytes
-* ``renderFile``: send a file directly from disk, very fast
+* ``renderText``: renders anything as a string without layout
+* ``renderJson``: renders JSON
+* ``renderBinary``: renders an array of bytes
+* ``renderFile``: sends a file directly from disk, very fast
   because `zero-copy <http://www.ibm.com/developerworks/library/j-zerocopy/>`_
   (send-file) is used
 

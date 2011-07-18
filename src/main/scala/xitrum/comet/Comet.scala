@@ -12,10 +12,9 @@ import xitrum.scope.request.Params
 
 // TODO: presense
 object Comet {
-  private val MAP_NAME    = "xitrum/comet"
   private val TTL_SECONDS = 60
 
-  private val map = Hazelcast.getMap(MAP_NAME).asInstanceOf[IMap[Long, CometMessage]]
+  private val map = Hazelcast.getMap("xitrum/comet").asInstanceOf[IMap[Long, CometMessage]]
 
   /** The listener returns true if it wants itself to be removed. */
   type MessageListener = (CometMessage) => Boolean
