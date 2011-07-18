@@ -35,8 +35,12 @@ libraryDependencies += "tv.cntt" % "annovention" % "1.0-SNAPSHOT"
 // https://github.com/infinispan/infinispan/blob/master/core/src/main/java/org/infinispan/util/logging/LogFactory.java
 libraryDependencies += "com.hazelcast" % "hazelcast" % "1.9.3"
 
-// https://github.com/lift/framework/tree/2.4-M1-release/core/json
-libraryDependencies += "net.liftweb" %% "lift-json" % "2.4-M2"
+// https://github.com/codahale/jerkson
+// lift-json does not generate correctly for:
+//   List(Map("user" -> List("langtu"), "body" -> List("hello world")))
+resolvers += "repo.codahale.com" at "http://repo.codahale.com"
+
+libraryDependencies += "com.codahale" %% "jerkson" % "0.3.2"
 
 // For easier development (sbt console etc.)
 unmanagedBase in Runtime <<= baseDirectory { base => base / "config" }

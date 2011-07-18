@@ -1,8 +1,7 @@
 package xitrum.comet
 
 import scala.collection.mutable.ListBuffer
-import net.liftweb.json._
-import net.liftweb.json.JsonDSL._
+import com.codahale.jerkson.Json
 
 import xitrum.Action
 import xitrum.scope.request.Params
@@ -44,7 +43,7 @@ class CometGetAction extends Action {
       (ts, bs)
     }
 
-    val json = ("timestamps" -> timestamps.toList) ~ ("bodies" -> bodies.toList)
-    renderText(compact(render(json)), "text/json")
+    val json = Json.generate(Map("timestamps" -> timestamps.toList, "bodies" -> bodies.toList))
+    renderText(json, "text/json")
   }
 }

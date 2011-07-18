@@ -8,6 +8,8 @@ import org.jboss.netty.handler.codec.http.{DefaultHttpChunk, HttpChunk, HttpHead
 import HttpHeaders.Names.{CONTENT_TYPE, CONTENT_LENGTH, TRANSFER_ENCODING}
 import HttpHeaders.Values.CHUNKED
 
+import com.codahale.jerkson.Json
+
 import xitrum.{Action, Config}
 import xitrum.handler.updown.XSendfile
 
@@ -33,6 +35,8 @@ trait Renderer extends JQuery with JSCollector with Flash with I18n {
   def renderLastChunk {
     if (ctx.getChannel.isOpen) ctx.getChannel.write(HttpChunk.LAST_CHUNK)
   }
+
+  //----------------------------------------------------------------------------
 
   def renderText(text: Any, contentType: String = null): String = {
     val textIsXml = text.isInstanceOf[Node] || text.isInstanceOf[NodeSeq]
@@ -77,6 +81,13 @@ trait Renderer extends JQuery with JSCollector with Flash with I18n {
     }
 
     ret
+  }
+
+  //----------------------------------------------------------------------------
+
+  def renderJson(any: Any) {
+    val json = Json.generate(any)
+    renderText(json, "text/json")
   }
 
   //----------------------------------------------------------------------------

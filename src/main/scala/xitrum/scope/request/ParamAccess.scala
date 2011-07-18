@@ -86,11 +86,10 @@ trait ParamAccess {
 
   private def convert[T](value: String)(implicit m: Manifest[T]): T = {
     val v = m.toString match {
-      case "int"    => value.toInt
-      case "short"  => value.toShort
-      case "long"   => value.toLong
-      case "float"  => value.toFloat
-      case "double" => value.toDouble
+      case "Int"    => value.toInt
+      case "Long"   => value.toLong
+      case "Float"  => value.toFloat
+      case "Double" => value.toDouble
       case unknown  => throw new Exception("Cannot covert String to " + unknown)
     }
     v.asInstanceOf[T]

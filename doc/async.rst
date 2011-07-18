@@ -72,8 +72,8 @@ Chat example
   class ChatAction {
     override def execute {
       renderView(
-        <div id="messages"></div>
-        {jsCometGet("chat", "function(message) { #('messages').append(message.body) }"}
+        <div id="chat_output"></div>
+        {jsCometGet("chat", "function(message) { $('#chat_output').append(message.body) }")}
 
         <form postback="submit" action={urlForPostback[CometPublishAction]} after="function() { $('#chat_input').html('') }">
           <input type="hidden" name={validate("channel")} value="chat" />

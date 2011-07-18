@@ -43,6 +43,12 @@ var xitrum = {
       }
     });
 
+    var after = target1.attr("after");
+    if (after) {
+      var f = eval('(' + after + ')');
+      f();
+    }
+
     return false;
   },
 
@@ -53,6 +59,30 @@ var xitrum = {
         '<div class="flash_msg">' + msg + '</div>' +
       '</div>';
     $("#flash").append($(div).hide().fadeIn(1000));
+  },
+
+  cometGet: function(encryptedChannel, channel, encryptedLastTimestamp, lastTimestamp, callback) {
+    var data = {};
+    data[encryptedChannel]       = channel;
+    data[encryptedLastTimestamp] = lastTimestamp;
+    $.ajax({
+      type: "POST",
+      url: XITRUM_COMET_GET_ACTION,
+      data: data,
+      error: function() {
+        // Wait for some time before the next retry
+        setTimeout(function() { xitrum.cometGet(encryptedChannel, channel, encryptedLastTimestamp, lastTimestamp, callback) }, 3000);
+      },
+      success: function(data) {
+        var timestamps = data.timestamps;
+        var bodies     = data.bodies;
+        var length     = timestamps.length;
+        for (var i = 0; i < length; i++) {
+          callback(timestamps[i], bodies[i]);
+        }
+        xitrum.cometGet(encryptedChannel, channel, encryptedLastTimestamp, timestamps[length - 1], callback);
+      }
+    });
   }
 };
 
