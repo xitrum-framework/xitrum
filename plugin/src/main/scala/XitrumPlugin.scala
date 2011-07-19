@@ -5,8 +5,8 @@ import Keys._
 
 object XitrumPlugin extends Plugin {
   // Must be lazy to avoid null error
-  // xitrumPackageNeedsPackageBin must be after xitrumPackageImpl
-  override lazy val settings = Seq(newTask, xitrumPackageImpl, xitrumPackageNeedsPackageBin)
+  // xitrumPackageNeedsPackageBin must be after xitrumPackageTask
+  override lazy val settings = Seq(xitrumNewTask, xitrumPackageTask, xitrumPackageNeedsPackageBin)
 
   //----------------------------------------------------------------------------
 
@@ -29,9 +29,9 @@ object XitrumPlugin extends Plugin {
 
   // --------------------------------------------------------------------------
 
-  val newKey = TaskKey[Unit]("xitrum-new", "Prepares files for a new SBT project, ready for development")
+  val xitrumNewKey = TaskKey[Unit]("xitrum-new", "Creates new Xitrum project skeleton")
 
-  lazy val newTask = newKey <<= baseDirectory map { baseDir =>
+  lazy val xitrumNewTask = xitrumNewKey <<= baseDirectory map { baseDir =>
     (baseDir / "config").mkdir
     copyResourceFile(baseDir, "config/hazelcast_cluster_member_or_super_client.xml")
     copyResourceFile(baseDir, "config/hazelcast_java_client.properties")
@@ -57,14 +57,16 @@ object XitrumPlugin extends Plugin {
 
     copyResourceFile(baseDir, "build.sbt")
     copyResourceFile(baseDir, "README")
+
+    println("New Xitrum project created")
   }
 
   // --------------------------------------------------------------------------
 
-  val xitrumPackage = TaskKey[Unit]("xitrum-package", "Package to target/xitrum_package directory, ready to deploy to production server")
+  val xitrumPackageKey = TaskKey[Unit]("xitrum-package", "Packages to target/xitrum_package directory, ready for deploying to production server")
 
   // Must be lazy to avoid null error
-  lazy val xitrumPackageImpl = xitrumPackage <<=
+  lazy val xitrumPackageTask = xitrumPackageKey <<=
       (externalDependencyClasspath in Runtime, baseDirectory, target, scalaVersion) map {
       (libs,                                   baseDir,       target, scalaVersion) =>
 
@@ -83,10 +85,10 @@ object XitrumPlugin extends Plugin {
     val configDir2 = packageDir / "config"
     IO.copyDirectory(configDir1, configDir2)
 
-    // Copy public directory
-    val publicDir1 = baseDir    / "public"
-    val publicDir2 = packageDir / "public"
-    IO.copyDirectory(publicDir1, publicDir2)
+    // Copy static directory
+    val staticDir1 = baseDir    / "static"
+    val staticDir2 = packageDir / "static"
+    IO.copyDirectory(staticDir1, staticDir2)
 
     // Copy lib directory
     val libDir = packageDir / "lib"
@@ -102,7 +104,9 @@ object XitrumPlugin extends Plugin {
     // Copy .jar files are created after running "sbt package"
     val jarDir = new File(target, "scala-" + scalaVersion.replace('-', '.'))
     (jarDir * "*.jar").get.foreach { file => IO.copyFile(file, libDir / file.name) }
+
+    println("Please see target/xitrum_package directory")
   }
 
-  val xitrumPackageNeedsPackageBin = xitrumPackage <<= xitrumPackage.dependsOn(packageBin in Compile)
+  val xitrumPackageNeedsPackageBin = xitrumPackageKey <<= xitrumPackageKey.dependsOn(packageBin in Compile)
 }
