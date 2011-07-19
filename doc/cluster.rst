@@ -19,3 +19,28 @@ to know how to config.
 
 Session are stored in cookie by default. You don't need to worry how to share
 sessions among Xitrum instances.
+
+xitrum.Config.hazelcastInstance
+-------------------------------
+
+Xitrum includes Hazelcast for cache and Comet. Thus, you can also use Hazelcast
+in your Xitrum project yourself.
+
+Hazelcast has `3 modes <http://www.hazelcast.com/documentation.jsp#Clients>`_:
+cluster member, super client, and Java client. Please see ``hazelcast_mode``
+in ``config/xitrum.properties``.
+
+Xitrum handles these modes automatically. When you need to get a Hazelcast map,
+do not do like this:
+
+::
+
+  import com.hazelcast.core.Hazelcast
+  val myMap = Hazelcast.getMap("myMap")
+
+You should do like this:
+
+::
+
+  import xitrum.Config.hazelcastInstance
+  val myMap = Config.hazelcastInstance.getMap("myMap")

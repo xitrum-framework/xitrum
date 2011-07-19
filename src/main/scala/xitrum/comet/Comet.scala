@@ -5,16 +5,17 @@ import java.util.concurrent.TimeUnit
 import scala.collection.JavaConverters._
 import scala.collection.mutable.{ArrayBuffer, Map => MMap}
 
-import com.hazelcast.core.{EntryEvent, EntryListener, Hazelcast, IMap}
+import com.hazelcast.core.{EntryEvent, EntryListener, IMap}
 import com.hazelcast.query.PredicateBuilder
 
+import xitrum.Config
 import xitrum.scope.request.Params
 
 // TODO: presense
 object Comet {
   private val TTL_SECONDS = 60
 
-  private val map = Hazelcast.getMap("xitrum/comet").asInstanceOf[IMap[Long, CometMessage]]
+  private val map = Config.hazelcastInstance.getMap("xitrum/comet").asInstanceOf[IMap[Long, CometMessage]]
 
   /** The listener returns true if it wants itself to be removed. */
   type MessageListener = (CometMessage) => Boolean
