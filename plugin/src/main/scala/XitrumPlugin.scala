@@ -56,6 +56,7 @@ object XitrumPlugin extends Plugin {
     copyResourceFile(baseDir, "src/main/scala/my_project/action/IndexAction.scala")
 
     copyResourceFile(baseDir, "build.sbt")
+    copyResourceFile(baseDir, "README")
   }
 
   // --------------------------------------------------------------------------
