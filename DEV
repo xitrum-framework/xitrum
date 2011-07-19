@@ -1,48 +1,5 @@
 Notes for Xitrum developers.
 
-Netty 4
--------
-
-**This part will be removed when Netty 4 is officially released.**
-
-File upload feature in Xitrum needs `Netty <https://github.com/netty/netty>`_ 4,
-which has not been released. You must build it yourself.
-
-::
-
-  git clone https://github.com/netty/netty.git
-
-Add to its pom.xml:
-
-::
-
-  <repositories>
-     <repository>
-       <id>repository.jboss.org</id>
-       <name>JBoss Releases Repository</name>
-       <url>http://repository.jboss.org/maven2</url>
-     </repository>
-   </repositories>
-
-   <pluginRepositories>
-     <pluginRepository>
-       <id>repository.jboss.org</id>
-       <name>JBoss Releases Repository</name>
-       <url>http://repository.jboss.org/maven2</url>
-     </pluginRepository>
-   </pluginRepositories>
-
-Build with `Maven <http://maven.apache.org/>`_:
-
-::
-
-  $ wget http://bit.ly/jebzNn
-  $ mvn install:install-file -DgroupId=org.jboss.logging -DartifactId=jboss-logging-spi \
-    -Dpackaging=jar -Dversion=2.1.2.GA -Dfile=jboss-logging-spi-2.1.2.GA.jar -DgeneratePom=true
-  $ MAVEN_OPTS=-Xmx512m mvn -Dmaven.test.skip=true install
-
-Above is the quick and dirty way. Long way: https://issues.jboss.org/browse/NETTY-387.
-
 Delete snapshots
 ----------------
 
@@ -55,3 +12,14 @@ To delete snapshots:
 ::
 
   $ find ~/.ivy2 -name *xitrum* -delete
+
+Netty 4
+-------
+
+**This part will be removed when Netty 4 is officially released.**
+
+File upload feature in Xitrum needs `Netty <https://github.com/netty/netty>`_ 4,
+which has not been released.
+
+You can use `nightly builds <http://www.jboss.org/netty/downloads.html`_
+instead of `building it yourself <http://www.jboss.org/netty/build>`_.
