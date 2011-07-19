@@ -20,7 +20,7 @@ You can do like this:
   $ mkdir -p ~/opt/sbt
   $ cd ~/opt/sbt
   $ wget http://typesafe.artifactoryonline.com/typesafe/ivy-releases/org.scala-tools.sbt/sbt-launch/0.10.1/sbt-launch.jar
-  $ echo 'java -Xmx512m -XX:MaxPermSize=256m -Dsbt.boot.directory="$HOME/.sbt/boot" -jar `dirname $0`/sbt-launch.jar "$@"' > sbt
+  $ echo 'java -Xmx512m -XX:MaxPermSize=128m -Dsbt.boot.directory="$HOME/.sbt/boot" -jar `dirname $0`/sbt-launch.jar "$@"' > sbt
   $ chmod +x sbt
   $ export PATH=$PATH:~/opt/sbt
 

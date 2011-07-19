@@ -15,19 +15,15 @@ scalacOptions ++= Seq(
 
 // Dependencies ----------------------------------------------------------------
 
-// Log using SLF4J
-// Projects using Xitrum must provide a concrete implentation (Logback etc.).
-libraryDependencies += "org.slf4j" % "slf4j-api" % "1.6.1" % "provided"
-
-// Web server
-
 // Use this when Netty 4 is released
 //resolvers += "JBoss Repository" at "https://repository.jboss.org/nexus/content/groups/public/"
 //"org.jboss.netty" % "netty" % "3.2.4.Final"
 
-resolvers += "Local Maven Repository" at "file://" + System.getProperty("user.home") + "/.m2/repository"
+// Remove this when Netty 4 is released
+libraryDependencies += "org.jboss.netty" % "netty" % "4.0.0.Alpha1-SNAPSHOT" from "https://hudson.jboss.org/jenkins/view/Netty/job/netty/lastSuccessfulBuild/artifact/target/netty-4.0.0.Alpha1-SNAPSHOT.jar"
 
-libraryDependencies += "org.jboss.netty" % "netty" % "4.0.0.Alpha1-SNAPSHOT"
+// Projects using Xitrum must provide a concrete implentation of SLF4J (Logback etc.)
+libraryDependencies += "org.slf4j" % "slf4j-api" % "1.6.1" % "provided"
 
 // For scanning all Controllers to build routes
 resolvers += "Sonatype Snapshot Repository" at "https://oss.sonatype.org/content/repositories/snapshots"
