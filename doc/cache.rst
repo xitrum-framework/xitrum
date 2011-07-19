@@ -83,8 +83,8 @@ is the password for the tool to connect to the group.
 Please see `Hazelcast's documentation <http://www.hazelcast.com/documentation.jsp#Monitoring>`_
 for more information how to config ``config/hazelcast.xml``.
 
-Internals
----------
+How Xitrum cache works
+----------------------
 
 Upstream
 

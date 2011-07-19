@@ -3,62 +3,34 @@ Tutorial
 
 .. image:: http://www.bdoubliees.com/journalspirou/sfigures6/schtroumpfs/s13.jpg
 
-This section describes how to create and run a simple Xitrum project.
-It assumes that you are using Linux and have installed Java.
+This chapter describes how to create and run a Xitrum project.
+**It assumes that you are using Linux and you have installed Java.**
 
 Install SBT
 -----------
 
-Scala projects use `SBT <https://github.com/harrah/xsbt>`_ as the de facto build tool.
+Most Scala projects use `SBT <https://github.com/harrah/xsbt>`_ as the de facto build tool.
 Xitrum needs SBT 0.10.1+.
 
 Follow `instructions <https://github.com/harrah/xsbt/wiki/Setup>`_ to install.
-
-Netty 4
--------
-
-**This part will be removed when Netty 4 is officially released.**
-
-File upload feature in Xitrum needs `Netty <https://github.com/netty/netty>`_ 4,
-which has not been released. You must download and build it yourself.
-
-`Download <https://github.com/netty/netty/archives/master>`_ it.
-
-Add to its pom.xml:
+You can do like this:
 
 ::
 
-  <repositories>
-     <repository>
-       <id>repository.jboss.org</id>
-       <name>JBoss Releases Repository</name>
-       <url>http://repository.jboss.org/maven2</url>
-     </repository>
-   </repositories>
+  $ mkdir -p ~/opt/sbt
+  $ cd ~/opt/sbt
+  $ wget http://typesafe.artifactoryonline.com/typesafe/ivy-releases/org.scala-tools.sbt/sbt-launch/0.10.1/sbt-launch.jar
+  $ echo 'java -Xmx512m -XX:MaxPermSize=256m -Dsbt.boot.directory="$HOME/.sbt/boot" -jar `dirname $0`/sbt-launch.jar "$@"' > sbt
+  $ chmod +x sbt
+  $ export PATH=$PATH:~/opt/sbt
 
-   <pluginRepositories>
-     <pluginRepository>
-       <id>repository.jboss.org</id>
-       <name>JBoss Releases Repository</name>
-       <url>http://repository.jboss.org/maven2</url>
-     </pluginRepository>
-   </pluginRepositories>
-
-Build with `Maven <http://maven.apache.org/>`_:
-
-::
-
-  $ wget http://bit.ly/jebzNn
-  $ mvn install:install-file -DgroupId=org.jboss.logging -DartifactId=jboss-logging-spi \
-    -Dpackaging=jar -Dversion=2.1.2.GA -Dfile=jboss-logging-spi-2.1.2.GA.jar -DgeneratePom=true
-  $ MAVEN_OPTS=-Xmx512m mvn -Dmaven.test.skip=true install
-
-Above is the quick and dirty way. For long way: https://issues.jboss.org/browse/NETTY-387.
+You should add the line ``export PATH=$PATH:~/opt/sbt`` to ``~/.profile``.
 
 Add Xitrum plugin to SBT
 ------------------------
 
-Create file ``~/.sbt/plugins/build.sbt``, then add to it:
+Create file ``~/.sbt/plugins/build.sbt``, then add to it (there must be a blank
+line between the 2 lines below):
 
 ::
 
@@ -66,10 +38,21 @@ Create file ``~/.sbt/plugins/build.sbt``, then add to it:
 
   libraryDependencies += "tv.cntt" %% "xitrum-plugin" % "1.1-SNAPSHOT"
 
+You can do like this:
+
+::
+
+  $ mkdir -p ~/.sbt/plugins
+  $ echo 'resolvers += "Sonatype Snapshot Repository" at "https://oss.sonatype.org/content/repositories/snapshots"' >> ~/.sbt/plugins/build.sbt
+  $ echo -e "\n" >> ~/.sbt/plugins/build.sbt
+  $ echo 'libraryDependencies += "tv.cntt" %% "xitrum-plugin" % "1.1-SNAPSHOT"' >> ~/.sbt/plugins/build.sbt
+
 Now you have 2 commands: ``sbt xitrum-new`` and :doc:`sbt xitrum-package </deploy>`.
 
 Create a new Xitrum project
 ---------------------------
+
+Use ``sbt xitrum-new`` to create a new Xitrum project:
 
 ::
 
@@ -84,7 +67,8 @@ A new project skeleton will be created:
 
   my_project
     config
-      hazelcast.xml
+      hazelcast_cluster_member_or_super_client.xml
+      hazelcast_java_client.properties
       logback.xml
       xitrum.properties
     static
@@ -108,9 +92,6 @@ A new project skeleton will be created:
               AppAction.scala
               IndexAction.scala
     build.sbt
-
-In build.sbt, you see that logback-classic is a dependency. It is because
-Xitrum uses SLF4J, so the project must provide an SLF4J implentation, e.g. logback-classic.
 
 Run
 ---

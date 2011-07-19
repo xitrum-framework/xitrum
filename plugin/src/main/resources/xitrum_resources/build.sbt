@@ -14,13 +14,18 @@ scalacOptions ++= Seq(
 // For Xitrum
 resolvers += "Sonatype Snapshot Repository" at "https://oss.sonatype.org/content/repositories/snapshots"
 
-// For Netty 4, remove this when Netty 4 is released
-resolvers += "Local Maven Repository"       at "file://" + System.getProperty("user.home") + "/.m2/repository"
+// For Jerkson, used by Xitrum
+// https://github.com/codahale/jerkson
+resolvers += "repo.codahale.com"            at "http://repo.codahale.com"
 
-libraryDependencies += "tv.cntt"        %% "xitrum"          % "1.1-SNAPSHOT"
+libraryDependencies += "tv.cntt"         %% "xitrum"          % "1.1-SNAPSHOT"
 
-// An implementation of SLF4J must be provided for Xitrum
-libraryDependencies += "ch.qos.logback" %  "logback-classic" % "0.9.29"
+// Remove this when Netty 4 is released
+libraryDependencies += "org.jboss.netty" %  "netty"           % "4.0.0.Alpha1-SNAPSHOT" from "https://hudson.jboss.org/jenkins/view/Netty/job/netty/lastSuccessfulBuild/artifact/target/netty-4.0.0.Alpha1-SNAPSHOT.jar"
+
+// Xitrum uses SLF4J
+// An implementation of SLF4J must be provided
+libraryDependencies += "ch.qos.logback"  %  "logback-classic" % "0.9.29"
 
 // For "sbt console"
 unmanagedClasspath in Compile <+= (baseDirectory) map { bd => Attributed.blank(bd / "config") }
