@@ -54,5 +54,4 @@ To delete snapshots:
 
 ::
 
-  rm .ivy2//cache/tv.cntt/xitrum-plugin_2.8.1/jars/xitrum-plugin_2.8.1-1.1-SNAPSHOT.jar
-
+  $ find ~/.ivy2 -name *xitrum* -delete
