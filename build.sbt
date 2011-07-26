@@ -25,10 +25,7 @@ libraryDependencies += "org.jboss.netty" % "netty" % "4.0.0.Alpha1-SNAPSHOT" fro
 // Projects using Xitrum must provide a concrete implentation of SLF4J (Logback etc.)
 libraryDependencies += "org.slf4j" % "slf4j-api" % "1.6.1" % "provided"
 
-// For scanning all Controllers to build routes
-resolvers += "Sonatype Snapshot Repository" at "https://oss.sonatype.org/content/repositories/snapshots"
-
-libraryDependencies += "tv.cntt" % "annovention" % "1.0-SNAPSHOT"
+libraryDependencies += "tv.cntt" % "annovention" % "1.0"
 
 // For distributed cache and Comet
 // Infinispan is good but much heavier, and the logging is bad:
@@ -44,7 +41,7 @@ libraryDependencies += "com.hazelcast" % "hazelcast-client" % "1.9.3.1"
 //   List(Map("user" -> List("langtu"), "body" -> List("hello world")))
 resolvers += "repo.codahale.com" at "http://repo.codahale.com"
 
-libraryDependencies += "com.codahale" %% "jerkson" % "0.3.2"
+libraryDependencies += "com.codahale" %% "jerkson" % "0.4.0"
 
 // For easier development (sbt console etc.)
 unmanagedBase in Runtime <<= baseDirectory { base => base / "config" }

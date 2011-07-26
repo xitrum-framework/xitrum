@@ -23,6 +23,9 @@ import xitrum.{Action, Config}
 trait Net {
   this: Action =>
 
+  // The "val"s must be "lazy", because when the action is constructed, the
+  // "request" object is null
+
   /** @return IP of the HTTP client, X-Forwarded-For is supported */
   lazy val remoteIp = {
     if (proxyNotAllowed)
