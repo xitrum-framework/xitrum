@@ -3,6 +3,30 @@ var xitrum = {
     return $("meta[name=antiCSRFToken]").attr("content");
   },
 
+  urlFor: function(actionClassName, params) {
+    var find = function() {
+      for (var i = 0; i < XITRUM_ROUTES.length; i++) {
+        var xs = XITRUM_ROUTES[i];
+        if (xs[1] == actionClassName) return xs[0];
+      }
+      return null;
+    };
+
+    var compiledRoute = find();
+    if (compiledRoute == null) return null;
+
+    var ret = XITRUM_BASE_URI;
+    for (var i = 0; i < compiledRoute.length; i++) {
+      var xs = compiledRoute[i];
+      if (xs[1]) {
+        ret += "/" + xs[0];
+      } else {
+        ret += "/" + params[xs[0]];
+      }
+    }
+    if (ret.length == 0) { return "/"; } else { return ret; }
+  },
+
   postback: function(event) {
     var target1 = $(event.target);
 

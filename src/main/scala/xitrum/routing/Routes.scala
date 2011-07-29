@@ -57,6 +57,18 @@ object Routes extends Logger {
     logger.info(builder.toString)
   }
 
+  lazy val jsRoutes = {
+    val xs = compiledRoutes.map { case (_, compiledPattern, actionClass) =>
+      val ys = compiledPattern.map { case (token, constant) =>
+        "['" + token + "', " + constant + "]"
+      }
+
+      "[[" + ys.mkString(", ") + "], '" + actionClass.getName + "']"
+    }
+
+    "[" + xs.mkString(", ") + "]"
+  }
+
   /**
    * This method may specify a new HttpMethod to override the old method.
    *

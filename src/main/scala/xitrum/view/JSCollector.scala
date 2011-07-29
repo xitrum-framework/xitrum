@@ -4,6 +4,7 @@ import scala.xml.Unparsed
 
 import xitrum.{Action, Config}
 import xitrum.comet.CometGetAction
+import xitrum.routing.Routes
 
 trait JSCollector {
   this: Action =>
@@ -27,6 +28,7 @@ trait JSCollector {
   def jsForView =
     <script>{Unparsed(
       "var XITRUM_BASE_URI = '" + Config.baseUri + "';\n" +
+      "var XITRUM_ROUTES = " + Routes.jsRoutes + ";\n" +
       "var XITRUM_COMET_GET_ACTION = '" + urlForPostback[CometGetAction] + "';\n" +
       "$(function() {\n" + buffer.toString + "});"
     )}</script>
