@@ -40,6 +40,43 @@ Anti-CSRF
 For non-GET requests, Xitrum protects your web application from
 `Cross-site request forgery <http://en.wikipedia.org/wiki/CSRF>`_ by default.
 
+When you include ``xitrumHead`` in your layout:
+
+::
+
+  import xitrum.Action
+  import xitrum.view.DocType
+
+  trait AppAction extends Action {
+    override def layout = DocType.xhtmlTransitional(
+      <html>
+        <head>
+          {xitrumHead}
+          <title>Welcome to Xitrum</title>
+        </head>
+        <body>
+          {renderedView}
+        </body>
+      </html>
+    )
+  }
+
+The ``<head>`` part will include something like this:
+
+::
+
+  <html>
+    <head>
+      ...
+      <meta name="antiCSRFToken" content="5402330e-9916-40d8-a3f4-16b271d583be" />
+      ...
+    </head>
+    ...
+  </html>
+
+The token will be automatically included in all non-GET Ajax requests sent by
+jQuery.
+
 When you create APIs for machines, e.g. smartphones, you may want to skip this
 check. To skip for an action (and its subclasses), make your action extend the
 trait xitrum.SkipCSRFCheck:
