@@ -20,7 +20,8 @@ scalacOptions ++= Seq(
 //"org.jboss.netty" % "netty" % "3.2.4.Final"
 
 // Remove this when Netty 4 is released
-libraryDependencies += "org.jboss.netty" % "netty" % "4.0.0.Alpha1-SNAPSHOT" from "https://hudson.jboss.org/jenkins/view/Netty/job/netty/lastSuccessfulBuild/artifact/target/netty-4.0.0.Alpha1-SNAPSHOT.jar"
+//libraryDependencies += "org.jboss.netty" % "netty" % "4.0.0.Alpha1-SNAPSHOT" from "https://hudson.jboss.org/jenkins/view/Netty/job/netty/lastSuccessfulBuild/artifact/target/netty-4.0.0.Alpha1-SNAPSHOT.jar"
+libraryDependencies += "org.jboss.netty" % "netty" % "4.0.0.Alpha1-SNAPSHOT" from "http://cloud.github.com/downloads/ngocdaothanh/xitrum/netty-4.0.0.Alpha1-SNAPSHOT.jar"
 
 // Projects using Xitrum must provide a concrete implentation of SLF4J (Logback etc.)
 libraryDependencies += "org.slf4j" % "slf4j-api" % "1.6.1" % "provided"
