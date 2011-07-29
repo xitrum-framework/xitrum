@@ -3,10 +3,7 @@ package xitrum.routing
 import org.jboss.netty.handler.codec.http.HttpHeaders
 
 import xitrum.Action
-import xitrum.annotation.POST
-import xitrum.scope.request.PathInfo
-import xitrum.scope.session.CSRF
-import xitrum.exception.InvalidCSRFToken
+import xitrum.scope.session.SecureBase64
 import xitrum.validation.ValidatorCaller
 
 object PostbackAction {
@@ -21,18 +18,7 @@ class PostbackAction extends Action {
     val encoded               = pathInfo.encoded
     val secureActionClassName = encoded.substring(PostbackAction.POSTBACK_PREFIX.length)
 
-    var actionClassName: String = null
-    try {
-      actionClassName = CSRF.decrypt(this, secureActionClassName).asInstanceOf[String]
-    } catch {
-      case e: InvalidCSRFToken =>
-        session.reset
-        jsRenderCall("alert", "\"Session expired. Please refresh your browser.\"")
-        return
-
-      case other =>
-        throw other
-    }
+    var actionClassName = SecureBase64.decrypt(secureActionClassName).get.asInstanceOf[String]
 
     if (ValidatorCaller.call(this)) {
       val actionClass = Class.forName(actionClassName).asInstanceOf[Class[Action]]

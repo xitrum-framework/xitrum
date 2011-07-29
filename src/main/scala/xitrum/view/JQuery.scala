@@ -3,6 +3,7 @@ package xitrum.view
 import org.jboss.netty.handler.codec.http.HttpHeaders.Names.CONTENT_TYPE
 
 import xitrum.{Action, Config}
+import xitrum.scope.session.CSRF
 
 trait JQuery {
   this: Action =>
@@ -15,6 +16,7 @@ trait JQuery {
         <script type="text/javascript" src={urlForResource("xitrum/jquery.validate-1.8.1/jquery.validate.min.js")}></script>
         <script type="text/javascript" src={urlForResource("xitrum/jquery.validate-1.8.1/additional-methods.min.js")}></script>
         <script type="text/javascript" src={urlForResource("xitrum/xitrum.js")}></script>
+        <meta name={CSRF.TOKEN} content={antiCSRFToken} />
       </xml:group>
     else
       <xml:group>
@@ -23,6 +25,7 @@ trait JQuery {
         <script type="text/javascript" src={urlForResource("xitrum/jquery.validate-1.8.1/jquery.validate.js")}></script>
         <script type="text/javascript" src={urlForResource("xitrum/jquery.validate-1.8.1/additional-methods.js")}></script>
         <script type="text/javascript" src={urlForResource("xitrum/xitrum.js")}></script>
+        <meta name={CSRF.TOKEN} content={antiCSRFToken} />
       </xml:group>
 
   /** See escape_javascript of Rails */

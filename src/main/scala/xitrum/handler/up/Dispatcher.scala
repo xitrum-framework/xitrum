@@ -11,13 +11,14 @@ import ChannelHandler.Sharable
 import HttpResponseStatus._
 import HttpVersion._
 
-import xitrum.{Action, Cache, Config, Logger}
-import xitrum.scope.request.RequestEnv
+import xitrum.{Action, SkipCSRFCheck, Cache, Config, Logger}
 import xitrum.routing.{Routes, PostbackAction}
-import xitrum.exception.MissingParam
+import xitrum.exception.{InvalidAntiCSRFToken, MissingParam}
 import xitrum.handler.HandlerEnv
 import xitrum.handler.down.ResponseCacher
 import xitrum.handler.updown.XSendfile
+import xitrum.scope.request.RequestEnv
+import xitrum.scope.session.CSRF
 
 object Dispatcher extends Logger {
   def dispatchWithFailsafe(action: Action, postback: Boolean) {
@@ -26,6 +27,13 @@ object Dispatcher extends Logger {
 
     try {
       action.handlerEnv.action = action
+
+      // Check for CSRF (CSRF has been checked if "postback" is true)
+      if (!postback &&
+          action.request.getMethod() != HttpMethod.GET &&
+          !action.isInstanceOf[SkipCSRFCheck] &&
+          !CSRF.isValidToken(action)) throw new InvalidAntiCSRFToken
+
       val actionClass = action.getClass.asInstanceOf[Class[Action]]
       val cacheSecs   = Routes.getCacheSecs(actionClass)
 
@@ -64,27 +72,29 @@ object Dispatcher extends Logger {
         // End timestamp
         val t2 = System.currentTimeMillis
 
-        val response = new DefaultHttpResponse(HTTP_1_1, INTERNAL_SERVER_ERROR)
-
-        // MissingParam is a special case
-        if (e.isInstanceOf[MissingParam]) {
-          response.setStatus(BAD_REQUEST)
-          val mp  = e.asInstanceOf[MissingParam]
-          val key = mp.key
-          val cb  = ChannelBuffers.copiedBuffer("Missing Param: " + key, CharsetUtil.UTF_8)
-          HttpHeaders.setContentLength(response, cb.readableBytes)
-          response.setContent(cb)
-        }
-
-        if (response.getStatus != BAD_REQUEST) {  // MissingParam
-          logAccess(action, postback, beginTimestamp, 0, false, e)
-          XSendfile.set500Page(response)
-        } else {
+        // These exceptions are special cases:
+        // We know that the exception is caused by the client (bad request)
+        if (e.isInstanceOf[InvalidAntiCSRFToken] || e.isInstanceOf[MissingParam]) {
           logAccess(action, postback, beginTimestamp, 0, false)
-        }
 
-        action.handlerEnv.response = response
-        action.ctx.getChannel.write(action.handlerEnv)
+          action.response.setStatus(BAD_REQUEST)
+
+          if (e.isInstanceOf[InvalidAntiCSRFToken]) {
+            action.session.reset
+            action.jsRenderCall("alert", "\"Session expired. Please refresh your browser.\"")
+          } else if (e.isInstanceOf[MissingParam]) {
+            val mp  = e.asInstanceOf[MissingParam]
+            val key = mp.key
+            action.renderText("Missing Param: " + key)
+          }
+        } else {
+          logAccess(action, postback, beginTimestamp, 0, false, e)
+
+          val response = new DefaultHttpResponse(HTTP_1_1, INTERNAL_SERVER_ERROR)
+          XSendfile.set500Page(response)
+          action.handlerEnv.response = response
+          action.ctx.getChannel.write(action.handlerEnv)
+        }
     }
   }
 

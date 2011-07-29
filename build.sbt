@@ -50,7 +50,12 @@ unmanagedBase in Runtime <<= baseDirectory { base => base / "config" }
 
 // https://github.com/harrah/xsbt/wiki/Cross-Build
 // Lastest version of 2.8.x is 2.8.1, of 2.9.x is 2.9.0-1
-crossScalaVersions := Seq("2.8.1", "2.9.0-1")
+// Temporarily commented out 2.8.1 because 2.8.1 is rarely used now
+//crossScalaVersions := Seq("2.8.1", "2.9.0-1")
+
+crossScalaVersions := Seq("2.9.0-1")
+
+scalaVersion := "2.9.0-1"
 
 publishTo := Some("Sonatype Snapshot Repository" at "https://oss.sonatype.org/content/repositories/snapshots")
 

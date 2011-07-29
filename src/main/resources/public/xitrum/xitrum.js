@@ -1,4 +1,8 @@
 var xitrum = {
+  antiCSRFToken: function() {
+    return $("meta[name=antiCSRFToken]").attr("content");
+  },
+
   postback: function(event) {
     var target1 = $(event.target);
 
@@ -95,6 +99,12 @@ var xitrum = {
 };
 
 $(function() {
+  $(document).ajaxSend(function(e, req, options) {
+    if (options.type != "GET") {
+      options.data += (options.data.length > 0 ? "&" : "") + "antiCSRFToken=" + xitrum.antiCSRFToken();
+    }
+  });
+
   $(".flash_close").live("click", function(event) {
     var parent = $(event.target).parent();
     parent.fadeOut(1000, function() { parent.remove() });

@@ -3,24 +3,38 @@ package xitrum.scope.session
 import java.util.UUID
 
 import xitrum.Action
-import xitrum.exception.InvalidCSRFToken
+import xitrum.exception.InvalidAntiCSRFToken
 
 /**
  * SecureBase64 is for preventing a user to mess with his own data to cheat the server.
  * CSRF is for preventing a user to fake other user data.
  */
 object CSRF {
-  val TOKEN = "_csrf_token"
+  val TOKEN = "antiCSRFToken"
 
-  def encrypt(action: Action, value: Any): String = action.csrfToken + SecureBase64.encrypt(value)
+  def isValidToken(action: Action): Boolean = {
+    // The token must be in the request body for more security
+    val tokenInRequest = action.param(TOKEN, action.bodyParams)
+    // Cleaner for application developers when seeing access log
+    action.bodyParams.remove(TOKEN)
+    val tokenInSession = action.antiCSRFToken
+    tokenInRequest == tokenInSession
+  }
+
+  /**
+   * For encrypting things that need to embed the anti-CSRF token for more security.
+   * (For example when using with GET requests, which does not include the token.)
+   * Otherwise you should use SecureBase64.encrypt for shorter result.
+   */
+  def encrypt(action: Action, value: Any): String = action.antiCSRFToken + SecureBase64.encrypt(value)
 
   def decrypt(action: Action, string: String): Any = {
-    val prefix = action.csrfToken
-    if (!string.startsWith(prefix)) throw new InvalidCSRFToken
+    val prefix = action.antiCSRFToken
+    if (!string.startsWith(prefix)) throw new InvalidAntiCSRFToken
 
     val base64String = string.substring(prefix.length)
     SecureBase64.decrypt(base64String) match {
-      case None       => throw new InvalidCSRFToken
+      case None       => throw new InvalidAntiCSRFToken
       case Some(data) => data
     }
   }
@@ -31,7 +45,7 @@ trait CSRF {
 
   import CSRF._
 
-  def csrfToken: String = {
+  def antiCSRFToken: String = {
     sessiono(TOKEN) match {
       case Some(x) =>
         x.toString
@@ -42,14 +56,4 @@ trait CSRF {
         y
     }
   }
-
-  /* Saved for POST1, not used for now
-  private def checkToken: Boolean = {
-    // The token must be in the request body for more security
-    val csrfTokenInRequest = param(TOKEN, bodyParams)
-    bodyParams.remove(TOKEN)  // Cleaner for application developers when seeing access log
-    val csrfTokenInSession = csrfToken
-    csrfTokenInRequest == csrfTokenInSession
-  }
-  */
 }

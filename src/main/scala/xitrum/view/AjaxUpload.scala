@@ -7,7 +7,7 @@ import org.jboss.netty.handler.codec.http.FileUpload
 
 import xitrum.Action
 import xitrum.annotation.GET
-import xitrum.scope.session.CSRF
+import xitrum.scope.session.SecureBase64
 import xitrum.handler.updown.XSendfile
 
 object AjaxUpload {
@@ -144,9 +144,12 @@ trait AjaxUpload {
     temp.deleteOnExit
 
     val tempFilePath = temp.getPath
-    val encryptedTempFilePath = CSRF.encrypt(this, tempFilePath)
 
-    CSRF.encrypt(this, (sanitizedFileName, encryptedTempFilePath))
+    // We don't use CSRF.encrypt because we only need to encrypt,
+    // anti-CSRF is not neccessary
+
+    val encryptedTempFilePath = SecureBase64.encrypt(tempFilePath)
+    SecureBase64.encrypt((sanitizedFileName, encryptedTempFilePath))
   }
 
   def saveTempFile(encryptedTempFilePath: String, destinationPath: String) {
@@ -158,7 +161,7 @@ trait AjaxUpload {
 class AjaxUploadTempFileServer extends Action {
   override def execute {
     val encryptedTempFilePath = param("encryptedTempFilePath")
-    val tempFilePath          = CSRF.decrypt(this, encryptedTempFilePath).toString
+    val tempFilePath          = SecureBase64.decrypt(encryptedTempFilePath).toString
 
     XSendfile.setHeader(response, tempFilePath)
     respond

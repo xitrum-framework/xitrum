@@ -7,7 +7,7 @@ import HttpResponseStatus._
 
 import xitrum.action._
 import xitrum.scope.request.ExtEnv
-import xitrum.scope.session.CSRF
+import xitrum.scope.session.SecureBase64
 import xitrum.routing.{PostbackAction, Routes}
 import xitrum.validation.{Validator, ValidatorInjector}
 import xitrum.view.Renderer
@@ -91,7 +91,7 @@ trait Action extends ExtEnv with Logger with Net with Filter with BasicAuthentic
 
   private def urlForPostbackAction(actionClass: Class[Action]): String = {
     val className       = actionClass.getName
-    val secureClassName = CSRF.encrypt(this, className)
+    val secureClassName = SecureBase64.encrypt(className)
     val url = PostbackAction.POSTBACK_PREFIX + secureClassName
     if (Config.baseUri.isEmpty) url else Config.baseUri + "/" + url
   }
