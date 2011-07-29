@@ -7,24 +7,35 @@ var xitrum = {
     var find = function() {
       for (var i = 0; i < XITRUM_ROUTES.length; i++) {
         var xs = XITRUM_ROUTES[i];
-        if (xs[1] == actionClassName) return xs[0];
+        if (xs[1] === actionClassName) return xs[0];
       }
-      return null;
+      throw "[urlFor] No route for: " + actionClassName;
     };
 
     var compiledRoute = find();
-    if (compiledRoute == null) return null;
 
     var ret = XITRUM_BASE_URI;
     for (var i = 0; i < compiledRoute.length; i++) {
-      var xs = compiledRoute[i];
-      if (xs[1]) {
-        ret += "/" + xs[0];
+      var xs       = compiledRoute[i];
+      var token    = xs[0];
+      var constant = xs[1];
+      if (constant) {
+        ret += "/" + token;
       } else {
-        ret += "/" + params[xs[0]];
+        var s = params[token];
+        if (s) {
+          ret += "/" + s;
+        } else {
+          throw "[urlFor] Missing key: " + token + ", for: " + actionClassName;
+        }
       }
     }
-    if (ret.length == 0) { return "/"; } else { return ret; }
+
+    if (ret.length === 0) {
+      return "/";
+    } else {
+      return ret;
+    }
   },
 
   postback: function(event) {
@@ -45,12 +56,12 @@ var xitrum = {
     var extraFormSelector = target1.attr("extra");
     if (extraFormSelector) {
       var extraForm = $(extraFormSelector);
-      if (extraForm && extraForm[0].tagName == "FORM" && extraForm.valid())
+      if (extraForm && extraForm[0].tagName === "FORM" && extraForm.valid())
         data = data + extraForm.serialize() + "&";
     }
 
     // or come from this element itself
-    if (target1[0].tagName == "FORM") {
+    if (target1[0].tagName === "FORM") {
        if (!target1.valid()) return false;
        data = data + target1.serialize();
     }
@@ -114,7 +125,7 @@ var xitrum = {
   },
 
   isScrollAtBottom: function(selector) {
-    return ($(selector).scrollTop() + $(selector).height() == $(selector)[0].scrollHeight);
+    return ($(selector).scrollTop() + $(selector).height() === $(selector)[0].scrollHeight);
   },
 
   scrollToBottom: function(selector) {
