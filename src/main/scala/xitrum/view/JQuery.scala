@@ -29,44 +29,25 @@ trait JQuery {
       </xml:group>
 
   /** See escape_javascript of Rails */
-  def jsEscape(value: Any) = value.toString
-    .replace("\\\\", "\\0\\0")
-    .replace("</",   "<\\/")
-    .replace("\r\n", "\\n")
-    .replace("\n",   "\\n")
-    .replace("\r",   "\\n")
-    .replace("\"",   "\\\"")
-    .replace("'",    "\\'")
+  def jsEscape(value: Any) = {
+    val escaped = value.toString
+      .replace("\\\\", "\\0\\0")
+      .replace("</",   "<\\/")
+      .replace("\r\n", "\\n")
+      .replace("\n",   "\\n")
+      .replace("\r",   "\\n")
+      .replace("\"",   "\\\"")
+      .replace("'",    "\\'")
 
-  def jsCall(function: String, args: String*) =
-    function + "(" + args.mkString(", ") + ")"
-
-  def js$(s: String) = jsCall("$", s)
-
-  def jsById(id: String) = js$("\"#" + id + "\"")
-
-  def jsByName(name: String) = js$("\"[name='" + name + "']\"")
-
-  def jsChain(jsCalls: String*) = jsCalls.mkString(".")
-
-  def jsHtml(selector: String, value: Any) =
-    jsChain(
-      selector,
-      jsCall("html", "\"" + jsEscape(value.toString) + "\"")
-    )
-
-  def jsVal(selector: String, value: Any) =
-    jsChain(
-      selector,
-      jsCall("val", "\"" + jsEscape(value.toString) + "\"")
-    )
-
-  def jsBefore(selector: String, value: Any) = {
-    jsChain(
-      selector,
-      jsCall("before", "\"" + jsEscape(value.toString) + "\"")
-    )
+    // The result needs to be wrapped with double quote, not single quote
+    "\"" + escaped + "\""
   }
+
+  def js$(selector: String) = "$(\"" + selector + "\")"
+
+  def js$id(id: String) = js$("#" + id)
+
+  def js$name(name: String) = js$("[name='" + name + "']")
 
   //----------------------------------------------------------------------------
 
@@ -75,20 +56,9 @@ trait JQuery {
     renderText(js, "text/javascript")
   }
 
-  def jsRenderCall(function: String, args: String*) {
-    val js = jsCall(function, args:_*)
-    jsRender(js)
-  }
-
-  def jsRenderHtml(selector: String, value: Any) {
-    jsRender(jsHtml(selector, value))
-  }
-
-  //----------------------------------------------------------------------------
-
   /** See http://stackoverflow.com/questions/503093/how-can-i-make-a-redirect-page-in-jquery */
-  def jsRedirectTo(location: String) {
-    jsRender("window.location.href = \"" + jsEscape(location) + "\"")
+  def jsRedirectTo(location: Any) {
+    jsRender("window.location.href = " + jsEscape(location))
   }
 
   def jsRedirectTo[T: Manifest] { jsRedirectTo(urlFor[T]) }

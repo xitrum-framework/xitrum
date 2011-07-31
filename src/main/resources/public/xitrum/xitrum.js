@@ -145,8 +145,12 @@ $(function() {
     parent.fadeOut(1000, function() { parent.remove() });
   });
 
-  // jQuery Validation plugin only works on forms and the form must be validated once
-  $("form").validate();
+  // jQuery Validation plugin only works on forms and the forms must be
+  // validated once, before any rules("add", rules) can be called
+  //
+  // We must iterate manually, $("form").validate() only works for the first
+  // form, not all forms when there are multiple form in a page
+  $.each($("form"), function(index, form) { $(form).validate() });
 
   $("[postback]").each(function(i, e) {
     var eventType = $(e).attr("postback");

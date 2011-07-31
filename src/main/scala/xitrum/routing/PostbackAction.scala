@@ -25,7 +25,7 @@ class PostbackAction extends Action {
       forward(actionClass, true)
     } else {
       // Flash the default error message if the response is empty (the validators did not respond anything)
-      if (HttpHeaders.getContentLength(response, 0) == 0) jsFlash("Please check your input.")
+      if (HttpHeaders.getContentLength(response, 0) == 0) jsRenderFlash("Please check your input.")
     }
   }
 }

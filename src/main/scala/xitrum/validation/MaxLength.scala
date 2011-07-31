@@ -9,12 +9,7 @@ object MaxLength {
 class MaxLength(length: Int) extends Validator {
   def render(action: Action, paramName: String, secureParamName: String) {
     import action._
-
-    val js = jsChain(
-      jsByName(secureParamName),
-      jsCall("rules", "\"add\"", "{maxlength: " + length + "}")
-    )
-    jsAddToView(js)
+    jsAddToView(js$name(secureParamName) + ".rules('add', {maxlength: " + length + "})")
   }
 
   def validate(action: Action, paramName: String, secureParamName: String): Boolean = {

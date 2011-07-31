@@ -81,7 +81,7 @@ object Dispatcher extends Logger {
 
           if (e.isInstanceOf[InvalidAntiCSRFToken]) {
             action.session.reset
-            action.jsRenderCall("alert", "\"Session expired. Please refresh your browser.\"")
+            action.jsRender("alert(" + action.jsEscape("Session expired. Please refresh your browser."))
           } else if (e.isInstanceOf[MissingParam]) {
             val mp  = e.asInstanceOf[MissingParam]
             val key = mp.key

@@ -13,16 +13,15 @@ object Base64 {
    */
   def encode(bytes: Array[Byte]): String = {
     // No line break because the result may be used in HTTP response header (cookie)
-    val buffer = B64.encode(ChannelBuffers.copiedBuffer(bytes), false)
+    val buffer = B64.encode(ChannelBuffers.copiedBuffer(bytes), false, Base64Dialect.URL_SAFE)
     val base64String = buffer.toString(Charset.forName("UTF-8"))
-    val withoutPadding = removePadding(base64String)
-    withoutPadding
+    removePadding(base64String)
   }
 
   def decode(base64String: String): Option[Array[Byte]] = {
     try {
       val withPadding = addPadding(base64String)
-      val buffer      = B64.decode(ChannelBuffers.copiedBuffer(withPadding, Charset.forName("UTF-8")))
+      val buffer      = B64.decode(ChannelBuffers.copiedBuffer(withPadding, Charset.forName("UTF-8")), Base64Dialect.URL_SAFE)
       val bytes       = new Array[Byte](buffer.readableBytes)
       buffer.readBytes(bytes)
       Some(bytes)

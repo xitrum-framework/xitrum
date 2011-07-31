@@ -37,7 +37,7 @@ trait Flash {
    * For web 2.0 style application.
    * Used in postback action to send a message to flash area right away.
    */
-  def jsFlash(msg: Any) = jsCall("xitrum.flash", "\"" + jsEscape(msg) + "\"")
+  def jsFlash(msg: Any) = "xitrum.flash(" + jsEscape(msg) + ")"
 
   def jsRenderFlash(msg: Any) {
     val js = jsFlash(msg)
@@ -45,14 +45,11 @@ trait Flash {
   }
 
   /**
-   * For web 2.0 style application. Called by
+   * For web 2.0 style application.
    * Used in application layout to display the flash  message right after a view is loaded.
    */
   def jsFlash {
     val msg = flash
-    if (!msg.isEmpty) {
-      val js = jsCall("xitrum.flash", "\"" + jsEscape(msg) + "\"")
-      jsAddToView(js)
-    }
+    if (!msg.isEmpty) jsAddToView(jsFlash(msg))
   }
 }

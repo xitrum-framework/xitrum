@@ -9,12 +9,7 @@ object MinLength {
 class MinLength(length: Int) extends Validator {
   def render(action: Action, paramName: String, secureParamName: String) {
     import action._
-
-    val js = jsChain(
-      jsByName(secureParamName),
-      jsCall("rules", "\"add\"", "{minlength: " + length + "}")
-    )
-    jsAddToView(js)
+    jsAddToView(js$name(secureParamName) + ".rules('add', {minlength: " + length + "})")
   }
 
   def validate(action: Action, paramName: String, secureParamName: String): Boolean = {

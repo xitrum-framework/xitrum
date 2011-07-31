@@ -5,12 +5,7 @@ import xitrum.Action
 object Required extends Validator {
   def render(action: Action, paramName: String, secureParamName: String) {
     import action._
-
-    val js = jsChain(
-      jsByName(secureParamName),
-      jsCall("rules", "\"add\"", "{required: true}")
-    )
-    jsAddToView(js)
+    jsAddToView(js$name(secureParamName) + ".rules('add', {required: true})")
   }
 
   def validate(action: Action, paramName: String, secureParamName: String): Boolean = {
