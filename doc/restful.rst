@@ -34,6 +34,28 @@ On web application startup, Xitrum will scan all those annotations, build the
 routing table and print it out for you (so that you know what APIs your
 application has). You don't need a seperate config file like routes.rb of Rails.
 
+Route order with "first" and "last"
+-----------------------------------
+
+When you want to route like this:
+
+::
+
+  /articles/:id --> ArticleShow
+  /articles/new --> ArticleNew
+
+You must make sure the second route be checked first. ``first`` is for that purpose:
+
+::
+
+  @GET("/articles/:id")
+  class ArticleShow...
+
+  @GET(value="/articles/new", first=true)
+  class ArticleNew...
+
+``last`` is similar.
+
 Anti-CSRF
 ---------
 
