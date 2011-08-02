@@ -58,9 +58,13 @@ crossScalaVersions := Seq("2.9.0-1")
 
 scalaVersion := "2.9.0-1"
 
-publishTo := Some("Sonatype Snapshot Repository" at "https://oss.sonatype.org/content/repositories/snapshots")
+publishTo <<= (version) { version: String =>
+  val nexus = "http://nexus.scala-tools.org/content/repositories/"
+  if (version.trim.endsWith("SNAPSHOT")) Some("snapshots" at nexus + "snapshots/") 
+  else                                   Some("releases"  at nexus + "releases/")
+}
 
-credentials += Credentials(new File(System.getProperty("user.home") + "/.ivy2/.credentials"))
+credentials += Credentials(Path.userHome / ".ivy2" / ".credentials")
 
 // There is error with sbt doc
 publishArtifact in (Compile, packageDoc) := false

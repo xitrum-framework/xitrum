@@ -15,10 +15,10 @@ scalacOptions ++= Seq(
 libraryDependencies += "org.jboss.netty" % "netty" % "4.0.0.Alpha1-SNAPSHOT" from "http://cloud.github.com/downloads/ngocdaothanh/xitrum/netty-4.0.0.Alpha1-SNAPSHOT.jar"
 
 // For Xitrum
-resolvers += "Sonatype Snapshot Repository" at "https://oss.sonatype.org/content/repositories/snapshots"
+resolvers += "Scala Tools Snapshot" at "http://nexus.scala-tools.org/content/repositories/snapshots"
 
 // Xitrum uses Jerkson: https://github.com/codahale/jerkson
-resolvers += "repo.codahale.com"            at "http://repo.codahale.com"
+resolvers += "repo.codahale.com"    at "http://repo.codahale.com"
 
 libraryDependencies += "tv.cntt"         %% "xitrum"          % "1.1-SNAPSHOT"
 

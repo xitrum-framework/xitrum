@@ -150,10 +150,10 @@ $(function() {
   //
   // We must iterate manually, $("form").validate() only works for the first
   // form, not all forms when there are multiple form in a page
-  $.each($("form"), function(index, form) { $(form).validate() });
+  $("form").each(function(index, form) { $(form).validate() });
 
-  $("[postback]").each(function(i, e) {
-    var eventType = $(e).attr("postback");
-    $(e).bind(eventType, xitrum.postback);
+  $("[postback]").each(function(index, elem) {
+    var eventType = $(elem).attr("postback");
+    $(elem).bind(eventType, xitrum.postback);
   });
 });
