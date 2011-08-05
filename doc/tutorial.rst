@@ -34,7 +34,7 @@ line between the 2 lines below):
 
 ::
 
-  resolvers += "Sonatype Snapshot Repository" at "https://oss.sonatype.org/content/repositories/snapshots"
+  resolvers += "Scala Tools Snapshot Repository" at "http://nexus.scala-tools.org/content/repositories/snapshots"
 
   libraryDependencies += "tv.cntt" %% "xitrum-plugin" % "1.1-SNAPSHOT"
 
@@ -43,7 +43,7 @@ You can do like this:
 ::
 
   $ mkdir -p ~/.sbt/plugins
-  $ echo 'resolvers += "Sonatype Snapshot Repository" at "https://oss.sonatype.org/content/repositories/snapshots"' >> ~/.sbt/plugins/build.sbt
+  $ echo 'resolvers += "Scala Tools Snapshot Repository" at "http://nexus.scala-tools.org/content/repositories/snapshots"' >> ~/.sbt/plugins/build.sbt
   $ echo -e "\n" >> ~/.sbt/plugins/build.sbt
   $ echo 'libraryDependencies += "tv.cntt" %% "xitrum-plugin" % "1.1-SNAPSHOT"' >> ~/.sbt/plugins/build.sbt
 

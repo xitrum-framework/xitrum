@@ -7,6 +7,10 @@ import com.hazelcast.core.IMap
 object Cache extends Logger {
   val cache = Config.hazelcastInstance.getMap("xitrum/cache").asInstanceOf[IMap[Any, Any]]
 
+  def expire(key: Any) {
+    cache.removeAsync(key)
+  }
+
   def putIfAbsentSecond(key: Any, value: Any, seconds: Int) {
     if (Config.isProductionMode) {
       logger.debug("putIfAbsent: " + key)
