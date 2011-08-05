@@ -1,6 +1,5 @@
 package xitrum.validation
 
-import java.io.Serializable
 import xitrum.Action
 
 trait Validator extends Serializable {

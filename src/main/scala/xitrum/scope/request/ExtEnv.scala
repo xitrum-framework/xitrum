@@ -44,13 +44,7 @@ trait ExtEnv extends RequestEnv with ParamAccess with UploadParamAccess with CSR
     new Cookies(request)
   }
 
-  def sessiono[T](key: String): Option[T] = {
-    if (session.isDefinedAt(key)) {
-      Some(session[T](key))
-    } else {
-      None
-    }
-  }
+  def sessiono[T](key: String): Option[T] = session.get(key).map(_.asInstanceOf[T])
 
   def prepareWhenRespond {
     if (sessionTouched) Config.sessionStore.store(session, this)

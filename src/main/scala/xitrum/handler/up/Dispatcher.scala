@@ -1,6 +1,5 @@
 package xitrum.handler.up
 
-import java.io.Serializable
 import scala.collection.mutable.{ArrayBuffer, Map => MMap}
 
 import org.jboss.netty.channel._
@@ -80,8 +79,8 @@ object Dispatcher extends Logger {
           action.response.setStatus(BAD_REQUEST)
 
           if (e.isInstanceOf[InvalidAntiCSRFToken]) {
-            action.session.reset
-            action.jsRender("alert(" + action.jsEscape("Session expired. Please refresh your browser."))
+            action.session.clear
+            action.jsRender("alert(" + action.jsEscape("Session expired. Please refresh your browser.") + ")")
           } else if (e.isInstanceOf[MissingParam]) {
             val mp  = e.asInstanceOf[MissingParam]
             val key = mp.key

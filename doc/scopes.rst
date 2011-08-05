@@ -162,3 +162,22 @@ The above code compiles but does not work correctly, because the Vars internally
 use class names to do look up. When using ``val``, ``rTitle`` and ``rCategory``
 will have the same class name ("xitrum.RequestVar"). The same for ``sUsername``
 and ``sIsAdmin``.
+
+Session store
+-------------
+
+In config/xitrum.properties (`example <https://github.com/ngocdaothanh/xitrum/blob/master/plugin/src/main/resources/xitrum_resources/config/xitrum.properties>`_),
+you can config the session store:
+
+::
+
+  session_store = xitrum.scope.session.CookieSessionStore
+
+If you want to store session on server side using Hazelcast:
+
+::
+
+  session_store = xitrum.scope.session.HazelcastSessionStore
+
+If you want to create your own session store, implement
+`SessionStore <https://github.com/ngocdaothanh/xitrum/blob/master/src/main/scala/xitrum/scope/session/SessionStore.scala>`_.

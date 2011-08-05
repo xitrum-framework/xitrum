@@ -1,6 +1,6 @@
 package xitrum.scope.session
 
-import java.io.{ByteArrayInputStream, ByteArrayOutputStream, ObjectInputStream, ObjectOutputStream, Serializable}
+import java.io.{ByteArrayInputStream, ByteArrayOutputStream, ObjectInputStream, ObjectOutputStream}
 
 object SeriDeseri {
   def serialize(value: Any): Array[Byte] = {

@@ -27,6 +27,13 @@
     <eviction-percentage>25</eviction-percentage>
   </map>
 
+  <map name="xitrum/session">
+    <backup-count>0</backup-count>
+    <eviction-policy>LRU</eviction-policy>
+    <max-size>100000</max-size>
+    <eviction-percentage>25</eviction-percentage>
+  </map>
+
   <map name="xitrum/comet">
     <backup-count>0</backup-count>
     <eviction-policy>LRU</eviction-policy>

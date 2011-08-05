@@ -90,7 +90,7 @@ object Config extends Logger {
   }
 
   val hazelcastInstance: HazelcastInstance = {
-    val hazelcastMode = properties.getProperty("hazelcast_mode")
+    val hazelcastMode = properties.getProperty("hazelcast_mode", "cluster_member")
 
     // http://code.google.com/p/hazelcast/issues/detail?id=94
     // http://code.google.com/p/hazelcast/source/browse/trunk/hazelcast/src/main/java/com/hazelcast/logging/Logger.java
@@ -120,7 +120,7 @@ object Config extends Logger {
     Class.forName(className).newInstance.asInstanceOf[SessionStore]
   }
 
-  val cookieName = properties.getProperty("cookie_name")
+  val sessionCookieName = properties.getProperty("session_cookie_name", "_session")
 
   val secureKey = properties.getProperty("secure_key")
 

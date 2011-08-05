@@ -2,6 +2,7 @@ package xitrum.scope.session
 
 import xitrum.scope.request.ExtEnv
 
+/** See trait Session. */
 trait SessionStore {
   /**
    * Called only at the firt access to the session. If the action does not use

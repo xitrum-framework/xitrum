@@ -26,7 +26,7 @@ trait Flash {
         ""
 
       case Some(msg) =>
-        session.delete(FLASH_KEY)
+        session.remove(FLASH_KEY)
         msg
     }
   }
