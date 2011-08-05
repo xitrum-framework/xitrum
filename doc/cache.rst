@@ -41,15 +41,18 @@ Cache object
 You use methods in ``xitrum.Cache``.
 
 Without an explicit TTL (time to live):
+
 * put(key, value)
 
 Without an explicit TTL:
+
 * putSecond(key, value, seconds)
 * putMinute(key, value, minutes)
 * putHour(key, value, hours)
 * putDay(key, value, days)
 
 Only if absent:
+
 * putIfAbsent(key, value)
 * putIfAbsentSecond(key, value, seconds)
 * putIfAbsentMinute(key, value, minutes)
