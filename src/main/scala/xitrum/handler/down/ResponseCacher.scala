@@ -56,7 +56,7 @@ object ResponseCacher extends Logger {
   }
 
   def getCachedResponse(action: Action): Option[HttpResponse] = {
-    val key = ResponseCacher.makeCacheKey(action)
+    val key = makeCacheKey(action)
     Cache.getAs[CachedResponse](key).map(deserializeToResponse)
   }
 
@@ -105,7 +105,7 @@ object ResponseCacher extends Logger {
     val sortedMap =
       (new TreeMap[String, List[String]]) ++  // See xitrum.action.env.Env.Params
       textParams
-    "xitrum/page-action/" + action.request.getMethod + "/" + action.getClass.getName + "/" + inspectSortedParams(sortedMap)
+    Cache.pageActionPrefix(action.getClass.asInstanceOf[Class[Action]]) + "/" + action.request.getMethod + "/" + inspectSortedParams(sortedMap)
   }
 
   // See RequestEnv.inspectParamsWithFilter

@@ -18,24 +18,83 @@ need seperate things like Memcache. Please see the chaper about :doc:`clustering
 
 Cache works with async response.
 
-Page cache
-----------
+Create cache page or action
+---------------------------
 
-Action cache
+It's very simple, you use ``CacheActionSecond/Minute/Hour/Day`` or
+``CachePageSecond/Minute/Hour/Day``. The difference between action cache and
+page cache is that for page cache, before filter is not touched if the cache
+exists.
+
+::
+
+  import xitrum.Action
+  import xitrum.annotations._
+
+  @CachePageMinute(1)  // Or @CacheActionMinute(1) if want to run the action's before filter
+  @GET("/")
+  class IndexAction extends Action ...
+
+Cache object
 ------------
 
-Object cache
+You use methods in ``xitrum.Cache``.
+
+Without an explicit TTL (time to live):
+* put(key, value)
+
+Without an explicit TTL:
+* putSecond(key, value, seconds)
+* putMinute(key, value, minutes)
+* putHour(key, value, hours)
+* putDay(key, value, days)
+
+Only if absent:
+* putIfAbsent(key, value)
+* putIfAbsentSecond(key, value, seconds)
+* putIfAbsentMinute(key, value, minutes)
+* putIfAbsentHour(key, value, hours)
+* putIfAbsentDay(key, value, days)
+
+Remove cache
 ------------
 
-Cache expiration
-----------------
+Remove page or action cache:
 
-* Expire page cache
-* Expire action cache
-* Expire object cache
+::
 
-Cache config
-------------
+  removeAction[MyAction]
+
+Remove object cache:
+
+::
+
+  remove(key)
+
+Remove all keys that start with a prefix:
+
+::
+
+  removePrefix(keyPrefix)
+
+With ``removePrefix``, you have the power to form hierarchical cache based on prefix.
+For example you want to cache things related to an article, then when the article
+changes, you want to remove all those things.
+
+::
+
+  import xitrum.Cache
+
+  // Cache with a prefix
+  val prefix = "articles/" + article.id
+  Cache.put(prefix + "/likes", likes)
+  Cache.put(prefix + "/comments", comments)
+
+  // Later, when something happens and you want to remove all cache related to the article
+  Cache.remove(prefix)
+
+Config
+------
 
 Hazelcast is powerful. It supports distributed cache. Please see its documentation.
 
@@ -83,8 +142,8 @@ is the password for the tool to connect to the group.
 Please see `Hazelcast's documentation <http://www.hazelcast.com/documentation.jsp#Monitoring>`_
 for more information how to config ``config/hazelcast.xml``.
 
-How Xitrum cache works
-----------------------
+How cache works
+---------------
 
 Upstream
 

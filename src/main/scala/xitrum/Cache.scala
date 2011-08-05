@@ -2,25 +2,67 @@ package xitrum
 
 import java.util.concurrent.TimeUnit
 
-import com.hazelcast.core.IMap
+import com.hazelcast.core.{IMap, MapEntry}
+import com.hazelcast.query.Predicate
 
 object Cache extends Logger {
-  val cache = Config.hazelcastInstance.getMap("xitrum/cache").asInstanceOf[IMap[Any, Any]]
+  val cache = Config.hazelcastInstance.getMap("xitrum/cache").asInstanceOf[IMap[String, Any]]
 
-  def expire(key: Any) {
-    cache.removeAsync(key)
+  def remove(key: Any) {
+    cache.removeAsync(key.toString)
   }
 
-  def putIfAbsentSecond(key: Any, value: Any, seconds: Int) {
-    if (Config.isProductionMode) {
-      logger.debug("putIfAbsent: " + key)
-      cache.putIfAbsent(key, value, seconds, TimeUnit.SECONDS)
+  def pageActionPrefix(actionClass: Class[Action]) = "xitrum/page-action/" + actionClass.getName
+
+  def removePrefix(keyPrefix: Any) {
+    val keyPrefixS = keyPrefix.toString
+    val prefixPredicate = new Predicate[String, Any] {
+      def apply(mapEntry: MapEntry[String, Any]) = mapEntry.getKey.startsWith(keyPrefixS)
+    }
+
+    val keys = cache.keySet(prefixPredicate)
+    val it = keys.iterator
+    while (it.hasNext) {
+      val key = it.next
+      cache.removeAsync(key)
     }
   }
 
+  def removeAction[T: Manifest] {
+    val actionClass = manifest[T].erasure.asInstanceOf[Class[Action]]
+    val keyPrefix = pageActionPrefix(actionClass)
+    removePrefix(keyPrefix)
+  }
+
+  //---------------------------------------------------------------------------
+
+  def put(key: Any, value: Any) {
+    logger.debug("put: " + key)
+    cache.putAsync(key.toString, value)
+  }
+
+  def putSecond(key: Any, value: Any, seconds: Int) {
+    logger.debug("put (" + seconds + "s): " + key)
+    cache.put(key.toString, value, seconds, TimeUnit.SECONDS)
+  }
+  def putMinute(key: Any, value: Any, minutes: Int) { putSecond(key, value, minutes * 60) }
+  def putHour  (key: Any, value: Any, hours:   Int) { putMinute(key, value, hours   * 60) }
+  def putDay   (key: Any, value: Any, days:    Int) { putHour  (key, value, days    * 24) }
+
+  def putIfAbsent(key: Any, value: Any) {
+    logger.debug("putIfAbsent: " + key)
+    cache.putIfAbsent(key.toString, value)
+  }
+
+  def putIfAbsentSecond(key: Any, value: Any, seconds: Int) {
+    logger.debug("putIfAbsent (" + seconds + "s): " + key)
+    cache.putIfAbsent(key.toString, value, seconds, TimeUnit.SECONDS)
+  }
   def putIfAbsentMinute(key: Any, value: Any, minutes: Int) { putIfAbsentSecond(key, value, minutes * 60) }
   def putIfAbsentHour  (key: Any, value: Any, hours:   Int) { putIfAbsentMinute(key, value, hours   * 60) }
   def putIfAbsentDay   (key: Any, value: Any, days:    Int) { putIfAbsentHour  (key, value, days    * 24) }
+
+  //---------------------------------------------------------------------------
 
   /**
    * Gets data from cache with type cast.
