@@ -108,8 +108,34 @@ TODO
 Session
 -------
 
+In your actions, you can use ``session``. It is an instance of
+`scala.collection.mutable.Map[String, Any]`. Things in ``session`` must be
+serializable.
+
+resetSession
+~~~~~~~~~~~~
+
+`One line of code will protect you from session fixation <http://guides.rubyonrails.org/security.html#session-fixation>`_.
+
+Read the link above to know about session fixation. To prevent session fixation
+attack, in the action that lets users login, call ``resetSession``.
+
+::
+
+  class LoginAction extends Action {
+    override def execute {
+      ...
+      resetSession  // Reset first before doing anything else with the session
+      session("username") = username
+    }
+  }
+
+To log users out, also call ``resetSession``.
+
 SessionVar
 ~~~~~~~~~~
+
+SessionVar, like RequestVar, is a way to make your session more typesafe.
 
 For example, you want save username to session after the user has logged in:
 
@@ -142,7 +168,7 @@ Display the username:
 * To reset the whole session: ``session.reset``
 
 object vs. val
---------------
+~~~~~~~~~~~~~~
 
 Please use ``object`` instead of ``val``.
 
@@ -164,7 +190,7 @@ will have the same class name ("xitrum.RequestVar"). The same for ``sUsername``
 and ``sIsAdmin``.
 
 Session store
--------------
+~~~~~~~~~~~~~
 
 In config/xitrum.properties (`example <https://github.com/ngocdaothanh/xitrum/blob/master/plugin/src/main/resources/xitrum_resources/config/xitrum.properties>`_),
 you can config the session store:

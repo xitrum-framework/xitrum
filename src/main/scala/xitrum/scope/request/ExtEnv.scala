@@ -50,4 +50,9 @@ trait ExtEnv extends RequestEnv with ParamAccess with UploadParamAccess with CSR
     if (sessionTouched) Config.sessionStore.store(session, this)
     if (cookiesTouched) cookies.setCookiesWhenRespond(this)
   }
+
+  def resetSession {
+    session.clear
+    cookies.clear  // This will clear the session cookie
+  }
 }
