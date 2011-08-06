@@ -1,7 +1,8 @@
 .. image:: http://www.bdoubliees.com/journalspirou/sfigures6/schtroumpfs/s3.jpg
 
-Xitrum ("Smurf" in Vietnamese) is a Scala web framework and web server on top of
-`Netty <http://www.jboss.org/netty>`_ and `Hazelcast <http://www.hazelcast.com/>`_:
+Xitrum ("Smurf" in Vietnamese) is an async and clustered Scala web framework and
+web server on top of `Netty <http://www.jboss.org/netty>`_ and
+`Hazelcast <http://www.hazelcast.com/>`_:
 
 * It fills the gap between `Scalatra <https://github.com/scalatra/scalatra>`_
   and `Lift <http://liftweb.net/>`_: more powerful than Scalatra and easier to
@@ -9,7 +10,7 @@ Xitrum ("Smurf" in Vietnamese) is a Scala web framework and web server on top of
   is controller-first like Scalatra, not
   `view-first <http://www.assembla.com/wiki/show/liftweb/View_First>`_ like Lift.
 * Typesafe, in the spirit of Scala.
-* Asynchronous, in the spirit of Netty.
+* Async, in the spirit of Netty.
 * Sessions can be stored in cookies or clustered Hazelcast.
 
 Hazelcast also gives:
