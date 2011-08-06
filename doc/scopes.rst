@@ -109,7 +109,7 @@ Session
 -------
 
 In your actions, you can use ``session``. It is an instance of
-`scala.collection.mutable.Map[String, Any]`. Things in ``session`` must be
+``scala.collection.mutable.Map[String, Any]``. Things in ``session`` must be
 serializable.
 
 resetSession
