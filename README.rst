@@ -14,8 +14,9 @@ Xitrum ("Smurf" in Vietnamese) is a Scala web framework and web server on top of
 
 Hazelcast also gives:
 
-* In-process and distribued cache, you don't need separate cache servers.
-* In-process and distribued `Comet <http://en.wikipedia.org/wiki/Comet_(programming)>`_.
+* In-process and clustered cache, you don't need separate cache servers.
+* In-process and clustered `Comet <http://en.wikipedia.org/wiki/Comet_(programming)>`_,
+  you don't need a separate Comet server.
 
 ::
 
