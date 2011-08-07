@@ -18,7 +18,7 @@ Xitrum's documentation
    restful
    postback
    xml
-   json
+   js
    async
    static
    scopes

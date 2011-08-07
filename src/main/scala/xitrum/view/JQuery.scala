@@ -29,8 +29,8 @@ trait JQuery {
       </xml:group>
 
   /** See escape_javascript of Rails */
-  def jsEscape(value: Any) = {
-    val escaped = value.toString
+  def jsEscape(string: Any) = {
+    val escaped = string.toString
       .replace("\\\\", "\\0\\0")
       .replace("</",   "<\\/")
       .replace("\r\n", "\\n")
@@ -51,9 +51,14 @@ trait JQuery {
 
   //----------------------------------------------------------------------------
 
-  def jsRender(values: String*) {
-    val js = values.mkString(";\n") + ";\n"
+  def jsRender(fragments: Any*) {
+    val js = fragments.mkString(";\n") + ";\n"
     renderText(js, "text/javascript")
+  }
+
+  def jsRenderFormat(format: String, args: Any*) {
+    val js = format.format(args:_*)
+    jsRender(js)
   }
 
   /** See http://stackoverflow.com/questions/503093/how-can-i-make-a-redirect-page-in-jquery */
