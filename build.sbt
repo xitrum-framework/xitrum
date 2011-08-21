@@ -26,7 +26,7 @@ libraryDependencies += "org.jboss.netty" % "netty" % "4.0.0.Alpha1-SNAPSHOT" fro
 // Projects using Xitrum must provide a concrete implentation of SLF4J (Logback etc.)
 libraryDependencies += "org.slf4j" % "slf4j-api" % "1.6.1" % "provided"
 
-libraryDependencies += "tv.cntt" % "annovention" % "1.0"
+libraryDependencies += "tv.cntt" % "annovention" % "1.2"
 
 // For distributed cache and Comet
 // Infinispan is good but much heavier, and the logging is bad:

@@ -5,7 +5,7 @@ import scala.collection.mutable.{ArrayBuffer, Map => MMap}
 
 import org.jboss.netty.handler.codec.http.HttpMethod
 
-import com.impetus.annovention.{Discoverer, ClasspathDiscoverer}
+import com.impetus.annovention.{ClasspathDiscoverer, FilterImpl}
 import com.impetus.annovention.listener.ClassAnnotationDiscoveryListener
 
 import xitrum.Action
@@ -20,9 +20,13 @@ class RouteCollector extends ClassAnnotationDiscoveryListener {
   private val others = MMap[Class[Action], (HttpMethod, Array[Routes.Pattern], Int)]()
 
   def collect: (Array[Routes.Route], Map[Class[Action], Int])  = {
+    val ignoredPackages = FilterImpl.IGNORED_PACKAGES ++ Array("com.hazelcast", "com.codahale.jerkson", "org.slf4j", "ch.qos.logback")
+    val filter = new FilterImpl(ignoredPackages)
+
     val discoverer = new ClasspathDiscoverer
     discoverer.addAnnotationListener(this)
-    discoverer.discover
+    discoverer.setFilter(filter)
+    discoverer.discover(true, false, false, true, false)
 
     val routeBuffer = ArrayBuffer[Routes.Route]()
     val cacheBuffer = MMap[Class[Action], Int]()
