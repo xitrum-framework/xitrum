@@ -59,7 +59,9 @@ class RouteCollector extends ClassAnnotationDiscoveryListener {
 
   def discovered(className: String, _annotationName: String) {
     val klass = Class.forName(className).asInstanceOf[Class[Action]]
-    if (firsts.contains(klass) || lasts.contains(klass) || others.contains(klass)) return
+
+    val processed = firsts.contains(klass) || lasts.contains(klass) || others.contains(klass)
+    if (processed) return
 
     // Annovention limitation: The annotations must be set on method, not class!
     val annotations = klass.getAnnotations
@@ -75,34 +77,51 @@ class RouteCollector extends ClassAnnotationDiscoveryListener {
   //----------------------------------------------------------------------------
 
   private def collectRoute(annotations: Array[JAnnotation]): Option[(RouteMap, HttpMethod, Array[Routes.Pattern])] = {
-    var ret: Option[(RouteMap, HttpMethod, Array[Routes.Pattern])] = None
-    for (a <- annotations) {
-      if (a.isInstanceOf[GET]) {
-        val a2   = a.asInstanceOf[GET]
-        val coll = if (a2.first) firsts else if (a2.last) lasts else others
-        ret      = Some((coll, HttpMethod.GET, Array(a2.value)))
+    var map:      RouteMap              = others
+    var method:   HttpMethod            = null
+    var patterns: Array[Routes.Pattern] = null
+
+    annotations.foreach { a =>
+      if (a.isInstanceOf[First]) {
+        map = firsts
+      } else if (a.isInstanceOf[Last]) {
+        map = lasts
+      }
+
+      else if (a.isInstanceOf[GET]) {
+        method   = HttpMethod.GET
+        patterns = Array(a.asInstanceOf[GET].value)
       } else if (a.isInstanceOf[GETs]) {
-        val a2   = a.asInstanceOf[GETs]
-        val coll = if (a2.first) firsts else if (a2.last) lasts else others
-        ret      = Some((coll, HttpMethod.GET, a2.value))
+        method   = HttpMethod.GET
+        patterns = a.asInstanceOf[GETs].value
       }
 
       else if (a.isInstanceOf[POST]) {
-        val a2 = a.asInstanceOf[POST]
-        ret    = Some((others, HttpMethod.POST, Array(a2.value)))
+        method   = HttpMethod.POST
+        patterns = Array(a.asInstanceOf[POST].value)
+      } else if (a.isInstanceOf[POSTs]) {
+        method   = HttpMethod.POST
+        patterns = a.asInstanceOf[POSTs].value
       }
 
       else if (a.isInstanceOf[PUT]) {
-        val a2 = a.asInstanceOf[PUT]
-        ret    = Some((others, HttpMethod.PUT, Array(a2.value)))
-      } else if (a.isInstanceOf[DELETE]) {
-        val a2 = a.asInstanceOf[DELETE]
-        ret    = Some((others, HttpMethod.DELETE, Array(a2.value)))
+        method   = HttpMethod.PUT
+        patterns = Array(a.asInstanceOf[PUT].value)
+      } else if (a.isInstanceOf[PUTs]) {
+        method   = HttpMethod.PUT
+        patterns = a.asInstanceOf[PUTs].value
       }
 
-      if (ret.isDefined) return ret
+      else if (a.isInstanceOf[DELETE]) {
+        method   = HttpMethod.DELETE
+        patterns = Array(a.asInstanceOf[DELETE].value)
+      } else if (a.isInstanceOf[DELETEs]) {
+        method   = HttpMethod.DELETE
+        patterns = a.asInstanceOf[DELETEs].value
+      }
     }
-    ret
+
+    if (method != null && patterns != null) Some(map, method, patterns) else None
   }
 
   private def collectCache(annotations: Array[JAnnotation]): Int = {

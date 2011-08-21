@@ -36,8 +36,9 @@ ArticleNew.scala
 
 ::
 
-  // first=true: force this route to be matched before "/articles/:id"
-  @GET(value="/articles/new", first=true)
+  // @First: force this route to be matched before "/articles/:id"
+  @First
+  @GET("/articles/new")
   class ArticleNew extends Action {
     override def execute {
       renderView(
