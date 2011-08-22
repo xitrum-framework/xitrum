@@ -3,6 +3,7 @@ package xitrum.routing
 import org.jboss.netty.handler.codec.http.HttpHeaders
 
 import xitrum.Action
+import xitrum.exception.SessionExpired
 import xitrum.scope.session.SecureBase64
 import xitrum.validation.ValidatorCaller
 
@@ -18,14 +19,18 @@ class PostbackAction extends Action {
     val encoded               = pathInfo.encoded
     val secureActionClassName = encoded.substring(PostbackAction.POSTBACK_PREFIX.length)
 
-    var actionClassName = SecureBase64.decrypt(secureActionClassName).get.asInstanceOf[String]
+    SecureBase64.decrypt(secureActionClassName) match {
+      case None => throw new SessionExpired
 
-    if (ValidatorCaller.call(this)) {
-      val actionClass = Class.forName(actionClassName).asInstanceOf[Class[Action]]
-      forward(actionClass, true)
-    } else {
-      // Flash the default error message if the response is empty (the validators did not respond anything)
-      if (HttpHeaders.getContentLength(response, 0) == 0) jsRenderFlash("Please check your input.")
+      case Some(obj) =>
+        val actionClassName = obj.asInstanceOf[String]
+        if (ValidatorCaller.call(this)) {
+          val actionClass = Class.forName(actionClassName).asInstanceOf[Class[Action]]
+          forward(actionClass, true)
+        } else {
+          // Flash the default error message if the response is empty (the validators did not respond anything)
+          if (HttpHeaders.getContentLength(response, 0) == 0) jsRenderFlash("Please check your input.")
+        }
+    }
     }
   }
-}
