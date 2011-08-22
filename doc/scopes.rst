@@ -205,5 +205,7 @@ If you want to store session on server side using Hazelcast:
 
   session_store = xitrum.scope.session.HazelcastSessionStore
 
+You may need to setup session replication by :doc:`configuring Hazelcast </cluster>`.
+
 If you want to create your own session store, implement
 `SessionStore <https://github.com/ngocdaothanh/xitrum/blob/master/src/main/scala/xitrum/scope/session/SessionStore.scala>`_.
