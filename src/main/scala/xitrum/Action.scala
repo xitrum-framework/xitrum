@@ -24,10 +24,9 @@ trait Action extends ExtEnv with Logger with Net with Filter with BasicAuthentic
 
   //----------------------------------------------------------------------------
 
-  private var _responded: Boolean = _
-  {
-    _responded = false
-  }
+  private var _responded = false
+
+  def responded = _responded
 
   def respond = synchronized {
     if (_responded) {
@@ -35,7 +34,7 @@ trait Action extends ExtEnv with Logger with Net with Filter with BasicAuthentic
       try {
         throw new Exception
       } catch {
-        case e => logger.warn("Double respond", e)
+        case e => logger.warn("Double response", e)
       }
     } else {
       _responded = true
@@ -46,8 +45,6 @@ trait Action extends ExtEnv with Logger with Net with Filter with BasicAuthentic
       }
     }
   }
-
-  def responded = _responded
 
   //----------------------------------------------------------------------------
 

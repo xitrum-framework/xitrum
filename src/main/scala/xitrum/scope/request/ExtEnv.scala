@@ -27,12 +27,8 @@ trait ExtEnv extends RequestEnv with ParamAccess with UploadParamAccess with CSR
   lazy val at = new At
 
   // Avoid encoding, decoding when cookies/session is not touched by the application
-  private var sessionTouched: Boolean = _
-  private var cookiesTouched: Boolean = _
-  {
-    sessionTouched = false
-    cookiesTouched = false
-  }
+  private var sessionTouched = false
+  private var cookiesTouched = false
 
   lazy val session = {
     sessionTouched = true
