@@ -39,6 +39,8 @@ object SecureBase64 {
   // Full algorithm to encrypt data with
   private val CRYPT_ALGORITHM = "AES/CBC/PKCS5Padding"
 
+  private val SEAL_SEPARATOR = "-xitrum-"
+
   /** AES compitable key computed from Config.secureKey */
   private val key: Array[Byte] = {
     // We need 16 bytes array for AES
@@ -84,14 +86,14 @@ object SecureBase64 {
 
   private def seal(key: Array[Byte], data: Array[Byte]): String = {
     val data2 = encrypt(key, data)
-    Base64.encode(data2) + "--" + Base64.encode(hmac(key, data2))
+    Base64.encode(data2) + SEAL_SEPARATOR + Base64.encode(hmac(key, data2))
   }
 
   private def unseal(key: Array[Byte], base64String: String): Option[Array[Byte]] = {
     try {
-      val a = base64String.split("--")
+      val a = base64String.split(SEAL_SEPARATOR)
       val base64Data = a(0)
-      val base64hmac  = a(1)
+      val base64hmac = a(1)
 
       Base64.decode(base64Data) match {
         case None        => None
