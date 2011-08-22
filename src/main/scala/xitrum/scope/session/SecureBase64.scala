@@ -39,6 +39,8 @@ object SecureBase64 {
   // Full algorithm to encrypt data with
   private val CRYPT_ALGORITHM = "AES/CBC/PKCS5Padding"
 
+  // This string should be unique, the base 64 encoded encrypted data should not
+  // contain this string
   private val SEAL_SEPARATOR = "-xitrum-"
 
   /** AES compitable key computed from Config.secureKey */
