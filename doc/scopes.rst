@@ -55,16 +55,14 @@ RequestVar
 To pass things around when processing a request (e.g. from action to view or layout)
 in the typesafe way, you should use RequestVar.
 
-Example:
-
-Var.scala
+RVar.scala
 
 ::
 
   import xitrum.RequestVar
 
-  object Var {
-    object rTitle extends RequestVar[String]
+  object RVar {
+    object title extends RequestVar[String]
   }
 
 AppAction.scala
@@ -79,7 +77,7 @@ AppAction.scala
       <html>
         <head>
           {xitrumHead}
-          <title>{if (Var.rTitle.isDefined) "My Site - " + Var.rTitle.get else "My Site"}</title>
+          <title>{if (RVar.title.isDefined) "My Site - " + RVar.title.get else "My Site"}</title>
         </head>
         <body>
           {renderedView}
@@ -95,7 +93,7 @@ ShowAction.scala
   class ShowAction extends AppAction {
     override def execute {
       val (title, body) = ...  // Get from DB
-      Var.rTitle.set(title)
+      RVar.title.set(title)
       renderView(body)
     }
   }
@@ -145,49 +143,27 @@ Declare the session var:
 
   import xitrum.SessionVar
 
-  object Var {
-    object sUsername extends SessionVar[String]
+  object SVar {
+    object username extends SessionVar[String]
   }
 
 After login success:
 
 ::
 
-  Var.sUsername.set(username)
+  SVar.username.set(username)
 
 Display the username:
 
 ::
 
-  if (Var.sUsername.isDefined)
-    <em>{Var.sUsername.get}</em>
+  if (SVar.username.isDefined)
+    <em>{SVar.username.get}</em>
   else
     <a href={urlFor[LoginAction]}>Login</a>
 
-* To delete the session var: ``Var.sUsername.delete``
-* To reset the whole session: ``session.reset``
-
-object vs. val
-~~~~~~~~~~~~~~
-
-Please use ``object`` instead of ``val``.
-
-**Do not do like this**:
-
-::
-
-  object Var {
-    val rTitle    = new RequestVar[String]
-    val rCategory = new RequestVar[String]
-
-    val sUsername = new SessionVar[String]
-    val sIsAdmin  = new SessionVar[Boolean]
-  }
-
-The above code compiles but does not work correctly, because the Vars internally
-use class names to do look up. When using ``val``, ``rTitle`` and ``rCategory``
-will have the same class name ("xitrum.RequestVar"). The same for ``sUsername``
-and ``sIsAdmin``.
+* To delete the session var: ``SVar.username.delete``
+* To reset the whole session: ``resetSession``
 
 Session store
 ~~~~~~~~~~~~~
@@ -209,3 +185,27 @@ You may need to setup session replication by :doc:`configuring Hazelcast </clust
 
 If you want to create your own session store, implement
 `SessionStore <https://github.com/ngocdaothanh/xitrum/blob/master/src/main/scala/xitrum/scope/session/SessionStore.scala>`_.
+
+object vs. val
+--------------
+
+Please use ``object`` instead of ``val``.
+
+**Do not do like this**:
+
+::
+
+  object RVar {
+    val title    = new RequestVar[String]
+    val category = new RequestVar[String]
+  }
+
+  object SVar {
+    val username = new SessionVar[String]
+    val isAdmin  = new SessionVar[Boolean]
+  }
+
+The above code compiles but does not work correctly, because the Vars internally
+use class names to do look up. When using ``val``, ``title`` and ``category``
+will have the same class name "xitrum.RequestVar". The same for ``username``
+and ``isAdmin``.
