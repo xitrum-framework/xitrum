@@ -10,7 +10,7 @@ Please see the following links for the idea about postback:
 
 Xitrum supports Ajax form postback, with additional features:
 
-* Anti-CSRF
+* `Anti-CSRF <http://guides.rubyonrails.org/security.html#cross-site-request-forgery-csrf>`_
 * :doc:`Validation </validation>`
 
 Layout
@@ -55,7 +55,7 @@ ArticleShow.scala
       val article = Article.find(id)
       renderView(
         <h1>{article.title}</h1>
-        {article.body}
+        <div>{article.body}</div>
       )
     }
   }
@@ -65,6 +65,7 @@ ArticleNew.scala
 ::
 
   import xitrum.annotation.{First, GET}
+  import xitrum.validation._
 
   // @First: force this route to be matched before "/articles/:id"
   @First
@@ -73,11 +74,11 @@ ArticleNew.scala
     override def execute {
       renderView(
         <form postback="submit" action={urlForPostbackThis}>
-          Title:
-          <input type="text" name="title" /><br />
+          <label>Title</label>
+          <input type="text" name={validate("title", Required)} /><br />
 
-          Body:
-          textarea name="body"></textarea><br />
+          <label>Body</label>
+          <textarea name={validate("body", Required)}></textarea><br />
 
           <input type="submit" value="Save" />
         </form>
