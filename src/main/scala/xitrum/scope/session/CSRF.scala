@@ -56,4 +56,8 @@ trait CSRF {
         y
     }
   }
+
+  lazy val antiCSRFMeta  = <meta name={CSRF.TOKEN} content={antiCSRFToken} />
+
+  lazy val antiCSRFInput = <input type="hidden" name={CSRF.TOKEN} value={antiCSRFToken} />
 }

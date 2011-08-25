@@ -13,6 +13,32 @@ Xitrum supports Ajax form postback, with additional features:
 * Anti-CSRF
 * :doc:`Validation </validation>`
 
+Layout
+------
+
+AppAction.scala
+
+::
+
+  import xitrum.Action
+  import xitrum.view.DocType
+
+  trait AppAction extends Action {
+    override def layout = DocType.xhtmlTransitional(
+      <html>
+        <head>
+          {antiCSRFMeta}
+          {xitrumCSS}
+          <title>Welcome to Xitrum</title>
+        </head>
+        <body>
+          {renderedView}
+          {jsAtBottom}
+        </body>
+      </html>
+    )
+  }
+
 Form
 ----
 
@@ -20,8 +46,10 @@ ArticleShow.scala
 
 ::
 
+  import xitrum.annotation.GET
+
   @GET("/articles/:id")
-  class ArticleShow {
+  class ArticleShow extends AppAction {
     override def execute {
       val id = param("id")
       val article = Article.find(id)
@@ -36,10 +64,12 @@ ArticleNew.scala
 
 ::
 
+  import xitrum.annotation.{First, GET}
+
   // @First: force this route to be matched before "/articles/:id"
   @First
   @GET("/articles/new")
-  class ArticleNew extends Action {
+  class ArticleNew extends AppAction {
     override def execute {
       renderView(
         <form postback="submit" action={urlForPostbackThis}>

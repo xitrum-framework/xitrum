@@ -21,7 +21,7 @@ import xitrum.handler.updown.XSendfile
  *
  * Headers are only sent on the first renderXXX call.
  */
-trait Renderer extends JQuery with JSCollector with Flash with I18n {
+trait Renderer extends JS with Flash with I18n {
   this: Action =>
 
   private def writeHeaderOnFirstChunk {

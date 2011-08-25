@@ -59,19 +59,22 @@ AppAction.scala
     override def layout = DocType.xhtmlTransitional(
       <html>
         <head>
-          {xitrumHead}
+          {antiCSRFMeta}
+          {xitrumCSS}
           <title>Welcome to Xitrum</title>
         </head>
         <body>
           {renderedView}
+          {jsAtBottom}
         </body>
       </html>
     )
   }
 
-``xitrumHead`` includes jQuery, jQuery Validate plugin, default CSS etc.
-In ``<head>``, it should be the first line, the following lines may override
-things it includes if needed.
+``xitrumCSS`` includes the default CSS for Xitrum. You may remove it if you
+don't like.
+
+``jsAtBottom`` includes jQuery, jQuery Validate plugin etc.
 
 Index.scala
 

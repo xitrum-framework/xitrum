@@ -26,7 +26,7 @@ In your action, call ``jsAddToView`` (multiple times if you need):
     }
   }
 
-In your layout, call ``jsForView``:
+In your layout, call ``jsAtBottom``:
 
 ::
 
@@ -37,12 +37,13 @@ In your layout, call ``jsForView``:
     override def layout = DocType.xhtmlTransitional(
       <html>
         <head>
-          {xitrumHead}
+          {antiCSRFMeta}
+          {xitrumCSS}
         </head>
         <body>
           <div id="flash">{jsFlash}</div>
           {renderedView}
-          {jsForView}
+          {jsAtBottom}
         </body>
       </html>
     )

@@ -76,11 +76,13 @@ AppAction.scala
     override def layout = DocType.xhtmlTransitional(
       <html>
         <head>
-          {xitrumHead}
+          {antiCSRFMeta}
+          {xitrumCSS}
           <title>{if (RVar.title.isDefined) "My Site - " + RVar.title.get else "My Site"}</title>
         </head>
         <body>
           {renderedView}
+          {jsAtBottom}
         </body>
       </html>
     )

@@ -52,4 +52,6 @@ trait Flash {
     val msg = flash
     if (!msg.isEmpty) jsAddToView(jsFlash(msg))
   }
+
+  lazy val xitrumCSS = <link href={urlForResource("xitrum/xitrum.css")} type="text/css" rel="stylesheet" media="all"></link>
 }

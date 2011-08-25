@@ -10,7 +10,7 @@ You can write RESTful APIs for iPhone, Android applications etc. very easily.
   import xitrum.Action
   import xitrum.annotation.{GET, GETs}
 
-  @GETs("/", "/articles")
+  @GETs(Array("/", "/articles"))
   class ArticleIndex extends Action {
     override def execute {
       //...
@@ -63,7 +63,7 @@ Anti-CSRF
 For non-GET requests, Xitrum protects your web application from
 `Cross-site request forgery <http://en.wikipedia.org/wiki/CSRF>`_ by default.
 
-When you include ``xitrumHead`` in your layout:
+When you include ``antiCSRFMeta`` in your layout:
 
 ::
 
@@ -74,11 +74,13 @@ When you include ``xitrumHead`` in your layout:
     override def layout = DocType.xhtmlTransitional(
       <html>
         <head>
-          {xitrumHead}
+          {antiCSRFMeta}
+          {xitrumCSS}
           <title>Welcome to Xitrum</title>
         </head>
         <body>
           {renderedView}
+          {jsAtBottom}
         </body>
       </html>
     )
@@ -99,6 +101,9 @@ The ``<head>`` part will include something like this:
 
 The token will be automatically included in all non-GET Ajax requests sent by
 jQuery.
+
+SkipCSRFCheck
+-------------
 
 When you create APIs for machines, e.g. smartphones, you may want to skip this
 check. To skip for an action (and its subclasses), make your action extend the
