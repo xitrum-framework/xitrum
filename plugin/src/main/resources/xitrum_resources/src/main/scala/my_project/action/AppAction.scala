@@ -9,7 +9,8 @@ trait AppAction extends Action {
   override def layout = DocType.xhtmlTransitional(
     <html>
       <head>
-        {xitrumHead}
+        {antiCSRFMeta}
+        {xitrumCSS}
 
         <meta content="text/html; charset=utf-8" http-equiv="content-type" />
         <title>Welcome to Xitrum</title>
@@ -34,7 +35,7 @@ trait AppAction extends Action {
             {renderChat}
           </div>
         </div>
-        {jsForView}
+        {jsAtBottom}
       </body>
     </html>
   )
