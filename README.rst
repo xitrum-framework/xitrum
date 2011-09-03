@@ -14,6 +14,8 @@ web server on top of `Netty <http://www.jboss.org/netty>`_ and
 * Typesafe, in the spirit of Scala.
 * Async, in the spirit of Netty.
 * Sessions can be stored in cookies or clustered Hazelcast.
+* `jQuery Validation <http://docs.jquery.com/Plugins/validation>`_ is integrated
+  for browser side and server side validation.
 
 Hazelcast also gives:
 
