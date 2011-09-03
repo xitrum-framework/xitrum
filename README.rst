@@ -9,6 +9,8 @@ web server on top of `Netty <http://www.jboss.org/netty>`_ and
   use than Lift. You can easily create both RESTful APIs and postbacks. Xitrum
   is controller-first like Scalatra, not
   `view-first <http://www.assembla.com/wiki/show/liftweb/View_First>`_ like Lift.
+* Annotation is used for URL routes, in the spirit of JAX-RS. You don't have to
+  declare all routes in a single place.
 * Typesafe, in the spirit of Scala.
 * Async, in the spirit of Netty.
 * Sessions can be stored in cookies or clustered Hazelcast.

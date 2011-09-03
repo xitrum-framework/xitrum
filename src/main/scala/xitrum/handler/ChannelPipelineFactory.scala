@@ -23,7 +23,7 @@ class ChannelPipelineFactory extends CPF {
     We put this right before Dispatcher to avoid request/response I/O hiccup.
   */
   private val executionHandler = {
-    val corePoolSize         = Runtime.getRuntime.availableProcessors * 20
+    val corePoolSize         = Runtime.getRuntime.availableProcessors * 2 + 1
     val maxTotalMemorySize   = Runtime.getRuntime.maxMemory / 2
     val maxChannelMemorySize = maxTotalMemorySize
     new ExecutionHandler(

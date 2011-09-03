@@ -55,7 +55,6 @@ Comet messages may be clustered. Please see the chaper about :doc:`clustering </
 
 Chunked response is `not very good <http://www.shanison.com/2010/05/10/stop-the-browser-%E2%80%9Cthrobber-of-doom%E2%80%9D-while-loading-comet-forever-iframe/>`_
 for `Comet <http://en.wikipedia.org/wiki/Comet_(programming)/>`_.
-
 Xitrum uses Ajax long polling. `WebSocket <http://en.wikipedia.org/wiki/WebSocket>`_
 will be supported in the future when all major browsers support it.
 
