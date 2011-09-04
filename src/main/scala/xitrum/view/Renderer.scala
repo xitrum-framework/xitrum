@@ -33,7 +33,7 @@ trait Renderer extends JS with Flash with I18n {
   }
 
   def renderLastChunk {
-    if (ctx.getChannel.isOpen) ctx.getChannel.write(HttpChunk.LAST_CHUNK)
+    if (channel.isOpen) channel.write(HttpChunk.LAST_CHUNK)
   }
 
   //----------------------------------------------------------------------------
@@ -53,7 +53,7 @@ trait Renderer extends JS with Flash with I18n {
       } else
         text.toString
 
-    if (!ctx.getChannel.isOpen) return ret
+    if (!channel.isOpen) return ret
 
 
     if (!responded) {
@@ -72,7 +72,7 @@ trait Renderer extends JS with Flash with I18n {
     if (response.isChunked) {
       writeHeaderOnFirstChunk
       val chunk = new DefaultHttpChunk(cb)
-      ctx.getChannel.write(chunk)
+      channel.write(chunk)
     } else {
       // Content length is number of bytes, not characters!
       HttpHeaders.setContentLength(response, cb.readableBytes)
@@ -97,11 +97,11 @@ trait Renderer extends JS with Flash with I18n {
   def layout = renderedView
 
   def renderView(view: Any) {
-    if (ctx.getChannel.isOpen) renderView(view, layout _)
+    if (channel.isOpen) renderView(view, layout _)
   }
 
   def renderView(view: Any, customLayout: () => Any) {
-    if (!ctx.getChannel.isOpen) return
+    if (!channel.isOpen) return
 
     renderedView = view
     val renderedLayout = customLayout.apply
@@ -114,13 +114,13 @@ trait Renderer extends JS with Flash with I18n {
   //----------------------------------------------------------------------------
 
   def renderBinary(bytes: Array[Byte]) {
-    if (!ctx.getChannel.isOpen) return
+    if (!channel.isOpen) return
 
     val cb = ChannelBuffers.wrappedBuffer(bytes)
     if (response.isChunked) {
       writeHeaderOnFirstChunk
       val chunk = new DefaultHttpChunk(cb)
-      ctx.getChannel.write(chunk)
+      channel.write(chunk)
     } else {
       HttpHeaders.setContentLength(response, bytes.length)
       response.setContent(cb)
@@ -136,7 +136,7 @@ trait Renderer extends JS with Flash with I18n {
    * path is not sanitized. To sanitize, use xitrum.Sanitizer.
    */
   def renderFile(path: String) {
-    if (!ctx.getChannel.isOpen) return
+    if (!channel.isOpen) return
 
     val abs = if (path.startsWith("/")) path else System.getProperty("user.dir") + File.separator + path
     XSendfile.setHeader(response, abs)
@@ -146,7 +146,7 @@ trait Renderer extends JS with Flash with I18n {
   //----------------------------------------------------------------------------
 
   def render404Page {
-    if (!ctx.getChannel.isOpen) return
+    if (!channel.isOpen) return
 
     XSendfile.set404Page(response)
     respond

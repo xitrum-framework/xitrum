@@ -38,10 +38,10 @@ trait Action extends ExtEnv with Logger with Net with Filter with BasicAuthentic
       }
     } else {
       _responded = true
-      if (ctx.getChannel.isOpen) {
+      if (channel.isOpen) {
         prepareWhenRespond
         handlerEnv.response = response
-        ctx.getChannel.write(handlerEnv)
+        channel.write(handlerEnv)
       }
     }
   }
@@ -116,7 +116,7 @@ trait Action extends ExtEnv with Logger with Net with Filter with BasicAuthentic
   //----------------------------------------------------------------------------
 
   def redirectTo(location: String, status: HttpResponseStatus = FOUND) {
-    if (!ctx.getChannel.isOpen) return
+    if (!channel.isOpen) return
 
     response.setStatus(status)
 
@@ -138,7 +138,7 @@ trait Action extends ExtEnv with Logger with Net with Filter with BasicAuthentic
 
   def forward(actionClass: Class[Action], postback: Boolean) {
     val action = actionClass.newInstance
-    action(ctx, handlerEnv)
+    action(channel, handlerEnv)
     action.isPostback = isPostback
     Dispatcher.dispatchWithFailsafe(action, postback)
   }
@@ -167,7 +167,7 @@ trait Action extends ExtEnv with Logger with Net with Filter with BasicAuthentic
   //----------------------------------------------------------------------------
 
   def addConnectionClosedListener(listener: () => Unit) {
-    val dispatcher = ctx.getPipeline.get(classOf[Dispatcher])
+    val dispatcher = channel.getPipeline.get(classOf[Dispatcher])
     dispatcher.addConnectionClosedListener(listener)
   }
 }

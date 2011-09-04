@@ -43,7 +43,7 @@ object Dispatcher extends Logger {
 
           case Some(response) =>
             hit = true
-            action.ctx.getChannel.write(response)
+            action.channel.write(response)
         }
       }
 
@@ -92,7 +92,7 @@ object Dispatcher extends Logger {
           val response = new DefaultHttpResponse(HTTP_1_1, INTERNAL_SERVER_ERROR)
           XSendfile.set500Page(response)
           action.handlerEnv.response = response
-          action.ctx.getChannel.write(action.handlerEnv)
+          action.channel.write(action.handlerEnv)
         }
     }
   }
@@ -158,7 +158,7 @@ class Dispatcher extends SimpleChannelUpstreamHandler with BadClientSilencer {
         env.pathParams  = pathParams
 
         val action = actionClass.newInstance
-        action(ctx, env)
+        action(ctx.getChannel, env)
         dispatchWithFailsafe(action, false)
 
       case None =>

@@ -1,7 +1,7 @@
 package xitrum.scope.request
 
 import scala.collection.mutable.{Map => MMap}
-import org.jboss.netty.channel.ChannelHandlerContext
+import org.jboss.netty.channel.Channel
 
 import xitrum.Config
 import xitrum.handler.HandlerEnv
@@ -48,11 +48,11 @@ object RequestEnv {
  * and Controller can be inferred from these variables.
  */
 class RequestEnv {
-  var ctx:        ChannelHandlerContext = _
-  var handlerEnv: HandlerEnv            = _
+  var channel:    Channel    = _
+  var handlerEnv: HandlerEnv = _
 
-  def apply(ctx: ChannelHandlerContext, handlerEnv: HandlerEnv) {
-    this.ctx        = ctx
+  def apply(channel: Channel, handlerEnv: HandlerEnv) {
+    this.channel    = channel
     this.handlerEnv = handlerEnv
   }
 

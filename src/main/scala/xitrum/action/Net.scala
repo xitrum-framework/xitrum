@@ -87,7 +87,7 @@ trait Net {
   // TODO: inetSocketAddress can be Inet4Address or Inet6Address
   // See java.net.preferIPv6Addresses
   private lazy val clientIp = {
-    val inetSocketAddress = ctx.getChannel.getRemoteAddress.asInstanceOf[InetSocketAddress]
+    val inetSocketAddress = channel.getRemoteAddress.asInstanceOf[InetSocketAddress]
     inetSocketAddress.getAddress.getHostAddress
   }
 

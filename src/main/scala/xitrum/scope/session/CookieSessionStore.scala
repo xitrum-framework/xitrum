@@ -10,7 +10,7 @@ import xitrum.scope.request.ExtEnv
 class CookieSessionStore extends SessionStore {
   def restore(extEnv: ExtEnv): Session = {
     try {
-      val cookie = extEnv.cookies(Config.sessionCookieName).get
+      val cookie = extEnv.cookies.get(Config.sessionCookieName).get
       val base64String = cookie.getValue
       val value = SecureBase64.decrypt(base64String).get
 
@@ -33,7 +33,7 @@ class CookieSessionStore extends SessionStore {
 
     val s = SecureBase64.encrypt(immutableMap)
     val cookiePath = Config.baseUri + "/"
-    extEnv.cookies(Config.sessionCookieName) match {
+    extEnv.cookies.get(Config.sessionCookieName) match {
       case Some(cookie) =>
         cookie.setHttpOnly(true)
         cookie.setPath(cookiePath)
