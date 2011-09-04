@@ -25,7 +25,7 @@ trait ParamAccess {
   //----------------------------------------------------------------------------
 
   def param[T](key: String, coll: Params = null)(implicit e: T DefaultsTo String, m: Manifest[T]): T = {
-    if (m.toString == classOf[FileUpload].getName) {
+    if (m <:< manifest[FileUpload]) {
       fileUploadParams.get(key) match {
         case None         => throw new MissingParam(key)
         case Some(values) => values(0).asInstanceOf[T]
@@ -38,7 +38,7 @@ trait ParamAccess {
   }
 
   def paramo[T](key: String, coll: Params = null)(implicit e: T DefaultsTo String, m: Manifest[T]): Option[T] = {
-    if (m.toString == classOf[FileUpload].getName) {
+    if (m <:< manifest[FileUpload]) {
       fileUploadParams.get(key).map { values => values(0).asInstanceOf[T] }
     } else {
       val coll2  = if (coll == null) textParams else coll
@@ -49,7 +49,7 @@ trait ParamAccess {
   }
 
   def params[T](key: String, coll: Params = null)(implicit e: T DefaultsTo String, m: Manifest[T]): List[T] = {
-    if (m.toString == classOf[FileUpload].getName) {
+    if (m <:< manifest[FileUpload]) {
       fileUploadParams.get(key) match {
         case None         => throw new MissingParam(key)
         case Some(values) => values.asInstanceOf[List[T]]
@@ -62,10 +62,10 @@ trait ParamAccess {
   }
 
   def paramso[T](key: String, coll: Params = null)(implicit e: T DefaultsTo String, m: Manifest[T]): Option[List[T]] = {
-    if (m.toString == classOf[FileUpload].getName) {
+    if (m <:< manifest[FileUpload]) {
       fileUploadParams.get(key).asInstanceOf[Option[List[T]]]
     } else {
-      val coll2   = if (coll == null) textParams else coll
+      val coll2 = if (coll == null) textParams else coll
       coll2.get(key) match {
         case None         => None
         case Some(values) => Some(values.map(convertText[T](_)))
@@ -77,14 +77,14 @@ trait ParamAccess {
 
   /** Applications may override this method to convert to more types. */
   def convertText[T](value: String)(implicit m: Manifest[T]): T = {
-    val v = m.toString match {
-      case "java.lang.String" => value
-      case "Int"              => value.toInt
-      case "Long"             => value.toLong
-      case "Float"            => value.toFloat
-      case "Double"           => value.toDouble
-      case unknown            => throw new Exception("Cannot covert " + value + " to " + unknown)
-    }
-    v.asInstanceOf[T]
+    val any: Any =
+           if (m <:< manifest[String]) value
+      else if (m <:< manifest[Int])    value.toInt
+      else if (m <:< manifest[Long])   value.toLong
+      else if (m <:< manifest[Float])  value.toFloat
+      else if (m <:< manifest[Double]) value.toDouble
+      else throw new Exception("Cannot covert " + value + " to " + m)
+
+    any.asInstanceOf[T]
   }
 }
