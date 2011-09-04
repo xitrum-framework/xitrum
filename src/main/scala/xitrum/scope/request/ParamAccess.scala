@@ -1,8 +1,5 @@
 package xitrum.scope.request
 
-import scala.collection.JavaConversions
-import scala.collection.mutable.{Map => MMap}
-
 import org.jboss.netty.handler.codec.http.FileUpload
 
 import xitrum.Action
