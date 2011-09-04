@@ -63,4 +63,25 @@ class RequestEnv {
   def bodyParams       = handlerEnv.bodyParams
   def pathParams       = handlerEnv.pathParams
   def fileUploadParams = handlerEnv.fileUploadParams
+
+  /**
+   * text (uriParams, bodyParams, pathParams) vs file upload (fileParams)
+   *
+   * Lazily initialized, so that bodyParams can be
+   * changed by ValidatorCaller. Because this is a lazy val, once this is accessed,
+   * the 3 params should not be changed, because the change will not be reflected
+   * by this val.
+   *
+   * Not a function ("def") so that the calculation is done only once.
+   */
+  lazy val textParams: Params = {
+    val ret = MMap[String, List[String]]()
+
+    // The order is important because we want the later to overwrite the former
+    ret ++= handlerEnv.uriParams
+    ret ++= handlerEnv.bodyParams
+    ret ++= handlerEnv.pathParams
+
+    ret
+  }
 }

@@ -27,11 +27,7 @@ object Routes extends Logger {
     // Compile and log routes
     // The compiled routes do not contain the original URL pattern
 
-    val (methodMaxLength, patternMaxLength) = routes.foldLeft((0, 0)) { case ((mmax, pmax), r) =>
-      val method      = r._1
-      val pattern     = r._2
-      val actionClass = r._3
-
+    val (methodMaxLength, patternMaxLength) = routes.foldLeft((0, 0)) { case ((mmax, pmax), (method, pattern, actionClass)) =>
       val mlen = method.getName.length
       val plen = pattern.length
 

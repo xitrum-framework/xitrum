@@ -8,7 +8,7 @@ import xitrum.scope.request.Params
 class CometGetAction extends Action {
   override def postback {
     val channel       = param("channel")
-    val lastTimestamp = tparam[Long]("lastTimestamp")
+    val lastTimestamp = param[Long]("lastTimestamp")
 
     val messages = Comet.getMessages(channel, lastTimestamp)
 

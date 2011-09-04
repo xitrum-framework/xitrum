@@ -17,10 +17,10 @@ There are 3 kinds of textual params, of type ``scala.collection.mutable.Map[Stri
 2. ``bodyParams``: params in POST request body
 3. ``pathParams``: params embedded in the URL, example: ``@GET("/articles/:id/:title")``
 
-These params are merged in the above order (from 1 to 3, the latter will
-override the former), as ``textParams``.
+These params are merged in the above order as ``textParams``
+(from 1 to 3, the latter will override the former).
 
-``fileUploadParams`` is of type ``scala.collection.mutable.Map[String, List[org.jboss.netty.handler.codec.http.FileUpload]]``.
+``fileUploadParams`` is of type scala.collection.mutable.Map[String, List[`FileUpload <https://github.com/netty/netty/blob/master/src/main/java/org/jboss/netty/handler/codec/http/FileUpload.java>`_]].
 
 Accesing params
 ~~~~~~~~~~~~~~~
@@ -35,19 +35,11 @@ To access ``textParams``:
 * ``paramo("x")``: returns ``Option[String]``
 * ``paramso("x")``: returns ``Option[List[String]]``
 
-You can convert String to other types (Int, Long, Fload, Double) automatically:
+You can convert text params to other types (Int, Long, Fload, Double) automatically
+by using ``param[Int]("x")``, ``params[Int]("x")`` etc. To convert text params to more types,
+override `convertText <https://github.com/ngocdaothanh/xitrum/blob/master/src/main/scala/xitrum/scope/request/ParamAccess.scala>`_.
 
-* ``tparam[Int]("x")``: returns ``Int``, throws exception if x does not exist
-* ``tparams[Int]("x")``: returns ``List[Int]``, throws exception if x does not exist
-* ``tparamo[Int]("x")``: returns ``Option[Int]``
-* ``tparamso[Int]("x")``: returns ``Option[List[Int]]``
-
-For file upload:
-
-* ``uploadParam("x")``: returns ``FileUpload``, throws exception if x does not exist
-* ``uploadParams("x")``: returns ``List[FileUpload]``, throws exception if x does not exist
-* ``uploadParamo("x")``: returns ``Option[FileUpload]``
-* ``uploadParamso("x")``: returns ``Option[List[FileUpload]]``
+For file upload: ``param[FileUpload]("x")``, ``params[FileUpload]("x")`` etc.
 
 RequestVar
 ~~~~~~~~~~

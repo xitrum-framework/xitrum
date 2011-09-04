@@ -24,18 +24,18 @@ scalacOptions ++= Seq(
 libraryDependencies += "org.jboss.netty" % "netty" % "4.0.0.Alpha1-SNAPSHOT" from "http://cloud.github.com/downloads/ngocdaothanh/xitrum/netty-4.0.0.Alpha1-SNAPSHOT.jar"
 
 // Projects using Xitrum must provide a concrete implentation of SLF4J (Logback etc.)
-libraryDependencies += "org.slf4j" % "slf4j-api" % "1.6.1" % "provided"
+libraryDependencies += "org.slf4j" % "slf4j-api" % "1.6.2" % "provided"
 
 libraryDependencies += "tv.cntt" % "annovention" % "1.2"
 
 // For distributed cache and Comet
 // Infinispan is good but much heavier, and the logging is bad:
 // https://github.com/infinispan/infinispan/blob/master/core/src/main/java/org/infinispan/util/logging/LogFactory.java
-libraryDependencies += "com.hazelcast" % "hazelcast" % "1.9.3.1"
+libraryDependencies += "com.hazelcast" % "hazelcast" % "1.9.3.3"
 
 // http://www.hazelcast.com/documentation.jsp#Clients
 // Hazelcast may be configured in Xitrum as super client or native client
-libraryDependencies += "com.hazelcast" % "hazelcast-client" % "1.9.3.1"
+libraryDependencies += "com.hazelcast" % "hazelcast-client" % "1.9.3.3"
 
 // https://github.com/codahale/jerkson
 // lift-json does not generate correctly for:
@@ -50,12 +50,7 @@ unmanagedBase in Runtime <<= baseDirectory { base => base / "config" }
 // Publish ---------------------------------------------------------------------
 
 // https://github.com/harrah/xsbt/wiki/Cross-Build
-// Lastest version of 2.8.x is 2.8.1, of 2.9.x is 2.9.0-1
-// Temporarily commented out 2.8.1 because 2.8.1 is rarely used now
-//crossScalaVersions := Seq("2.8.1", "2.9.0-1")
-
-crossScalaVersions := Seq("2.9.0-1")
-
+//crossScalaVersions := Seq("2.9.0-1", "2.9.1")
 scalaVersion := "2.9.0-1"
 
 publishTo <<= (version) { version: String =>
