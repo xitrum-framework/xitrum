@@ -8,10 +8,8 @@ Please see the following links for the idea about postback:
 * http://en.wikipedia.org/wiki/Postback
 * http://nitrogenproject.com/doc/tutorial.html
 
-Xitrum supports Ajax form postback, with additional features:
-
-* `Anti-CSRF <http://guides.rubyonrails.org/security.html#cross-site-request-forgery-csrf>`_
-* :doc:`Validation </validation>`
+Xitrum's Ajax form postback is inspired by `Nitrogen <http://nitrogenproject.com/>`_,
+with similar :doc:`validation </validation>` feature.
 
 Layout
 ------

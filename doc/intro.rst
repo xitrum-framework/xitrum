@@ -42,16 +42,7 @@ Hazelcast also gives:
   | +-------------+ |
   +-----------------+
 
-What do you create web applications for? There are 2 main use cases:
-
-* To serve machines: you need to create RESTful APIs for smartphones, web services
-  for other web sites.
-* To serve human users: you need to create interactive web pages.
-
-As a web framework, Xitrum aims to support you to solve these use cases easily.
-
-Xitrum is inspired by `Nitrogen <http://nitrogenproject.com/>`_:
+Xitrum is open source:
 
 * Source code: https://github.com/ngocdaothanh/xitrum
-* Documentation: http://ngocdaothanh.github.com/xitrum
 * Google group: http://groups.google.com/group/xitrum-framework

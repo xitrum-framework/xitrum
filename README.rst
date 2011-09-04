@@ -1,5 +1,7 @@
 .. image:: http://www.bdoubliees.com/journalspirou/sfigures6/schtroumpfs/s3.jpg
 
+Full documentation: http://ngocdaothanh.github.com/xitrum
+
 Xitrum ("Smurf" in Vietnamese) is an async and clustered Scala web framework and
 web server on top of `Netty <http://www.jboss.org/netty>`_ and
 `Hazelcast <http://www.hazelcast.com/>`_:
@@ -39,16 +41,7 @@ Hazelcast also gives:
   | +-------------+ |
   +-----------------+
 
-What do you create web applications for? There are 2 main use cases:
-
-* To serve machines: you need to create RESTful APIs for smartphones, web services
-  for other web sites.
-* To serve human users: you need to create interactive web pages.
-
-As a web framework, Xitrum aims to support you to solve these use cases easily.
-
-Xitrum is inspired by `Nitrogen <http://nitrogenproject.com/>`_:
+Xitrum is open source:
 
 * Source code: https://github.com/ngocdaothanh/xitrum
-* Documentation: http://ngocdaothanh.github.com/xitrum
 * Google group: http://groups.google.com/group/xitrum-framework

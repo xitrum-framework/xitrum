@@ -3,7 +3,14 @@ Action and View
 
 .. image:: http://www.bdoubliees.com/journalspirou/sfigures6/schtroumpfs/s7.jpg
 
-There are 2 kinds of actions: :doc:`RESTful actions </restful>` and
+What do you create web applications for? There are 2 main use cases:
+
+* To serve machines: you need to create RESTful APIs for smartphones, web services
+  for other web sites.
+* To serve human users: you need to create interactive web pages.
+
+As a web framework, Xitrum aims to support you to solve these use cases easily.
+In Xitrum, there are 2 kinds of actions: :doc:`RESTful actions </restful>` and
 :doc:`postback actions </postback>`.
 
 Normally, you write view directly in its action.
