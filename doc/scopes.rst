@@ -118,6 +118,9 @@ Remember that there's no way for the server to directly delete a cookie on brows
 Instead, to delete immediately set max age to 0. To delete when the browser closes windows,
 set max age to -1.
 
+Note that `Internet Explorer does not support "max-age" <http://mrcoles.com/blog/cookies-max-age-vs-expires/>`_,
+but Netty detects and outputs either "max-age" or "expires" properly. Don't worry!
+
 Session
 -------
 
