@@ -25,7 +25,7 @@ trait ParamAccess {
   //----------------------------------------------------------------------------
 
   def param[T](key: String, coll: Params = null)(implicit e: T DefaultsTo String, m: Manifest[T]): T = {
-    if (m.toString == "org.jboss.netty.handler.codec.http.FileUpload") {
+    if (m.toString == classOf[FileUpload].getName) {
       fileUploadParams.get(key) match {
         case None         => throw new MissingParam(key)
         case Some(values) => values(0).asInstanceOf[T]
@@ -38,7 +38,7 @@ trait ParamAccess {
   }
 
   def paramo[T](key: String, coll: Params = null)(implicit e: T DefaultsTo String, m: Manifest[T]): Option[T] = {
-    if (m.toString == "org.jboss.netty.handler.codec.http.FileUpload") {
+    if (m.toString == classOf[FileUpload].getName) {
       fileUploadParams.get(key).map { values => values(0).asInstanceOf[T] }
     } else {
       val coll2  = if (coll == null) textParams else coll
@@ -49,7 +49,7 @@ trait ParamAccess {
   }
 
   def params[T](key: String, coll: Params = null)(implicit e: T DefaultsTo String, m: Manifest[T]): List[T] = {
-    if (m.toString == "org.jboss.netty.handler.codec.http.FileUpload") {
+    if (m.toString == classOf[FileUpload].getName) {
       fileUploadParams.get(key) match {
         case None         => throw new MissingParam(key)
         case Some(values) => values.asInstanceOf[List[T]]
@@ -62,7 +62,7 @@ trait ParamAccess {
   }
 
   def paramso[T](key: String, coll: Params = null)(implicit e: T DefaultsTo String, m: Manifest[T]): Option[List[T]] = {
-    if (m.toString == "org.jboss.netty.handler.codec.http.FileUpload") {
+    if (m.toString == classOf[FileUpload].getName) {
       fileUploadParams.get(key).asInstanceOf[Option[List[T]]]
     } else {
       val coll2   = if (coll == null) textParams else coll
