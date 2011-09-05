@@ -1,59 +1,15 @@
 package xitrum
 
-import java.io.{File, FileInputStream, InputStream}
-import java.util.Properties
+import java.io.File
 import java.nio.charset.Charset
 
 import com.hazelcast.client.HazelcastClient
 import com.hazelcast.core.{Hazelcast, HazelcastInstance}
 
 import xitrum.scope.session.SessionStore
+import xitrum.util.Loader
 
 object Config extends Logger {
-  def bytesFromInputStream(is: InputStream): Array[Byte] = {
-    val len   = is.available
-    val bytes = new Array[Byte](len)
-    var total = 0
-    while (total < len) {
-      val bytesRead = is.read(bytes, total, len - total)
-      total += bytesRead
-    }
-    is.close
-    bytes
-  }
-
-  /**
-   * @param path Relative to one of the elements in CLASSPATH, without leading "/"
-   */
-  def stringFromClasspath(path: String): String = {
-    val stream = getClass.getClassLoader.getResourceAsStream(path)
-    val bytes  = bytesFromInputStream(stream)
-    new String(bytes, "UTF-8")
-  }
-
-  /**
-   * @param path Relative to one of the elements in CLASSPATH, without leading "/"
-   */
-  def propertiesFromClasspath(path: String): Properties = {
-    // http://www.javaworld.com/javaworld/javaqa/2003-08/01-qa-0808-property.html?page=2
-    val stream = getClass.getClassLoader.getResourceAsStream(path)
-
-    val ret = new Properties
-    ret.load(stream)
-    stream.close
-    ret
-  }
-
-  def propertiesFromFile(path: String): Properties = {
-    val stream = new FileInputStream(path)
-    val ret = new Properties
-    ret.load(stream)
-    stream.close
-    ret
-  }
-
-  //----------------------------------------------------------------------------
-
   val isProductionMode = (System.getProperty("xitrum.mode") == "production")
 
   // See xitrum.properties
@@ -61,11 +17,11 @@ object Config extends Logger {
 
   val properties = {
     try {
-      propertiesFromClasspath("xitrum.properties")
+      Loader.propertiesFromClasspath("xitrum.properties")
     } catch {
       case _ =>
         try {
-          propertiesFromFile("config/xitrum.properties")
+          Loader.propertiesFromFile("config/xitrum.properties")
         } catch {
           case _ =>
             logger.error("Could not load xitrum.properties from CLASSPATH or from config/xitrum.properties")
@@ -107,7 +63,7 @@ object Config extends Logger {
       System.setProperty("hazelcast.config", config)
       Hazelcast.getDefaultInstance
     } else {
-      val props = propertiesFromClasspath("hazelcast_java_client.properties")
+      val props = Loader.propertiesFromClasspath("hazelcast_java_client.properties")
       val groupName     = props.getProperty("group_name")
       val groupPassword = props.getProperty("group_password")
       val addresses     = props.getProperty("addresses").split(",").map(_.trim)

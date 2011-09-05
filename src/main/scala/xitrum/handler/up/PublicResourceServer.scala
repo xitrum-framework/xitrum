@@ -11,7 +11,7 @@ import HttpVersion._
 import xitrum.Config
 import xitrum.handler.{BaseUri, NotModified}
 import xitrum.handler.updown.XSendfile
-import xitrum.util.{Gzip, Mime, PathSanitizer}
+import xitrum.util.{Gzip, Mime, Loader, PathSanitizer}
 
 @Sharable
 class PublicResourceServer extends SimpleChannelUpstreamHandler with BadClientSilencer {
@@ -97,7 +97,7 @@ class PublicResourceServer extends SimpleChannelUpstreamHandler with BadClientSi
         if (stream == null) {
           None
         } else {
-          val bytes = Config.bytesFromInputStream(stream)
+          val bytes = Loader.bytesFromInputStream(stream)
           Some(bytes)
         }
     }
