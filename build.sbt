@@ -31,11 +31,11 @@ libraryDependencies += "tv.cntt" % "annovention" % "1.2"
 // For distributed cache and Comet
 // Infinispan is good but much heavier, and the logging is bad:
 // https://github.com/infinispan/infinispan/blob/master/core/src/main/java/org/infinispan/util/logging/LogFactory.java
-libraryDependencies += "com.hazelcast" % "hazelcast" % "1.9.3.3"
+libraryDependencies += "com.hazelcast" % "hazelcast" % "1.9.4"
 
 // http://www.hazelcast.com/documentation.jsp#Clients
 // Hazelcast may be configured in Xitrum as super client or native client
-libraryDependencies += "com.hazelcast" % "hazelcast-client" % "1.9.3.3"
+libraryDependencies += "com.hazelcast" % "hazelcast-client" % "1.9.4"
 
 // https://github.com/codahale/jerkson
 // lift-json does not generate correctly for:
@@ -55,7 +55,7 @@ scalaVersion := "2.9.0-1"
 
 publishTo <<= (version) { version: String =>
   val nexus = "http://nexus.scala-tools.org/content/repositories/"
-  if (version.trim.endsWith("SNAPSHOT")) Some("snapshots" at nexus + "snapshots/") 
+  if (version.trim.endsWith("SNAPSHOT")) Some("snapshots" at nexus + "snapshots/")
   else                                   Some("releases"  at nexus + "releases/")
 }
 
