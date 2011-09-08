@@ -42,7 +42,7 @@ libraryDependencies += "com.hazelcast" % "hazelcast-client" % "1.9.4"
 //   List(Map("user" -> List("langtu"), "body" -> List("hello world")))
 resolvers += "repo.codahale.com" at "http://repo.codahale.com"
 
-libraryDependencies += "com.codahale" %% "jerkson" % "0.4.0"
+libraryDependencies += "com.codahale" % "jerkson_2.9.0-1" % "0.4.0"
 
 // For easier development (sbt console etc.)
 unmanagedBase in Runtime <<= baseDirectory { base => base / "config" }
@@ -51,7 +51,7 @@ unmanagedBase in Runtime <<= baseDirectory { base => base / "config" }
 
 // https://github.com/harrah/xsbt/wiki/Cross-Build
 //crossScalaVersions := Seq("2.9.0-1", "2.9.1")
-scalaVersion := "2.9.0-1"
+scalaVersion := "2.9.1"
 
 publishTo <<= (version) { version: String =>
   val nexus = "http://nexus.scala-tools.org/content/repositories/"

@@ -4,10 +4,13 @@ import scala.collection.mutable.{ListBuffer, Map => MMap}
 import xitrum.util.Loader
 
 object PoLoader {
-  private val cache = MMap[String, Option[Po]]()
+  private val cache = MMap[String, Po]()
 
-  /** Merges all po files of the language. */
-  def load(lang: String): Option[Po] = synchronized {
+  /**
+   * @return Merge of all po files of the language, or an empty Po when there's
+   * no po file.
+   */
+  def load(lang: String): Po = synchronized {
     if (cache.isDefinedAt(lang)) return cache(lang)
 
     val urlEnum = getClass.getClassLoader.getResources("i18n/" + lang + ".po")
@@ -22,11 +25,11 @@ object PoLoader {
     }
 
     val ret = if (buffer.isEmpty) {
-      None
+      new Po(Map())
     } else {
-      val mergedPo = buffer.reduce { (po1, po2) => po1.merge(po2) }
-      Some(mergedPo)
+      buffer.reduce { (po1, po2) => po1.merge(po2) }
     }
+
     cache(lang) = ret
     ret
   }
