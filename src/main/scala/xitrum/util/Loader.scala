@@ -4,16 +4,18 @@ import java.io.{FileInputStream, InputStream}
 import java.util.Properties
 
 object Loader {
+  private val BUFFER_SIZE = 1024
   def bytesFromInputStream(is: InputStream): Array[Byte] = {
-    val len   = is.available
-    val bytes = new Array[Byte](len)
-    var total = 0
-    while (total < len) {
-      val bytesRead = is.read(bytes, total, len - total)
-      total += bytesRead
+    var ret = Array[Byte]()
+
+    var buffer = new Array[Byte](BUFFER_SIZE)
+    while (is.available > 0) {  // "available" is not always the exact size
+      val bytesRead = is.read(buffer)
+      ret = ret ++ buffer.take(bytesRead)
     }
     is.close
-    bytes
+
+    ret
   }
 
   /**
