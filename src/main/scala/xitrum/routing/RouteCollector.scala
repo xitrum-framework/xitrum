@@ -1,35 +1,37 @@
 package xitrum.routing
 
-import java.lang.annotation.{Annotation => JAnnotation}
+import java.io.{ByteArrayInputStream, DataInputStream}
 import scala.collection.mutable.{ArrayBuffer, Map => MMap}
+
+import javassist.bytecode.ClassFile
+import javassist.bytecode.AnnotationsAttribute
+import javassist.bytecode.annotation.{Annotation, MemberValue, ArrayMemberValue, StringMemberValue, IntegerMemberValue}
 
 import org.jboss.netty.handler.codec.http.HttpMethod
 
-import com.impetus.annovention.{ClasspathDiscoverer, FilterImpl}
-import com.impetus.annovention.listener.ClassAnnotationDiscoveryListener
+import sclasner.{FileEntry, Scanner}
 
-import xitrum.Action
+import xitrum.{Action, Logger}
 import xitrum.annotation._
 
 /** Scan all classes to collect routes. */
-class RouteCollector extends ClassAnnotationDiscoveryListener {
-  type RouteMap = MMap[Class[Action], (HttpMethod, Array[Routes.Pattern], Int)]
+class RouteCollector extends Logger {
+  // Use String because HttpMethod is not serializable
+  type RouteMap = Map[Class[Action], (String, Array[Routes.Pattern], Int)]
 
-  private val firsts = MMap[Class[Action], (HttpMethod, Array[Routes.Pattern], Int)]()
-  private val lasts  = MMap[Class[Action], (HttpMethod, Array[Routes.Pattern], Int)]()
-  private val others = MMap[Class[Action], (HttpMethod, Array[Routes.Pattern], Int)]()
+  object RouteOrder extends Enumeration {
+    type RouteOrder = Value
+    val firsts, lasts, others = Value
+  }
 
-  def collect: (Array[Routes.Route], Map[Class[Action], Int])  = {
-    val ignoredPackages = FilterImpl.IGNORED_PACKAGES ++ Array("com.hazelcast", "com.codahale.jerkson", "org.slf4j", "ch.qos.logback")
-    val filter = new FilterImpl(ignoredPackages)
-
-    val discoverer = new ClasspathDiscoverer
-    discoverer.addAnnotationListener(this)
-    discoverer.setFilter(filter)
-    discoverer.discover(true, false, false, true, false)
+  def collect: (Array[Routes.Route], Map[Class[Action], Int]) = {
+    logger.info("Collect routes/load from routes.sclasner...")
 
     val routeBuffer = ArrayBuffer[Routes.Route]()
     val cacheBuffer = MMap[Class[Action], Int]()
+
+    val empty = Map[Class[Action], (String, Array[Routes.Pattern], Int)]()
+    val (firsts, lasts, others) = Scanner.foldLeft("routes.sclasner", (empty, empty, empty), discovered _)
 
     // Make PostbackAction the first route for quicker route matching
     routeBuffer.append((HttpMethod.POST, PostbackAction.POSTBACK_PREFIX + ":*", classOf[PostbackAction].asInstanceOf[Class[Action]]))
@@ -41,7 +43,7 @@ class RouteCollector extends ClassAnnotationDiscoveryListener {
 
       for ((actionClass, httpMethod_patterns_cacheSecs) <- sorted) {
         val (httpMethod, patterns, cacheSecs) = httpMethod_patterns_cacheSecs
-        for (p <- patterns) routeBuffer.append((httpMethod, p, actionClass))
+        for (p <- patterns) routeBuffer.append((new HttpMethod(httpMethod), p, actionClass))
         cacheBuffer(actionClass) = cacheSecs
       }
     }
@@ -49,114 +51,134 @@ class RouteCollector extends ClassAnnotationDiscoveryListener {
     (routeBuffer.toArray, cacheBuffer.toMap)
   }
 
-  def supportedAnnotations = Array(
-    classOf[GET].getName, classOf[GETs].getName,
-    classOf[POST].getName,
-    classOf[PUT].getName,
-    classOf[DELETE].getName,
-    classOf[CacheActionDay].getName, classOf[CacheActionHour].getName, classOf[CacheActionMinute].getName, classOf[CacheActionSecond].getName,
-    classOf[CachePageDay].getName,   classOf[CachePageDay].getName,    classOf[CachePageDay].getName,      classOf[CachePageDay].getName)
+  //----------------------------------------------------------------------------
 
-  def discovered(className: String, _annotationName: String) {
-    val klass = Class.forName(className).asInstanceOf[Class[Action]]
+  private def discovered(acc: (RouteMap, RouteMap, RouteMap), entry: FileEntry) = {
+    try {
+      if (entry.relPath.endsWith(".class")) {
+        val bais = new ByteArrayInputStream(entry.bytes)
+        val dis  = new DataInputStream(bais)
+        val cf   = new ClassFile(dis)
+        dis.close
 
-    val processed = firsts.contains(klass) || lasts.contains(klass) || others.contains(klass)
-    if (processed) return
+        val aa = cf.getAttribute(AnnotationsAttribute.visibleTag).asInstanceOf[AnnotationsAttribute]
+        if (aa == null) {
+          acc
+        } else {
+          val as = aa.getAnnotations
+          collectRoute(as) match {
+            case None => acc
 
-    // Annovention limitation: The annotations must be set on method, not class!
-    val annotations = klass.getAnnotations
-    collectRoute(annotations) match {
-      case None =>
-
-      case Some((routeMap, httpMethod, routePatterns)) =>
-        val cacheSecs = collectCache(annotations)
-        routeMap(klass) = (httpMethod, routePatterns, cacheSecs)
+            case Some((order, httpMethod, routePatterns)) =>
+              val (firsts, lasts, others) = acc
+              val klass                   = Class.forName(cf.getName).asInstanceOf[Class[Action]]
+              val cacheSecs               = collectCache(as)
+              val route                   = (klass -> (httpMethod, routePatterns, cacheSecs))
+              order match {
+                case RouteOrder.firsts => (firsts + route, lasts, others)
+                case RouteOrder.lasts  => (firsts, lasts + route, others)
+                case RouteOrder.others => (firsts, lasts, others + route)
+              }
+          }
+        }
+      } else {
+        acc
+      }
+    } catch {
+      case e =>
+        logger.debug("Could not scan route for " + entry.relPath + " in " + entry.container, e)
+        acc
     }
   }
+
+  private def collectRoute(as: Array[Annotation]): Option[(RouteOrder.RouteOrder, String, Array[Routes.Pattern])] = {
+    var order                           = RouteOrder.others
+    var method:   String            = null
+    var patterns: Array[Routes.Pattern] = null
+
+    as.foreach { a =>
+      val tn = a.getTypeName
+
+      if (tn == classOf[First].getName) {
+        order = RouteOrder.firsts
+      } else if (tn == classOf[Last].getName) {
+        order = RouteOrder.lasts
+      }
+
+      else if (tn == classOf[GET].getName) {
+        method   = "GET"
+        patterns = getMethodPattern(a)
+      } else if (tn == classOf[GETs].getName) {
+        method   = "GET"
+        patterns = getMethodPatterns(a)
+      }
+
+      else if (tn == classOf[POST].getName) {
+        method   = "POST"
+        patterns = getMethodPattern(a)
+      } else if (tn == classOf[POSTs].getName) {
+        method   = "POST"
+        patterns = getMethodPatterns(a)
+      }
+
+      else if (tn == classOf[PUT].getName) {
+        method   = "PUT"
+        patterns = getMethodPattern(a)
+      } else if (tn == classOf[PUTs].getName) {
+        method   = "PUT"
+        patterns = getMethodPatterns(a)
+      }
+
+      else if (tn == classOf[DELETE].getName) {
+        method   = "DELETE"
+        patterns = getMethodPattern(a)
+      } else if (tn == classOf[DELETEs].getName) {
+        method   = "DELETE"
+        patterns = getMethodPatterns(a)
+      }
+    }
+
+    if (method != null && patterns != null) Some(order, method, patterns) else None
+  }
+
+  private def getMethodPattern(a: Annotation): Array[String] =
+    Array(a.getMemberValue("value").asInstanceOf[StringMemberValue].getValue)
+
+  private def getMethodPatterns(a: Annotation): Array[String] =
+    a.getMemberValue("value").asInstanceOf[ArrayMemberValue].getValue.map(_.asInstanceOf[StringMemberValue].getValue)
 
   //----------------------------------------------------------------------------
 
-  private def collectRoute(annotations: Array[JAnnotation]): Option[(RouteMap, HttpMethod, Array[Routes.Pattern])] = {
-    var map:      RouteMap              = others
-    var method:   HttpMethod            = null
-    var patterns: Array[Routes.Pattern] = null
+  private def collectCache(as: Array[Annotation]): Int = {
+    as.foreach { a =>
+      val tn = a.getTypeName
 
-    annotations.foreach { a =>
-      if (a.isInstanceOf[First]) {
-        map = firsts
-      } else if (a.isInstanceOf[Last]) {
-        map = lasts
-      }
+      val secs =
+           if (tn == classOf[CacheActionDay].getName)
+        - getCacheSecs(a) * 24 * 60 * 60
+      else if (tn == classOf[CacheActionHour].getName)
+        - getCacheSecs(a)      * 60 * 60
+      else if (tn == classOf[CacheActionMinute].getName)
+        - getCacheSecs(a)           * 60
+      else if (tn == classOf[CacheActionSecond].getName)
+        - getCacheSecs(a)
 
-      else if (a.isInstanceOf[GET]) {
-        method   = HttpMethod.GET
-        patterns = Array(a.asInstanceOf[GET].value)
-      } else if (a.isInstanceOf[GETs]) {
-        method   = HttpMethod.GET
-        patterns = a.asInstanceOf[GETs].value
-      }
+      else if (tn == classOf[CachePageDay].getName)
+        getCacheSecs(a) * 24 * 60 * 60
+      else if (tn == classOf[CachePageHour].getName)
+        getCacheSecs(a)      * 60 * 60
+      else if (tn == classOf[CachePageMinute].getName)
+        getCacheSecs(a)           * 60
+      else if (tn == classOf[CachePageSecond].getName)
+        getCacheSecs(a)
+      else
+        0
 
-      else if (a.isInstanceOf[POST]) {
-        method   = HttpMethod.POST
-        patterns = Array(a.asInstanceOf[POST].value)
-      } else if (a.isInstanceOf[POSTs]) {
-        method   = HttpMethod.POST
-        patterns = a.asInstanceOf[POSTs].value
-      }
-
-      else if (a.isInstanceOf[PUT]) {
-        method   = HttpMethod.PUT
-        patterns = Array(a.asInstanceOf[PUT].value)
-      } else if (a.isInstanceOf[PUTs]) {
-        method   = HttpMethod.PUT
-        patterns = a.asInstanceOf[PUTs].value
-      }
-
-      else if (a.isInstanceOf[DELETE]) {
-        method   = HttpMethod.DELETE
-        patterns = Array(a.asInstanceOf[DELETE].value)
-      } else if (a.isInstanceOf[DELETEs]) {
-        method   = HttpMethod.DELETE
-        patterns = a.asInstanceOf[DELETEs].value
-      }
+      if (secs != 0) return secs
     }
-
-    if (method != null && patterns != null) Some(map, method, patterns) else None
+    0
   }
 
-  private def collectCache(annotations: Array[JAnnotation]): Int = {
-    var ret = 0
-    for (a <- annotations) {
-      if (a.isInstanceOf[CacheActionDay]) {
-        val a2 = a.asInstanceOf[CacheActionDay]
-        ret    = - a2.value * 24 * 60 * 60
-      } else if (a.isInstanceOf[CacheActionHour]) {
-        val a2 = a.asInstanceOf[CacheActionHour]
-        ret    = - a2.value      * 60 * 60
-      } else if (a.isInstanceOf[CacheActionMinute]) {
-        val a2 = a.asInstanceOf[CacheActionMinute]
-        ret    = - a2.value           * 60
-      } else if (a.isInstanceOf[CacheActionSecond]) {
-        val a2 = a.asInstanceOf[CacheActionSecond]
-        ret    = - a2.value
-      }
-
-      else if (a.isInstanceOf[CachePageDay]) {
-        val a2 = a.asInstanceOf[CachePageDay]
-        ret    = a2.value * 24 * 60 * 60
-      } else if (a.isInstanceOf[CachePageHour]) {
-        val a2 = a.asInstanceOf[CachePageHour]
-        ret    = a2.value      * 60 * 60
-      } else if (a.isInstanceOf[CachePageMinute]) {
-        val a2 = a.asInstanceOf[CachePageMinute]
-        ret    = a2.value           * 60
-      } else if (a.isInstanceOf[CachePageSecond]) {
-        val a2 = a.asInstanceOf[CachePageSecond]
-        ret    = a2.value
-      }
-
-      if (ret != 0) return ret
-    }
-    ret
-  }
+  private def getCacheSecs(a: Annotation) =
+    a.getMemberValue("value").asInstanceOf[IntegerMemberValue].getValue
 }

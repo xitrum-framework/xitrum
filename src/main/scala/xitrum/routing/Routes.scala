@@ -20,7 +20,6 @@ object Routes extends Logger {
     // Avoid loading twice in some servlet containers
     if (compiledRoutes != null) return
 
-    logger.info("Collect routes...")
     val (routes, cacheSecs0) = (new RouteCollector).collect
     cacheSecs = cacheSecs0
 

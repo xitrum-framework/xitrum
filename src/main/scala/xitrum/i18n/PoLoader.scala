@@ -1,6 +1,7 @@
 package xitrum.i18n
 
 import scala.collection.mutable.{ListBuffer, Map => MMap}
+import scaposer.{Po, Parser}
 import xitrum.util.Loader
 
 object PoLoader {
@@ -20,14 +21,14 @@ object PoLoader {
       val is     = url.openStream
       val bytes  = Loader.bytesFromInputStream(is)
       val string = new String(bytes, "UTF-8")
-      val poo    = PoParser.parsePo(string)
+      val poo    = Parser.parsePo(string)
       if (poo.isDefined) buffer.append(poo.get)
     }
 
     val ret = if (buffer.isEmpty) {
       new Po(Map())
     } else {
-      buffer.reduce { (po1, po2) => po1.merge(po2) }
+      buffer.reduce { (po1, po2) => po1 ++ po2 }
     }
 
     cache(lang) = ret

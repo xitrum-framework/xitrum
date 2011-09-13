@@ -17,16 +17,21 @@ scalacOptions ++= Seq(
 
 // Use this when Netty 4 is released
 //resolvers += "JBoss Repository" at "https://repository.jboss.org/nexus/content/groups/public/"
-//"org.jboss.netty" % "netty" % "3.2.4.Final"
+//"org.jboss.netty" % "netty" % "4"
 
 // Remove this when Netty 4 is released
-//libraryDependencies += "org.jboss.netty" % "netty" % "4.0.0.Alpha1-SNAPSHOT" from "https://hudson.jboss.org/jenkins/view/Netty/job/netty/lastSuccessfulBuild/artifact/target/netty-4.0.0.Alpha1-SNAPSHOT.jar"
+// The nightly build site of JBoss is not always online
+// GitHub is more stable
 libraryDependencies += "org.jboss.netty" % "netty" % "4.0.0.Alpha1-SNAPSHOT" from "http://cloud.github.com/downloads/ngocdaothanh/xitrum/netty-4.0.0.Alpha1-SNAPSHOT.jar"
 
 // Projects using Xitrum must provide a concrete implentation of SLF4J (Logback etc.)
 libraryDependencies += "org.slf4j" % "slf4j-api" % "1.6.2" % "provided"
 
-libraryDependencies += "tv.cntt" % "annovention" % "1.2"
+libraryDependencies += "tv.cntt" %% "sclasner" % "1.0"
+
+libraryDependencies += "tv.cntt" %% "scaposer" % "1.0"
+
+libraryDependencies += "javassist" % "javassist" % "3.12.1.GA"
 
 // For distributed cache and Comet
 // Infinispan is good but much heavier, and the logging is bad:
