@@ -34,6 +34,15 @@ On web application startup, Xitrum will scan all those annotations, build the
 routing table and print it out for you (so that you know what APIs your
 application has). You don't need a seperate config file like routes.rb of Rails.
 
+Route cache
+-----------
+
+For better startup speed, routes are cached to file ``routes.sclasner``.
+While developing, routes in .class files in the ``target`` directory are not
+cached. If you change library dependencies that contain routes, you may need to
+delete ``routes.sclasner``. This file should not be committed to your project
+source code repository.
+
 Route order with @First and @Last
 ---------------------------------
 

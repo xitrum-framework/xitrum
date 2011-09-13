@@ -114,3 +114,9 @@ In the console, you will see all the routes and request information:
 On startup, all routes will be collected and output to log. It is very
 convenient for you to have a list of routes if you want to write documentation
 for 3rd parties about the RESTful APIs in your web application.
+
+For better startup speed, routes are cached to file ``routes.sclasner``.
+While developing, routes in .class files in the ``target`` directory are not
+cached. If you change library dependencies that contain routes, you may need to
+delete ``routes.sclasner``. This file should not be committed to your project
+source code repository.
