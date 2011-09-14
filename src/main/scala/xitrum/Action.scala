@@ -6,14 +6,15 @@ import HttpHeaders.Names._
 import HttpResponseStatus._
 
 import xitrum.action._
+import xitrum.i18n.I18n
+import xitrum.handler.up.Dispatcher
+import xitrum.routing.{PostbackAction, Routes}
 import xitrum.scope.request.ExtEnv
 import xitrum.scope.session.SecureBase64
-import xitrum.routing.{PostbackAction, Routes}
 import xitrum.validation.{Validator, ValidatorInjector}
 import xitrum.view.Renderer
-import xitrum.handler.up.Dispatcher
 
-trait Action extends ExtEnv with Logger with Net with Filter with BasicAuthentication with Renderer {
+trait Action extends ExtEnv with Logger with Net with Filter with BasicAuthentication with Renderer with I18n {
   def execute {}
   def postback {}
 

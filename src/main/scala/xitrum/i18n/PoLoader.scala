@@ -11,10 +11,10 @@ object PoLoader {
    * @return Merge of all po files of the language, or an empty Po when there's
    * no po file.
    */
-  def load(lang: String): Po = synchronized {
-    if (cache.isDefinedAt(lang)) return cache(lang)
+  def load(language: String): Po = synchronized {
+    if (cache.isDefinedAt(language)) return cache(language)
 
-    val urlEnum = getClass.getClassLoader.getResources("i18n/" + lang + ".po")
+    val urlEnum = getClass.getClassLoader.getResources("i18n/" + language + ".po")
     val buffer  = ListBuffer[Po]()
     while (urlEnum.hasMoreElements) {
       val url    = urlEnum.nextElement
@@ -31,7 +31,7 @@ object PoLoader {
       buffer.reduce { (po1, po2) => po1 ++ po2 }
     }
 
-    cache(lang) = ret
+    cache(language) = ret
     ret
   }
 }
