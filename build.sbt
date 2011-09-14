@@ -47,7 +47,7 @@ libraryDependencies += "com.hazelcast" % "hazelcast-client" % "1.9.4"
 //   List(Map("user" -> List("langtu"), "body" -> List("hello world")))
 resolvers += "repo.codahale.com" at "http://repo.codahale.com"
 
-libraryDependencies += "com.codahale" % "jerkson_2.9.0-1" % "0.4.0"
+libraryDependencies += "com.codahale" %% "jerkson" % "0.4.1"
 
 // For easier development (sbt console etc.)
 unmanagedBase in Runtime <<= baseDirectory { base => base / "config" }
