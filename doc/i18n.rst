@@ -24,6 +24,8 @@ Extracting messages to po files
 
   xgettext -ktrc:1c,2 -ktrnc:1c,2,3 -ktr -kmarktr -ktrn:1,2 -o po/keys.pot src/*.scala
 
+  xgettext -kt -ktc:1c,2 -ktn:1,2 -ktcn:1c,2,3 -o i18n.pot --from-code=UTF-8 $(find src/main/scala -name "*.scala")
+
 Where to save po files
 ----------------------
 

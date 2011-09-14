@@ -77,6 +77,7 @@ trait JS {
         <script type="text/javascript" src={urlForResource("xitrum/jquery-1.6.2.min.js")}></script>
         <script type="text/javascript" src={urlForResource("xitrum/jquery.validate-1.8.1/jquery.validate.min.js")}></script>
         <script type="text/javascript" src={urlForResource("xitrum/jquery.validate-1.8.1/additional-methods.min.js")}></script>
+        {if (getLanguage != "en") <script type="text/javascript" src={urlForResource("xitrum/jquery.validate-1.8.1/localization/messages_"+ getLanguage +".js")}></script>}
         <script type="text/javascript" src={urlForResource("xitrum/xitrum.js")}></script>
         <script type="text/javascript" src={urlFor[JSRoutesAction]}></script>
         {jsForView}
@@ -86,6 +87,7 @@ trait JS {
         <script type="text/javascript" src={urlForResource("xitrum/jquery-1.6.2.js")}></script>
         <script type="text/javascript" src={urlForResource("xitrum/jquery.validate-1.8.1/jquery.validate.js")}></script>
         <script type="text/javascript" src={urlForResource("xitrum/jquery.validate-1.8.1/additional-methods.js")}></script>
+        {if (getLanguage != "en") <script type="text/javascript" src={urlForResource("xitrum/jquery.validate-1.8.1/localization/messages_"+ getLanguage +".js")}></script>}
         <script type="text/javascript" src={urlForResource("xitrum/xitrum.js")}></script>
         <script type="text/javascript" src={urlFor[JSRoutesAction]}></script>
         {jsForView}
