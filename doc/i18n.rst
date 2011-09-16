@@ -8,10 +8,30 @@ GNU Gettext is used. Unlike many other methods, Gettext supports plural forms.
 Write internationalized messages in source code
 -----------------------------------------------
 
+``xitrum.Action`` extends ``xitrum.I18n``, which has these methods:
+
 ::
 
   t("Message")
   tc("Context", "Message")
+
+In other places like models, you need to pass the action to them and call
+``t`` and ``tc`` on it:
+
+::
+
+  // In an action
+  val errorMessageo = MyModel.validate(this, data)
+
+  // In the model
+  import xitrum.I18n
+  object MyModel {
+    // Returns None on success or Some(error message) on failure
+    def validate(i18n: I18n, data: Data): Option[String] = {
+      if (...) return Some(i18n.t("An error message))
+      ...
+    }
+  }
 
 Extract messages to pot files
 -----------------------------

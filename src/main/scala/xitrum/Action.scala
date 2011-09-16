@@ -6,7 +6,6 @@ import HttpHeaders.Names._
 import HttpResponseStatus._
 
 import xitrum.action._
-import xitrum.i18n.I18n
 import xitrum.handler.up.Dispatcher
 import xitrum.routing.{PostbackAction, Routes}
 import xitrum.scope.request.ExtEnv

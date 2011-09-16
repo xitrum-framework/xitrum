@@ -1,7 +1,7 @@
-package xitrum.i18n
+package xitrum
 
 import org.jboss.netty.handler.codec.http.HttpHeaders.Names
-import xitrum.Action
+import xitrum.i18n.PoLoader
 
 trait I18n {
   this: Action =>

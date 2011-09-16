@@ -17,8 +17,9 @@ class Xgettext(val global: Global) extends Plugin {
   val description = "This Scala compiler plugin extracts and creates gettext.pot file"
   val components = List[PluginComponent](MapComponent, ReduceComponent)
 
-  val OUTPUT_FILE           = "i18n.pot"
-  val HEADER                = """msgid ""
+  val XITRUM_I18N = "xitrum.I18n"
+  val OUTPUT_FILE = "i18n.pot"
+  val HEADER      = """msgid ""
 msgstr ""
 "Project-Id-Version: \n"
 "POT-Creation-Date: \n"
@@ -30,6 +31,7 @@ msgstr ""
 "Content-Transfer-Encoding: 8bit\n"
 
 """
+
   val outputFile            = new File(OUTPUT_FILE)
   val emptyOutputFileExists = outputFile.exists && outputFile.isFile && outputFile.length == 0
   //                                        msgctxt         msgid   msgid_plural           source  line
@@ -51,7 +53,7 @@ msgstr ""
       def apply(unit: CompilationUnit) {
         if (emptyOutputFileExists) {
           for (tree @ Apply(Select(x1, x2), list) <- unit.body) {
-            if (x1.tpe <:< definitions.getClass("xitrum.Action").tpe) {
+            if (x1.tpe <:< definitions.getClass(XITRUM_I18N).tpe) {
               val methodName = x2.toString
               val pos        = tree.pos  // scala.tools.nsc.util.OffsetPosition
               val line       = (relPath(pos.source.path), pos.line)
