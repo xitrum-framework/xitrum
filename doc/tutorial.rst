@@ -26,41 +26,12 @@ You can do like this:
 
 You should add the line ``export PATH=$PATH:~/opt/sbt`` to ``~/.profile``.
 
-Add Xitrum plugin to SBT
-------------------------
-
-Create file ``~/.sbt/plugins/build.sbt``, then add to it (there must be a blank
-line between the 2 lines below):
-
-::
-
-  resolvers += "Scala Tools Snapshot Repository" at "http://nexus.scala-tools.org/content/repositories/snapshots"
-
-  libraryDependencies += "tv.cntt" %% "xitrum-plugin" % "1.1-SNAPSHOT"
-
-You can do like this:
-
-::
-
-  $ mkdir -p ~/.sbt/plugins
-  $ echo 'resolvers += "Scala Tools Snapshot Repository" at "http://nexus.scala-tools.org/content/repositories/snapshots"' >> ~/.sbt/plugins/build.sbt
-  $ echo -e "\n" >> ~/.sbt/plugins/build.sbt
-  $ echo 'libraryDependencies += "tv.cntt" %% "xitrum-plugin" % "1.1-SNAPSHOT"' >> ~/.sbt/plugins/build.sbt
-
-Now you have 2 commands: ``sbt xitrum-new`` and :doc:`sbt xitrum-package </deploy>`.
-
 Create a new Xitrum project
 ---------------------------
 
-Use ``sbt xitrum-new`` to create a new Xitrum project:
+Install `Giter8 <https://github.com/n8han/giter8>`_.
 
-::
-
-  $ cd /tmp
-  $ mkdir my_project
-  $ cd my_project
-  $ sbt xitrum-new
-
+Run ``g8 ngocdaothanh/xitrum`` to create a new Xitrum project.
 A new project skeleton will be created:
 
 ::
@@ -96,8 +67,9 @@ A new project skeleton will be created:
 Run
 ---
 
-Run ``sbt run``. This command will download dependencies, compile the project,
-and run the class ``my_project.Boot``, which starts the web server.
+Change to the newly created project and run ``sbt run``. This command will
+download dependencies, compile the project and run the class
+``my_project.Boot``, which starts the web server.
 
 Open http://localhost:8000/ in your browser.
 
