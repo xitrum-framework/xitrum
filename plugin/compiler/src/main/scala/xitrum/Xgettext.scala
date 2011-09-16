@@ -32,7 +32,8 @@ msgstr ""
 """
   val outputFile            = new File(OUTPUT_FILE)
   val emptyOutputFileExists = outputFile.exists && outputFile.isFile && outputFile.length == 0
-  val msgidToLines          = new MHashMap[String, MSet[(String, Int)]] with MultiMap[String, (String, Int)]
+  //                                        msgctxt         msgid   msgid_plural           source  line
+  val msgToLines            = new MHashMap[(Option[String], String, Option[String]), MSet[(String, Int)]] with MultiMap[(Option[String], String, Option[String]), (String, Int)]
   var reduced               = false
 
   private object MapComponent extends PluginComponent {
@@ -40,7 +41,7 @@ msgstr ""
 
     val runsAfter = List("refchecks")
 
-    val phaseName = "scaposer-xgettext-map"
+    val phaseName = "xitrum-xgettext-map"
 
     def newPhase(_prev: Phase) = new MapPhase(_prev)
 
@@ -50,11 +51,28 @@ msgstr ""
       def apply(unit: CompilationUnit) {
         if (emptyOutputFileExists) {
           for (tree @ Apply(Select(x1, x2), list) <- unit.body) {
-            if ((x1.tpe <:< definitions.getClass("xitrum.Action").tpe) && x2.toString == "t") {
-              val pos = tree.pos  // scala.tools.nsc.util.OffsetPosition
+            if (x1.tpe <:< definitions.getClass("xitrum.Action").tpe) {
+              val methodName = x2.toString
+              val pos        = tree.pos  // scala.tools.nsc.util.OffsetPosition
+              val line       = (relPath(pos.source.path), pos.line)
 
-              val msgid = list(0)
-              msgidToLines.addBinding(msgid.toString, (relPath(pos.source.path), pos.line))
+              if (methodName == "t") {
+                val msgid = list(0).toString
+                msgToLines.addBinding((None, msgid, None), line)
+              } else if (methodName == "tc") {
+                val msgctxt = list(0).toString
+                val msgid   = list(1).toString
+                msgToLines.addBinding((Some(msgctxt), msgid, None), line)
+              } else if (methodName == "tn") {
+                val msgid       = list(0).toString
+                val msgidPlural = list(1).toString
+                msgToLines.addBinding((None, msgid, Some(msgidPlural)), line)
+              } else if (methodName == "tcn") {
+                val msgctxt     = list(0).toString
+                val msgid       = list(1).toString
+                val msgidPlural = list(2).toString
+                msgToLines.addBinding((Some(msgctxt), msgid, Some(msgidPlural)), line)
+              }
             }
           }
         }
@@ -75,7 +93,7 @@ msgstr ""
 
     val runsAfter = List("jvm")
 
-    val phaseName = "scaposer-xgettext-reduce"
+    val phaseName = "xitrum-xgettext-reduce"
 
     def newPhase(_prev: Phase) = new ReducePhase(_prev)
 
@@ -84,19 +102,21 @@ msgstr ""
 
       def apply(unit: CompilationUnit) {
         if (emptyOutputFileExists && !reduced) {
-          val builder = new StringBuilder
-          for ((msgid, lines) <- msgidToLines) {
+          val builder = new StringBuilder(HEADER)
+
+          for (((msgctxto, msgid, msgidPluralo), lines) <- msgToLines) {
             for ((srcPath, lineNo) <- lines) {
               builder.append("#: " + srcPath + ":" + lineNo + "\n")
             }
+
+            if (msgctxto.isDefined) builder.append("msgctxt " + msgctxto.get + "\n")
             builder.append("msgid " + msgid + "\n")
+            if (msgidPluralo.isDefined) builder.append("msgid_plural " + msgidPluralo.get + "\n")
             builder.append("msgstr \"\"" + "\n\n")
           }
-          val body = builder.toString
 
           val out = new BufferedWriter(new FileWriter(outputFile))
-          out.write(HEADER)
-          out.write(body)
+          out.write(builder.toString)
           out.close
 
           reduced = true

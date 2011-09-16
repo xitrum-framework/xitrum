@@ -3,42 +3,63 @@ I18n
 
 .. image:: http://www.bdoubliees.com/journalspirou/sfigures6/schtroumpfs/s16.jpg
 
-TODO
+GNU Gettext is used. Unlike many other methods, Gettext supports plural forms.
 
-GNU Gettext is used.
-
-Mo rong them tu cai nay la tot nhat:
-http://code.google.com/p/gettext-commons/wiki/Tutorial
-
-Writing internationalized messages in source code
--------------------------------------------------
+Write internationalized messages in source code
+-----------------------------------------------
 
 ::
 
-  t("Hello World")
+  t("Message")
+  tc("Context", "Message")
 
-Extracting messages to po files
--------------------------------
+Extract messages to pot files
+-----------------------------
+
+Create an empty i18n.pot file in your project's root directory, then recompile
+the whole project. i18n.pot will be filled with Gettext messages in the source
+code.
 
 ::
 
-  xgettext -ktrc:1c,2 -ktrnc:1c,2,3 -ktr -kmarktr -ktrn:1,2 -o po/keys.pot src/*.scala
+  $ sbt clean
+  $ touch i18n.pot
+  $ sbt compile
 
-  xgettext -kt -ktc:1c,2 -ktn:1,2 -ktcn:1c,2,3 -o i18n.pot --from-code=UTF-8 $(find src/main/scala -name "*.scala")
+To do this magic, `Scala compiler plugin technique <http://www.scala-lang.org/node/140>`_
+has been used.
+
+One caveat of this method is that only Gettext messages in Scala source code
+files are extracted. If you have Java files, you may want to extract manually
+using ``xgettext`` command line:
+
+::
+
+  $ xgettext -kt -ktc:1c,2 -ktn:1,2 -ktcn:1c,2,3 -o i18n_java.pot --from-code=UTF-8 $(find src/main/java -name "*.java")
+
+Then you manually merge i18n_java.pot to i18n.pot.
 
 Where to save po files
 ----------------------
 
-In your SBT project:
+i18n.pot is the template file. You need to copy it to <language>.po files and
+translate.
 
 ::
 
   src
     main
+      scala
+        ...
       resources
         i18n
           en.po
           ja.po
+          vi.po
+          ...
+
+Use a tool like `gedit <http://projects.gnome.org/gedit/>`_ to edit po files.
+You can use it to merge newly created pot file to existing po files.
 
 You can package po files in multiple JAR files. Xitrum will automatically merge
 them when running.
@@ -59,22 +80,33 @@ Validation messages
 -------------------
 
 jQuery Validation plugin provides `i18n error messages <https://github.com/jzaefferer/jquery-validation/tree/master/localization>`_.
-Xitrum automatically include the message file corresponding to the current locale.
+Xitrum automatically include the message file corresponding to the current language.
 
 Plural forms
 ------------
 
-http://www.gnu.org/software/gettext/manual/html_node/Plural-forms.html#Plural-forms
-http://www.gnu.org/software/gettext/manual/html_node/Translating-plural-forms.html#Translating-plural-forms
+::
 
-nplurals=1; plural=0
-nplurals=2; plural=n != 1
-nplurals=2; plural=n>1
-nplurals=3; plural=n%10==1 && n%100!=11 ? 0 : n != 0 ? 1 : 2
-nplurals=3; plural=n==1 ? 0 : n==2 ? 1 : 2
-nplurals=3; plural=n==1 ? 0 : (n==0 || (n%100 > 0 && n%100 < 20)) ? 1 : 2
-nplurals=3; plural=n%10==1 && n%100!=11 ? 0 : n%10>=2 && (n%100<10 || n%100>=20) ? 1 : 2
-nplurals=3; plural=n%10==1 && n%100!=11 ? 0 : n%10>=2 && n%10<=4 && (n%100<10 || n%100>=20) ? 1 : 2
-nplurals=3; plural=(n==1) ? 0 : (n>=2 && n<=4) ? 1 : 2
-nplurals=3; plural=n==1 ? 0 : n%10>=2 && n%10<=4 && (n%100<10 || n%100>=20) ? 1 : 2
-nplurals=4; plural=n%100==1 ? 0 : n%100==2 ? 1 : n%100==3 || n%100==4 ? 2 : 3
+  tn("Message", "Plural form", n)
+  tc("Context", "Message", "Plural form", n)
+
+Xitrum can only work correctly with Plural-Forms exactly listed at:
+
+* `What are plural forms <http://www.gnu.org/software/gettext/manual/html_node/Plural-forms.html#Plural-forms>`_
+* `Translating plural forms <http://www.gnu.org/software/gettext/manual/html_node/Translating-plural-forms.html#Translating-plural-forms>`_
+
+Your plural forms must be exactly one of the following:
+
+::
+
+  nplurals=1; plural=0
+  nplurals=2; plural=n != 1
+  nplurals=2; plural=n>1
+  nplurals=3; plural=n%10==1 && n%100!=11 ? 0 : n != 0 ? 1 : 2
+  nplurals=3; plural=n==1 ? 0 : n==2 ? 1 : 2
+  nplurals=3; plural=n==1 ? 0 : (n==0 || (n%100 > 0 && n%100 < 20)) ? 1 : 2
+  nplurals=3; plural=n%10==1 && n%100!=11 ? 0 : n%10>=2 && (n%100<10 || n%100>=20) ? 1 : 2
+  nplurals=3; plural=n%10==1 && n%100!=11 ? 0 : n%10>=2 && n%10<=4 && (n%100<10 || n%100>=20) ? 1 : 2
+  nplurals=3; plural=(n==1) ? 0 : (n>=2 && n<=4) ? 1 : 2
+  nplurals=3; plural=n==1 ? 0 : n%10>=2 && n%10<=4 && (n%100<10 || n%100>=20) ? 1 : 2
+  nplurals=4; plural=n%100==1 ? 0 : n%100==2 ? 1 : n%100==3 || n%100==4 ? 2 : 3

@@ -6,26 +6,18 @@ import Keys._
 object XitrumPlugin extends Plugin {
   // Must be lazy to avoid null error
   // xitrumPackageNeedsPackageBin must be after xitrumPackageTask
-  override lazy val settings = Seq(xitrumXgettextTask, xitrumPackageTask, xitrumPackageNeedsPackageBin)
+  override lazy val settings = Seq(xitrumPackageTask, xitrumPackageNeedsPackageBin)
 
   //----------------------------------------------------------------------------
 
-  val xitrumXgettextKey = TaskKey[Unit]("xitrum-xgettext", "Creates i18n.pot")
-
-  lazy val xitrumXgettextTask = xitrumXgettextKey <<= baseDirectory map { baseDir =>
-    println("i18n.pot created")
-  }
-
-  // ---------------------------------------------------------------------------
-
-  val xitrumPackageKey = TaskKey[Unit]("xitrum-package", "Packages to target/deploy directory, ready for deploying to production server")
+  val xitrumPackageKey = TaskKey[Unit]("xitrum-package", "Packages to target/xitrum directory, ready for deploying to production server")
 
   // Must be lazy to avoid null error
   lazy val xitrumPackageTask = xitrumPackageKey <<=
       (externalDependencyClasspath in Runtime, baseDirectory, target, scalaVersion) map {
       (libs,                                   baseDir,       target, scalaVersion) =>
 
-    val packageDir = target / "deploy"
+    val packageDir = target / "xitrum"
     packageDir.mkdirs
 
     // Copy bin directory
@@ -59,7 +51,7 @@ object XitrumPlugin extends Plugin {
     val jarDir = new File(target, "scala-" + scalaVersion.replace('-', '.'))
     (jarDir * "*.jar").get.foreach { file => IO.copyFile(file, libDir / file.name) }
 
-    println("Please see target/deploy directory")
+    println("Please see target/xitrum directory")
   }
 
   val xitrumPackageNeedsPackageBin = xitrumPackageKey <<= xitrumPackageKey.dependsOn(packageBin in Compile)

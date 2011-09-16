@@ -19,6 +19,7 @@ web server on top of `Netty <http://www.jboss.org/netty>`_ and
 * Sessions can be stored in cookies or clustered Hazelcast.
 * `jQuery Validation <http://docs.jquery.com/Plugins/validation>`_ is integrated
   for browser side and server side validation.
+* i18n using Gettext.
 
 Hazelcast also gives:
 
