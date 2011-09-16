@@ -1,0 +1,3 @@
+This plugin adds tasks:
+* xitrum-xgettext: see doc of Xitrum, section about i18n
+* xitrum-package: see doc of Xitrum, section about deployment

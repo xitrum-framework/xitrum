@@ -1,0 +1,7 @@
+This is a compiler plugin for Scala that acts like xgettext to extract string
+resources to Gettext po file.
+
+See http://www.scala-lang.org/node/140
+
+This compiler plugin checks if there's an empty i18n.pot file in the current
+working directory, then it will fill that file with string resources.
