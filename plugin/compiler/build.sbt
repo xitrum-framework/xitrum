@@ -18,7 +18,7 @@ libraryDependencies += "org.scala-lang" % "scala-compiler" % "2.9.1"
 //
 // SBT 0.10.0 uses Scala 2.8.1
 //crossScalaVersions := Seq("2.9.0-1", "2.9.1")
-crossScalaVersions := Seq("2.9.1")
+scalaVersion := "2.9.1"
 
 publishTo <<= (version) { version: String =>
   val nexus = "http://nexus.scala-tools.org/content/repositories/"

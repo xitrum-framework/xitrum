@@ -1,5 +1,6 @@
 package xitrum
 
+import java.io.{BufferedWriter, File, FileWriter}
 import scala.collection.mutable.{HashMap => MHashMap, MultiMap, Set => MSet}
 
 import scala.tools.nsc
@@ -16,8 +17,23 @@ class Xgettext(val global: Global) extends Plugin {
   val description = "This Scala compiler plugin extracts and creates gettext.pot file"
   val components = List[PluginComponent](MapComponent, ReduceComponent)
 
-  val msgidToLines = new MHashMap[String, MSet[(String, Int)]] with MultiMap[String, (String, Int)]
-  var reduced = false
+  val OUTPUT_FILE           = "i18n.pot"
+  val HEADER                = """msgid ""
+msgstr ""
+"Project-Id-Version: \n"
+"POT-Creation-Date: \n"
+"PO-Revision-Date: \n"
+"Last-Translator: Your Name <email@example.com>\n"
+"Language-Team: \n"
+"MIME-Version: 1.0\n"
+"Content-Type: text/plain; charset=UTF-8\n"
+"Content-Transfer-Encoding: 8bit\n"
+
+"""
+  val outputFile            = new File(OUTPUT_FILE)
+  val emptyOutputFileExists = outputFile.exists && outputFile.isFile && outputFile.length == 0
+  val msgidToLines          = new MHashMap[String, MSet[(String, Int)]] with MultiMap[String, (String, Int)]
+  var reduced               = false
 
   private object MapComponent extends PluginComponent {
     val global: Xgettext.this.global.type = Xgettext.this.global
@@ -32,12 +48,14 @@ class Xgettext(val global: Global) extends Plugin {
       override def name = phaseName
 
       def apply(unit: CompilationUnit) {
-        for (tree @ Apply(Select(x1, x2), list) <- unit.body) {
-          if ((x1.tpe <:< definitions.getClass("xitrum.Action").tpe) && x2.toString == "t") {
-            val pos = tree.pos  // scala.tools.nsc.util.OffsetPosition
+        if (emptyOutputFileExists) {
+          for (tree @ Apply(Select(x1, x2), list) <- unit.body) {
+            if ((x1.tpe <:< definitions.getClass("xitrum.Action").tpe) && x2.toString == "t") {
+              val pos = tree.pos  // scala.tools.nsc.util.OffsetPosition
 
-            val msgid = list(0)
-            msgidToLines.addBinding(msgid.toString, (relPath(pos.source.path), pos.line))
+              val msgid = list(0)
+              msgidToLines.addBinding(msgid.toString, (relPath(pos.source.path), pos.line))
+            }
           }
         }
       }
@@ -46,7 +64,7 @@ class Xgettext(val global: Global) extends Plugin {
         val curDir   = System.getProperty("user.dir")
         val relPath  = absPath.substring(curDir.length)
         val unixPath = relPath.replace("\\", "/")  // Windows uses '\' to separate
-        ".." + unixPath  // po file will be put in src/main/resources/i18n directory
+        "../../../.." + unixPath  // po files should be put in src/main/resources/i18n directory
       }
     }
   }
@@ -65,15 +83,22 @@ class Xgettext(val global: Global) extends Plugin {
       override def name = phaseName
 
       def apply(unit: CompilationUnit) {
-        if (!reduced) {
+        if (emptyOutputFileExists && !reduced) {
+          val builder = new StringBuilder
           for ((msgid, lines) <- msgidToLines) {
             for ((srcPath, lineNo) <- lines) {
-              println("#: " + srcPath + ":" + lineNo)
+              builder.append("#: " + srcPath + ":" + lineNo + "\n")
             }
-            println("msgid: " + msgid)
-            println("msgstr: \"\"")
-            println
+            builder.append("msgid " + msgid + "\n")
+            builder.append("msgstr \"\"" + "\n\n")
           }
+          val body = builder.toString
+
+          val out = new BufferedWriter(new FileWriter(outputFile))
+          out.write(HEADER)
+          out.write(body)
+          out.close
+
           reduced = true
         }
       }
