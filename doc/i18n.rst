@@ -37,8 +37,7 @@ Extract messages to pot files
 -----------------------------
 
 Create an empty i18n.pot file in your project's root directory, then recompile
-the whole project. i18n.pot will be filled with Gettext messages in the source
-code.
+the whole project.
 
 ::
 
@@ -46,6 +45,12 @@ code.
   $ touch i18n.pot
   $ sbt compile
 
+``sbt clean`` is to delete all .class files, forcing SBT to recompile the whole
+project. Because after ``sbt clean``, SBT will try to redownload all dependencies,
+you can do a little faster with the command ``find target -name *.class -delete``,
+which deletes all .class files in the ``target`` directory.
+
+After the recompilation, i18n.pot will be filled with Gettext messages in the source code.
 To do this magic, `Scala compiler plugin technique <http://www.scala-lang.org/node/140>`_
 has been used.
 
