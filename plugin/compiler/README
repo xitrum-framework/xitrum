@@ -1,5 +1,5 @@
 This is a compiler plugin for Scala that acts like xgettext to extract string
-resources to Gettext po file.
+resources to gettext po file.
 
 See http://www.scala-lang.org/node/140
 

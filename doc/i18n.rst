@@ -3,7 +3,7 @@ I18n
 
 .. image:: http://www.bdoubliees.com/journalspirou/sfigures6/schtroumpfs/s16.jpg
 
-GNU Gettext is used. Unlike many other methods, Gettext supports plural forms.
+GNU gettext is used. Unlike many other methods, gettext supports plural forms.
 
 Write internationalized messages in source code
 -----------------------------------------------
@@ -51,11 +51,11 @@ project. Because after ``sbt clean``, SBT will try to redownload all dependencie
 you can do a little faster with the command ``find target -name *.class -delete``,
 which deletes all .class files in the ``target`` directory.
 
-After the recompilation, i18n.pot will be filled with Gettext messages in the source code.
-To do this magic, `Scala compiler plugin technique <http://www.scala-lang.org/node/140>`_
+After the recompilation, i18n.pot will be filled with gettext messages extracted
+from the source code. To do this magic, `Scala compiler plugin technique <http://www.scala-lang.org/node/140>`_
 has been used.
 
-One caveat of this method is that only Gettext messages in Scala source code
+One caveat of this method is that only gettext messages in Scala source code
 files are extracted. If you have Java files, you may want to extract manually
 using ``xgettext`` command line:
 
@@ -114,7 +114,7 @@ Plural forms
 ::
 
   tn("Message", "Plural form", n)
-  tc("Context", "Message", "Plural form", n)
+  tcn("Context", "Message", "Plural form", n)
 
 Xitrum can only work correctly with Plural-Forms exactly listed at:
 
