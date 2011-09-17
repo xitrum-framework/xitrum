@@ -4,7 +4,7 @@ organization := "tv.cntt"
 
 name := "xitrum-plugin"
 
-version := "1.1-SNAPSHOT"
+version := "1.2-SNAPSHOT"
 
 // Publish ---------------------------------------------------------------------
 
@@ -17,7 +17,7 @@ crossScalaVersions := Seq("2.8.1")
 
 publishTo <<= (version) { version: String =>
   val nexus = "http://nexus.scala-tools.org/content/repositories/"
-  if (version.trim.endsWith("SNAPSHOT")) Some("snapshots" at nexus + "snapshots/") 
+  if (version.trim.endsWith("SNAPSHOT")) Some("snapshots" at nexus + "snapshots/")
   else                                   Some("releases"  at nexus + "releases/")
 }
 

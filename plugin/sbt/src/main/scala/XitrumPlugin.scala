@@ -14,10 +14,10 @@ object XitrumPlugin extends Plugin {
 
   // Must be lazy to avoid null error
   lazy val xitrumPackageTask = xitrumPackageKey <<=
-      (externalDependencyClasspath in Runtime, baseDirectory, target, scalaVersion) map {
-      (libs,                                   baseDir,       target, scalaVersion) =>
+      (externalDependencyClasspath in Runtime, baseDirectory, target,    crossTarget) map {
+      (libs,                                   baseDir,       targetDir, jarOutputDir) =>
 
-    val packageDir = target / "xitrum"
+    val packageDir = targetDir / "xitrum"
     packageDir.mkdirs
 
     // Copy bin directory
@@ -48,8 +48,7 @@ object XitrumPlugin extends Plugin {
     }
 
     // Copy .jar files are created after running "sbt package"
-    val jarDir = new File(target, "scala-" + scalaVersion.replace('-', '.'))
-    (jarDir * "*.jar").get.foreach { file => IO.copyFile(file, libDir / file.name) }
+    (jarOutputDir * "*.jar").get.foreach { file => IO.copyFile(file, libDir / file.name) }
 
     println("Please see target/xitrum directory")
   }
