@@ -158,7 +158,7 @@ trait AjaxUpload {
 }
 
 @GET("/xitrum/ajax_uploads/:encryptedTempFilePath")
-class AjaxUploadTempFileServer extends Action {
+class AjaxUploadTempFileServerAction extends Action {
   override def execute {
     val encryptedTempFilePath = param("encryptedTempFilePath")
     val tempFilePath          = SecureBase64.decrypt(encryptedTempFilePath).toString

@@ -1,6 +1,6 @@
 package xitrum.routing
 
-import java.io.{ByteArrayInputStream, DataInputStream}
+import java.io.{ByteArrayInputStream, DataInputStream, File}
 import scala.collection.mutable.{ArrayBuffer, Map => MMap}
 
 import javassist.bytecode.ClassFile
@@ -31,7 +31,29 @@ class RouteCollector extends Logger {
     val cacheBuffer = MMap[Class[Action], Int]()
 
     val empty = Map[Class[Action], (String, Array[Routes.Pattern], Int)]()
-    val (firsts, lasts, others) = Scanner.foldLeft("routes.sclasner", (empty, empty, empty), discovered _)
+    val (firsts, lasts, others) = try {
+      Scanner.foldLeft("routes.sclasner", (empty, empty, empty), discovered _)
+    } catch {
+      case e =>
+        // Maybe routes.sclasner could not be loaded because dependencies have changed.
+        // Try deleting routes.sclasner and scan again.
+        val f = new File("routes.sclasner")
+        if (f.exists) {
+          f.delete
+          try {
+        	Scanner.foldLeft("routes.sclasner", (empty, empty, empty), discovered _)
+          } catch {
+            case e2 =>
+	          logger.error("Could not collect routes", e)
+	          System.exit(-1)
+	          throw e
+          }
+        } else {
+          logger.error("Could not collect routes", e)
+          System.exit(-1)
+          throw e
+        }
+    }
 
     // Make PostbackAction the first route for quicker route matching
     routeBuffer.append((HttpMethod.POST, PostbackAction.POSTBACK_PREFIX + ":*", classOf[PostbackAction].asInstanceOf[Class[Action]]))

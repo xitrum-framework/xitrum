@@ -55,7 +55,6 @@ class ChannelPipelineFactory extends CPF {
 
       // Up
       new PublicFileServer,
-      new PublicResourceServer,
       new Request2Env,
       new UriParser,
       new BodyParser,
