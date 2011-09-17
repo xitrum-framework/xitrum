@@ -1,10 +1,11 @@
-package xitrum.handler
+package xitrum.util
 
 import java.text.SimpleDateFormat
 import java.util.{Locale, TimeZone}
 
 object NotModified {
   val TTL_IN_MINUTES = 10
+  val SECS_IN_A_YEAR = 60 * 60 * 24 * 365
 
   // SimpleDateFormat is locale dependent
   // Avoid the case when Xitrum is run on for example Japanese platform
@@ -13,6 +14,10 @@ object NotModified {
     ret.setTimeZone(TimeZone.getTimeZone("GMT"))
     ret
   }
+
+  // See PublicResourceServerAction, JSRoutesAction
+  val serverStartupTimestamp = System.currentTimeMillis
+  val serverStartupTimestampRfc2822 = formatRfc2822(serverStartupTimestamp)
 
   def formatRfc2822(timestamp: Long) = rfc2822.format(timestamp)
 }

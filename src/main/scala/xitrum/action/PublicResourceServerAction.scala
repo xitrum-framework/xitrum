@@ -1,30 +1,39 @@
 package xitrum.action
 
-import org.jboss.netty.handler.codec.http.HttpHeaders
+import org.jboss.netty.handler.codec.http.{HttpHeaders, HttpResponseStatus}
 import HttpHeaders.Names._
 import HttpHeaders.Values._
+import HttpResponseStatus._
 
 import xitrum.Action
 import xitrum.annotation.{First, GET}
-import xitrum.util.{Mime, Loader, PathSanitizer}
+import xitrum.util.{Mime, Loader, NotModified, PathSanitizer}
 
 @First
 @GET("/resources/public/:*")
 class PublicResourceServerAction extends Action {
   override def execute {
+    // See below
+    if (request.getHeader(IF_MODIFIED_SINCE) == NotModified.serverStartupTimestampRfc2822) {
+      response.setStatus(NOT_MODIFIED)
+      respond
+      return
+    }
+
     val path = "public/" + param("*")
     loadResource(path) match {
       case None => render404Page
 
       case Some(bytes) =>
-        val mimeo = Mime.get(path)
-        if (mimeo.isDefined) response.setHeader(CONTENT_TYPE, mimeo.get)
+        response.setHeader(LAST_MODIFIED, NotModified.serverStartupTimestampRfc2822)
 
         // Tell the browser to cache for a long time
         // This is OK when there's a cluster of web servers behind a load balancer
         // because the URL created by urlForResource is in the form: resource?web-server-startup-timestamp
-        val secsIn1Year = 60 * 60 * 24 * 365
-        response.setHeader(CACHE_CONTROL, MAX_AGE + "=" + secsIn1Year)
+        response.setHeader(CACHE_CONTROL, MAX_AGE + "=" + NotModified.SECS_IN_A_YEAR)
+
+        val mimeo = Mime.get(path)
+        if (mimeo.isDefined) response.setHeader(CONTENT_TYPE, mimeo.get)
 
         renderBinary(bytes)
     }

@@ -5,6 +5,7 @@ import scala.xml.Unparsed
 import xitrum.{Action, Config}
 import xitrum.comet.CometGetAction
 import xitrum.routing.Routes
+import xitrum.util.NotModified
 
 trait JS {
   this: Action =>
@@ -79,7 +80,7 @@ trait JS {
         <script type="text/javascript" src={urlForResource("xitrum/jquery.validate-1.8.1/additional-methods.min.js")}></script>
         {if (getLanguage != "en") <script type="text/javascript" src={urlForResource("xitrum/jquery.validate-1.8.1/localization/messages_"+ getLanguage +".js")}></script>}
         <script type="text/javascript" src={urlForResource("xitrum/xitrum.js")}></script>
-        <script type="text/javascript" src={urlFor[JSRoutesAction]}></script>
+        <script type="text/javascript" src={urlFor[JSRoutesAction] + "?" + NotModified.serverStartupTimestamp}></script>
         {jsForView}
       </xml:group>
     else
@@ -89,7 +90,7 @@ trait JS {
         <script type="text/javascript" src={urlForResource("xitrum/jquery.validate-1.8.1/additional-methods.js")}></script>
         {if (getLanguage != "en") <script type="text/javascript" src={urlForResource("xitrum/jquery.validate-1.8.1/localization/messages_"+ getLanguage +".js")}></script>}
         <script type="text/javascript" src={urlForResource("xitrum/xitrum.js")}></script>
-        <script type="text/javascript" src={urlFor[JSRoutesAction]}></script>
+        <script type="text/javascript" src={urlFor[JSRoutesAction] + "?" + NotModified.serverStartupTimestamp}></script>
         {jsForView}
       </xml:group>
   }

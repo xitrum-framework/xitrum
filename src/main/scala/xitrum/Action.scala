@@ -10,6 +10,7 @@ import xitrum.handler.up.Dispatcher
 import xitrum.routing.{PostbackAction, Routes}
 import xitrum.scope.request.ExtEnv
 import xitrum.scope.session.SecureBase64
+import xitrum.util.NotModified
 import xitrum.validation.{Validator, ValidatorInjector}
 import xitrum.view.Renderer
 
@@ -111,7 +112,7 @@ trait Action extends ExtEnv with Logger with Net with Filter with BasicAuthentic
 
   def urlForPublic(path: String) = Config.baseUri + "/public/" + path
 
-  def urlForResource(path: String) = Config.baseUri + "/resources/public/" + path
+  def urlForResource(path: String) = Config.baseUri + "/resources/public/" + path + "?" + NotModified.serverStartupTimestamp
 
   //----------------------------------------------------------------------------
 
