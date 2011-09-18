@@ -16,7 +16,7 @@ import xitrum.{Config, Logger}
 import xitrum.handler.SmallFileCache
 
 object XSendfile extends Logger {
-  val CHUNK_SIZE = 8192
+  val CHUNK_SIZE = 8 * 1024
 
   private val XSENDFILE_HEADER = "X-Sendfile"
 
@@ -71,13 +71,13 @@ object XSendfile extends Logger {
       case SmallFileCache.Miss(bytes, gzipped, lastModified, mimeo) =>
         sendFileFromCache(false, bytes, gzipped, lastModified, mimeo)
 
-      case SmallFileCache.FileTooBig(raf, fileLength, lastModified, mimeo) =>
+      case SmallFileCache.FileTooBig(raf, lastModified, mimeo) =>
         if (response.getStatus == OK && request.getHeader(IF_MODIFIED_SINCE) == lastModified) {
           response.setStatus(NOT_MODIFIED)
           ctx.sendDownstream(e)
         } else {
           // Write the initial line and the header
-          HttpHeaders.setContentLength(response, fileLength)
+          HttpHeaders.setContentLength(response, raf.length)
           response.setHeader(LAST_MODIFIED, lastModified)
           if (mimeo.isDefined) response.setHeader(CONTENT_TYPE, mimeo.get)
           ctx.sendDownstream(e)
@@ -85,7 +85,7 @@ object XSendfile extends Logger {
           // Write the content
           if (ctx.getPipeline.get(classOf[SslHandler]) != null) {
             // Cannot use zero-copy with HTTPS
-            val future = Channels.write(ctx.getChannel, new ChunkedFile(raf, 0, fileLength, CHUNK_SIZE))
+            val future = Channels.write(ctx.getChannel, new ChunkedFile(raf, 0, raf.length, CHUNK_SIZE))
             future.addListener(new ChannelFutureListener {
               def operationComplete(f: ChannelFuture) {
                 raf.close
@@ -98,7 +98,7 @@ object XSendfile extends Logger {
             }
           } else {
             // No encryption - use zero-copy
-            val region = new DefaultFileRegion(raf.getChannel, 0, fileLength)
+            val region = new DefaultFileRegion(raf.getChannel, 0, raf.length)
 
             // This will cause ClosedChannelException:
             // Channels.write(ctx, e.getFuture, region)
