@@ -67,8 +67,7 @@ class PublicFileServer extends SimpleChannelUpstreamHandler with BadClientSilenc
     // pathInfo starts with "/"
 
     PathSanitizer.sanitize(pathInfo) match {
-      case None =>
-        None
+      case None => None
 
       case Some(path) =>
         // Convert to absolute path

@@ -25,7 +25,7 @@ trait Renderer extends JS with Flash with I18n {
   this: Action =>
 
   private def writeHeaderOnFirstChunk {
-    if (!responded) {
+    if (!isResponded) {
       response.removeHeader(CONTENT_LENGTH)
       response.setHeader(TRANSFER_ENCODING, CHUNKED)
       respond
@@ -56,7 +56,7 @@ trait Renderer extends JS with Flash with I18n {
     if (!channel.isOpen) return ret
 
 
-    if (!responded) {
+    if (!isResponded) {
       // Set content type automatically
       if (contentType != null)
         response.setHeader(CONTENT_TYPE, contentType)

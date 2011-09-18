@@ -1,6 +1,9 @@
 package xitrum
 
+import java.io.File
 import scala.xml.Elem
+import scala.util.Random
+
 import org.jboss.netty.handler.codec.http._
 import HttpHeaders.Names._
 import HttpResponseStatus._
@@ -25,12 +28,12 @@ trait Action extends ExtEnv with Logger with Net with Filter with BasicAuthentic
 
   //----------------------------------------------------------------------------
 
-  private var _responded = false
+  private var responded = false
 
-  def responded = _responded
+  def isResponded = responded
 
   def respond = synchronized {
-    if (_responded) {
+    if (responded) {
       // Print the stack trace so that application developers know where to fix
       try {
         throw new Exception
@@ -38,7 +41,7 @@ trait Action extends ExtEnv with Logger with Net with Filter with BasicAuthentic
         case e => logger.warn("Double response", e)
       }
     } else {
-      _responded = true
+      responded = true
       if (channel.isOpen) {
         prepareWhenRespond
         handlerEnv.response = response
@@ -110,7 +113,19 @@ trait Action extends ExtEnv with Logger with Net with Filter with BasicAuthentic
 
   //----------------------------------------------------------------------------
 
-  def urlForPublic(path: String) = Config.baseUri + "/public/" + path
+  def urlForPublic(path: String) = {
+    val timestamp = {
+      val file = new File(System.getProperty("user.dir") + "/static/public/" + path)
+      if (file.exists) {
+        file.lastModified
+      } else {
+        logger.warn("File not found: " + file.getAbsolutePath)
+        Random.nextLong
+      }
+    }
+
+    Config.baseUri + "/public/" + path + "?" + timestamp
+  }
 
   def urlForResource(path: String) = Config.baseUri + "/resources/public/" + path + "?" + NotModified.serverStartupTimestamp
 

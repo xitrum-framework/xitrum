@@ -117,7 +117,7 @@ object Dispatcher extends Logger {
 
     def extraInfo = {
       if (cacheSecs == 0) {
-        if (action.responded) "" else " (async)"
+        if (action.isResponded) "" else " (async)"
       } else {
         if (hit) {
           if (cacheSecs < 0) " (action cache hit)"  else " (page cache hit)"
