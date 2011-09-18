@@ -13,29 +13,22 @@ import xitrum.util.{Mime, Loader, NotModified, PathSanitizer}
 @GET("/resources/public/:*")
 class PublicResourceServerAction extends Action {
   override def execute {
-    // See below
-    if (request.getHeader(IF_MODIFIED_SINCE) == NotModified.serverStartupTimestampRfc2822) {
-      response.setStatus(NOT_MODIFIED)
-      respond
-      return
-    }
+    if (!NotModified.respondIfNotModifidedSinceServerStart(this)) {
+      val path = "public/" + param("*")
+      loadResource(path) match {
+        case None => render404Page
 
-    val path = "public/" + param("*")
-    loadResource(path) match {
-      case None => render404Page
+        case Some(bytes) =>
+          // Tell the browser to cache for a long time
+          // This is OK when there's a cluster of web servers behind a load balancer
+          // because the URL created by urlForResource is in the form: resource?web-server-startup-timestamp
+          NotModified.setMaxAgeUntilNextServerRestart(response)
 
-      case Some(bytes) =>
-        response.setHeader(LAST_MODIFIED, NotModified.serverStartupTimestampRfc2822)
+          val mimeo = Mime.get(path)
+          if (mimeo.isDefined) response.setHeader(CONTENT_TYPE, mimeo.get)
 
-        // Tell the browser to cache for a long time
-        // This is OK when there's a cluster of web servers behind a load balancer
-        // because the URL created by urlForResource is in the form: resource?web-server-startup-timestamp
-        response.setHeader(CACHE_CONTROL, MAX_AGE + "=" + NotModified.SECS_IN_A_YEAR)
-
-        val mimeo = Mime.get(path)
-        if (mimeo.isDefined) response.setHeader(CONTENT_TYPE, mimeo.get)
-
-        renderBinary(bytes)
+          renderBinary(bytes)
+      }
     }
   }
 

@@ -38,21 +38,23 @@ object XSendfile extends Logger {
   }
 
   def sendFile(ctx: ChannelHandlerContext, e: ChannelEvent, request: HttpRequest, response: HttpResponse, abs: String) {
+    val sendFileFromCache = (hit: Boolean, bytes: Array[Byte], gzipped: Boolean, lastModified: String, mimeo: Option[String]) => {
+    if (response.getStatus == OK && request.getHeader(IF_MODIFIED_SINCE) == lastModified) {
+      response.setStatus(NOT_MODIFIED)
+    } else {
+      if (hit) logger.debug("Serve " + abs + " from cache")
+
+      response.setContent(ChannelBuffers.wrappedBuffer(bytes))
+      HttpHeaders.setContentLength(response, bytes.length)
+      if (gzipped) response.setHeader(CONTENT_ENCODING, "gzip")
+      response.setHeader(LAST_MODIFIED, lastModified)
+      if (mimeo.isDefined) response.setHeader(CONTENT_TYPE, mimeo.get)
+    }
+    ctx.sendDownstream(e)
+  }
+
     // Try to serve from cache
     SmallFileCache.get(abs) match {
-      case SmallFileCache.Hit(bytes, gzipped, lastModified, mimeo) =>
-        if (response.getStatus == OK && request.getHeader(IF_MODIFIED_SINCE) == lastModified) {
-          response.setStatus(NOT_MODIFIED)
-        } else {
-          logger.debug("Serve " + abs + " from cache")
-          response.setContent(ChannelBuffers.wrappedBuffer(bytes))
-          HttpHeaders.setContentLength(response, bytes.length)
-          if (gzipped) response.setHeader(CONTENT_ENCODING, "gzip")
-          response.setHeader(LAST_MODIFIED, lastModified)
-          if (mimeo.isDefined) response.setHeader(CONTENT_TYPE, mimeo.get)
-        }
-        ctx.sendDownstream(e)
-
       case SmallFileCache.FileNotFound =>
         response.setStatus(NOT_FOUND)
         if (abs.startsWith(abs404)) {
@@ -62,6 +64,12 @@ object XSendfile extends Logger {
         } else {
           sendFile(ctx, e, request, response, abs404)
         }
+
+      case SmallFileCache.Hit(bytes, gzipped, lastModified, mimeo) =>
+        sendFileFromCache(true, bytes, gzipped, lastModified, mimeo)
+
+      case SmallFileCache.Miss(bytes, gzipped, lastModified, mimeo) =>
+        sendFileFromCache(false, bytes, gzipped, lastModified, mimeo)
 
       case SmallFileCache.FileTooBig(raf, fileLength, lastModified, mimeo) =>
         if (response.getStatus == OK && request.getHeader(IF_MODIFIED_SINCE) == lastModified) {

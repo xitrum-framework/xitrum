@@ -25,7 +25,7 @@ class RouteCollector extends Logger {
   }
 
   def collect: (Array[Routes.Route], Map[Class[Action], Int]) = {
-    logger.info("Collect routes/load from routes.sclasner...")
+    logger.info("Collect routes/load routes.sclasner...")
 
     val routeBuffer = ArrayBuffer[Routes.Route]()
     val cacheBuffer = MMap[Class[Action], Int]()
@@ -39,14 +39,15 @@ class RouteCollector extends Logger {
         // Try deleting routes.sclasner and scan again.
         val f = new File("routes.sclasner")
         if (f.exists) {
+          logger.warn("Error loading routes.sclasner. Delete the file and recollect routes...")
           f.delete
           try {
-        	Scanner.foldLeft("routes.sclasner", (empty, empty, empty), discovered _)
+            Scanner.foldLeft("routes.sclasner", (empty, empty, empty), discovered _)
           } catch {
             case e2 =>
-	          logger.error("Could not collect routes", e)
-	          System.exit(-1)
-	          throw e
+              logger.error("Could not collect routes", e2)
+              System.exit(-1)
+              throw e2
           }
         } else {
           logger.error("Could not collect routes", e)

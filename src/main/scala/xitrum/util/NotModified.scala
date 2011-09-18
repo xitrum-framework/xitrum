@@ -3,9 +3,15 @@ package xitrum.util
 import java.text.SimpleDateFormat
 import java.util.{Locale, TimeZone}
 
+import org.jboss.netty.handler.codec.http.{HttpHeaders, HttpResponse, HttpResponseStatus}
+import HttpHeaders.Names._
+import HttpHeaders.Values._
+import HttpResponseStatus._
+
+import xitrum.Action
+
 object NotModified {
-  val TTL_IN_MINUTES = 10
-  val SECS_IN_A_YEAR = 60 * 60 * 24 * 365
+  private val SECS_IN_A_YEAR = 60 * 60 * 24 * 365
 
   // SimpleDateFormat is locale dependent
   // Avoid the case when Xitrum is run on for example Japanese platform
@@ -16,8 +22,24 @@ object NotModified {
   }
 
   // See PublicResourceServerAction, JSRoutesAction
-  val serverStartupTimestamp = System.currentTimeMillis
+  val serverStartupTimestamp        = System.currentTimeMillis
   val serverStartupTimestampRfc2822 = formatRfc2822(serverStartupTimestamp)
 
   def formatRfc2822(timestamp: Long) = rfc2822.format(timestamp)
+
+  /** @return true if NOT_MODIFIED response has been sent */
+  def respondIfNotModifidedSinceServerStart(action: Action) = {
+    if (action.request.getHeader(IF_MODIFIED_SINCE) == serverStartupTimestampRfc2822) {
+      action.response.setStatus(NOT_MODIFIED)
+      action.respond
+      true
+    } else {
+      false
+    }
+  }
+
+  def setMaxAgeUntilNextServerRestart(response: HttpResponse) {
+    response.setHeader(LAST_MODIFIED, serverStartupTimestampRfc2822)
+    response.setHeader(CACHE_CONTROL, MAX_AGE + "=" + SECS_IN_A_YEAR)
+  }
 }

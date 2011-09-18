@@ -55,7 +55,6 @@ trait Renderer extends JS with Flash with I18n {
 
     if (!channel.isOpen) return ret
 
-
     if (!isResponded) {
       // Set content type automatically
       if (contentType != null)

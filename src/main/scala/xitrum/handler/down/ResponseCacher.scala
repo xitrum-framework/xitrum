@@ -12,7 +12,7 @@ import xitrum.{Cache, Config, Logger}
 import xitrum.Action
 import xitrum.routing.Routes
 import xitrum.scope.request.RequestEnv
-import xitrum.handler.{HandlerEnv, SmallFileCache}
+import xitrum.handler.HandlerEnv
 import xitrum.util.{Gzip, Mime}
 
 object ResponseCacher extends Logger {
