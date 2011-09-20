@@ -102,6 +102,8 @@ object Config extends Logger {
    */
   var cacheSmallStaticFileMaxSizeInKB = 512
 
+  var cacheSmallStaticFileTTLInMunutes = 10
+
   /**
    * Xitrum checks the response Content-Type header to test if the response is
    * textual (text/html, text/plain etc.). If the response is big and gzip or

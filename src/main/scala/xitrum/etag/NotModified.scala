@@ -1,4 +1,4 @@
-package xitrum.util
+package xitrum.etag
 
 import java.text.SimpleDateFormat
 import java.util.{Locale, TimeZone}
@@ -27,19 +27,11 @@ object NotModified {
 
   def formatRfc2822(timestamp: Long) = rfc2822.format(timestamp)
 
-  /** @return true if NOT_MODIFIED response has been sent */
-  def respondIfNotModifidedSinceServerStart(action: Action) = {
-    if (action.request.getHeader(IF_MODIFIED_SINCE) == serverStartupTimestampRfc2822) {
-      action.response.setStatus(NOT_MODIFIED)
-      action.respond
-      true
-    } else {
-      false
-    }
+  def setMaxAge(response: HttpResponse, maxAge: Int) {
+    if (!response.containsHeader(CACHE_CONTROL)) response.setHeader(CACHE_CONTROL, MAX_AGE + "=" + maxAge)
   }
 
   def setMaxAgeUntilNextServerRestart(response: HttpResponse) {
-    response.setHeader(LAST_MODIFIED, serverStartupTimestampRfc2822)
-    response.setHeader(CACHE_CONTROL, MAX_AGE + "=" + SECS_IN_A_YEAR)
+    setMaxAge(response, SECS_IN_A_YEAR)
   }
 }

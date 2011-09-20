@@ -1,4 +1,4 @@
-package xitrum.scope.session
+package xitrum.util
 
 import java.nio.charset.Charset
 import org.jboss.netty.buffer.ChannelBuffers

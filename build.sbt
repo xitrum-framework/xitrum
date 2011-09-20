@@ -36,7 +36,7 @@ libraryDependencies += "javassist" % "javassist" % "3.12.1.GA"
 // For distributed cache and Comet
 // Infinispan is good but much heavier, and the logging is bad:
 // https://github.com/infinispan/infinispan/blob/master/core/src/main/java/org/infinispan/util/logging/LogFactory.java
-libraryDependencies += "com.hazelcast" % "hazelcast" % "1.9.4"
+libraryDependencies += "com.hazelcast" % "hazelcast" % "1.9.4.2"
 
 // http://www.hazelcast.com/documentation.jsp#Clients
 // Hazelcast may be configured in Xitrum as super client or native client

@@ -7,52 +7,33 @@ import HttpResponseStatus._
 
 import xitrum.Action
 import xitrum.annotation.{First, GET}
-import xitrum.util.{Mime, Loader, NotModified, PathSanitizer}
+import xitrum.etag.{Etag, NotModified}
+import xitrum.util.{Mime, PathSanitizer}
 
 @First
 @GET("/resources/public/:*")
 class PublicResourceServerAction extends Action {
   override def execute {
-    if (!NotModified.respondIfNotModifidedSinceServerStart(this)) {
-      val path = "public/" + param("*")
-      loadResource(path) match {
-        case None => render404Page
-
-        case Some(bytes) =>
-          // Tell the browser to cache for a long time
-          // This is OK when there's a cluster of web servers behind a load balancer
-          // because the URL created by urlForResource is in the form: resource?web-server-startup-timestamp
-          NotModified.setMaxAgeUntilNextServerRestart(response)
-
-          val mimeo = Mime.get(path)
-          if (mimeo.isDefined) response.setHeader(CONTENT_TYPE, mimeo.get)
-
-          renderBinary(bytes)
-      }
-    }
-  }
-
-  //----------------------------------------------------------------------------
-
-  /**
-   * Read whole file to memory. It's OK because the files are normally small.
-   * No one is stupid enough to store large files in resources.
-   *
-   * @param path Relative to one of the elements in CLASSPATH, without leading "/"
-   */
-  private def loadResource(path: String): Option[Array[Byte]] = {
+    val path = "public/" + param("*")
     PathSanitizer.sanitize(path) match {
-      case None => None
+      case None => render404Page
 
       case Some(path2) =>
-        // http://www.javaworld.com/javaworld/javaqa/2003-08/01-qa-0808-property.html?page=2
-        val stream = getClass.getClassLoader.getResourceAsStream(path2)
+        Etag.forResource(path2) match {
+          case Etag.NotFound => render404Page
 
-        if (stream == null) {
-          None
-        } else {
-          val bytes = Loader.bytesFromInputStream(stream)
-          Some(bytes)
+          case Etag.Small(bytes, etag, mimeo, gzipped) =>
+            if (!Etag.respondIfEtagsMatch(this, etag)) {
+              if (mimeo.isDefined) response.setHeader(CONTENT_TYPE, mimeo.get)
+              if (gzipped)         response.setHeader(CONTENT_ENCODING, "gzip")
+
+              // Tell the browser to cache for a long time
+              // This works well even when this is a cluster of web servers behind a load balancer
+              // because the URL created by urlForResource is in the form: resource?etag
+              NotModified.setMaxAgeUntilNextServerRestart(response)
+
+              renderBinary(bytes)
+            }
         }
     }
   }

@@ -13,7 +13,7 @@ import xitrum.handler.up.Dispatcher
 import xitrum.routing.{PostbackAction, Routes}
 import xitrum.scope.request.ExtEnv
 import xitrum.scope.session.SecureBase64
-import xitrum.util.NotModified
+import xitrum.etag.{Etag, NotModified}
 import xitrum.validation.{Validator, ValidatorInjector}
 import xitrum.view.Renderer
 
@@ -114,20 +114,22 @@ trait Action extends ExtEnv with Logger with Net with Filter with BasicAuthentic
   //----------------------------------------------------------------------------
 
   def urlForPublic(path: String) = {
-    val timestamp = {
-      val file = new File(System.getProperty("user.dir") + "/static/public/" + path)
-      if (file.exists) {
-        file.lastModified
-      } else {
-        logger.warn("File not found: " + file.getAbsolutePath)
-        Random.nextLong
-      }
+    val absPath     = System.getProperty("user.dir") + "/static/public/" + path
+    val forceReload = Etag.forFile(absPath) match {
+      case Etag.NotFound                           => Random.nextLong.toString
+      case Etag.TooBig(file)                       => file.lastModified
+      case Etag.Small(bytes, etag, mimeo, gzipped) => etag
     }
-
-    Config.baseUri + "/public/" + path + "?" + timestamp
+    Config.baseUri + "/public/" + path + "?" + forceReload
   }
 
-  def urlForResource(path: String) = Config.baseUri + "/resources/public/" + path + "?" + NotModified.serverStartupTimestamp
+  def urlForResource(path: String) = {
+    val forceReload = Etag.forResource(path) match {
+      case Etag.NotFound                           => NotModified.serverStartupTimestamp.toString
+      case Etag.Small(bytes, etag, mimeo, gzipped) => etag
+    }
+    Config.baseUri + "/resources/public/" + path + "?" + forceReload
+  }
 
   //----------------------------------------------------------------------------
 

@@ -12,6 +12,7 @@ import HttpVersion._
 import xitrum.Config
 import xitrum.handler.BaseUri
 import xitrum.handler.updown.XSendfile
+import xitrum.etag.NotModified
 import xitrum.util.PathSanitizer
 
 /** Serves files in "static/public" directory. */
@@ -53,8 +54,11 @@ class PublicFileServer extends SimpleChannelUpstreamHandler with BadClientSilenc
 
         val response = new DefaultHttpResponse(HTTP_1_1, OK)
         absStaticPath(pathInfo1) match {
-          case None      => XSendfile.set404Page(response)
-          case Some(abs) => XSendfile.setHeader(response, abs)
+          case None => XSendfile.set404Page(response)
+
+          case Some(abs) =>
+            NotModified.setMaxAge(response, Config.cacheSmallStaticFileTTLInMunutes * 60)
+            XSendfile.setHeader(response, abs)
         }
         ctx.getChannel.write(response)
     }

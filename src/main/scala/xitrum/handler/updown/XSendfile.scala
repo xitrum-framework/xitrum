@@ -1,19 +1,20 @@
 package xitrum.handler.updown
 
-import java.io.File
-import java.io.RandomAccessFile
+import java.io.{File, RandomAccessFile}
 
 import org.jboss.netty.channel.{ChannelEvent, ChannelUpstreamHandler, ChannelDownstreamHandler, Channels, ChannelHandlerContext, DownstreamMessageEvent, UpstreamMessageEvent, ChannelFuture, DefaultFileRegion, ChannelFutureListener}
 import org.jboss.netty.handler.codec.http.{HttpHeaders, HttpRequest, HttpResponse, HttpResponseStatus, HttpVersion}
 import HttpResponseStatus._
 import HttpVersion._
 import HttpHeaders.Names._
+import HttpHeaders.Values._
 import org.jboss.netty.handler.ssl.SslHandler
 import org.jboss.netty.handler.stream.ChunkedFile
 import org.jboss.netty.buffer.ChannelBuffers
 
 import xitrum.{Config, Logger}
-import xitrum.handler.SmallFileCache
+import xitrum.etag.{Etag, NotModified}
+import xitrum.util.Mime
 
 object XSendfile extends Logger {
   val CHUNK_SIZE = 8 * 1024
@@ -38,24 +39,9 @@ object XSendfile extends Logger {
   }
 
   def sendFile(ctx: ChannelHandlerContext, e: ChannelEvent, request: HttpRequest, response: HttpResponse, abs: String) {
-    val sendFileFromCache = (hit: Boolean, bytes: Array[Byte], gzipped: Boolean, lastModified: String, mimeo: Option[String]) => {
-    if (response.getStatus == OK && request.getHeader(IF_MODIFIED_SINCE) == lastModified) {
-      response.setStatus(NOT_MODIFIED)
-    } else {
-      if (hit) logger.debug("Serve " + abs + " from cache")
-
-      response.setContent(ChannelBuffers.wrappedBuffer(bytes))
-      HttpHeaders.setContentLength(response, bytes.length)
-      if (gzipped) response.setHeader(CONTENT_ENCODING, "gzip")
-      response.setHeader(LAST_MODIFIED, lastModified)
-      if (mimeo.isDefined) response.setHeader(CONTENT_TYPE, mimeo.get)
-    }
-    ctx.sendDownstream(e)
-  }
-
     // Try to serve from cache
-    SmallFileCache.get(abs) match {
-      case SmallFileCache.FileNotFound =>
+    Etag.forFile(abs) match {
+      case Etag.NotFound =>
         response.setStatus(NOT_FOUND)
         if (abs.startsWith(abs404)) {
           // Event 404.html is not found!
@@ -65,20 +51,36 @@ object XSendfile extends Logger {
           sendFile(ctx, e, request, response, abs404)
         }
 
-      case SmallFileCache.Hit(bytes, gzipped, lastModified, mimeo) =>
-        sendFileFromCache(true, bytes, gzipped, lastModified, mimeo)
+      case Etag.Small(bytes, etag, mimeo, gzipped) =>
+        if (request.getHeader(IF_NONE_MATCH) == etag) {
+          response.setStatus(NOT_MODIFIED)
+        } else {
+          NotModified.setMaxAge(response, Config.cacheSmallStaticFileTTLInMunutes * 60)
 
-      case SmallFileCache.Miss(bytes, gzipped, lastModified, mimeo) =>
-        sendFileFromCache(false, bytes, gzipped, lastModified, mimeo)
+          response.setContent(ChannelBuffers.wrappedBuffer(bytes))
+          HttpHeaders.setContentLength(response, bytes.length)
+          response.setHeader(ETAG, etag)
+          if (mimeo.isDefined) response.setHeader(CONTENT_TYPE, mimeo.get)
+          if (gzipped)         response.setHeader(CONTENT_ENCODING, "gzip")
+        }
+        ctx.sendDownstream(e)
 
-      case SmallFileCache.FileTooBig(raf, lastModified, mimeo) =>
-        if (response.getStatus == OK && request.getHeader(IF_MODIFIED_SINCE) == lastModified) {
+      case Etag.TooBig(file) =>
+        // LAST_MODIFIED is not reliable as ETAG when this is a cluster of web servers,
+        // but it's still good to give it a try
+        val lastModifiedRfc2822 = NotModified.formatRfc2822(file.lastModified)
+        if (request.getHeader(IF_MODIFIED_SINCE) == lastModifiedRfc2822) {
           response.setStatus(NOT_MODIFIED)
           ctx.sendDownstream(e)
         } else {
+          NotModified.setMaxAge(response, Config.cacheSmallStaticFileTTLInMunutes * 60)
+
+          val mimeo = Mime.get(abs)
+          val raf   = new RandomAccessFile(abs, "r")
+
           // Write the initial line and the header
           HttpHeaders.setContentLength(response, raf.length)
-          response.setHeader(LAST_MODIFIED, lastModified)
+          response.setHeader(LAST_MODIFIED, lastModifiedRfc2822)
           if (mimeo.isDefined) response.setHeader(CONTENT_TYPE, mimeo.get)
           ctx.sendDownstream(e)
 

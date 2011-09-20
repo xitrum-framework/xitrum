@@ -5,6 +5,7 @@ import javax.crypto.{Cipher, Mac}
 import javax.crypto.spec.{SecretKeySpec, IvParameterSpec}
 
 import xitrum.Config
+import xitrum.util.{Base64, SeriDeseri}
 
 /**
  * See https://github.com/mmcgrana/ring/blob/master/ring-core/src/ring/middleware/session/cookie.clj

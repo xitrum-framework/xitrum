@@ -1,4 +1,4 @@
-package xitrum.scope.session
+package xitrum.util
 
 import java.io.{ByteArrayInputStream, ByteArrayOutputStream, ObjectInputStream, ObjectOutputStream}
 

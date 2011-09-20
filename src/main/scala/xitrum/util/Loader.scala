@@ -6,6 +6,8 @@ import java.util.Properties
 object Loader {
   private val BUFFER_SIZE = 1024
   def bytesFromInputStream(is: InputStream): Array[Byte] = {
+    if (is == null) return null
+
     var ret = Array[Byte]()
 
     var buffer = new Array[Byte](BUFFER_SIZE)
@@ -18,13 +20,25 @@ object Loader {
     ret
   }
 
+  def bytesFromFile(path: String): Array[Byte] = {
+    val is = new FileInputStream(path)
+    bytesFromInputStream(is)
+  }
+
+  /**
+   * @param path Relative to one of the elements in CLASSPATH, without leading "/"
+   */
+  def bytesFromClasspath(path: String): Array[Byte] = {
+    val is = getClass.getClassLoader.getResourceAsStream(path)
+    bytesFromInputStream(is)
+  }
+
   /**
    * @param path Relative to one of the elements in CLASSPATH, without leading "/"
    */
   def stringFromClasspath(path: String): String = {
-    val stream = getClass.getClassLoader.getResourceAsStream(path)
-    val bytes  = bytesFromInputStream(stream)
-    new String(bytes, "UTF-8")
+    val bytes = bytesFromClasspath(path)
+    if (bytes == null) null else new String(bytes, "UTF-8")
   }
 
   /**
