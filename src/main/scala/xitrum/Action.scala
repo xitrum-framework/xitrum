@@ -124,8 +124,9 @@ trait Action extends ExtEnv with Logger with Net with Filter with BasicAuthentic
   }
 
   def urlForResource(path: String) = {
-    val forceReload = Etag.forResource(path) match {
-      case Etag.NotFound                           => NotModified.serverStartupTimestamp.toString
+    val classPathPath = "public/" + path
+    val forceReload = Etag.forResource(classPathPath) match {
+      case Etag.NotFound                           => Random.nextLong.toString
       case Etag.Small(bytes, etag, mimeo, gzipped) => etag
     }
     Config.baseUri + "/resources/public/" + path + "?" + forceReload

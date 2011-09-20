@@ -24,6 +24,7 @@ class PublicResourceServerAction extends Action {
 
           case Etag.Small(bytes, etag, mimeo, gzipped) =>
             if (!Etag.respondIfEtagsMatch(this, etag)) {
+              response.setHeader(ETAG, etag)
               if (mimeo.isDefined) response.setHeader(CONTENT_TYPE, mimeo.get)
               if (gzipped)         response.setHeader(CONTENT_ENCODING, "gzip")
 
