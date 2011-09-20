@@ -20,6 +20,7 @@ web server on top of `Netty <http://www.jboss.org/netty>`_ and
 * `jQuery Validation <http://docs.jquery.com/Plugins/validation>`_ is integrated
   for browser side and server side validation.
 * i18n using `GNU gettext <http://en.wikipedia.org/wiki/GNU_gettext>`_.
+* Conditional GET.
 
 Hazelcast also gives:
 
