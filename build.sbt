@@ -31,7 +31,7 @@ libraryDependencies += "tv.cntt" %% "sclasner" % "1.0"
 
 libraryDependencies += "tv.cntt" %% "scaposer" % "1.0"
 
-libraryDependencies += "javassist" % "javassist" % "3.12.1.GA"
+libraryDependencies += "org.javassist" % "javassist" % "3.15.0-GA"
 
 // For distributed cache and Comet
 // Infinispan is good but much heavier, and the logging is bad:
@@ -40,7 +40,7 @@ libraryDependencies += "com.hazelcast" % "hazelcast" % "1.9.4.2"
 
 // http://www.hazelcast.com/documentation.jsp#Clients
 // Hazelcast may be configured in Xitrum as super client or native client
-libraryDependencies += "com.hazelcast" % "hazelcast-client" % "1.9.4"
+libraryDependencies += "com.hazelcast" % "hazelcast-client" % "1.9.4.2"
 
 // https://github.com/codahale/jerkson
 // lift-json does not generate correctly for:
