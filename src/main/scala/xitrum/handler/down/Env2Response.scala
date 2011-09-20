@@ -36,11 +36,11 @@ class Env2Response extends SimpleChannelDownstreamHandler {
   }
 
   private def tryCompressBigTextualResponse(response: HttpResponse) {
+    if (response.containsHeader(CONTENT_ENCODING)) return
+
     val channelBuffer = response.getContent
     val readableBytes = channelBuffer.readableBytes
     if (readableBytes <= Config.compressBigTextualResponseMinSizeInKB * 1024) return
-
-    if (response.getHeader(CONTENT_ENCODING) != null) return
 
     val contentType = response.getHeader(CONTENT_TYPE)
     if (contentType == null || !Mime.isTextual(contentType)) return

@@ -18,7 +18,7 @@ object Etag extends Logger {
   case class  Small(val bytes: Array[Byte], val etag: String, val mimeo: Option[String], val gzipped: Boolean) extends Result
 
   //                                              path    mtime
-  private val smallFileCache = new LocalLRUCache[(String, Long), Small](100)  // FIXME
+  private val smallFileCache = new LocalLRUCache[(String, Long), Small](200)  // FIXME
 
   def forBytes(bytes: Array[Byte]): String = {
     val md5 = MessageDigest.getInstance("MD5")  // MD5 is fastest
@@ -91,9 +91,11 @@ object Etag extends Logger {
 
   //----------------------------------------------------------------------------
 
+  // Always compress all text file because these are static file,
+  // the compression is only done once
   private def compressBigTextualFile(small: Small): Small = {
-  val (bytes2, gzipped) =
-      if (small.bytes.length > Config.compressBigTextualResponseMinSizeInKB * 1024 && small.mimeo.isDefined && Mime.isTextual(small.mimeo.get))
+    val (bytes2, gzipped) =
+      if (small.mimeo.isDefined && Mime.isTextual(small.mimeo.get))
         (Gzip.compress(small.bytes), true)
       else
         (small.bytes, false)
