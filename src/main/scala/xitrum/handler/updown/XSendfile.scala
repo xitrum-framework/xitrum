@@ -56,12 +56,12 @@ object XSendfile extends Logger {
           response.setStatus(NOT_MODIFIED)
         } else {
           NotModified.setMaxAge(response, Config.staticFileMaxAgeInMinutes * 60)
-
-          response.setContent(ChannelBuffers.wrappedBuffer(bytes))
-          HttpHeaders.setContentLength(response, bytes.length)
           response.setHeader(ETAG, etag)
-          if (mimeo.isDefined) response.setHeader(CONTENT_TYPE, mimeo.get)
+          if (mimeo.isDefined) response.setHeader(CONTENT_TYPE,     mimeo.get)
           if (gzipped)         response.setHeader(CONTENT_ENCODING, "gzip")
+
+          HttpHeaders.setContentLength(response, bytes.length)
+          response.setContent(ChannelBuffers.wrappedBuffer(bytes))
         }
         ctx.sendDownstream(e)
 

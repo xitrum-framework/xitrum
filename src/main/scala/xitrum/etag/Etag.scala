@@ -36,7 +36,7 @@ object Etag extends Logger {
       return NotFound
     }
 
-    if (file.length > Config.smallStaticFileSizeInKB) return TooBig(file)
+    if (file.length > Config.smallStaticFileSizeInKB * 1024) return TooBig(file)
 
     val mtime = file.lastModified
     val key   = (path, mtime)

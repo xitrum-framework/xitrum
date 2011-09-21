@@ -1,0 +1,9 @@
+1.2:
+* Conditional GET
+* Applications can use their own error handling (404 and 500)
+* wro4j integration
+* Middleware architecture
+
+1.1:
+* i18n
+* Faster route collecting on startup

@@ -3,10 +3,12 @@ package xitrum.handler.down
 import org.jboss.netty.buffer.ChannelBuffers
 import org.jboss.netty.channel.{ChannelHandler, SimpleChannelDownstreamHandler, ChannelHandlerContext, MessageEvent, Channels, ChannelFutureListener}
 import ChannelHandler.Sharable
-import org.jboss.netty.handler.codec.http.{HttpHeaders, HttpRequest, HttpResponse}
+import org.jboss.netty.handler.codec.http.{HttpHeaders, HttpRequest, HttpResponse, HttpResponseStatus}
 import HttpHeaders.Names._
+import HttpResponseStatus._
 
 import xitrum.Config
+import xitrum.etag.Etag
 import xitrum.handler.HandlerEnv
 import xitrum.util.{Gzip, Mime}
 
@@ -28,7 +30,10 @@ class Env2Response extends SimpleChannelDownstreamHandler {
     // it is because the response body will be sent later and the channel will
     // be closed later by the code that sends the response body
     if (HttpHeaders.getContentLength(response) == response.getContent.readableBytes) {
+      // Only effective for dynamic response, static file response
+      // has already be handled
       tryCompressBigTextualResponse(response)
+
       if (!HttpHeaders.isKeepAlive(request)) future.addListener(ChannelFutureListener.CLOSE)
     }
 
@@ -38,12 +43,12 @@ class Env2Response extends SimpleChannelDownstreamHandler {
   private def tryCompressBigTextualResponse(response: HttpResponse) {
     if (response.containsHeader(CONTENT_ENCODING)) return
 
+    val contentType = response.getHeader(CONTENT_TYPE)
+    if (contentType == null || !Mime.isTextual(contentType)) return
+
     val channelBuffer = response.getContent
     val readableBytes = channelBuffer.readableBytes
     if (readableBytes < Config.bigTextualResponseSizeInKB * 1024) return
-
-    val contentType = response.getHeader(CONTENT_TYPE)
-    if (contentType == null || !Mime.isTextual(contentType)) return
 
     val bytes  = new Array[Byte](readableBytes)
     channelBuffer.readBytes(bytes)
