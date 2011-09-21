@@ -32,12 +32,48 @@ class Env2Response extends SimpleChannelDownstreamHandler {
     if (HttpHeaders.getContentLength(response) == response.getContent.readableBytes) {
       // Only effective for dynamic response, static file response
       // has already be handled
-      tryCompressBigTextualResponse(response)
+      if (!tryEtag(request, response)) tryCompressBigTextualResponse(response)
 
       if (!HttpHeaders.isKeepAlive(request)) future.addListener(ChannelFutureListener.CLOSE)
     }
 
     Channels.write(ctx, future, response)
+  }
+
+  //----------------------------------------------------------------------------
+
+ /**
+   * This does not make the server faster, but decrease the response transmission
+   * time through the network to the browser.
+   *
+   * @return true if the NO_MODIFIED response is set by this method
+   */
+  private def tryEtag(request: HttpRequest, response: HttpResponse): Boolean = {
+    if (response.containsHeader(ETAG)) return false
+
+    val readableBytes = response.getContent.readableBytes
+    if (readableBytes > Config.smallStaticFileSizeInKB * 1024) return false
+
+    val channelBuffer = response.getContent
+    val bytes = new Array[Byte](readableBytes)
+    channelBuffer.readBytes(bytes)
+    val etag = Etag.forBytes(bytes)
+
+    if (request.getHeader(IF_NONE_MATCH) == etag) {
+      // Only send headers, the content is empty
+      response.setStatus(NOT_MODIFIED)
+      HttpHeaders.setContentLength(response, 0)
+      response.setContent(ChannelBuffers.EMPTY_BUFFER)
+      true
+    } else {
+      response.setHeader(ETAG, etag)
+
+      // The response channel buffer is empty now because we have already read
+      // everything out, we need to set it back
+      response.setContent(ChannelBuffers.copiedBuffer(bytes))
+
+      false
+    }
   }
 
   private def tryCompressBigTextualResponse(response: HttpResponse) {

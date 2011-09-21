@@ -14,6 +14,7 @@ import xitrum.util.{Base64, SeriDeseri}
  * CSRF is for preventing a user to fake other user data.
  */
 object SecureBase64 {
+  /** Always returns same output for same input. */
   def encrypt(value: Any): String = {
     val bytes = SeriDeseri.serialize(value)
     seal(key, bytes)
@@ -27,9 +28,6 @@ object SecureBase64 {
   }
 
   //----------------------------------------------------------------------------
-
-  // Algorithm to seed random numbers
-  private val SEED_ALGORITHM = "SHA1PRNG"
 
   // Algorithm to generate a HMAC
   private val HMAC_ALGORITHM = "HmacSHA256"
@@ -55,11 +53,13 @@ object SecureBase64 {
     messageDigest.digest
   }
 
-  /** @return a random byte array of the specified size. */
-  private def secureRandomBytes(size: Int): Array[Byte] = {
-    val seed = new Array[Byte](size)
-    SecureRandom.getInstance(SEED_ALGORITHM).nextBytes(seed)
-    seed
+  /** @return a byte array of the specified size. */
+  private def bytes(size: Int): Array[Byte] = {
+    // Do not return random bytes so that SecureBase64.encrypt
+    // always returns same output for same input
+    //
+    // TODO: each user session should have different bytes?
+    new Array[Byte](size)
   }
 
   private def hmac(key: Array[Byte], data: Array[Byte]) = {
@@ -71,20 +71,20 @@ object SecureBase64 {
   private def encrypt(key: Array[Byte], data: Array[Byte]): Array[Byte] = {
     val cipher    = Cipher.getInstance(CRYPT_ALGORITHM)
     val secretKey = new SecretKeySpec(key, CRYPT_TYPE)
-    val iv        = secureRandomBytes(cipher.getBlockSize)
+    val iv        = bytes(cipher.getBlockSize)
 
     cipher.init(Cipher.ENCRYPT_MODE, secretKey, new IvParameterSpec(iv))
-    iv ++ cipher.doFinal(data)
+    cipher.doFinal(data)
   }
 
   private def decrypt(key: Array[Byte], data: Array[Byte]): Array[Byte] = {
     val cipher      = Cipher.getInstance(CRYPT_ALGORITHM)
     val secretKey   = new SecretKeySpec(key, CRYPT_TYPE)
-    val (iv, data2) = data.splitAt(cipher.getBlockSize)
+    val iv          = bytes(cipher.getBlockSize)
     val ivSpec      = new IvParameterSpec(iv)
 
     cipher.init(Cipher.DECRYPT_MODE, secretKey, ivSpec)
-    cipher.doFinal(data2)
+    cipher.doFinal(data)
   }
 
   private def seal(key: Array[Byte], data: Array[Byte]): String = {

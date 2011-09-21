@@ -1,8 +1,13 @@
-1.2:
-* Conditional GET
+1.3:
 * Applications can use their own error handling (404 and 500)
 * wro4j integration
 * Middleware architecture
+
+1.2:
+* Conditional GET using ETag
+* Fix for radio: SecureBase64.encrypt always returns same output for same input
+  <input type="radio" name={validate("myname")} value="yes" />
+  <input type="radio" name={validate("myname")} value="no"  />
 
 1.1:
 * i18n
