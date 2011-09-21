@@ -4,7 +4,7 @@
 * Middleware architecture
 
 1.2:
-* Conditional GET using ETag
+* Conditional GET using ETag, see http://stevesouders.com/hpws/rules.php
 * Fix for radio: SecureBase64.encrypt always returns same output for same input
   <input type="radio" name={validate("myname")} value="yes" />
   <input type="radio" name={validate("myname")} value="no"  />
