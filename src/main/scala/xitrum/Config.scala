@@ -82,50 +82,26 @@ object Config extends Logger {
 
   //----------------------------------------------------------------------------
 
-  // Below are all "var"s so that application developers may change the defaults
+  val maxRequestContentLengthInMB   = properties.getProperty("max_request_content_length_in_mb").toInt
 
-  var maxRequestContentLengthInMB = 32  // Same as GAE
+  val paramCharsetName              = properties.getProperty("param_charset")
+  val paramCharset                  = Charset.forName(paramCharsetName)
 
-  /**
-   * For speed, to avoid checking file existance on every request, public files
-   * should have URL pattern /public/...
-   *
-   * favicon.ico: http://en.wikipedia.org/wiki/Favicon
-   * robots.txt:  http://en.wikipedia.org/wiki/Robots_exclusion_standard
-   */
-  var publicFilesNotBehindPublicUrl = List("favicon.ico", "robots.txt")
+  val filteredParams                = properties.getProperty("filtered_params").split(",").map(_.trim)
 
-  /**
-   * Xitrum can serve static files (request URL in the form /public/...
-   * or /responses/public/... or there is X-Sendfile in the response header),
-   * and it caches small static files in memory.
-   */
-  var cacheSmallStaticFileMaxSizeInKB = 512
+  val publicFilesNotBehindPublicUrl = properties.getProperty("public_files_not_behind_public_url").split(",").map(_.trim)
 
-  var cacheSmallStaticFileTTLInMunutes = 10
+  val smallStaticFileSizeInKB       = properties.getProperty("small_static_file_size_in_kb").toInt
+  val maxCachedSmallStaticFiles     = properties.getProperty("max_cached_small_static_files").toInt
 
-  /**
-   * Xitrum checks the response Content-Type header to test if the response is
-   * textual (text/html, text/plain etc.). If the response is big and gzip or
-   * deflate Accept-Encoding header is set in the request, Xitrum will gzip or
-   * deflate it. Xitrum compresses both static (see cacheSmallStaticFileMaxSizeInKB)
-   * and dynamic response.
-   */
-  var compressBigTextualResponseMinSizeInKB = 10
+  val bigTextualResponseSizeInKB    = properties.getProperty("big_textual_response_size_in_kb").toInt
 
-  var paramCharsetName = "UTF-8"
-  var paramCharset     = Charset.forName(paramCharsetName)
-
-  /**
-   * Parameters are logged to access log
-   * Comma separated list of sensitive parameters that should not be logged
-   */
-  var filteredParams = Array("password")
+  val staticFileMaxAgeInMinutes     = properties.getProperty("static_file_max_age_in_minutes").toInt
 
   /**
    * When there is trouble (high load on startup ect.), the response may not be
    * OK. If the response is specified to be cached, we should only cache it
    * for a short time.
    */
-  var non200ResponseCacheTTLInSecs = 30
+  val non200ResponseCacheTTLInSecs = 30
 }

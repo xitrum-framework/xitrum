@@ -55,7 +55,7 @@ object XSendfile extends Logger {
         if (request.getHeader(IF_NONE_MATCH) == etag) {
           response.setStatus(NOT_MODIFIED)
         } else {
-          NotModified.setMaxAge(response, Config.cacheSmallStaticFileTTLInMunutes * 60)
+          NotModified.setMaxAge(response, Config.staticFileMaxAgeInMinutes * 60)
 
           response.setContent(ChannelBuffers.wrappedBuffer(bytes))
           HttpHeaders.setContentLength(response, bytes.length)
@@ -73,7 +73,7 @@ object XSendfile extends Logger {
           response.setStatus(NOT_MODIFIED)
           ctx.sendDownstream(e)
         } else {
-          NotModified.setMaxAge(response, Config.cacheSmallStaticFileTTLInMunutes * 60)
+          NotModified.setMaxAge(response, Config.staticFileMaxAgeInMinutes * 60)
 
           val mimeo = Mime.get(abs)
           val raf   = new RandomAccessFile(abs, "r")

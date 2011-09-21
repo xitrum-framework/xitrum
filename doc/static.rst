@@ -46,8 +46,8 @@ To send a static file on disk from your action, use ``renderFile``.
   renderFile("/absolute/path")
   renderFile("relative/path/to/the/current/working/directory")
 
-publicFilesNotBehindPublicUrl
-~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+public_files_not_behind_public_url
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
 favicon.ico and robots.txt are special files, their URLs do not have ``/public``
 prefix:
@@ -59,11 +59,7 @@ prefix:
 
 When for example you have a file called crossdomain.xml and you want its
 URL to be ``http://mydomain.com/crossdomain.xml`` (no ``/public/`` prefix),
-put it right in the ``static`` directory, and in your boot class add this line:
-
-::
-
-  xitrum.Config.publicFilesNotBehindPublicUrl ++= List("crossdomain.xml")
+modify ``public_files_not_behind_public_url`` in ``config/xitrum.properties``.
 
 To refer to them:
 
@@ -118,7 +114,7 @@ generate. For example:
   urlForResource("xitrum/jquery-1.6.4.js")
   => /resources/public/xitrum/jquery-1.6.4.js?xndGJVH0zA8q8ZJJe1Dz9Q
 
-Xitrum also sets ``max-age`` for static files. See ````
+Xitrum also sets ``max-age`` for static files. See ``static_file_max_age_in_minutes``
 in ``config/xitrum.properties``.
 
 Don't worry that browsers do not pickup a latest file when you change it.
@@ -133,11 +129,13 @@ Xitrum automatically gzips textual responses. It checks the ``Content-Type``
 header to determine if a response is textual: ``text/html``, ``xml/application`` etc.
 
 Xitrum always gzips static textual files, but for dynamic textual responses,
-it only gzips only if response sizes are small, not bigger than 10 KB.
+it only gzips only if response sizes are big, not not smaller than
+``big_textual_response_size_in_kb`` in ``config/xitrum.properties``.
 
 Server side cache
 -----------------
 
 To avoid loading files from disk, Xitrum caches small static files
 (not only textual) in memory with LRU (Least Recently Used) expiration.
-See ```` and ```` in ``config/xitrum.properties``.
+See ``small_static_file_size_in_kb`` and ``max_cached_small_static_files``
+in ``config/xitrum.properties``.
