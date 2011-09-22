@@ -94,14 +94,19 @@ object Config extends Logger {
   val smallStaticFileSizeInKB       = properties.getProperty("small_static_file_size_in_kb").toInt
   val maxCachedSmallStaticFiles     = properties.getProperty("max_cached_small_static_files").toInt
 
-  val bigTextualResponseSizeInKB    = properties.getProperty("big_textual_response_size_in_kb").toInt
-
-  val staticFileMaxAgeInMinutes     = properties.getProperty("static_file_max_age_in_minutes").toInt
+  /**
+   * Static textual files are always compressed
+   * Dynamic textual responses are only compressed if they are big
+   * http://code.google.com/intl/en/speed/page-speed/docs/payload.html#GzipCompression
+   *
+   * Google recommends > 150B-1KB
+   */
+  val BIG_TEXTUAL_RESPONSE_SIZE_IN_KB    = 1
 
   /**
    * When there is trouble (high load on startup ect.), the response may not be
    * OK. If the response is specified to be cached, we should only cache it
    * for a short time.
    */
-  val non200ResponseCacheTTLInSecs = 30
+  val NON_200_RESPONSE_CACHE_TTT_IN_SECS = 30
 }

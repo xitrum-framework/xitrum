@@ -40,12 +40,12 @@ object ResponseCacher extends Logger {
     if (!contained) {  // Check to avoid the cost of serializing
       val response       = action.response
       val cachedResponse = serializeResponse(response)
-      val secs           = {  // See Config.non200ResponseCacheTTLInSecs
+      val secs           = {  // See Config.NON_200_RESPONSE_CACHE_TTT_IN_SECS
         val cs = if (cacheSecs < 0) -cacheSecs else cacheSecs
         if (response.getStatus == HttpResponseStatus.OK) {
           cs
         } else {
-          val ret = if (cs < Config.non200ResponseCacheTTLInSecs) cs else Config.non200ResponseCacheTTLInSecs
+          val ret = if (cs < Config.NON_200_RESPONSE_CACHE_TTT_IN_SECS) cs else Config.NON_200_RESPONSE_CACHE_TTT_IN_SECS
           logger.debug("Cache non 200 response for {} secs, key: {}", ret, key)
           ret
         }
