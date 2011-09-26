@@ -37,7 +37,7 @@ class JSRoutesAction extends Action {
     val etag = Etag.forBytes(Routes.jsRoutes.getBytes)
     if (!Etag.respondIfEtagsMatch(this, etag)) {
       response.setHeader(ETAG, etag)
-      NotModified.setMaxAgeUntilNextServerRestart(response)
+      NotModified.setMaxAgeAggressively(response)
 
       if (Config.isProductionMode) {
         jsRender(JSRoutesAction.jsRoutes(this))

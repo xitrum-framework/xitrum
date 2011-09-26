@@ -27,11 +27,19 @@ object NotModified {
 
   def formatRfc2822(timestamp: Long) = rfc2822.format(timestamp)
 
-  def setMaxAge(response: HttpResponse, maxAge: Int) {
-    if (!response.containsHeader(CACHE_CONTROL)) response.setHeader(CACHE_CONTROL, MAX_AGE + "=" + maxAge)
-  }
-
-  def setMaxAgeUntilNextServerRestart(response: HttpResponse) {
-    setMaxAge(response, SECS_IN_A_YEAR)
+  /**
+   * Max-age header is automatically set for static files.
+   * Don't worry that browsers do not pick up new files after you modified them,
+   * see the doc about static files.
+   *
+   * Google recommends 1 year:
+   * http://code.google.com/intl/ja/speed/page-speed/docs/caching.html
+   *
+   * Also set Expires because IEs use Expires, not max-age:
+   * http://mrcoles.com/blog/cookies-max-age-vs-expires/
+   */
+  def setMaxAgeAggressively(response: HttpResponse) {
+    if (!response.containsHeader(CACHE_CONTROL)) response.setHeader(CACHE_CONTROL, "public, " + MAX_AGE + "=" + SECS_IN_A_YEAR)
+    if (!response.containsHeader(EXPIRES))       response.setHeader(EXPIRES, formatRfc2822(System.currentTimeMillis + SECS_IN_A_YEAR * 1000))
   }
 }

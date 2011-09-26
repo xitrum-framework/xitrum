@@ -31,7 +31,7 @@ class PublicResourceServerAction extends Action {
               // Tell the browser to cache for a long time
               // This works well even when this is a cluster of web servers behind a load balancer
               // because the URL created by urlForResource is in the form: resource?etag
-              NotModified.setMaxAgeUntilNextServerRestart(response)
+              NotModified.setMaxAgeAggressively(response)
 
               renderBinary(bytes)
             }

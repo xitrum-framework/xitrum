@@ -84,7 +84,7 @@ class Env2Response extends SimpleChannelDownstreamHandler {
 
     val channelBuffer = response.getContent
     val readableBytes = channelBuffer.readableBytes
-    if (readableBytes < Config.bigTextualResponseSizeInKB * 1024) return
+    if (readableBytes < Config.BIG_TEXTUAL_RESPONSE_SIZE_IN_KB * 1024) return
 
     val bytes  = new Array[Byte](readableBytes)
     channelBuffer.readBytes(bytes)

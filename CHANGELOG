@@ -6,8 +6,9 @@
 1.2:
 * Conditional GET using ETag, see http://stevesouders.com/hpws/rules.php
 * Fix for radio: SecureBase64.encrypt always returns same output for same input
-  <input type="radio" name={validate("myname")} value="yes" />
-  <input type="radio" name={validate("myname")} value="no"  />
+  <input type="radio" name={validate("light")} value="red" />
+  <input type="radio" name={validate("light")} value="yellow" />
+  <input type="radio" name={validate("light")} value="green" />
 
 1.1:
 * i18n
