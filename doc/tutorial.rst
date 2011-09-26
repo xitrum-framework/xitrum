@@ -6,63 +6,14 @@ Tutorial
 This chapter describes how to create and run a Xitrum project.
 **It assumes that you are using Linux and you have installed Java.**
 
-Install SBT
------------
-
-Most Scala projects use `SBT <https://github.com/harrah/xsbt>`_ as the de facto build tool.
-Xitrum needs SBT 0.10.1+.
-
-Follow `instructions <https://github.com/harrah/xsbt/wiki/Setup>`_ to install.
-You can do like this:
-
-::
-
-  $ mkdir -p ~/opt/sbt
-  $ cd ~/opt/sbt
-  $ wget http://typesafe.artifactoryonline.com/typesafe/ivy-releases/org.scala-tools.sbt/sbt-launch/0.10.1/sbt-launch.jar
-  $ echo 'java -Xmx512m -XX:MaxPermSize=128m -Dsbt.boot.directory="$HOME/.sbt/boot" -jar `dirname $0`/sbt-launch.jar "$@"' > sbt
-  $ chmod +x sbt
-  $ export PATH=$PATH:~/opt/sbt
-
-You should add the line ``export PATH=$PATH:~/opt/sbt`` to ``~/.profile``.
-
 Create a new Xitrum project
 ---------------------------
 
-Install `Giter8 <https://github.com/n8han/giter8>`_.
+Install `SBT 0.11.0+ <https://github.com/harrah/xsbt/wiki/Setup>`_  and
+`Giter8 <https://github.com/n8han/giter8>`_.
 
 Run ``g8 ngocdaothanh/xitrum`` to create a new Xitrum project.
 A new project skeleton will be created:
-
-::
-
-  my_project
-    config
-      hazelcast_cluster_member_or_super_client.xml
-      hazelcast_java_client.properties
-      logback.xml
-      xitrum.properties
-    static
-      public
-        css
-          960
-            reset.css
-            text.css
-            960.css
-          app.css
-      404.html
-      500.html
-      favicon.ico
-      robots.txt
-    src
-      main
-        scala
-          my_project
-            Boot.scala
-            action
-              AppAction.scala
-              IndexAction.scala
-    build.sbt
 
 Run
 ---
