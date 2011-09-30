@@ -9,29 +9,25 @@ import com.hazelcast.core.{Hazelcast, HazelcastInstance}
 import xitrum.scope.session.SessionStore
 import xitrum.util.Loader
 
+/** See config/xitrum.properties */
 object Config extends Logger {
+  /** See bin/runner.sh */
   val isProductionMode = (System.getProperty("xitrum.mode") == "production")
-
-  // See xitrum.properties
-  // Below are all "val"s
 
   val properties = {
     try {
       Loader.propertiesFromClasspath("xitrum.properties")
     } catch {
       case _ =>
-        try {
-          Loader.propertiesFromFile("config/xitrum.properties")
-        } catch {
-          case _ =>
-            logger.error("Could not load xitrum.properties from CLASSPATH or from config/xitrum.properties")
-            System.exit(-1)
-            null
-        }
+        logger.error("Could not load xitrum.properties. The \"config\" directory should be in CLASSPATH.")
+        System.exit(-1)
+        null
     }
   }
 
-  val httpPort = properties.getProperty("http_port").toInt
+  //----------------------------------------------------------------------------
+
+  val httpPort = getPropertyWithoudDefault("http_port").toInt
 
   val proxyIpso: Option[Array[String]] = {
     val s = properties.getProperty("proxy_ips")
@@ -40,13 +36,8 @@ object Config extends Logger {
 
   val baseUri = properties.getProperty("base_uri", "")
 
-  val compressResponse = {
-    val s = properties.getProperty("compress_response")
-    if (s == null || s == "false") false else true
-  }
-
   val hazelcastInstance: HazelcastInstance = {
-    val hazelcastMode = properties.getProperty("hazelcast_mode", "cluster_member")
+    val hazelcastMode = getPropertyWithoudDefault("hazelcast_mode")
 
     // http://code.google.com/p/hazelcast/issues/detail?id=94
     // http://code.google.com/p/hazelcast/source/browse/trunk/hazelcast/src/main/java/com/hazelcast/logging/Logger.java
@@ -71,28 +62,30 @@ object Config extends Logger {
     }
   }
 
+  //----------------------------------------------------------------------------
+
   val sessionStore  = {
-    val className = properties.getProperty("session_store")
+    val className = getPropertyWithoudDefault("session_store")
     Class.forName(className).newInstance.asInstanceOf[SessionStore]
   }
 
-  val sessionCookieName = properties.getProperty("session_cookie_name", "_session")
+  val sessionCookieName = getPropertyWithoudDefault("session_cookie_name")
 
-  val secureKey = properties.getProperty("secure_key")
+  val secureKey = getPropertyWithoudDefault("secure_key")
 
   //----------------------------------------------------------------------------
 
-  val maxRequestContentLengthInMB   = properties.getProperty("max_request_content_length_in_mb").toInt
+  val maxRequestContentLengthInMB   = getPropertyWithoudDefault("max_request_content_length_in_mb").toInt
 
-  val paramCharsetName              = properties.getProperty("param_charset")
+  val paramCharsetName              = getPropertyWithoudDefault("param_charset")
   val paramCharset                  = Charset.forName(paramCharsetName)
 
-  val filteredParams                = properties.getProperty("filtered_params").split(",").map(_.trim)
+  val filteredParams                = getPropertyWithoudDefault("filtered_params").split(",").map(_.trim)
 
-  val publicFilesNotBehindPublicUrl = properties.getProperty("public_files_not_behind_public_url").split(",").map(_.trim)
+  val publicFilesNotBehindPublicUrl = getPropertyWithoudDefault("public_files_not_behind_public_url").split(",").map(_.trim)
 
-  val smallStaticFileSizeInKB       = properties.getProperty("small_static_file_size_in_kb").toInt
-  val maxCachedSmallStaticFiles     = properties.getProperty("max_cached_small_static_files").toInt
+  val smallStaticFileSizeInKB       = getPropertyWithoudDefault("small_static_file_size_in_kb").toInt
+  val maxCachedSmallStaticFiles     = getPropertyWithoudDefault("max_cached_small_static_files").toInt
 
   /**
    * Static textual files are always compressed
@@ -109,4 +102,18 @@ object Config extends Logger {
    * for a short time.
    */
   val NON_200_RESPONSE_CACHE_TTT_IN_SECS = 30
+
+  //----------------------------------------------------------------------------
+
+  // For default value, use properties.getProperty(key, default) directly
+  private def getPropertyWithoudDefault(key: String): String = {
+    try {
+      properties.getProperty(key)
+    } catch {
+      case _ =>
+        logger.error("Could not load propery \"" + key + "\" in xitrum.properties. You probably forgot to update xitrum.properties when updating Xitrum.")
+        System.exit(-1)
+        null
+    }
+  }
 }

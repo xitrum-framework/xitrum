@@ -15,9 +15,9 @@ import xitrum.handler.updown.XSendFile
 import xitrum.etag.NotModified
 import xitrum.util.PathSanitizer
 
-/** Serves files in "static/public" directory. */
+/** Routes /resources/public/xxx URL to resources in CLASSPATH. */
 @Sharable
-class PublicFileServer extends SimpleChannelUpstreamHandler with BadClientSilencer {
+class PublicResourceServer extends SimpleChannelUpstreamHandler with BadClientSilencer {
   override def messageReceived(ctx: ChannelHandlerContext, e: MessageEvent) {
     val m = e.getMessage
     if (!m.isInstanceOf[HttpRequest]) {
@@ -66,6 +66,7 @@ class PublicFileServer extends SimpleChannelUpstreamHandler with BadClientSilenc
   /** Sanitizes and returns absolute path. */
   private def absStaticPath(pathInfo: String): Option[String] = {
     // pathInfo starts with "/"
+
     PathSanitizer.sanitize(pathInfo) match {
       case None => None
 

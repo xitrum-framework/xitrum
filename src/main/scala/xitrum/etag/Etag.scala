@@ -17,8 +17,9 @@ object Etag extends Logger {
   case class  TooBig(file: File)                                                                               extends Result
   case class  Small(val bytes: Array[Byte], val etag: String, val mimeo: Option[String], val gzipped: Boolean) extends Result
 
-  //                                              path    mtime
-  private val smallFileCache = new LocalLRUCache[(String, Long), Small](Config.maxCachedSmallStaticFiles)
+  //                                                     path    mtime
+  private val smallFileCache        = new LocalLRUCache[(String, Long), Small](Config.maxCachedSmallStaticFiles)
+  private val gzippedSmallFileCache = new LocalLRUCache[(String, Long), Small](Config.maxCachedSmallStaticFiles)
 
   def forBytes(bytes: Array[Byte]): String = {
     val md5 = MessageDigest.getInstance("MD5")  // MD5 is fastest

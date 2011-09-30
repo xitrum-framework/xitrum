@@ -15,7 +15,7 @@ import xitrum.routing.{Routes, PostbackAction}
 import xitrum.exception.{InvalidAntiCSRFToken, MissingParam, SessionExpired}
 import xitrum.handler.HandlerEnv
 import xitrum.handler.down.ResponseCacher
-import xitrum.handler.updown.XSendfile
+import xitrum.handler.updown.XSendFile
 import xitrum.scope.request.RequestEnv
 import xitrum.scope.session.CSRF
 
@@ -90,7 +90,7 @@ object Dispatcher extends Logger {
           logAccess(action, postback, beginTimestamp, 0, false, e)
 
           val response = new DefaultHttpResponse(HTTP_1_1, INTERNAL_SERVER_ERROR)
-          XSendfile.set500Page(response)
+          XSendFile.set500Page(response)
           action.handlerEnv.response = response
           action.channel.write(action.handlerEnv)
         }
@@ -163,7 +163,7 @@ class Dispatcher extends SimpleChannelUpstreamHandler with BadClientSilencer {
 
       case None =>
         val response = new DefaultHttpResponse(HTTP_1_1, NOT_FOUND)
-        XSendfile.set404Page(response)
+        XSendFile.set404Page(response)
         env.response = response
         ctx.getChannel.write(env)
     }

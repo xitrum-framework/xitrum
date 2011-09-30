@@ -16,16 +16,16 @@ import xitrum.{Config, Logger}
 import xitrum.etag.{Etag, NotModified}
 import xitrum.util.Mime
 
-object XSendfile extends Logger {
+object XSendFile extends Logger {
   val CHUNK_SIZE = 8 * 1024
 
-  private val XSENDFILE_HEADER = "X-Sendfile"
+  private val X_SENDFILE_HEADER = "X-Sendfile"
 
   private val abs404 = System.getProperty("user.dir") + "/static/404.html"
   private val abs500 = System.getProperty("user.dir") + "/static/500.html"
 
   def setHeader(response: HttpResponse, abs: String) {
-    response.setHeader(XSENDFILE_HEADER, abs)
+    response.setHeader(X_SENDFILE_HEADER, abs)
   }
 
   def set404Page(response: HttpResponse) {
@@ -124,12 +124,12 @@ object XSendfile extends Logger {
 }
 
 /**
- * This handler send file to client using various strategies:
+ * This handler sends file:
  * 1. If the file is big: use zero-copy for HTTP or chunking for HTTPS
  * 2. If the file is small: cache in memory and use normal response
  */
-class XSendfile extends ChannelUpstreamHandler with ChannelDownstreamHandler {
-  import XSendfile._
+class XSendFile extends ChannelUpstreamHandler with ChannelDownstreamHandler {
+  import XSendFile._
 
   var request: HttpRequest = _
 
@@ -162,15 +162,15 @@ class XSendfile extends ChannelUpstreamHandler with ChannelDownstreamHandler {
     }
 
     val response = m.asInstanceOf[HttpResponse]
-    if (!response.containsHeader(XSENDFILE_HEADER)) {
+    if (!response.containsHeader(X_SENDFILE_HEADER)) {
       ctx.sendDownstream(e)
       return
     }
 
     // X-Sendfile is not standard
     // To avoid leaking the information, we remove it
-    val abs = response.getHeader(XSENDFILE_HEADER)
-    response.removeHeader(XSENDFILE_HEADER)
+    val abs = response.getHeader(X_SENDFILE_HEADER)
+    response.removeHeader(X_SENDFILE_HEADER)
 
     sendFile(ctx, e, request, response, abs)
   }

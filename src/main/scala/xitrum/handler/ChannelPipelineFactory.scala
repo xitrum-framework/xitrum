@@ -51,7 +51,7 @@ class ChannelPipelineFactory extends CPF {
       new HttpResponseEncoder,
 
       // Both up and down
-      new XSendfile,
+      new XSendFile,
 
       // Up
       new PublicFileServer,

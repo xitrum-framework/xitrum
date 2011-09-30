@@ -18,7 +18,9 @@ web server on top of `Netty <http://www.jboss.org/netty>`_ and
 * Sessions can be stored in cookies or clustered Hazelcast.
 * `jQuery Validation <http://docs.jquery.com/Plugins/validation>`_ is integrated
   for browser side and server side validation.
-* i18n using `GNU gettext <http://en.wikipedia.org/wiki/GNU_gettext>`_.
+* i18n using `GNU gettext <http://en.wikipedia.org/wiki/GNU_gettext>`_,
+  which means unlike most other solutions, both singular and plural
+  forms are supported.
 * Conditional GET using ETag.
 
 Hazelcast also gives:

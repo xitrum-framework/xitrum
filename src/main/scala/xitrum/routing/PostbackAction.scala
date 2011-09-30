@@ -14,7 +14,7 @@ object PostbackAction {
 /** Route to this action is automatically added by RouteCollector. */
 class PostbackAction extends Action {
   override def execute {
-    isPostback = true
+    setPostback(true)
 
     val encoded               = pathInfo.encoded
     val secureActionClassName = encoded.substring(PostbackAction.POSTBACK_PREFIX.length)
@@ -32,5 +32,5 @@ class PostbackAction extends Action {
           if (HttpHeaders.getContentLength(response, 0) == 0) jsRenderFlash("Please check your input.")
         }
     }
-    }
   }
+}

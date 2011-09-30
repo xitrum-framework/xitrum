@@ -3,6 +3,9 @@
 * wro4j integration
 * Middleware architecture
 
+1.2.1:
+* Update SBT from 0.10.1 to 0.11.0
+
 1.2:
 * Conditional GET using ETag, see http://stevesouders.com/hpws/rules.php
 * Fix for radio: SecureBase64.encrypt always returns same output for same input

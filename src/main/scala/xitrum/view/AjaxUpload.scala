@@ -8,7 +8,7 @@ import org.jboss.netty.handler.codec.http.FileUpload
 import xitrum.Action
 import xitrum.annotation.GET
 import xitrum.scope.session.SecureBase64
-import xitrum.handler.updown.XSendfile
+import xitrum.handler.updown.XSendFile
 
 object AjaxUpload {
   def ::(elem: Node)(implicit action: Action) = {
@@ -163,7 +163,7 @@ class AjaxUploadTempFileServerAction extends Action {
     val encryptedTempFilePath = param("encryptedTempFilePath")
     val tempFilePath          = SecureBase64.decrypt(encryptedTempFilePath).toString
 
-    XSendfile.setHeader(response, tempFilePath)
+    XSendFile.setHeader(response, tempFilePath)
     respond
   }
 }
