@@ -35,7 +35,7 @@ class JSRoutesAction extends Action {
   override def execute {
     // See PublicResourceServerAction
     val etag = Etag.forBytes(Routes.jsRoutes.getBytes)
-    if (!Etag.respondIfEtagsMatch(this, etag)) {
+    if (!Etag.respondIfEtagsIdentical(this, etag)) {
       response.setHeader(ETAG, etag)
       NotModified.setMaxAgeAggressively(response)
 

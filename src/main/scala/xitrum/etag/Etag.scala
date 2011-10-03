@@ -3,6 +3,7 @@ package xitrum.etag
 import java.io.File
 import java.security.MessageDigest
 
+import org.jboss.netty.buffer.ChannelBuffers
 import org.jboss.netty.handler.codec.http.{HttpHeaders, HttpRequest, HttpResponse, HttpResponseStatus}
 import HttpHeaders.Names._
 import HttpHeaders.Values._
@@ -32,10 +33,7 @@ object Etag extends Logger {
 
   def forFile(path: String): Result = {
     val file = new File(path)
-    if (!file.exists) {
-      logger.warn("File not found: " + file.getAbsolutePath)
-      return NotFound
-    }
+    if (!file.exists) return NotFound
 
     if (file.length > Config.smallStaticFileSizeInKB * 1024) return TooBig(file)
 
@@ -59,15 +57,12 @@ object Etag extends Logger {
    * No one is stupid enough to store large files in resources.
    */
   def forResource(path: String): Result = {
-    val bytes = Loader.bytesFromClasspath(path)
-    if (bytes == null) {
-      logger.warn("Resource not found: " + path)
-      return NotFound
-    }
-
     val key   = ("[resource]" + path, 0l)
     val value = smallFileCache.get(key)
     if (value != null) return value
+
+    val bytes = Loader.bytesFromClasspath(path)
+    if (bytes == null) return NotFound
 
     val etag    = forBytes(bytes)
     val small   = Small(bytes, etag, Mime.get(path), false)
@@ -78,10 +73,15 @@ object Etag extends Logger {
 
   //----------------------------------------------------------------------------
 
+  def areEtagsIdentical(request: HttpRequest, etag: String) =
+    (request.getHeader(IF_NONE_MATCH) == etag)
+
   /** @return true if NOT_MODIFIED response has been sent */
-  def respondIfEtagsMatch(action: Action, etag: String) = {
-    if (action.request.getHeader(IF_NONE_MATCH) == etag) {
+  def respondIfEtagsIdentical(action: Action, etag: String) = {
+    if (areEtagsIdentical(action.request, etag)) {
       action.response.setStatus(NOT_MODIFIED)
+      HttpHeaders.setContentLength(action.response, 0)
+      action.response.setContent(ChannelBuffers.EMPTY_BUFFER)
       action.respond
       true
     } else {

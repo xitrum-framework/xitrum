@@ -42,7 +42,7 @@ class PublicResourceServer extends SimpleChannelUpstreamHandler with BadClientSi
     val response = new DefaultHttpResponse(HTTP_1_1, OK)
     PathSanitizer.sanitize(pathInfo) match {
       case None       => XSendFile.set404Page(response)
-      case Some(path) => XSendResource.setHeader(response, path)
+      case Some(path) => XSendResource.setHeader(response, pathInfo.substring("/resources/".length))
     }
     ctx.getChannel.write(response)
   }

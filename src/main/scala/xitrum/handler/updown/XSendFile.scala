@@ -54,6 +54,8 @@ object XSendFile extends Logger {
       case Etag.Small(bytes, etag, mimeo, gzipped) =>
         if (request.getHeader(IF_NONE_MATCH) == etag) {
           response.setStatus(NOT_MODIFIED)
+          HttpHeaders.setContentLength(response, 0)
+          response.setContent(ChannelBuffers.EMPTY_BUFFER)
         } else {
           NotModified.setMaxAgeAggressively(response)
           response.setHeader(ETAG, etag)
@@ -71,6 +73,8 @@ object XSendFile extends Logger {
         val lastModifiedRfc2822 = NotModified.formatRfc2822(file.lastModified)
         if (request.getHeader(IF_MODIFIED_SINCE) == lastModifiedRfc2822) {
           response.setStatus(NOT_MODIFIED)
+          HttpHeaders.setContentLength(response, 0)
+          response.setContent(ChannelBuffers.EMPTY_BUFFER)
           ctx.sendDownstream(e)
         } else {
           NotModified.setMaxAgeAggressively(response)
@@ -162,16 +166,14 @@ class XSendFile extends ChannelUpstreamHandler with ChannelDownstreamHandler {
     }
 
     val response = m.asInstanceOf[HttpResponse]
-    if (!response.containsHeader(X_SENDFILE_HEADER)) {
+    val abs      = response.getHeader(X_SENDFILE_HEADER)
+    if (abs == null) {
       ctx.sendDownstream(e)
       return
     }
 
-    // X-Sendfile is not standard
-    // To avoid leaking the information, we remove it
-    val abs = response.getHeader(X_SENDFILE_HEADER)
+    // X-SendFile is not standard, remove to avoid leaking information
     response.removeHeader(X_SENDFILE_HEADER)
-
     sendFile(ctx, e, request, response, abs)
   }
 }

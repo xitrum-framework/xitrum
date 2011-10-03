@@ -11,7 +11,7 @@ import HttpHeaders.Values.CHUNKED
 import com.codahale.jerkson.Json
 
 import xitrum.{Action, Config}
-import xitrum.handler.updown.XSendFile
+import xitrum.handler.updown.{XSendFile, XSendResource}
 
 trait Renderer extends JS with Flash with I18n {
   this: Action =>
@@ -128,7 +128,7 @@ trait Renderer extends JS with Flash with I18n {
   }
 
   /**
-   * Sends a file using X-Sendfile.
+   * Sends a file using X-SendFile.
    *
    * @param path Starts with "/" for absolute path, otherwise it is relative to
    * the current working directory (System.getProperty("user.dir")).
@@ -142,8 +142,12 @@ trait Renderer extends JS with Flash with I18n {
     respond
   }
 
+  /** @param path No / prefix, relative to an entry in CLASSPATH */
   def renderResource(path: String) {
+    if (!channel.isOpen) return
 
+    XSendResource.setHeader(response, path)
+    respond
   }
 
   //----------------------------------------------------------------------------

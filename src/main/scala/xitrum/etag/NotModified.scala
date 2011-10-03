@@ -28,14 +28,17 @@ object NotModified {
   def formatRfc2822(timestamp: Long) = rfc2822.format(timestamp)
 
   /**
-   * Max-age header is automatically set for static files.
+   * Tells the browser to cache static files for a long time.
+   * This works well even when this is a cluster of web servers behind a load balancer
+   * because the URL created by urlForResource is in the form: resource?etag
+   *
    * Don't worry that browsers do not pick up new files after you modified them,
    * see the doc about static files.
    *
    * Google recommends 1 year:
    * http://code.google.com/intl/ja/speed/page-speed/docs/caching.html
    *
-   * Also set Expires because IEs use Expires, not max-age:
+   * Both Max-age and Expires header are set because IEs use Expires, not max-age:
    * http://mrcoles.com/blog/cookies-max-age-vs-expires/
    */
   def setMaxAgeAggressively(response: HttpResponse) {

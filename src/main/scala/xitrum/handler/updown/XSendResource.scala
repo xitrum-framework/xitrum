@@ -25,7 +25,29 @@ object XSendResource extends Logger {
     response.setHeader(X_SENDRESOURCE_HEADER, path)
   }
 
-  def sendFile(ctx: ChannelHandlerContext, e: ChannelEvent, request: HttpRequest, response: HttpResponse, abs: String) {
+  /** @return false if not found */
+  def sendResource(ctx: ChannelHandlerContext, e: ChannelEvent, request: HttpRequest, response: HttpResponse, path: String) {
+    Etag.forResource(path) match {
+      case Etag.NotFound => XSendFile.set404Page(response)
+
+      case Etag.Small(bytes, etag, mimeo, gzipped) =>
+        if (Etag.areEtagsIdentical(request, etag)) {
+          response.setStatus(NOT_MODIFIED)
+          HttpHeaders.setContentLength(response, 0)
+          response.setContent(ChannelBuffers.EMPTY_BUFFER)
+        } else {
+          response.setHeader(ETAG, etag)
+          if (mimeo.isDefined) response.setHeader(CONTENT_TYPE, mimeo.get)
+          if (gzipped)         response.setHeader(CONTENT_ENCODING, "gzip")
+
+          NotModified.setMaxAgeAggressively(response)
+
+          val cb = ChannelBuffers.wrappedBuffer(bytes)
+          HttpHeaders.setContentLength(response, bytes.length)
+          response.setContent(cb)
+        }
+    }
+    ctx.sendDownstream(e)
   }
 }
 
@@ -66,16 +88,14 @@ class XSendResource extends ChannelUpstreamHandler with ChannelDownstreamHandler
     }
 
     val response = m.asInstanceOf[HttpResponse]
-    if (!response.containsHeader(X_SENDRESOURCE_HEADER)) {
+    val path     = response.getHeader(X_SENDRESOURCE_HEADER)
+    if (path == null) {
       ctx.sendDownstream(e)
       return
     }
 
-    // X-Sendfile is not standard
-    // To avoid leaking the information, we remove it
-    val abs = response.getHeader(X_SENDRESOURCE_HEADER)
+    // X-SendResource is not standard, remove to avoid leaking information
     response.removeHeader(X_SENDRESOURCE_HEADER)
-
-    sendFile(ctx, e, request, response, abs)
+    sendResource(ctx, e, request, response, path)
   }
 }
