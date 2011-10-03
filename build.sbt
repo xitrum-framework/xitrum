@@ -40,7 +40,7 @@ libraryDependencies += "com.hazelcast" % "hazelcast" % "1.9.4.2"
 
 // http://www.hazelcast.com/documentation.jsp#Clients
 // Hazelcast may be configured in Xitrum as super client or native client
-libraryDependencies += "com.hazelcast" % "hazelcast-client" % "1.9.4.2"
+libraryDependencies += "com.hazelcast" % "hazelcast-client" % "1.9.4.3"
 
 // https://github.com/codahale/jerkson
 // lift-json does not generate correctly for:
