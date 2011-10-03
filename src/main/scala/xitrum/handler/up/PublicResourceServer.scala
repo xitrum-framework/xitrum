@@ -2,7 +2,7 @@ package xitrum.handler.up
 
 import java.io.File
 
-import org.jboss.netty.channel.{ChannelHandler, SimpleChannelUpstreamHandler, ChannelHandlerContext, MessageEvent, ExceptionEvent, Channels}
+import org.jboss.netty.channel.{ChannelHandler, SimpleChannelUpstreamHandler, ChannelHandlerContext, MessageEvent}
 import org.jboss.netty.handler.codec.http.{HttpMethod, HttpResponseStatus, HttpRequest, DefaultHttpResponse, HttpHeaders, HttpVersion}
 import ChannelHandler.Sharable
 import HttpMethod._
@@ -10,12 +10,14 @@ import HttpResponseStatus._
 import HttpVersion._
 
 import xitrum.Config
-import xitrum.handler.BaseUri
-import xitrum.handler.updown.XSendFile
+import xitrum.handler.updown.{XSendFile, XSendResource}
 import xitrum.etag.NotModified
 import xitrum.util.PathSanitizer
 
-/** Routes /resources/public/xxx URL to resources in CLASSPATH. */
+/**
+ * Routes /resources/public/xxx URL to resources in CLASSPATH.
+ * See ChannelPipelineFactory, this handler is put after XSendResource.
+ */
 @Sharable
 class PublicResourceServer extends SimpleChannelUpstreamHandler with BadClientSilencer {
   override def messageReceived(ctx: ChannelHandlerContext, e: MessageEvent) {
@@ -26,55 +28,22 @@ class PublicResourceServer extends SimpleChannelUpstreamHandler with BadClientSi
     }
 
     val request = m.asInstanceOf[HttpRequest]
-
     if (request.getMethod != GET) {
       ctx.sendUpstream(e)
       return
     }
 
-    val pathInfo0 = request.getUri.split('?')(0)
-
-    // See ChannelPipelineFactory, this handler is put after only XSendFile
-    // We check baseUri here
-    BaseUri.remove(pathInfo0) match {
-      case None =>
-        val response = new DefaultHttpResponse(HTTP_1_1, NOT_FOUND)
-        XSendFile.set404Page(response)
-        ctx.getChannel.write(response)
-        return
-
-      case Some(pathInfo1) =>
-        val withoutSlashPrefix  = pathInfo1.substring(1)
-        val isSpecialPublicFile = Config.publicFilesNotBehindPublicUrl.contains(withoutSlashPrefix)
-
-        if (!isSpecialPublicFile && !pathInfo1.startsWith("/public/")) {
-          ctx.sendUpstream(e)
-          return
-        }
-
-        val response = new DefaultHttpResponse(HTTP_1_1, OK)
-        absStaticPath(pathInfo1) match {
-          case None      => XSendFile.set404Page(response)
-          case Some(abs) => XSendFile.setHeader(response, abs)
-        }
-        ctx.getChannel.write(response)
+    val pathInfo = request.getUri.split('?')(0)
+    if (!pathInfo.startsWith("/resources/public/")) {
+      ctx.sendUpstream(e)
+      return
     }
-  }
 
-  //----------------------------------------------------------------------------
-
-  /** Sanitizes and returns absolute path. */
-  private def absStaticPath(pathInfo: String): Option[String] = {
-    // pathInfo starts with "/"
-
+    val response = new DefaultHttpResponse(HTTP_1_1, OK)
     PathSanitizer.sanitize(pathInfo) match {
-      case None => None
-
-      case Some(path) =>
-        // Convert to absolute path
-        // user.dir: current working directory
-        // See: http://www.java2s.com/Tutorial/Java/0120__Development/Javasystemproperties.htm
-        Some(System.getProperty("user.dir") + "/static" + path)
+      case None       => XSendFile.set404Page(response)
+      case Some(path) => XSendResource.setHeader(response, path)
     }
+    ctx.getChannel.write(response)
   }
 }

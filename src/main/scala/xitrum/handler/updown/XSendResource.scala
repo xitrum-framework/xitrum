@@ -21,12 +21,16 @@ object XSendResource extends Logger {
 
   private val X_SENDRESOURCE_HEADER = "X-Sendresource"
 
+  def setHeader(response: HttpResponse, path: String) {
+    response.setHeader(X_SENDRESOURCE_HEADER, path)
+  }
+
   def sendFile(ctx: ChannelHandlerContext, e: ChannelEvent, request: HttpRequest, response: HttpResponse, abs: String) {
   }
 }
 
 /**
- * This handler sends resource file (should be small) in CLASSPATH.
+ * This handler sends resource files (should be small) in CLASSPATH.
  */
 class XSendResource extends ChannelUpstreamHandler with ChannelDownstreamHandler {
   import XSendResource._

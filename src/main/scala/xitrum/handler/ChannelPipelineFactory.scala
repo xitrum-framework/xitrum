@@ -23,12 +23,27 @@ class ChannelPipelineFactory extends CPF {
     We put this right before Dispatcher to avoid request/response I/O hiccup.
   */
   private val executionHandler = {
-    val corePoolSize         = Runtime.getRuntime.availableProcessors * 2 + 1
+    // In case of CPU bound, the pool size should be equal the number of cores
+    // http://grizzly.java.net/nonav/docs/docbkx2.0/html/bestpractices.html
+    val corePoolSize = Runtime.getRuntime.availableProcessors * 20
+
     val maxTotalMemorySize   = Runtime.getRuntime.maxMemory / 2
     val maxChannelMemorySize = maxTotalMemorySize
-    new ExecutionHandler(
-      new OrderedMemoryAwareThreadPoolExecutor(corePoolSize, maxChannelMemorySize, maxTotalMemorySize))
+    new ExecutionHandler(new OrderedMemoryAwareThreadPoolExecutor(
+          corePoolSize, maxChannelMemorySize, maxTotalMemorySize))
   }
+
+  // Sharable handlers
+  private val baseUriRemover       = new BaseUriRemover
+  private val publicFileServer     = new PublicFileServer
+  private val publicResourceServer = new PublicResourceServer
+  private val request2Env          = new Request2Env
+  private val uriParser            = new UriParser
+  private val bodyParser           = new BodyParser
+  private val methodOverrider      = new MethodOverrider
+  private val dispatcher           = new Dispatcher
+  private val env2Response         = new Env2Response
+  private val responseCacher       = new ResponseCacher
 
   def getPipeline: ChannelPipeline = {
     // StaticChannelPipeline provides extreme performance at the cost of
@@ -40,8 +55,8 @@ class ChannelPipelineFactory extends CPF {
     // TODO: websocket
 
     new StaticChannelPipeline(
-      // Upstream, direction: first handler -> last handler
-      // Downstream, direction: last handler -> first handler
+      // Upstream direction: first handler -> last handler
+      // Downstream direction: last handler -> first handler
 
       // Up
       new HttpRequestDecoder,
@@ -52,18 +67,22 @@ class ChannelPipelineFactory extends CPF {
 
       // Both up and down
       new XSendFile,
+      new XSendResource,
 
       // Up
-      new PublicFileServer,
-      new Request2Env,
-      new UriParser,
-      new BodyParser,
-      new MethodOverrider,
+      baseUriRemover,
+      publicFileServer,
+      publicResourceServer,
+
+      request2Env,
+      uriParser,
+      bodyParser,
+      methodOverrider,
       executionHandler,  // Must be shared
-      new Dispatcher,
+      dispatcher,
 
       // Down
-      new Env2Response,
-      new ResponseCacher)
+      env2Response,
+      responseCacher)
   }
 }

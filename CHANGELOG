@@ -1,10 +1,15 @@
-1.3:
+1.4:
 * Applications can use their own error handling (404 and 500)
 * wro4j integration
 * Middleware architecture
 
-1.2.1:
+1.3:
 * Update SBT from 0.10.1 to 0.11.0
+* Improve performance, simple test on MacBook Pro 2 GHz Core i7, 8 GB memory:
+    Static file 1 KB: ~12000 req/s
+    Resource file in CLASSPATH 1 KB: ~12000 req/s
+    Dynamic HTML 1 KB: ~8000 req/s
+* Only gzip when client specifies "gzip" in Accept-Encoding request header
 
 1.2:
 * Conditional GET using ETag, see http://stevesouders.com/hpws/rules.php
@@ -14,5 +19,5 @@
   <input type="radio" name={validate("light")} value="green" />
 
 1.1:
-* i18n
-* Faster route collecting on startup
+* i18n using Scaposer
+* Faster route collecting on startup using Sclasner

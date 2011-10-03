@@ -3,12 +3,12 @@ package xitrum.handler.up
 import java.util.{Map => JMap, List => JList, LinkedHashMap => JLinkedHashMap}
 import scala.collection.mutable.{ArrayBuffer, Map => MMap}
 
-import org.jboss.netty.channel.{ChannelHandler, SimpleChannelUpstreamHandler, ChannelHandlerContext, MessageEvent, ExceptionEvent, Channels}
+import org.jboss.netty.channel.{ChannelHandler, SimpleChannelUpstreamHandler, ChannelHandlerContext, MessageEvent, Channels}
 import ChannelHandler.Sharable
 import org.jboss.netty.handler.codec.http.QueryStringDecoder
 
 import xitrum.Config
-import xitrum.handler.{BaseUri, HandlerEnv}
+import xitrum.handler.HandlerEnv
 import xitrum.scope.request.{Params, PathInfo}
 
 @Sharable
@@ -24,8 +24,7 @@ class UriParser extends SimpleChannelUpstreamHandler with BadClientSilencer {
     val request = env.request
 
     try {
-      val uri = BaseUri.remove(request.getUri).get  // None has been checked at PublicFileServer
-      val decoder   = new QueryStringDecoder(uri, Config.paramCharset)
+      val decoder   = new QueryStringDecoder(request.getUri, Config.paramCharset)
       env.pathInfo  = new PathInfo(decoder.getPath)
       env.uriParams = jParamsToParams(decoder.getParameters)
     } catch {
