@@ -6,7 +6,6 @@ import org.jboss.netty.channel._
 import org.jboss.netty.buffer.ChannelBuffers
 import org.jboss.netty.util.CharsetUtil
 import org.jboss.netty.handler.codec.http._
-import ChannelHandler.Sharable
 import HttpResponseStatus._
 import HttpVersion._
 
@@ -135,7 +134,7 @@ object Dispatcher extends Logger {
   }
 }
 
-@Sharable
+// Not sharable because of closedListeners
 class Dispatcher extends SimpleChannelUpstreamHandler with BadClientSilencer {
   import Dispatcher._
 

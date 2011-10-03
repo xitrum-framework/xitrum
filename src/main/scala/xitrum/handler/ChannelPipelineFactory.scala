@@ -41,7 +41,6 @@ class ChannelPipelineFactory extends CPF {
   private val uriParser            = new UriParser
   private val bodyParser           = new BodyParser
   private val methodOverrider      = new MethodOverrider
-  private val dispatcher           = new Dispatcher
   private val env2Response         = new Env2Response
   private val responseCacher       = new ResponseCacher
 
@@ -79,7 +78,7 @@ class ChannelPipelineFactory extends CPF {
       bodyParser,
       methodOverrider,
       executionHandler,  // Must be shared
-      dispatcher,
+      new Dispatcher,
 
       // Down
       env2Response,
