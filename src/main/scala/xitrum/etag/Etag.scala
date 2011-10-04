@@ -31,7 +31,7 @@ object Etag extends Logger {
 
   def forString(string: String) = forBytes(string.getBytes(Config.paramCharsetName))
 
-  def forFile(path: String): Result = {
+  def forFile(path: String, gzipped: Boolean): Result = {
     val file = new File(path)
     if (!file.exists) return NotFound
 
@@ -39,7 +39,8 @@ object Etag extends Logger {
 
     val mtime = file.lastModified
     val key   = (path, mtime)
-    val value = smallFileCache.get(key)
+    val cache = if (gzipped) gzippedSmallFileCache else smallFileCache
+    val value = cache.get(key)
     if (value != null) return value
 
     val bytes = Loader.bytesFromFile(path)
@@ -47,8 +48,8 @@ object Etag extends Logger {
 
     val etag    = forBytes(bytes)
     val small   = Small(bytes, etag, Mime.get(path), false)
-    val smaller = compressBigTextualFile(small)
-    smallFileCache.synchronized { smallFileCache.put(key, smaller) }
+    val smaller = if (gzipped) compressBigTextualFile(small) else small
+    cache.synchronized { cache.put(key, smaller) }
     smaller
   }
 
@@ -56,9 +57,10 @@ object Etag extends Logger {
    * Read whole file to memory. It's OK because the files are normally small.
    * No one is stupid enough to store large files in resources.
    */
-  def forResource(path: String): Result = {
+  def forResource(path: String, gzipped: Boolean): Result = {
     val key   = ("[resource]" + path, 0l)
-    val value = smallFileCache.get(key)
+    val cache = if (gzipped) gzippedSmallFileCache else smallFileCache
+    val value = cache.get(key)
     if (value != null) return value
 
     val bytes = Loader.bytesFromClasspath(path)
@@ -66,8 +68,8 @@ object Etag extends Logger {
 
     val etag    = forBytes(bytes)
     val small   = Small(bytes, etag, Mime.get(path), false)
-    val smaller = compressBigTextualFile(small)
-    smallFileCache.synchronized { smallFileCache.put(key, smaller) }
+    val smaller = if (gzipped) compressBigTextualFile(small) else small
+    cache.synchronized { cache.put(key, smaller) }
     smaller
   }
 

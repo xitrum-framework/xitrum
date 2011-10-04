@@ -31,8 +31,8 @@ class Env2Response extends SimpleChannelDownstreamHandler {
     // be closed later by the code that sends the response body
     if (HttpHeaders.getContentLength(response) == response.getContent.readableBytes) {
       // Only effective for dynamic response, static file response
-      // has already be handled
-      if (!tryEtag(request, response)) tryCompressBigTextualResponse(response)
+      // has already been handled
+      if (!tryEtag(request, response)) tryCompressBigTextualResponse(request, response)
 
       if (!HttpHeaders.isKeepAlive(request)) future.addListener(ChannelFutureListener.CLOSE)
     }
@@ -76,8 +76,8 @@ class Env2Response extends SimpleChannelDownstreamHandler {
     }
   }
 
-  private def tryCompressBigTextualResponse(response: HttpResponse) {
-    if (response.containsHeader(CONTENT_ENCODING)) return
+  private def tryCompressBigTextualResponse(request: HttpRequest, response: HttpResponse) {
+    if (!Gzip.isAccepted(request) || response.containsHeader(CONTENT_ENCODING)) return
 
     val contentType = response.getHeader(CONTENT_TYPE)
     if (contentType == null || !Mime.isTextual(contentType)) return

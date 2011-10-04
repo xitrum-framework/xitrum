@@ -14,7 +14,7 @@ import org.jboss.netty.buffer.ChannelBuffers
 
 import xitrum.{Config, Logger}
 import xitrum.etag.{Etag, NotModified}
-import xitrum.util.Mime
+import xitrum.util.{Gzip, Mime}
 
 object XSendFile extends Logger {
   val CHUNK_SIZE = 8 * 1024
@@ -40,7 +40,7 @@ object XSendFile extends Logger {
 
   def sendFile(ctx: ChannelHandlerContext, e: ChannelEvent, request: HttpRequest, response: HttpResponse, abs: String) {
     // Try to serve from cache
-    Etag.forFile(abs) match {
+    Etag.forFile(abs, Gzip.isAccepted(request)) match {
       case Etag.NotFound =>
         response.setStatus(NOT_FOUND)
         if (abs.startsWith(abs404)) {

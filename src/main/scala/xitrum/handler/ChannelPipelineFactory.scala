@@ -81,7 +81,7 @@ class ChannelPipelineFactory extends CPF {
       new Dispatcher,
 
       // Down
-      env2Response,
-      responseCacher)
+      env2Response/*,
+      responseCacher*/)
   }
 }

@@ -14,7 +14,7 @@ import org.jboss.netty.buffer.ChannelBuffers
 
 import xitrum.{Config, Logger}
 import xitrum.etag.{Etag, NotModified}
-import xitrum.util.Mime
+import xitrum.util.{Gzip, Mime}
 
 object XSendResource extends Logger {
   val CHUNK_SIZE = 8 * 1024
@@ -27,7 +27,7 @@ object XSendResource extends Logger {
 
   /** @return false if not found */
   def sendResource(ctx: ChannelHandlerContext, e: ChannelEvent, request: HttpRequest, response: HttpResponse, path: String) {
-    Etag.forResource(path) match {
+    Etag.forResource(path, Gzip.isAccepted(request)) match {
       case Etag.NotFound => XSendFile.set404Page(response)
 
       case Etag.Small(bytes, etag, mimeo, gzipped) =>
