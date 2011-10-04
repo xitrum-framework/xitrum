@@ -3,6 +3,17 @@ Introduction
 
 .. image:: http://www.bdoubliees.com/journalspirou/sfigures6/schtroumpfs/s3.jpg
 
+Quick start: install `SBT <https://github.com/harrah/xsbt/wiki/Setup>`_ and
+`Giter8 <https://github.com/n8han/giter8>`_, then
+
+::
+
+  $ g8 ngocdaothanh/xitrum
+  $ cd my_project
+  $ sbt run
+
+See `full documentation <http://ngocdaothanh.github.com/xitrum>`_ for details.
+
 Xitrum ("Smurf" in Vietnamese) is an async and clustered Scala web framework and
 web server on top of `Netty <http://www.jboss.org/netty>`_ and
 `Hazelcast <http://www.hazelcast.com/>`_:
@@ -46,7 +57,5 @@ Hazelcast also gives:
   | +-------------+ |
   +-----------------+
 
-Xitrum is open source:
-
-* Source code: https://github.com/ngocdaothanh/xitrum
-* Google group: http://groups.google.com/group/xitrum-framework
+Xitrum is `open source <https://github.com/ngocdaothanh/xitrum>`_, please join
+its `Google group <http://groups.google.com/group/xitrum-framework>`_.
