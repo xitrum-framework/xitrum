@@ -8,7 +8,8 @@
     Hazelcast: 1.9.4.2 -> 1.9.4.3
     Jerkson:   0.4.1   -> 0.4.2
     SBT:       0.10.1  -> 0.11.0
-* Improve performance, simple test on MacBook Pro 2 GHz Core i7, 8 GB memory:
+* Improve performance, simple benchmark (please use httperf, ab is broken) on
+  MacBook Pro 2 GHz Core i7, 8 GB memory:
     Static file:                 ~11000 req/s
     Resource file in CLASSPATH:  ~11000 req/s
     Dynamic HTML without layout: ~7000  req/s
