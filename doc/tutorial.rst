@@ -9,17 +9,17 @@ This chapter describes how to create and run a Xitrum project.
 Create a new Xitrum project
 ---------------------------
 
-Install `SBT 0.11.0+ <https://github.com/harrah/xsbt/wiki/Setup>`_  and
+Install `SBT 0.11.0 <https://github.com/harrah/xsbt/wiki/Setup>`_  and
 `Giter8 <https://github.com/n8han/giter8>`_.
 
 Run ``g8 ngocdaothanh/xitrum`` to create a new Xitrum project.
-A new project skeleton will be created:
+A new project skeleton will be created.
 
 Run
 ---
 
-Change to the newly created project and run ``sbt run``. This command will
-download dependencies, compile the project and run the class
+Change to the newly created project directory and run ``sbt run``. This command
+will download all dependencies, compile the project, and run the class
 ``my_project.Boot``, which starts the web server.
 
 Open http://localhost:8000/ in your browser.
