@@ -1,4 +1,7 @@
 1.4 (planned):
+* Fix bug at setting Expires header for static content, it should be one year
+  later instead of 17 days later
+* Set Expires header for resources in CLASSPATH
 * Applications can use their own error handling (404 and 500)
 * wro4j integration
 * Middleware architecture
