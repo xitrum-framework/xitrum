@@ -11,7 +11,7 @@ import HttpResponseStatus._
 import xitrum.Action
 
 object NotModified {
-  private val SECS_IN_A_YEAR = 60 * 60 * 24 * 365
+  private val SECS_IN_A_YEAR = 365 * 24 * 60 * 60
 
   // SimpleDateFormat is locale dependent
   // Avoid the case when Xitrum is run on for example Japanese platform
@@ -41,8 +41,18 @@ object NotModified {
    * Both Max-age and Expires header are set because IEs use Expires, not max-age:
    * http://mrcoles.com/blog/cookies-max-age-vs-expires/
    */
-  def setMaxAgeAggressively(response: HttpResponse) {
-    if (!response.containsHeader(CACHE_CONTROL)) response.setHeader(CACHE_CONTROL, "public, " + MAX_AGE + "=" + SECS_IN_A_YEAR)
-    if (!response.containsHeader(EXPIRES))       response.setHeader(EXPIRES, formatRfc2822(System.currentTimeMillis + SECS_IN_A_YEAR * 1000))
+  def setClientCacheAggressively(response: HttpResponse) {
+    if (!response.containsHeader(CACHE_CONTROL))
+      response.setHeader(CACHE_CONTROL, "public, " + MAX_AGE + "=" + SECS_IN_A_YEAR)
+
+    // Note that SECS_IN_A_YEAR * 1000 is different from SECS_IN_A_YEAR * 1000l
+    // because of integer overflow!
+    if (!response.containsHeader(EXPIRES))
+      response.setHeader(EXPIRES, formatRfc2822(System.currentTimeMillis + SECS_IN_A_YEAR * 1000l))
+  }
+
+  def removeClientCache(response: HttpResponse) {
+    response.removeHeader(CACHE_CONTROL)
+    response.removeHeader(EXPIRES)
   }
 }
