@@ -17,6 +17,10 @@ import xitrum.etag.{Etag, NotModified}
 import xitrum.util.{Gzip, Mime}
 
 object XSendFile extends Logger {
+  // setClientCacheAggressively should be called at PublicFileServer, not
+  // here because XSendFile may be used by applications which does not want
+  // to clients to cache.
+
   val CHUNK_SIZE = 8 * 1024
 
   private val X_SENDFILE_HEADER = "X-Sendfile"
@@ -43,8 +47,9 @@ object XSendFile extends Logger {
     Etag.forFile(abs, Gzip.isAccepted(request)) match {
       case Etag.NotFound =>
         response.setStatus(NOT_FOUND)
-        if (abs.startsWith(abs404)) {
-          // Even 404.html is not found!
+        NotModified.removeClientCache(response)
+
+        if (abs.startsWith(abs404)) {  // Even 404.html is not found!
           HttpHeaders.setContentLength(response, 0)
           ctx.sendDownstream(e)
         } else {
@@ -57,7 +62,6 @@ object XSendFile extends Logger {
           HttpHeaders.setContentLength(response, 0)
           response.setContent(ChannelBuffers.EMPTY_BUFFER)
         } else {
-          NotModified.setMaxAgeAggressively(response)
           response.setHeader(ETAG, etag)
           if (mimeo.isDefined) response.setHeader(CONTENT_TYPE,     mimeo.get)
           if (gzipped)         response.setHeader(CONTENT_ENCODING, "gzip")
@@ -77,8 +81,6 @@ object XSendFile extends Logger {
           response.setContent(ChannelBuffers.EMPTY_BUFFER)
           ctx.sendDownstream(e)
         } else {
-          NotModified.setMaxAgeAggressively(response)
-
           val mimeo = Mime.get(abs)
           val raf   = new RandomAccessFile(abs, "r")
 

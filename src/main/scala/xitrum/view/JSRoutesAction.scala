@@ -41,7 +41,7 @@ object JSRoutesAction {
 class JSRoutesAction extends Action {
   override def execute {
     if (!Etag.respondIfEtagsIdentical(this, JSRoutesAction.etag)) {
-      NotModified.setMaxAgeAggressively(response)
+      NotModified.setClientCacheAggressively(response)
       response.setHeader(CONTENT_TYPE, "text/javascript")
       if (Gzip.isAccepted(request)) {
         response.setHeader(CONTENT_ENCODING, "gzip")

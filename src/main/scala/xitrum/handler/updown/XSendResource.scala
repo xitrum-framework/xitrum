@@ -17,6 +17,10 @@ import xitrum.etag.{Etag, NotModified}
 import xitrum.util.{Gzip, Mime}
 
 object XSendResource extends Logger {
+  // setClientCacheAggressively should be called at PublicResourceServer, not
+  // here because XSendResource may be used by applications which does not want
+  // to clients to cache.
+
   val CHUNK_SIZE = 8 * 1024
 
   private val X_SENDRESOURCE_HEADER = "X-Sendresource"
@@ -39,8 +43,6 @@ object XSendResource extends Logger {
           response.setHeader(ETAG, etag)
           if (mimeo.isDefined) response.setHeader(CONTENT_TYPE, mimeo.get)
           if (gzipped)         response.setHeader(CONTENT_ENCODING, "gzip")
-
-          NotModified.setMaxAgeAggressively(response)
 
           HttpHeaders.setContentLength(response, bytes.length)
           response.setContent(ChannelBuffers.wrappedBuffer(bytes))

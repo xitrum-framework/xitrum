@@ -47,7 +47,7 @@ class PublicFileServer extends SimpleChannelUpstreamHandler with BadClientSilenc
       case None => XSendFile.set404Page(response)
 
       case Some(abs) =>
-        NotModified.setMaxAgeAggressively(response)
+        NotModified.setClientCacheAggressively(response)
         XSendFile.setHeader(response, abs)
     }
     ctx.getChannel.write(response)
