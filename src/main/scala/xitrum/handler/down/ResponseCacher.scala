@@ -5,7 +5,8 @@ import scala.collection.immutable.{SortedMap, TreeMap}
 import org.jboss.netty.channel.{ChannelHandler, SimpleChannelDownstreamHandler, ChannelHandlerContext, MessageEvent, Channels, ChannelFutureListener}
 import org.jboss.netty.buffer.ChannelBuffers
 import ChannelHandler.Sharable
-import org.jboss.netty.handler.codec.http.{DefaultHttpResponse, HttpHeaders, HttpResponse, HttpResponseStatus, HttpVersion}
+import org.jboss.netty.handler.codec.http.{DefaultHttpResponse, HttpHeaders, HttpRequest, HttpResponse, HttpResponseStatus, HttpVersion}
+import HttpResponseStatus.OK
 import HttpHeaders.Names.{CONTENT_ENCODING, CONTENT_TYPE}
 
 import xitrum.{Cache, Config, Logger}
@@ -16,8 +17,6 @@ import xitrum.handler.HandlerEnv
 import xitrum.util.{Gzip, Mime}
 
 object ResponseCacher extends Logger {
-  private val GZIP_THRESHOLD_KB = 10
-
   //                             statusCode  headers                  content
   private type CachedResponse = (Int,        Array[(String, String)], Array[Byte])
 
@@ -27,30 +26,10 @@ object ResponseCacher extends Logger {
     if (cacheSecs == 0) return
 
     val key = makeCacheKey(action)
-
-    // http://groups.google.com/group/hazelcast/browse_thread/thread/4ba36ed398ea9664
-    val contained = try {
-      Cache.cache.containsKey(key)
-    } catch {
-      case _ =>
-        logger.warn("Error when calling Hazelcast containsKey")
-        false
-    }
-
-    if (!contained) {  // Check to avoid the cost of serializing
+    if (!Cache.cache.containsKey(key)) {  // Check to avoid the cost of serializing
       val response       = action.response
-      val cachedResponse = serializeResponse(response)
-      val secs           = {  // See Config.NON_200_RESPONSE_CACHE_TTT_IN_SECS
-        val cs = if (cacheSecs < 0) -cacheSecs else cacheSecs
-        if (response.getStatus == HttpResponseStatus.OK) {
-          cs
-        } else {
-          val ret = if (cs < Config.NON_200_RESPONSE_CACHE_TTT_IN_SECS) cs else Config.NON_200_RESPONSE_CACHE_TTT_IN_SECS
-          logger.debug("Cache non 200 response for {} secs, key: {}", ret, key)
-          ret
-        }
-      }
-
+      val cachedResponse = serializeResponse(action.request, response)
+      val secs           = if (cacheSecs < 0) -cacheSecs else cacheSecs
       Cache.putIfAbsentSecond(key, cachedResponse, secs)
     }
   }
@@ -70,12 +49,12 @@ object ResponseCacher extends Logger {
    *   content: Array[Byte]
    *   gzipped: Boolean  // Big textual content is gzipped to save memory
    */
-  private def serializeResponse(response: HttpResponse): CachedResponse = {
+  private def serializeResponse(request: HttpRequest, response: HttpResponse): CachedResponse = {
     val status = response.getStatus.getCode
 
     // Should be before extracting headers, because the CONTENT_LENGTH header
     // can be updated if the content if gzipped
-    val bytes = gzipBigTextualContent(response)
+    val bytes = Gzip.tryCompressBigTextualResponse(request, response)
 
     val headers = {
       val list = response.getHeaders  // JList[JMap.Entry[String, String]], JMap.Entry is not Serializable!
@@ -101,11 +80,15 @@ object ResponseCacher extends Logger {
 
   // uploadParams is not included in the key, only textParams is
   private def makeCacheKey(action: Action): String = {
-    val textParams = action.textParams
-    val sortedMap =
-      (new TreeMap[String, List[String]]) ++  // See xitrum.action.env.Env.Params
-      textParams
-    Cache.pageActionPrefix(action.getClass.asInstanceOf[Class[Action]]) + "/" + action.request.getMethod + "/" + inspectSortedParams(sortedMap)
+    // See xitrum.action.env.Env.Params
+    val sortedMap = (new TreeMap[String, List[String]]) ++ action.textParams
+
+    val request = action.request
+    val key     =
+      Cache.pageActionPrefix(action.getClass.asInstanceOf[Class[Action]]) + "/" +
+      request.getMethod + "/" +
+      inspectSortedParams(sortedMap)
+    if (Gzip.isAccepted(request)) key + "_gzipped" else key
   }
 
   // See RequestEnv.inspectParamsWithFilter
@@ -138,31 +121,6 @@ object ResponseCacher extends Logger {
     sb.append("}")
     sb.toString
   }
-
-  // If gzipped, CONTENT_LENGTH header is updated and CONTENT_ENCODING is set to gzip.
-  private def gzipBigTextualContent(response: HttpResponse): Array[Byte] = {
-    val bytes = {
-      val channelBuffer = response.getContent
-      val ret           = new Array[Byte](channelBuffer.readableBytes)
-      channelBuffer.readBytes(ret)
-      channelBuffer.resetReaderIndex
-      ret
-    }
-
-    if (!Mime.isTextual(response.getHeader(CONTENT_TYPE))) return bytes
-
-    val big = bytes.length > GZIP_THRESHOLD_KB * 1024
-    if (!big) return bytes
-
-    val gzippedBytes = Gzip.compress(bytes)
-
-    // Update CONTENT_LENGTH and set CONTENT_ENCODING
-    HttpHeaders.setContentLength(response, gzippedBytes.length)
-    response.setHeader(CONTENT_ENCODING, "gzip")
-
-    response.setContent(ChannelBuffers.wrappedBuffer(gzippedBytes))
-    gzippedBytes
-  }
 }
 
 @Sharable
@@ -186,7 +144,9 @@ class ResponseCacher extends SimpleChannelDownstreamHandler with Logger {
       return
     }
 
-    if (!action.response.isChunked) cacheResponse(action)
+    val response = action.response
+    if (response.getStatus == OK && !response.isChunked) cacheResponse(action)
+
     ctx.sendDownstream(e)
   }
 }

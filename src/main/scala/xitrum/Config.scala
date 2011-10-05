@@ -94,14 +94,13 @@ object Config extends Logger {
    *
    * Google recommends > 150B-1KB
    */
-  val BIG_TEXTUAL_RESPONSE_SIZE_IN_KB    = 1
+  val BIG_TEXTUAL_RESPONSE_SIZE_IN_KB = 1
 
   /**
-   * When there is trouble (high load on startup ect.), the response may not be
-   * OK. If the response is specified to be cached, we should only cache it
-   * for a short time.
+   * In case of CPU bound, the pool size should be equal the number of cores
+   * http://grizzly.java.net/nonav/docs/docbkx2.0/html/bestpractices.html
    */
-  val NON_200_RESPONSE_CACHE_TTT_IN_SECS = 30
+  val EXECUTIORS_PER_CORE = 64
 
   //----------------------------------------------------------------------------
 

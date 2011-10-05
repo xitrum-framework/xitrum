@@ -39,7 +39,7 @@ Hazelcast also gives:
 
 * In-process and distribued cache, you don't need separate cache servers.
 * In-process and clustered `Comet <http://en.wikipedia.org/wiki/Comet_(programming)>`_,
-  you don't need a separate Comet server.
+  you can scale Comet to multiple web servers.
 
 ::
 

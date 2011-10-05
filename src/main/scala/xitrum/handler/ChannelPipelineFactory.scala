@@ -23,10 +23,7 @@ class ChannelPipelineFactory extends CPF {
     We put this right before Dispatcher to avoid request/response I/O hiccup.
   */
   private val executionHandler = {
-    // In case of CPU bound, the pool size should be equal the number of cores
-    // http://grizzly.java.net/nonav/docs/docbkx2.0/html/bestpractices.html
-    val corePoolSize = Runtime.getRuntime.availableProcessors * 20
-
+    val corePoolSize         = Runtime.getRuntime.availableProcessors * Config.EXECUTIORS_PER_CORE
     val maxTotalMemorySize   = Runtime.getRuntime.maxMemory / 2
     val maxChannelMemorySize = maxTotalMemorySize
     new ExecutionHandler(new OrderedMemoryAwareThreadPoolExecutor(
@@ -81,7 +78,7 @@ class ChannelPipelineFactory extends CPF {
       new Dispatcher,
 
       // Down
-      env2Response/*,
-      responseCacher*/)
+      env2Response,
+      responseCacher)
   }
 }

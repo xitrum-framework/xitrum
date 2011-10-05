@@ -42,9 +42,8 @@ object XSendResource extends Logger {
 
           NotModified.setMaxAgeAggressively(response)
 
-          val cb = ChannelBuffers.wrappedBuffer(bytes)
           HttpHeaders.setContentLength(response, bytes.length)
-          response.setContent(cb)
+          response.setContent(ChannelBuffers.wrappedBuffer(bytes))
         }
     }
     ctx.sendDownstream(e)

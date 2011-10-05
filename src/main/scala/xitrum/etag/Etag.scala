@@ -80,14 +80,16 @@ object Etag extends Logger {
 
   /** @return true if NOT_MODIFIED response has been sent */
   def respondIfEtagsIdentical(action: Action, etag: String) = {
-    if (areEtagsIdentical(action.request, etag)) {
-      action.response.setStatus(NOT_MODIFIED)
-      HttpHeaders.setContentLength(action.response, 0)
-      action.response.setContent(ChannelBuffers.EMPTY_BUFFER)
+    val request  = action.request
+    val response = action.response
+    if (areEtagsIdentical(request, etag)) {
+      response.setStatus(NOT_MODIFIED)
+      HttpHeaders.setContentLength(response, 0)
+      response.setContent(ChannelBuffers.EMPTY_BUFFER)
       action.respond
       true
     } else {
-      action.request.setHeader(ETAG, etag)
+      request.setHeader(ETAG, etag)
       false
     }
   }

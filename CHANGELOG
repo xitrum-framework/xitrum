@@ -1,4 +1,4 @@
-1.4:
+1.4 (planned):
 * Applications can use their own error handling (404 and 500)
 * wro4j integration
 * Middleware architecture
@@ -6,9 +6,10 @@
 1.3:
 * Update SBT from 0.10.1 to 0.11.0
 * Improve performance, simple test on MacBook Pro 2 GHz Core i7, 8 GB memory:
-    Static file 1 KB: ~12000 req/s
-    Resource file in CLASSPATH 1 KB: ~12000 req/s
-    Dynamic HTML 1 KB: ~8000 req/s
+    Static file:                 ~11000 req/s
+    Resource file in CLASSPATH:  ~11000 req/s
+    Dynamic HTML without layout: ~7000  req/s
+    Dynamic HTML with layout:    ~7000  req/s
 * Only gzip when client specifies "gzip" in Accept-Encoding request header
 
 1.2:

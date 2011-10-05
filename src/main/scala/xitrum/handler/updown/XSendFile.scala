@@ -44,7 +44,7 @@ object XSendFile extends Logger {
       case Etag.NotFound =>
         response.setStatus(NOT_FOUND)
         if (abs.startsWith(abs404)) {
-          // Event 404.html is not found!
+          // Even 404.html is not found!
           HttpHeaders.setContentLength(response, 0)
           ctx.sendDownstream(e)
         } else {

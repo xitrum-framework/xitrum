@@ -30,9 +30,8 @@ class Env2Response extends SimpleChannelDownstreamHandler {
     // it is because the response body will be sent later and the channel will
     // be closed later by the code that sends the response body
     if (HttpHeaders.getContentLength(response) == response.getContent.readableBytes) {
-      // Only effective for dynamic response, static file response
-      // has already been handled
-      if (!tryEtag(request, response)) tryCompressBigTextualResponse(request, response)
+      // Only effective for dynamic response, static file response has already been handled
+      if (!tryEtag(request, response)) Gzip.tryCompressBigTextualResponse(request, response)
 
       if (!HttpHeaders.isKeepAlive(request)) future.addListener(ChannelFutureListener.CLOSE)
     }
@@ -49,49 +48,34 @@ class Env2Response extends SimpleChannelDownstreamHandler {
    * @return true if the NO_MODIFIED response is set by this method
    */
   private def tryEtag(request: HttpRequest, response: HttpResponse): Boolean = {
-    if (response.containsHeader(ETAG)) return false
-
-    val readableBytes = response.getContent.readableBytes
+    val channelBuffer = response.getContent
+    val readableBytes = channelBuffer.readableBytes
     if (readableBytes > Config.smallStaticFileSizeInKB * 1024) return false
 
-    val channelBuffer = response.getContent
-    val bytes = new Array[Byte](readableBytes)
-    channelBuffer.readBytes(bytes)
-    val etag = Etag.forBytes(bytes)
+    val etag1 = response.getHeader(ETAG)
+    val etag2 =
+      if (etag1 != null) {
+        etag1
+      } else {
+        val bytes = new Array[Byte](readableBytes)
+        channelBuffer.readBytes(bytes)
+        Etag.forBytes(bytes)
+      }
 
-    if (request.getHeader(IF_NONE_MATCH) == etag) {
+    if (request.getHeader(IF_NONE_MATCH) == etag2) {
       // Only send headers, the content is empty
       response.setStatus(NOT_MODIFIED)
       HttpHeaders.setContentLength(response, 0)
       response.setContent(ChannelBuffers.EMPTY_BUFFER)
       true
     } else {
-      response.setHeader(ETAG, etag)
+      response.setHeader(ETAG, etag2)
 
       // The response channel buffer is empty now because we have already read
       // everything out, we need to set it back
-      response.setContent(ChannelBuffers.copiedBuffer(bytes))
+      channelBuffer.resetReaderIndex
 
       false
     }
-  }
-
-  private def tryCompressBigTextualResponse(request: HttpRequest, response: HttpResponse) {
-    if (!Gzip.isAccepted(request) || response.containsHeader(CONTENT_ENCODING)) return
-
-    val contentType = response.getHeader(CONTENT_TYPE)
-    if (contentType == null || !Mime.isTextual(contentType)) return
-
-    val channelBuffer = response.getContent
-    val readableBytes = channelBuffer.readableBytes
-    if (readableBytes < Config.BIG_TEXTUAL_RESPONSE_SIZE_IN_KB * 1024) return
-
-    val bytes  = new Array[Byte](readableBytes)
-    channelBuffer.readBytes(bytes)
-    val bytes2 = Gzip.compress(bytes)
-
-    response.setHeader(CONTENT_ENCODING, "gzip")
-    HttpHeaders.setContentLength(response, bytes2.length)
-    response.setContent(ChannelBuffers.wrappedBuffer(bytes2))
   }
 }
