@@ -15,9 +15,14 @@ trait BadClientSilencer extends Logger {
     // java.io.IOException: Connection reset by peer
     // java.io.IOException: Broken pipe
     // java.nio.channels.ClosedChannelException: null
+    // javax.net.ssl.SSLException: not an SSL/TLS record
+    // java.lang.IllegalArgumentException: empty text (Use https://... to connect to HTTP server)
     val cause = e.getCause
     val s     = cause.toString
-    if (s.startsWith("java.nio.channels.ClosedChannelException") || s.startsWith("java.io.IOException")) return
+    if (s.startsWith("java.nio.channels.ClosedChannelException") ||
+        s.startsWith("java.io.IOException") ||
+        s.startsWith("javax.net.ssl.SSLException") ||
+        s.startsWith("java.lang.IllegalArgumentException")) return
 
     logger.debug(getClass.getName + " -> BadClientSilencer", cause)
   }

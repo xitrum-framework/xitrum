@@ -27,12 +27,17 @@ object Config extends Logger {
 
   //----------------------------------------------------------------------------
 
-  val httpPort = getPropertyWithoudDefault("http_port").toInt
+  val httpPorto:  Option[Int] = getOptionalProperty("http_port"). map(_.toInt)
+  val httpsPorto: Option[Int] = getOptionalProperty("https_port").map(_.toInt)
 
-  val proxyIpso: Option[Array[String]] = {
-    val s = properties.getProperty("proxy_ips")
-    if (s == null) None else Some(s.split(",").map(_.trim))
-  }
+  // When these are used, they must exist
+  lazy val httpsKeyStore            = getPropertyWithoudDefault("https_keystore")
+  lazy val httpsKeyStorePassword    = getPropertyWithoudDefault("https_keystore_password")
+  lazy val httpsCertificatePassword = getPropertyWithoudDefault("https_certificate_password")
+
+  //----------------------------------------------------------------------------
+
+  val proxyIpso: Option[Array[String]] = getOptionalProperty("proxy_ips").map { s => s.split(",").map(_.trim)}
 
   val baseUri = properties.getProperty("base_uri", "")
 
@@ -103,6 +108,11 @@ object Config extends Logger {
   val EXECUTIORS_PER_CORE = 64
 
   //----------------------------------------------------------------------------
+
+  private def getOptionalProperty(key: String): Option[String] = {
+    val s = properties.getProperty(key)
+    if (s == null) None else Some(s)
+  }
 
   // For default value, use properties.getProperty(key, default) directly
   private def getPropertyWithoudDefault(key: String): String = {

@@ -10,7 +10,7 @@ import xitrum.handler.down._
 import xitrum.handler.updown._
 
 /** See doc/HANDLER */
-class ChannelPipelineFactory extends CPF {
+class ChannelPipelineFactory(https: Boolean) extends CPF {
   /*
     From Netty's documentation about ExecutionHandler:
       Used when your ChannelHandler
@@ -42,18 +42,21 @@ class ChannelPipelineFactory extends CPF {
   private val responseCacher       = new ResponseCacher
 
   def getPipeline: ChannelPipeline = {
+    val handlers1 = httpHandlers
+    val handlers2 = if (https) ServerSsl.handler +: handlers1 else handlers1
+
     // StaticChannelPipeline provides extreme performance at the cost of
     // disabled dynamic manipulation of pipeline
     //
     // Creating StaticChannelPipeline with empty constructor will cause
     // java.lang.IllegalArgumentException: no handlers specified
+    new StaticChannelPipeline(handlers2:_*)
+  }
 
-    // TODO: websocket
-
-    new StaticChannelPipeline(
-      // Upstream direction: first handler -> last handler
-      // Downstream direction: last handler -> first handler
-
+  // Upstream direction: first handler -> last handler
+  // Downstream direction: last handler -> first handler
+  def httpHandlers = {
+    List(
       // Up
       new HttpRequestDecoder,
       new HttpChunkAggregator(Config.maxRequestContentLengthInMB * 1024 * 1024),
@@ -79,6 +82,7 @@ class ChannelPipelineFactory extends CPF {
 
       // Down
       env2Response,
-      responseCacher)
+      responseCacher
+    )
   }
 }

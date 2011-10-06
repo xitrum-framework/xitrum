@@ -3,8 +3,11 @@
   later instead of 17 days later
 * Set Expires header for resources in CLASSPATH
 * Applications can use their own error handling (404 and 500)
+* HTTPS, you can use KeyStore Explorer (http://www.lazgosoftware.com/kse/index.html)
+  to create your own keystore
 * wro4j integration
 * Middleware architecture
+* WebSocket
 
 1.3:
 * Update

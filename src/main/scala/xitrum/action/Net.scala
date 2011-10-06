@@ -2,6 +2,7 @@ package xitrum.action
 
 import java.net.InetSocketAddress
 import org.jboss.netty.handler.codec.http.HttpHeaders.Names.HOST
+import org.jboss.netty.handler.ssl.SslHandler
 
 import xitrum.{Action, Config}
 
@@ -40,22 +41,26 @@ trait Net {
   }
 
   lazy val isSsl = {
-    if (proxyNotAllowed)
-      false
-    else {
-      val xForwardedProto = request.getHeader("X-Forwarded-Proto")
-      if (xForwardedProto != null)
-        (xForwardedProto == "https")
+    if (channel.getPipeline.get(classOf[SslHandler]) != null) {
+      true
+    } else {
+      if (proxyNotAllowed)
+        false
       else {
-        val xForwardedScheme = request.getHeader("X-Forwarded-Scheme")
-        if (xForwardedScheme != null) 
-          (xForwardedScheme == "https")
+        val xForwardedProto = request.getHeader("X-Forwarded-Proto")
+        if (xForwardedProto != null)
+          (xForwardedProto == "https")
         else {
-          val xForwardedSsl = request.getHeader("X-Forwarded-Ssl")
-          if (xForwardedSsl != null)
-            (xForwardedSsl == "on")
-          else
-            false
+          val xForwardedScheme = request.getHeader("X-Forwarded-Scheme")
+          if (xForwardedScheme != null)
+            (xForwardedScheme == "https")
+          else {
+            val xForwardedSsl = request.getHeader("X-Forwarded-Ssl")
+            if (xForwardedSsl != null)
+              (xForwardedSsl == "on")
+            else
+              false
+          }
         }
       }
     }

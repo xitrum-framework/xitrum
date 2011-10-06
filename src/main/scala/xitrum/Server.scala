@@ -18,19 +18,27 @@ class Server extends Logger {
 
     Routes.collectAndCompile
 
+    if (Config.httpPorto.isDefined)  start(false)
+    if (Config.httpsPorto.isDefined) start(true)
+
+    val mode = if (Config.isProductionMode) "production" else "development"
+    logger.info("Xitrum started in {} mode", mode)
+  }
+
+  private def start(https: Boolean) {
     val bossExecutor    = Executors.newCachedThreadPool
     val workerExecutor  = Executors.newCachedThreadPool
     val channelFactory  = new NioServerSocketChannelFactory(bossExecutor, workerExecutor)
     val bootstrap       = new ServerBootstrap(channelFactory)
-    val pipelineFactory = new ChannelPipelineFactory
+    val pipelineFactory = new ChannelPipelineFactory(https)
+    val (kind, port)    = if (https) ("HTTPS", Config.httpsPorto.get) else ("HTTP", Config.httpPorto.get)
 
     bootstrap.setPipelineFactory(pipelineFactory)
     bootstrap.setOption("reuseAddress",     true)
     bootstrap.setOption("child.tcpNoDelay", true)
     bootstrap.setOption("child.keepAlive",  true)
-    bootstrap.bind(new InetSocketAddress(Config.httpPort))
+    bootstrap.bind(new InetSocketAddress(port))
 
-    val mode = if (Config.isProductionMode) "production" else "development"
-    logger.info("Xitrum started on port {} in {} mode", Config.httpPort, mode)
+    logger.info("{} server started on port {}", kind, port)
   }
 }
