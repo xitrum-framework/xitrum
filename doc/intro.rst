@@ -3,8 +3,8 @@ Introduction
 
 .. image:: http://www.bdoubliees.com/journalspirou/sfigures6/schtroumpfs/s3.jpg
 
-Quick start: install `SBT <https://github.com/harrah/xsbt/wiki/Setup>`_ and
-`Giter8 <https://github.com/n8han/giter8>`_, then
+Quick start: install `SBT 0.11.0 <https://github.com/harrah/xsbt/wiki/Setup>`_ and
+`the latest Giter8 <https://github.com/n8han/giter8>`_, then
 
 ::
 
