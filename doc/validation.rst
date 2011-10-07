@@ -55,6 +55,10 @@ be automatically decrypted when the form is posted back to the server.
   validation must be marked with ``Validated``. See ``textarea name="memo"`` above.
   We will try to remove this is inconvenience.
 
+  The philosophy behind the ``::`` syntax is "decoration". Given the HTML element
+  ``<input type="password" name="password" />``, you want to decorate it with
+  ``Required``, thus ``Required`` should come after the element.
+
 Write custom validators
 -----------------------
 
