@@ -11,7 +11,7 @@ object Required extends Validator {
 
     // jQuery Validation plugin does not automatically adds class "required"
     val klass1 = (elem \ "@class").text
-    val klass2 = if (klass1.endsWith(" ")) klass1 + "required" else klass1 + " required"
+    val klass2 = if (klass1.endsWith(" ")) klass1 + "required" else klass1 + "required"
     elem % Attribute(None, "class", Text(klass2), Null)
   }
 

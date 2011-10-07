@@ -1,7 +1,6 @@
 package xitrum.validation
 
 import scala.collection.mutable.ArrayBuffer
-import scala.xml.{Attribute, Elem, Text, Null}
 
 import xitrum.Action
 import xitrum.scope.session.SecureBase64

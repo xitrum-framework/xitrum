@@ -1,6 +1,6 @@
 package xitrum.validation
 
-import scala.xml.{Attribute, Elem, Null, Text}
+import scala.xml.Elem
 import xitrum.Action
 
 trait Validator extends Serializable {
@@ -9,27 +9,10 @@ trait Validator extends Serializable {
 
   //----------------------------------------------------------------------------
 
-  var others = List[Validator]()
+  def ::(other: Validator) = new Validators(List(other, this))
 
-  def ::(other: Validator): Validator = {
-    others = other :: others
-    this
-  }
-
-  /**
-   * {<input type="text" name="username" /> :: Required :: MaxLength(10)}
-   *
-   * This method changes "name" attribute of the element to inject serialized
-   * validators, while validators may add new or change other attributes. For
-   * example, Required adds class="required".
-   */
   def ::(elem: Elem)(implicit action: Action): Elem = {
-    val paramName = (elem \ "@name").text
-
-    val validators      = others :+ this
-    val secureParamName = ValidatorInjector.injectToParamName(paramName, validators:_*)
-
-    val elem2 = validators.foldLeft(elem) { (acc, validator) => validator.render(action, acc, paramName, secureParamName) }
-    elem2 % Attribute(None, "name", Text(secureParamName), Null)
+    val validators = new Validators(List(this))
+    elem :: validators
   }
 }
