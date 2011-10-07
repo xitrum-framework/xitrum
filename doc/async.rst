@@ -86,8 +86,8 @@ Chat example
         <div id="chatOutput"></div>
 
         <form postback="submit" action={urlForPostback[CometPublishAction]} after="function() { $('#chatInput').attr('value', '') }">
-          <input type="hidden" name={validate("channel")} value="chat" />
-          <input type="text" id="chatInput" name={validate("chatInput", Required)} />
+          {<input type="hidden" name="channel" value="chat" /> :: Validated}
+          {<input type="text" id="chatInput" name="chatInput" /> :: Required}
         </form>
       )
     }

@@ -31,16 +31,16 @@ Xitrum provides a lot of default validators. You can use them right away.
 
   <form postback="submit" action={urlForPostbackThis}>
     Username:
-    <input type="text" name={validate("username", MinLength(5), MaxLength(10)} /><br />
+    {<input type="text" name="username" /> :: MinLength(5) :: MaxLength(10)}<br />
 
     Password:
-    <input type="password" name={validate("password", Required)} /><br />
+    {<input type="password" name="password" /> :: Required}<br />
 
     Password confirmation:
-    <input type="passord" name={validate("password_confirm", EqualTo("password"))} /><br />
+    {<input type="password" name="password_confirm" /> :: EqualTo("password")}<br />
 
     Memo:
-    <textarea name={validate("memo")}></textarea><br />
+    {<textarea name="memo"></textarea> :: Validated}<br />
 
     <input type="submit" value="Register" />
   </form>
@@ -52,28 +52,36 @@ be automatically decrypted when the form is posted back to the server.
 
   Technically, for the server side to ensure that hackers cannot bypass validators,
   all input names must be encrypted. This means that even inputs that do not need
-  validation must be marked with ``validate``. See ``validate("memo")`` above.
-  We will try to remove this is inconvenience in the next version of Xitrum.
+  validation must be marked with ``Validated``. See ``textarea name="memo"`` above.
+  We will try to remove this is inconvenience.
 
 Write custom validators
 -----------------------
 
-You can also write your own custom validators very easily.
+You can also write your own custom validators very easily. See the source code
+of `existing validators <https://github.com/ngocdaothanh/xitrum/tree/master/src/main/scala/xitrum/validation>`_
+as a guide.
 
 ::
 
+  import scala.xml.Elem
   import xitrum.validation.Validator
 
   class MyValidator extends Validator {
     // Client side validation
     //
     // This method should output JS that uses jQuery Validation plugin to validate securedParamName
-    def render(action: Action, paramName: String, securedParamName: String) {
+    def render(action: Action, elem: Elem, paramName: String, securedParamName: String): Elem = {
       // Call jsAddToView(<JS that uses jQuery Validation plugin>)
       // to add JS to the end of the web page
+
+      // Change elem if you wish
+      elem
     }
 
     // Server side validation
+    // As a rule for secure applications, client side validation may be optional
+    // but server side validation is a "must"
     def validate(action: Action, paramName: String, securedParamName: String): Boolean = {
     }
   }

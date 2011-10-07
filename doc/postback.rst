@@ -73,10 +73,10 @@ ArticleNew.scala
       renderView(
         <form postback="submit" action={urlForPostbackThis}>
           <label>Title</label>
-          <input type="text" name={validate("title", Required)} /><br />
+          {<input type="text" name="title" /> :: Required}<br />
 
           <label>Body</label>
-          <textarea name={validate("body", Required)}></textarea><br />
+          {<textarea name="body"></textarea> :: Required}<br />
 
           <input type="submit" value="Save" />
         </form>
@@ -145,7 +145,7 @@ You may also put extra params in a separate form:
 
   <form id="myform" postback="submit" action={urlForPostbackThis}>
     Search:
-    <input type="text" name={validate("keyword")} />
+    {<input type="text" name="keyword" /> :: Validated}
 
     <a class="pagination"
        href="#"
