@@ -1,6 +1,5 @@
 1.5 (planned):
 * Change validation API to allow validators to change HTML element
-
   <input type="text" name={validate("username", Required)} /> now becomes
   {<input type="text" name="username" /> :: Required}
 
@@ -10,6 +9,8 @@
   <input type="text" name={validate("no_need_to_validate")} /> now becomes
   {<input type="text" name="no_need_to_validate" /> :: Validated}
 * Implement more validators: Email, EqualTo, Min, Max, Range, RangeLength
+* Update jQuery Validation from 1.8.1 to 1.9.0:
+  https://github.com/jzaefferer/jquery-validation/blob/master/changelog.txt
 * wro4j integration
 * Middleware architecture
 * WebSocket
@@ -19,9 +20,9 @@
 * Fix bug at setting Expires header for static content, it is now one year
   later instead of 17 days later
 * Set Expires header for resources in CLASSPATH
-* HTTPS (see config/xitrum.properties
-  KeyStore Explorer (http://www.lazgosoftware.com/kse/index.html) is a good tool
-  to create self-signed keystore
+* HTTPS (see config/xitrum.properties)
+  KeyStore Explorer is a good tool to create self-signed keystore:
+  http://www.lazgosoftware.com/kse/index.html
 
 1.3:
 * Update

@@ -77,9 +77,9 @@ trait JS {
     if (Config.isProductionMode)
       <xml:group>
         <script type="text/javascript" src={urlForResource("xitrum/jquery-1.6.4.min.js")}></script>
-        <script type="text/javascript" src={urlForResource("xitrum/jquery.validate-1.8.1/jquery.validate.min.js")}></script>
-        <script type="text/javascript" src={urlForResource("xitrum/jquery.validate-1.8.1/additional-methods.min.js")}></script>
-        {if (getLanguage != "en") <script type="text/javascript" src={urlForResource("xitrum/jquery.validate-1.8.1/localization/messages_"+ getLanguage +".js")}></script>}
+        <script type="text/javascript" src={urlForResource("xitrum/jquery.validate-1.9.0/jquery.validate.min.js")}></script>
+        <script type="text/javascript" src={urlForResource("xitrum/jquery.validate-1.9.0/additional-methods.min.js")}></script>
+        {if (getLanguage != "en") <script type="text/javascript" src={urlForResource("xitrum/jquery.validate-1.9.0/localization/messages_"+ getLanguage +".js")}></script>}
         <script type="text/javascript" src={urlForResource("xitrum/xitrum.js")}></script>
         <script type="text/javascript" src={urlFor[JSRoutesAction] + "?" + Etag.forString(Routes.jsRoutes)}></script>
         {jsForView}
@@ -87,9 +87,9 @@ trait JS {
     else
       <xml:group>
         <script type="text/javascript" src={urlForResource("xitrum/jquery-1.6.4.js")}></script>
-        <script type="text/javascript" src={urlForResource("xitrum/jquery.validate-1.8.1/jquery.validate.js")}></script>
-        <script type="text/javascript" src={urlForResource("xitrum/jquery.validate-1.8.1/additional-methods.js")}></script>
-        {if (getLanguage != "en") <script type="text/javascript" src={urlForResource("xitrum/jquery.validate-1.8.1/localization/messages_"+ getLanguage +".js")}></script>}
+        <script type="text/javascript" src={urlForResource("xitrum/jquery.validate-1.9.0/jquery.validate.js")}></script>
+        <script type="text/javascript" src={urlForResource("xitrum/jquery.validate-1.9.0/additional-methods.js")}></script>
+        {if (getLanguage != "en") <script type="text/javascript" src={urlForResource("xitrum/jquery.validate-1.9.0/localization/messages_"+ getLanguage +".js")}></script>}
         <script type="text/javascript" src={urlForResource("xitrum/xitrum.js")}></script>
         <script type="text/javascript" src={urlFor[JSRoutesAction] + "?" + Etag.forString(Routes.jsRoutes)}></script>
         {jsForView}
