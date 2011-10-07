@@ -1,4 +1,14 @@
 1.5 (planned):
+* Change validation API to allow validators to change HTML element
+
+  <input type="text" name={validate("username", Required)} /> now becomes
+  {<input type="text" name="username" /> :: Required}
+
+  <input type="text" name={validate("param", MaxLength(32), MyValidator)} /> now becomes
+  {<input type="text" name="param" /> :: MaxLength(32) :: MyValidator}
+
+  <input type="text" name={validate("no_need_to_validate")} /> now becomes
+  {<input type="text" name="no_need_to_validate" /> :: Validated}
 * wro4j integration
 * Middleware architecture
 * WebSocket

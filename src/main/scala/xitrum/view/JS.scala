@@ -6,6 +6,7 @@ import xitrum.{Action, Config}
 import xitrum.comet.CometGetAction
 import xitrum.etag.{Etag, NotModified}
 import xitrum.routing.Routes
+import xitrum.validation.Validated
 
 trait JS {
   this: Action =>
@@ -60,8 +61,8 @@ trait JS {
   def jsRedirectTo[T: Manifest] { jsRedirectTo(urlFor[T]) }
 
   def jsCometGet(channel: String, callback: String) {
-    val encryptedChannel       = validate("channel")
-    val encryptedLastTimestamp = validate("lastTimestamp")
+    val encryptedChannel       = Validated.secureParamName("channel")
+    val encryptedLastTimestamp = Validated.secureParamName("lastTimestamp")
 
     // http://stackoverflow.com/questions/2703861/chromes-loading-indicator-keeps-spinning-during-xmlhttprequest
     // http://stackoverflow.com/questions/1735560/stop-the-browser-throbber-of-doom-while-loading-comet-server-push-xmlhttpreques

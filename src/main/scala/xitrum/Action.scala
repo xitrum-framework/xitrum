@@ -39,27 +39,8 @@ trait Action extends ExtEnv with Logger with Net with Filter with BasicAuthentic
 
   //----------------------------------------------------------------------------
 
-  // For Validate to use
+  // For Validators to use
   implicit val action: Action = this
-
-  /** @return Param name that has been encrypted to include serialized validators */
-  def validate(paramName: String, validators: Validator*): String = {
-    /* Design decision:
-    App developers would write:
-      <input type="text" name={validate("username", MinLength(5), MaxLength(10)} />
-
-    This is easier to read and simpler than:
-      {<input type="text" name="username" /> +: Validate(MinLength(5), MaxLength(10))}
-    and he know that the resulting name may not be "username".
-
-    This is faster than:
-      {<input type="text" name="username" /> +: MinLength(5) +: MaxLength(10)}
-    */
-
-    val secureParamName = ValidatorInjector.injectToParamName(paramName, validators:_*)
-    validators.foreach { v => v.render(this, paramName, secureParamName) }
-    secureParamName
-  }
 
   //----------------------------------------------------------------------------
 
