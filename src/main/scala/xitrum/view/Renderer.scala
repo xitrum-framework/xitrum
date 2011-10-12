@@ -61,9 +61,9 @@ trait Renderer extends JS with Flash with I18n {
         response.setHeader(CONTENT_TYPE, contentType)
       else if (!response.containsHeader(CONTENT_TYPE)) {
         if (textIsXml)
-          response.setHeader(CONTENT_TYPE, "application/xml")
+          response.setHeader(CONTENT_TYPE, "application/xml; charset=" + Config.paramCharsetName)
         else
-          response.setHeader(CONTENT_TYPE, "text/plain")
+          response.setHeader(CONTENT_TYPE, "text/plain; charset=" + Config.paramCharsetName)
       }
     }
 
@@ -86,7 +86,7 @@ trait Renderer extends JS with Flash with I18n {
 
   def renderJson(any: Any) {
     val json = Json.generate(any)
-    renderText(json, "text/json")
+    renderText(json, "text/json; charset=" + Config.paramCharsetName)
   }
 
   //----------------------------------------------------------------------------
@@ -105,9 +105,9 @@ trait Renderer extends JS with Flash with I18n {
     renderedView = view
     val renderedLayout = customLayout.apply
     if (renderedLayout == null)
-      renderText(renderedView, "text/html")
+      renderText(renderedView, "text/html; charset=" + Config.paramCharsetName)
     else
-      renderText(renderedLayout, "text/html")
+      renderText(renderedLayout, "text/html; charset=" + Config.paramCharsetName)
   }
 
   //----------------------------------------------------------------------------

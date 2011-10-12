@@ -93,7 +93,7 @@ object Config extends Logger {
   /**
    * Static textual files are always compressed
    * Dynamic textual responses are only compressed if they are big
-   * http://code.google.com/intl/en/speed/page-speed/docs/payload.html#GzipCompression
+   * http://code.google.com/speed/page-speed/docs/payload.html#GzipCompression
    *
    * Google recommends > 150B-1KB
    */

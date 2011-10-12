@@ -1,8 +1,14 @@
-1.5 (planned):
-* Static public files now do not have to have /public prefix, this decreases
-  dynamic content perfomance a little
-* Applications can handle 404 and 500 error by their own
-* Change validation API to allow validators to change HTML element
+1.6 (planned):
+* wro4j integration
+* Middleware architecture
+* WebSocket
+
+1.5:
+* Static public files now do not have to have /public prefix, this is convenient
+  but dynamic content perfomance decreases a little
+* Applications can handle 404 and 500 errors by their own instead of using
+  the default 404.html and 500.html
+* Change validation syntax to allow validators to change HTML element
   <input type="text" name={validate("username", Required)} /> now becomes
   {<input type="text" name="username" /> :: Required}
 
@@ -11,13 +17,14 @@
 
   <input type="text" name={validate("no_need_to_validate")} /> now becomes
   {<input type="text" name="no_need_to_validate" /> :: Validated}
+* RESTful actions now can use validators (see doc):
+  val username = param("username") :: Required :: MaxLength(32)
 * Implement more validators: Email, EqualTo, Min, Max, Range, RangeLength
 * Update jQuery Validation from 1.8.1 to 1.9.0:
   https://github.com/jzaefferer/jquery-validation/blob/master/changelog.txt
+* Textual responses now include charset in Content-Type header:
+  http://code.google.com/speed/page-speed/docs/rendering.html#SpecifyCharsetEarly
 * Fix bug header not found: Content-Length for 404 and 500 content
-* wro4j integration
-* Middleware architecture
-* WebSocket
 
 1.4:
 * Fix bug at setting Expires header for static content, it is now one year
@@ -32,7 +39,9 @@
     Hazelcast: 1.9.4.2 -> 1.9.4.3
     Jerkson:   0.4.1   -> 0.4.2
     SBT:       0.10.1  -> 0.11.0
-* Improve performance, simple benchmark (please use httperf, ab is broken) on
+* Improve performance, based on Google's best practices:
+  http://code.google.com/speed/page-speed/docs/rules_intro.html
+  Simple benchmark (please use httperf, ab is broken) on
   MacBook Pro 2 GHz Core i7, 8 GB memory:
     Static file:                 ~11000 req/s
     Resource file in CLASSPATH:  ~11000 req/s
@@ -41,7 +50,8 @@
 * Only gzip when client specifies "gzip" in Accept-Encoding request header
 
 1.2:
-* Conditional GET using ETag, see http://stevesouders.com/hpws/rules.php
+* Conditional GET using ETag, see:
+  http://stevesouders.com/hpws/rules.php
 * Fix for radio: SecureBase64.encrypt always returns same output for same input
   <input type="radio" name={validate("light")} value="red" />
   <input type="radio" name={validate("light")} value="yellow" />
