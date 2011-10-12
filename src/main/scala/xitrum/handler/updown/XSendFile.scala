@@ -30,6 +30,7 @@ object XSendFile extends Logger {
 
   def setHeader(response: HttpResponse, abs: String) {
     response.setHeader(X_SENDFILE_HEADER, abs)
+    HttpHeaders.setContentLength(response, 0)  // Env2Response checks Content-Length
   }
 
   def set404Page(response: HttpResponse) {
