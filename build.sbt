@@ -6,7 +6,7 @@ organization := "tv.cntt"
 
 name := "xitrum"
 
-version := "1.5-SNAPSHOT"
+version := "1.6-SNAPSHOT"
 
 scalacOptions ++= Seq(
   "-deprecation",
@@ -47,7 +47,7 @@ libraryDependencies += "com.hazelcast" % "hazelcast-client" % "1.9.4.3"
 //   List(Map("user" -> List("langtu"), "body" -> List("hello world")))
 resolvers += "repo.codahale.com" at "http://repo.codahale.com"
 
-libraryDependencies += "com.codahale" %% "jerkson" % "0.4.2"
+libraryDependencies += "com.codahale" %% "jerkson" % "0.5.0"
 
 // For easier development (sbt console etc.)
 unmanagedBase in Runtime <<= baseDirectory { base => base / "config" }
