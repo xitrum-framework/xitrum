@@ -1,4 +1,7 @@
 1.5 (planned):
+* Static public files now do not have to have /public prefix, this decreases
+  dynamic content perfomance a little
+* Applications can handle 404 and 500 error by their own
 * Change validation API to allow validators to change HTML element
   <input type="text" name={validate("username", Required)} /> now becomes
   {<input type="text" name="username" /> :: Required}
@@ -15,7 +18,6 @@
 * wro4j integration
 * Middleware architecture
 * WebSocket
-* Applications can use their own error handling (404 and 500)
 
 1.4:
 * Fix bug at setting Expires header for static content, it is now one year
