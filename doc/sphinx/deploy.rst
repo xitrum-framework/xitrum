@@ -28,7 +28,7 @@ deploy to production server:
       runner.sh
     config
       [config files]
-    static
+    public
       [static public files]
     lib
       [dependencies and packaged project file]

@@ -61,13 +61,13 @@ trait UrlFor {
   //----------------------------------------------------------------------------
 
   def urlForPublic(path: String) = {
-    val absPath     = System.getProperty("user.dir") + "/static/public/" + path
+    val absPath     = System.getProperty("user.dir") + "/public/" + path
     val forceReload = Etag.forFile(absPath, true) match {
       case Etag.NotFound                           => Random.nextLong.toString
       case Etag.TooBig(file)                       => file.lastModified
       case Etag.Small(bytes, etag, mimeo, gzipped) => etag
     }
-    Config.baseUri + "/public/" + path + "?" + forceReload
+    Config.baseUri + "/" + path + "?" + forceReload
   }
 
   def urlForResource(path: String) = {

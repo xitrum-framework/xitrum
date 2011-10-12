@@ -48,6 +48,8 @@ class Env2Response extends SimpleChannelDownstreamHandler {
    * @return true if the NO_MODIFIED response is set by this method
    */
   private def tryEtag(request: HttpRequest, response: HttpResponse): Boolean = {
+    if (response.getStatus != OK) return false
+
     val channelBuffer = response.getContent
     val readableBytes = channelBuffer.readableBytes
     if (readableBytes > Config.smallStaticFileSizeInKB * 1024) return false

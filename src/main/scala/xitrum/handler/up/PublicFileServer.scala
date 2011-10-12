@@ -33,24 +33,24 @@ class PublicFileServer extends SimpleChannelUpstreamHandler with BadClientSilenc
       return
     }
 
-    val pathInfo            = request.getUri.split('?')(0)
-    val withoutSlashPrefix  = pathInfo.substring(1)
-    val isSpecialPublicFile = Config.publicFilesNotBehindPublicUrl.contains(withoutSlashPrefix)
-
-    if (!isSpecialPublicFile && !pathInfo.startsWith("/public/")) {
-      ctx.sendUpstream(e)
-      return
-    }
-
-    val response = new DefaultHttpResponse(HTTP_1_1, OK)
+    val pathInfo = request.getUri.split('?')(0)
     absStaticPath(pathInfo) match {
-      case None => XSendFile.set404Page(response)
+      case None =>
+        val response = new DefaultHttpResponse(HTTP_1_1, OK)
+        XSendFile.set404Page(response)
+        ctx.getChannel.write(response)
 
       case Some(abs) =>
-        NotModified.setClientCacheAggressively(response)
-        XSendFile.setHeader(response, abs)
+        val file = new File(abs)
+        if (file.isFile && file.exists) {
+          val response = new DefaultHttpResponse(HTTP_1_1, OK)
+          NotModified.setClientCacheAggressively(response)
+          XSendFile.setHeader(response, abs)
+          ctx.getChannel.write(response)
+        } else {
+          ctx.sendUpstream(e)
+        }
     }
-    ctx.getChannel.write(response)
   }
 
   //----------------------------------------------------------------------------
@@ -65,7 +65,7 @@ class PublicFileServer extends SimpleChannelUpstreamHandler with BadClientSilenc
         // Convert to absolute path
         // user.dir: current working directory
         // See: http://www.java2s.com/Tutorial/Java/0120__Development/Javasystemproperties.htm
-        Some(System.getProperty("user.dir") + "/static" + path)
+        Some(System.getProperty("user.dir") + "/public" + path)
     }
   }
 }

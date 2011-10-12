@@ -87,8 +87,6 @@ object Config extends Logger {
 
   val filteredParams                = getPropertyWithoudDefault("filtered_params").split(",").map(_.trim)
 
-  val publicFilesNotBehindPublicUrl = getPropertyWithoudDefault("public_files_not_behind_public_url").split(",").map(_.trim)
-
   val smallStaticFileSizeInKB       = getPropertyWithoudDefault("small_static_file_size_in_kb").toInt
   val maxCachedSmallStaticFiles     = getPropertyWithoudDefault("max_cached_small_static_files").toInt
 

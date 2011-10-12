@@ -25,8 +25,8 @@ object XSendFile extends Logger {
 
   private val X_SENDFILE_HEADER = "X-Sendfile"
 
-  private val abs404 = System.getProperty("user.dir") + "/static/404.html"
-  private val abs500 = System.getProperty("user.dir") + "/static/500.html"
+  private val abs404 = System.getProperty("user.dir") + "/public/404.html"
+  private val abs500 = System.getProperty("user.dir") + "/public/500.html"
 
   def setHeader(response: HttpResponse, abs: String) {
     response.setHeader(X_SENDFILE_HEADER, abs)

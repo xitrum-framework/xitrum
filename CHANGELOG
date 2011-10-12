@@ -11,6 +11,7 @@
 * Implement more validators: Email, EqualTo, Min, Max, Range, RangeLength
 * Update jQuery Validation from 1.8.1 to 1.9.0:
   https://github.com/jzaefferer/jquery-validation/blob/master/changelog.txt
+* Fix bug header not found: Content-Length for 404 and 500 content
 * wro4j integration
 * Middleware architecture
 * WebSocket

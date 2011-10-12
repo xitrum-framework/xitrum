@@ -154,7 +154,7 @@ class Dispatcher extends SimpleChannelUpstreamHandler with BadClientSilencer {
     Routes.matchRoute(request.getMethod, pathInfo) match {
       case Some((method, actionClass, pathParams)) =>
         request.setMethod(method)  // Override
-        env.pathParams  = pathParams
+        env.pathParams = pathParams
 
         val action = actionClass.newInstance
         action(ctx.getChannel, env)

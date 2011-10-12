@@ -11,27 +11,25 @@ Project directory layout:
 ::
 
   config
-  static
+  public
     favicon.ico
     robots.txt
-    public
-      img
-        myimage.png
-      css
-        mystyle.css
+    img
+      myimage.png
+    css
+      mystyle.css
+    js
+      myscript.js
   src
   build.sbt
 
-Xitrum automatically serves static files inside ``static/public`` directory.
-URLs to them must have prefix ``/public/``:
+Xitrum automatically serves static files inside ``public`` directory.
+URLs to them are in the form:
 
 ::
 
-  /public/img/myimage.png
-  /public/css/mystyle.css
-
-This design decision is for speed. It avoids disk I/O by not checking for file
-existence on every request.
+  /img/myimage.png
+  /css/mystyle.css
 
 To refer to them:
 
@@ -44,28 +42,7 @@ To send a static file on disk from your action, use ``renderFile``.
 ::
 
   renderFile("/absolute/path")
-  renderFile("relative/path/to/the/current/working/directory")
-
-public_files_not_behind_public_url
-~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-
-favicon.ico and robots.txt are special files, their URLs do not have ``/public``
-prefix:
-
-::
-
-  /favicon.ico
-  /robots.txt
-
-When for example you have a file called crossdomain.xml and you want its
-URL to be ``http://mydomain.com/crossdomain.xml`` (no ``/public/`` prefix),
-modify ``public_files_not_behind_public_url`` in ``config/xitrum.properties``.
-
-To refer to them:
-
-::
-
-  <img src={urlForPublic("../favicon.ico")} />
+  renderFile("path/relative/to/the/current/working/directory")
 
 Serve resource files in classpath
 ---------------------------------
@@ -90,6 +67,12 @@ It will become:
 ::
 
   <img src="/resources/public/my_lib/img/myimage.png" />
+
+To send a static file inside an element (a .jar file or a directory) in classpath:
+
+::
+
+  renderResource("path/relative/to/the/element")
 
 Client side cache with ETag and max-age
 ---------------------------------------
