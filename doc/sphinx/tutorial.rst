@@ -28,11 +28,13 @@ In the console, you will see all the routes and request information:
 
 ::
 
-  [INFO] x.r.Routes$: Routes:
+  [INFO] Routes:
   GET / my_project.action.IndexAction
 
-  [INFO] x.Server: Xitrum started on port 8000 in development mode
-  [DEBUG] x.h.u.Dispatcher$: GET my_project.action.IndexAction, 1 [ms]
+  [INFO] HTTP server started on port 8364
+  [INFO] HTTPS server started on port 4364
+  [INFO] Xitrum started in development mode
+  [DEBUG] GET my_project.action.IndexAction, 1 [ms]
 
 On startup, all routes will be collected and output to log. It is very
 convenient for you to have a list of routes if you want to write documentation
