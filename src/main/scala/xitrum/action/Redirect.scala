@@ -35,9 +35,9 @@ trait Redirect {
     this.postback = postback
   }
 
-  def forward(actionClass: Class[Action], postback: Boolean) {
+  def forward(actionClass: Class[_ <: Action], postback: Boolean) {
     val action = actionClass.newInstance
-    action(channel, handlerEnv)
+    action(handlerEnv)
     action.setPostback(isPostback)
     Dispatcher.dispatchWithFailsafe(action, postback)
   }

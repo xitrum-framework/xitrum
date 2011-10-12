@@ -31,7 +31,6 @@ trait Action extends ExtEnv with Logger with Net with Filter with BasicAuthentic
       responded = true
       if (channel.isOpen) {
         prepareWhenRespond
-        handlerEnv.response = response
         channel.write(handlerEnv)
       }
     }

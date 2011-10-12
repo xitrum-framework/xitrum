@@ -152,10 +152,17 @@ trait Renderer extends JS with Flash with I18n {
 
   //----------------------------------------------------------------------------
 
-  def render404Page {
+  def renderDefault404Page {
     if (!channel.isOpen) return
 
     XSendFile.set404Page(response)
+    respond
+  }
+
+  def renderDefault500Page {
+    if (!channel.isOpen) return
+
+    XSendFile.set500Page(response)
     respond
   }
 }

@@ -88,10 +88,15 @@ object Dispatcher extends Logger {
         } else {
           logAccess(action, postback, beginTimestamp, 0, false, e)
 
-          val response = new DefaultHttpResponse(HTTP_1_1, INTERNAL_SERVER_ERROR)
-          XSendFile.set500Page(response)
-          action.handlerEnv.response = response
-          action.channel.write(action.handlerEnv)
+          if (Config.action500 == null) {
+            val response = new DefaultHttpResponse(HTTP_1_1, INTERNAL_SERVER_ERROR)
+            XSendFile.set500Page(response)
+            action.handlerEnv.response = response
+            action.channel.write(action.handlerEnv)
+          } else {
+            action.response.setStatus(INTERNAL_SERVER_ERROR)
+            action.forward(Config.action500, false)
+          }
         }
     }
   }
@@ -157,14 +162,22 @@ class Dispatcher extends SimpleChannelUpstreamHandler with BadClientSilencer {
         env.pathParams = pathParams
 
         val action = actionClass.newInstance
-        action(ctx.getChannel, env)
+        action(env)
         dispatchWithFailsafe(action, false)
 
       case None =>
-        val response = new DefaultHttpResponse(HTTP_1_1, NOT_FOUND)
-        XSendFile.set404Page(response)
-        env.response = response
-        ctx.getChannel.write(env)
+        if (Config.action404 == null) {
+          val response = new DefaultHttpResponse(HTTP_1_1, NOT_FOUND)
+          XSendFile.set404Page(response)
+          env.response = response
+          ctx.getChannel.write(env)
+        } else {
+          env.pathParams = MMap.empty
+          val action = Config.action404.newInstance
+          env.response.setStatus(NOT_FOUND)
+          action(env)
+          dispatchWithFailsafe(action, false)
+        }
     }
   }
 

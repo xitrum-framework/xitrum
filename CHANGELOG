@@ -1,4 +1,6 @@
 1.6 (planned):
+* RESTful actions now can use validators:
+  val username = param("username") :: Required :: MaxLength(32)
 * wro4j integration
 * Middleware architecture
 * WebSocket
@@ -8,7 +10,7 @@
   but dynamic content perfomance decreases a little
 * Applications can handle 404 and 500 errors by their own instead of using
   the default 404.html and 500.html
-* Change validation syntax to allow validators to change HTML element
+* Change validation syntax to allow validators to change HTML element:
   <input type="text" name={validate("username", Required)} /> now becomes
   {<input type="text" name="username" /> :: Required}
 
@@ -17,8 +19,6 @@
 
   <input type="text" name={validate("no_need_to_validate")} /> now becomes
   {<input type="text" name="no_need_to_validate" /> :: Validated}
-* RESTful actions now can use validators (see doc):
-  val username = param("username") :: Required :: MaxLength(32)
 * Implement more validators: Email, EqualTo, Min, Max, Range, RangeLength
 * Update jQuery Validation from 1.8.1 to 1.9.0:
   https://github.com/jzaefferer/jquery-validation/blob/master/changelog.txt

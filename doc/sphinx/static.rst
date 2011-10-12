@@ -14,6 +14,8 @@ Project directory layout:
   public
     favicon.ico
     robots.txt
+    404.html
+    500.html
     img
       myimage.png
     css
@@ -43,6 +45,30 @@ To send a static file on disk from your action, use ``renderFile``.
 
   renderFile("/absolute/path")
   renderFile("path/relative/to/the/current/working/directory")
+
+404 and 500
+-----------
+
+404.html and 500.html in ``public`` directory are used when there's no matching
+route and there's error processing request, respectively. If you want to use
+your own handler, configure before starting web server:
+
+::
+
+  import xitrum.{Config, Server}
+
+  object Boot {
+    def main(args: Array[String]) {
+      Config.action404 = classOf[MyAction]
+      Config.action500 = classOf[MyAction]
+
+      val s = new Server
+      s.start
+    }
+  }
+
+Response status is set to 404 or 500 before the actions are executed, so you
+don't have to set yourself.
 
 Serve resource files in classpath
 ---------------------------------

@@ -1,6 +1,8 @@
 package xitrum.handler
 
 import scala.collection.mutable.{HashMap => MHashMap}
+
+import org.jboss.netty.channel.Channel
 import org.jboss.netty.handler.codec.http.{HttpRequest, HttpResponse}
 
 import xitrum.Action
@@ -11,6 +13,8 @@ import xitrum.scope.request.{FileUploadParams, Params, PathInfo}
  * typesafe, fixed data variables are put inside.
  */
 class HandlerEnv extends MHashMap[String, Any] {
+  var channel:          Channel          = null
+
   var request:          HttpRequest      = null  // Set by Request2Env
   var response:         HttpResponse     = null  // Set before the response is sent to client
 
