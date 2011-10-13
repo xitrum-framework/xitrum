@@ -31,10 +31,10 @@ object XitrumPlugin extends Plugin {
       val configDir2 = packageDir / "config"
       IO.copyDirectory(configDir1, configDir2)
 
-      // Copy static directory
-      val staticDir1 = baseDir    / "static"
-      val staticDir2 = packageDir / "static"
-      IO.copyDirectory(staticDir1, staticDir2)
+      // Copy public directory
+      val publicDir1 = baseDir    / "public"
+      val publicDir2 = packageDir / "public"
+      IO.copyDirectory(publicDir1, publicDir2)
 
       // Copy lib directory
       val libDir = packageDir / "lib"

@@ -4,7 +4,7 @@ organization := "tv.cntt"
 
 name := "xitrum-plugin"
 
-version := "1.3-SNAPSHOT"
+version := "1.4-SNAPSHOT"
 
 // Publish ---------------------------------------------------------------------
 
