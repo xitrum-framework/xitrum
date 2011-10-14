@@ -39,10 +39,9 @@ provides free license for Scala developers!
 
 Install:
 
-1. Download JRebel
-2. Apply for a `free license for Scala <http://sales.zeroturnaround.com/>`_
-3. Save ``jrebel.lic`` (the free license above) to the same directory with ``jrebel.jar``
-4. Add ``-noverify -javaagent:/path/to/jrebel/jrebel.jar`` to the ``sbt`` command line
+1. Apply for a `free license for Scala <http://sales.zeroturnaround.com/>`_
+2. Download and install JRebel using the license above
+3. Add ``-noverify -javaagent:/path/to/jrebel/jrebel.jar`` to the ``sbt`` command line
 
 Example:
 
