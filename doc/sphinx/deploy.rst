@@ -33,10 +33,10 @@ deploy to production server:
     lib
       [dependencies and packaged project file]
 
-Copy additional files to target/xitrum
-----------------------------------------------
+Customize xitrum-package
+------------------------
 
-``sbt xitrum-package`` command simply copies ``config`` and ``public``
+By default ``sbt xitrum-package`` command simply copies ``config`` and ``public``
 directories to ``target/xitrum``. If you want it to copy additional files
 and directories (README, INSTALL, doc etc.), config ``build.sbt`` like this:
 
@@ -44,26 +44,18 @@ and directories (README, INSTALL, doc etc.), config ``build.sbt`` like this:
 
   TODO
 
-Now run ``sbt xitrum-package`` and check ``target/xitrum`` directory.
-
 Starting Xitrum in production mode
 ----------------------------------
 
-runner.sh is the script to start the web server in production environment.
-You may want to modify runner.sh to tune JVM settings.
+``bin/runner.sh`` is the script to run any object with ``main`` method. Use it to
+start the web server in production environment.
 
 ::
 
   $ bin/runner.sh my_project.Boot
 
-You may need to write the above command line to INSTALL file, for example, so
-that the user of your project know how to start the web server.
+You may want to modify runner.sh to tune JVM settings. Also see ``config/xitrum.properties``.
 
-To change the port of the web server, change ``http_port`` in ``config/xitrum.properties``.
-
-Base URI
---------
-
-Virtual host is ususally used when running behind a proxy server. But if you
-don't want to use virtual host, you want to use base URI, see ``base_uri`` option
-in the file ``config/xitrum.properties``.
+To start Xitrum in background when the system starts, `daemontools <http://cr.yp.to/daemontools.html>`_
+is a very good tool. To install it on CentOS, see
+`this instruction <http://whomwah.com/2008/11/04/installing-daemontools-on-centos5-x86_64/>`_.
