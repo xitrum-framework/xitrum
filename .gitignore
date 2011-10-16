@@ -1,7 +1,5 @@
-doc/_build
-lib_managed
+doc/sphinx/_build
+plugin/project/boot
 project/boot
 target
-tmp
-plugin/project/boot
 .*
