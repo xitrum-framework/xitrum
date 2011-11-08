@@ -6,6 +6,16 @@ HOWTO
 This chapter contains various small tips. Each tip is too small to have its own
 chapter.
 
+Basic authentication
+--------------------
+
+::
+
+  class MyAction extends Action {
+    beforeFilters("basicAuthentication") =
+      () => basicAuthenticationCheck("Realm", "username", "password")
+  }
+
 Link to an action
 -----------------
 
