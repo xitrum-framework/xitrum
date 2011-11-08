@@ -8,17 +8,20 @@ import xitrum.util.Base64
 trait BasicAuthentication {
   this: Action =>
 
-  def basicAuthenticationCheck(realm: String, username: String, password: String): Boolean = {
-    basicAuthenticationUsernamePassword() match {
+  /**
+   * f takes username and password, and returns true if it want to let the user in.
+   */
+  def basicAuthenticate(realm: String)(f: (String, String) => Boolean): () => Boolean = () => {
+    getUsernamePassword match {
       case None =>
-        basicAuthenticationRespond(realm)
+        respondBasic(realm)
         false
 
       case Some((username2, password2)) =>
-        if (username2 == username && password2 == password) {
+        if (f(username2, password2)) {
           true
         } else {
-          basicAuthenticationRespond(realm)
+          respondBasic(realm)
           false
         }
     }
@@ -26,7 +29,7 @@ trait BasicAuthentication {
 
   //----------------------------------------------------------------------------
 
-  private def basicAuthenticationUsernamePassword(): Option[(String, String)] = {
+  private def getUsernamePassword: Option[(String, String)] = {
     val authorization = request.getHeader(HttpHeaders.Names.AUTHORIZATION)
 
     if (authorization == null || !authorization.startsWith("Basic ")) {
@@ -49,7 +52,7 @@ trait BasicAuthentication {
     }
   }
 
-  private def basicAuthenticationRespond(realm: String) {
+  private def respondBasic(realm: String) {
     response.setHeader(HttpHeaders.Names.WWW_AUTHENTICATE, "Basic realm=\"" + realm + "\"")
     response.setStatus(HttpResponseStatus.UNAUTHORIZED)
     respond
