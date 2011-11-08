@@ -26,7 +26,7 @@ object Loader {
   }
 
   /**
-   * @param path Relative to one of the elements in CLASSPATH, without leading "/"
+   * @param path Relative to one of the elements in classpath, without leading "/"
    */
   def bytesFromClasspath(path: String): Array[Byte] = {
     val is = getClass.getClassLoader.getResourceAsStream(path)
@@ -34,7 +34,7 @@ object Loader {
   }
 
   /**
-   * @param path Relative to one of the elements in CLASSPATH, without leading "/"
+   * @param path Relative to one of the elements in classpath, without leading "/"
    */
   def stringFromClasspath(path: String): String = {
     val bytes = bytesFromClasspath(path)
@@ -42,7 +42,7 @@ object Loader {
   }
 
   /**
-   * @param path Relative to one of the elements in CLASSPATH, without leading "/"
+   * @param path Relative to one of the elements in classpath, without leading "/"
    */
   def propertiesFromClasspath(path: String): Properties = {
     // http://www.javaworld.com/javaworld/javaqa/2003-08/01-qa-0808-property.html?page=2

@@ -53,7 +53,7 @@ object XSendResource extends Logger {
 }
 
 /**
- * This handler sends resource files (should be small) in CLASSPATH.
+ * This handler sends resource files (should be small) in classpath.
  */
 class XSendResource extends ChannelUpstreamHandler with ChannelDownstreamHandler {
   import XSendResource._

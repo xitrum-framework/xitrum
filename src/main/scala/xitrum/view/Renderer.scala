@@ -132,7 +132,7 @@ trait Renderer extends JS with Flash with I18n {
    *
    * @param path Starts with "/" for absolute path, otherwise it is relative to
    * the current working directory (System.getProperty("user.dir")).
-   * path is not sanitized. To sanitize, use xitrum.Sanitizer.
+   * The given path is not sanitized. To sanitize, use xitrum.util.PathSanitizer.
    */
   def renderFile(path: String) {
     if (!channel.isOpen) return
@@ -142,7 +142,7 @@ trait Renderer extends JS with Flash with I18n {
     respond
   }
 
-  /** @param path No / prefix, relative to an entry in CLASSPATH */
+  /** @param path Relative to an entry in classpath, without leading "/" */
   def renderResource(path: String) {
     if (!channel.isOpen) return
 

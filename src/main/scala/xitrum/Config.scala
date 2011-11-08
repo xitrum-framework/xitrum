@@ -25,7 +25,7 @@ object Config extends Logger {
       Loader.propertiesFromClasspath("xitrum.properties")
     } catch {
       case _ =>
-        logger.error("Could not load xitrum.properties. The \"config\" directory should be in CLASSPATH.")
+        logger.error("Could not load xitrum.properties. The \"config\" directory should be in classpath.")
         System.exit(-1)
         null
     }

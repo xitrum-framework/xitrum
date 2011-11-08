@@ -32,7 +32,7 @@
 1.4:
 * Fix bug at setting Expires header for static content, it is now one year
   later instead of 17 days later
-* Set Expires header for resources in CLASSPATH
+* Set Expires header for resources in classpath
 * HTTPS (see config/xitrum.properties)
   KeyStore Explorer is a good tool to create self-signed keystore:
   http://www.lazgosoftware.com/kse/index.html
@@ -47,7 +47,7 @@
   Simple benchmark (please use httperf, ab is broken) on
   MacBook Pro 2 GHz Core i7, 8 GB memory:
     Static file:                 ~11000 req/s
-    Resource file in CLASSPATH:  ~11000 req/s
+    Resource file in classpath:  ~11000 req/s
     Dynamic HTML without layout: ~7000  req/s
     Dynamic HTML with layout:    ~7000  req/s
 * Only gzip when client specifies "gzip" in Accept-Encoding request header

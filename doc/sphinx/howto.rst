@@ -12,8 +12,9 @@ Basic authentication
 ::
 
   class MyAction extends Action {
-    beforeFilters("basicAuthentication") =
-      () => basicAuthenticationCheck("Realm", "username", "password")
+    beforeFilters("authenticate") = basicAuthenticate("Realm") { (username, password) =>
+      username == "myusername" && password == "mypassword"
+    }
   }
 
 Link to an action
@@ -30,27 +31,40 @@ Don't write URL manually, use urlFor like this:
 Log
 ---
 
-Xitrum uses `SLF4J <http://www.slf4j.org/>`_. Your project must provide an
-implementation of SLF4J.
-
-When you create a new Xitrum project with ``sbt xitrum-new``, the created
-build.sbt file has this line:
+Xitrum actions extend trait xitrum.Logger, which provides ``logger``.
+In any action, you can do like this:
 
 ::
 
-  libraryDependencies += "ch.qos.logback"  %  "logback-classic" % "0.9.29"
+  logger.debug("Hello World")
 
-This means that `Logback <http://logback.qos.ch/>`_ (an implementation of SLF4J)
-is used by default. Logback config file is at ``config/logback.xml``. You may
-replace Logback with another implementation if you like.
+Of course you can extend xitrum.Logger any time you want:
+
+::
+
+  object MyModel extends xitrum.Logger {
+    ...
+  }
+
+In build.sbt, notice this line:
+
+::
+
+  libraryDependencies += "ch.qos.logback" % "logback-classic" % "0.9.29"
+
+This means that `Logback <http://logback.qos.ch/>`_ is used by default.
+Logback config file is at ``config/logback.xml``.
+You may replace Logback with any implementation of SLF4J.
 
 Load config files
 -----------------
 
-Save config files in "config" directory. This directory is put in classpath by
-runner.sh, so that you can load them easily when your application is running.
+Save your own config files in "config" directory. This directory is put into
+classpath in development mode by build.sbt and in production mode by bin/runner.sh.
 
-To load in your application:
+::
 
-* xitrum.Config.load("file.txt"): returns the content of the file as a String
-* xitrum.Config.loadProperties("file.properties"): returns a java.util.Properties
+  import xitrum.util.Loader
+
+  // Here you get an instance of java.util.Properties
+  val properties = Loader.propertiesFromClasspath("myconfig.properties")

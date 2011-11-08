@@ -10,5 +10,5 @@ import org.slf4j.LoggerFactory
  */
 trait Logger {
   /** Logger name is inferred from the class name. */
-  val logger = LoggerFactory.getLogger(getClass)
+  lazy val logger = LoggerFactory.getLogger(getClass)
 }

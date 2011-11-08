@@ -15,7 +15,7 @@ import xitrum.etag.NotModified
 import xitrum.util.PathSanitizer
 
 /**
- * Routes /resources/public/xxx URL to resources in CLASSPATH.
+ * Routes /resources/public/xxx URL to resources in classpath.
  * See ChannelPipelineFactory, this handler is put after XSendResource.
  */
 @Sharable
