@@ -34,6 +34,8 @@ object XSendFile extends Logger {
     HttpHeaders.setContentLength(response, 0)  // Env2Response checks Content-Length
   }
 
+  def isHeaderSet(response: HttpResponse) = response.containsHeader(X_SENDFILE_HEADER)
+
   def set404Page(response: HttpResponse) {
     response.setStatus(NOT_FOUND)
     setHeader(response, abs404)
@@ -55,6 +57,7 @@ object XSendFile extends Logger {
         if (path.startsWith(abs404)) {  // Even 404.html is not found!
           HttpHeaders.setContentLength(response, 0)
           ctx.sendDownstream(e)
+          if (!HttpHeaders.isKeepAlive(request)) e.getFuture.addListener(ChannelFutureListener.CLOSE)
         } else {
           sendFile(ctx, e, request, response, abs404)
         }
@@ -73,6 +76,9 @@ object XSendFile extends Logger {
           response.setContent(ChannelBuffers.wrappedBuffer(bytes))
         }
         ctx.sendDownstream(e)
+
+        // Keep alive
+        if (!HttpHeaders.isKeepAlive(request)) e.getFuture.addListener(ChannelFutureListener.CLOSE)
 
       case Etag.TooBig(file) =>
         // LAST_MODIFIED is not reliable as ETAG when this is a cluster of web servers,
@@ -102,11 +108,7 @@ object XSendFile extends Logger {
                 raf.close
               }
             })
-
-            // Keep alive
-            if (!HttpHeaders.isKeepAlive(request)) {
-              future.addListener(ChannelFutureListener.CLOSE)
-            }
+            if (!HttpHeaders.isKeepAlive(request)) future.addListener(ChannelFutureListener.CLOSE)
           } else {
             // No encryption - use zero-copy
             val region = new DefaultFileRegion(raf.getChannel, 0, raf.length)
@@ -121,11 +123,7 @@ object XSendFile extends Logger {
                 raf.close
               }
             })
-
-            // Keep alive
-            if (!HttpHeaders.isKeepAlive(request)) {
-              future.addListener(ChannelFutureListener.CLOSE)
-            }
+            if (!HttpHeaders.isKeepAlive(request)) future.addListener(ChannelFutureListener.CLOSE)
           }
         }
     }

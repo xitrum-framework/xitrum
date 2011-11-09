@@ -10,6 +10,7 @@ import HttpResponseStatus._
 import xitrum.Config
 import xitrum.etag.Etag
 import xitrum.handler.HandlerEnv
+import xitrum.handler.updown.{XSendFile, XSendResource}
 import xitrum.util.{Gzip, Mime}
 
 @Sharable
@@ -33,7 +34,10 @@ class Env2Response extends SimpleChannelDownstreamHandler {
       // Only effective for dynamic response, static file response has already been handled
       if (!tryEtag(request, response)) Gzip.tryCompressBigTextualResponse(request, response)
 
-      if (!HttpHeaders.isKeepAlive(request)) future.addListener(ChannelFutureListener.CLOSE)
+      // Do not handle keep alive if XSendFile or XSendResource is used
+      // because it is handled by them in their own way
+      if (!XSendFile.isHeaderSet(response) && !XSendResource.isHeaderSet(response) && !HttpHeaders.isKeepAlive(request))
+        future.addListener(ChannelFutureListener.CLOSE)
     }
 
     Channels.write(ctx, future, response)

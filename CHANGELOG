@@ -6,6 +6,15 @@
   val username = param("username") :: Required :: MaxLength(32)
 * Middleware architecture
 
+1.5.3:
+* Close connection for HTTP 1.0 clients. This allows Xitrum to be run behind
+  Nginx without having to set proxy_buffering to off.
+  Nginx talks HTTP/1.1 to the browser and HTTP/1.0 to the backend server, and
+  it needs the backend server to close connection after finishing sending
+  response to it. See http://wiki.nginx.org/HttpProxyModule.
+* Fix the bug that causes connection to be closed immediately when sending file
+  from action using renderFile to HTTP 1.0 clients.
+
 1.5.2:
 * Add xitrum.Config.root (like Rails.root) and fix #47
 * Better API for basic authentication

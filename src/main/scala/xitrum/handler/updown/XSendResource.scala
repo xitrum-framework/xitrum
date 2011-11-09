@@ -29,10 +29,14 @@ object XSendResource extends Logger {
     response.setHeader(X_SENDRESOURCE_HEADER, path)
   }
 
+  def isHeaderSet(response: HttpResponse) = response.containsHeader(X_SENDRESOURCE_HEADER)
+
   /** @return false if not found */
   def sendResource(ctx: ChannelHandlerContext, e: ChannelEvent, request: HttpRequest, response: HttpResponse, path: String) {
     Etag.forResource(path, Gzip.isAccepted(request)) match {
-      case Etag.NotFound => XSendFile.set404Page(response)
+      case Etag.NotFound =>
+        // Keep alive is handled by XSendFile
+        XSendFile.set404Page(response)
 
       case Etag.Small(bytes, etag, mimeo, gzipped) =>
         if (Etag.areEtagsIdentical(request, etag)) {
@@ -47,6 +51,8 @@ object XSendResource extends Logger {
           HttpHeaders.setContentLength(response, bytes.length)
           response.setContent(ChannelBuffers.wrappedBuffer(bytes))
         }
+
+        if (!HttpHeaders.isKeepAlive(request)) e.getFuture.addListener(ChannelFutureListener.CLOSE)
     }
     ctx.sendDownstream(e)
   }
