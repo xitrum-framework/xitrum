@@ -50,7 +50,7 @@ In build.sbt, notice this line:
 
 ::
 
-  libraryDependencies += "ch.qos.logback" % "logback-classic" % "0.9.29"
+  libraryDependencies += "ch.qos.logback" % "logback-classic" % "1.0.0"
 
 This means that `Logback <http://logback.qos.ch/>`_ is used by default.
 Logback config file is at ``config/logback.xml``.
