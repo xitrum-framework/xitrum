@@ -25,11 +25,12 @@ object XSendFile extends Logger {
 
   private val X_SENDFILE_HEADER = "X-Sendfile"
 
-  private val abs404 = System.getProperty("user.dir") + "/public/404.html"
-  private val abs500 = System.getProperty("user.dir") + "/public/500.html"
+  private val abs404 = Config.root + "/public/404.html"
+  private val abs500 = Config.root + "/public/500.html"
 
-  def setHeader(response: HttpResponse, abs: String) {
-    response.setHeader(X_SENDFILE_HEADER, abs)
+  /** @param path see Renderer#renderFile */
+  def setHeader(response: HttpResponse, path: String) {
+    response.setHeader(X_SENDFILE_HEADER, path)
     HttpHeaders.setContentLength(response, 0)  // Env2Response checks Content-Length
   }
 
@@ -43,14 +44,15 @@ object XSendFile extends Logger {
     setHeader(response, abs500)
   }
 
-  def sendFile(ctx: ChannelHandlerContext, e: ChannelEvent, request: HttpRequest, response: HttpResponse, abs: String) {
+  /** @param path see Renderer#renderFile */
+  def sendFile(ctx: ChannelHandlerContext, e: ChannelEvent, request: HttpRequest, response: HttpResponse, path: String) {
     // Try to serve from cache
-    Etag.forFile(abs, Gzip.isAccepted(request)) match {
+    Etag.forFile(path, Gzip.isAccepted(request)) match {
       case Etag.NotFound =>
         response.setStatus(NOT_FOUND)
         NotModified.removeClientCache(response)
 
-        if (abs.startsWith(abs404)) {  // Even 404.html is not found!
+        if (path.startsWith(abs404)) {  // Even 404.html is not found!
           HttpHeaders.setContentLength(response, 0)
           ctx.sendDownstream(e)
         } else {
@@ -82,8 +84,8 @@ object XSendFile extends Logger {
           response.setContent(ChannelBuffers.EMPTY_BUFFER)
           ctx.sendDownstream(e)
         } else {
-          val mimeo = Mime.get(abs)
-          val raf   = new RandomAccessFile(abs, "r")
+          val mimeo = Mime.get(path)
+          val raf   = new RandomAccessFile(path, "r")
 
           // Write the initial line and the header
           HttpHeaders.setContentLength(response, raf.length)
@@ -169,14 +171,14 @@ class XSendFile extends ChannelUpstreamHandler with ChannelDownstreamHandler {
     }
 
     val response = m.asInstanceOf[HttpResponse]
-    val abs      = response.getHeader(X_SENDFILE_HEADER)
-    if (abs == null) {
+    val path      = response.getHeader(X_SENDFILE_HEADER)
+    if (path == null) {
       ctx.sendDownstream(e)
       return
     }
 
     // X-SendFile is not standard, remove to avoid leaking information
     response.removeHeader(X_SENDFILE_HEADER)
-    sendFile(ctx, e, request, response, abs)
+    sendFile(ctx, e, request, response, path)
   }
 }

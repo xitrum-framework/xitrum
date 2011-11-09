@@ -11,7 +11,7 @@ import org.jboss.netty.handler.codec.http.HttpMethod
 
 import sclasner.{FileEntry, Scanner}
 
-import xitrum.{Action, Logger}
+import xitrum.{Action, Config, Logger}
 import xitrum.annotation._
 
 /** Scan all classes to collect routes. */
@@ -45,13 +45,11 @@ class RouteCollector extends Logger {
             Scanner.foldLeft("routes.sclasner", (empty, empty, empty), discovered _)
           } catch {
             case e2 =>
-              logger.error("Could not collect routes", e2)
-              System.exit(-1)
+              Config.exitOnError("Could not collect routes", e2)
               throw e2
           }
         } else {
-          logger.error("Could not collect routes", e)
-          System.exit(-1)
+          Config.exitOnError("Could not collect routes", e)
           throw e
         }
     }

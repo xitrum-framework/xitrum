@@ -37,8 +37,12 @@ class Server extends Logger {
     bootstrap.setOption("reuseAddress",     true)
     bootstrap.setOption("child.tcpNoDelay", true)
     bootstrap.setOption("child.keepAlive",  true)
-    bootstrap.bind(new InetSocketAddress(port))
-
-    logger.info("{} server started on port {}", kind, port)
+    try {
+      bootstrap.bind(new InetSocketAddress(port))
+      logger.info("{} server started on port {}", kind, port)
+    } catch {
+      case e =>
+        Config.exitOnError("Check to see if there's another process running on port " + port, e)
+    }
   }
 }

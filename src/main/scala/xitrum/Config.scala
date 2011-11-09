@@ -11,6 +11,21 @@ import xitrum.util.Loader
 
 /** See config/xitrum.properties */
 object Config extends Logger {
+  /**
+   * Path to the root directory of the current project.
+   * If you're familiar with Rails, this is the same as Rails.root.
+   * See https://github.com/ngocdaothanh/xitrum/issues/47
+   */
+  val root = {
+    val res = getClass.getClassLoader.getResource("xitrum.properties")
+    if (res != null)
+      res.getFile.replace(File.separator + "config" + File.separator + "xitrum.properties", "")
+    else
+      System.getProperty("user.dir")  // Fallback to current working directory
+  }
+
+  //----------------------------------------------------------------------------
+
   /** 404.html and 500.html is used by default */
   var action404: Class[_ <: Action] = _
   var action500: Class[_ <: Action] = _
@@ -24,9 +39,8 @@ object Config extends Logger {
     try {
       Loader.propertiesFromClasspath("xitrum.properties")
     } catch {
-      case _ =>
-        logger.error("Could not load xitrum.properties. The \"config\" directory should be in classpath.")
-        System.exit(-1)
+      case e =>
+        Config.exitOnError("Could not load xitrum.properties. The \"config\" directory should be in classpath.", e)
         null
     }
   }
@@ -47,7 +61,10 @@ object Config extends Logger {
 
   val baseUri = properties.getProperty("base_uri", "")
 
-  val hazelcastInstance: HazelcastInstance = {
+  // Use lazy to avoid starting Hazelcast if it is not used
+  // (starting Hazelcast takes several seconds, sometimes we want to work in
+  // sbt console mode and don't like this overhead)
+  lazy val hazelcastInstance: HazelcastInstance = {
     val hazelcastMode = getPropertyWithoudDefault("hazelcast_mode")
 
     // http://code.google.com/p/hazelcast/issues/detail?id=94
@@ -61,7 +78,7 @@ object Config extends Logger {
     // http://code.google.com/p/hazelcast/wiki/Config
     // http://code.google.com/p/hazelcast/source/browse/trunk/hazelcast/src/main/java/com/hazelcast/config/XmlConfigBuilder.java
     if (hazelcastMode == "super_client" || hazelcastMode == "cluster_member") {
-      val config = System.getProperty("user.dir") + File.separator + "config" + File.separator + "hazelcast_cluster_member_or_super_client.xml"
+      val config = Config.root + File.separator + "config" + File.separator + "hazelcast_cluster_member_or_super_client.xml"
       System.setProperty("hazelcast.config", config)
       Hazelcast.getDefaultInstance
     } else {
@@ -71,6 +88,17 @@ object Config extends Logger {
       val addresses     = props.getProperty("addresses").split(",").map(_.trim)
       HazelcastClient.newHazelcastClient(groupName, groupPassword, addresses:_*)
     }
+  }
+
+  /**
+   * Shutdowns Hazelcast and call System.exit(-1).
+   * Once Hazelcast is started, calling System.exit(-1) does not make the stop
+   * the current process!
+   */
+  def exitOnError(msg: String, e: Throwable) {
+    logger.error(msg, e)
+    Hazelcast.shutdownAll
+    System.exit(-1)
   }
 
   //----------------------------------------------------------------------------
@@ -123,9 +151,8 @@ object Config extends Logger {
     try {
       properties.getProperty(key)
     } catch {
-      case _ =>
-        logger.error("Could not load propery \"" + key + "\" in xitrum.properties. You probably forgot to update xitrum.properties when updating Xitrum.")
-        System.exit(-1)
+      case e =>
+        Config.exitOnError("Could not load propery \"" + key + "\" in xitrum.properties. You probably forgot to update xitrum.properties when updating Xitrum.", e)
         null
     }
   }

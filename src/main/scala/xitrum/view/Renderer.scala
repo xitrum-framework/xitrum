@@ -130,15 +130,15 @@ trait Renderer extends JS with Flash with I18n {
   /**
    * Sends a file using X-SendFile.
    *
-   * @param path Starts with "/" for absolute path, otherwise it is relative to
-   * the current working directory (System.getProperty("user.dir")).
-   * The given path is not sanitized. To sanitize, use xitrum.util.PathSanitizer.
+   * @param path may be absolute or relative to the current working directory.
+   * In some cases, the current working directory is not always the root directory
+   * of the project (https://github.com/ngocdaothanh/xitrum/issues/47), you may
+   * need to use xitrum.Config.root to calculate the correct absolute path from
+   * a relative path.
    */
   def renderFile(path: String) {
     if (!channel.isOpen) return
-
-    val abs = if (path.startsWith("/")) path else System.getProperty("user.dir") + File.separator + path
-    XSendFile.setHeader(response, abs)
+    XSendFile.setHeader(response, path)
     respond
   }
 

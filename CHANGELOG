@@ -1,9 +1,18 @@
 1.6 (planned):
+* WebSocket
+* Scalate
+* wro4j
 * RESTful actions now can use validators:
   val username = param("username") :: Required :: MaxLength(32)
-* wro4j integration
 * Middleware architecture
-* WebSocket
+
+1.5.2:
+* Add xitrum.Config.root (like Rails.root) and fix #47
+* Better API for basic authentication
+* renderFile now can work with absolute path on Windows
+* Exit if there's error on startup
+* Update SLF4J from 1.6.2 to 1.6.4 (and Logback from 0.9.30 from to 1.0.0)
+* Update Hazelcast from 1.9.4.3 to 1.9.4.4
 
 1.5.1:
 * Update Jerkson from 0.4.2 to 0.5.0

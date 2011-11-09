@@ -25,7 +25,7 @@ scalacOptions ++= Seq(
 libraryDependencies += "org.jboss.netty" % "netty" % "4.0.0.Alpha1-SNAPSHOT" from "http://cloud.github.com/downloads/ngocdaothanh/xitrum/netty-4.0.0.Alpha1-SNAPSHOT.jar"
 
 // Projects using Xitrum must provide a concrete implentation of SLF4J (Logback etc.)
-libraryDependencies += "org.slf4j" % "slf4j-api" % "1.6.2" % "provided"
+libraryDependencies += "org.slf4j" % "slf4j-api" % "1.6.4" % "provided"
 
 libraryDependencies += "tv.cntt" %% "sclasner" % "1.0"
 
@@ -36,11 +36,11 @@ libraryDependencies += "org.javassist" % "javassist" % "3.15.0-GA"
 // For distributed cache and Comet
 // Infinispan is good but much heavier, and the logging is bad:
 // https://github.com/infinispan/infinispan/blob/master/core/src/main/java/org/infinispan/util/logging/LogFactory.java
-libraryDependencies += "com.hazelcast" % "hazelcast" % "1.9.4.3"
+libraryDependencies += "com.hazelcast" % "hazelcast" % "1.9.4.4"
 
 // http://www.hazelcast.com/documentation.jsp#Clients
 // Hazelcast may be configured in Xitrum as super client or native client
-libraryDependencies += "com.hazelcast" % "hazelcast-client" % "1.9.4.3"
+libraryDependencies += "com.hazelcast" % "hazelcast-client" % "1.9.4.4"
 
 // https://github.com/codahale/jerkson
 // lift-json does not generate correctly for:

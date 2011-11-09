@@ -60,8 +60,9 @@ trait UrlFor {
 
   //----------------------------------------------------------------------------
 
+  /** path must be relative to the "public" directory */
   def urlForPublic(path: String) = {
-    val absPath     = System.getProperty("user.dir") + "/public/" + path
+    val absPath     = Config.root + "/public/" + path
     val forceReload = Etag.forFile(absPath, true) match {
       case Etag.NotFound                           => Random.nextLong.toString
       case Etag.TooBig(file)                       => file.lastModified

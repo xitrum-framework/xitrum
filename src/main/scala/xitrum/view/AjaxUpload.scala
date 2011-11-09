@@ -77,7 +77,7 @@ trait AjaxUpload {
    *     val id   = Product.create(name)
    *
    *     val encyptedFileName = param("encyptedFileName")
-   *     val path             = System.getProperty("user.dir") + "/public/products/" + id + extension
+   *     val path             = Config.root + "/public/products/" + id + extension
    *     TempFileServer.renameTo(encyptedFileName, path)
    *
    *     redirectTo[ProductIndexAction]

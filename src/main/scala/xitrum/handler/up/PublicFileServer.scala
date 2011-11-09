@@ -57,15 +57,13 @@ class PublicFileServer extends SimpleChannelUpstreamHandler with BadClientSilenc
 
   /** Sanitizes and returns absolute path. */
   private def absStaticPath(pathInfo: String): Option[String] = {
-    // pathInfo starts with "/"
     PathSanitizer.sanitize(pathInfo) match {
       case None => None
 
       case Some(path) =>
         // Convert to absolute path
-        // user.dir: current working directory
-        // See: http://www.java2s.com/Tutorial/Java/0120__Development/Javasystemproperties.htm
-        Some(System.getProperty("user.dir") + "/public" + path)
+        // pathInfo starts with "/"
+        Some(Config.root + "/public" + path)
     }
   }
 }
