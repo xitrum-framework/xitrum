@@ -69,6 +69,9 @@ If you use a plain text editor, not Eclipse:
 The ``sbt ~compile`` process will automatically recompile the file, and JRebel will
 automatically reload the generated .class files.
 
+``sbt ~compile`` works fine in bash and sh shell. In zsh shell, you need to use
+``sbt "~compile"``, or it will complain "no such user or named directory: compile".
+
 Routes are not reloaded
 ~~~~~~~~~~~~~~~~~~~~~~~
 
