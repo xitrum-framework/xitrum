@@ -63,11 +63,12 @@ automatically reload the generated .class files.
 If you use a plain text editor, not Eclipse:
 
 1. Run ``sbt run``
-2. Run ``sbt "~compile"`` in another console to compile in continuous/incremental mode
+2. Run ``sbt "~compile"`` in another console to compile in
+continuous/incremental mode
 3. In the editor, try editing a Scala file, and save
 
-The ``sbt ~compile`` process will automatically recompile the file, and JRebel will
-automatically reload the generated .class files.
+The ``sbt "~compile"`` process will automatically recompile the file, and
+JRebel will automatically reload the generated .class files.
 
 Routes are not reloaded
 ~~~~~~~~~~~~~~~~~~~~~~~
