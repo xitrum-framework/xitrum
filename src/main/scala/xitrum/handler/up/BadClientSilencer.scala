@@ -9,7 +9,7 @@ trait BadClientSilencer extends Logger {
   this: SimpleChannelUpstreamHandler =>
 
   override def exceptionCaught(ctx: ChannelHandlerContext, e: ExceptionEvent) {
-    if (e.getChannel.isOpen) e.getChannel.close
+    e.getChannel.close
 
     // Do nothing if the exception is one of the following:
     // java.io.IOException: Connection reset by peer

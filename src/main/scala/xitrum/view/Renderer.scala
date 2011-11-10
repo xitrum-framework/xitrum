@@ -33,7 +33,7 @@ trait Renderer extends JS with Flash with I18n {
    * Headers are only sent on the first renderXXX call.
    */
   def renderLastChunk {
-    if (channel.isOpen) channel.write(HttpChunk.LAST_CHUNK)
+    channel.write(HttpChunk.LAST_CHUNK)
   }
 
   //----------------------------------------------------------------------------
@@ -50,10 +50,9 @@ trait Renderer extends JS with Flash with I18n {
           Xhtml.toXhtml(text.asInstanceOf[Node])
         else
           Xhtml.toXhtml(text.asInstanceOf[NodeSeq])
-      } else
+      } else {
         text.toString
-
-    if (!channel.isOpen) return ret
+      }
 
     if (!isResponded) {
       // Set content type automatically
@@ -96,12 +95,10 @@ trait Renderer extends JS with Flash with I18n {
   def layout = renderedView
 
   def renderView(view: Any) {
-    if (channel.isOpen) renderView(view, layout _)
+    renderView(view, layout _)
   }
 
   def renderView(view: Any, customLayout: () => Any) {
-    if (!channel.isOpen) return
-
     renderedView = view
     val renderedLayout = customLayout.apply
     if (renderedLayout == null)
@@ -113,8 +110,6 @@ trait Renderer extends JS with Flash with I18n {
   //----------------------------------------------------------------------------
 
   def renderBinary(bytes: Array[Byte]) {
-    if (!channel.isOpen) return
-
     val cb = ChannelBuffers.wrappedBuffer(bytes)
     if (response.isChunked) {
       writeHeaderOnFirstChunk
@@ -140,15 +135,12 @@ trait Renderer extends JS with Flash with I18n {
    * To sanitize the path, use xitrum.util.PathSanitizer.
    */
   def renderFile(path: String) {
-    if (!channel.isOpen) return
     XSendFile.setHeader(response, path)
     respond
   }
 
   /** @param path Relative to an entry in classpath, without leading "/" */
   def renderResource(path: String) {
-    if (!channel.isOpen) return
-
     XSendResource.setHeader(response, path)
     respond
   }
@@ -156,15 +148,11 @@ trait Renderer extends JS with Flash with I18n {
   //----------------------------------------------------------------------------
 
   def renderDefault404Page {
-    if (!channel.isOpen) return
-
     XSendFile.set404Page(response)
     respond
   }
 
   def renderDefault500Page {
-    if (!channel.isOpen) return
-
     XSendFile.set500Page(response)
     respond
   }

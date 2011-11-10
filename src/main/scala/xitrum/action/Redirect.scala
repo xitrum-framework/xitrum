@@ -11,10 +11,7 @@ trait Redirect {
   this: Action =>
 
   def redirectTo(location: String, status: HttpResponseStatus = FOUND) {
-    if (!channel.isOpen) return
-
     response.setStatus(status)
-
     HttpHeaders.setContentLength(response, 0)
     response.setHeader(LOCATION, location)
     respond
