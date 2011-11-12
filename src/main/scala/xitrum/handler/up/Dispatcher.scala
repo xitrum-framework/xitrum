@@ -46,28 +46,24 @@ object Dispatcher extends Logger {
         }
       }
 
+      def runAroundAndAfterFilters {
+        val executeOrPostback = if (postback) action.postback _ else action.execute _
+        action.callAroundFilters(executeOrPostback)
+        action.callAfterFilters
+      }
+
       if (cacheSecs > 0) {             // Page cache
         tryCache {
           val passed = action.callBeforeFilters
-          if (passed) {
-            val executeOrPostback = if (postback) action.postback _ else action.execute _
-            action.callAroundFilters(executeOrPostback)
-            action.callAfterFilters
-          }
+          if (passed) runAroundAndAfterFilters
         }
       } else {
         val passed = action.callBeforeFilters
         if (passed) {
           if (cacheSecs == 0) {        // No cache
-            val executeOrPostback = if (postback) action.postback _ else action.execute _
-            action.callAroundFilters(executeOrPostback)
-            action.callAfterFilters
+            runAroundAndAfterFilters
           } else if (cacheSecs < 0) {  // Action cache
-            tryCache {
-              val executeOrPostback = if (postback) action.postback _ else action.execute _
-              action.callAroundFilters(executeOrPostback)
-              action.callAfterFilters
-            }
+            tryCache { runAroundAndAfterFilters }
           }
         }
       }
