@@ -38,6 +38,11 @@ trait Renderer extends JS with Flash with I18n {
 
   //----------------------------------------------------------------------------
 
+  /**
+   * If contentType param is not given and Content-Type header is not set, it is
+   * set to "application/xml" if text param is Node or NodeSeq, otherwise it is
+   * set to "text/plain".
+   */
   def renderText(text: Any, contentType: String = null): String = {
     val textIsXml = text.isInstanceOf[Node] || text.isInstanceOf[NodeSeq]
 
@@ -83,6 +88,7 @@ trait Renderer extends JS with Flash with I18n {
 
   //----------------------------------------------------------------------------
 
+  /** Content-Type header is set to "text/json" */
   def renderJson(any: Any) {
     val json = Json.generate(any)
     renderText(json, "text/json; charset=" + Config.paramCharsetName)
@@ -98,6 +104,7 @@ trait Renderer extends JS with Flash with I18n {
     renderView(view, layout _)
   }
 
+  /** Content-Type header is set to "text/html" */
   def renderView(view: Any, customLayout: () => Any) {
     renderedView = view
     val renderedLayout = customLayout.apply
@@ -109,7 +116,11 @@ trait Renderer extends JS with Flash with I18n {
 
   //----------------------------------------------------------------------------
 
+  /** If Content-Type header is not set, it is set to "application/octet-stream" */
   def renderBinary(bytes: Array[Byte]) {
+    if (!response.containsHeader(CONTENT_TYPE))
+      response.setHeader(CONTENT_TYPE, "application/octet-stream")
+
     val cb = ChannelBuffers.wrappedBuffer(bytes)
     if (response.isChunked) {
       writeHeaderOnFirstChunk
@@ -124,6 +135,7 @@ trait Renderer extends JS with Flash with I18n {
 
   /**
    * Sends a file using X-SendFile.
+   * If Content-Type header is not set, it is guessed from the file name.
    *
    * @param path absolute or relative to the current working directory
    *
@@ -139,7 +151,13 @@ trait Renderer extends JS with Flash with I18n {
     respond
   }
 
-  /** @param path Relative to an entry in classpath, without leading "/" */
+  /**
+   * Sends a file from public directory in one of the entry (may be a JAR file)
+   * in classpath.
+   * If Content-Type header is not set, it is guessed from the file name.
+   *
+   * @param path Relative to an entry in classpath, without leading "/"
+   */
   def renderResource(path: String) {
     XSendResource.setHeader(response, path)
     respond

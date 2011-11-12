@@ -7,7 +7,9 @@ import xitrum.scope.session.CSRF
 trait ExtEnv extends RequestEnv with ParamAccess with CSRF {
   this: Action =>
 
-  // The below are not always accessed by framwork/application, thus set to lazy
+  // Below are lazy because they are not always accessed by framwork/application
+  // (to save calculation time) or the things they depend on are null when this
+  // instance is created
 
   lazy val at = new At
 
