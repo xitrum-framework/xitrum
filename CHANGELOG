@@ -6,6 +6,10 @@
   val username = param("username") :: Required :: MaxLength(32)
 * Middleware architecture
 
+1.5.4:
+* Redesign filters to be typesafe
+* Add after and arround filters
+
 1.5.3:
 * Close connection for HTTP 1.0 clients. This allows Xitrum to be run behind
   Nginx without having to set proxy_buffering to off.
