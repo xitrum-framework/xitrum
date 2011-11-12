@@ -33,20 +33,20 @@ trait Filter {
 
   //----------------------------------------------------------------------------
 
-  private val arroundFilters = ArrayBuffer[(() => Any) => Any]()
+  private val aroundFilters = ArrayBuffer[(() => Any) => Any]()
 
-  def arroundFilter(f: (() => Any) => Any) {
-    arroundFilters.append(f)
+  def aroundFilter(f: (() => Any) => Any) {
+    aroundFilters.append(f)
   }
 
-  def skipArroundFilter(f: (() => Any) => Any) {
-    arroundFilters -= f
+  def skipAroundFilter(f: (() => Any) => Any) {
+    aroundFilters -= f
   }
 
   /** Called by Dispatcher */
-  def callArroundFilters(execute: () => Any) {
-    val initialWrapper = () => execute()
-    val bigWrapper = arroundFilters.foldLeft(initialWrapper) { (wrapper, f) =>
+  def callAroundFilters(executeOrPostback: () => Any) {
+    val initialWrapper = () => executeOrPostback()
+    val bigWrapper = aroundFilters.foldLeft(initialWrapper) { (wrapper, f) =>
       () => f(wrapper)
     }
     bigWrapper()

@@ -50,16 +50,24 @@ object Dispatcher extends Logger {
         tryCache {
           val passed = action.callBeforeFilters
           if (passed) {
-            if (postback) action.postback else action.execute
+            val executeOrPostback = if (postback) action.postback _ else action.execute _
+            action.callAroundFilters(executeOrPostback)
+            action.callAfterFilters
           }
         }
       } else {
         val passed = action.callBeforeFilters
         if (passed) {
           if (cacheSecs == 0) {        // No cache
-            if (postback) action.postback else action.execute
+            val executeOrPostback = if (postback) action.postback _ else action.execute _
+            action.callAroundFilters(executeOrPostback)
+            action.callAfterFilters
           } else if (cacheSecs < 0) {  // Action cache
-            tryCache { if (postback) action.postback else action.execute }
+            tryCache {
+              val executeOrPostback = if (postback) action.postback _ else action.execute _
+              action.callAroundFilters(executeOrPostback)
+              action.callAfterFilters
+            }
           }
         }
       }

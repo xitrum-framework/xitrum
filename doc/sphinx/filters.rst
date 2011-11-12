@@ -4,8 +4,8 @@ Filters
 Before filters
 --------------
 
-Before filters of an action are run before the ``execute`` method of the action
-is run. They are funtions that take no argument and returns true or false.
+Before filters are run before ``execute`` or ``postback`` method is run.
+They are funtions that take no argument and returns true or false.
 If a before filter returns false, all filters after it and ``execute`` will
 not be run.
 
@@ -73,8 +73,8 @@ Before filters can be skipped using ``skipBeforeFilter``.
 After filters
 -------------
 
-After filters are run after ``execute`` is run. They are functions that take no
-argument. Their return value will be ignored.
+After filters are run after ``execute`` or ``postback`` method is run.
+They are functions that take no argument. Their return value will be ignored.
 
 ::
 
@@ -94,7 +94,7 @@ argument. Their return value will be ignored.
 
 After filters can be skipped using ``skipAfterFilter``.
 
-Arround filters
+Around filters
 ---------------
 
 ::
@@ -104,9 +104,9 @@ Arround filters
 
   @GET("/")
   class MyAction extends Action {
-    arroundFilter { execute =>
+    aroundFilter { executeOrPostback =>
       val begin = System.currentTimeMillis
-      execute
+      executeOrPostback
       val end   = System.currentTimeMillis
       println("The action takes " + (end - begin) + " [ms]")
     }
@@ -116,4 +116,27 @@ Arround filters
     }
   }
 
-Arround filters can be skipped using ``skipArroundFilter``.
+If there are many around filters, they will be nested.
+Around filters can be skipped using ``skipAroundFilter``.
+
+Priority
+--------
+
+* Before filters are run first, then around filters, then after filters
+* If one of the before filters returns false, the rest (including around and
+  after filters) will not be run
+* After filters are always run if at least an around filter is run
+* If an around filter decide not to call ``executeOrPostback``, the inner nested
+  around filters will not be run
+
+::
+
+  before1 -true-> before2 -true-> +-----------------------+ --> after1 --> after2
+                                  | around1 (1 of 2)      |
+                                  | +-------------------+ |
+                                  | | around2 (1 of 2)  | |
+                                  | | executeOrPostback | |
+                                  | | around2 (2 of 2)  | |
+                                  | +-------------------+ |
+                                  | around2 (2 of 2)      |
+                                  +-----------------------+
