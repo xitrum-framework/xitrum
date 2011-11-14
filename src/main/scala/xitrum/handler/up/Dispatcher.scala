@@ -80,26 +80,33 @@ object Dispatcher extends Logger {
           logAccess(action, postback, beginTimestamp, 0, false)
 
           action.response.setStatus(BAD_REQUEST)
-
-          if (e.isInstanceOf[SessionExpired] || e.isInstanceOf[InvalidAntiCSRFToken]) {
+          val msg = if (e.isInstanceOf[SessionExpired] || e.isInstanceOf[InvalidAntiCSRFToken]) {
             action.resetSession
-            action.jsRender("alert(" + action.jsEscape("Session expired. Please refresh your browser.") + ")")
+            "Session expired. Please refresh your browser."
           } else if (e.isInstanceOf[MissingParam]) {
             val mp  = e.asInstanceOf[MissingParam]
             val key = mp.key
-            action.renderText("Missing Param: " + key)
+            "Missing Param: " + key
           }
+          if (action.isAjax)
+            action.jsRender("alert(" + action.jsEscape(msg) + ")")
+          else
+            action.renderText(msg)
         } else {
           logAccess(action, postback, beginTimestamp, 0, false, e)
 
-          if (Config.action500 == null) {
-            val response = new DefaultHttpResponse(HTTP_1_1, INTERNAL_SERVER_ERROR)
-            XSendFile.set500Page(response)
-            action.handlerEnv.response = response
-            action.channel.write(action.handlerEnv)
+          if (action.isAjax) {
+            action.jsRender("alert(" + action.jsEscape("Internal Server Error") + ")")
           } else {
-            action.response.setStatus(INTERNAL_SERVER_ERROR)
-            action.forward(Config.action500, false)
+            if (Config.action500 == null) {
+              val response = new DefaultHttpResponse(HTTP_1_1, INTERNAL_SERVER_ERROR)
+              XSendFile.set500Page(response)
+              action.handlerEnv.response = response
+              action.channel.write(action.handlerEnv)
+            } else {
+              action.response.setStatus(INTERNAL_SERVER_ERROR)
+              action.forward(Config.action500, false)
+            }
           }
         }
     }

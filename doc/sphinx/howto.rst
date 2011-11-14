@@ -6,10 +6,26 @@ HOWTO
 This chapter contains various small tips. Each tip is too small to have its own
 chapter.
 
+Determine is the request is Ajax request
+----------------------------------------
+
+Use ``isAjax``.
+
+::
+
+  // In an action
+  val msg = "A message"
+  if (isAjax)
+    jsRender("alert(" + jsEscape(msg) + ")")
+  else
+    renderText(msg)
+
 Basic authentication
 --------------------
 
 ::
+
+  import xitrum.Action
 
   class MyAction extends Action {
     beforeFilters("authenticate") = basicAuthenticate("Realm") { (username, password) =>
