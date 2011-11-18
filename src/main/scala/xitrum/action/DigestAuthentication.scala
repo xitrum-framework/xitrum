@@ -298,7 +298,6 @@ trait DigestAuthentication {
       case "HMACSHA1" =>
         hexaHmacSHA1Signature(data, getSecretTokenClient)
     }
-    ""
   }
   /**
    * Hash algorithm = MD2, MD5 , SHA1,...
