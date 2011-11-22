@@ -9,6 +9,7 @@
 1.5.4:
 * Redesign filters to be typesafe
 * Add after and around filters
+* Add Loader.json and use JSON for config files
 
 1.5.3:
 * Close connection for HTTP 1.0 clients. This allows Xitrum to be run behind

@@ -78,9 +78,38 @@ Load config files
 Save your own config files in "config" directory. This directory is put into
 classpath in development mode by build.sbt and in production mode by bin/runner.sh.
 
+myconfig.json
+
 ::
 
-  import xitrum.util.Loader
+  {
+    // You can write comment in JSON file like this
+    "username": "God",
+    // Keys must be quoted with double quotes
+    "password": "Does God needs a password?",
+    "children": ["Adam", "Eva"]
+  }
+
+Load it:
+
+::
+
+  case class MyConfig(username: String, password: String, children: List[String])
+  val myConfig = xitrum.util.Loader.jsonFromClasspath[MyConfig]("myconfig.json")
+
+You can also use properties files, but you should use JSON whenever possible
+because it's much better. Properties files are not typesafe, do not support UTF-8
+and nested structures etc.
+
+myconfig.properties
+
+::
+
+  username = God
+  password = Does God needs a password?
+  children = Adam, Eva
+
+::
 
   // Here you get an instance of java.util.Properties
-  val properties = Loader.propertiesFromClasspath("myconfig.properties")
+  val properties = xitrum.util.Loader.propertiesFromClasspath("myconfig.properties")
