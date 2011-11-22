@@ -21,11 +21,7 @@ case class ReverseProxyConfig(ips: List[String], baseUri: String)
 case class SessionConfig(store: String, cookieName: String, secureKey: String)
 
 case class RequestConfig(maxSizeInMB: Int, charset: String, filteredParams: List[String])
-case class ResponseConfig(
-  smallStaticFileSizeInKB:    Int,
-  maxCachedSmallStaticFiles:  Int,
-  bigTextualResponseSizeInKB: Int,
-  staticFileMaxAgeInMinutes:  Int)
+case class ResponseConfig(smallStaticFileSizeInKB: Int, maxCachedSmallStaticFiles: Int)
 
 case class Config(
   http:          Option[HttpConfig],
