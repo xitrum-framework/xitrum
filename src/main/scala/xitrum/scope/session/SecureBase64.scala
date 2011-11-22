@@ -49,7 +49,7 @@ object SecureBase64 {
     // Idea: http://stackoverflow.com/questions/992019/java-256bit-aes-encryption/992413
     val messageDigest = MessageDigest.getInstance("MD5")
     messageDigest.reset
-    messageDigest.update(Config.secureKey.getBytes("UTF-8"))
+    messageDigest.update(Config.config.session.secureKey.getBytes("UTF-8"))
     messageDigest.digest
   }
 

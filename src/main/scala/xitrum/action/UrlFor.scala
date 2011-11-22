@@ -55,7 +55,7 @@ trait UrlFor {
     val className       = actionClass.getName
     val secureClassName = SecureBase64.encrypt(className)
     val url = PostbackAction.POSTBACK_PREFIX + secureClassName
-    if (Config.baseUri.isEmpty) url else Config.baseUri + "/" + url
+    Config.withBaseUri(url)
   }
 
   //----------------------------------------------------------------------------
@@ -68,7 +68,7 @@ trait UrlFor {
       case Etag.TooBig(file)                       => file.lastModified
       case Etag.Small(bytes, etag, mimeo, gzipped) => etag
     }
-    Config.baseUri + "/" + path + "?" + forceReload
+    Config.withBaseUri(path + "?" + forceReload)
   }
 
   def urlForResource(path: String) = {
@@ -77,7 +77,7 @@ trait UrlFor {
       case Etag.NotFound                           => Random.nextLong.toString
       case Etag.Small(bytes, etag, mimeo, gzipped) => etag
     }
-    Config.baseUri + "/resources/public/" + path + "?" + forceReload
+    Config.withBaseUri("/resources/public/" + path + "?" + forceReload)
   }
 
   //----------------------------------------------------------------------------

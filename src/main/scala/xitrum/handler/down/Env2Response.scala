@@ -56,7 +56,7 @@ class Env2Response extends SimpleChannelDownstreamHandler {
 
     val channelBuffer = response.getContent
     val readableBytes = channelBuffer.readableBytes
-    if (readableBytes > Config.smallStaticFileSizeInKB * 1024) return false
+    if (readableBytes > Config.config.response.smallStaticFileSizeInKB * 1024) return false
 
     val etag1 = response.getHeader(ETAG)
     val etag2 =

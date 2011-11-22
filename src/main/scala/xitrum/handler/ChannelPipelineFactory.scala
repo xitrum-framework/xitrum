@@ -59,7 +59,7 @@ class ChannelPipelineFactory(https: Boolean) extends CPF {
     List(
       // Up
       new HttpRequestDecoder,
-      new HttpChunkAggregator(Config.maxRequestContentLengthInMB * 1024 * 1024),
+      new HttpChunkAggregator(Config.config.request.maxSizeInMB * 1024 * 1024),
 
       // Down
       new HttpResponseEncoder,

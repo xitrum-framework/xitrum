@@ -24,7 +24,7 @@ class UriParser extends SimpleChannelUpstreamHandler with BadClientSilencer {
     val request = env.request
 
     try {
-      val decoder   = new QueryStringDecoder(request.getUri, Config.paramCharset)
+      val decoder   = new QueryStringDecoder(request.getUri, Config.requestCharset)
       env.pathInfo  = new PathInfo(decoder.getPath)
       env.uriParams = jParamsToParams(decoder.getParameters)
     } catch {

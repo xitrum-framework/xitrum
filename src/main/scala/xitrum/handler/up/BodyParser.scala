@@ -27,7 +27,7 @@ object BodyParser {
 
   // "Save to disk if size exceeds MINSIZE" only works in chunk mode, not compatible with HttpChunkAggregator
   // When the file is too big, it will cause java.lang.NullPointerException: buffer (AbstractDiskHttpData.java:173)
-  val factory = new DefaultHttpDataFactory(Config.maxRequestContentLengthInMB * 1024 * 1024)
+  val factory = new DefaultHttpDataFactory(Config.config.request.maxSizeInMB * 1024 * 1024)
 }
 
 @Sharable

@@ -19,8 +19,8 @@ object Etag extends Logger {
   case class  Small(val bytes: Array[Byte], val etag: String, val mimeo: Option[String], val gzipped: Boolean) extends Result
 
   //                                                     path    mtime
-  private val smallFileCache        = new LocalLRUCache[(String, Long), Small](Config.maxCachedSmallStaticFiles)
-  private val gzippedSmallFileCache = new LocalLRUCache[(String, Long), Small](Config.maxCachedSmallStaticFiles)
+  private val smallFileCache        = new LocalLRUCache[(String, Long), Small](Config.config.response.maxCachedSmallStaticFiles)
+  private val gzippedSmallFileCache = new LocalLRUCache[(String, Long), Small](Config.config.response.maxCachedSmallStaticFiles)
 
   def forBytes(bytes: Array[Byte]): String = {
     val md5 = MessageDigest.getInstance("MD5")  // MD5 is fastest
@@ -29,13 +29,13 @@ object Etag extends Logger {
     Base64.encode(md5.digest)
   }
 
-  def forString(string: String) = forBytes(string.getBytes(Config.paramCharsetName))
+  def forString(string: String) = forBytes(string.getBytes(Config.config.request.charset))
 
   def forFile(path: String, gzipped: Boolean): Result = {
     val file = new File(path)
     if (!file.exists) return NotFound
 
-    if (file.length > Config.smallStaticFileSizeInKB * 1024) return TooBig(file)
+    if (file.length > Config.config.response.smallStaticFileSizeInKB * 1024) return TooBig(file)
 
     val mtime = file.lastModified
     val key   = (path, mtime)

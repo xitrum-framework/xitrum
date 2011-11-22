@@ -20,7 +20,7 @@ object HazelcastSessionStore {
 class HazelcastSessionStore extends SessionStore {
   def restore(extEnv: ExtEnv): Session = {
     try {
-      val cookie = extEnv.cookies.get(Config.sessionCookieName).get
+      val cookie = extEnv.cookies.get(Config.config.session.cookieName).get
       val base64String = cookie.getValue
       val sessionId = SecureBase64.decrypt(base64String).get
 
@@ -37,9 +37,9 @@ class HazelcastSessionStore extends SessionStore {
   }
 
   def store(session: Session, extEnv: ExtEnv) {
-    val cookiePath = Config.baseUri + "/"
+    val cookiePath = Config.withBaseUri("/")
 
-    val sessionId = extEnv.cookies.get(Config.sessionCookieName) match {
+    val sessionId = extEnv.cookies.get(Config.config.session.cookieName) match {
       case Some(cookie) =>
         val ret = try {
           val base64String = cookie.getValue
@@ -55,7 +55,7 @@ class HazelcastSessionStore extends SessionStore {
 
       case None =>
         val ret = UUID.randomUUID.toString
-        val cookie = new DefaultCookie(Config.sessionCookieName, SecureBase64.encrypt(ret))
+        val cookie = new DefaultCookie(Config.config.session.cookieName, SecureBase64.encrypt(ret))
         cookie.setHttpOnly(true)
         cookie.setPath(cookiePath)
         extEnv.cookies.add(cookie)

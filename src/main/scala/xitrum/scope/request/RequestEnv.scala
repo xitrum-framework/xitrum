@@ -18,7 +18,7 @@ object RequestEnv {
       sb.append(key)
       sb.append(": ")
 
-      if (Config.filteredParams.contains(key)) {
+      if (Config.config.request.filteredParams.contains(key)) {
         sb.append("[FILTERED]")
       } else {
         val values = params(key)

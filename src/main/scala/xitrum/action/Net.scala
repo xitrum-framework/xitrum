@@ -97,9 +97,9 @@ trait Net {
   }
 
   private lazy val proxyNotAllowed = {
-    Config.proxyIpso match {
+    Config.config.reverseProxy match {
       case None      => false
-      case Some(ips) => ips.contains(clientIp)
+      case Some(reverseProxy) => reverseProxy.ips.contains(clientIp)
     }
   }
 }

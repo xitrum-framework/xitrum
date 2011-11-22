@@ -65,13 +65,13 @@ trait Renderer extends JS with Flash with I18n {
         response.setHeader(CONTENT_TYPE, contentType)
       else if (!response.containsHeader(CONTENT_TYPE)) {
         if (textIsXml)
-          response.setHeader(CONTENT_TYPE, "application/xml; charset=" + Config.paramCharsetName)
+          response.setHeader(CONTENT_TYPE, "application/xml; charset=" + Config.config.request.charset)
         else
-          response.setHeader(CONTENT_TYPE, "text/plain; charset=" + Config.paramCharsetName)
+          response.setHeader(CONTENT_TYPE, "text/plain; charset=" + Config.config.request.charset)
       }
     }
 
-    val cb = ChannelBuffers.copiedBuffer(ret, Config.paramCharset)
+    val cb = ChannelBuffers.copiedBuffer(ret, Config.requestCharset)
     if (response.isChunked) {
       writeHeaderOnFirstChunk
       val chunk = new DefaultHttpChunk(cb)
@@ -91,7 +91,7 @@ trait Renderer extends JS with Flash with I18n {
   /** Content-Type header is set to "text/json" */
   def renderJson(any: Any) {
     val json = Json.generate(any)
-    renderText(json, "text/json; charset=" + Config.paramCharsetName)
+    renderText(json, "text/json; charset=" + Config.config.request.charset)
   }
 
   //----------------------------------------------------------------------------
@@ -109,9 +109,9 @@ trait Renderer extends JS with Flash with I18n {
     renderedView = view
     val renderedLayout = customLayout.apply
     if (renderedLayout == null)
-      renderText(renderedView, "text/html; charset=" + Config.paramCharsetName)
+      renderText(renderedView, "text/html; charset=" + Config.config.request.charset)
     else
-      renderText(renderedLayout, "text/html; charset=" + Config.paramCharsetName)
+      renderText(renderedLayout, "text/html; charset=" + Config.config.request.charset)
   }
 
   //----------------------------------------------------------------------------

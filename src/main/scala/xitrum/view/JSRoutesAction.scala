@@ -28,7 +28,7 @@ object JSRoutesAction {
 
   def gzippedJsRoutes(action: Action): Array[Byte] = synchronized {
     if (gzippedJs == null) {
-      gzippedJs = Gzip.compress(jsRoutes(action).getBytes(Config.paramCharsetName))
+      gzippedJs = Gzip.compress(jsRoutes(action).getBytes(Config.config.request.charset))
     }
     gzippedJs
   }
