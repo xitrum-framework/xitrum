@@ -23,20 +23,54 @@ In Netty, there are 2 types of handlers:
 * upstream: the request direction client -> server
 * downstream: the response direction server -> client
 
+Please see the doc of `ChannelPipeline <http://docs.jboss.org/netty/3.2/api/org/jboss/netty/channel/ChannelPipeline.html>`_
+for more information.
+
 ::
 
-                                                                                                                           /favicon.ico
-                                                                                                                           /robots.txt                                                                                       fileParams
-                                                        Request                                                            /public/...           /resources/public/...                 Env            uriParams              bodyParams                                pathParams
-  [upstream]  HttpRequestDecoder -> HttpChunkAggregator -------------------------------------------------> | XSendfile| -> PublicFileServer -+-> PublicResourceServer -+-> Request2Env ---> UriParser --------->  BodyParser ----------> MethodOverrider -> Dispatcher ----------> [Action responds Env] ----------------------------------+
-                                                                                                           | (both up |                      |                         |                                                                                                                                                                   |
-                                                                                                  Response | and down |                      |                         |                                                                                                                      Response                                 Env |
-  [downstream]                                          HttpResponseEncoder <----------------------------- | handler) | <--------------------+-------------------------+------------------------------------------------------------------------------------------------------------------------------ Env2Response <- ResponseCacher <----+
+                                       I/O Request
+                                     via Channel or
+                                 ChannelHandlerContext
+                                           |
+  +----------------------------------------+---------------+
+  |                  ChannelPipeline       |               |
+  |                                       \|/              |
+  |  +----------------------+  +-----------+------------+  |
+  |  | Upstream Handler  N  |  | Downstream Handler  1  |  |
+  |  +----------+-----------+  +-----------+------------+  |
+  |            /|\                         |               |
+  |             |                         \|/              |
+  |  +----------+-----------+  +-----------+------------+  |
+  |  | Upstream Handler N-1 |  | Downstream Handler  2  |  |
+  |  +----------+-----------+  +-----------+------------+  |
+  |            /|\                         .               |
+  |             .                          .               |
+  |     [ sendUpstream() ]        [ sendDownstream() ]     |
+  |     [ + INBOUND data ]        [ + OUTBOUND data  ]     |
+  |             .                          .               |
+  |             .                         \|/              |
+  |  +----------+-----------+  +-----------+------------+  |
+  |  | Upstream Handler  2  |  | Downstream Handler M-1 |  |
+  |  +----------+-----------+  +-----------+------------+  |
+  |            /|\                         |               |
+  |             |                         \|/              |
+  |  +----------+-----------+  +-----------+------------+  |
+  |  | Upstream Handler  1  |  | Downstream Handler  M  |  |
+  |  +----------+-----------+  +-----------+------------+  |
+  |            /|\                         |               |
+  +-------------+--------------------------+---------------+
+                |                         \|/
+  +-------------+--------------------------+---------------+
+  |             |                          |               |
+  |     [ Socket.read() ]          [ Socket.write() ]      |
+  |                                                        |
+  |  Netty Internal I/O Threads (Transport Implementation) |
+  +--------------------------------------------------------+
 
 Xitrum handlers
 ---------------
 
-See class xitrum.handler.ChannelPipelineFactory
+See `xitrum.handler.ChannelPipelineFactory <https://github.com/ngocdaothanh/xitrum/blob/master/src/main/scala/xitrum/handler/ChannelPipelineFactory.scala>`_.
 
 Custom handler
 --------------

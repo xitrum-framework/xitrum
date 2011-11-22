@@ -9,7 +9,7 @@ import xitrum.handler.up._
 import xitrum.handler.down._
 import xitrum.handler.updown._
 
-/** See doc/HANDLER */
+// See doc/sphinx/handler.rst
 class ChannelPipelineFactory(https: Boolean) extends CPF {
   /*
     From Netty's documentation about ExecutionHandler:
