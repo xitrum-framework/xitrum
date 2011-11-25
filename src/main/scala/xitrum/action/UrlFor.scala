@@ -7,7 +7,7 @@ import org.jboss.netty.handler.codec.http.QueryStringEncoder
 import xitrum.{Action, Config}
 import xitrum.etag.Etag
 import xitrum.routing.{PostbackAction, Routes}
-import xitrum.scope.session.SecureBase64
+import xitrum.util.SecureBase64
 import xitrum.validation.ValidatorInjector
 
 trait UrlFor {

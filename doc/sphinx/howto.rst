@@ -113,3 +113,44 @@ myconfig.properties
 
   // Here you get an instance of java.util.Properties
   val properties = xitrum.util.Loader.propertiesFromClasspath("myconfig.properties")
+
+Encrypt data
+------------
+
+To encrypt data that you don't need to decrypt later (one way encryption),
+you can use MD5 or something like that.
+
+If you want to decrypt later, you can use the utility Xitrum provides:
+
+::
+
+  import xitrum.util.Secure
+  val encrypted: Array[Byte]         = Secure.encrypt("my data".getBytes)
+  val decrypted: Option[Array[Byte]] = Secure.decrypt(encrypted)
+
+You can use ``xitrum.util.Base64`` to encode and decode the binary data to
+normal string (to embed to HTML for response etc.).
+
+If you can combine the above operations in one step:
+
+::
+
+  import xitrum.util.SecureBase64
+  val encrypted: String         = SecureBase64.encrypt("my object")
+  val decrypted: Option[String] = SecureBase64.decrypt(encrypted).asInstanceOf[Option[String]]
+
+``SecureBase64`` uses ``xitrum.util.SeriDeseri`` to serialize and deserialize.
+As a result, your data must be serializable.
+
+You can specify a key for encryption and decryption, like:
+
+::
+
+  Secure.encrypt("my data".getBytes, "my key")
+  Secure.decrypt(encrypted, "my key")
+
+  SecureBase64.encrypt("my object", "my key")
+  SecureBase64.decrypt(encrypted, "my key")
+
+If no key is specified, ``secureKey`` in xitrum.json file in config directory
+is used.

@@ -4,7 +4,7 @@ import org.jboss.netty.handler.codec.http.HttpHeaders
 
 import xitrum.Action
 import xitrum.exception.SessionExpired
-import xitrum.scope.session.SecureBase64
+import xitrum.util.SecureBase64
 import xitrum.validation.ValidatorCaller
 
 object PostbackAction {

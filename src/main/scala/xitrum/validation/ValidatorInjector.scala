@@ -3,7 +3,7 @@ package xitrum.validation
 import scala.collection.mutable.ArrayBuffer
 
 import xitrum.Action
-import xitrum.scope.session.SecureBase64
+import xitrum.util.SecureBase64
 
 object ValidatorInjector {
   /** @return Param name that has been encrypted to include serialized validators */

@@ -8,6 +8,7 @@ import com.hazelcast.core.IMap
 
 import xitrum.Config
 import xitrum.scope.request.ExtEnv
+import xitrum.util.SecureBase64
 
 // We can use Cache, but we use a separate Hazelcast map to avoid the cost of
 // iterating through a big map as much as we can. Another reason is that the

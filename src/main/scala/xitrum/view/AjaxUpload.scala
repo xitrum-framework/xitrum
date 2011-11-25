@@ -7,8 +7,8 @@ import org.jboss.netty.handler.codec.http.FileUpload
 
 import xitrum.Action
 import xitrum.annotation.GET
-import xitrum.scope.session.SecureBase64
 import xitrum.handler.updown.XSendFile
+import xitrum.util.SecureBase64
 
 object AjaxUpload {
   def ::(elem: Node)(implicit action: Action) = {

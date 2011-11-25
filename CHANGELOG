@@ -1,4 +1,6 @@
 1.7 (planned):
+* Expose API for data encryption so that application developers may use
+  (xitrum.util.{Secure, SecureBase64, SeriDeseri})
 * Digest authentication
 * WebSocket
 * Knockout.js and Scala Enhanced Strings

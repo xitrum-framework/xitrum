@@ -6,6 +6,7 @@ import org.jboss.netty.handler.codec.http.DefaultCookie
 
 import xitrum.{Action, Config}
 import xitrum.scope.request.ExtEnv
+import xitrum.util.SecureBase64
 
 class CookieSessionStore extends SessionStore {
   def restore(extEnv: ExtEnv): Session = {

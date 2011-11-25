@@ -4,6 +4,7 @@ import java.util.UUID
 
 import xitrum.Action
 import xitrum.exception.InvalidAntiCSRFToken
+import xitrum.util.SecureBase64
 
 /**
  * SecureBase64 is for preventing a user to mess with his own data to cheat the server.
