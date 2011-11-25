@@ -58,7 +58,7 @@ object Secure {
   // MD5 => 16 bytes, SHA-256 => 32 bytes
   // Idea: http://stackoverflow.com/questions/992019/java-256bit-aes-encryption/992413
   private def makeKey(key: String): Array[Byte] = {
-    if (key == Config.config.session.secureKey) {
+    if (key == Config.config.session.secureKey && defaultKey != null) {
       defaultKey
     } else {
       val messageDigest = MessageDigest.getInstance("MD5")
