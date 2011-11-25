@@ -32,18 +32,16 @@ object Gzip {
    */
   def tryCompressBigTextualResponse(request: HttpRequest, response: HttpResponse): Array[Byte] = {
     val channelBuffer = response.getContent
-    val bytes         = new Array[Byte](channelBuffer.readableBytes)
-    channelBuffer.readBytes(bytes)
+    val bytes         = ChannelBufferToBytes(channelBuffer)
 
     if (!isAccepted(request) ||
         response.containsHeader(CONTENT_ENCODING) ||
         !Mime.isTextual(response.getHeader(CONTENT_TYPE)) ||
         bytes.length < Config.BIG_TEXTUAL_RESPONSE_SIZE_IN_KB * 1024) {
-      channelBuffer.resetReaderIndex  // The response body content is now empty after reading
       return bytes
     }
 
-    val gzippedBytes = Gzip.compress(bytes)
+    val gzippedBytes = compress(bytes)
 
     // Update CONTENT_LENGTH and set CONTENT_ENCODING
     HttpHeaders.setContentLength(response, gzippedBytes.length)

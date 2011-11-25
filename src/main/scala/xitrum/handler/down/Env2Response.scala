@@ -11,7 +11,7 @@ import xitrum.Config
 import xitrum.etag.Etag
 import xitrum.handler.HandlerEnv
 import xitrum.handler.updown.{XSendFile, XSendResource}
-import xitrum.util.{Gzip, Mime}
+import xitrum.util.{ChannelBufferToBytes, Gzip, Mime}
 
 @Sharable
 class Env2Response extends SimpleChannelDownstreamHandler {
@@ -55,17 +55,14 @@ class Env2Response extends SimpleChannelDownstreamHandler {
     if (response.getStatus != OK) return false
 
     val channelBuffer = response.getContent
-    val readableBytes = channelBuffer.readableBytes
-    if (readableBytes > Config.config.response.smallStaticFileSizeInKB * 1024) return false
+    if (channelBuffer.readableBytes > Config.config.response.smallStaticFileSizeInKB * 1024) return false
 
     val etag1 = response.getHeader(ETAG)
     val etag2 =
       if (etag1 != null) {
         etag1
       } else {
-        val bytes = new Array[Byte](readableBytes)
-        channelBuffer.readBytes(bytes)
-        Etag.forBytes(bytes)
+        Etag.forBytes(ChannelBufferToBytes(channelBuffer))
       }
 
     if (request.getHeader(IF_NONE_MATCH) == etag2) {
@@ -76,11 +73,6 @@ class Env2Response extends SimpleChannelDownstreamHandler {
       true
     } else {
       response.setHeader(ETAG, etag2)
-
-      // The response channel buffer is empty now because we have already read
-      // everything out, we need to set it back
-      channelBuffer.resetReaderIndex
-
       false
     }
   }
