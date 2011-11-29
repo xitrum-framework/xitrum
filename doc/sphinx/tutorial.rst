@@ -22,7 +22,7 @@ Change to the newly created project directory and run ``sbt run``. This command
 will download all dependencies, compile the project, and run the class
 ``my_project.Boot``, which starts the web server.
 
-Open http://localhost:8000/ in your browser.
+Open http://localhost:8000/ or https://localhost:4430/ in your browser.
 
 In the console, you will see all the routes and request information:
 

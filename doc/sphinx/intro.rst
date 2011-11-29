@@ -3,7 +3,7 @@ Introduction
 
 .. image:: http://www.bdoubliees.com/journalspirou/sfigures6/schtroumpfs/s3.jpg
 
-Quick start: install `SBT 0.11.0 <https://github.com/harrah/xsbt/wiki/Setup>`_ and
+Quick start: install `SBT 0.11.2 <https://github.com/harrah/xsbt/wiki/Setup>`_ and
 `the latest Giter8 <https://github.com/n8han/giter8>`_, then
 
 ::
@@ -11,6 +11,9 @@ Quick start: install `SBT 0.11.0 <https://github.com/harrah/xsbt/wiki/Setup>`_ a
   $ g8 ngocdaothanh/xitrum
   $ cd my_project
   $ sbt run
+
+Now you have a sample project running at http://localhost:8000/
+and https://localhost:4430/
 
 See `full documentation <http://ngocdaothanh.github.com/xitrum>`_ for details.
 
