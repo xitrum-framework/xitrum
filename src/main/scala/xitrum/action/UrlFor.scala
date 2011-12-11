@@ -2,7 +2,7 @@ package xitrum.action
 
 import scala.util.Random
 
-import org.jboss.netty.handler.codec.http.QueryStringEncoder
+import io.netty.handler.codec.http.QueryStringEncoder
 
 import xitrum.{Action, Config}
 import xitrum.etag.Etag

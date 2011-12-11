@@ -3,7 +3,7 @@ package xitrum.view
 import java.io.File
 import java.util.UUID
 import scala.xml.Node
-import org.jboss.netty.handler.codec.http.FileUpload
+import io.netty.handler.codec.http.FileUpload
 
 import xitrum.Action
 import xitrum.annotation.GET

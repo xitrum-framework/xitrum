@@ -1,6 +1,6 @@
 package xitrum.routing
 
-import org.jboss.netty.handler.codec.http.HttpHeaders
+import io.netty.handler.codec.http.HttpHeaders
 
 import xitrum.Action
 import xitrum.exception.SessionExpired

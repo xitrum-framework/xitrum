@@ -9,7 +9,7 @@ import xitrum.scope.request.ExtEnv
 import xitrum.validation.{Validator, ValidatorInjector}
 import xitrum.view.Renderer
 
-trait Action extends ExtEnv with Logger with Net with Filter with BasicAuthentication with Redirect with UrlFor with Renderer with I18n {
+trait Action extends ExtEnv with Logger with Net with Filter with BasicAuthentication with WebSocket with Redirect with UrlFor with Renderer with I18n {
   def execute {}
   def postback {}
 

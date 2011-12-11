@@ -3,8 +3,8 @@ package xitrum
 import java.net.InetSocketAddress
 import java.util.concurrent.Executors
 
-import org.jboss.netty.bootstrap.ServerBootstrap
-import org.jboss.netty.channel.socket.nio.NioServerSocketChannelFactory
+import io.netty.bootstrap.ServerBootstrap
+import io.netty.channel.socket.nio.NioServerSocketChannelFactory
 
 import xitrum.routing.Routes
 import xitrum.handler.ChannelPipelineFactory

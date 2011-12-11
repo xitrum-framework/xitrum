@@ -2,7 +2,7 @@ package xitrum.scope.request
 
 import java.util.{TreeSet => JTreeSet}
 
-import org.jboss.netty.handler.codec.http.{HttpRequest, Cookie, CookieDecoder, CookieEncoder, HttpHeaders}
+import io.netty.handler.codec.http.{HttpRequest, Cookie, CookieDecoder, CookieEncoder, HttpHeaders}
 import HttpHeaders.Names._
 
 import xitrum.Action

@@ -2,9 +2,9 @@ package xitrum.handler.up
 
 import scala.collection.mutable.{ArrayBuffer, Map => MMap}
 
-import org.jboss.netty.channel._
-import org.jboss.netty.util.CharsetUtil
-import org.jboss.netty.handler.codec.http._
+import io.netty.channel._
+import io.netty.util.CharsetUtil
+import io.netty.handler.codec.http._
 import HttpResponseStatus._
 import HttpVersion._
 

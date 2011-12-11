@@ -3,7 +3,7 @@ package xitrum.etag
 import java.text.SimpleDateFormat
 import java.util.{Locale, TimeZone}
 
-import org.jboss.netty.handler.codec.http.{HttpHeaders, HttpResponse, HttpResponseStatus}
+import io.netty.handler.codec.http.{HttpHeaders, HttpResponse, HttpResponseStatus}
 import HttpHeaders.Names._
 import HttpHeaders.Values._
 import HttpResponseStatus._

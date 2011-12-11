@@ -1,6 +1,6 @@
 package xitrum.util
 
-import org.jboss.netty.buffer.ChannelBuffer
+import io.netty.buffer.ChannelBuffer
 
 object ChannelBufferToBytes {
   def apply(buffer: ChannelBuffer): Array[Byte] = {

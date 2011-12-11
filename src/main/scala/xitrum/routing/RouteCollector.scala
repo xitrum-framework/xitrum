@@ -7,7 +7,7 @@ import javassist.bytecode.ClassFile
 import javassist.bytecode.AnnotationsAttribute
 import javassist.bytecode.annotation.{Annotation, MemberValue, ArrayMemberValue, StringMemberValue, IntegerMemberValue}
 
-import org.jboss.netty.handler.codec.http.HttpMethod
+import io.netty.handler.codec.http.HttpMethod
 
 import sclasner.{FileEntry, Scanner}
 
@@ -114,7 +114,7 @@ class RouteCollector extends Logger {
 
   private def collectRoute(as: Array[Annotation]): Option[(RouteOrder.RouteOrder, String, Array[Routes.Pattern])] = {
     var order                           = RouteOrder.others
-    var method:   String            = null
+    var method:   String                = null
     var patterns: Array[Routes.Pattern] = null
 
     as.foreach { a =>
@@ -155,6 +155,14 @@ class RouteCollector extends Logger {
         patterns = getMethodPattern(a)
       } else if (tn == classOf[DELETEs].getName) {
         method   = "DELETE"
+        patterns = getMethodPatterns(a)
+      }
+
+      else if (tn == classOf[WEBSOCKET].getName) {
+        method   = "WEBSOCKET"
+        patterns = getMethodPattern(a)
+      } else if (tn == classOf[WEBSOCKETs].getName) {
+        method   = "WEBSOCKET"
         patterns = getMethodPatterns(a)
       }
     }

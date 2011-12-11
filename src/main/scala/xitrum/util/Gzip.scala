@@ -3,9 +3,9 @@ package xitrum.util
 import java.io.ByteArrayOutputStream
 import java.util.zip.GZIPOutputStream
 
-import org.jboss.netty.handler.codec.http.{HttpHeaders, HttpRequest, HttpResponse}
+import io.netty.handler.codec.http.{HttpHeaders, HttpRequest, HttpResponse}
 import HttpHeaders.Names.{ACCEPT_ENCODING, CONTENT_ENCODING, CONTENT_TYPE}
-import org.jboss.netty.buffer.ChannelBuffers
+import io.netty.buffer.ChannelBuffers
 
 import xitrum.Config
 

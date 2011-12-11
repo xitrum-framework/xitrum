@@ -1,6 +1,6 @@
 package xitrum.action
 
-import org.jboss.netty.handler.codec.http.{HttpHeaders, HttpResponseStatus}
+import io.netty.handler.codec.http.{HttpHeaders, HttpResponseStatus}
 
 import xitrum.Action
 import xitrum.util.Base64

@@ -3,9 +3,9 @@ package xitrum.handler.up
 import java.nio.charset.Charset
 import scala.collection.mutable.{Map => MMap}
 
-import org.jboss.netty.channel.{ChannelHandler, SimpleChannelUpstreamHandler, ChannelHandlerContext, MessageEvent, ExceptionEvent, Channels}
+import io.netty.channel.{ChannelHandler, SimpleChannelUpstreamHandler, ChannelHandlerContext, MessageEvent, ExceptionEvent, Channels}
 import ChannelHandler.Sharable
-import org.jboss.netty.handler.codec.http.{Attribute, DefaultHttpDataFactory, DiskAttribute, DiskFileUpload, FileUpload, HttpRequest, HttpMethod, HttpPostRequestDecoder, InterfaceHttpData}
+import io.netty.handler.codec.http.{Attribute, DefaultHttpDataFactory, DiskAttribute, DiskFileUpload, FileUpload, HttpRequest, HttpMethod, HttpPostRequestDecoder, InterfaceHttpData}
 import HttpMethod._
 import InterfaceHttpData.HttpDataType
 
@@ -22,7 +22,7 @@ object BodyParser {
 
   // Creating factory should be after the above for the factory to take effect of the settings
 
-  // TODO: Use chunk mode, remove HttpChunkAggregator, see org.jboss.netty.example.http.upload.HttpRequestHandler
+  // TODO: Use chunk mode, remove HttpChunkAggregator, see io.netty.example.http.upload.HttpRequestHandler
   //val factory = new DefaultHttpDataFactory(DefaultHttpDataFactory.MINSIZE)  // Save to disk if size exceeds MINSIZE
 
   // "Save to disk if size exceeds MINSIZE" only works in chunk mode, not compatible with HttpChunkAggregator

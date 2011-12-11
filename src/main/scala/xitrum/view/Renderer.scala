@@ -3,8 +3,9 @@ package xitrum.view
 import java.io.File
 import scala.xml.{Node, NodeSeq, Xhtml}
 
-import org.jboss.netty.buffer.ChannelBuffers
-import org.jboss.netty.handler.codec.http.{DefaultHttpChunk, HttpChunk, HttpHeaders}
+import io.netty.buffer.ChannelBuffers
+import io.netty.handler.codec.http.{DefaultHttpChunk, HttpChunk, HttpHeaders}
+import io.netty.handler.codec.http.websocketx.TextWebSocketFrame
 import HttpHeaders.Names.{CONTENT_TYPE, CONTENT_LENGTH, TRANSFER_ENCODING}
 import HttpHeaders.Values.CHUNKED
 
@@ -173,5 +174,15 @@ trait Renderer extends JS with Flash with I18n {
   def renderDefault500Page {
     XSendFile.set500Page(response)
     respond
+  }
+
+  //----------------------------------------------------------------------------
+
+  def renderWebSocketMessage(text: String) {
+    channel.write(new TextWebSocketFrame(text))
+  }
+
+  def renderWebSocketMessage(bytes: Array[Byte]) {
+    channel.write(new TextWebSocketFrame(ChannelBuffers.wrappedBuffer(bytes)))
   }
 }

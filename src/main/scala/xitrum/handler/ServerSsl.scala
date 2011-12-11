@@ -9,7 +9,7 @@ import javax.net.ssl.KeyManagerFactory
 import javax.net.ssl.SSLContext
 import javax.net.ssl.SSLEngine
 
-import org.jboss.netty.handler.ssl.SslHandler
+import io.netty.handler.ssl.SslHandler
 
 import xitrum.Config
 

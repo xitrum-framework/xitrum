@@ -2,15 +2,15 @@ package xitrum.handler.updown
 
 import java.io.{File, RandomAccessFile}
 
-import org.jboss.netty.channel.{ChannelEvent, ChannelUpstreamHandler, ChannelDownstreamHandler, Channels, ChannelHandlerContext, DownstreamMessageEvent, UpstreamMessageEvent, ChannelFuture, DefaultFileRegion, ChannelFutureListener}
-import org.jboss.netty.handler.codec.http.{HttpHeaders, HttpRequest, HttpResponse, HttpResponseStatus, HttpVersion}
+import io.netty.channel.{ChannelEvent, ChannelUpstreamHandler, ChannelDownstreamHandler, Channels, ChannelHandlerContext, DownstreamMessageEvent, UpstreamMessageEvent, ChannelFuture, DefaultFileRegion, ChannelFutureListener}
+import io.netty.handler.codec.http.{HttpHeaders, HttpRequest, HttpResponse, HttpResponseStatus, HttpVersion}
 import HttpResponseStatus._
 import HttpVersion._
 import HttpHeaders.Names._
 import HttpHeaders.Values._
-import org.jboss.netty.handler.ssl.SslHandler
-import org.jboss.netty.handler.stream.ChunkedFile
-import org.jboss.netty.buffer.ChannelBuffers
+import io.netty.handler.ssl.SslHandler
+import io.netty.handler.stream.ChunkedFile
+import io.netty.buffer.ChannelBuffers
 
 import xitrum.{Config, Logger}
 import xitrum.etag.{Etag, NotModified}

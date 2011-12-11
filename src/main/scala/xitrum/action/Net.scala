@@ -1,8 +1,8 @@
 package xitrum.action
 
 import java.net.InetSocketAddress
-import org.jboss.netty.handler.codec.http.HttpHeaders.Names.HOST
-import org.jboss.netty.handler.ssl.SslHandler
+import io.netty.handler.codec.http.HttpHeaders.Names.HOST
+import io.netty.handler.ssl.SslHandler
 
 import xitrum.{Action, Config}
 

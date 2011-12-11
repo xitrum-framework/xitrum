@@ -1,9 +1,9 @@
 package xitrum.handler.down
 
-import org.jboss.netty.buffer.ChannelBuffers
-import org.jboss.netty.channel.{ChannelHandler, SimpleChannelDownstreamHandler, ChannelHandlerContext, MessageEvent, Channels, ChannelFutureListener}
+import io.netty.buffer.ChannelBuffers
+import io.netty.channel.{ChannelHandler, SimpleChannelDownstreamHandler, ChannelHandlerContext, MessageEvent, Channels, ChannelFutureListener}
 import ChannelHandler.Sharable
-import org.jboss.netty.handler.codec.http.{HttpHeaders, HttpRequest, HttpResponse, HttpResponseStatus}
+import io.netty.handler.codec.http.{HttpHeaders, HttpRequest, HttpResponse, HttpResponseStatus}
 import HttpHeaders.Names._
 import HttpResponseStatus._
 

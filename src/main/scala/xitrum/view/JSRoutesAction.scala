@@ -1,6 +1,6 @@
 package xitrum.view
 
-import org.jboss.netty.handler.codec.http.{HttpHeaders, HttpResponseStatus}
+import io.netty.handler.codec.http.{HttpHeaders, HttpResponseStatus}
 import HttpHeaders.Names._
 import HttpHeaders.Values._
 import HttpResponseStatus._

@@ -3,7 +3,7 @@ package xitrum.scope.session
 import java.util.UUID
 import scala.collection.mutable.{Map => MMap}
 
-import org.jboss.netty.handler.codec.http.DefaultCookie
+import io.netty.handler.codec.http.DefaultCookie
 import com.hazelcast.core.IMap
 
 import xitrum.Config
