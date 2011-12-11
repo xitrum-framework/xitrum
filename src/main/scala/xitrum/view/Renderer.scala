@@ -178,11 +178,7 @@ trait Renderer extends JS with Flash with I18n {
 
   //----------------------------------------------------------------------------
 
-  def renderWebSocketMessage(text: String) {
+  def renderWebSocket(text: String) {
     channel.write(new TextWebSocketFrame(text))
-  }
-
-  def renderWebSocketMessage(bytes: Array[Byte]) {
-    channel.write(new TextWebSocketFrame(ChannelBuffers.wrappedBuffer(bytes)))
   }
 }

@@ -3,7 +3,6 @@ package xitrum.handler.up
 import scala.collection.mutable.{ArrayBuffer, Map => MMap}
 
 import io.netty.channel._
-import io.netty.util.CharsetUtil
 import io.netty.handler.codec.http._
 import HttpResponseStatus._
 import HttpVersion._
@@ -14,6 +13,7 @@ import xitrum.exception.{InvalidAntiCSRFToken, MissingParam, SessionExpired}
 import xitrum.handler.HandlerEnv
 import xitrum.handler.down.ResponseCacher
 import xitrum.handler.updown.XSendFile
+import xitrum.routing.WebSocketHttpMethod
 import xitrum.scope.request.RequestEnv
 import xitrum.scope.session.CSRF
 
@@ -28,41 +28,25 @@ object Dispatcher extends Logger {
       // Check for CSRF (CSRF has been checked if "postback" is true)
       if (!postback &&
           action.request.getMethod() != HttpMethod.GET &&
+          action.request.getMethod() != WebSocketHttpMethod &&
           !action.isInstanceOf[SkipCSRFCheck] &&
           !CSRF.isValidToken(action)) throw new InvalidAntiCSRFToken
 
       val actionClass = action.getClass.asInstanceOf[Class[Action]]
       val cacheSecs   = Routes.getCacheSecs(actionClass)
 
-      def tryCache(f: => Unit) {
-        ResponseCacher.getCachedResponse(action) match {
-          case None =>
-            f  // hit has already been initialized to false
-
-          case Some(response) =>
-            hit = true
-            action.channel.write(response)
-        }
-      }
-
-      def runAroundAndAfterFilters {
-        val executeOrPostback = if (postback) action.postback _ else action.execute _
-        action.callAroundFilters(executeOrPostback)
-        action.callAfterFilters
-      }
-
       if (cacheSecs > 0) {             // Page cache
-        tryCache {
+        tryCache(action) {
           val passed = action.callBeforeFilters
-          if (passed) runAroundAndAfterFilters
+          if (passed) runAroundAndAfterFilters(action, postback)
         }
       } else {
         val passed = action.callBeforeFilters
         if (passed) {
           if (cacheSecs == 0) {        // No cache
-            runAroundAndAfterFilters
+            runAroundAndAfterFilters(action, postback)
           } else if (cacheSecs < 0) {  // Action cache
-            tryCache { runAroundAndAfterFilters }
+            tryCache(action) { runAroundAndAfterFilters(action, postback) }
           }
         }
       }
@@ -112,6 +96,25 @@ object Dispatcher extends Logger {
   }
 
   //----------------------------------------------------------------------------
+
+  /** @return true if the cache was hit */
+  private def tryCache(action: Action)(f: => Unit): Boolean = {
+    ResponseCacher.getCachedResponse(action) match {
+      case None =>
+        f
+        false
+
+      case Some(response) =>
+        action.channel.write(response)
+        true
+    }
+  }
+
+  private def runAroundAndAfterFilters(action: Action, postback: Boolean) {
+    val executeOrPostback = if (postback) action.postback _ else action.execute _
+    action.callAroundFilters(executeOrPostback)
+    action.callAfterFilters
+  }
 
   private def logAccess(action: Action, postback: Boolean, beginTimestamp: Long, cacheSecs: Int, hit: Boolean, e: Throwable = null) {
     // PostbackAction is a gateway, skip it to avoid noisy log if there is no error

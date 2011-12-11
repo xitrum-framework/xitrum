@@ -89,7 +89,11 @@ object Config extends Logger {
    * will cause the browser to send request to http://xitrum/postback/zOIc0v...
    */
   def withBaseUri(path: String) = {
-    if (Config.baseUri.isEmpty) path else Config.baseUri + "/" + path
+    if (Config.baseUri.isEmpty) {
+      path
+    } else {
+      if (path.isEmpty) Config.baseUri else Config.baseUri + "/" + path
+    }
   }
 
   val requestCharset = Charset.forName(config.request.charset)

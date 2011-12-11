@@ -66,7 +66,8 @@ trait Net {
     }
   }
 
-  lazy val scheme = if (isSsl) "https" else "http"
+  lazy val scheme          = if (isSsl) "https" else "http"
+  lazy val webSocketScheme = if (isSsl) "wss"   else "ws"
 
   lazy val (serverName, serverPort) = {
     val np = request.getHeader(HOST)  // Ex: localhost, localhost:3000
@@ -78,16 +79,19 @@ trait Net {
       (xs(0), xs(1).toInt)
   }
 
-  lazy val absoluteUrlPrefix = {
+  lazy val absoluteUrlPrefix          = scheme          + "://" + absoluteUrlPrefixWithoutScheme
+  lazy val webSocketAbsoluteUrlPrefix = webSocketScheme + "://" + absoluteUrlPrefixWithoutScheme
+
+  //----------------------------------------------------------------------------
+
+  lazy val absoluteUrlPrefixWithoutScheme = {
     val portSuffix =
       if ((isSsl && serverPort == 443) || (!isSsl && serverPort == 80))
         ""
       else
         ":" + serverPort
-    scheme + "://" + serverName + portSuffix
+    serverName + portSuffix + Config.baseUri
   }
-
-  //---------------------------------------------------------------------------
 
   // TODO: inetSocketAddress can be Inet4Address or Inet6Address
   // See java.net.preferIPv6Addresses

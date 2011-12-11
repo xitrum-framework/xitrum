@@ -1,14 +1,16 @@
-1.7 (planned):
-* Expose API for data encryption so that application developers may use
-  (xitrum.util.{Secure, SecureBase64, SeriDeseri})
+1.8 (planned):
 * Digest authentication
-* WebSocket
 * Knockout.js and Scala Enhanced Strings
 * Scalate
 * wro4j
 * RESTful actions now can use validators:
   val username = param("username") :: Required :: MaxLength(32)
 * Middleware architecture
+
+1.7 (planned):
+* Expose API for data encryption so that application developers may use
+  (xitrum.util.{Secure, SecureBase64, SeriDeseri})
+* WebSocket, see http://netty.io/blog/2011/11/17/
 
 1.6:
 * Redesign filters to be typesafe
