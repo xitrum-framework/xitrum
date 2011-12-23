@@ -3,23 +3,9 @@ Introduction
 
 .. image:: http://www.bdoubliees.com/journalspirou/sfigures6/schtroumpfs/s3.jpg
 
-Quick start: install `SBT 0.11.2 <https://github.com/harrah/xsbt/wiki/Setup>`_ and
-`the latest Giter8 <https://github.com/n8han/giter8>`_, then
-
-::
-
-  $ g8 ngocdaothanh/xitrum
-  $ cd my_project
-  $ sbt run
-
-Now you have a sample project running at http://localhost:8000/
-and https://localhost:4430/
-
-See `full documentation <http://ngocdaothanh.github.com/xitrum>`_ for details.
-
-Xitrum ("Smurf" in Vietnamese) is an async and clustered Scala web framework and
-web server on top of `Netty <http://www.jboss.org/netty>`_ and
-`Hazelcast <http://www.hazelcast.com/>`_:
+Xitrum (means "Smurf" in Vietnamese) is an async and clustered Scala web framework
+and web server on top of `Netty <http://www.jboss.org/netty>`_
+and `Hazelcast <http://www.hazelcast.com/>`_:
 
 * It fills the gap between `Scalatra <https://github.com/scalatra/scalatra>`_
   and `Lift <http://liftweb.net/>`_: more powerful than Scalatra and easier to
@@ -62,3 +48,26 @@ Hazelcast also gives:
 
 Xitrum is `open source <https://github.com/ngocdaothanh/xitrum>`_, please join
 its `Google group <http://groups.google.com/group/xitrum-framework>`_.
+
+See `full documentation <http://ngocdaothanh.github.com/xitrum>`_ for details.
+
+Quick start
+-----------
+
+Install `SBT 0.11.2 <https://github.com/harrah/xsbt/wiki/Setup>`_ and
+`the latest Giter8 <https://github.com/n8han/giter8>`_, then
+
+::
+
+  $ g8 ngocdaothanh/xitrum
+  New Xitrum project (http://ngocdaothanh.github.com/xitrum)
+  name [my_project]:
+  verbatim [*]:
+  Applied ngocdaothanh/xitrum.g8 in my_project
+  $ cd my_project
+  $ sbt run
+
+Now you have a sample project running at http://localhost:8000/
+and https://localhost:4430/
+
+At the g8 command line, you can change the project name, but please leave verbatim blank.
