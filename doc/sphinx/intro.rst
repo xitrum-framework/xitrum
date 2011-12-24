@@ -49,25 +49,16 @@ Hazelcast also gives:
 Xitrum is `open source <https://github.com/ngocdaothanh/xitrum>`_, please join
 its `Google group <http://groups.google.com/group/xitrum-framework>`_.
 
-See `full documentation <http://ngocdaothanh.github.com/xitrum>`_ for details.
-
 Quick start
 -----------
 
-Install `SBT 0.11.2 <https://github.com/harrah/xsbt/wiki/Setup>`_ and
-`the latest Giter8 <https://github.com/n8han/giter8>`_, then
+Install `SBT 0.11.2 <https://github.com/harrah/xsbt/wiki/Setup>`_, then:
 
 ::
 
-  $ g8 ngocdaothanh/xitrum
-  New Xitrum project (http://ngocdaothanh.github.com/xitrum)
-  name [my_project]:
-  verbatim [*]:
-  Applied ngocdaothanh/xitrum.g8 in my_project
-  $ cd my_project
+  $ git clone https://github.com/ngocdaothanh/xitrum-quickstart.git
+  $ cd xitrum-quickstart
   $ sbt run
 
 Now you have a sample project running at http://localhost:8000/
 and https://localhost:4430/
-
-At the g8 command line, you can change the project name, but please leave verbatim blank.
