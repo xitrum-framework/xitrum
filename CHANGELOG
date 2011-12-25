@@ -1,4 +1,4 @@
-1.8 (planned):
+1.9 (planned):
 * Digest authentication
 * Knockout.js and Scala Enhanced Strings
 * Scalate
@@ -7,10 +7,21 @@
   val username = param("username") :: Required :: MaxLength(32)
 * Middleware architecture
 
-1.7 (planned):
-* Expose API for data encryption so that application developers may use
-  (xitrum.util.{Secure, SecureBase64, SeriDeseri})
+1.8 (planned):
+* Akka
+* Typesafe routes using Scala compiler plugin
+
+1.7:
 * WebSocket, see http://netty.io/blog/2011/11/17/
+* Make postback tag attributes HTML5 standards-compliant:
+  You must change:
+    postback to data-postback
+    after    to data-after
+    confirum to data-confirm
+* Expose API for data encryption so that application developers may use
+  xitrum.util.{Secure, SecureBase64, SeriDeseri}
+  See http://ngocdaothanh.github.com/xitrum/howto.html#encrypt-data
+* Update Hazelcast from 1.9.4.4 to 1.9.4.5
 
 1.6:
 * Redesign filters to be typesafe

@@ -1,7 +1,6 @@
 package xitrum.handler.up
 
 import scala.collection.mutable.{ArrayBuffer, Map => MMap}
-import akka.actor.Actor._
 
 import io.netty.channel._
 import io.netty.handler.codec.http._
