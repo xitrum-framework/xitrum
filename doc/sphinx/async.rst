@@ -51,14 +51,29 @@ Notes:
 WebSocket
 ---------
 
-execute
-* Accept: webSocketHandshake
-* Deny: ?
+Example:
 
-onWebSocketFrame
-onWebSocketClose
+::
 
-renderWebSocket(text)
+  package quickstart.action
+
+  import xitrum.Action
+  import xitrum.annotation.WEBSOCKET
+
+  @WEBSOCKET("/hello_websocket")  // Entry point
+  class HelloWebSocket extends Action {
+    override def execute {
+      webSocketHandshake  // Call this if you want to accept the WebSocket connection
+    }
+
+    override def onWebSocketFrame(text: String) {
+      renderWebSocket(text.toUpperCase)  // Send back data to the WebSocket client
+    }
+
+    override def onWebSocketClose {
+      println("The WebSocket connection has been closed")
+    }
+  }
 
 Comet
 -----

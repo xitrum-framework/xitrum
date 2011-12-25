@@ -8,11 +8,15 @@
 * Middleware architecture
 
 1.8 (planned):
+* Integrate WebSocket to Comet
+  Comet uses WebSocket if available, or falls back to Ajax
 * Akka
 * Typesafe routes using Scala compiler plugin
 
 1.7:
-* WebSocket, see http://netty.io/blog/2011/11/17/
+* WebSocket, see:
+  http://ngocdaothanh.github.com/xitrum/async.html#websocket
+  http://netty.io/blog/2011/11/17/
 * Make postback tag attributes HTML5 standards-compliant:
   You must change:
     postback to data-postback
