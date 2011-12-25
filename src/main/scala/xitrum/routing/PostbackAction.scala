@@ -8,7 +8,7 @@ import xitrum.util.SecureBase64
 import xitrum.validation.ValidatorCaller
 
 object PostbackAction {
-  val POSTBACK_PREFIX  = "/xitrum/postback/"  // Postback URLs are in the form POSTBACK_PREFIX + encryptedActionClassName
+  val POSTBACK_PREFIX = "/xitrum/postback/" // Postback URLs are in the form POSTBACK_PREFIX + encryptedActionClassName
 }
 
 /** Route to this action is automatically added by RouteCollector. */

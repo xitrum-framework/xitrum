@@ -29,7 +29,7 @@ Xitrum provides a lot of default validators. You can use them right away.
   // https://github.com/ngocdaothanh/xitrum/tree/master/src/main/scala/xitrum/validation
   import xitrum.validation._
 
-  <form postback="submit" action={urlForPostbackThis}>
+  <form data-postback="submit" action={urlForPostbackThis}>
     Username:
     {<input type="text" name="username" /> :: MinLength(5) :: MaxLength(10)}<br />
 

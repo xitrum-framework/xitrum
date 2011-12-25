@@ -7,12 +7,9 @@ import io.netty.handler.execution.{ExecutionHandler, OrderedMemoryAwareThreadPoo
 import xitrum.Config
 import xitrum.handler.up._
 import xitrum.handler.down._
-import xitrum.handler.updown._
 
 object ChannelPipelineFactory {
   def removeUnusedDefaultHttpHandlersForWebSocket(pipeline: ChannelPipeline) {
-    pipeline.remove(classOf[XSendFile])
-    pipeline.remove(classOf[XSendResource])
     pipeline.remove(classOf[BaseUriRemover])
     pipeline.remove(classOf[PublicFileServer])
     pipeline.remove(classOf[PublicResourceServer])
@@ -21,6 +18,9 @@ object ChannelPipelineFactory {
     pipeline.remove(classOf[BodyParser])
     pipeline.remove(classOf[MethodOverrider])
     pipeline.remove(classOf[Dispatcher])
+
+    pipeline.remove(classOf[XSendFile])
+    pipeline.remove(classOf[XSendResource])
     pipeline.remove(classOf[Env2Response])
     pipeline.remove(classOf[ResponseCacher])
   }
@@ -29,6 +29,7 @@ object ChannelPipelineFactory {
 // See doc/sphinx/handler.rst
 class ChannelPipelineFactory(https: Boolean) extends CPF {
   // Sharable handlers
+
   private val baseUriRemover       = new BaseUriRemover
   private val publicFileServer     = new PublicFileServer
   private val publicResourceServer = new PublicResourceServer
@@ -36,19 +37,23 @@ class ChannelPipelineFactory(https: Boolean) extends CPF {
   private val uriParser            = new UriParser
   private val bodyParser           = new BodyParser
   private val methodOverrider      = new MethodOverrider
+  private val dispatcher           = new Dispatcher
+
+  private val xSendFile            = new XSendFile
+  private val xSendResource        = new XSendResource
   private val env2Response         = new Env2Response
   private val responseCacher       = new ResponseCacher
 
   /*
-    From Netty's documentation about ExecutionHandler:
-      Used when your ChannelHandler
-      performs a blocking operation that takes long time or accesses a resource
-      which is not CPU-bound business logic such as DB access. Running such
-      operations in a pipeline without an ExecutionHandler will result in
-      unwanted hiccup during I/O because an I/O thread cannot perform I/O until
-      your handler returns the control to the I/O thread.
+  From Netty's documentation about ExecutionHandler:
+  Used when your ChannelHandler
+  performs a blocking operation that takes long time or accesses a resource
+  which is not CPU-bound business logic such as DB access. Running such
+  operations in a pipeline without an ExecutionHandler will result in
+  unwanted hiccup during I/O because an I/O thread cannot perform I/O until
+  your handler returns the control to the I/O thread.
 
-    We put this right before Dispatcher to avoid request/response I/O hiccup.
+  We put this right before Dispatcher to avoid request/response I/O hiccup.
   */
   private val executionHandler = {
     val corePoolSize         = Runtime.getRuntime.availableProcessors * Config.EXECUTIORS_PER_CORE
@@ -87,27 +92,20 @@ class ChannelPipelineFactory(https: Boolean) extends CPF {
     // Up
     new HttpRequestDecoder,
     new HttpChunkAggregator(Config.config.request.maxSizeInMB * 1024 * 1024),
-
-    // Down
-    new HttpResponseEncoder,
-
-    // Both up and down
-    new XSendFile,
-    new XSendResource,
-
-    // Up
-    baseUriRemover,
+    baseUriRemover,  // HttpRequest is attached to the channel here
     publicFileServer,
     publicResourceServer,
-
     request2Env,
     uriParser,
     bodyParser,
     methodOverrider,
     executionHandler,  // Must be shared
-    new Dispatcher,
+    dispatcher,
 
     // Down
+    new HttpResponseEncoder,
+    xSendFile,
+    xSendResource,
     env2Response,
     responseCacher
   )

@@ -1,15 +1,14 @@
-package xitrum.handler.updown
+package xitrum.handler.down
 
 import java.io.{File, RandomAccessFile}
 
-import io.netty.channel.{ChannelEvent, ChannelUpstreamHandler, ChannelDownstreamHandler, Channels, ChannelHandlerContext, DownstreamMessageEvent, UpstreamMessageEvent, ChannelFuture, DefaultFileRegion, ChannelFutureListener}
+import io.netty.channel.{ChannelEvent, ChannelDownstreamHandler, Channels, ChannelHandler, ChannelHandlerContext, DownstreamMessageEvent, UpstreamMessageEvent, ChannelFuture, DefaultFileRegion, ChannelFutureListener}
 import io.netty.handler.codec.http.{HttpHeaders, HttpRequest, HttpResponse, HttpResponseStatus, HttpVersion}
+import ChannelHandler.Sharable
 import HttpResponseStatus._
 import HttpVersion._
 import HttpHeaders.Names._
 import HttpHeaders.Values._
-import io.netty.handler.ssl.SslHandler
-import io.netty.handler.stream.ChunkedFile
 import io.netty.buffer.ChannelBuffers
 
 import xitrum.{Config, Logger}
@@ -61,26 +60,9 @@ object XSendResource extends Logger {
 /**
  * This handler sends resource files (should be small) in classpath.
  */
-class XSendResource extends ChannelUpstreamHandler with ChannelDownstreamHandler {
+@Sharable
+class XSendResource extends ChannelDownstreamHandler {
   import XSendResource._
-
-  var request: HttpRequest = _
-
-  def handleUpstream(ctx: ChannelHandlerContext, e: ChannelEvent) {
-    if (!e.isInstanceOf[UpstreamMessageEvent]) {
-      ctx.sendUpstream(e)
-      return
-    }
-
-    val m = e.asInstanceOf[UpstreamMessageEvent].getMessage
-    if (!m.isInstanceOf[HttpRequest]) {
-      ctx.sendUpstream(e)
-      return
-    }
-
-    request = m.asInstanceOf[HttpRequest]
-    ctx.sendUpstream(e)
-  }
 
   def handleDownstream(ctx: ChannelHandlerContext, e: ChannelEvent) {
     if (!e.isInstanceOf[DownstreamMessageEvent]) {
@@ -103,6 +85,8 @@ class XSendResource extends ChannelUpstreamHandler with ChannelDownstreamHandler
 
     // X-SendResource is not standard, remove to avoid leaking information
     response.removeHeader(X_SENDRESOURCE_HEADER)
+
+    val request = ctx.getChannel.getAttachment.asInstanceOf[HttpRequest]
     sendResource(ctx, e, request, response, path)
   }
 }

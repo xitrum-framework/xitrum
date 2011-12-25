@@ -31,8 +31,20 @@ simulate PUT and DELETE, send a POST with _method=put or _method=delete in the
 request body.
 
 On web application startup, Xitrum will scan all those annotations, build the
-routing table and print it out for you (so that you know what APIs your
-application has). You don't need a seperate config file like routes.rb of Rails.
+routing table and print it out for you so that you know what APIs your
+application has, like this:
+
+::
+
+  [INFO] Routes:
+  GET / quickstart.action.IndexAction
+
+You don't need a seperate central config file like routes.rb of Rails.
+Annotation is used for URL routes, in the spirit of JAX-RS and Rails Engines.
+You don't have to declare all routes in a single place. Think of annotations
+as distributed routes.You can plug an app into another app. If you have a
+blog engine, you can package it as a JAR file. Then you can plug that JAR file
+into another app.
 
 Route cache
 -----------

@@ -3,6 +3,8 @@ package xitrum
 import java.io.File
 import scala.xml.Elem
 
+import io.netty.channel.{ChannelFuture, ChannelFutureListener}
+
 import xitrum.action._
 import xitrum.handler.up.Dispatcher
 import xitrum.scope.request.ExtEnv
@@ -42,7 +44,10 @@ trait Action extends ExtEnv with Logger with Net with Filter with BasicAuthentic
   //----------------------------------------------------------------------------
 
   def addConnectionClosedListener(listener: () => Unit) {
-    val dispatcher = channel.getPipeline.get(classOf[Dispatcher])
-    dispatcher.addConnectionClosedListener(listener)
+    val dispatcher = channel.getCloseFuture.addListener(new ChannelFutureListener {
+      def operationComplete(future: ChannelFuture) {
+        listener()
+      }
+    })
   }
 }

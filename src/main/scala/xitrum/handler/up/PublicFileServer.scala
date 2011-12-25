@@ -10,7 +10,7 @@ import HttpResponseStatus._
 import HttpVersion._
 
 import xitrum.Config
-import xitrum.handler.updown.XSendFile
+import xitrum.handler.down.XSendFile
 import xitrum.etag.NotModified
 import xitrum.util.PathSanitizer
 

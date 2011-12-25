@@ -9,18 +9,19 @@ This chapter describes how to create and run a Xitrum project.
 Create a new Xitrum project
 ---------------------------
 
-Install `SBT 0.11.0 <https://github.com/harrah/xsbt/wiki/Setup>`_  and
-`Giter8 <https://github.com/n8han/giter8>`_.
+Install `SBT 0.11.2 <https://github.com/harrah/xsbt/wiki/Setup>`_, then clone
+the xitrum-quickstart project.
 
-Run ``g8 ngocdaothanh/xitrum`` to create a new Xitrum project.
-A new project skeleton will be created.
+::
+
+  $ git clone https://github.com/ngocdaothanh/xitrum-quickstart.git
 
 Run
 ---
 
 Change to the newly created project directory and run ``sbt run``. This command
 will download all dependencies, compile the project, and run the class
-``my_project.Boot``, which starts the web server.
+``quickstart.Boot``, which starts the web server.
 
 Open http://localhost:8000/ or https://localhost:4430/ in your browser.
 
@@ -29,7 +30,7 @@ In the console, you will see all the routes and request information:
 ::
 
   [INFO] Routes:
-  GET / my_project.action.IndexAction
+  GET / quickstart.action.IndexAction
 
   [INFO] HTTP server started on port 8364
   [INFO] HTTPS server started on port 4364

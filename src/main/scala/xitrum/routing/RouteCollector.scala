@@ -17,20 +17,20 @@ import xitrum.annotation._
 /** Scan all classes to collect routes. */
 class RouteCollector extends Logger {
   // Use String because HttpMethod is not serializable
-  type RouteMap = Map[Class[Action], (String, Array[Routes.Pattern], Int)]
+  type RouteMap = Map[Class[_ <: Action], (String, Array[Routes.Pattern], Int)]
 
   object RouteOrder extends Enumeration {
     type RouteOrder = Value
     val firsts, lasts, others = Value
   }
 
-  def collect: (Array[Routes.Route], Map[Class[Action], Int]) = {
+  def collect: (Array[Routes.Route], Map[Class[_ <: Action], Int]) = {
     logger.info("Collect routes/load routes.sclasner...")
 
     val routeBuffer = ArrayBuffer[Routes.Route]()
-    val cacheBuffer = MMap[Class[Action], Int]()
+    val cacheBuffer = MMap[Class[_ <: Action], Int]()
 
-    val empty = Map[Class[Action], (String, Array[Routes.Pattern], Int)]()
+    val empty = Map[Class[_ <: Action], (String, Array[Routes.Pattern], Int)]()
     val (firsts, lasts, others) = try {
       Scanner.foldLeft("routes.sclasner", (empty, empty, empty), discovered _)
     } catch {
@@ -55,7 +55,7 @@ class RouteCollector extends Logger {
     }
 
     // Make PostbackAction the first route for quicker route matching
-    routeBuffer.append((HttpMethod.POST, PostbackAction.POSTBACK_PREFIX + ":*", classOf[PostbackAction].asInstanceOf[Class[Action]]))
+    routeBuffer.append((HttpMethod.POST, PostbackAction.POSTBACK_PREFIX + ":*", classOf[PostbackAction]))
 
     for (map <- Array(firsts, others, lasts)) {
       val sorted = map.toBuffer.sortWith { (a1, a2) =>

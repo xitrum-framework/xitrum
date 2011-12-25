@@ -12,8 +12,11 @@ and `Hazelcast <http://www.hazelcast.com/>`_:
   use than Lift. You can easily create both RESTful APIs and postbacks. Xitrum
   is controller-first like Scalatra, not
   `view-first <http://www.assembla.com/wiki/show/liftweb/View_First>`_ like Lift.
-* Annotation is used for URL routes, in the spirit of JAX-RS. You don't have to
-  declare all routes in a single place.
+* Annotations are used for URL routes, in the spirit of JAX-RS and Rails Engines.
+  You don't have to declare all routes in a single place. Think of annotations
+  as distributed routes.You can plug an app into another app. If you have a
+  blog engine, you can package it as a JAR file. Then you can plug that JAR file
+  into another app.
 * Typesafe, in the spirit of Scala.
 * Async, in the spirit of Netty.
 * Sessions can be stored in cookies or clustered Hazelcast.

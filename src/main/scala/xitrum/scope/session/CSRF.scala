@@ -11,7 +11,7 @@ import xitrum.util.SecureBase64
  * CSRF is for preventing a user to fake other user data.
  */
 object CSRF {
-  val TOKEN = "antiCSRFToken"
+  val TOKEN = "csrf-token"
 
   def isValidToken(action: Action): Boolean = {
     // The token must be in the request body for more security

@@ -1,6 +1,6 @@
 var xitrum = {
   antiCSRFToken: function() {
-    return $("meta[name=antiCSRFToken]").attr("content");
+    return $("meta[name='csrf-token']").attr("content");
   },
 
   urlFor: function(actionClassName, params) {
@@ -41,7 +41,7 @@ var xitrum = {
   postback: function(event) {
     var target1 = $(event.target);
 
-    var confirmMsg = target1.attr("confirm");
+    var confirmMsg = target1.attr("data-confirm");
     if (confirmMsg && !confirm(confirmMsg)) return false;
 
     var action = target1.attr("action");
@@ -53,7 +53,7 @@ var xitrum = {
     if (extraParams) data = extraParams + "&";
 
     // or come from extra form
-    var extraFormSelector = target1.attr("extra");
+    var extraFormSelector = target1.attr("data-extra");
     if (extraFormSelector) {
       var extraForm = $(extraFormSelector);
       if (extraForm && extraForm[0].tagName === "FORM" && extraForm.valid())
@@ -82,7 +82,7 @@ var xitrum = {
       }
     });
 
-    var after = target1.attr("after");
+    var after = target1.attr("data-after");
     if (after) {
       var f = eval('(' + after + ')');
       f();
@@ -136,7 +136,7 @@ var xitrum = {
 $(function() {
   $(document).ajaxSend(function(e, req, options) {
     if (options.type != "GET") {
-      options.data += (options.data.length > 0 ? "&" : "") + "antiCSRFToken=" + xitrum.antiCSRFToken();
+      options.data += (options.data.length > 0 ? "&" : "") + "csrf-token=" + xitrum.antiCSRFToken();
     }
   });
 
@@ -152,8 +152,8 @@ $(function() {
   // form, not all forms when there are multiple form in a page
   $("form").each(function(index, form) { $(form).validate() });
 
-  $("[postback]").each(function(index, elem) {
-    var eventType = $(elem).attr("postback");
+  $("[data-postback]").each(function(index, elem) {
+    var eventType = $(elem).attr("data-postback");
     $(elem).bind(eventType, xitrum.postback);
   });
 });

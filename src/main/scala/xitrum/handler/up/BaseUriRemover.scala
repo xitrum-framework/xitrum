@@ -5,7 +5,7 @@ import ChannelHandler.Sharable
 import io.netty.handler.codec.http.{DefaultHttpResponse, HttpResponseStatus, HttpRequest, HttpVersion}
 
 import xitrum.Config
-import xitrum.handler.updown.XSendFile
+import xitrum.handler.down.XSendFile
 
 @Sharable
 class BaseUriRemover extends SimpleChannelUpstreamHandler with BadClientSilencer {
@@ -16,7 +16,10 @@ class BaseUriRemover extends SimpleChannelUpstreamHandler with BadClientSilencer
       return
     }
 
+    // Attach HttpRequest to the channel so that other handlers can reuse
     val request = m.asInstanceOf[HttpRequest]
+    ctx.getChannel.setAttachment(request)
+
     remove(request.getUri) match {
       case None =>
         val response = new DefaultHttpResponse(HttpVersion.HTTP_1_1, HttpResponseStatus.NOT_FOUND)

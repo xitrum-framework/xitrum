@@ -10,11 +10,11 @@ import xitrum.scope.request.{Params, PathInfo}
 object Routes extends Logger {
   type Pattern         = String
   type CompiledPattern = Array[(String, Boolean)]  // String: token, Boolean: true if the token is constant
-  type Route           = (HttpMethod, Pattern,         Class[Action])
-  type CompiledRoute   = (HttpMethod, CompiledPattern, Class[Action])
+  type Route           = (HttpMethod, Pattern,         Class[_ <: Action])
+  type CompiledRoute   = (HttpMethod, CompiledPattern, Class[_ <: Action])
 
-  private var compiledRoutes: Iterable[CompiledRoute] = _
-  private var cacheSecs:      Map[Class[Action], Int] = _  // Int: 0 = no cache, < 0 = action, > 0 = page
+  private var compiledRoutes: Iterable[CompiledRoute]      = _
+  private var cacheSecs:      Map[Class[_ <: Action], Int] = _  // Int: 0 = no cache, < 0 = action, > 0 = page
 
   def collectAndCompile {
     // Avoid loading twice in some servlet containers
@@ -69,7 +69,7 @@ object Routes extends Logger {
    *
    * @return None if not matched
    */
-  def matchRoute(method: HttpMethod, pathInfo: PathInfo): Option[(HttpMethod, Class[Action], Params)] = {
+  def matchRoute(method: HttpMethod, pathInfo: PathInfo): Option[(HttpMethod, Class[_ <: Action], Params)] = {
     val tokens = pathInfo.tokens
     val max1   = tokens.size
 
@@ -155,7 +155,7 @@ object Routes extends Logger {
     }
   }
 
-  def getCacheSecs(actionClass: Class[Action]) = cacheSecs.getOrElse(actionClass, 0)
+  def getCacheSecs(actionClass: Class[_ <: Action]) = cacheSecs.getOrElse(actionClass, 0)
 
   def urlFor(actionClass: Class[Action], params: (String, Any)*): String = {
     val cpo = compiledRoutes.find { case (_, _, klass) => klass == actionClass }

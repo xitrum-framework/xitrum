@@ -75,7 +75,7 @@ trait JS {
   //----------------------------------------------------------------------------
 
   def jsAtBottom = {
-    val jsForView = <script>{Unparsed("$(function() {\n" + buffer.toString + "});")}</script>
+    val jsForView = <script type="text/javascript">{Unparsed("\n//<![CDATA[\n$(function() {\n" + buffer.toString + "});\n//]]>\n")}</script>
 
     if (Config.isProductionMode)
       <xml:group>

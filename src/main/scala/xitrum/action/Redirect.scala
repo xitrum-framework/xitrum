@@ -27,15 +27,11 @@ trait Redirect {
 
   def isPostback: Boolean = postback
 
-  // Called by PostbackAction
   def setPostback(postback: Boolean) {
     this.postback = postback
   }
 
   def forward(actionClass: Class[_ <: Action], postback: Boolean) {
-    val action = actionClass.newInstance
-    action(handlerEnv)
-    action.setPostback(isPostback)
-    Dispatcher.dispatchWithFailsafe(action, postback)
+    Dispatcher.dispatchWithFailsafe(actionClass, handlerEnv, postback)
   }
 }

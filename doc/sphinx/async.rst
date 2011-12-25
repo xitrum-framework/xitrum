@@ -48,6 +48,18 @@ Notes:
 * Headers are only sent on the first renderXXX call.
 * Chunks cannot be used with :doc:`page or action cache </cache>`.
 
+WebSocket
+---------
+
+execute
+* Accept: webSocketHandshake
+* Deny: ?
+
+onWebSocketFrame
+onWebSocketClose
+
+renderWebSocket(text)
+
 Comet
 -----
 
@@ -85,7 +97,7 @@ Chat example
       renderView(
         <div id="chatOutput"></div>
 
-        <form postback="submit" action={urlForPostback[CometPublishAction]} after="function() { $('#chatInput').attr('value', '') }">
+        <form data-postback="submit" action={urlForPostback[CometPublishAction]} data-after="function() { $('#chatInput').attr('value', '') }">
           {<input type="hidden" name="channel" value="chat" /> :: Validated}
           {<input type="text" id="chatInput" name="chatInput" /> :: Required}
         </form>
@@ -114,7 +126,7 @@ the message for you. If you want to publish the message yourself, call ``Comet.p
   class AdminAction extends Action {
     override def execute {
       renderView(
-        <form postback="submit" action={urlForPostbackThis}>
+        <form data-postback="submit" action={urlForPostbackThis}>
           Message from admin:
           <input type="text" name={validate("body", Required)} />
         </form>

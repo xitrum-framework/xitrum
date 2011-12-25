@@ -1,9 +1,10 @@
-package xitrum.handler.updown
+package xitrum.handler.down
 
 import java.io.{File, RandomAccessFile}
 
-import io.netty.channel.{ChannelEvent, ChannelUpstreamHandler, ChannelDownstreamHandler, Channels, ChannelHandlerContext, DownstreamMessageEvent, UpstreamMessageEvent, ChannelFuture, DefaultFileRegion, ChannelFutureListener}
+import io.netty.channel.{ChannelEvent, ChannelDownstreamHandler, Channels, ChannelHandler, ChannelHandlerContext, DownstreamMessageEvent, UpstreamMessageEvent, ChannelFuture, DefaultFileRegion, ChannelFutureListener}
 import io.netty.handler.codec.http.{HttpHeaders, HttpRequest, HttpResponse, HttpResponseStatus, HttpVersion}
+import ChannelHandler.Sharable
 import HttpResponseStatus._
 import HttpVersion._
 import HttpHeaders.Names._
@@ -135,26 +136,9 @@ object XSendFile extends Logger {
  * 1. If the file is big: use zero-copy for HTTP or chunking for HTTPS
  * 2. If the file is small: cache in memory and use normal response
  */
-class XSendFile extends ChannelUpstreamHandler with ChannelDownstreamHandler {
+@Sharable
+class XSendFile extends ChannelDownstreamHandler {
   import XSendFile._
-
-  var request: HttpRequest = _
-
-  def handleUpstream(ctx: ChannelHandlerContext, e: ChannelEvent) {
-    if (!e.isInstanceOf[UpstreamMessageEvent]) {
-      ctx.sendUpstream(e)
-      return
-    }
-
-    val m = e.asInstanceOf[UpstreamMessageEvent].getMessage
-    if (!m.isInstanceOf[HttpRequest]) {
-      ctx.sendUpstream(e)
-      return
-    }
-
-    request = m.asInstanceOf[HttpRequest]
-    ctx.sendUpstream(e)
-  }
 
   def handleDownstream(ctx: ChannelHandlerContext, e: ChannelEvent) {
     if (!e.isInstanceOf[DownstreamMessageEvent]) {
@@ -177,6 +161,8 @@ class XSendFile extends ChannelUpstreamHandler with ChannelDownstreamHandler {
 
     // X-SendFile is not standard, remove to avoid leaking information
     response.removeHeader(X_SENDFILE_HEADER)
+
+    val request = ctx.getChannel.getAttachment.asInstanceOf[HttpRequest]
     sendFile(ctx, e, request, response, path)
   }
 }

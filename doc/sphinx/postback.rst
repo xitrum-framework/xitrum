@@ -71,7 +71,7 @@ ArticleNew.scala
   class ArticleNew extends AppAction {
     override def execute {
       renderView(
-        <form postback="submit" action={urlForPostbackThis}>
+        <form data-postback="submit" action={urlForPostbackThis}>
           <label>Title</label>
           {<input type="text" name="title" /> :: Required}<br />
 
@@ -107,7 +107,7 @@ An example with link:
 
 ::
 
-  <a href="#" postback="click" action={urlForPostback[LogoutAction]}>Logout</a>
+  <a href="#" data-postback="click" action={urlForPostback[LogoutAction]}>Logout</a>
 
 Clicking the link above will trigger the postback to LogoutAction.
 
@@ -118,9 +118,9 @@ If you want to display a confirmation dialog:
 
 ::
 
-  <a href="#" postback="click"
+  <a href="#" data-postback="click"
               action={urlForPostback[LogoutAction]}
-              confirm="Do you want to logout?">Logout</a>
+              data-confirm="Do you want to logout?">Logout</a>
 
 If the user clicks "Cancel", the postback will not be sent.
 
@@ -135,22 +135,22 @@ For other elements, you do like this:
 ::
 
   <a href="#"
-     postback="click"
+     data-postback="click"
      action={urlForPostbackThis("itemId" -> item.id)}
-     confirm={"Do you want to delete %s?".format(item.name)}>Delete</a>
+     data-confirm={"Do you want to delete %s?".format(item.name)}>Delete</a>
 
 You may also put extra params in a separate form:
 
 ::
 
-  <form id="myform" postback="submit" action={urlForPostbackThis}>
+  <form id="myform" data-postback="submit" action={urlForPostbackThis}>
     Search:
     {<input type="text" name="keyword" /> :: Validated}
 
     <a class="pagination"
        href="#"
-       postback="click"
-       extra="#myform"
+       data-postback="click"
+       data-extra="#myform"
        action={urlForPostbackThis("page" -> page)}>{page}</a>
   </form>
 

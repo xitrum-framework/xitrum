@@ -10,7 +10,6 @@ import HttpResponseStatus._
 import xitrum.Config
 import xitrum.etag.Etag
 import xitrum.handler.HandlerEnv
-import xitrum.handler.updown.{XSendFile, XSendResource}
 import xitrum.util.{ChannelBufferToBytes, Gzip, Mime}
 
 @Sharable

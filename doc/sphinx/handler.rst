@@ -72,6 +72,17 @@ Xitrum handlers
 
 See `xitrum.handler.ChannelPipelineFactory <https://github.com/ngocdaothanh/xitrum/blob/master/src/main/scala/xitrum/handler/ChannelPipelineFactory.scala>`_.
 
+Channel attachement
+-------------------
+
+HttpRequest is attached to the channel using Channel#setAttachment.
+Use Channel#getAttachment to get it back.
+
+Channel close event
+-------------------
+
+To act when the connection is closed, listen to the channel's close event: TODO
+
 Custom handler
 --------------
 

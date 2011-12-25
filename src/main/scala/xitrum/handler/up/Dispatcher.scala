@@ -1,9 +1,11 @@
 package xitrum.handler.up
 
 import scala.collection.mutable.{ArrayBuffer, Map => MMap}
+import akka.actor.Actor._
 
 import io.netty.channel._
 import io.netty.handler.codec.http._
+import ChannelHandler.Sharable
 import HttpResponseStatus._
 import HttpVersion._
 
@@ -12,28 +14,30 @@ import xitrum.routing.{Routes, PostbackAction}
 import xitrum.exception.{InvalidAntiCSRFToken, MissingParam, SessionExpired}
 import xitrum.handler.HandlerEnv
 import xitrum.handler.down.ResponseCacher
-import xitrum.handler.updown.XSendFile
+import xitrum.handler.down.XSendFile
 import xitrum.routing.WebSocketHttpMethod
 import xitrum.scope.request.RequestEnv
 import xitrum.scope.session.CSRF
 
 object Dispatcher extends Logger {
-  def dispatchWithFailsafe(action: Action, postback: Boolean) {
+  def dispatchWithFailsafe(actionClass: Class[_ <: Action], env: HandlerEnv, postback: Boolean) {
     val beginTimestamp = System.currentTimeMillis
     var hit            = false
 
-    try {
-      action.handlerEnv.action = action
+    val action = actionClass.newInstance
+    action(env)
+    action.setPostback(postback)
+    action.handlerEnv.action = action
 
+    try {
       // Check for CSRF (CSRF has been checked if "postback" is true)
       if (!postback &&
-          action.request.getMethod() != HttpMethod.GET &&
-          action.request.getMethod() != WebSocketHttpMethod &&
+          action.request.getMethod != HttpMethod.GET &&
+          action.request.getMethod != WebSocketHttpMethod &&
           !action.isInstanceOf[SkipCSRFCheck] &&
           !CSRF.isValidToken(action)) throw new InvalidAntiCSRFToken
 
-      val actionClass = action.getClass.asInstanceOf[Class[Action]]
-      val cacheSecs   = Routes.getCacheSecs(actionClass)
+      val cacheSecs = Routes.getCacheSecs(actionClass)
 
       if (cacheSecs > 0) {             // Page cache
         tryCache(action) {
@@ -152,7 +156,7 @@ object Dispatcher extends Logger {
   }
 }
 
-// Not sharable because of closedListeners
+@Sharable
 class Dispatcher extends SimpleChannelUpstreamHandler with BadClientSilencer {
   import Dispatcher._
 
@@ -173,10 +177,7 @@ class Dispatcher extends SimpleChannelUpstreamHandler with BadClientSilencer {
       case Some((method, actionClass, pathParams)) =>
         request.setMethod(method)  // Override
         env.pathParams = pathParams
-
-        val action = actionClass.newInstance
-        action(env)
-        dispatchWithFailsafe(action, false)
+        dispatchWithFailsafe(actionClass, env, false)
 
       case None =>
         if (Config.action404 == null) {
@@ -186,25 +187,9 @@ class Dispatcher extends SimpleChannelUpstreamHandler with BadClientSilencer {
           ctx.getChannel.write(env)
         } else {
           env.pathParams = MMap.empty
-          val action = Config.action404.newInstance
           env.response.setStatus(NOT_FOUND)
-          action(env)
-          dispatchWithFailsafe(action, false)
+          dispatchWithFailsafe(Config.action404, env, false)
         }
-    }
-  }
-
-  //----------------------------------------------------------------------------
-
-  private val closedListeners = ArrayBuffer[() => Unit]()
-
-  def addConnectionClosedListener(listener: () => Unit) {
-    closedListeners.synchronized { closedListeners.append(listener) }
-  }
-
-  override def channelClosed(ctx: ChannelHandlerContext, e: ChannelStateEvent) {
-    closedListeners.synchronized {
-      closedListeners.foreach { listener => listener() }
     }
   }
 }

@@ -7,7 +7,7 @@ import io.netty.handler.codec.http.FileUpload
 
 import xitrum.Action
 import xitrum.annotation.GET
-import xitrum.handler.updown.XSendFile
+import xitrum.handler.down.XSendFile
 import xitrum.util.SecureBase64
 
 object AjaxUpload {
