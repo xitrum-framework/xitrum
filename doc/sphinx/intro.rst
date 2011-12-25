@@ -65,3 +65,9 @@ Install `SBT 0.11.2 <https://github.com/harrah/xsbt/wiki/Setup>`_, then:
 
 Now you have a sample project running at http://localhost:8000/
 and https://localhost:4430/
+
+Samples
+-------
+
+* `Quickstart <https://github.com/ngocdaothanh/xitrum-quickstart>`_
+* `Comy <https://github.com/ngocdaothanh/comy>`_

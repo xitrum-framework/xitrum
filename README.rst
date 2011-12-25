@@ -65,3 +65,9 @@ and https://localhost:4430/
 
 After playing with the quickstart project, please read
 `full documentation <http://ngocdaothanh.github.com/xitrum>`_ for details.
+
+Samples
+-------
+
+* `Quickstart <https://github.com/ngocdaothanh/xitrum-quickstart>`_
+* `Comy <https://github.com/ngocdaothanh/comy>`_
