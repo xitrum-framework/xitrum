@@ -22,7 +22,7 @@ In your action, call ``jsAddToView`` (multiple times if you need):
       ...
       jsAddToView("alert('Hello again')")
       ...
-      rederView(<p>My view</p>)
+      renderView(<p>My view</p>)
     }
   }
 
