@@ -84,6 +84,8 @@ object Config extends Logger {
   val baseUri = if (config.reverseProxy.isDefined) config.reverseProxy.get.baseUri else ""
 
   /**
+   * @param path with leading "/"
+   *
    * Avoids returning path with double "//" prefix. Something like
    * //xitrum/postback/zOIc0v...
    * will cause the browser to send request to http://xitrum/postback/zOIc0v...

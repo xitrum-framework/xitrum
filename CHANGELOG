@@ -8,6 +8,7 @@
 * Middleware architecture
 
 1.8 (planned):
+* Fix urlForPublic bug, resulted URL now has the leading "/"
 * Integrate WebSocket to Comet
   Comet uses WebSocket if available, or falls back to Ajax
 * Akka

@@ -60,7 +60,7 @@ trait UrlFor {
 
   //----------------------------------------------------------------------------
 
-  /** path must be relative to the "public" directory */
+  /** @param path Relative to the "public" directory, without leading "/" */
   def urlForPublic(path: String) = {
     val absPath     = Config.root + "/public/" + path
     val forceReload = Etag.forFile(absPath, true) match {
@@ -68,9 +68,10 @@ trait UrlFor {
       case Etag.TooBig(file)                       => file.lastModified
       case Etag.Small(bytes, etag, mimeo, gzipped) => etag
     }
-    Config.withBaseUri(path + "?" + forceReload)
+    Config.withBaseUri("/" + path + "?" + forceReload)
   }
 
+  /** @param path Relative to an entry in classpath, without leading "/" */
   def urlForResource(path: String) = {
     val classPathPath = "public/" + path
     val forceReload = Etag.forResource(classPathPath, true) match {
