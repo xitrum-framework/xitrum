@@ -23,7 +23,7 @@ Create cache page or action
 
 It's very simple, you use ``CacheActionSecond/Minute/Hour/Day`` or
 ``CachePageSecond/Minute/Hour/Day``. The difference between action cache and
-page cache is that for page cache, before filter is not touched if the cache
+page cache is that for page cache, before filters are not run if the cache
 exists.
 
 ::
@@ -31,9 +31,10 @@ exists.
   import xitrum.Action
   import xitrum.annotations._
 
-  @CachePageMinute(1)  // Or @CacheActionMinute(1) if want to run the action's before filter
+  @CachePageMinute(1)
+  // Or @CacheActionMinute(1) if you want to run the action's before filter
   @GET("/")
-  class IndexAction extends Action ...
+  class IndexAction extends Action...
 
 Cache object
 ------------

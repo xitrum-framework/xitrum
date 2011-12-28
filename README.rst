@@ -4,7 +4,7 @@ Xitrum (means "Smurf" in Vietnamese) is an async and clustered Scala web framewo
 and HTTP(S) server on top of `Netty <http://www.jboss.org/netty>`_
 and `Hazelcast <http://www.hazelcast.com/>`_:
 
-* It fills the gap between `Scalatra <https://github.com/scalatra/scalatra>`_
+* It tries to fill the spectrum between `Scalatra <https://github.com/scalatra/scalatra>`_
   and `Lift <http://liftweb.net/>`_: more powerful than Scalatra and easier to
   use than Lift. You can easily create both RESTful APIs and postbacks. Xitrum
   is controller-first like Scalatra, not
@@ -14,7 +14,7 @@ and `Hazelcast <http://www.hazelcast.com/>`_:
   as distributed routes.You can plug an app into another app. If you have a
   blog engine, you can package it as a JAR file. Then you can plug that JAR file
   into another app.
-* Typesafe, in the spirit of Scala. All the APIs try to be as typesafe as possible
+* Typesafe, in the spirit of Scala. All the APIs try to be as typesafe as possible.
 * Async, in the spirit of Netty. Your request proccessing action does not have
   to respond immediately.
 * Sessions can be stored in cookies (more scalable) or clustered Hazelcast (more secure).
