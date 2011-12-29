@@ -68,3 +68,10 @@ credentials += Credentials(Path.userHome / ".ivy2" / ".credentials")
 
 // There is error with sbt doc
 publishArtifact in (Compile, packageDoc) := false
+
+autoCompilerPlugins := true
+
+addCompilerPlugin("org.scala-lang.plugins" % "continuations" % "2.9.1")
+
+scalacOptions += "-P:continuations:enable"
+
