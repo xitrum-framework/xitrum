@@ -1,7 +1,6 @@
 package xitrum.handler.up
 
 import io.netty.channel.{ChannelHandlerContext, ExceptionEvent, SimpleChannelUpstreamHandler}
-
 import xitrum.Logger
 
 /** Bad client = closed connection, malformed request etc. */
@@ -15,8 +14,8 @@ trait BadClientSilencer extends Logger {
     // java.io.IOException: Connection reset by peer
     // java.io.IOException: Broken pipe
     // java.nio.channels.ClosedChannelException: null
-    // javax.net.ssl.SSLException: not an SSL/TLS record
-    // java.lang.IllegalArgumentException: empty text (Use https://... to connect to HTTP server)
+    // javax.net.ssl.SSLException: not an SSL/TLS record (Use http://... URL to connect to HTTPS server)
+    // java.lang.IllegalArgumentException: empty text (Use https://... URL to connect to HTTP server)
     val cause = e.getCause
     val s     = cause.toString
     if (s.startsWith("java.nio.channels.ClosedChannelException") ||
