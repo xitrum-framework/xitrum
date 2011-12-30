@@ -23,6 +23,8 @@
     http://www.earldouglas.com/continuation-based-web-workflows-part-two/
     http://stackoverflow.com/questions/6062003/event-listeners-with-scala-continuations
     http://jim-mcbeath.blogspot.com/2010/08/delimited-continuations.html
+* Expose APIs for routing and action/page caching, for cases you don't want
+  to use annotation
 
 1.7:
 * WebSocket, see:
@@ -33,7 +35,7 @@
     postback to data-postback
     after    to data-after
     confirum to data-confirm
-* Expose API for data encryption so that application developers may use
+* Expose APIs for data encryption so that application developers may use
   xitrum.util.{Secure, SecureBase64, SeriDeseri}
   See http://ngocdaothanh.github.com/xitrum/howto.html#encrypt-data
 * Update Hazelcast from 1.9.4.4 to 1.9.4.5

@@ -13,21 +13,89 @@ object Routes extends Logger {
   type Route           = (HttpMethod, Pattern,         Class[_ <: Action])
   type CompiledRoute   = (HttpMethod, CompiledPattern, Class[_ <: Action])
 
-  private var compiledRoutes: Iterable[CompiledRoute]      = _
-  private var cacheSecs:      Map[Class[_ <: Action], Int] = _  // Int: 0 = no cache, < 0 = action, > 0 = page
+  val compiledRoutes = ArrayBuffer[CompiledRoute]()
+  val cacheSecs      = MMap[Class[_ <: Action], Int]()  // Int: 0 = no cache, < 0 = action, > 0 = page
 
-  def collectAndCompile {
-    // Avoid loading twice in some servlet containers
-    if (compiledRoutes != null) return
+  //----------------------------------------------------------------------------
 
-    val (routes, cacheSecs0) = (new RouteCollector).collect
-    cacheSecs = cacheSecs0
+  def compileRoute(route: Route): CompiledRoute = {
+    val (method, pattern, actionClass) = route
+    val cp = compilePattern(pattern)
+    (method, cp, actionClass)
+  }
 
-    // Compile and log routes
-    // The compiled routes do not contain the original URL pattern
+  def fromCacheFileOrAnnotations() {
+    val routeCollector = new RouteCollector("routes.sclasner")
+    val (routes, cacheSecs0) = routeCollector.fromCacheFileOrAnnotations()
+    compiledRoutes ++= routes.map(compileRoute _)
+    cacheSecs      ++= cacheSecs0
 
-    val (methodMaxLength, patternMaxLength) = routes.foldLeft((0, 0)) { case ((mmax, pmax), (method, pattern, actionClass)) =>
-      val mlen = method.getName.length
+    // Make PostbackAction the first route for quicker route matching
+    val route = (HttpMethod.POST, PostbackAction.POSTBACK_PREFIX + ":*", classOf[PostbackAction])
+    compiledRoutes.prepend(compileRoute(route))
+  }
+
+  def append(httpMethod: HttpMethod, pattern: String, klass: Class[_ <: Action]) {
+    val route = (httpMethod, pattern, klass)
+    compiledRoutes.append(compileRoute(route))
+  }
+
+  def append(httpMethod: String, pattern: String, klass: Class[_ <: Action]) {
+    append(new HttpMethod(httpMethod), pattern, klass)
+  }
+
+  def prepend(httpMethod: HttpMethod, pattern: String, klass: Class[_ <: Action]) {
+    val route = (httpMethod, pattern, klass)
+    compiledRoutes.prepend(compileRoute(route))
+  }
+
+  def prepend(httpMethod: String, pattern: String, klass: Class[_ <: Action]) {
+    prepend(new HttpMethod(httpMethod), pattern, klass)
+  }
+
+  def GET(pattern: String, klass: Class[_ <: Action], isAppend: Boolean = true) {
+    if (isAppend)
+      append(HttpMethod.GET, pattern, klass)
+    else
+      prepend(HttpMethod.GET, pattern, klass)
+  }
+
+  def POST(pattern: String, klass: Class[_ <: Action], isAppend: Boolean = true) {
+    if (isAppend)
+      append(HttpMethod.POST, pattern, klass)
+    else
+      prepend(HttpMethod.POST, pattern, klass)
+  }
+
+  def PUT(pattern: String, klass: Class[_ <: Action], isAppend: Boolean = true) {
+    if (isAppend)
+      append(HttpMethod.PUT, pattern, klass)
+    else
+      prepend(HttpMethod.PUT, pattern, klass)
+  }
+
+  def DELETE(pattern: String, klass: Class[_ <: Action], isAppend: Boolean = true) {
+    if (isAppend)
+      append(HttpMethod.DELETE, pattern, klass)
+    else
+      prepend(HttpMethod.DELETE, pattern, klass)
+  }
+
+  def WEBSOCKET(pattern: String, klass: Class[_ <: Action], isAppend: Boolean = true) {
+    if (isAppend)
+      append(WebSocketHttpMethod, pattern, klass)
+    else
+      prepend(WebSocketHttpMethod, pattern, klass)
+  }
+
+  def printRoutes() {
+    // Reconstruct raw routes from compiled routes
+    val routes = compiledRoutes.map { case (httpMethod, compiledPattern, actionClass) =>
+      (httpMethod, decompiledPattern(compiledPattern), actionClass)
+    }
+
+    val (methodMaxLength, patternMaxLength) = routes.foldLeft((0, 0)) { case ((mmax, pmax), (httpMethod, pattern, actionClass)) =>
+      val mlen = httpMethod.getName.length
       val plen = pattern.length
 
       // actionClass != classOf[PostbackAction]: see below
@@ -39,30 +107,84 @@ object Routes extends Logger {
 
     val builder = new StringBuilder
     builder.append("Routes:\n")
-    compiledRoutes = routes.map { r =>
+    routes.foreach { r =>
       val method      = r._1
       val pattern     = r._2
       val actionClass = r._3
 
       if (actionClass != classOf[PostbackAction])  // Skip noisy information
         builder.append(logFormat.format(method.getName, pattern, actionClass.getName))
-
-      compileRoute(r)
     }
     logger.info(builder.toString)
   }
 
+  /** For use from browser */
   lazy val jsRoutes = {
     val xs = compiledRoutes.map { case (_, compiledPattern, actionClass) =>
       val ys = compiledPattern.map { case (token, constant) =>
         "['" + token + "', " + constant + "]"
       }
-
       "[[" + ys.mkString(", ") + "], '" + actionClass.getName + "']"
     }
-
     "[" + xs.mkString(", ") + "]"
   }
+
+  //----------------------------------------------------------------------------
+
+  def cacheActionSecond(seconds: Int, klass: Class[_ <: Action]) {
+    cacheSecs(klass) = -seconds
+  }
+
+  def cacheActionMinute(minutes: Int, klass: Class[_ <: Action]) {
+    cacheActionSecond(minutes * 60, klass)
+  }
+
+  def cacheActionHour(hours: Int, klass: Class[_ <: Action]) {
+    cacheActionMinute(hours * 60, klass)
+  }
+
+  def cacheActionDay(days: Int, klass: Class[_ <: Action]) {
+    cacheActionHour(days * 24, klass)
+  }
+
+  def cachePageSecond(seconds: Int, klass: Class[_ <: Action]) {
+    cacheSecs(klass) = seconds
+  }
+
+  def cachePageMinute(minutes: Int, klass: Class[_ <: Action]) {
+    cachePageSecond(minutes * 60, klass)
+  }
+
+  def cachePageHour(hours: Int, klass: Class[_ <: Action]) {
+    cachePageMinute(hours * 60, klass)
+  }
+
+  def cachePageDay(days: Int, klass: Class[_ <: Action]) {
+    cachePageHour(days * 24, klass)
+  }
+
+  def printCaches() {
+    val (actionCacheSecs, pageCacheSecs) = cacheSecs.partition { case (klass, secs) => secs < 0 }
+    val builder = new StringBuilder
+
+    if (!actionCacheSecs.isEmpty) {
+      builder.append("Action cache:\n")
+      actionCacheSecs.foreach { case (klass, secs) =>
+        builder.append("%s: %d\n".format(klass.getName, -secs))
+      }
+    }
+
+    if (!pageCacheSecs.isEmpty) {
+      builder.append("Page cache:\n")
+      pageCacheSecs.foreach { case (klass, secs) =>
+        builder.append("%s: %d\n".format(klass.getName, secs))
+      }
+    }
+
+    if (!builder.isEmpty) logger.info(builder.toString)
+  }
+
+  //----------------------------------------------------------------------------
 
   /**
    * This method may specify a new HttpMethod to override the old method.
@@ -169,18 +291,20 @@ object Routes extends Logger {
 
   //----------------------------------------------------------------------------
 
-  private def compileRoute(route: Route): CompiledRoute = {
-    val (method, pattern, actionClass) = route
-    val cp = compilePattern(pattern)
-    (method, cp, actionClass)
-  }
-
   private def compilePattern(pattern: String): CompiledPattern = {
     val tokens = pattern.split('/').filter(_ != "")
     tokens.map { e: String =>
       val constant = !e.startsWith(":")
       val token    = if (constant) e else e.substring(1)
       (token, constant)
+    }
+  }
+
+  private def decompiledPattern(compiledPattern: CompiledPattern): String = {
+    compiledPattern.foldLeft("") { (acc, tc) =>
+      val (token, isConstant) = tc
+      val rawToken = if (isConstant) token else ":" + token
+      "/" + rawToken
     }
   }
 

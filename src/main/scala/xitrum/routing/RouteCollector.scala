@@ -14,8 +14,8 @@ import sclasner.{FileEntry, Scanner}
 import xitrum.{Action, Config, Logger}
 import xitrum.annotation._
 
-/** Scan all classes to collect routes. */
-class RouteCollector extends Logger {
+/** Scan all classes to collect routes from annotations. */
+class RouteCollector(cachedFileName: String) extends Logger {
   // Use String because HttpMethod is not serializable
   type RouteMap = Map[Class[_ <: Action], (String, Array[Routes.Pattern], Int)]
 
@@ -24,25 +24,25 @@ class RouteCollector extends Logger {
     val firsts, lasts, others = Value
   }
 
-  def collect: (Array[Routes.Route], Map[Class[_ <: Action], Int]) = {
-    logger.info("Collect routes/load routes.sclasner...")
+  def fromCacheFileOrAnnotations(): (Array[Routes.Route], Map[Class[_ <: Action], Int]) = {
+    logger.info("Collect routes/load " + cachedFileName + "...")
 
     val routeBuffer = ArrayBuffer[Routes.Route]()
     val cacheBuffer = MMap[Class[_ <: Action], Int]()
 
     val empty = Map[Class[_ <: Action], (String, Array[Routes.Pattern], Int)]()
     val (firsts, lasts, others) = try {
-      Scanner.foldLeft("routes.sclasner", (empty, empty, empty), discovered _)
+      Scanner.foldLeft(cachedFileName, (empty, empty, empty), discovered _)
     } catch {
       case e =>
         // Maybe routes.sclasner could not be loaded because dependencies have changed.
         // Try deleting routes.sclasner and scan again.
-        val f = new File("routes.sclasner")
+        val f = new File(cachedFileName)
         if (f.exists) {
-          logger.warn("Error loading routes.sclasner. Delete the file and recollect routes...")
+          logger.warn("Error loading " + cachedFileName + ". Delete the file and recollect routes...")
           f.delete
           try {
-            Scanner.foldLeft("routes.sclasner", (empty, empty, empty), discovered _)
+            Scanner.foldLeft(cachedFileName, (empty, empty, empty), discovered _)
           } catch {
             case e2 =>
               Config.exitOnError("Could not collect routes", e2)
@@ -54,9 +54,6 @@ class RouteCollector extends Logger {
         }
     }
 
-    // Make PostbackAction the first route for quicker route matching
-    routeBuffer.append((HttpMethod.POST, PostbackAction.POSTBACK_PREFIX + ":*", classOf[PostbackAction]))
-
     for (map <- Array(firsts, others, lasts)) {
       val sorted = map.toBuffer.sortWith { (a1, a2) =>
         a1.toString < a2.toString
@@ -65,7 +62,8 @@ class RouteCollector extends Logger {
       for ((actionClass, httpMethod_patterns_cacheSecs) <- sorted) {
         val (httpMethod, patterns, cacheSecs) = httpMethod_patterns_cacheSecs
         for (p <- patterns) routeBuffer.append((new HttpMethod(httpMethod), p, actionClass))
-        cacheBuffer(actionClass) = cacheSecs
+
+        if (cacheSecs != 0) cacheBuffer(actionClass) = cacheSecs
       }
     }
 

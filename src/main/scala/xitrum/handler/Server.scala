@@ -1,4 +1,4 @@
-package xitrum
+package xitrum.handler
 
 import java.net.InetSocketAddress
 import java.util.concurrent.Executors
@@ -6,17 +6,19 @@ import java.util.concurrent.Executors
 import io.netty.bootstrap.ServerBootstrap
 import io.netty.channel.socket.nio.NioServerSocketChannelFactory
 
+import xitrum.{Cache, Config, Logger}
 import xitrum.routing.Routes
-import xitrum.handler.ChannelPipelineFactory
 
-class Server extends Logger {
-  def start {
+object Server extends Logger {
+  def start() {
     // Because Hazelcast takes serveral seconds to start, we force it to
     // start before the web server begins receiving requests, instead of
     // letting it start lazily
     Cache.cache.size
 
-    Routes.collectAndCompile
+    // Routes.fromCacheFileOrAnnotations() should have been called
+    Routes.printRoutes()
+    Routes.printCaches()
 
     if (Config.config.http.isDefined)  start(false)
     if (Config.config.https.isDefined) start(true)

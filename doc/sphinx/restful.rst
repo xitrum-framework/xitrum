@@ -78,6 +78,41 @@ You must make sure the second route be checked first. ``@First`` is for that pur
 
 ``@Last`` is similar.
 
+Routing without using annotation
+--------------------------------
+
+A typical booting process looks like this:
+
+::
+
+  import xitrum.handler.Server
+  import xitrum.routing.Routes
+
+  object Boot {
+    def main(args: Array[String]) {
+      Routes.fromCacheFileOrAnnotations()
+      Server.start()
+    }
+  }
+
+If you don't want to use annotation, before starting the server you can append
+routes like this:
+
+::
+
+  Routes.GET("/books/:id", classOf[BookShowAction])
+  Routes.POST("/books",    classOf[BookCreateAction])
+
+If you want to prepend, pass ``false`` as the last parameter:
+
+::
+
+  Routes.GET("/books/:id/edit", classOf[BookEditAction],    false)
+  Routes.DELETE("/books/:id",   classOf[BookDestroyAction], false)
+
+If you want full control over routing, `play <https://github.com/ngocdaothanh/xitrum/blob/master/src/main/scala/xitrum/routing/Routes.scala>`_
+with ``Routes.compiledRoutes`` and ``Routes.compileRoute``.
+
 Anti-CSRF
 ---------
 

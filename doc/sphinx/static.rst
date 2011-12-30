@@ -55,15 +55,17 @@ your own handler, configure before starting web server:
 
 ::
 
-  import xitrum.{Config, Server}
+  import xitrum.Config
+  import xitrum.routing.Routes
+  import xitrum.handler.Server
 
   object Boot {
     def main(args: Array[String]) {
       Config.action404 = classOf[MyAction]
       Config.action500 = classOf[MyAction]
 
-      val s = new Server
-      s.start
+      Routes.fromCacheFileOrAnnotations()
+      Server.start()
     }
   }
 
