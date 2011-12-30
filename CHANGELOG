@@ -1,19 +1,28 @@
 1.9 (planned):
-* Digest authentication
-* Knockout.js and Scala Enhanced Strings
-* Scalate
-* wro4j
-* RESTful actions now can use validators:
-  val username = param("username") :: Required :: MaxLength(32)
-* Middleware architecture
-
-1.8 (planned):
-* Fix urlForPublic bug, resulted URL now has the leading "/"
-* Integrate Knockout.js
 * Integrate WebSocket to Comet
   Comet uses WebSocket if available, or falls back to Ajax
 * Akka
 * Typesafe routes using Scala compiler plugin
+* Digest authentication
+* wro4j
+* RESTful actions now can use validators:
+    val username = param("username") :: Required :: MaxLength(32)
+* Middleware architecture based on Netty handlers
+
+1.8 (planned):
+* Fix urlForPublic bug, resulted URL now has the leading "/"
+* Add Scalate back
+* Improve Quickstart: https://github.com/ngocdaothanh/xitrum-quickstart
+* Improve data-after, now you can write
+    data-after="$('#chatInput').val('')"
+  instead of
+    data-after="function () { $('#chatInput').val('') }"
+* Integrate Knockout.js
+* Use Scala delimited continuation
+  See:
+    http://www.earldouglas.com/continuation-based-web-workflows-part-two/
+    http://stackoverflow.com/questions/6062003/event-listeners-with-scala-continuations
+    http://jim-mcbeath.blogspot.com/2010/08/delimited-continuations.html
 
 1.7:
 * WebSocket, see:
