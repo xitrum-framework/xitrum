@@ -84,7 +84,7 @@ var xitrum = {
 
     var after = target1.attr("data-after");
     if (after) {
-      var f = eval('(' + after + ')');
+      var f = eval('(function() {' + after + '})');
       f();
     }
 

@@ -112,7 +112,7 @@ Chat example
       renderView(
         <div id="chatOutput"></div>
 
-        <form data-postback="submit" action={urlForPostback[CometPublishAction]} data-after="function() { $('#chatInput').attr('value', '') }">
+        <form data-postback="submit" action={urlForPostback[CometPublishAction]} data-after="$('#chatInput').value('')">
           {<input type="hidden" name="channel" value="chat" /> :: Validated}
           {<input type="text" id="chatInput" name="chatInput" /> :: Required}
         </form>
