@@ -130,6 +130,10 @@ var xitrum = {
 
   scrollToBottom: function(selector) {
     $(selector).scrollTop($(selector)[0].scrollHeight);
+  },
+
+  escapeHtml: function(html) {
+    return $('<div/>').text(html).html();
   }
 };
 

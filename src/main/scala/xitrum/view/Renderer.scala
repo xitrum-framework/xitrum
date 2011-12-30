@@ -14,7 +14,7 @@ import com.codahale.jerkson.Json
 import xitrum.{Action, Config}
 import xitrum.handler.down.{XSendFile, XSendResource}
 
-trait Renderer extends JS with Flash with I18n {
+trait Renderer extends JS with Flash with Knockout with I18n {
   this: Action =>
 
   private def writeHeaderOnFirstChunk {
