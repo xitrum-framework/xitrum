@@ -7,6 +7,7 @@ import java.util.Arrays
 import javax.crypto.{Cipher, Mac}
 import javax.crypto.spec.{SecretKeySpec, IvParameterSpec}
 
+import io.netty.util.CharsetUtil.UTF_8
 import xitrum.Config
 
 /**
@@ -63,7 +64,7 @@ object Secure {
     } else {
       val messageDigest = MessageDigest.getInstance("MD5")
       messageDigest.reset
-      messageDigest.update(key.getBytes("UTF-8"))
+      messageDigest.update(key.getBytes(UTF_8))
       messageDigest.digest
     }
   }

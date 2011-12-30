@@ -1,7 +1,10 @@
 package xitrum.i18n
 
 import scala.collection.mutable.{ListBuffer, Map => MMap}
+
+import io.netty.util.CharsetUtil.UTF_8
 import scaposer.{Po, Parser}
+
 import xitrum.util.Loader
 
 object PoLoader {
@@ -20,7 +23,7 @@ object PoLoader {
       val url    = urlEnum.nextElement
       val is     = url.openStream
       val bytes  = Loader.bytesFromInputStream(is)
-      val string = new String(bytes, "UTF-8")
+      val string = new String(bytes, UTF_8)
       val poo    = Parser.parsePo(string)
       if (poo.isDefined) buffer.append(poo.get)
     }

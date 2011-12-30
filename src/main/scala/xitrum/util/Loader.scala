@@ -2,7 +2,9 @@ package xitrum.util
 
 import java.io.{FileInputStream, InputStream}
 import java.util.Properties
+
 import com.codahale.jerkson.Json
+import io.netty.util.CharsetUtil.UTF_8
 
 object Loader {
   private val BUFFER_SIZE = 1024
@@ -40,13 +42,13 @@ object Loader {
   //----------------------------------------------------------------------------
 
   def stringFromFile(path: String) =
-    new String(bytesFromFile(path), "UTF-8")
+    new String(bytesFromFile(path), UTF_8)
 
   /**
    * @param path Relative to one of the elements in classpath, without leading "/"
    */
   def stringFromClasspath(path: String) =
-    new String(bytesFromClasspath(path), "UTF-8")
+    new String(bytesFromClasspath(path), UTF_8)
 
   //----------------------------------------------------------------------------
 
