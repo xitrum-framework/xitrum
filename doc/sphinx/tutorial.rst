@@ -9,17 +9,21 @@ This chapter describes how to create and run a Xitrum project.
 Create a new Xitrum project
 ---------------------------
 
-Install `SBT 0.11.2 <https://github.com/harrah/xsbt/wiki/Setup>`_, then clone
-the xitrum-quickstart project.
+Clone the xitrum-quickstart project:
 
 ::
 
   $ git clone https://github.com/ngocdaothanh/xitrum-quickstart.git
 
+The de facto stardard way of building Scala projects is using
+`SBT <https://github.com/harrah/xsbt/wiki/Setup>`_. The quickstart project
+has already included SBT 0.11.2 in ``sbt`` directory. If you want to install
+SBT yourself, see its `setup guide <https://github.com/harrah/xsbt/wiki/Setup>`_.
+
 Run
 ---
 
-Change to the newly created project directory and run ``sbt run``. This command
+Change to the newly created project directory and run ``sbt/sbt run``. This command
 will download all dependencies, compile the project, and run the class
 ``quickstart.Boot``, which starts the web server.
 
@@ -35,7 +39,7 @@ In the console, you will see all the routes and request information:
   [INFO] HTTP server started on port 8364
   [INFO] HTTPS server started on port 4364
   [INFO] Xitrum started in development mode
-  [DEBUG] GET my_project.action.IndexAction, 1 [ms]
+  [DEBUG] GET quickstart.action.IndexAction, 1 [ms]
 
 On startup, all routes will be collected and output to log. It is very
 convenient for you to have a list of routes if you want to write documentation

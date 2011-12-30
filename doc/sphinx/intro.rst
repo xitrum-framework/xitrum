@@ -63,13 +63,11 @@ its `Google group <http://groups.google.com/group/xitrum-framework>`_.
 Quick start
 -----------
 
-Install `SBT 0.11.2 <https://github.com/harrah/xsbt/wiki/Setup>`_, then:
-
 ::
 
   $ git clone https://github.com/ngocdaothanh/xitrum-quickstart.git
   $ cd xitrum-quickstart
-  $ sbt run
+  $ sbt/sbt run
 
 Now you have a sample project running at http://localhost:8000/
 and https://localhost:4430/

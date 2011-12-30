@@ -6,26 +6,35 @@ Development flow with SBT, Eclipse, and JRebel
 This chapter assumes that you have installed Eclipse and
 `Scala plugin for Eclipse <http://www.scala-ide.org/>`_.
 
-Install plugins for SBT
------------------------
-
-Install Xitrum plugin as in the :doc:`tutorial </tutorial>`.
-
-Install Eclipse plugin by adding to file ``~/.sbt/plugins/build.sbt``
-the content as described at https://github.com/typesafehub/sbteclipse.
-
 Create a new Xitrum project
 ---------------------------
 
+Copy the quickstart project as described in the :doc:`tutorial </tutorial>`
+as your new project. If you're using git, you should remove its hidden ``.git``
+directory and recreate it yourself, but you should keep the ``.gitignore`` file.
+
 ::
 
-  $ cd <Eclipse workspace directory>
-  $ mkdir my_project
+  $ git clone –depth 1 https://github.com/ngocdaothanh/xitrum-quickstart.git my_project
   $ cd my_project
-  $ sbt xitrum-new
+  $ rm -rf .git
+  $ git init
+  $ git add -f .gitignore
+
+Install Eclipse plugin for SBT
+------------------------------
+
+Install Eclipse plugin for SBT by adding to file ``~/.sbt/plugins/build.sbt``
+the content as described at https://github.com/typesafehub/sbteclipse.
+
+To create the ``.project`` file for Eclipse from ``build.sbt``, from the
+project directory, run:
+
+::
+
   $ sbt eclipse
 
-Now open Eclipse, and import the created project.
+Now open Eclipse, and import the project.
 
 Install JRebel
 --------------
@@ -55,7 +64,7 @@ Use JRebel
 ----------
 
 1. Run ``sbt run``
-2. In Eclipse, try editing a Scala file, and save
+2. In Eclipse, try editing a Scala file, then save it
 
 The Scala plugin for Eclipse will automatically recompile the file. And JRebel will
 automatically reload the generated .class files.

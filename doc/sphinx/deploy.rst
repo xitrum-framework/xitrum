@@ -52,7 +52,7 @@ start the web server in production environment.
 
 ::
 
-  $ bin/runner.sh my_project.Boot
+  $ bin/runner.sh quickstart.Boot
 
 You may want to modify runner.sh to tune JVM settings. Also see ``config/xitrum.properties``.
 
