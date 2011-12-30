@@ -19,6 +19,8 @@ and `Hazelcast <http://www.hazelcast.com/>`_:
   to respond immediately. Chunked response (streaming), WebSocket, and Comet
   (using WebSocket or long-polling) are supported.
 * Sessions can be stored in cookies (more scalable) or clustered Hazelcast (more secure).
+  Hazelcast is recommended when using continuations-based Actions, since serialized
+  continuations are usually too big to store in cookies.
 * `jQuery Validation <http://docs.jquery.com/Plugins/validation>`_ is integrated
   for browser side and server side validation.
 * i18n using `GNU gettext <http://en.wikipedia.org/wiki/GNU_gettext>`_.
