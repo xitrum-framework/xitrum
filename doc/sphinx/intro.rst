@@ -19,7 +19,8 @@ and `Hazelcast <http://www.hazelcast.com/>`_:
   into another app.
 * Typesafe, in the spirit of Scala. All the APIs try to be as typesafe as possible.
 * Async, in the spirit of Netty. Your request proccessing action does not have
-  to respond immediately.
+  to respond immediately. Chunked response (streaming), WebSocket, and Comet
+  (using WebSocket or long-polling) are supported.
 * Sessions can be stored in cookies (more scalable) or clustered Hazelcast (more secure).
 * `jQuery Validation <http://docs.jquery.com/Plugins/validation>`_ is integrated
   for browser side and server side validation.

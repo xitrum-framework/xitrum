@@ -92,7 +92,7 @@ When you include ``antiCSRFMeta`` in your layout:
   import xitrum.view.DocType
 
   trait AppAction extends Action {
-    override def layout = DocType.xhtmlTransitional(
+    override def layout = DocType.html5(
       <html>
         <head>
           {antiCSRFMeta}
@@ -111,10 +111,11 @@ The ``<head>`` part will include something like this:
 
 ::
 
+  <!DOCTYPE html>
   <html>
     <head>
       ...
-      <meta name="antiCSRFToken" content="5402330e-9916-40d8-a3f4-16b271d583be" />
+      <meta name="csrf-token" content="5402330e-9916-40d8-a3f4-16b271d583be" />
       ...
     </head>
     ...

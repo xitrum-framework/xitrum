@@ -22,7 +22,7 @@ AppAction.scala
   import xitrum.view.DocType
 
   trait AppAction extends Action {
-    override def layout = DocType.xhtmlTransitional(
+    override def layout = DocType.html5(
       <html>
         <head>
           {antiCSRFMeta}
