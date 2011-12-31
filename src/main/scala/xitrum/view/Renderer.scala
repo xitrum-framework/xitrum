@@ -93,10 +93,14 @@ trait Renderer extends JS with Flash with Knockout with I18n {
 
   //----------------------------------------------------------------------------
 
-  /** Content-Type header is set to "text/json" */
+  /**
+   * Content-Type header is set to "application/json".
+   * With text/json browser downloads it instead of displaying it,
+   * which makes debugging a pain.
+   */
   def renderJson(any: Any) {
     val json = Json.generate(any)
-    renderText(json, "text/json; charset=" + Config.config.request.charset)
+    renderText(json, "application/json; charset=" + Config.config.request.charset)
   }
 
   //----------------------------------------------------------------------------
