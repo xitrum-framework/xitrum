@@ -301,10 +301,14 @@ object Routes extends Logger {
   }
 
   private def decompiledPattern(compiledPattern: CompiledPattern): String = {
-    compiledPattern.foldLeft("") { (acc, tc) =>
-      val (token, isConstant) = tc
-      val rawToken = if (isConstant) token else ":" + token
-      "/" + rawToken
+    if (compiledPattern.isEmpty) {
+      "/"
+    } else {
+      compiledPattern.foldLeft("") { (acc, tc) =>
+        val (token, isConstant) = tc
+        val rawToken = if (isConstant) token else ":" + token
+        acc + "/" + rawToken
+      }
     }
   }
 
