@@ -25,7 +25,7 @@ class RouteCollector(cachedFileName: String) extends Logger {
   }
 
   def fromCacheFileOrAnnotations(): (Array[Routes.Route], Map[Class[_ <: Action], Int]) = {
-    logger.info("Collect routes/load " + cachedFileName + "...")
+    logger.info("Load " + cachedFileName + "/recollect routes and action/page cache config from annotations...")
 
     val routeBuffer = ArrayBuffer[Routes.Route]()
     val cacheBuffer = MMap[Class[_ <: Action], Int]()

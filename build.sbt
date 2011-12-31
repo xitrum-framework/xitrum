@@ -13,7 +13,7 @@ scalacOptions ++= Seq(
   "-unchecked"
 )
 
-// For easier development (sbt console etc.)
+// Put config directory in classpath for easier development (sbt console etc.)
 unmanagedBase in Runtime <<= baseDirectory { base => base / "config" }
 
 // Netty -----------------------------------------------------------------------
@@ -56,16 +56,16 @@ libraryDependencies += "org.mozilla" % "rhino" % "1.7R3"
 
 // Other dependencies ----------------------------------------------------------
 
-libraryDependencies += "tv.cntt" %% "sclasner" % "1.0"
-
 libraryDependencies += "tv.cntt" %% "scaposer" % "1.0"
+
+libraryDependencies += "tv.cntt" %% "sclasner" % "1.0"
 
 libraryDependencies += "org.javassist" % "javassist" % "3.15.0-GA"
 
 // Projects using Xitrum must provide a concrete implentation of SLF4J (Logback etc.)
 libraryDependencies += "org.slf4j" % "slf4j-api" % "1.6.4" % "provided"
 
-// xitrum.imperatively uses continuation ---------------------------------------
+// xitrum.imperatively uses Scala continuation, a compiler plugin --------------
 
 autoCompilerPlugins := true
 
@@ -88,4 +88,5 @@ publishTo <<= (version) { version: String =>
 credentials += Credentials(Path.userHome / ".ivy2" / ".credentials")
 
 // There is error with sbt doc
+// TODO: fix it
 publishArtifact in (Compile, packageDoc) := false
