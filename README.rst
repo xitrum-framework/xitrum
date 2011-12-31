@@ -76,6 +76,19 @@ and https://localhost:4430/
 After playing with the quickstart project, please read
 `full documentation <http://ngocdaothanh.github.com/xitrum>`_ for details.
 
+From `a reader <https://groups.google.com/group/xitrum-framework/msg/d6de4865a8576d39>`_:
+
+  Wow, this is a really impressive body of work, arguably the most
+  complete Scala framework outside of Lift (but much easier to use).
+
+  Xitrum is truly a full stack web framework, all the bases are covered,
+  including wtf-am-I-on-the-moon extras like ETags, static file cache
+  identifiers & auto-gzip compression. Tack on built-in JSON converter,
+  before/around/after interceptors, request/session/cookie/flash scopes,
+  integrated validation (server & client-side, nice), built-in cache
+  layer (Hazelcast), i18n a la GNU gettext, Netty (with Nginx, hello
+  blazing fast), etc. and you have, wow.
+
 Samples
 -------
 

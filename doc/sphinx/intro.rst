@@ -23,6 +23,8 @@ and `Hazelcast <http://www.hazelcast.com/>`_:
   (using WebSocket or long-polling) are supported.
 * Views can be written in `Scalate <http://scalate.fusesource.org/>`_ or Scala XML.
 * Sessions can be stored in cookies (more scalable) or clustered Hazelcast (more secure).
+  Hazelcast is recommended when using continuations-based Actions, since serialized
+  continuations are usually too big to store in cookies.
 * `jQuery Validation <http://docs.jquery.com/Plugins/validation>`_ is integrated
   for browser side and server side validation.
 * i18n using `GNU gettext <http://en.wikipedia.org/wiki/GNU_gettext>`_.
@@ -73,6 +75,22 @@ Quick start
 
 Now you have a sample project running at http://localhost:8000/
 and https://localhost:4430/
+
+After playing with the quickstart project, please read
+`full documentation <http://ngocdaothanh.github.com/xitrum>`_ for details.
+
+From `a reader <https://groups.google.com/group/xitrum-framework/msg/d6de4865a8576d39>`_:
+
+  Wow, this is a really impressive body of work, arguably the most
+  complete Scala framework outside of Lift (but much easier to use).
+
+  Xitrum is truly a full stack web framework, all the bases are covered,
+  including wtf-am-I-on-the-moon extras like ETags, static file cache
+  identifiers & auto-gzip compression. Tack on built-in JSON converter,
+  before/around/after interceptors, request/session/cookie/flash scopes,
+  integrated validation (server & client-side, nice), built-in cache
+  layer (Hazelcast), i18n a la GNU gettext, Netty (with Nginx, hello
+  blazing fast), etc. and you have, wow.
 
 Samples
 -------
