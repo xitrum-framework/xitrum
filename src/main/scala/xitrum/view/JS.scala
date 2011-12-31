@@ -48,7 +48,7 @@ trait JS {
 
   def jsRender(fragments: Any*) {
     val js = fragments.mkString(";\n") + ";\n"
-    renderText(js, "text/javascript")
+    renderText(js, "text/javascript; charset=" + Config.config.request.charset)
   }
 
   def jsRenderFormat(format: String, args: Any*) {
