@@ -75,18 +75,20 @@ trait JS {
   //----------------------------------------------------------------------------
 
   def jsAtBottom = {
-    val jsForView = <script type="text/javascript">{Unparsed("\n//<![CDATA[\n$(function() {\n" + buffer.toString + "});\n//]]>\n")}</script>
+    val validatei18n = if (getLanguage == "en") "" else <script type="text/javascript" src={urlForResource("xitrum/jquery.validate-1.9.0/localization/messages_"+ getLanguage +".js")}></script>
+    val jsRoutesAction = <script type="text/javascript" src={urlFor[JSRoutesAction] + "?" + Etag.forString(Routes.jsRoutes)}></script>
+    val jsForView = if (buffer.isEmpty) "" else <script type="text/javascript">{Unparsed("\n//<![CDATA[\n$(function() {\n" + buffer.toString + "});\n//]]>\n")}</script>
 
     if (Config.isProductionMode)
       <xml:group>
         <script type="text/javascript" src={urlForResource("xitrum/jquery-1.6.4.min.js")}></script>
         <script type="text/javascript" src={urlForResource("xitrum/jquery.validate-1.9.0/jquery.validate.min.js")}></script>
         <script type="text/javascript" src={urlForResource("xitrum/jquery.validate-1.9.0/additional-methods.min.js")}></script>
-        {if (getLanguage != "en") <script type="text/javascript" src={urlForResource("xitrum/jquery.validate-1.9.0/localization/messages_"+ getLanguage +".js")}></script>}
+        {validatei18n}
         <script type="text/javascript" src={urlForResource("xitrum/knockout/knockout-2.0.0.min.js")}></script>
         <script type="text/javascript" src={urlForResource("xitrum/knockout/knockout.mapping-2.0.3.min.js")}></script>
         <script type="text/javascript" src={urlForResource("xitrum/xitrum.js")}></script>
-        <script type="text/javascript" src={urlFor[JSRoutesAction] + "?" + Etag.forString(Routes.jsRoutes)}></script>
+        {jsRoutesAction}
         {jsForView}
       </xml:group>
     else
@@ -94,11 +96,11 @@ trait JS {
         <script type="text/javascript" src={urlForResource("xitrum/jquery-1.6.4.js")}></script>
         <script type="text/javascript" src={urlForResource("xitrum/jquery.validate-1.9.0/jquery.validate.js")}></script>
         <script type="text/javascript" src={urlForResource("xitrum/jquery.validate-1.9.0/additional-methods.js")}></script>
-        {if (getLanguage != "en") <script type="text/javascript" src={urlForResource("xitrum/jquery.validate-1.9.0/localization/messages_"+ getLanguage +".js")}></script>}
+        {validatei18n}
         <script type="text/javascript" src={urlForResource("xitrum/knockout/knockout-2.0.0.js")}></script>
         <script type="text/javascript" src={urlForResource("xitrum/knockout/knockout.mapping-2.0.3.js")}></script>
         <script type="text/javascript" src={urlForResource("xitrum/xitrum.js")}></script>
-        <script type="text/javascript" src={urlFor[JSRoutesAction] + "?" + Etag.forString(Routes.jsRoutes)}></script>
+        {jsRoutesAction}
         {jsForView}
       </xml:group>
   }
