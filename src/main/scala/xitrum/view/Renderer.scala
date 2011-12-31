@@ -14,6 +14,10 @@ import com.codahale.jerkson.Json
 import xitrum.{Action, Config}
 import xitrum.handler.down.{XSendFile, XSendResource}
 
+/**
+ * When rendering text, charset is automatically set, as advised by Google:
+ * http://code.google.com/speed/page-speed/docs/rendering.html#SpecifyCharsetEarly
+ */
 trait Renderer extends JS with Flash with Knockout with I18n {
   this: Action =>
 
@@ -27,9 +31,9 @@ trait Renderer extends JS with Flash with Knockout with I18n {
 
   /**
    * To respond chunks (http://en.wikipedia.org/wiki/Chunked_transfer_encoding):
-   * 1. Call ``response.setChunked(true)``
+   * 1. Call response.setChunked(true)
    * 2. Call renderXXX as many times as you want
-   * 3. Lastly, call ``renderLastChunk``
+   * 3. Lastly, call renderLastChunk
    *
    * Headers are only sent on the first renderXXX call.
    */
@@ -108,6 +112,32 @@ trait Renderer extends JS with Flash with Knockout with I18n {
   /** Content-Type header is set to "text/html" */
   def renderView(view: Any, customLayout: () => Any) {
     renderedView = view
+    val renderedLayout = customLayout.apply
+    if (renderedLayout == null)
+      renderText(renderedView, "text/html; charset=" + Config.config.request.charset)
+    else
+      renderText(renderedLayout, "text/html; charset=" + Config.config.request.charset)
+  }
+
+  //----------------------------------------------------------------------------
+
+  def renderScalateTemplateToString(path: String) = Scalate.renderFile(this, path)
+
+  def renderScalateTemplateToString(actionClass: Class[_]): String = {
+    val path = "src/main/scalate/" + actionClass.getName.replace(".", "/") + ".jade"
+    renderScalateTemplateToString(path)
+  }
+
+  def renderScalateView() {
+    renderScalateView(getClass)
+  }
+
+  def renderScalateView(actionClass: Class[_]) {
+    renderScalateView(actionClass, layout _)
+  }
+
+  def renderScalateView(actionClass: Class[_], customLayout: () => Any) {
+    renderedView = renderScalateTemplateToString(actionClass)
     val renderedLayout = customLayout.apply
     if (renderedLayout == null)
       renderText(renderedView, "text/html; charset=" + Config.config.request.charset)

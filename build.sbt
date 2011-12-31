@@ -49,6 +49,11 @@ resolvers += "repo.codahale.com" at "http://repo.codahale.com"
 
 libraryDependencies += "com.codahale" %% "jerkson" % "0.5.0"
 
+libraryDependencies += "org.fusesource.scalate" % "scalate-core" % "1.5.3"
+
+// For Scalate to compile CoffeeScript to JavaScript
+libraryDependencies += "org.mozilla" % "rhino" % "1.7R3"
+
 // For easier development (sbt console etc.)
 unmanagedBase in Runtime <<= baseDirectory { base => base / "config" }
 

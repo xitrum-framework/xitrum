@@ -111,3 +111,66 @@ You can pass the layout directly to ``renderView``:
 
   val s = "World"
   renderView(<p>Hello <em>{s}</em>!</p>, specialLayout _)
+
+Scalate
+-------
+
+For small views you can use Scala XML for convenience, but for big views you
+should use `Scalate <http://scalate.fusesource.org/>`_.
+
+scr/main/scala/quickstart/action/AppAction.scala:
+
+::
+
+  package quickstart.action
+
+  import xitrum.Action
+
+  trait AppAction extends Action {
+    override def layout = renderScalateTemplateToString(classOf[AppAction])
+  }
+
+scr/main/scala/quickstart/action/IndexAction.scala:
+
+::
+
+  package quickstart.action
+
+  import xitrum.annotation.GET
+
+  @GET("/")
+  class IndexAction extends AppAction {
+    override def execute {
+      renderScalateView()
+    }
+
+    def hello(what: String) = "Hello %s".format(what)
+  }
+
+scr/main/scalate/quickstart/action/AppAction.jade:
+
+::
+
+  !!! 5
+  html
+    head
+      = antiCSRFMeta
+      = xitrumCSS
+      title Welcome to Xitrum
+
+    body
+      != renderedView
+      = jsAtBottom
+
+scr/main/scalate/quickstart/action/IndexAction.jade:
+
+::
+
+  - import quickstart.IndexAction
+
+  a(href={urlForThis}) Path to current action
+  p= helper.asInstanceOf[IndexAction].hello("World")
+
+In views you can use all methods of the class `xitrum.Action <https://github.com/ngocdaothanh/xitrum/blob/master/src/main/scala/xitrum/Action.scala>`_.
+If you want to have exactly instance of the current action, cast ``helper`` to
+the action you wish.

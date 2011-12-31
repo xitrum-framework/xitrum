@@ -18,6 +18,7 @@ and `Hazelcast <http://www.hazelcast.com/>`_:
 * Async, in the spirit of Netty. Your request proccessing action does not have
   to respond immediately. Chunked response (streaming), WebSocket, and Comet
   (using WebSocket or long-polling) are supported.
+* Views can be written in `Scalate <http://scalate.fusesource.org/>`_ or Scala XML.
 * Sessions can be stored in cookies (more scalable) or clustered Hazelcast (more secure).
   Hazelcast is recommended when using continuations-based Actions, since serialized
   continuations are usually too big to store in cookies.
