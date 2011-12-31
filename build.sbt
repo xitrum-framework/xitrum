@@ -13,25 +13,21 @@ scalacOptions ++= Seq(
   "-unchecked"
 )
 
-// Dependencies ----------------------------------------------------------------
+// For easier development (sbt console etc.)
+unmanagedBase in Runtime <<= baseDirectory { base => base / "config" }
+
+// Netty -----------------------------------------------------------------------
 
 // Use this when Netty 4 is released
 //resolvers += "JBoss Repository" at "https://repository.jboss.org/nexus/content/groups/public/"
-//"org.jboss.netty" % "netty" % "4"
+//libraryDependencies += "io.netty" % "netty" % "4"
 
 // Remove this when Netty 4 is released
 // The nightly build site of JBoss is not always online
 // GitHub is more stable
 libraryDependencies += "io.netty" % "netty" % "4.0.0.Alpha1-SNAPSHOT" from "http://cloud.github.com/downloads/ngocdaothanh/xitrum/netty-4.0.0.Alpha1-SNAPSHOT.jar"
 
-// Projects using Xitrum must provide a concrete implentation of SLF4J (Logback etc.)
-libraryDependencies += "org.slf4j" % "slf4j-api" % "1.6.4" % "provided"
-
-libraryDependencies += "tv.cntt" %% "sclasner" % "1.0"
-
-libraryDependencies += "tv.cntt" %% "scaposer" % "1.0"
-
-libraryDependencies += "org.javassist" % "javassist" % "3.15.0-GA"
+// Hazelcast -------------------------------------------------------------------
 
 // For distributed cache and Comet
 // Infinispan is good but much heavier, and the logging is bad:
@@ -39,8 +35,10 @@ libraryDependencies += "org.javassist" % "javassist" % "3.15.0-GA"
 libraryDependencies += "com.hazelcast" % "hazelcast" % "1.9.4.5"
 
 // http://www.hazelcast.com/documentation.jsp#Clients
-// Hazelcast may be configured in Xitrum as super client or native client
+// Hazelcast can be configured in Xitrum as super client or native client
 libraryDependencies += "com.hazelcast" % "hazelcast-client" % "1.9.4.5"
+
+// Jerkson ---------------------------------------------------------------------
 
 // https://github.com/codahale/jerkson
 // lift-json does not generate correctly for:
@@ -49,13 +47,31 @@ resolvers += "repo.codahale.com" at "http://repo.codahale.com"
 
 libraryDependencies += "com.codahale" %% "jerkson" % "0.5.0"
 
+// Scalate ---------------------------------------------------------------------
+
 libraryDependencies += "org.fusesource.scalate" % "scalate-core" % "1.5.3"
 
 // For Scalate to compile CoffeeScript to JavaScript
 libraryDependencies += "org.mozilla" % "rhino" % "1.7R3"
 
-// For easier development (sbt console etc.)
-unmanagedBase in Runtime <<= baseDirectory { base => base / "config" }
+// Other dependencies ----------------------------------------------------------
+
+libraryDependencies += "tv.cntt" %% "sclasner" % "1.0"
+
+libraryDependencies += "tv.cntt" %% "scaposer" % "1.0"
+
+libraryDependencies += "org.javassist" % "javassist" % "3.15.0-GA"
+
+// Projects using Xitrum must provide a concrete implentation of SLF4J (Logback etc.)
+libraryDependencies += "org.slf4j" % "slf4j-api" % "1.6.4" % "provided"
+
+// xitrum.imperatively uses continuation ---------------------------------------
+
+autoCompilerPlugins := true
+
+addCompilerPlugin("org.scala-lang.plugins" % "continuations" % "2.9.1")
+
+scalacOptions += "-P:continuations:enable"
 
 // Publish ---------------------------------------------------------------------
 
@@ -73,10 +89,3 @@ credentials += Credentials(Path.userHome / ".ivy2" / ".credentials")
 
 // There is error with sbt doc
 publishArtifact in (Compile, packageDoc) := false
-
-autoCompilerPlugins := true
-
-addCompilerPlugin("org.scala-lang.plugins" % "continuations" % "2.9.1")
-
-scalacOptions += "-P:continuations:enable"
-
