@@ -14,10 +14,10 @@ not be run.
   import xitrum.Action
   import xitrum.annotation.GET
 
-  @GET("/")
+  @GET("/before_filter")
   class MyAction extends Action {
     val myFilter = { () =>
-      println("Run at " + System.currentTimeMillis)
+      logger.info("Run at " + System.currentTimeMillis)
       true
     }
 
@@ -27,13 +27,13 @@ not be run.
     // Filter can be anonymous
     // This filter is run after the above
     beforeFilter { () =>
-      println("I run therefore I am")
+      logger.info("I run therefore I am")
       true
     }
 
     // This method is run after the above filters
     override def execute {
-      renderText("Hi")
+      renderText("Before filters should have been run, please check the log")
     }
   }
 
@@ -81,14 +81,14 @@ They are functions that take no argument. Their return value will be ignored.
   import xitrum.Action
   import xitrum.annotation.GET
 
-  @GET("/")
+  @GET("/after_filter")
   class MyAction extends Action {
     override def execute {
-      renderText("Hello")
+      renderText("After filter should have been run, please check the log")
     }
 
     afterFilter { () =>
-      println(" World")
+      logger.info("Run at " + System.currentTimeMillis)
     }
   }
 
@@ -102,17 +102,17 @@ Around filters
   import xitrum.Action
   import xitrum.annotation.GET
 
-  @GET("/")
+  @GET("/around_filter")
   class MyAction extends Action {
     aroundFilter { executeOrPostback =>
       val begin = System.currentTimeMillis
-      executeOrPostback
+      executeOrPostback()
       val end   = System.currentTimeMillis
-      println("The action takes " + (end - begin) + " [ms]")
+      logger.info("The action took " + (end - begin) + " [ms]")
     }
 
     override def execute {
-      renderText("Hi")
+      renderText("Around filter should have been run, please check the log")
     }
   }
 
