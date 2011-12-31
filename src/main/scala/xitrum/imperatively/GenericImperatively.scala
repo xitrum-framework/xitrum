@@ -2,6 +2,12 @@ package xitrum.imperatively
 
 import scala.util.continuations.{cps, reset, shift}
 
+/**
+ * See:
+ *   http://www.earldouglas.com/continuation-based-web-workflows-part-two/
+ *   http://stackoverflow.com/questions/6062003/event-listeners-with-scala-continuations
+ *   http://jim-mcbeath.blogspot.com/2010/08/delimited-continuations.html
+ */
 trait GenericImperatively[A, B] {
   type Step = A => B
 
