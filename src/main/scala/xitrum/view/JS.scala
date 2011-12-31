@@ -5,7 +5,7 @@ import scala.xml.Unparsed
 import xitrum.{Action, Config}
 import xitrum.comet.CometGetAction
 import xitrum.etag.{Etag, NotModified}
-import xitrum.routing.Routes
+import xitrum.routing.{Routes, JSRoutesAction}
 import xitrum.validation.Validated
 
 trait JS {

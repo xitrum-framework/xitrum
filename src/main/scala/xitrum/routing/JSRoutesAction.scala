@@ -1,4 +1,4 @@
-package xitrum.view
+package xitrum.routing
 
 import io.netty.handler.codec.http.{HttpHeaders, HttpResponseStatus}
 import HttpHeaders.Names._
@@ -9,7 +9,6 @@ import xitrum.{Action, Config}
 import xitrum.annotation.GET
 import xitrum.comet.CometGetAction
 import xitrum.etag.{Etag, NotModified}
-import xitrum.routing.Routes
 import xitrum.util.Gzip
 
 object JSRoutesAction {
