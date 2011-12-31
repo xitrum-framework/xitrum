@@ -81,17 +81,27 @@ object Dispatcher extends Logger {
         } else {
           logAccess(action, postback, beginTimestamp, 0, false, e)
 
-          if (action.isAjax) {
-            action.jsRender("alert(" + action.jsEscape("Internal Server Error") + ")")
-          } else {
-            if (Config.action500 == null) {
-              val response = new DefaultHttpResponse(HTTP_1_1, INTERNAL_SERVER_ERROR)
-              XSendFile.set500Page(response)
-              action.handlerEnv.response = response
-              action.channel.write(action.handlerEnv)
-            } else {
+          if (Config.isProductionMode) {
+            if (action.isAjax) {
               action.response.setStatus(INTERNAL_SERVER_ERROR)
-              action.forward(Config.action500, false)
+              action.jsRender("alert(" + action.jsEscape("Internal Server Error") + ")")
+            } else {
+              if (Config.action500 == null) {
+                val response = new DefaultHttpResponse(HTTP_1_1, INTERNAL_SERVER_ERROR)
+                XSendFile.set500Page(response)
+                action.handlerEnv.response = response
+                action.channel.write(action.handlerEnv)
+              } else {
+                action.response.setStatus(INTERNAL_SERVER_ERROR)
+                action.forward(Config.action500, false)
+              }
+            }
+          } else {
+            action.response.setStatus(INTERNAL_SERVER_ERROR)
+            if (action.isAjax) {
+              action.jsRender("alert(" + action.jsEscape(e.toString + "\n\n" + e.getStackTraceString) + ")")
+            } else {
+              action.renderText(e.toString + "\n\n" + e.getStackTraceString)
             }
           }
         }
