@@ -174,3 +174,17 @@ scr/main/scalate/quickstart/action/IndexAction.jade:
 In views you can use all methods of the class `xitrum.Action <https://github.com/ngocdaothanh/xitrum/blob/master/src/main/scala/xitrum/Action.scala>`_.
 If you want to have exactly instance of the current action, cast ``helper`` to
 the action you wish.
+
+The default Scalate template type is `Jade <http://scalate.fusesource.org/documentation/jade.html>`_.
+You can also use `Mustache <http://scalate.fusesource.org/documentation/mustache.html>`_,
+`Scaml <http://scalate.fusesource.org/documentation/scaml-reference.html>`_, or
+`Ssp <http://scalate.fusesource.org/documentation/ssp-reference.html>`_.
+To config the default template type, see `scalate` in xitrum.json.
+
+You can override the default template type by passing "jade", "mustache", "scamal",
+or "ssp" as the last parameter to `renderScalateTemplateToString` or `renderScalateView`.
+
+::
+
+  renderScalateTemplateToString(classOf[AppAction], "mustache")
+  renderScalateView("scaml")

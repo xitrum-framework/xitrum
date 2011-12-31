@@ -27,6 +27,7 @@ case class Config(
   http:          Option[HttpConfig],
   https:         Option[HttpsConfig],
   reverseProxy:  Option[ReverseProxyConfig],
+  scalate:       String,
   hazelcastMode: String,
   session:       SessionConfig,
   request:       RequestConfig,
@@ -77,6 +78,7 @@ object Config extends Logger {
   /** See bin/runner.sh */
   val isProductionMode = (System.getProperty("xitrum.mode") == "production")
 
+  /** Taken from xitrum.json */
   val config = Loader.jsonFromClasspath[Config]("xitrum.json")
 
   //----------------------------------------------------------------------------

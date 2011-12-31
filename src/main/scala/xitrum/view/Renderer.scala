@@ -123,26 +123,42 @@ trait Renderer extends JS with Flash with Knockout with I18n {
 
   def renderScalateTemplateToString(path: String) = Scalate.renderFile(this, path)
 
-  def renderScalateTemplateToString(actionClass: Class[_]): String = {
-    val path = "src/main/scalate/" + actionClass.getName.replace(".", "/") + ".jade"
+  def renderScalateTemplateToString(actionClass: Class[_], templateType: String): String = {
+    val path = "src/main/scalate/" + actionClass.getName.replace(".", "/") + "." + templateType
     renderScalateTemplateToString(path)
   }
 
+  def renderScalateTemplateToString(actionClass: Class[_]): String = {
+    renderScalateTemplateToString(actionClass, Config.config.scalate)
+  }
+
+  def renderScalateView(templateType: String) {
+    renderScalateView(getClass, templateType)
+  }
+
   def renderScalateView() {
-    renderScalateView(getClass)
+    renderScalateView(getClass, Config.config.scalate)
+  }
+
+  def renderScalateView(actionClass: Class[_], templateType: String) {
+    renderScalateView(actionClass, layout _, templateType)
   }
 
   def renderScalateView(actionClass: Class[_]) {
-    renderScalateView(actionClass, layout _)
+    renderScalateView(actionClass, layout _, Config.config.scalate)
   }
 
-  def renderScalateView(actionClass: Class[_], customLayout: () => Any) {
-    renderedView = renderScalateTemplateToString(actionClass)
+  def renderScalateView(actionClass: Class[_], customLayout: () => Any, templateType: String) {
+    renderedView = renderScalateTemplateToString(actionClass, templateType)
     val renderedLayout = customLayout.apply
     if (renderedLayout == null)
       renderText(renderedView, "text/html; charset=" + Config.config.request.charset)
     else
       renderText(renderedLayout, "text/html; charset=" + Config.config.request.charset)
+  }
+
+  def renderScalateView(actionClass: Class[_], customLayout: () => Any) {
+    renderScalateView(actionClass, customLayout, Config.config.scalate)
   }
 
   //----------------------------------------------------------------------------
