@@ -16,17 +16,17 @@ object ControllerReflection {
   private val routeWithNullRouteMethod_to_RouteMethod = MMap[Route, Method]()
 
   /** @return controller#route */
-  def friendlyControllerRouteName(route: Route): String =
-    friendlyControllerRouteName(route.routeMethod)
+  def controllerRouteName(route: Route): String =
+    controllerRouteName(route.routeMethod)
 
-  def friendlyControllerRouteName(routeMethod: Method): String = {
+  def controllerRouteName(routeMethod: Method): String = {
     val controllerClassName = routeMethod.getDeclaringClass.getName
     val routeName           = routeMethod.getName
     controllerClassName + "#" + routeName
   }
 
-  def splitFriendlyControllerRouteName(friendlyControllerRouteName: String): (String, String) = {
-    val array = friendlyControllerRouteName.split('#')
+  def splitControllerRouteName(controllerRouteName: String): (String, String) = {
+    val array = controllerRouteName.split('#')
     (array(0), array(1))
   }
 
@@ -57,8 +57,8 @@ object ControllerReflection {
     (controller, withRouteMethod)
   }
 
-  def newControllerAndRoute(friendlyControllerRouteName: String): (Controller, Route) = {
-    val (controllerName, routeName) = splitFriendlyControllerRouteName(friendlyControllerRouteName)
+  def newControllerAndRoute(controllerRouteName: String): (Controller, Route) = {
+    val (controllerName, routeName) = splitControllerRouteName(controllerRouteName)
     val routeo = getRouteMethod(controllerName, routeName)
     newControllerAndRoute(routeo.get)
   }

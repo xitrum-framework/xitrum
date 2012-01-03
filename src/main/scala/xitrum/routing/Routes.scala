@@ -53,9 +53,9 @@ object Routes extends Logger {
     var others = ArrayBuffer[(String, String, String)]()
     val lasts  = ArrayBuffer[(String, String, String)]()
     for ((httpMethod, (fs, os, ls)) <- routes) {
-      for (r <- fs) firsts.append((httpMethod.toString, decompiledPattern(r.compiledPattern), ControllerReflection.friendlyControllerRouteName(r)))
-      for (r <- os) others.append((httpMethod.toString, decompiledPattern(r.compiledPattern), ControllerReflection.friendlyControllerRouteName(r)))
-      for (r <- ls) lasts.append ((httpMethod.toString, decompiledPattern(r.compiledPattern), ControllerReflection.friendlyControllerRouteName(r)))
+      for (r <- fs) firsts.append((httpMethod.toString, decompiledPattern(r.compiledPattern), ControllerReflection.controllerRouteName(r)))
+      for (r <- os) others.append((httpMethod.toString, decompiledPattern(r.compiledPattern), ControllerReflection.controllerRouteName(r)))
+      for (r <- ls) lasts.append ((httpMethod.toString, decompiledPattern(r.compiledPattern), ControllerReflection.controllerRouteName(r)))
     }
 
     var all = firsts ++ others ++ lasts
@@ -79,26 +79,26 @@ object Routes extends Logger {
     // This method is only run once on start, speed is not a problem
 
     var actions = ArrayBuffer[(String, Int)]()
-    var actionMaxFriendlyControllerRouteNameLength = 0
+    var actionMaxControllerRouteNameLength = 0
 
     var pages = ArrayBuffer[(String, Int)]()
-    var pageMaxFriendlyControllerRouteNameLength = 0
+    var pageMaxControllerRouteNameLength = 0
 
     for ((httpMethod, (fs, os, ls)) <- routes) {
       val all = fs ++ os ++ ls
       for (r <- all) {
         if (r.cacheSeconds < 0) {
-          val n = ControllerReflection.friendlyControllerRouteName(r)
+          val n = ControllerReflection.controllerRouteName(r)
           actions.append((n, -r.cacheSeconds))
 
           val nLength = n.length
-          if (nLength > actionMaxFriendlyControllerRouteNameLength) actionMaxFriendlyControllerRouteNameLength = nLength
+          if (nLength > actionMaxControllerRouteNameLength) actionMaxControllerRouteNameLength = nLength
         } else if (r.cacheSeconds > 0) {
-          val n = ControllerReflection.friendlyControllerRouteName(r)
+          val n = ControllerReflection.controllerRouteName(r)
           pages.append((n, r.cacheSeconds))
 
           val nLength = n.length
-          if (nLength > pageMaxFriendlyControllerRouteNameLength) pageMaxFriendlyControllerRouteNameLength = nLength
+          if (nLength > pageMaxControllerRouteNameLength) pageMaxControllerRouteNameLength = nLength
         }
       }
     }
@@ -124,14 +124,14 @@ object Routes extends Logger {
 
     if (!actions.isEmpty) {
       actions = actions.sortBy(_._1)
-      val logFormat = "%-" + actionMaxFriendlyControllerRouteNameLength + "s    %s"
+      val logFormat = "%-" + actionMaxControllerRouteNameLength + "s    %s"
       val strings = actions.map { case (n, s) => logFormat.format(n, formatTime(s)) }
       logger.info("Action cache:\n" + strings.mkString("\n"))
     }
 
     if (!pages.isEmpty) {
       pages = pages.sortBy(_._1)
-      val logFormat = "%-" + pageMaxFriendlyControllerRouteNameLength + "s    %s"
+      val logFormat = "%-" + pageMaxControllerRouteNameLength + "s    %s"
       val strings = pages.map { case (n, s) => logFormat.format(n, formatTime(s)) }
       logger.info("Page cache:\n" + strings.mkString("\n"))
     }
@@ -188,7 +188,7 @@ object Routes extends Logger {
       val ys = route.compiledPattern.map { case (token, constant) =>
         "['" + token + "', " + constant + "]"
       }
-      "[[" + ys.mkString(", ") + "], '" + ControllerReflection.friendlyControllerRouteName(route) + "']"
+      "[[" + ys.mkString(", ") + "], '" + ControllerReflection.controllerRouteName(route) + "']"
     }
     "[" + xs.mkString(", ") + "]"
   }

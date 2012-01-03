@@ -12,17 +12,17 @@ object PostbackController extends PostbackController
 
 class PostbackController extends Controller {
   /** Route to this is automatically added by RouteCollector. */
-  val postback = POST("/xitrum/postback/:encryptedFriendlyControllerRouteName") {
+  val postback = POST("/xitrum/postback/:ecr") {
     setPostback(true)
 
-    val encryptedFriendlyControllerRouteName = param("encryptedFriendlyControllerRouteName")
-    SecureBase64.decrypt(encryptedFriendlyControllerRouteName) match {
+    val encryptedControllerRouteName = param("ecr")
+    SecureBase64.decrypt(encryptedControllerRouteName) match {
       case None => throw new SessionExpired
 
       case Some(obj) =>
         if (ValidatorCaller.call(this)) {
-          val friendlyControllerRouteName = obj.asInstanceOf[String]
-          val (_controller, route) = ControllerReflection.newControllerAndRoute(friendlyControllerRouteName)
+          val controllerRouteName = obj.asInstanceOf[String]
+          val (_controller, route) = ControllerReflection.newControllerAndRoute(controllerRouteName)
           forward(route, true)
         } else {
           // Flash the default error message if the response is empty (the validators did not respond anything)

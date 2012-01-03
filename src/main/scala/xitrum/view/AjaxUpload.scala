@@ -157,8 +157,8 @@ trait AjaxUpload {
 }
 
 class AjaxUploadTempFileServerController extends Controller {
-  val serve = GET("xitrum/ajax_uploads/:encryptedTempFilePath") {
-    val encryptedTempFilePath = param("encryptedTempFilePath")
+  val serve = GET("xitrum/ajax_uploads/:etf") {
+    val encryptedTempFilePath = param("etf")
     val tempFilePath          = SecureBase64.decrypt(encryptedTempFilePath).toString
 
     XSendFile.setHeader(response, tempFilePath)

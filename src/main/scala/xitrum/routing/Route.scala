@@ -79,8 +79,8 @@ case class Route(httpMethod: HttpMethod, order: RouteOrder.RouteOrder, compiledP
         ControllerReflection.lookupRouteMethodForRouteWithNullRouteMethod(this)
 
     // routeMethod (thus Route) is not serializable
-    // Use friendlyControllerRouteName instead
-    val encryptedFriendlyControllerRouteName = SecureBase64.encrypt(ControllerReflection.friendlyControllerRouteName(nonNullRouteMethod))
-    PostbackController.postback.url("encryptedFriendlyControllerRouteName" -> encryptedFriendlyControllerRouteName)
+    // Use controllerRouteName instead
+    val encryptedControllerRouteName = SecureBase64.encrypt(ControllerReflection.controllerRouteName(nonNullRouteMethod))
+    PostbackController.postback.url("ecr" -> encryptedControllerRouteName)
   }
 }
