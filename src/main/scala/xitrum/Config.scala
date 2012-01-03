@@ -69,12 +69,6 @@ object Config extends Logger {
 
   //----------------------------------------------------------------------------
 
-  /** 404.html and 500.html is used by default */
-  var action404: Class[_ <: Action] = _
-  var action500: Class[_ <: Action] = _
-
-  //----------------------------------------------------------------------------
-
   /** See bin/runner.sh */
   val isProductionMode = (System.getProperty("xitrum.mode") == "production")
 

@@ -1,38 +1,24 @@
 package xitrum.routing
 
 import java.io.{ByteArrayInputStream, DataInputStream, File}
-import scala.collection.mutable.{ArrayBuffer, Map => MMap}
+import java.lang.reflect.Method
+import java.util.{List => JList}
 
-import javassist.bytecode.ClassFile
-import javassist.bytecode.AnnotationsAttribute
-import javassist.bytecode.annotation.{Annotation, MemberValue, ArrayMemberValue, StringMemberValue, IntegerMemberValue}
-
-import io.netty.handler.codec.http.HttpMethod
+import scala.collection.JavaConversions
 
 import sclasner.{FileEntry, Scanner}
+import javassist.bytecode.{ClassFile, FieldInfo}
 
-import xitrum.{Action, Config, Logger}
-import xitrum.annotation._
+import xitrum.{Config, Logger}
 
-/** Scan all classes to collect routes from annotations. */
+/** Scan all classes to collect routes from controllers. */
 class RouteCollector(cachedFileName: String) extends Logger {
-  // Use String because HttpMethod is not serializable
-  type RouteMap = Map[Class[_ <: Action], (String, Array[Routes.Pattern], Int)]
+  /** @return Action methods grouped by controllers */
+  def fromCacheFileOrRecollect(): Seq[Seq[Method]] = {
+    logger.info("Load " + cachedFileName + "/recollect routes and action/page cache config from cotrollers...")
 
-  object RouteOrder extends Enumeration {
-    type RouteOrder = Value
-    val firsts, lasts, others = Value
-  }
-
-  def fromCacheFileOrAnnotations(): (Array[Routes.Route], Map[Class[_ <: Action], Int]) = {
-    logger.info("Load " + cachedFileName + "/recollect routes and action/page cache config from annotations...")
-
-    val routeBuffer = ArrayBuffer[Routes.Route]()
-    val cacheBuffer = MMap[Class[_ <: Action], Int]()
-
-    val empty = Map[Class[_ <: Action], (String, Array[Routes.Pattern], Int)]()
-    val (firsts, lasts, others) = try {
-      Scanner.foldLeft(cachedFileName, (empty, empty, empty), discovered _)
+    try {
+      Scanner.foldLeft(cachedFileName, Seq[Seq[Method]](), discovered _)
     } catch {
       case e =>
         // Maybe routes.sclasner could not be loaded because dependencies have changed.
@@ -40,9 +26,9 @@ class RouteCollector(cachedFileName: String) extends Logger {
         val f = new File(cachedFileName)
         if (f.exists) {
           logger.warn("Error loading " + cachedFileName + ". Delete the file and recollect routes...")
-          f.delete
+          f.delete()
           try {
-            Scanner.foldLeft(cachedFileName, (empty, empty, empty), discovered _)
+            Scanner.foldLeft(cachedFileName, Seq[Seq[Method]](), discovered _)
           } catch {
             case e2 =>
               Config.exitOnError("Could not collect routes", e2)
@@ -53,51 +39,38 @@ class RouteCollector(cachedFileName: String) extends Logger {
           throw e
         }
     }
-
-    for (map <- Array(firsts, others, lasts)) {
-      val sorted = map.toBuffer.sortWith { (a1, a2) =>
-        a1.toString < a2.toString
-      }
-
-      for ((actionClass, httpMethod_patterns_cacheSecs) <- sorted) {
-        val (httpMethod, patterns, cacheSecs) = httpMethod_patterns_cacheSecs
-        for (p <- patterns) routeBuffer.append((new HttpMethod(httpMethod), p, actionClass))
-
-        if (cacheSecs != 0) cacheBuffer(actionClass) = cacheSecs
-      }
-    }
-
-    (routeBuffer.toArray, cacheBuffer.toMap)
   }
 
   //----------------------------------------------------------------------------
 
-  private def discovered(acc: (RouteMap, RouteMap, RouteMap), entry: FileEntry) = {
+  private def discovered(acc: Seq[Seq[Method]], entry: FileEntry): Seq[Seq[Method]] = {
     try {
       if (entry.relPath.endsWith(".class")) {
         val bais = new ByteArrayInputStream(entry.bytes)
         val dis  = new DataInputStream(bais)
         val cf   = new ClassFile(dis)
-        dis.close
+        dis.close()
 
-        val aa = cf.getAttribute(AnnotationsAttribute.visibleTag).asInstanceOf[AnnotationsAttribute]
-        if (aa == null) {
+        val className  = cf.getName
+        if (className.endsWith("$")) {  // Ignore Scala objects
           acc
         } else {
-          val as = aa.getAnnotations
-          collectRoute(as) match {
-            case None => acc
-
-            case Some((order, httpMethod, routePatterns)) =>
-              val (firsts, lasts, others) = acc
-              val klass                   = Class.forName(cf.getName).asInstanceOf[Class[Action]]
-              val cacheSecs               = collectCache(as)
-              val route                   = (klass -> (httpMethod, routePatterns, cacheSecs))
-              order match {
-                case RouteOrder.firsts => (firsts + route, lasts, others)
-                case RouteOrder.lasts  => (firsts, lasts + route, others)
-                case RouteOrder.others => (firsts, lasts, others + route)
+          val fieldInfoList = cf.getFields.asInstanceOf[JList[FieldInfo]]
+          if (fieldInfoList == null) {
+            acc
+          } else {
+            val routeMethods = JavaConversions.asScalaBuffer(fieldInfoList).foldLeft(Seq[Method]()) { (acc2, fi) =>
+              if (fi.getDescriptor == routeClassDescriptor) {
+                val methodName = fi.getName  // Scala "val" creates method with the same name
+                ControllerReflection.getRouteMethod(className, methodName) match {
+                  case None => acc2
+                  case Some(routeMethod) => acc2 :+ routeMethod
+                }
+              } else {
+                acc2
               }
+            }
+            if (routeMethods.isEmpty) acc else acc :+ routeMethods
           }
         }
       } else {
@@ -110,102 +83,8 @@ class RouteCollector(cachedFileName: String) extends Logger {
     }
   }
 
-  private def collectRoute(as: Array[Annotation]): Option[(RouteOrder.RouteOrder, String, Array[Routes.Pattern])] = {
-    var order                           = RouteOrder.others
-    var method:   String                = null
-    var patterns: Array[Routes.Pattern] = null
-
-    as.foreach { a =>
-      val tn = a.getTypeName
-
-      if (tn == classOf[First].getName) {
-        order = RouteOrder.firsts
-      } else if (tn == classOf[Last].getName) {
-        order = RouteOrder.lasts
-      }
-
-      else if (tn == classOf[GET].getName) {
-        method   = "GET"
-        patterns = getMethodPattern(a)
-      } else if (tn == classOf[GETs].getName) {
-        method   = "GET"
-        patterns = getMethodPatterns(a)
-      }
-
-      else if (tn == classOf[POST].getName) {
-        method   = "POST"
-        patterns = getMethodPattern(a)
-      } else if (tn == classOf[POSTs].getName) {
-        method   = "POST"
-        patterns = getMethodPatterns(a)
-      }
-
-      else if (tn == classOf[PUT].getName) {
-        method   = "PUT"
-        patterns = getMethodPattern(a)
-      } else if (tn == classOf[PUTs].getName) {
-        method   = "PUT"
-        patterns = getMethodPatterns(a)
-      }
-
-      else if (tn == classOf[DELETE].getName) {
-        method   = "DELETE"
-        patterns = getMethodPattern(a)
-      } else if (tn == classOf[DELETEs].getName) {
-        method   = "DELETE"
-        patterns = getMethodPatterns(a)
-      }
-
-      else if (tn == classOf[WEBSOCKET].getName) {
-        method   = "WEBSOCKET"
-        patterns = getMethodPattern(a)
-      } else if (tn == classOf[WEBSOCKETs].getName) {
-        method   = "WEBSOCKET"
-        patterns = getMethodPatterns(a)
-      }
-    }
-
-    if (method != null && patterns != null) Some(order, method, patterns) else None
+  private lazy val routeClassDescriptor = {
+    // Something like "Lxitrum/routing/Route;"
+    "L" + classOf[Route].getName.replace('.', '/') + ";"
   }
-
-  private def getMethodPattern(a: Annotation): Array[String] =
-    Array(a.getMemberValue("value").asInstanceOf[StringMemberValue].getValue)
-
-  private def getMethodPatterns(a: Annotation): Array[String] =
-    a.getMemberValue("value").asInstanceOf[ArrayMemberValue].getValue.map(_.asInstanceOf[StringMemberValue].getValue)
-
-  //----------------------------------------------------------------------------
-
-  private def collectCache(as: Array[Annotation]): Int = {
-    as.foreach { a =>
-      val tn = a.getTypeName
-
-      val secs =
-           if (tn == classOf[CacheActionDay].getName)
-        - getCacheSecs(a) * 24 * 60 * 60
-      else if (tn == classOf[CacheActionHour].getName)
-        - getCacheSecs(a)      * 60 * 60
-      else if (tn == classOf[CacheActionMinute].getName)
-        - getCacheSecs(a)           * 60
-      else if (tn == classOf[CacheActionSecond].getName)
-        - getCacheSecs(a)
-
-      else if (tn == classOf[CachePageDay].getName)
-        getCacheSecs(a) * 24 * 60 * 60
-      else if (tn == classOf[CachePageHour].getName)
-        getCacheSecs(a)      * 60 * 60
-      else if (tn == classOf[CachePageMinute].getName)
-        getCacheSecs(a)           * 60
-      else if (tn == classOf[CachePageSecond].getName)
-        getCacheSecs(a)
-      else
-        0
-
-      if (secs != 0) return secs
-    }
-    0
-  }
-
-  private def getCacheSecs(a: Annotation) =
-    a.getMemberValue("value").asInstanceOf[IntegerMemberValue].getValue
 }

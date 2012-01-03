@@ -4,8 +4,8 @@ import xitrum.scope.request.ExtEnv
 
 trait SessionStore {
   /**
-   * Called only at the firt access to the session. If the action does not use
-   * session, no proccessing is performed.
+   * Called only at the first access to the session. If session is not used,
+   * no proccessing is performed.
    */
   def restore(extEnv: ExtEnv): Session
 

@@ -1,9 +1,12 @@
 package xitrum
 
+import java.lang.reflect.Method
 import java.util.concurrent.TimeUnit
 
 import com.hazelcast.core.{IMap, MapEntry}
 import com.hazelcast.query.Predicate
+
+import xitrum.routing.{Route, Routes, ControllerReflection}
 
 object Cache extends Logger {
   val cache = Config.hazelcastInstance.getMap("xitrum/cache").asInstanceOf[IMap[String, Any]]
@@ -12,9 +15,21 @@ object Cache extends Logger {
     cache.removeAsync(key.toString)
   }
 
-  def pageActionPrefix(actionClass: Class[Action]) = "xitrum/page-action/" + actionClass.getName
+  def removeAction(route: Route) {
+    val keyPrefix = pageActionPrefix(route)
+    removePrefix(keyPrefix)
+  }
 
-  def removePrefix(keyPrefix: Any) {
+  def pageActionPrefix(controller: Controller): String = {
+    val route = controller.handlerEnv.route
+    pageActionPrefix(route)
+  }
+
+  private def pageActionPrefix(route: Route): String = {
+    "xitrum/page-action/" + ControllerReflection.fullFriendlyActionName(route)
+  }
+
+  private def removePrefix(keyPrefix: Any) {
     val keyPrefixS = keyPrefix.toString
     val prefixPredicate = new Predicate[String, Any] {
       def apply(mapEntry: MapEntry[String, Any]) = mapEntry.getKey.startsWith(keyPrefixS)
@@ -26,12 +41,6 @@ object Cache extends Logger {
       val key = it.next
       cache.removeAsync(key)
     }
-  }
-
-  def removeAction[T: Manifest] {
-    val actionClass = manifest[T].erasure.asInstanceOf[Class[Action]]
-    val keyPrefix = pageActionPrefix(actionClass)
-    removePrefix(keyPrefix)
   }
 
   //---------------------------------------------------------------------------

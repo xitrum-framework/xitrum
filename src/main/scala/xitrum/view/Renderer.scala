@@ -11,7 +11,8 @@ import HttpHeaders.Values.CHUNKED
 
 import com.codahale.jerkson.Json
 
-import xitrum.{Action, Config}
+import xitrum.{Controller, Config}
+import xitrum.routing.{Route, Routes}
 import xitrum.handler.down.{XSendFile, XSendResource}
 
 /**
@@ -19,7 +20,7 @@ import xitrum.handler.down.{XSendFile, XSendResource}
  * http://code.google.com/speed/page-speed/docs/rendering.html#SpecifyCharsetEarly
  */
 trait Renderer extends JS with Flash with Knockout with I18n {
-  this: Action =>
+  this: Controller =>
 
   private def writeHeaderOnFirstChunk {
     if (!isResponded) {
@@ -109,14 +110,14 @@ trait Renderer extends JS with Flash with Knockout with I18n {
 
   def layout = renderedView
 
-  def renderView(view: Any) {
-    renderView(view, layout _)
+  def renderInlineView(view: Any) {
+    renderInlineView(view, layout _)
   }
 
   /** Content-Type header is set to "text/html" */
-  def renderView(view: Any, customLayout: () => Any) {
+  def renderInlineView(view: Any, customLayout: () => Any) {
     renderedView = view
-    val renderedLayout = customLayout.apply
+    val renderedLayout = customLayout.apply()
     if (renderedLayout == null)
       renderText(renderedView, "text/html; charset=" + Config.config.request.charset)
     else
@@ -127,33 +128,43 @@ trait Renderer extends JS with Flash with Knockout with I18n {
 
   def renderScalateTemplateToString(path: String) = Scalate.renderFile(this, path)
 
-  def renderScalateTemplateToString(actionClass: Class[_], templateType: String): String = {
-    val path = "src/main/scalate/" + actionClass.getName.replace(".", "/") + "." + templateType
+  def renderScalateTemplateToString(controllerClass: Class[_], templateType: String): String = {
+    val path = "src/main/scalate/" + controllerClass.getName.replace(".", "/") + "." + templateType
     renderScalateTemplateToString(path)
   }
 
-  def renderScalateTemplateToString(actionClass: Class[_]): String = {
-    renderScalateTemplateToString(actionClass, Config.config.scalate)
+  def renderScalateTemplateToString(controllerClass: Class[_]): String = {
+    renderScalateTemplateToString(controllerClass, Config.config.scalate)
   }
 
-  def renderScalateView(templateType: String) {
-    renderScalateView(getClass, templateType)
+  def renderView(templateType: String) {
+    renderView(currentRoute, templateType)
   }
 
-  def renderScalateView() {
-    renderScalateView(getClass, Config.config.scalate)
+  def renderView() {
+    renderView(currentRoute, Config.config.scalate)
   }
 
-  def renderScalateView(actionClass: Class[_], templateType: String) {
-    renderScalateView(actionClass, layout _, templateType)
+  def renderView(route: Route, templateType: String) {
+    renderView(route, layout _, templateType)
   }
 
-  def renderScalateView(actionClass: Class[_]) {
-    renderScalateView(actionClass, layout _, Config.config.scalate)
+  def renderView(route: Route) {
+    renderView(route, layout _, Config.config.scalate)
   }
 
-  def renderScalateView(actionClass: Class[_], customLayout: () => Any, templateType: String) {
-    renderedView = renderScalateTemplateToString(actionClass, templateType)
+  def renderView(route: Route, customLayout: () => Any, templateType: String) {
+    val routeMethod =
+      if (route.routeMethod != null)  // Current route
+        route.routeMethod
+      else                            // Route taken from controller companion object
+        Routes.lookupRouteMethod(route)
+
+    val controllerClass = routeMethod.getDeclaringClass
+    val routeName       = routeMethod.getName
+    val path = "src/main/scalate/" + controllerClass.getName.replace(".", "/") + "/" + routeName + "." + templateType
+
+    renderedView = renderScalateTemplateToString(path)
     val renderedLayout = customLayout.apply
     if (renderedLayout == null)
       renderText(renderedView, "text/html; charset=" + Config.config.request.charset)
@@ -161,8 +172,8 @@ trait Renderer extends JS with Flash with Knockout with I18n {
       renderText(renderedLayout, "text/html; charset=" + Config.config.request.charset)
   }
 
-  def renderScalateView(actionClass: Class[_], customLayout: () => Any) {
-    renderScalateView(actionClass, customLayout, Config.config.scalate)
+  def renderView(route: Route, customLayout: () => Any) {
+    renderView(route, customLayout, Config.config.scalate)
   }
 
   //----------------------------------------------------------------------------

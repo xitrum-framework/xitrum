@@ -16,7 +16,7 @@ object Server extends Logger {
     // letting it start lazily
     Cache.cache.size
 
-    // Routes.fromCacheFileOrAnnotations() should have been called
+    // Routes.fromCacheFileOrRecollect() should have been called
     Routes.printRoutes()
     Routes.printCaches()
 

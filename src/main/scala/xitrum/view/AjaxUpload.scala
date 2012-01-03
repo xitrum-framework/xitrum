@@ -5,16 +5,15 @@ import java.util.UUID
 import scala.xml.Node
 import io.netty.handler.codec.http.FileUpload
 
-import xitrum.Action
-import xitrum.annotation.GET
+import xitrum.Controller
 import xitrum.handler.down.XSendFile
 import xitrum.util.SecureBase64
 
 object AjaxUpload {
-  def ::(elem: Node)(implicit action: Action) = {
+  def ::(elem: Node)(implicit controller: Controller) = {
     val uuid = UUID.randomUUID.toString
     <xml:group>
-      <iframe id={uuid} name={uuid} src={action.urlForPostbackThis} style="display:none; width:1px; height:1px;"></iframe>
+      <iframe id={uuid} name={uuid} src={controller.currentRoute.postbackUrl} style="display:none; width:1px; height:1px;"></iframe>
       <form method="post" enctype="multipart/form-data" target={uuid}>
         {elem}
         <input type="submit" value="Upload" />
@@ -24,10 +23,10 @@ object AjaxUpload {
 }
 
 trait AjaxUpload {
-  this: Action =>
+  this: Controller =>
 
   /**
-   * The upload will be posted back to the current action under fileParam("file").
+   * The upload will be posted back to the current route under fileParam("file").
    *
    * To get the file name set by the browser: fileParam("file").getFileName
    *
@@ -91,7 +90,7 @@ trait AjaxUpload {
   def ajaxUpload = {
     val uuid = UUID.randomUUID.toString
     <xml:group>
-      <iframe id={uuid} name={uuid} src={urlForThis} style="display:none; width:1px; height:1px;"></iframe>
+      <iframe id={uuid} name={uuid} src={currentRoute.url} style="display:none; width:1px; height:1px;"></iframe>
       <form method="post" enctype="multipart/form-data" target={uuid}>
         <input type="file" name="file" />
         <input type="submit" value="Upload" />
@@ -157,9 +156,8 @@ trait AjaxUpload {
   }
 }
 
-@GET("/xitrum/ajax_uploads/:encryptedTempFilePath")
-class AjaxUploadTempFileServerAction extends Action {
-  override def execute {
+class AjaxUploadTempFileServerController extends Controller {
+  val serve = GET("xitrum/ajax_uploads/:encryptedTempFilePath") {
     val encryptedTempFilePath = param("encryptedTempFilePath")
     val tempFilePath          = SecureBase64.decrypt(encryptedTempFilePath).toString
 

@@ -9,7 +9,7 @@ import HttpHeaders.Names._
 import HttpHeaders.Values._
 import HttpResponseStatus._
 
-import xitrum.{Action, Config, Logger}
+import xitrum.{Controller, Config, Logger}
 import xitrum.util.{Base64, Gzip, Loader, LocalLRUCache, Mime}
 
 object Etag extends Logger {
@@ -79,14 +79,14 @@ object Etag extends Logger {
     (request.getHeader(IF_NONE_MATCH) == etag)
 
   /** @return true if NOT_MODIFIED response has been sent */
-  def respondIfEtagsIdentical(action: Action, etag: String) = {
-    val request  = action.request
-    val response = action.response
+  def respondIfEtagsIdentical(controller: Controller, etag: String) = {
+    val request  = controller.request
+    val response = controller.response
     if (areEtagsIdentical(request, etag)) {
       response.setStatus(NOT_MODIFIED)
       HttpHeaders.setContentLength(response, 0)
       response.setContent(ChannelBuffers.EMPTY_BUFFER)
-      action.respond
+      controller.respond
       true
     } else {
       request.setHeader(ETAG, etag)

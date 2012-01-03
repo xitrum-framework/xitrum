@@ -1,9 +1,9 @@
 package xitrum.view
 
-import xitrum.Action
+import xitrum.Controller
 
 trait I18n {
-  this: Action =>
+  this: Controller =>
 
   def t(key: String, args: Any*): String = {
     val msg = key

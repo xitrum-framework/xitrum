@@ -5,7 +5,7 @@ import java.util.{TreeSet => JTreeSet}
 import io.netty.handler.codec.http.{HttpRequest, Cookie, CookieDecoder, CookieEncoder, HttpHeaders}
 import HttpHeaders.Names._
 
-import xitrum.Action
+import xitrum.Controller
 
 class Cookies(request: HttpRequest) extends JTreeSet[Cookie] {
   {
@@ -26,7 +26,7 @@ class Cookies(request: HttpRequest) extends JTreeSet[Cookie] {
   }
 
   /** Used by Xitrum. */
-  def setCookiesWhenRespond(action: Action) {
+  def setCookiesWhenRespond(controller: Controller) {
     val iter = this.iterator
     // http://en.wikipedia.org/wiki/HTTP_cookie
     // Server needs to SET_COOKIE multiple times
@@ -34,7 +34,7 @@ class Cookies(request: HttpRequest) extends JTreeSet[Cookie] {
       val encoder = new CookieEncoder(true)
       val cookie  = iter.next
       encoder.addCookie(cookie)
-      action.response.addHeader(SET_COOKIE, encoder.encode)
+      controller.response.addHeader(SET_COOKIE, encoder.encode)
     }
   }
 }

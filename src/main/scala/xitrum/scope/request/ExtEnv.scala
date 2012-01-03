@@ -1,11 +1,10 @@
 package xitrum.scope.request
 
-import xitrum.Config
-import xitrum.Action
+import xitrum.{Config, Controller}
 import xitrum.scope.session.CSRF
 
 trait ExtEnv extends RequestEnv with ParamAccess with CSRF {
-  this: Action =>
+  this: Controller =>
 
   // Below are lazy because they are not always accessed by framwork/application
   // (to save calculation time) or the things they depend on are null when this
@@ -29,12 +28,12 @@ trait ExtEnv extends RequestEnv with ParamAccess with CSRF {
 
   def sessiono[T](key: String): Option[T] = session.get(key).map(_.asInstanceOf[T])
 
-  def prepareWhenRespond {
+  def prepareWhenRespond() {
     if (sessionTouched) Config.sessionStore.store(session, this)
     if (cookiesTouched) cookies.setCookiesWhenRespond(this)
   }
 
-  def resetSession {
+  def resetSession() {
     session.clear
     cookies.clear  // This will clear the session cookie
   }

@@ -3,16 +3,16 @@ package xitrum
 class RequestVar[T] {
   private val key = this.getClass.getName
 
-  def get(implicit action: Action) = {
-    action.at[T](key)
+  def get(implicit controller: Controller) = {
+    controller.at[T](key)
   }
 
-  def set(value: T)(implicit action: Action) = {
-    action.at(key) = value
+  def set(value: T)(implicit controller: Controller) = {
+    controller.at(key) = value
     value
   }
 
-  def isDefined(implicit action: Action) = {
-    action.at.isDefinedAt(key)
+  def isDefined(implicit controller: Controller) = {
+    controller.at.isDefinedAt(key)
   }
 }

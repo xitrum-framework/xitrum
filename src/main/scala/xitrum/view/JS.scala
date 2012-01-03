@@ -2,14 +2,14 @@ package xitrum.view
 
 import scala.xml.Unparsed
 
-import xitrum.{Action, Config}
-import xitrum.comet.CometGetAction
+import xitrum.{Config, Controller}
+import xitrum.comet.CometGetController
 import xitrum.etag.{Etag, NotModified}
-import xitrum.routing.{Routes, JSRoutesAction}
-import xitrum.validation.Validated
+import xitrum.routing.{Route, Routes, JSRoutesController}
+import xitrum.validator.Validated
 
 trait JS {
-  this: Action =>
+  this: Controller =>
 
   private val buffer = new StringBuilder
 
@@ -61,7 +61,7 @@ trait JS {
     jsRender("window.location.href = " + jsEscape(location))
   }
 
-  def jsRedirectTo[T: Manifest] { jsRedirectTo(urlFor[T]) }
+  def jsRedirectTo(route: Route) { jsRedirectTo(route.url) }
 
   def jsCometGet(channel: String, callback: String) {
     val encryptedChannel       = Validated.secureParamName("channel")
@@ -76,7 +76,7 @@ trait JS {
 
   def jsAtBottom = {
     val validatei18n = if (getLanguage == "en") "" else <script type="text/javascript" src={urlForResource("xitrum/jquery.validate-1.9.0/localization/messages_"+ getLanguage +".js")}></script>
-    val jsRoutesAction = <script type="text/javascript" src={urlFor[JSRoutesAction] + "?" + Etag.forString(Routes.jsRoutes)}></script>
+    val jsRoutesAction = <script type="text/javascript" src={JSRoutesController.serve.url + "?" + Etag.forString(Routes.jsRoutes)}></script>
     val jsForView = if (buffer.isEmpty) "" else <script type="text/javascript">{Unparsed("\n//<![CDATA[\n$(function() {\n" + buffer.toString + "});\n//]]>\n")}</script>
 
     if (Config.isProductionMode)

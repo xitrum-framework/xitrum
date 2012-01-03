@@ -9,7 +9,7 @@ import HttpHeaders.Values.WEBSOCKET
 import HttpMethod.POST
 
 import xitrum.handler.HandlerEnv
-import xitrum.routing.WebSocketHttpMethod
+import xitrum.routing.HttpMethodWebSocket
 
 /**
  * If the real request method is POST and "_method" param exists (taken out by BodyParser),
@@ -33,7 +33,7 @@ class MethodOverrider extends SimpleChannelUpstreamHandler with BadClientSilence
 
     val upgradeHeader = request.getHeader(UPGRADE)
     if (upgradeHeader != null && upgradeHeader.toLowerCase == WEBSOCKET.toLowerCase) {
-      request.setMethod(WebSocketHttpMethod)
+      request.setMethod(HttpMethodWebSocket)
     } else if (method == POST) {
       val _methods = bodyParams.get("_method")
       if (_methods != null && !_methods.isEmpty) {

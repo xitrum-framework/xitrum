@@ -8,7 +8,7 @@ import HttpHeaders.Names._
 import HttpHeaders.Values._
 import HttpResponseStatus._
 
-import xitrum.Action
+import xitrum.Controller
 
 object NotModified {
   private val SECS_IN_A_YEAR = 365 * 24 * 60 * 60
@@ -21,7 +21,7 @@ object NotModified {
     ret
   }
 
-  // See PublicResourceServerAction, JSRoutesAction
+  // See PublicResourceServerController, JSRoutesController
   val serverStartupTimestamp        = System.currentTimeMillis
   val serverStartupTimestampRfc2822 = formatRfc2822(serverStartupTimestamp)
 

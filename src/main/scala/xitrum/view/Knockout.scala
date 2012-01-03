@@ -1,11 +1,11 @@
 package xitrum.view
 
 import com.codahale.jerkson.Json
-import xitrum.Action
+import xitrum.Controller
 
 /** Support for Knockout.js */
 trait Knockout {
-  this: Action =>
+  this: Controller =>
 
   def koApplyBindings(model: Any, syncPath: String, js: String) {
     koApplyBindings(model, null, syncPath, js)

@@ -5,9 +5,9 @@ import io.netty.handler.codec.http.websocketx.{
   CloseWebSocketFrame, PingWebSocketFrame, PongWebSocketFrame, TextWebSocketFrame, WebSocketFrame, WebSocketServerHandshaker
 }
 
-import xitrum.Action
+import xitrum.Controller
 
-class WebSocketDispatcher(handshaker: WebSocketServerHandshaker, action: Action) extends SimpleChannelUpstreamHandler with BadClientSilencer {
+class WebSocketDispatcher(handshaker: WebSocketServerHandshaker, controller: Controller) extends SimpleChannelUpstreamHandler with BadClientSilencer {
   override def messageReceived(ctx: ChannelHandlerContext, e: MessageEvent) {
     val m = e.getMessage
     if (!m.isInstanceOf[WebSocketFrame]) {
@@ -19,7 +19,7 @@ class WebSocketDispatcher(handshaker: WebSocketServerHandshaker, action: Action)
 
     if (frame.isInstanceOf[CloseWebSocketFrame]) {
       handshaker.performClosingHandshake(ctx.getChannel, frame.asInstanceOf[CloseWebSocketFrame])
-      action.onWebSocketClose
+      controller.onWebSocketClose()
       return
     }
 
@@ -35,7 +35,7 @@ class WebSocketDispatcher(handshaker: WebSocketServerHandshaker, action: Action)
     }
 
     val text = frame.asInstanceOf[TextWebSocketFrame].getText
-    action.onWebSocketFrame(text)
+    controller.onWebSocketFrame(text)
   }
 }
 

@@ -5,7 +5,8 @@ import scala.collection.mutable.{HashMap => MHashMap}
 import io.netty.channel.Channel
 import io.netty.handler.codec.http.{HttpRequest, HttpResponse}
 
-import xitrum.Action
+import xitrum.Controller
+import xitrum.routing.Route
 import xitrum.scope.request.{FileUploadParams, Params, PathInfo}
 
 /**
@@ -18,12 +19,16 @@ class HandlerEnv extends MHashMap[String, Any] {
   var request:          HttpRequest      = null  // Set by Request2Env
   var response:         HttpResponse     = null  // Set before the response is sent to client
 
-  var pathInfo:         PathInfo         = null  // Set by UriParser
-  var uriParams:        Params           = null  // Set by UriParser
+  // Set by UriParser
+  var pathInfo:         PathInfo         = null
+  var uriParams:        Params           = null
 
-  var bodyParams:       Params           = null  // Set by BodyParser
-  var fileUploadParams: FileUploadParams = null  // Set by BodyParser, the filename has been sanitized for insecure character
+  // Set by BodyParser
+  var bodyParams:       Params           = null
+  var fileUploadParams: FileUploadParams = null  // The filename has been sanitized for insecure character
 
-  var action:           Action           = null  // Set by Dispatcher's dispatchWithFailsafe
-  var pathParams:       Params           = null  // Set by Dispatcher, the above 3 are real from the request, this one is logical from the route
+  // Set by Dispatcher
+  var route:            Route            = null
+  var pathParams:       Params           = null  // The above params are real from the request, this one is logical from the route
+  var controller:       Controller       = null
 }

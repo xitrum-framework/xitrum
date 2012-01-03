@@ -1,13 +1,13 @@
 package xitrum.view
 
-import xitrum.Action
+import xitrum.Controller
 
 object Flash {
   val FLASH_KEY = "_flash"
 }
 
 trait Flash {
-  this: Action =>
+  this: Controller =>
 
   import Flash._
 
@@ -35,7 +35,7 @@ trait Flash {
 
   /**
    * For web 2.0 style application.
-   * Used in postback action to send a message to flash area right away.
+   * Used in postbacks to send a message to flash area right away.
    */
   def jsFlash(msg: Any) = "xitrum.flash(" + jsEscape(msg) + ")"
 

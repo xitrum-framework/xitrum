@@ -4,7 +4,7 @@ import scala.collection.mutable.{Map => MMap}
 
 import io.netty.handler.codec.http.DefaultCookie
 
-import xitrum.{Action, Config}
+import xitrum.Config
 import xitrum.scope.request.ExtEnv
 import xitrum.util.SecureBase64
 

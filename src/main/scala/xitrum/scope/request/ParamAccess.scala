@@ -2,11 +2,11 @@ package xitrum.scope.request
 
 import io.netty.handler.codec.http.FileUpload
 
-import xitrum.Action
+import xitrum.Controller
 import xitrum.exception.MissingParam
 
 trait ParamAccess {
-  this: Action =>
+  this: Controller =>
 
   //----------------------------------------------------------------------------
 
@@ -14,12 +14,12 @@ trait ParamAccess {
 
   sealed class DefaultsTo[A, B]
 
-  trait LowPriorityDefaultsTo { 
-    implicit def overrideDefault[A, B] = new DefaultsTo[A, B] 
-  } 
+  trait LowPriorityDefaultsTo {
+    implicit def overrideDefault[A, B] = new DefaultsTo[A, B]
+  }
 
-  object DefaultsTo extends LowPriorityDefaultsTo { 
-    implicit def default[B] = new DefaultsTo[B, B] 
+  object DefaultsTo extends LowPriorityDefaultsTo {
+    implicit def default[B] = new DefaultsTo[B, B]
   }
 
   //----------------------------------------------------------------------------
@@ -53,7 +53,7 @@ trait ParamAccess {
       fileUploadParams.get(key) match {
         case None         => throw new MissingParam(key)
         case Some(values) => values.asInstanceOf[List[T]]
-      } 
+      }
     } else {
       val coll2  = if (coll == null) textParams else coll
       val values = if (coll2.contains(key)) coll2.apply(key) else throw new MissingParam(key)
