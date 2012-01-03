@@ -15,6 +15,7 @@
 * Remove all annotations
 * Put related actions into controller
 * Add Knockout.js
+* Update jQuery from 1.6.4 to 1.7.1
 * Add Scala delimited continuation
   See:
     http://www.earldouglas.com/continuation-based-web-workflows-part-two/

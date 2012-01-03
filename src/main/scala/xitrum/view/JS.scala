@@ -81,7 +81,7 @@ trait JS {
 
     if (Config.isProductionMode)
       <xml:group>
-        <script type="text/javascript" src={urlForResource("xitrum/jquery-1.6.4.min.js")}></script>
+        <script type="text/javascript" src={urlForResource("xitrum/jquery-1.7.1.min.js")}></script>
         <script type="text/javascript" src={urlForResource("xitrum/jquery.validate-1.9.0/jquery.validate.min.js")}></script>
         <script type="text/javascript" src={urlForResource("xitrum/jquery.validate-1.9.0/additional-methods.min.js")}></script>
         {validatei18n}
@@ -93,7 +93,7 @@ trait JS {
       </xml:group>
     else
       <xml:group>
-        <script type="text/javascript" src={urlForResource("xitrum/jquery-1.6.4.js")}></script>
+        <script type="text/javascript" src={urlForResource("xitrum/jquery-1.7.1.js")}></script>
         <script type="text/javascript" src={urlForResource("xitrum/jquery.validate-1.9.0/jquery.validate.js")}></script>
         <script type="text/javascript" src={urlForResource("xitrum/jquery.validate-1.9.0/additional-methods.js")}></script>
         {validatei18n}
