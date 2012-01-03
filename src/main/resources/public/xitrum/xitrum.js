@@ -73,8 +73,17 @@ var xitrum = {
       type: "POST",
       url: action,
       data: data,
-      error: function() {
-        alert("Could not connect to server or server error.");
+      error: function(jqxhr) {
+        var contentType = jqxhr.getResponseHeader('Content-Type');
+        if (contentType && contentType.indexOf('javascript') != -1) {
+          try {
+            eval(jqxhr.responseText);
+          } catch (err) {
+            alert("Could not connect to server or server error.");
+          }
+        } else {
+          alert("Could not connect to server or server error.");
+        }
       },
       complete: function() {
         target1.show();

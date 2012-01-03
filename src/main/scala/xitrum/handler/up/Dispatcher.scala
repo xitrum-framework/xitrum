@@ -74,7 +74,7 @@ object Dispatcher extends Logger {
           } else if (e.isInstanceOf[MissingParam]) {
             val mp  = e.asInstanceOf[MissingParam]
             val key = mp.key
-            "Missing Param: " + key
+            "Missing param: " + key
           }
           if (controller.isAjax)
             controller.jsRender("alert(" + controller.jsEscape(msg) + ")")
