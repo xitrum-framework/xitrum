@@ -7,7 +7,7 @@ import io.netty.handler.codec.http.{HttpMethod, QueryStringEncoder}
 import xitrum.{Controller, Config, Logger}
 import xitrum.scope.request.{Params, PathInfo}
 
-object Routes extends Logger with ActionPageCacheApi with RouteApi {
+object Routes extends Logger {
   type First_Other_Last = (ArrayBuffer[Route], ArrayBuffer[Route], ArrayBuffer[Route])
 
   /**
