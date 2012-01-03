@@ -88,16 +88,14 @@ object Dispatcher extends Logger {
               controller.response.setStatus(INTERNAL_SERVER_ERROR)
               controller.jsRender("alert(" + controller.jsEscape("Internal Server Error") + ")")
             } else {
-              if (Routes.error500 == null) {
+              if (Routes.error500 == null || Routes.error500 == route) {
                 val response = new DefaultHttpResponse(HTTP_1_1, INTERNAL_SERVER_ERROR)
                 XSendFile.set500Page(response)
                 env.response = response
                 env.channel.write(env)
               } else {
                 controller.response.setStatus(INTERNAL_SERVER_ERROR)
-
-                // FIXME
-                //controller.forward(Config.route500, false)
+                dispatchWithFailsafe(Routes.error500, env, false)
               }
             }
           } else {
