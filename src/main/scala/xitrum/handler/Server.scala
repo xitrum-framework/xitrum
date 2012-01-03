@@ -18,7 +18,7 @@ object Server extends Logger {
 
     // Routes.fromCacheFileOrRecollect() should have been called
     Routes.printRoutes()
-    Routes.printCaches()
+    Routes.printActionPageCaches()
 
     if (Config.config.http.isDefined)  start(false)
     if (Config.config.https.isDefined) start(true)

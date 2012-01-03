@@ -66,19 +66,75 @@ object Routes extends Logger with ActionPageCacheApi with RouteApi {
       val pmax2 = if (pmax < plen) plen else pmax
       (mmax2, pmax2)
     }
-    val logFormat = "%-" + methodHttpMaxLength + "s %-" + patternMaxLength + "s %s"
+    val logFormat = "%-" + methodHttpMaxLength + "s    %-" + patternMaxLength + "s    %s"
 
     others = others.sortBy(_._3)
     all = firsts ++ others ++ lasts
 
     val strings = all.map { case (m, p, cr) => logFormat.format(m, p, cr) }
-    logger.info("Routes:\n" + strings.mkString("\n"))
+    logger.info("Route:\n" + strings.mkString("\n"))
   }
 
-  def printCaches() {
+  def printActionPageCaches() {
     // This method is only run once on start, speed is not a problem
 
-    logger.info("Caches: FIXME")
+    var actions = ArrayBuffer[(String, Int)]()
+    var actionMaxFriendlyControllerRouteNameLength = 0
+
+    var pages = ArrayBuffer[(String, Int)]()
+    var pageMaxFriendlyControllerRouteNameLength = 0
+
+    for ((httpMethod, (fs, os, ls)) <- routes) {
+      val all = fs ++ os ++ ls
+      for (r <- all) {
+        if (r.cacheSeconds < 0) {
+          val n = ControllerReflection.friendlyControllerRouteName(r)
+          actions.append((n, -r.cacheSeconds))
+
+          val nLength = n.length
+          if (nLength > actionMaxFriendlyControllerRouteNameLength) actionMaxFriendlyControllerRouteNameLength = nLength
+        } else if (r.cacheSeconds > 0){
+          val n = ControllerReflection.friendlyControllerRouteName(r)
+          pages.append((n, r.cacheSeconds))
+
+          val nLength = n.length
+          if (nLength > pageMaxFriendlyControllerRouteNameLength) pageMaxFriendlyControllerRouteNameLength = nLength
+        }
+      }
+    }
+
+    def formatTime(seconds: Int): String = {
+      if (seconds < 60) {
+        "%d [sec]".format(seconds)
+      } else {
+        val minutes = seconds / 60
+        if (minutes < 60) {
+          "%d [min]".format(minutes)
+        } else {
+          val hours = minutes / 60
+          if (hours < 24) {
+            "%d [h]".format(hours)
+          } else {
+            val days = hours / 24
+            "%d [d]".format(days)
+          }
+        }
+      }
+    }
+
+    if (!actions.isEmpty) {
+      actions = actions.sortBy(_._1)
+      val logFormat = "%-" + actionMaxFriendlyControllerRouteNameLength + "s    %s"
+      val strings = actions.map { case (n, s) => logFormat.format(n, formatTime(s)) }
+      logger.info("Action cache:\n" + strings.mkString("\n"))
+    }
+
+    if (!pages.isEmpty) {
+      pages = pages.sortBy(_._1)
+      val logFormat = "%-" + pageMaxFriendlyControllerRouteNameLength + "s    %s"
+      val strings = pages.map { case (n, s) => logFormat.format(n, formatTime(s)) }
+      logger.info("Page cache:\n" + strings.mkString("\n"))
+    }
   }
 
   //----------------------------------------------------------------------------

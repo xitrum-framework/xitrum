@@ -37,6 +37,18 @@ case class Route(httpMethod: HttpMethod, order: RouteOrder.RouteOrder, compiledP
   def GET(pattern: String = "")(body: => Unit) =
     Route(HttpMethod.GET, order, Routes.compilePattern(withPathPrefix(pattern)), () => body, routeMethod, cacheSeconds)
 
+  def POST(pattern: String = "")(body: => Unit) =
+    Route(HttpMethod.POST, order, Routes.compilePattern(withPathPrefix(pattern)), () => body, routeMethod, cacheSeconds)
+
+  def PUT(pattern: String = "")(body: => Unit) =
+    Route(HttpMethod.PUT, order, Routes.compilePattern(withPathPrefix(pattern)), () => body, routeMethod, cacheSeconds)
+
+  def DELETE(pattern: String = "")(body: => Unit) =
+    Route(HttpMethod.DELETE, order, Routes.compilePattern(withPathPrefix(pattern)), () => body, routeMethod, cacheSeconds)
+
+  def WEBSOCKET(pattern: String = "")(body: => Unit) =
+    Route(HttpMethodWebSocket, order, Routes.compilePattern(withPathPrefix(pattern)), () => body, routeMethod, cacheSeconds)
+
   //----------------------------------------------------------------------------
 
   def url(params: (String, Any)*) = {
