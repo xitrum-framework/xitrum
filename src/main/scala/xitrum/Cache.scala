@@ -25,9 +25,8 @@ object Cache extends Logger {
     pageActionPrefix(route)
   }
 
-  private def pageActionPrefix(route: Route): String = {
-    "xitrum/page-action/" + ControllerReflection.fullFriendlyActionName(route)
-  }
+  private def pageActionPrefix(route: Route): String =
+    "xitrum/page-action/" + ControllerReflection.friendlyControllerRouteName(route)
 
   private def removePrefix(keyPrefix: Any) {
     val keyPrefixS = keyPrefix.toString

@@ -47,25 +47,44 @@ object Routes extends Logger with ActionPageCacheApi with RouteApi {
   //----------------------------------------------------------------------------
 
   def printRoutes() {
-    logger.info("Routes:\n" + routes)
+    // This method is only run once on start, speed is not a problem
 
-    for ((httpMethod, (firsts, others, lasts)) <- routes) {
-      println(httpMethod)
-      for (route <- firsts ++ others ++ lasts) {
-      val pattern = decompiledPattern(route.compiledPattern)
-        println(pattern + " " + ControllerReflection.fullFriendlyActionName(route))
-      }
+    val firsts = ArrayBuffer[(String, String, String)]()
+    var others = ArrayBuffer[(String, String, String)]()
+    val lasts  = ArrayBuffer[(String, String, String)]()
+    for ((httpMethod, (fs, os, ls)) <- routes) {
+      for (r <- fs) firsts.append((httpMethod.toString, decompiledPattern(r.compiledPattern), ControllerReflection.friendlyControllerRouteName(r)))
+      for (r <- os) others.append((httpMethod.toString, decompiledPattern(r.compiledPattern), ControllerReflection.friendlyControllerRouteName(r)))
+      for (r <- ls) lasts.append ((httpMethod.toString, decompiledPattern(r.compiledPattern), ControllerReflection.friendlyControllerRouteName(r)))
     }
+
+    var all = firsts ++ others ++ lasts
+    val (methodHttpMaxLength, patternMaxLength) = all.foldLeft((0, 0)) { case ((mmax, pmax), (m, p, _)) =>
+      val mlen  = m.length
+      val plen  = p.length
+      val mmax2 = if (mmax < mlen) mlen else mmax
+      val pmax2 = if (pmax < plen) plen else pmax
+      (mmax2, pmax2)
+    }
+    val logFormat = "%-" + methodHttpMaxLength + "s %-" + patternMaxLength + "s %s"
+
+    others = others.sortBy(_._3)
+    all = firsts ++ others ++ lasts
+
+    val strings = all.map { case (m, p, cr) => logFormat.format(m, p, cr) }
+    logger.info("Routes:\n" + strings.mkString("\n"))
   }
 
   def printCaches() {
+    // This method is only run once on start, speed is not a problem
+
     logger.info("Caches: FIXME")
   }
 
   //----------------------------------------------------------------------------
 
   def fromCacheFileOrRecollect() {
-    val routeCollector                    = new RouteCollector("routes.sclasner")
+    val routeCollector                   = new RouteCollector("routes.sclasner")
     val routeMethodsGroupedByControllers = routeCollector.fromCacheFileOrRecollect()
 
     routeMethodsGroupedByControllers.foreach { routeMethods =>
@@ -116,6 +135,8 @@ object Routes extends Logger with ActionPageCacheApi with RouteApi {
   //----------------------------------------------------------------------------
 
   def matchRoute(httpMethod: HttpMethod, pathInfo: PathInfo): Option[(Route, Params)] = {
+    // This method is only run for every request, speed is a problem
+
     if (!routes.isDefinedAt(httpMethod)) return None
 
     val tokens = pathInfo.tokens

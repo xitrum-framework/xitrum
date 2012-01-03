@@ -9,7 +9,7 @@ object ControllerReflection {
   private val classResolver = ClassResolvers.softCachingResolver(getClass.getClassLoader)
 
   /** @return controller#route */
-  def fullFriendlyActionName(route: Route) = {
+  def friendlyControllerRouteName(route: Route) = {
     val routeMethod         = route.routeMethod
     val controllerClassName = routeMethod.getDeclaringClass.getName
     val routeName           = routeMethod.getName

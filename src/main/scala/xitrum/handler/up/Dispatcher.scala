@@ -154,7 +154,7 @@ object Dispatcher extends Logger {
       val dt           = endTimestamp - beginTimestamp
       val env          = controller.handlerEnv
 
-      (if (postback) "POSTBACK" else controller.request.getMethod) + " " + ControllerReflection.fullFriendlyActionName(controller.handlerEnv.route)                        +
+      (if (postback) "POSTBACK" else controller.request.getMethod) + " " + ControllerReflection.friendlyControllerRouteName(controller.handlerEnv.route)                   +
       (if (!env.uriParams.isEmpty)        ", uriParams: "        + RequestEnv.inspectParamsWithFilter(env.uriParams       .asInstanceOf[MMap[String, List[Any]]]) else "") +
       (if (!env.bodyParams.isEmpty)       ", bodyParams: "       + RequestEnv.inspectParamsWithFilter(env.bodyParams      .asInstanceOf[MMap[String, List[Any]]]) else "") +
       (if (!env.pathParams.isEmpty)       ", pathParams: "       + RequestEnv.inspectParamsWithFilter(env.pathParams      .asInstanceOf[MMap[String, List[Any]]]) else "") +
