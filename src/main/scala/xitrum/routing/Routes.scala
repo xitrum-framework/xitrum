@@ -178,16 +178,19 @@ object Routes extends Logger {
 
   /** For use from browser */
   lazy val jsRoutes = {
-    "FIXME"
-    /*
-    val xs = compiledRoutes.map { case (_, compiledPattern, routeMethod) =>
-      val ys = compiledPattern.map { case (token, constant) =>
+    val routeArray = ArrayBuffer[Route]()
+    for ((httpMethod, (firsts, others, lasts)) <- routes) {
+      val all = firsts ++ others ++ lasts
+      routeArray.appendAll(all)
+    }
+
+    val xs = routeArray.map { route =>
+      val ys = route.compiledPattern.map { case (token, constant) =>
         "['" + token + "', " + constant + "]"
       }
-      "[[" + ys.mkString(", ") + "], '" + routeMethod.getName + "']"
+      "[[" + ys.mkString(", ") + "], '" + ControllerReflection.friendlyControllerRouteName(route) + "']"
     }
     "[" + xs.mkString(", ") + "]"
-    */
   }
 
   //----------------------------------------------------------------------------
