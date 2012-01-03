@@ -8,7 +8,7 @@ import xitrum.scope.request.Params
 object CometGetController extends CometGetController
 
 class CometGetController extends Controller {
-  val postback = POSTBACK {
+  val postback = indirectRoute {
     val channel       = param("channel")
     val lastTimestamp = param[Long]("lastTimestamp")
 

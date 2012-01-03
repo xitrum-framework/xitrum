@@ -12,9 +12,7 @@ import xitrum.validator.{Validator, ValidatorInjector}
 import xitrum.view.Renderer
 
 trait Controller extends ExtEnv with RouteFactory with Logger with Net with Filter with BasicAuthentication with WebSocket with Redirect with UrlFor with Renderer with I18n {
-  private var _pathPrefix = ""
-  def pathPrefix(prefix: String) { _pathPrefix = prefix }
-  def pathPrefix = _pathPrefix
+  var pathPrefix = ""
 
   //----------------------------------------------------------------------------
 

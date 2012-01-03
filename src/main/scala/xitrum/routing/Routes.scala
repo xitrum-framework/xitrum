@@ -18,8 +18,8 @@ object Routes extends Logger with ActionPageCacheApi with RouteApi {
   val routes = MMap[HttpMethod, First_Other_Last]()
 
   /** 404.html and 500.html is used by default */
-  var route404: Route = _
-  var route500: Route = _
+  var error404: Route = _
+  var error500: Route = _
 
   //----------------------------------------------------------------------------
 
@@ -93,7 +93,7 @@ object Routes extends Logger with ActionPageCacheApi with RouteApi {
 
           val nLength = n.length
           if (nLength > actionMaxFriendlyControllerRouteNameLength) actionMaxFriendlyControllerRouteNameLength = nLength
-        } else if (r.cacheSeconds > 0){
+        } else if (r.cacheSeconds > 0) {
           val n = ControllerReflection.friendlyControllerRouteName(r)
           pages.append((n, r.cacheSeconds))
 
@@ -148,7 +148,7 @@ object Routes extends Logger with ActionPageCacheApi with RouteApi {
       val controller      = controllerClass.newInstance()
       routeMethods.foreach { routeMethod =>
         val route = routeMethod.invoke(controller).asInstanceOf[Route]
-        if (route.body != null) {
+        if (route.httpMethod != null) {
           val withRouteMethod = Route(route.httpMethod, route.order, route.compiledPattern, route.body, routeMethod, route.cacheSeconds)
 
           val firsts_others_lasts =
@@ -171,8 +171,6 @@ object Routes extends Logger with ActionPageCacheApi with RouteApi {
       }
     }
   }
-
-  def lookupRouteMethod(route: Route): Method = null  // FIXME
 
   /** For use from browser */
   lazy val jsRoutes = {

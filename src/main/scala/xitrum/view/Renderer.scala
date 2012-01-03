@@ -12,7 +12,7 @@ import HttpHeaders.Values.CHUNKED
 import com.codahale.jerkson.Json
 
 import xitrum.{Controller, Config}
-import xitrum.routing.{Route, Routes}
+import xitrum.routing.{Route, ControllerReflection}
 import xitrum.handler.down.{XSendFile, XSendResource}
 
 /**
@@ -157,8 +157,8 @@ trait Renderer extends JS with Flash with Knockout with I18n {
     val routeMethod =
       if (route.routeMethod != null)  // Current route
         route.routeMethod
-      else                            // Route taken from controller companion object
-        Routes.lookupRouteMethod(route)
+      else                            // Route from controller companion object has null routeMethod
+        ControllerReflection.lookupRouteMethodForRouteWithNullRouteMethod(route)
 
     val controllerClass = routeMethod.getDeclaringClass
     val routeName       = routeMethod.getName

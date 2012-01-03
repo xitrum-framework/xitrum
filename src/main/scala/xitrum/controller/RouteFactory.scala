@@ -34,6 +34,14 @@ trait RouteFactory {
 
   //----------------------------------------------------------------------------
 
+  /**
+   * Creates route which is not for direct routing for HTTP client,
+   * like postback, 404 or 500 error handler.
+   */
+  def indirectRoute(body: => Unit) = Route(null, null, null, () => body, null, 0)
+
+  //----------------------------------------------------------------------------
+
   // first and last should be lazy val or def so that they are run after
   // pathPrefix has been set
 
@@ -70,8 +78,6 @@ trait RouteFactory {
 
   def WEBSOCKET(pattern: String = "")(body: => Unit) =
     Route(HttpMethodWebSocket, RouteOrder.OTHER, Routes.compilePattern(withPathPrefix(pattern)), () => body, null, 0)
-
-  def POSTBACK(body: => Unit) = Route(HttpMethod.POST, RouteOrder.OTHER, null, () => body, null, 0)
 }
 
 object PathPrefix {

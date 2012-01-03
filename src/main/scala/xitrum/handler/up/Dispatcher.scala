@@ -24,7 +24,7 @@ object Dispatcher extends Logger {
     val beginTimestamp = System.currentTimeMillis
     var hit            = false
 
-    val (controller, withRouteMethod) = ControllerReflection.newControllerAndRoute(route.routeMethod)
+    val (controller, withRouteMethod) = ControllerReflection.newControllerAndRoute(route)
     controller(env)
     controller.setPostback(postback)
 
@@ -88,7 +88,7 @@ object Dispatcher extends Logger {
               controller.response.setStatus(INTERNAL_SERVER_ERROR)
               controller.jsRender("alert(" + controller.jsEscape("Internal Server Error") + ")")
             } else {
-              if (Routes.route500 == null) {
+              if (Routes.error500 == null) {
                 val response = new DefaultHttpResponse(HTTP_1_1, INTERNAL_SERVER_ERROR)
                 XSendFile.set500Page(response)
                 env.response = response
@@ -205,7 +205,7 @@ class Dispatcher extends SimpleChannelUpstreamHandler with BadClientSilencer {
         dispatchWithFailsafe(route, env, false)
 
       case None =>
-        if (Routes.route404 == null) {
+        if (Routes.error404 == null) {
           val response = new DefaultHttpResponse(HTTP_1_1, NOT_FOUND)
           XSendFile.set404Page(response)
           env.response = response
@@ -213,7 +213,7 @@ class Dispatcher extends SimpleChannelUpstreamHandler with BadClientSilencer {
         } else {
           env.pathParams = MMap.empty
           env.response.setStatus(NOT_FOUND)
-          dispatchWithFailsafe(Routes.route404, env, false)
+          dispatchWithFailsafe(Routes.error404, env, false)
         }
     }
   }
