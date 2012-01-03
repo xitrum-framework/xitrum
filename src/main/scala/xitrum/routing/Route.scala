@@ -75,7 +75,7 @@ case class Route(httpMethod: HttpMethod, order: RouteOrder.RouteOrder, compiledP
     val nonNullRouteMethod =
       if (routeMethod != null)  // Current route
         routeMethod
-      else                            // Route from controller companion object has null routeMethod
+      else                      // Route from controller companion object has null routeMethod
         ControllerReflection.lookupRouteMethodForRouteWithNullRouteMethod(this)
 
     // routeMethod (thus Route) is not serializable
