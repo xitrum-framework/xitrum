@@ -7,16 +7,20 @@ import xitrum.scope.request.Params
 
 object ValidatorCaller {
   def call(controller: Controller): Boolean = {
-    // Params in URL are not allowed for security because we only check bodyParams
-    controller.handlerEnv.uriParams.clear
-    controller.handlerEnv.pathParams.clear
+    // Params in URL are not allowed for security, we only check bodyParams
+    controller.handlerEnv.uriParams.clear()
+    controller.handlerEnv.pathParams.clear()
 
-    val (bodyParams, name_secureParamName_validators) = takeoutValidators(controller.handlerEnv.bodyParams)
+    val (bodyParams, paramName_secureParamName_validators) = takeoutValidators(controller.handlerEnv.bodyParams)
 
-    controller.handlerEnv.bodyParams.clear
+    controller.handlerEnv.bodyParams.clear()
     controller.handlerEnv.bodyParams ++= bodyParams
 
-    for ((paramName, secureParamName, validators) <- name_secureParamName_validators) {
+    // See note at textParams
+    controller.textParams.clear()
+    controller.textParams ++= bodyParams
+
+    for ((paramName, secureParamName, validators) <- paramName_secureParamName_validators) {
       for (v <- validators) {
         if (!v.validate(controller, paramName, secureParamName)) return false
       }

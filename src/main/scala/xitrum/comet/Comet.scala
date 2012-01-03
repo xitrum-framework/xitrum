@@ -54,7 +54,7 @@ object Comet {
   //----------------------------------------------------------------------------
 
   def publish(channel: String, message: Params) {
-    val timestamp = System.currentTimeMillis
+    val timestamp = System.currentTimeMillis()
     val cm        = new CometMessage(channel, timestamp, message)
     map.put(timestamp, cm, TTL_SECONDS, TimeUnit.SECONDS)
   }

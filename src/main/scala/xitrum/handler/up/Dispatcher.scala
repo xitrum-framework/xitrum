@@ -21,7 +21,7 @@ import xitrum.scope.session.CSRF
 
 object Dispatcher extends Logger {
   def dispatchWithFailsafe(route: Route, env: HandlerEnv, postback: Boolean) {
-    val beginTimestamp = System.currentTimeMillis
+    val beginTimestamp = System.currentTimeMillis()
     var hit            = false
 
     val (controller, withRouteMethod) = ControllerReflection.newControllerAndRoute(route)
@@ -60,7 +60,7 @@ object Dispatcher extends Logger {
     } catch {
       case e =>
         // End timestamp
-        val t2 = System.currentTimeMillis
+        val t2 = System.currentTimeMillis()
 
         // These exceptions are special cases:
         // We know that the exception is caused by the client (bad request)
@@ -95,7 +95,7 @@ object Dispatcher extends Logger {
                 env.channel.write(env)
               } else {
                 controller.response.setStatus(INTERNAL_SERVER_ERROR)
-                dispatchWithFailsafe(Routes.error500, env, false)
+                controller.forward(Routes.error500, false)
               }
             }
           } else {
@@ -144,11 +144,10 @@ object Dispatcher extends Logger {
 
   private def logAccess(controller: Controller, postback: Boolean, beginTimestamp: Long, cacheSecs: Int, hit: Boolean, e: Throwable = null) {
     // PostbackAction is a gateway, skip it to avoid noisy log if there is no error
-    // FIXME
-    //if (controller.isInstanceOf[PostbackController$] && e == null) return
+    if (controller.isInstanceOf[PostbackController] && e == null) return
 
     def msgWithTime = {
-      val endTimestamp = System.currentTimeMillis
+      val endTimestamp = System.currentTimeMillis()
       val dt           = endTimestamp - beginTimestamp
       val env          = controller.handlerEnv
 

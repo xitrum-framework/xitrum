@@ -17,7 +17,7 @@ not be run.
   @GET("/before_filter")
   class MyAction extends Action {
     val myFilter = { () =>
-      logger.info("Run at " + System.currentTimeMillis)
+      logger.info("Run at " + System.currentTimeMillis())
       true
     }
 
@@ -88,7 +88,7 @@ They are functions that take no argument. Their return value will be ignored.
     }
 
     afterFilter { () =>
-      logger.info("Run at " + System.currentTimeMillis)
+      logger.info("Run at " + System.currentTimeMillis())
     }
   }
 
@@ -105,9 +105,9 @@ Around filters
   @GET("/around_filter")
   class MyAction extends Action {
     aroundFilter { executeOrPostback =>
-      val begin = System.currentTimeMillis
+      val begin = System.currentTimeMillis()
       executeOrPostback()
-      val end   = System.currentTimeMillis
+      val end   = System.currentTimeMillis()
       logger.info("The action took " + (end - begin) + " [ms]")
     }
 

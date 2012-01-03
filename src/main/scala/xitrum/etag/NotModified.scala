@@ -22,7 +22,7 @@ object NotModified {
   }
 
   // See PublicResourceServerController, JSRoutesController
-  val serverStartupTimestamp        = System.currentTimeMillis
+  val serverStartupTimestamp        = System.currentTimeMillis()
   val serverStartupTimestampRfc2822 = formatRfc2822(serverStartupTimestamp)
 
   def formatRfc2822(timestamp: Long) = rfc2822.format(timestamp)
@@ -48,7 +48,7 @@ object NotModified {
     // Note that SECS_IN_A_YEAR * 1000 is different from SECS_IN_A_YEAR * 1000l
     // because of integer overflow!
     if (!response.containsHeader(EXPIRES))
-      response.setHeader(EXPIRES, formatRfc2822(System.currentTimeMillis + SECS_IN_A_YEAR * 1000l))
+      response.setHeader(EXPIRES, formatRfc2822(System.currentTimeMillis() + SECS_IN_A_YEAR * 1000l))
   }
 
   def removeClientCache(response: HttpResponse) {

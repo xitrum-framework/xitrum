@@ -154,14 +154,14 @@ trait Renderer extends JS with Flash with Knockout with I18n {
   }
 
   def renderView(route: Route, customLayout: () => Any, templateType: String) {
-    val routeMethod =
+    val nonNullRouteMethod =
       if (route.routeMethod != null)  // Current route
         route.routeMethod
       else                            // Route from controller companion object has null routeMethod
         ControllerReflection.lookupRouteMethodForRouteWithNullRouteMethod(route)
 
-    val controllerClass = routeMethod.getDeclaringClass
-    val routeName       = routeMethod.getName
+    val controllerClass = nonNullRouteMethod.getDeclaringClass
+    val routeName       = nonNullRouteMethod.getName
     val path = "src/main/scalate/" + controllerClass.getName.replace(".", "/") + "/" + routeName + "." + templateType
 
     renderedView = renderScalateTemplateToString(path)

@@ -16,11 +16,18 @@ object ControllerReflection {
   private val routeWithNullRouteMethod_to_RouteMethod = MMap[Route, Method]()
 
   /** @return controller#route */
-  def friendlyControllerRouteName(route: Route) = {
-    val routeMethod         = route.routeMethod
+  def friendlyControllerRouteName(route: Route): String =
+    friendlyControllerRouteName(route.routeMethod)
+
+  def friendlyControllerRouteName(routeMethod: Method): String = {
     val controllerClassName = routeMethod.getDeclaringClass.getName
     val routeName           = routeMethod.getName
     controllerClassName + "#" + routeName
+  }
+
+  def splitFriendlyControllerRouteName(friendlyControllerRouteName: String): (String, String) = {
+    val array = friendlyControllerRouteName.split('#')
+    (array(0), array(1))
   }
 
   /** Called by RouteCollector */
@@ -38,13 +45,22 @@ object ControllerReflection {
   def newControllerAndRoute(route: Route): (Controller, Route) = {
     val routeMethod        = route.routeMethod
     val nonNullRouteMethod = if (routeMethod == null) lookupRouteMethodForRouteWithNullRouteMethod(route) else routeMethod
+    newControllerAndRoute(nonNullRouteMethod)
+  }
 
+  def newControllerAndRoute(nonNullRouteMethod: Method): (Controller, Route) = {
     val controllerClass = nonNullRouteMethod.getDeclaringClass
     val controller      = controllerClass.newInstance().asInstanceOf[Controller]
     val newRoute        = nonNullRouteMethod.invoke(controller).asInstanceOf[Route]
 
     val withRouteMethod = Route(newRoute.httpMethod, newRoute.order, newRoute.compiledPattern, newRoute.body, nonNullRouteMethod, newRoute.cacheSeconds)
     (controller, withRouteMethod)
+  }
+
+  def newControllerAndRoute(friendlyControllerRouteName: String): (Controller, Route) = {
+    val (controllerName, routeName) = splitFriendlyControllerRouteName(friendlyControllerRouteName)
+    val routeo = getRouteMethod(controllerName, routeName)
+    newControllerAndRoute(routeo.get)
   }
 
   /** Called by Renderer and newControllerAndRoute */

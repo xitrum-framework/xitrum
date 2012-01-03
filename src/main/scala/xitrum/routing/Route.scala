@@ -72,7 +72,15 @@ case class Route(httpMethod: HttpMethod, order: RouteOrder.RouteOrder, compiledP
   lazy val url: String = url()
 
   lazy val postbackUrl: String = {
-    val secureClassName = SecureBase64.encrypt(routeMethod)
-    PostbackController.postback.url("*" -> secureClassName)
+    val nonNullRouteMethod =
+      if (routeMethod != null)  // Current route
+        routeMethod
+      else                            // Route from controller companion object has null routeMethod
+        ControllerReflection.lookupRouteMethodForRouteWithNullRouteMethod(this)
+
+    // routeMethod (thus Route) is not serializable
+    // Use friendlyControllerRouteName instead
+    val encryptedFriendlyControllerRouteName = SecureBase64.encrypt(ControllerReflection.friendlyControllerRouteName(nonNullRouteMethod))
+    PostbackController.postback.url("encryptedFriendlyControllerRouteName" -> encryptedFriendlyControllerRouteName)
   }
 }
