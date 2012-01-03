@@ -202,7 +202,6 @@ class Dispatcher extends SimpleChannelUpstreamHandler with BadClientSilencer {
     Routes.matchRoute(request.getMethod, pathInfo) match {
       case Some((route, pathParams)) =>
         env.pathParams = pathParams
-        env.pathParams = MMap.empty
         dispatchWithFailsafe(route, env, false)
 
       case None =>

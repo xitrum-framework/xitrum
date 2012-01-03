@@ -193,10 +193,8 @@ object Routes extends Logger with ActionPageCacheApi with RouteApi {
 
     val (firsts, others, lasts) = routes(httpMethod)
     (firsts ++ others ++ lasts).find(finder) match {
-      case Some(route) =>
-        Some((route, pathParams))
-
       case None => None
+      case Some(route) => Some((route, pathParams))
     }
   }
 }

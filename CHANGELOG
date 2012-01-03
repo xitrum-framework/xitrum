@@ -1,24 +1,21 @@
-1.9 (planned):
+2.1 (planned):
+* Add digest authentication
+* Make extensive use of Knockout.js and Scala delimited continuation
 * Integrate WebSocket to Comet
   Comet uses WebSocket if available, or falls back to Ajax
-* Akka
+* Add Akka
 * Typesafe routes using Scala compiler plugin
-* Digest authentication
 * wro4j
 * RESTful actions now can use validators:
     val username = param("username") :: Required :: MaxLength(32)
 * Middleware architecture based on Netty handlers
 
-1.8 (planned):
-* Fix urlForPublic bug, resulted URL now has the leading "/"
+2.0 (planned):
 * Add Scalate back
-* Improve Quickstart: https://github.com/ngocdaothanh/xitrum-quickstart
-* Improve data-after, now you can write
-    data-after="$('#chatInput').val('')"
-  instead of
-    data-after="function () { $('#chatInput').val('') }"
-* Integrate Knockout.js
-* Use Scala delimited continuation
+* Remove all annotations
+* Put related actions into controller
+* Add Knockout.js
+* Add Scala delimited continuation
   See:
     http://www.earldouglas.com/continuation-based-web-workflows-part-two/
     http://stackoverflow.com/questions/6062003/event-listeners-with-scala-continuations
@@ -28,6 +25,12 @@
   See:
     http://ngocdaothanh.github.com/xitrum/restful.html#routing-without-using-annotation
     http://ngocdaothanh.github.com/xitrum/cache.html#cache-page-or-action-without-using-annotation
+* Improve Quickstart: https://github.com/ngocdaothanh/xitrum-quickstart
+* Improve data-after, now you can write
+    data-after="$('#chatInput').val('')"
+  instead of
+    data-after="function () { $('#chatInput').val('') }"
+* Fix urlForPublic bug, resulted URL now has the leading "/"
 
 1.7:
 * WebSocket, see:
