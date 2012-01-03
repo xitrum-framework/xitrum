@@ -140,33 +140,37 @@ object Routes extends Logger {
   //----------------------------------------------------------------------------
 
   def fromCacheFileOrRecollect() {
-    val routeCollector                   = new RouteCollector("routes.sclasner")
-    val routeMethodsGroupedByControllers = routeCollector.fromCacheFileOrRecollect()
+    val routeCollector                          = new RouteCollector("routes.sclasner")
+    val controllerClassName_to_routeMethodNames = routeCollector.fromCacheFileOrRecollect()
 
-    routeMethodsGroupedByControllers.foreach { routeMethods =>
-      val controllerClass = routeMethods.head.getDeclaringClass
-      val controller      = controllerClass.newInstance()
-      routeMethods.foreach { routeMethod =>
-        val route = routeMethod.invoke(controller).asInstanceOf[Route]
-        if (route.httpMethod != null) {
-          val withRouteMethod = Route(route.httpMethod, route.order, route.compiledPattern, route.body, routeMethod, route.cacheSeconds)
+    for ((controllerClassName, routeMethodNames) <- controllerClassName_to_routeMethodNames) {
+      for (routeMethodName <- routeMethodNames) {
+        ControllerReflection.getRouteMethod(controllerClassName, routeMethodName) match {
+          case None =>
+          case Some(routeMethod) =>
+            val controllerClass = routeMethod.getDeclaringClass
+            val controller      = controllerClass.newInstance()
+            val route           = routeMethod.invoke(controller).asInstanceOf[Route]
+            if (route.httpMethod != null) {
+              val withRouteMethod = Route(route.httpMethod, route.order, route.compiledPattern, route.body, routeMethod, route.cacheSeconds)
 
-          val firsts_others_lasts =
-            if (routes.isDefinedAt(route.httpMethod)) {
-              routes(route.httpMethod)
-            } else {
-              val ret = (ArrayBuffer[Route](), ArrayBuffer[Route](), ArrayBuffer[Route]())
-              routes(route.httpMethod) = ret
-              ret
+              val firsts_others_lasts =
+                if (routes.isDefinedAt(route.httpMethod)) {
+                  routes(route.httpMethod)
+                } else {
+                  val ret = (ArrayBuffer[Route](), ArrayBuffer[Route](), ArrayBuffer[Route]())
+                  routes(route.httpMethod) = ret
+                  ret
+                }
+
+              val arrayBuffer = route.order match {
+                case RouteOrder.FIRST => firsts_others_lasts._1
+                case RouteOrder.OTHER => firsts_others_lasts._2
+                case RouteOrder.LAST  => firsts_others_lasts._3
+              }
+
+              arrayBuffer.append(withRouteMethod)
             }
-
-          val arrayBuffer = route.order match {
-            case RouteOrder.FIRST => firsts_others_lasts._1
-            case RouteOrder.OTHER => firsts_others_lasts._2
-            case RouteOrder.LAST  => firsts_others_lasts._3
-          }
-
-          arrayBuffer.append(withRouteMethod)
         }
       }
     }

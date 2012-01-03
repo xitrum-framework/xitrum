@@ -13,12 +13,15 @@ import xitrum.{Config, Logger}
 
 /** Scan all classes to collect routes from controllers. */
 class RouteCollector(cachedFileName: String) extends Logger {
-  /** @return Action methods grouped by controllers */
-  def fromCacheFileOrRecollect(): Seq[Seq[Method]] = {
+  /**
+   * Because java.lang.reflect.Method is not serializable, we return a map of
+   * controller class name -> route method names.
+   */
+  def fromCacheFileOrRecollect(): Map[String, Seq[String]] = {
     logger.info("Load " + cachedFileName + "/recollect routes and action/page cache config from cotrollers...")
 
     try {
-      Scanner.foldLeft(cachedFileName, Seq[Seq[Method]](), discovered _)
+      Scanner.foldLeft(cachedFileName, Map[String, Seq[String]](), discovered _)
     } catch {
       case e =>
         // Maybe routes.sclasner could not be loaded because dependencies have changed.
@@ -28,7 +31,7 @@ class RouteCollector(cachedFileName: String) extends Logger {
           logger.warn("Error loading " + cachedFileName + ". Delete the file and recollect routes...")
           f.delete()
           try {
-            Scanner.foldLeft(cachedFileName, Seq[Seq[Method]](), discovered _)
+            Scanner.foldLeft(cachedFileName, Map[String, Seq[String]](), discovered _)
           } catch {
             case e2 =>
               Config.exitOnError("Could not collect routes", e2)
@@ -43,7 +46,7 @@ class RouteCollector(cachedFileName: String) extends Logger {
 
   //----------------------------------------------------------------------------
 
-  private def discovered(acc: Seq[Seq[Method]], entry: FileEntry): Seq[Seq[Method]] = {
+  private def discovered(acc: Map[String, Seq[String]], entry: FileEntry): Map[String, Seq[String]] = {
     try {
       if (entry.relPath.endsWith(".class")) {
         val bais = new ByteArrayInputStream(entry.bytes)
@@ -52,25 +55,21 @@ class RouteCollector(cachedFileName: String) extends Logger {
         dis.close()
 
         val className  = cf.getName
-        if (className.endsWith("$")) {  // Ignore Scala objects
+        if (className.contains("$")) {  // Ignore Scala objects
           acc
         } else {
           val fieldInfoList = cf.getFields.asInstanceOf[JList[FieldInfo]]
           if (fieldInfoList == null) {
             acc
           } else {
-            val routeMethods = JavaConversions.asScalaBuffer(fieldInfoList).foldLeft(Seq[Method]()) { (acc2, fi) =>
+            val routeMethodNames = JavaConversions.asScalaBuffer(fieldInfoList).foldLeft(Seq[String]()) { (acc2, fi) =>
               if (fi.getDescriptor == routeClassDescriptor) {
-                val methodName = fi.getName  // Scala "val" creates method with the same name
-                ControllerReflection.getRouteMethod(className, methodName) match {
-                  case None => acc2
-                  case Some(routeMethod) => acc2 :+ routeMethod
-                }
+                acc2 :+ fi.getName  // Scala "val" creates method with the same name
               } else {
                 acc2
               }
             }
-            if (routeMethods.isEmpty) acc else acc :+ routeMethods
+            if (routeMethodNames.isEmpty) acc else acc + (className -> routeMethodNames)
           }
         }
       } else {

@@ -8,20 +8,14 @@ import xitrum.exception.SessionExpired
 import xitrum.util.SecureBase64
 import xitrum.validator.ValidatorCaller
 
-object PostbackController extends PostbackController {
-  val POSTBACK_PREFIX = "/xitrum/postback/" // Postback URLs are in the form POSTBACK_PREFIX + encryptedActionClassName
-}
+object PostbackController extends PostbackController
 
 class PostbackController extends Controller {
-  import PostbackController._
-
   /** Route to this is automatically added by RouteCollector. */
-  val postback = POST(POSTBACK_PREFIX + ":*") {
+  val postback = POST("/xitrum/postback/:*") {  // *: encryptedActionClassName
     setPostback(true)
 
-    val encoded               = pathInfo.encoded
-    val secureActionClassName = encoded.substring(POSTBACK_PREFIX.length)
-
+    val secureActionClassName = param("*")
     SecureBase64.decrypt(secureActionClassName) match {
       case None => throw new SessionExpired
 

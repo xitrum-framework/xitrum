@@ -73,7 +73,6 @@ case class Route(httpMethod: HttpMethod, order: RouteOrder.RouteOrder, compiledP
 
   lazy val postbackUrl: String = {
     val secureClassName = SecureBase64.encrypt(routeMethod)
-    val url = PostbackController.POSTBACK_PREFIX + secureClassName
-    Config.withBaseUri(url)
+    PostbackController.postback.url("*" -> secureClassName)
   }
 }
