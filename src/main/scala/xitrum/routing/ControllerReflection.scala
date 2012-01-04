@@ -64,8 +64,23 @@ object ControllerReflection {
   }
 
   /** Called by Renderer and newControllerAndRoute */
-  def lookupRouteMethodForRouteWithNullRouteMethod(route: Route): Method =
-    routeWithNullRouteMethod_to_RouteMethod(route)
+  def lookupRouteMethodForRouteWithNullRouteMethod(route: Route): Method = {
+    routeWithNullRouteMethod_to_RouteMethod.get(route) match {
+      case Some(method) => method
+      case None => throw new Exception("""Please use route from companion object of the controller class, like:
+class MyController extends xitrum.Controller {
+  // A route:
+  val index = GET() {...}
+}
+
+// Companion object of the controller class
+object MyController extends MyController
+
+// Refer to the route:
+MyController.index
+""")
+    }
+  }
 
   private def storeRouteMethodForRouteWithNullRouteMethodToLookupLater(controllerClassName: String, routeName: String, routeMethod: Method) {
     // If the controller class has no companion object,
