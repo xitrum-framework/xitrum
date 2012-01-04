@@ -12,7 +12,7 @@ You can write RESTful APIs for iPhone, Android applications etc. very easily.
   class Articles extends Controller {
     pathPrefix = "articles"
 
-    val index = GET() {...}
+    val index = GET {...}
     val show  = GET(":id) {...}
   }
 
@@ -132,10 +132,10 @@ trait xitrum.SkipCSRFCheck:
 
   class LogPositionAPI extends API {
     pathPrefix = "api/positions"
-    val log = POST() {...}
+    val log = POST {...}
   }
 
   class CreateTodoAPI extends API {
     pathPrefix = "api/todos"
-    val create = POST() {...}
+    val create = POST {...}
   }

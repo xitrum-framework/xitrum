@@ -26,7 +26,7 @@ Cache page or action
   import xitrum.Controller
 
   class MyController extends Controller {
-    val index = cachePageMinute(1).GET() {
+    val index = cachePageMinute(1).GET {
       ...
     }
 

@@ -20,7 +20,7 @@ Normally, you write view directly in its action.
   import xitrum.Controller
 
   class MyController extends Controller {
-    val index = GET() {
+    val index = GET {
       val s = "World"  // Will be automatically escaped
 
       respondInlineView(
@@ -88,7 +88,7 @@ MyController.scala
   import xitrum.Controller
 
   class MyController extends AppController {
-    val index = GET() {
+    val index = GET {
       val s = "World"
       respondInlineView(<p>Hello <em>{s}</em>!</p>)
     }
@@ -133,7 +133,7 @@ scr/main/scala/quickstart/action/MyController.scala:
   package quickstart.controller
 
   class MyController extends AppController {
-    val index = GET() {
+    val index = GET {
       respondView()
     }
 
