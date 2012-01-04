@@ -8,7 +8,7 @@ GNU gettext is used. Unlike many other methods, gettext supports plural forms.
 Write internationalized messages in source code
 -----------------------------------------------
 
-``xitrum.Action`` extends ``xitrum.I18n``, which has these methods:
+``xitrum.Controller`` extends ``xitrum.I18n``, which has these methods:
 
 ::
 

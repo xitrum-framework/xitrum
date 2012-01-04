@@ -57,14 +57,14 @@ RVar.scala
     object title extends RequestVar[String]
   }
 
-AppAction.scala
+AppController.scala
 
 ::
 
-  import xitrum.Action
+  import xitrum.Controller
   import xitrum.view.DocType
 
-  trait AppAction extends Action {
+  trait AppController extends Controller {
     override def layout = DocType.html5(
       <html>
         <head>
@@ -80,15 +80,15 @@ AppAction.scala
     )
   }
 
-ShowAction.scala
+Articles.scala
 
 ::
 
-  class ShowAction extends AppAction {
-    override def execute {
+  class Articles extends AppController {
+    val show = GET(":id") {
       val (title, body) = ...  // Get from DB
       RVar.title.set(title)
-      renderView(body)
+      renderInlineView(body)
     }
   }
 

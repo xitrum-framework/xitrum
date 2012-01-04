@@ -14,14 +14,14 @@ with similar :doc:`validation </validation>` feature.
 Layout
 ------
 
-AppAction.scala
+AppController.scala
 
 ::
 
-  import xitrum.Action
+  import xitrum.Controller
   import xitrum.view.DocType
 
-  trait AppAction extends Action {
+  trait AppController extends Controller {
     override def layout = DocType.html5(
       <html>
         <head>
@@ -40,38 +40,27 @@ AppAction.scala
 Form
 ----
 
-ArticleShow.scala
+Articles.scala
 
 ::
 
-  import xitrum.annotation.GET
+  import xitrum.validator._
 
-  @GET("/articles/:id")
-  class ArticleShow extends AppAction {
-    override def execute {
+  class Articles extends AppController {
+    pathPrefix = "articles"
+
+    val show = GET(":id") {
       val id = param("id")
       val article = Article.find(id)
-      renderView(
+      respondInlineView(
         <h1>{article.title}</h1>
         <div>{article.body}</div>
       )
     }
-  }
 
-ArticleNew.scala
-
-::
-
-  import xitrum.annotation.{First, GET}
-  import xitrum.validation._
-
-  // @First: force this route to be matched before "/articles/:id"
-  @First
-  @GET("/articles/new")
-  class ArticleNew extends AppAction {
-    override def execute {
-      renderView(
-        <form data-postback="submit" action={urlForPostbackThis}>
+    val niw = first.GET("niw") {  // first: force this route to be matched before "show"
+      respondInlineView(
+        <form data-postback="submit" action={create.postbackUrl}>
           <label>Title</label>
           {<input type="text" name="title" /> :: Required}<br />
 
@@ -83,18 +72,18 @@ ArticleNew.scala
       )
     }
 
-    override def postback {
+    val create = indirectRoute {
       val title   = param("title")
       val body    = param("body")
       val article = Article.save(title, body)
 
       flash("Article has been saved.")
-      jsRedirectTo[ArticleShow]("id" -> article.id)
+      jsRedirectTo(show, "id" -> article.id)
     }
   }
 
 When ``submit`` JavaScript event of the form is triggered, the form will be posted back
-to the current Xitrum action.
+to ``create``.
 
 ``action`` attribute of ``<form>`` is encrypted. The encrypted URL acts as the anti-CSRF token.
 
@@ -107,9 +96,9 @@ An example with link:
 
 ::
 
-  <a href="#" data-postback="click" action={urlForPostback[LogoutAction]}>Logout</a>
+  <a href="#" data-postback="click" action={AuthenticateController.logout.postbackurl}>Logout</a>
 
-Clicking the link above will trigger the postback to LogoutAction.
+Clicking the link above will trigger the postback to logout action of AuthenticateController.
 
 Confirmation dialog
 -------------------
@@ -119,7 +108,7 @@ If you want to display a confirmation dialog:
 ::
 
   <a href="#" data-postback="click"
-              action={urlForPostback[LogoutAction]}
+              action={AuthenticateController.logout.postbackurl}
               data-confirm="Do you want to logout?">Logout</a>
 
 If the user clicks "Cancel", the postback will not be sent.
@@ -136,14 +125,14 @@ For other elements, you do like this:
 
   <a href="#"
      data-postback="click"
-     action={urlForPostbackThis("itemId" -> item.id)}
+     action={Articles.destroy.postbackUrl("id" -> item.id)}
      data-confirm={"Do you want to delete %s?".format(item.name)}>Delete</a>
 
 You may also put extra params in a separate form:
 
 ::
 
-  <form id="myform" data-postback="submit" action={urlForPostbackThis}>
+  <form id="myform" data-postback="submit" action={Site.search.postbackUrl}>
     Search:
     {<input type="text" name="keyword" /> :: Validated}
 
@@ -151,7 +140,7 @@ You may also put extra params in a separate form:
        href="#"
        data-postback="click"
        data-extra="#myform"
-       action={urlForPostbackThis("page" -> page)}>{page}</a>
+       action={Site.search.postbackUrl("page" -> page)}>{page}</a>
   </form>
 
 ``#myform`` is the jQuery selector to select the form that contains extra params.

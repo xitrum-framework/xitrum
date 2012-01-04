@@ -21,43 +21,19 @@ Cache works with async response.
 Cache page or action
 --------------------
 
-It's very simple, you use ``CacheActionSecond/Minute/Hour/Day`` or
-``CachePageSecond/Minute/Hour/Day``. The difference between action cache and
-page cache is that for page cache, before filters are not run if the cache
-exists.
-
 ::
 
-  import xitrum.Action
-  import xitrum.annotations._
+  import xitrum.Controller
 
-  @CachePageMinute(1)
-  // Or @CacheActionMinute(1) if you want to run the action's before filter
-  @GET("/")
-  class IndexAction extends Action...
+  class MyController extends Controller {
+    val index = cachePageMinute(1).GET() {
+      ...
+    }
 
-Cache page or action without using annotation
----------------------------------------------
-
-A typical booting process looks like this:
-
-::
-
-  import xitrum.handler.Server
-  import xitrum.routing.Routes
-
-  object Boot {
-    def main(args: Array[String]) {
-      Routes.fromCacheFileOrAnnotations()
-      Server.start()
+    val show = cacheActionMinute(1).GET(":id") {
+      ...
     }
   }
-
-If you don't want to use annotation, before starting the server you can do like this:
-
-::
-
-  Routes.cachePageMinute(1, classOf[IndexAction])
 
 Cache object
 ------------

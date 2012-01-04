@@ -17,15 +17,13 @@ Normally, you write view directly in its action.
 
 ::
 
-  import xitrum.Action
-  import xitrum.annotation.GET
+  import xitrum.Controller
 
-  @GET("/")
-  class Index extends Action {
-    def override execute {
+  class MyController extends Controller {
+    val index = GET() {
       val s = "World"  // Will be automatically escaped
 
-      renderView(
+      respondInlineView(
         <html>
           <body>
             <p>Hello <em>{s}</em>!</p>
@@ -37,32 +35,32 @@ Normally, you write view directly in its action.
 
 Of course you can refactor the view into a separate Scala file.
 
-There are methods for rendering things other than views:
+There are methods for responding things other than views:
 
-* ``renderText``: renders anything as a string without layout
-* ``renderJson``: renders JSON
-* ``renderBinary``: renders an array of bytes
-* ``renderFile``: sends a file directly from disk, very fast
+* ``respondText``: responds anything as a string without layout
+* ``respondJson``: responds JSON
+* ``respondBinary``: responds an array of bytes
+* ``respondFile``: sends a file directly from disk, very fast
   because `zero-copy <http://www.ibm.com/developerworks/library/j-zerocopy/>`_
   (send-file) is used
 
 Layout
 ------
 
-With ``renderView``, layout is rendered. By default the layout is what passed to
-``renderView``. You can customize the layout by overriding the ``layout`` method.
+With ``respondInlineView``, layout is rendered. By default the layout is what passed to
+``respondInlineView``. You can customize the layout by overriding the ``layout`` method.
 
 Typically, you create a parent class which has a common layout for many views,
 like this:
 
-AppAction.scala
+AppController.scala
 
 ::
 
-  import xitrum.Action
+  import xitrum.Controller
   import xitrum.view.DocType
 
-  trait AppAction extends Action {
+  trait AppController extends Controller {
     override def layout = DocType.html5(
       <html>
         <head>
@@ -71,7 +69,7 @@ AppAction.scala
           <title>Welcome to Xitrum</title>
         </head>
         <body>
-          {renderedView}
+          {respondedView}
           {jsAtBottom}
         </body>
       </html>
@@ -83,34 +81,32 @@ don't like.
 
 ``jsAtBottom`` includes jQuery, jQuery Validate plugin etc.
 
-Index.scala
+MyController.scala
 
 ::
 
-  import xitrum.Action
-  import xitrum.annotation.GET
+  import xitrum.Controller
 
-  @GET("/")
-  class Index extends AppAction {
-    def override execute {
+  class MyController extends AppController {
+    val index = GET() {
       val s = "World"
-      renderView(<p>Hello <em>{s}</em>!</p>)
+      respondInlineView(<p>Hello <em>{s}</em>!</p>)
     }
   }
 
-You can pass the layout directly to ``renderView``:
+You can pass the layout directly to ``respondInlineView``:
 
 ::
 
   val specialLayout = () =>
     <html>
       <body>
-        {renderedView}
+        {respondedView}
       </body>
     </html>
 
   val s = "World"
-  renderView(<p>Hello <em>{s}</em>!</p>, specialLayout _)
+  respondInlineView(<p>Hello <em>{s}</em>!</p>, specialLayout _)
 
 Scalate
 -------
@@ -118,36 +114,33 @@ Scalate
 For small views you can use Scala XML for convenience, but for big views you
 should use `Scalate <http://scalate.fusesource.org/>`_.
 
-scr/main/scala/quickstart/action/AppAction.scala:
+scr/main/scala/quickstart/controller/AppController.scala:
 
 ::
 
-  package quickstart.action
+  package quickstart.controller
 
-  import xitrum.Action
+  import xitrum.Controller
 
-  trait AppAction extends Action {
-    override def layout = renderScalateTemplateToString(classOf[AppAction])
+  trait AppController extends Controller {
+    override def layout = renderScalate(classOf[AppAction])
   }
 
-scr/main/scala/quickstart/action/IndexAction.scala:
+scr/main/scala/quickstart/action/MyController.scala:
 
 ::
 
-  package quickstart.action
+  package quickstart.controller
 
-  import xitrum.annotation.GET
-
-  @GET("/")
-  class IndexAction extends AppAction {
-    override def execute {
-      renderScalateView()
+  class MyController extends AppController {
+    val index = GET() {
+      respondView()
     }
 
     def hello(what: String) = "Hello %s".format(what)
   }
 
-scr/main/scalate/quickstart/action/AppAction.jade:
+scr/main/scalate/quickstart/controller/AppController.jade:
 
 ::
 
@@ -159,19 +152,19 @@ scr/main/scalate/quickstart/action/AppAction.jade:
       title Welcome to Xitrum
 
     body
-      != renderedView
+      != respondedView
       = jsAtBottom
 
-scr/main/scalate/quickstart/action/IndexAction.jade:
+scr/main/scalate/quickstart/controller/MyController/index.jade:
 
 ::
 
-  - import quickstart.IndexAction
+  - import quickstart.controller.MyController
 
-  a(href={urlForThis}) Path to current action
-  p= helper.asInstanceOf[IndexAction].hello("World")
+  a(href={currentRoute.url}) Path to current action
+  p= helper.asInstanceOf[MyController].hello("World")
 
-In views you can use all methods of the class `xitrum.Action <https://github.com/ngocdaothanh/xitrum/blob/master/src/main/scala/xitrum/Action.scala>`_.
+In views you can use all methods of the class `xitrum.Controller <https://github.com/ngocdaothanh/xitrum/blob/master/src/main/scala/xitrum/Controller.scala>`_.
 If you want to have exactly instance of the current action, cast ``helper`` to
 the action you wish.
 
@@ -182,9 +175,9 @@ You can also use `Mustache <http://scalate.fusesource.org/documentation/mustache
 To config the default template type, see `scalate` in xitrum.json.
 
 You can override the default template type by passing "jade", "mustache", "scamal",
-or "ssp" as the last parameter to `renderScalateTemplateToString` or `renderScalateView`.
+or "ssp" as the last parameter to `respondScalateTemplateToString` or `respondScalateView`.
 
 ::
 
-  renderScalateTemplateToString(classOf[AppAction], "mustache")
-  renderScalateView("scaml")
+  renderScalate(classOf[AppAction], "mustache")
+  respondView("scaml")

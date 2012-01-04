@@ -3,19 +3,20 @@ Async response
 
 .. image:: img/xitrum/lao_gamen_gargamel.jpg
 
-renderXXX:
+respondXXX:
 
-* ``renderView``: renders HTML with or without layout
-* ``renderText``: renders a string without layout
-* ``renderJson``: renderss JSON
-* ``renderBinary``: renders an array of bytes
-* ``renderFile``: sends a file directly from disk, very fast
+* ``respondInlineView``: responds HTML with or without layout
+* ``respondView``: responds HTML with or without layout
+* ``respondText``: responds a string without layout
+* ``respondJson``: respondss JSON
+* ``respondBinary``: responds an array of bytes
+* ``respondFile``: sends a file directly from disk, very fast
   because `zero-copy <http://www.ibm.com/developerworks/library/j-zerocopy/>`_
   (aka send-file) is used
 
-There is no default response. You must call renderXXX explicitly to send response
-to the client. If you don't call renderXXX, the HTTP connection is kept for you,
-and you can call renderXXX later.
+There is no default response. You must call respondXXX explicitly to send response
+to the client. If you don't call respondXXX, the HTTP connection is kept for you,
+and you can call respondXXX later.
 
 Chunked response
 ----------------
@@ -30,22 +31,22 @@ file that does may not fit memory.
 
   val generator = new MyCsvGenerator
   val header = generator.getHeader
-  renderText(header, "text/csv")
+  respondText(header, "text/csv")
 
   while (generator.hasNextLine) {
     val line = generator.nextLine
-    renderText(line)
+    respondText(line)
   }
 
-  renderLastChunk
+  respondLastChunk
 
 1. Call ``response.setChunked(true)``
-2. Call renderXXX as many times as you want
-3. Lastly, call ``renderLastChunk``
+2. Call respondXXX as many times as you want
+3. Lastly, call ``respondLastChunk``
 
 Notes:
 
-* Headers are only sent on the first renderXXX call.
+* Headers are only sent on the first respondXXX call.
 * Chunks cannot be used with :doc:`page or action cache </cache>`.
 
 WebSocket
@@ -55,19 +56,17 @@ Example:
 
 ::
 
-  package quickstart.action
+  package quickstart.controller
 
-  import xitrum.Action
-  import xitrum.annotation.WEBSOCKET
+  import xitrum.Controller
 
-  @WEBSOCKET("/hello_websocket")  // Entry point
-  class HelloWebSocket extends Action {
-    override def execute {
-      webSocketHandshake  // Call this if you want to accept the WebSocket connection
+  class HelloWebSocket extends Controller {
+    val index = WEBSOCKET("hello_websocket") {  // Entry point
+      webSocketHandshake()  // Call this if you want to accept the WebSocket connection
     }
 
     override def onWebSocketFrame(text: String) {
-      renderWebSocket(text.toUpperCase)  // Send back data to the WebSocket client
+      respondWebSocket(text.toUpperCase)  // Send back data to the WebSocket client
     }
 
     override def onWebSocketClose {
@@ -90,29 +89,24 @@ Chat example
 
 ::
 
-  import xitrum.Action
-  import xitrum.annotation.GET
+  import xitrum.Controller
   import xitrum.comet.CometPublishAction
-  import xitrum.validation.Required
+  import xitrum.validator.{Required, Validated}
 
-  @GET("/chat")
-  class ChatAction {
-    override def execute {
+  class ChatController {
+    val index = GET("chat") {
       jsCometGet("chat", """
         function(channel, timestamp, body) {
           var wasScrollAtBottom = xitrum.isScrollAtBottom('#chatOutput');
-
-          var escaped = $('<div/>').text(body.chatInput[0]).html();
-          $('#chatOutput').append('- ' + escaped + '<br />');
-
+          $('#chatOutput').append('- ' + xitrum.escape(body.chatInput[0]) + '<br />');
           if (wasScrollAtBottom) xitrum.scrollToBottom('#chatOutput');
         }
       """)
 
-      renderView(
+      respondInlineView(
         <div id="chatOutput"></div>
 
-        <form data-postback="submit" action={urlForPostback[CometPublishAction]} data-after="$('#chatInput').value('')">
+        <form data-postback="submit" action={CometPublishController.postback.postbackUrl} data-after="$('#chatInput').value('')">
           {<input type="hidden" name="channel" value="chat" /> :: Validated}
           {<input type="text" id="chatInput" name="chatInput" /> :: Required}
         </form>
@@ -122,35 +116,33 @@ Chat example
 
 ``jsCometGet`` will send long polling Ajax requests, get published messages,
 and call your callback function. The 3rd argument ``body`` is a hash
-containing everything inside the form commited to ``CometPublishAction``.
+containing everything inside the form commited to ``CometPublishController``.
 
 Publish message
 ~~~~~~~~~~~~~~~
 
-In the example above, ``CometPublishAction`` will receive form post and publish
+In the example above, ``CometPublishController`` will receive form post and publish
 the message for you. If you want to publish the message yourself, call ``Comet.publish``:
 
 ::
 
-  import xitrum.Action
-  import xitrum.annotation.GET
+  import xitrum.Controller
   import xitrum.comet.Comet
-  import xitrum.validation.Required
+  import xitrum.validator.Required
 
-  @GET("/admin")
-  class AdminAction extends Action {
-    override def execute {
-      renderView(
-        <form data-postback="submit" action={urlForPostbackThis}>
+  class AdminController extends Controller {
+    val index = GET("admin") {
+      respondInlineView(
+        <form data-postback="submit" action={postback.postbackUrl}>
           Message from admin:
           <input type="text" name={validate("body", Required)} />
         </form>
       )
     }
 
-    override def postback {
+    val postback = indirectRoute {
       val body = param("body")
       Comet.publish("chat", "[From admin]: " + body)
-      renderText("")
+      respondText("")
     }
   }

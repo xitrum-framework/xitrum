@@ -13,16 +13,14 @@ In your action, call ``jsAddToView`` (multiple times if you need):
 
 ::
 
-  import xitrum.Action
-
-  class MyAction extends AppAction {
-    override def execute {
+  class MyController extends AppController {
+    val index = GET() {
       ...
       jsAddToView("alert('Hello')")
       ...
       jsAddToView("alert('Hello again')")
       ...
-      renderView(<p>My view</p>)
+      respondView(<p>My view</p>)
     }
   }
 
@@ -30,10 +28,10 @@ In your layout, call ``jsAtBottom``:
 
 ::
 
-  import xitrum.Action
+  import xitrum.Controller
   import xitrum.view.DocType
 
-  trait AppAction extends Action {
+  trait AppController extends Controller {
     override def layout = DocType.html5(
       <html>
         <head>
@@ -51,20 +49,18 @@ In your layout, call ``jsAtBottom``:
 Respond JavaScript directly without view
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
-To render JavaScript:
+To respond JavaScript:
 
 ::
 
-  jsRender("$('#error').html(%s)".format(jsEscape(<p class="error">Could not login.</p>)))
-  or shorter:
-  jsRenderFormat("$('#error').html(%s)", jsEscape(<p class="error">Could not login.</p>))
+  jsRespond("$('#error').html(%s)".format(jsEscape(<p class="error">Could not login.</p>)))
 
 To redirect:
 
 ::
 
   jsRedirectTo("http://cntt.tv/")
-  jsRedirectTo[LoginAction]
+  jsRedirectTo(AuthenticateController.login)
 
 JSON
 ----
@@ -77,4 +73,4 @@ To respond JSON:
 ::
 
   val scalaData = List(1, 2, 3)  // An example
-  renderJson(scalaData)
+  respondJson(scalaData)

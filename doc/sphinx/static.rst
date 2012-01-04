@@ -39,12 +39,12 @@ To refer to them:
 
   <img src={urlForPublic("img/myimage.png")} />
 
-To send a static file on disk from your action, use ``renderFile``.
+To send a static file on disk from your action, use ``respondFile``.
 
 ::
 
-  renderFile("/absolute/path")
-  renderFile("path/relative/to/the/current/working/directory")
+  respondFile("/absolute/path")
+  respondFile("path/relative/to/the/current/working/directory")
 
 404 and 500
 -----------
@@ -61,10 +61,9 @@ your own handler, configure before starting web server:
 
   object Boot {
     def main(args: Array[String]) {
-      Config.action404 = classOf[MyAction]
-      Config.action500 = classOf[MyAction]
-
-      Routes.fromCacheFileOrAnnotations()
+      Routes.route404 = MyController.route404
+      Routes.route500 = MyController.route500
+      Routes.fromCacheFileOrRecollect()
       Server.start()
     }
   }
@@ -100,7 +99,7 @@ To send a static file inside an element (a .jar file or a directory) in classpat
 
 ::
 
-  renderResource("path/relative/to/the/element")
+  respondResource("path/relative/to/the/element")
 
 Client side cache with ETag and max-age
 ---------------------------------------

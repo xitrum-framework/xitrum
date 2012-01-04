@@ -7,21 +7,13 @@ You can write RESTful APIs for iPhone, Android applications etc. very easily.
 
 ::
 
-  import xitrum.Action
-  import xitrum.annotation.{GET, GETs}
+  import xitrum.Controller
 
-  @GETs(Array("/", "/articles"))
-  class ArticleIndex extends Action {
-    override def execute {
-      //...
-    }
-  }
+  class Articles extends Controller {
+    pathPrefix = "articles"
 
-  @GET("/articles/:id")
-  class ArticleShow extends Action {
-    override def execute {
-      //...
-    }
+    val index = GET() {...}
+    val show  = GET(":id) {...}
   }
 
 The same for POST, PUT, and DELETE.
@@ -37,14 +29,15 @@ application has, like this:
 ::
 
   [INFO] Routes:
-  GET / quickstart.action.IndexAction
+  GET /articles     quickstart.controller.Articles#index
+  GET /articles/:id quickstart.controller.Articles#show
 
-You don't need a seperate central config file like routes.rb of Rails.
-Annotation is used for URL routes, in the spirit of JAX-RS and Rails Engines.
-You don't have to declare all routes in a single place. Think of annotations
-as distributed routes.You can plug an app into another app. If you have a
-blog engine, you can package it as a JAR file. Then you can plug that JAR file
-into another app.
+Routes are automatically collected in the spirit of JAX-RS (but without annotations!)
+and Rails Engines. You don't have to declare all routes in a single place.
+Think of this feature as distributed routes. You can plug an app into another app.
+If you have a blog engine, you can package it as a JAR file, then you can put
+that JAR file into another app and that app automatically has blog feature!
+Routing is also two-way: you can recreate URLs (reverse routing) in a typesafe way.
 
 Route cache
 -----------
@@ -55,63 +48,28 @@ cached. If you change library dependencies that contain routes, you may need to
 delete ``routes.sclasner``. This file should not be committed to your project
 source code repository.
 
-Route order with @First and @Last
+Route order with first and last
 ---------------------------------
 
 When you want to route like this:
 
 ::
 
-  /articles/:id --> ArticleShow
-  /articles/new --> ArticleNew
+  /articles/:id --> Articles#show
+  /articles/new --> Articles#niw
 
-You must make sure the second route be checked first. ``@First`` is for that purpose:
-
-::
-
-  @GET("/articles/:id")
-  class ArticleShow...
-
-  @First
-  @GET("/articles/new")
-  class ArticleNew...
-
-``@Last`` is similar.
-
-Routing without using annotation
---------------------------------
-
-A typical booting process looks like this:
+You must make sure the second route be checked first. ``first`` is for this purpose:
 
 ::
 
-  import xitrum.handler.Server
-  import xitrum.routing.Routes
+  class Articles extends Controller {
+    pathPrefix = "articles"
 
-  object Boot {
-    def main(args: Array[String]) {
-      Routes.fromCacheFileOrAnnotations()
-      Server.start()
-    }
+    val show = GET(":id") {...}
+    val niw  = first.GET("new") {...}
   }
 
-If you don't want to use annotation, before starting the server you can append
-routes like this:
-
-::
-
-  Routes.GET("/books/:id", classOf[BookShowAction])
-  Routes.POST("/books",    classOf[BookCreateAction])
-
-If you want to prepend, pass ``false`` as the last parameter:
-
-::
-
-  Routes.GET("/books/:id/edit", classOf[BookEditAction],    false)
-  Routes.DELETE("/books/:id",   classOf[BookDestroyAction], false)
-
-If you want full control over routing, `play <https://github.com/ngocdaothanh/xitrum/blob/master/src/main/scala/xitrum/routing/Routes.scala>`_
-with ``Routes.compiledRoutes`` and ``Routes.compileRoute``.
+``last`` is similar.
 
 Anti-CSRF
 ---------
@@ -123,10 +81,10 @@ When you include ``antiCSRFMeta`` in your layout:
 
 ::
 
-  import xitrum.Action
+  import xitrum.Controller
   import xitrum.view.DocType
 
-  trait AppAction extends Action {
+  trait AppController extends Controller {
     override def layout = DocType.html5(
       <html>
         <head>
@@ -168,21 +126,16 @@ trait xitrum.SkipCSRFCheck:
 
 ::
 
-  import xitrum.{Action, SkipCSRFCheck}
-  import xitrum.annotation.POST
+  import xitrum.{Controller, SkipCSRFCheck}
 
-  trait API extends Action with SkipCSRFCheck
+  trait API extends Controller with SkipCSRFCheck
 
-  @POST("/api/positions")
   class LogPositionAPI extends API {
-    override def execute {
-      //...
-    }
+    pathPrefix = "api/positions"
+    val log = POST() {...}
   }
 
-  @POST("/api/todos")
   class CreateTodoAPI extends API {
-    override def execute {
-      //...
-    }
+    pathPrefix = "api/todos"
+    val create = POST() {...}
   }

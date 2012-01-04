@@ -18,18 +18,20 @@ Use ``isAjax``.
   if (isAjax)
     jsRender("alert(" + jsEscape(msg) + ")")
   else
-    renderText(msg)
+    respondText(msg)
 
 Basic authentication
 --------------------
 
 ::
 
-  import xitrum.Action
+  import xitrum.Controller
 
-  class MyAction extends Action {
-    beforeFilters("authenticate") = basicAuthenticate("Realm") { (username, password) =>
-      username == "myusername" && password == "mypassword"
+  class MyController extends Controller {
+    beforeFilter {
+      basicAuthenticate("Realm") { (username, password) =>
+        username == "myusername" && password == "mypassword"
+      }
     }
   }
 
@@ -42,7 +44,7 @@ Don't write URL manually, use urlFor like this:
 
 ::
 
-  <a href={urlFor[ArticleShowAction]("id" -> myArticle.id)}>{myArticle.title}</a>
+  <a href={Articles.show.url("id" -> myArticle.id)}>{myArticle.title}</a>
 
 Log
 ---

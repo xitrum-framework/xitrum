@@ -34,7 +34,7 @@ In the console, you will see all the routes and request information:
 ::
 
   [INFO] Routes:
-  GET / quickstart.action.IndexAction
+  GET / quickstart.controller.Site#index
 
   [INFO] HTTP server started on port 8364
   [INFO] HTTPS server started on port 4364
