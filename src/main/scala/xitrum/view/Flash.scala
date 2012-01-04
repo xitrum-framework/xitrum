@@ -33,24 +33,24 @@ trait Flash {
 
   //----------------------------------------------------------------------------
 
+  private def jsFlashCall(msg: Any) = "xitrum.flash(" + jsEscape(msg) + ")"
+
   /**
    * For web 2.0 style application.
-   * Used in postbacks to send a message to flash area right away.
+   * Used in Ajax request handling to send a message to the flash area right away.
    */
-  def jsFlash(msg: Any) = "xitrum.flash(" + jsEscape(msg) + ")"
-
   def jsRenderFlash(msg: Any) {
-    val js = jsFlash(msg)
+    val js = jsFlashCall(msg)
     jsRender(js)
   }
 
   /**
    * For web 2.0 style application.
-   * Used in application layout to display the flash  message right after a view is loaded.
+   * Used in application layout to display the flash message right after a view is loaded.
    */
-  def jsFlash {
-    val msg = flash
-    if (!msg.isEmpty) jsAddToView(jsFlash(msg))
+  def jsFlash(msg: Any) {
+    val js = jsFlashCall(msg)
+    jsAddToView(js)
   }
 
   lazy val xitrumCSS = <link href={urlForResource("xitrum/xitrum.css")} type="text/css" rel="stylesheet" media="all"></link>
