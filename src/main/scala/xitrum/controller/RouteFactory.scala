@@ -66,20 +66,35 @@ trait RouteFactory {
     if (pathPrefix.isEmpty) pattern else pathPrefix + "/" + pattern
   }
 
-  def GET(pattern: String = "")(body: => Unit) =
+  def GET(pattern: String)(body: => Any) =
     Route(HttpMethod.GET, RouteOrder.OTHER, Routes.compilePattern(withPathPrefix(pattern)), () => body, null, 0)
 
-  def POST(pattern: String = "")(body: => Unit) =
+  def GET(body: => Any) =
+    Route(HttpMethod.GET, RouteOrder.OTHER, Routes.compilePattern(withPathPrefix("")), () => body, null, 0)
+
+  def POST(pattern: String)(body: => Any) =
     Route(HttpMethod.POST, RouteOrder.OTHER, Routes.compilePattern(withPathPrefix(pattern)), () => body, null, 0)
 
-  def PUT(pattern: String = "")(body: => Unit) =
+  def POST(body: => Any) =
+    Route(HttpMethod.POST, RouteOrder.OTHER, Routes.compilePattern(withPathPrefix("")), () => body, null, 0)
+
+  def PUT(pattern: String)(body: => Any) =
     Route(HttpMethod.PUT, RouteOrder.OTHER, Routes.compilePattern(withPathPrefix(pattern)), () => body, null, 0)
 
-  def DELETE(pattern: String = "")(body: => Unit) =
+  def PUT(body: => Any) =
+    Route(HttpMethod.PUT, RouteOrder.OTHER, Routes.compilePattern(withPathPrefix("")), () => body, null, 0)
+
+  def DELETE(pattern: String)(body: => Any) =
     Route(HttpMethod.DELETE, RouteOrder.OTHER, Routes.compilePattern(withPathPrefix(pattern)), () => body, null, 0)
 
-  def WEBSOCKET(pattern: String = "")(body: => Unit) =
+  def DELETE(body: => Any) =
+    Route(HttpMethod.DELETE, RouteOrder.OTHER, Routes.compilePattern(withPathPrefix("")), () => body, null, 0)
+
+  def WEBSOCKET(pattern: String)(body: => Any) =
     Route(HttpMethodWebSocket, RouteOrder.OTHER, Routes.compilePattern(withPathPrefix(pattern)), () => body, null, 0)
+
+  def WEBSOCKET(body: => Any) =
+    Route(HttpMethodWebSocket, RouteOrder.OTHER, Routes.compilePattern(withPathPrefix("")), () => body, null, 0)
 
   //----------------------------------------------------------------------------
 

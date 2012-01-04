@@ -36,20 +36,35 @@ case class Route(httpMethod: HttpMethod, order: RouteOrder.RouteOrder, compiledP
     if (pathPrefix.isEmpty) pattern else pathPrefix + "/" + pattern
   }
 
-  def GET(pattern: String = "")(body: => Unit) =
+  def GET(pattern: String)(body: => Any) =
     Route(HttpMethod.GET, order, Routes.compilePattern(withPathPrefix(pattern)), () => body, routeMethod, cacheSeconds)
 
-  def POST(pattern: String = "")(body: => Unit) =
+  def GET(body: => Any) =
+    Route(HttpMethod.GET, order, Routes.compilePattern(withPathPrefix("")), () => body, routeMethod, cacheSeconds)
+
+  def POST(pattern: String)(body: => Any) =
     Route(HttpMethod.POST, order, Routes.compilePattern(withPathPrefix(pattern)), () => body, routeMethod, cacheSeconds)
 
-  def PUT(pattern: String = "")(body: => Unit) =
+  def POST(body: => Any) =
+    Route(HttpMethod.POST, order, Routes.compilePattern(withPathPrefix("")), () => body, routeMethod, cacheSeconds)
+
+  def PUT(pattern: String)(body: => Any) =
     Route(HttpMethod.PUT, order, Routes.compilePattern(withPathPrefix(pattern)), () => body, routeMethod, cacheSeconds)
 
-  def DELETE(pattern: String = "")(body: => Unit) =
+  def PUT(body: => Any) =
+    Route(HttpMethod.PUT, order, Routes.compilePattern(withPathPrefix("")), () => body, routeMethod, cacheSeconds)
+
+  def DELETE(pattern: String)(body: => Any) =
     Route(HttpMethod.DELETE, order, Routes.compilePattern(withPathPrefix(pattern)), () => body, routeMethod, cacheSeconds)
 
-  def WEBSOCKET(pattern: String = "")(body: => Unit) =
+  def DELETE(body: => Any) =
+    Route(HttpMethod.DELETE, order, Routes.compilePattern(withPathPrefix("")), () => body, routeMethod, cacheSeconds)
+
+  def WEBSOCKET(pattern: String)(body: => Any) =
     Route(HttpMethodWebSocket, order, Routes.compilePattern(withPathPrefix(pattern)), () => body, routeMethod, cacheSeconds)
+
+  def WEBSOCKET(body: => Any) =
+    Route(HttpMethodWebSocket, order, Routes.compilePattern(withPathPrefix("")), () => body, routeMethod, cacheSeconds)
 
   //----------------------------------------------------------------------------
 
