@@ -8,12 +8,14 @@ import xitrum.controller.PathPrefix
 import xitrum.util.SecureBase64
 
 /**
- * @param routeMethod for creating new controller instance, see xitrum.routing.Routes
- * @param cacheSecs    0 = no cache, < 0 = cache action, > 0 = cache page
+ * @param routeMethod for creating new controller instance,
+ *                    or getting controller class name and route method name,
+ *                    is a var because it will be updated for caching
+ * @param cacheSecs   0 = no cache, < 0 = cache action, > 0 = cache page
  *
  * See RouteFactory, methods here relates to those there.
  */
-case class Route(httpMethod: HttpMethod, order: RouteOrder.RouteOrder, compiledPattern: CompiledPattern, body: () => Unit, routeMethod: Method, cacheSeconds: Int) {
+case class Route(httpMethod: HttpMethod, order: RouteOrder.RouteOrder, compiledPattern: CompiledPattern, body: () => Unit, var routeMethod: Method, cacheSeconds: Int) {
   def first = Route(httpMethod, RouteOrder.FIRST, compiledPattern, body, routeMethod, cacheSeconds)
   def last  = Route(httpMethod, RouteOrder.LAST,  compiledPattern, body, routeMethod, cacheSeconds)
 

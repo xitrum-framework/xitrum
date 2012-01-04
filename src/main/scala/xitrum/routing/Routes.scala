@@ -152,7 +152,7 @@ object Routes extends Logger {
             val controller      = controllerClass.newInstance()
             val route           = routeMethod.invoke(controller).asInstanceOf[Route]
             if (route.httpMethod != null) {  // Routes created by indirectRoute do not have httpMethod
-              val withRouteMethod = Route(route.httpMethod, route.order, route.compiledPattern, route.body, routeMethod, route.cacheSeconds)
+              route.routeMethod = routeMethod  // Cache it
 
               val firsts_others_lasts =
                 if (routes.isDefinedAt(route.httpMethod)) {
@@ -169,7 +169,7 @@ object Routes extends Logger {
                 case RouteOrder.LAST  => firsts_others_lasts._3
               }
 
-              arrayBuffer.append(withRouteMethod)
+              arrayBuffer.append(route)
             }
         }
       }

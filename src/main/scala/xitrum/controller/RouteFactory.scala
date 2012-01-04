@@ -84,33 +84,24 @@ trait RouteFactory {
   //----------------------------------------------------------------------------
 
   /**
-   * Route in controller companion object or in this same controller but
-   * not the currentRoute will have null routeMethod.
+   * Route in this same controller instance but not the currentRoute will have
+   * null routeMethod.
    *
    * In that case, to create new controller instance or get controller
-   * class name & route name, call this method. It calls
-   * ControllerReflection.lookupRouteMethodForRouteWithNullRouteMethod
-   * (for route in controller companion object) then falls back to using
-   * reflection to find inside this controller.
+   * class name & route name, call this method. It falls back to using
+   * reflection to find inside this controller instance.
    */
   def nonNullRouteMethodFromRoute(route: Route): Method = {
+    // Route in controller companion object is OK, see
+    // ControllerReflection.cacheRouteMethodToRouteInCompanionControllerObject
     if (route.routeMethod != null) {  // currentRoute
       route.routeMethod
     } else {
-      val fromControllerReflection = ControllerReflection.lookupRouteMethodForRouteWithNullRouteMethod(route)
-      if (fromControllerReflection != null)
-        fromControllerReflection
-      else
-        lookupRouteMethodForRouteWithNullRouteMethod(route)
+      lookupRouteMethodForRouteWithNullRouteMethod(route)
     }
   }
 
-  private val routeWithNullRouteMethod_to_RouteMethod_cache = MMap[Route, Method]()
-
   private def lookupRouteMethodForRouteWithNullRouteMethod(route: Route): Method = synchronized {
-    if (routeWithNullRouteMethod_to_RouteMethod_cache.isDefinedAt(route))
-      return routeWithNullRouteMethod_to_RouteMethod_cache(route)
-
     // Use reflection on this controller to find, and cache the result if any
     // Cannot use getFields because route fields are "val"s which are private in Java
     // Must use getDeclaredFields and set fields to public
@@ -123,7 +114,7 @@ trait RouteFactory {
         if (any == route) {
           val methodName = field.getName
           val routeMethod = controllerClass.getMethod(methodName)
-          routeWithNullRouteMethod_to_RouteMethod_cache(route) = routeMethod  // Cache it
+          route.routeMethod = routeMethod  // Cache it
           return routeMethod
         }
       }
