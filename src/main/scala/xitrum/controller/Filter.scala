@@ -6,8 +6,10 @@ import xitrum.routing.Route
 trait Filter {
   private val beforeFilters = ArrayBuffer[() => Boolean]()
 
-  def beforeFilter(f: () => Boolean) {
-    beforeFilters.append(f)
+  def beforeFilter(f: => Boolean): () => Boolean = {
+    val ret = () => f
+    beforeFilters.append(ret)
+    ret
   }
 
   def skipBeforeFilter(f: () => Boolean) {
@@ -21,8 +23,10 @@ trait Filter {
 
   private val afterFilters = ArrayBuffer[() => Any]()
 
-  def afterFilter(f: () => Any) {
-    afterFilters.append(f)
+  def afterFilter(f: => Any): () => Any = {
+    val ret = () => f
+    afterFilters.append(ret)
+    ret
   }
 
   def skipAfterFilter(f: () => Any) {
@@ -36,8 +40,9 @@ trait Filter {
 
   private val aroundFilters = ArrayBuffer[(() => Any) => Any]()
 
-  def aroundFilter(f: (() => Any) => Any) {
+  def aroundFilter(f: (() => Any) => Any): (() => Any) => Any = {
     aroundFilters.append(f)
+    f
   }
 
   def skipAroundFilter(f: (() => Any) => Any) {

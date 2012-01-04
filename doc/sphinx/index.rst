@@ -24,7 +24,7 @@ Xitrum's documentation
    scopes
    validation
    upload
-   filters
+   filter
    cache
    i18n
    deploy
