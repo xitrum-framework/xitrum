@@ -46,19 +46,14 @@ trait JS {
 
   //----------------------------------------------------------------------------
 
-  def jsRender(fragments: Any*) {
+  def jsRespond(fragments: Any*) {
     val js = fragments.mkString(";\n") + ";\n"
-    renderText(js, "text/javascript; charset=" + Config.config.request.charset)
-  }
-
-  def jsRenderFormat(format: String, args: Any*) {
-    val js = format.format(args:_*)
-    jsRender(js)
+    respondText(js, "text/javascript; charset=" + Config.config.request.charset)
   }
 
   /** See http://stackoverflow.com/questions/503093/how-can-i-make-a-redirect-page-in-jquery */
   def jsRedirectTo(location: Any) {
-    jsRender("window.location.href = " + jsEscape(location))
+    jsRespond("window.location.href = " + jsEscape(location))
   }
 
   def jsRedirectTo(route: Route) { jsRedirectTo(route.url) }

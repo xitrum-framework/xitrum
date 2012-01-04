@@ -43,6 +43,6 @@ class CometGetController extends Controller {
       bs.append(m.body)
       (ts, bs)
     }
-    renderJson(Map("channel" -> channel, "timestamps" -> timestamps.toList, "bodies" -> bodies.toList))
+    respondJson(Map("channel" -> channel, "timestamps" -> timestamps.toList, "bodies" -> bodies.toList))
   }
 }

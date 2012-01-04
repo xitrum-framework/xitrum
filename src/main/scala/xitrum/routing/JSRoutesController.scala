@@ -44,9 +44,9 @@ class JSRoutesController extends Controller {
       response.setHeader(CONTENT_TYPE, "text/javascript")
       if (Gzip.isAccepted(request)) {
         response.setHeader(CONTENT_ENCODING, "gzip")
-        renderBinary(gzippedJsRoutes(this))
+        respondBinary(gzippedJsRoutes(this))
       } else {
-        jsRender(jsRoutes(this))
+        jsRespond(jsRoutes(this))
       }
     }
   }

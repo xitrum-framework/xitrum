@@ -17,10 +17,9 @@ trait Flash {
   }
 
   /**
-   * Same as jsFlash, but for web 1.0. The flash is clear right after this method
-   * is called.
+   * Returns the current content in flash, and clears the flash.
    */
-  def flash = {
+  def flash() = {
     sessiono(FLASH_KEY) match {
       case None =>
         ""
@@ -37,20 +36,29 @@ trait Flash {
 
   /**
    * For web 2.0 style application.
-   * Used in Ajax request handling to send a message to the flash area right away.
+   * Used in Ajax request handling to respond a message and have the browser
+   * render it to the flash area right away.
    */
-  def jsRenderFlash(msg: Any) {
+  def jsRespondFlash(msg: Any) {
     val js = jsFlashCall(msg)
-    jsRender(js)
+    jsRespond(js)
   }
 
   /**
    * For web 2.0 style application.
    * Used in application layout to display the flash message right after a view is loaded.
    */
-  def jsFlash(msg: Any) {
+  def jsRenderFlash(msg: Any) {
     val js = jsFlashCall(msg)
     jsAddToView(js)
+  }
+
+  /**
+   * Like jsRenderFlash(msg), but uses the current flash.
+   */
+  def jsRenderFlash() {
+    val msg = flash()
+    if (!msg.isEmpty) jsRenderFlash(msg)
   }
 
   lazy val xitrumCSS = <link href={urlForResource("xitrum/xitrum.css")} type="text/css" rel="stylesheet" media="all"></link>

@@ -77,16 +77,16 @@ object Dispatcher extends Logger {
             "Missing param: " + key
           }
           if (controller.isAjax)
-            controller.jsRender("alert(" + controller.jsEscape(msg) + ")")
+            controller.jsRespond("alert(" + controller.jsEscape(msg) + ")")
           else
-            controller.renderText(msg)
+            controller.respondText(msg)
         } else {
           logAccess(controller, postback, beginTimestamp, 0, false, e)
 
           if (Config.isProductionMode) {
             if (controller.isAjax) {
               controller.response.setStatus(INTERNAL_SERVER_ERROR)
-              controller.jsRender("alert(" + controller.jsEscape("Internal Server Error") + ")")
+              controller.jsRespond("alert(" + controller.jsEscape("Internal Server Error") + ")")
             } else {
               if (Routes.error500 == null || Routes.error500 == route) {
                 val response = new DefaultHttpResponse(HTTP_1_1, INTERNAL_SERVER_ERROR)
@@ -113,9 +113,9 @@ object Dispatcher extends Logger {
             }
 
             if (controller.isAjax) {
-              controller.jsRender("alert(" + controller.jsEscape(errorMsg) + ")")
+              controller.jsRespond("alert(" + controller.jsEscape(errorMsg) + ")")
             } else {
-              controller.renderText(errorMsg)
+              controller.respondText(errorMsg)
             }
           }
         }

@@ -16,10 +16,10 @@ import xitrum.routing.Route
 import xitrum.handler.down.{XSendFile, XSendResource}
 
 /**
- * When rendering text, charset is automatically set, as advised by Google:
+ * When responding text, charset is automatically set, as advised by Google:
  * http://code.google.com/speed/page-speed/docs/rendering.html#SpecifyCharsetEarly
  */
-trait Renderer extends JS with Flash with Knockout with I18n {
+trait Responder extends JS with Flash with Knockout with I18n {
   this: Controller =>
 
   private def writeHeaderOnFirstChunk {
@@ -33,12 +33,12 @@ trait Renderer extends JS with Flash with Knockout with I18n {
   /**
    * To respond chunks (http://en.wikipedia.org/wiki/Chunked_transfer_encoding):
    * 1. Call response.setChunked(true)
-   * 2. Call renderXXX as many times as you want
-   * 3. Lastly, call renderLastChunk
+   * 2. Call respondXXX as many times as you want
+   * 3. Lastly, call respondLastChunk
    *
-   * Headers are only sent on the first renderXXX call.
+   * Headers are only sent on the first respondXXX call.
    */
-  def renderLastChunk {
+  def respondLastChunk {
     channel.write(HttpChunk.LAST_CHUNK)
   }
 
@@ -49,10 +49,10 @@ trait Renderer extends JS with Flash with Knockout with I18n {
    * set to "application/xml" if text param is Node or NodeSeq, otherwise it is
    * set to "text/plain".
    */
-  def renderText(text: Any, contentType: String = null): String = {
+  def respondText(text: Any, contentType: String = null): String = {
     val textIsXml = text.isInstanceOf[Node] || text.isInstanceOf[NodeSeq]
 
-    // <br />.toString will create <br></br> which renders as 2 <br /> on some browsers!
+    // <br />.toString will create <br></br> which responds as 2 <br /> on some browsers!
     // http://www.scala-lang.org/node/492
     // http://www.ne.jp/asahi/hishidama/home/tech/scala/xml.html
     val ret =
@@ -99,9 +99,9 @@ trait Renderer extends JS with Flash with Knockout with I18n {
    * With text/json browser downloads it instead of displaying it,
    * which makes debugging a pain.
    */
-  def renderJson(any: Any) {
+  def respondJson(any: Any) {
     val json = Json.generate(any)
-    renderText(json, "application/json; charset=" + Config.config.request.charset)
+    respondText(json, "application/json; charset=" + Config.config.request.charset)
   }
 
   //----------------------------------------------------------------------------
@@ -110,71 +110,71 @@ trait Renderer extends JS with Flash with Knockout with I18n {
 
   def layout = renderedView
 
-  def renderInlineView(view: Any) {
-    renderInlineView(view, layout _)
+  def respondInlineView(view: Any) {
+    respondInlineView(view, layout _)
   }
 
   /** Content-Type header is set to "text/html" */
-  def renderInlineView(view: Any, customLayout: () => Any) {
+  def respondInlineView(view: Any, customLayout: () => Any) {
     renderedView = view
-    val renderedLayout = customLayout.apply()
-    if (renderedLayout == null)
-      renderText(renderedView, "text/html; charset=" + Config.config.request.charset)
+    val respondedLayout = customLayout.apply()
+    if (respondedLayout == null)
+      respondText(renderedView, "text/html; charset=" + Config.config.request.charset)
     else
-      renderText(renderedLayout, "text/html; charset=" + Config.config.request.charset)
+      respondText(respondedLayout, "text/html; charset=" + Config.config.request.charset)
   }
 
   //----------------------------------------------------------------------------
 
-  def renderScalateTemplateToString(path: String) = Scalate.renderFile(this, path)
+  def renderScalate(path: String) = Scalate.renderFile(this, path)
 
-  def renderScalateTemplateToString(controllerClass: Class[_], templateType: String): String = {
+  def renderScalate(controllerClass: Class[_], templateType: String): String = {
     val path = "src/main/scalate/" + controllerClass.getName.replace(".", "/") + "." + templateType
-    renderScalateTemplateToString(path)
+    renderScalate(path)
   }
 
-  def renderScalateTemplateToString(controllerClass: Class[_]): String = {
-    renderScalateTemplateToString(controllerClass, Config.config.scalate)
+  def renderScalate(controllerClass: Class[_]): String = {
+    renderScalate(controllerClass, Config.config.scalate)
   }
 
-  def renderView(templateType: String) {
-    renderView(currentRoute, templateType)
+  def respondView(templateType: String) {
+    respondView(currentRoute, templateType)
   }
 
-  def renderView() {
-    renderView(currentRoute, Config.config.scalate)
+  def respondView() {
+    respondView(currentRoute, Config.config.scalate)
   }
 
-  def renderView(route: Route, templateType: String) {
-    renderView(route, layout _, templateType)
+  def respondView(route: Route, templateType: String) {
+    respondView(route, layout _, templateType)
   }
 
-  def renderView(route: Route) {
-    renderView(route, layout _, Config.config.scalate)
+  def respondView(route: Route) {
+    respondView(route, layout _, Config.config.scalate)
   }
 
-  def renderView(route: Route, customLayout: () => Any, templateType: String) {
+  def respondView(route: Route, customLayout: () => Any, templateType: String) {
     val nonNullRouteMethod = nonNullRouteMethodFromRoute(route)
     val controllerClass    = nonNullRouteMethod.getDeclaringClass
     val routeName          = nonNullRouteMethod.getName
     val path = "src/main/scalate/" + controllerClass.getName.replace(".", "/") + "/" + routeName + "." + templateType
 
-    renderedView = renderScalateTemplateToString(path)
-    val renderedLayout = customLayout.apply
-    if (renderedLayout == null)
-      renderText(renderedView, "text/html; charset=" + Config.config.request.charset)
+    renderedView = renderScalate(path)
+    val respondedLayout = customLayout.apply
+    if (respondedLayout == null)
+      respondText(renderedView, "text/html; charset=" + Config.config.request.charset)
     else
-      renderText(renderedLayout, "text/html; charset=" + Config.config.request.charset)
+      respondText(respondedLayout, "text/html; charset=" + Config.config.request.charset)
   }
 
-  def renderView(route: Route, customLayout: () => Any) {
-    renderView(route, customLayout, Config.config.scalate)
+  def respondView(route: Route, customLayout: () => Any) {
+    respondView(route, customLayout, Config.config.scalate)
   }
 
   //----------------------------------------------------------------------------
 
   /** If Content-Type header is not set, it is set to "application/octet-stream" */
-  def renderBinary(bytes: Array[Byte]) {
+  def respondBinary(bytes: Array[Byte]) {
     if (!response.containsHeader(CONTENT_TYPE))
       response.setHeader(CONTENT_TYPE, "application/octet-stream")
 
@@ -203,7 +203,7 @@ trait Renderer extends JS with Flash with Knockout with I18n {
    *
    * To sanitize the path, use xitrum.util.PathSanitizer.
    */
-  def renderFile(path: String) {
+  def respondFile(path: String) {
     XSendFile.setHeader(response, path)
     respond
   }
@@ -215,26 +215,26 @@ trait Renderer extends JS with Flash with Knockout with I18n {
    *
    * @param path Relative to an entry in classpath, without leading "/"
    */
-  def renderResource(path: String) {
+  def respondResource(path: String) {
     XSendResource.setHeader(response, path)
     respond
   }
 
   //----------------------------------------------------------------------------
 
-  def renderDefault404Page {
+  def respondDefault404Page {
     XSendFile.set404Page(response)
     respond
   }
 
-  def renderDefault500Page {
+  def respondDefault500Page {
     XSendFile.set500Page(response)
     respond
   }
 
   //----------------------------------------------------------------------------
 
-  def renderWebSocket(text: String) {
+  def respondWebSocket(text: String) {
     channel.write(new TextWebSocketFrame(text))
   }
 }

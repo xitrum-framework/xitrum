@@ -55,6 +55,6 @@ trait BasicAuthentication {
   private def respondBasic(realm: String) {
     response.setHeader(HttpHeaders.Names.WWW_AUTHENTICATE, "Basic realm=\"" + realm + "\"")
     response.setStatus(HttpResponseStatus.UNAUTHORIZED)
-    renderText("Wrong username or password")
+    respondText("Wrong username or password")
   }
 }

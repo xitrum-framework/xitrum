@@ -9,9 +9,9 @@ import xitrum.controller._
 import xitrum.handler.up.Dispatcher
 import xitrum.scope.request.ExtEnv
 import xitrum.validator.{Validator, ValidatorInjector}
-import xitrum.view.Renderer
+import xitrum.view.Responder
 
-trait Controller extends ExtEnv with RouteFactory with Logger with Net with Filter with BasicAuthentication with WebSocket with Redirect with UrlFor with Renderer with I18n {
+trait Controller extends ExtEnv with RouteFactory with Logger with Net with Filter with BasicAuthentication with WebSocket with Redirect with UrlFor with Responder with I18n {
   var pathPrefix = ""
 
   //----------------------------------------------------------------------------
