@@ -37,8 +37,8 @@ trait Controller extends ExtEnv with RouteFactory with Logger with Net with Filt
 
   //----------------------------------------------------------------------------
 
-  // For Validators to use
-  implicit val controller: Controller = this
+  // For Validators and postbackUrl to use
+  implicit val currentController: Controller = this
 
   //----------------------------------------------------------------------------
 

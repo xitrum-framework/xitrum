@@ -12,7 +12,7 @@ import HttpHeaders.Values.CHUNKED
 import com.codahale.jerkson.Json
 
 import xitrum.{Controller, Config}
-import xitrum.routing.{Route, ControllerReflection}
+import xitrum.routing.Route
 import xitrum.handler.down.{XSendFile, XSendResource}
 
 /**
@@ -154,14 +154,9 @@ trait Renderer extends JS with Flash with Knockout with I18n {
   }
 
   def renderView(route: Route, customLayout: () => Any, templateType: String) {
-    val nonNullRouteMethod =
-      if (route.routeMethod != null)  // Current route
-        route.routeMethod
-      else                            // Route from controller companion object has null routeMethod
-        ControllerReflection.lookupRouteMethodForRouteWithNullRouteMethod(route)
-
-    val controllerClass = nonNullRouteMethod.getDeclaringClass
-    val routeName       = nonNullRouteMethod.getName
+    val nonNullRouteMethod = nonNullRouteMethodFromRoute(route)
+    val controllerClass    = nonNullRouteMethod.getDeclaringClass
+    val routeName          = nonNullRouteMethod.getName
     val path = "src/main/scalate/" + controllerClass.getName.replace(".", "/") + "/" + routeName + "." + templateType
 
     renderedView = renderScalateTemplateToString(path)

@@ -151,7 +151,7 @@ object Routes extends Logger {
             val controllerClass = routeMethod.getDeclaringClass
             val controller      = controllerClass.newInstance()
             val route           = routeMethod.invoke(controller).asInstanceOf[Route]
-            if (route.httpMethod != null) {
+            if (route.httpMethod != null) {  // Routes created by indirectRoute do not have httpMethod
               val withRouteMethod = Route(route.httpMethod, route.order, route.compiledPattern, route.body, routeMethod, route.cacheSeconds)
 
               val firsts_others_lasts =

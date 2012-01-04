@@ -16,12 +16,12 @@ class Validators(var validators: List[Validator]) {
    * validators, while validators may add new or change other attributes. For
    * example, Required adds class="required".
    */
-  def ::(elem: Elem)(implicit controller: Controller): Elem = {
+  def ::(elem: Elem)(implicit currentController: Controller): Elem = {
     val paramName       = (elem \ "@name").text
     val secureParamName = ValidatorInjector.injectToParamName(paramName, validators:_*)
 
     val elem2 = validators.foldLeft(elem) { (acc, validator) =>
-      validator.render(controller, acc, paramName, secureParamName)
+      validator.render(currentController, acc, paramName, secureParamName)
     }
     elem2 % Attribute(None, "name", Text(secureParamName), Null)
   }

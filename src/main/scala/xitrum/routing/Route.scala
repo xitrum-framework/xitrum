@@ -3,7 +3,7 @@ package xitrum.routing
 import java.lang.reflect.Method
 import io.netty.handler.codec.http.{HttpMethod, QueryStringEncoder}
 
-import xitrum.Config
+import xitrum.{Config, Controller}
 import xitrum.controller.PathPrefix
 import xitrum.util.SecureBase64
 
@@ -71,13 +71,8 @@ case class Route(httpMethod: HttpMethod, order: RouteOrder.RouteOrder, compiledP
 
   lazy val url: String = url()
 
-  lazy val postbackUrl: String = {
-    val nonNullRouteMethod =
-      if (routeMethod != null)  // Current route
-        routeMethod
-      else                      // Route from controller companion object has null routeMethod
-        ControllerReflection.lookupRouteMethodForRouteWithNullRouteMethod(this)
-
+  def postbackUrl(implicit currentController: Controller): String = {
+    val nonNullRouteMethod = currentController.nonNullRouteMethodFromRoute(this)
     // routeMethod (thus Route) is not serializable
     // Use controllerRouteName instead
     val encryptedControllerRouteName = SecureBase64.encrypt(ControllerReflection.controllerRouteName(nonNullRouteMethod))

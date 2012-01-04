@@ -44,8 +44,7 @@ trait UrlFor {
   }
 
   def currentPostbackUrl(extraParams: (String, Any)*) = {
-    val route = currentRoute
-    postbackUrl(route, extraParams:_*)
+    postbackUrl(currentRoute, extraParams:_*)
   }
 
   private def registerExtraParams(url: String, extraParams: Iterable[(String, Any)]) {

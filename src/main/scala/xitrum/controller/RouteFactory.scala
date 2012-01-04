@@ -1,9 +1,11 @@
 package xitrum.controller
 
+import java.lang.reflect.Method
+import scala.collection.mutable.{Map => MMap}
 import io.netty.handler.codec.http.HttpMethod
 
 import xitrum.Controller
-import xitrum.routing.{HttpMethodWebSocket, Route, RouteOrder, Routes}
+import xitrum.routing.{HttpMethodWebSocket, Route, RouteOrder, Routes, ControllerReflection}
 
 /**
  * val route = GET("pattern") {
@@ -78,6 +80,56 @@ trait RouteFactory {
 
   def WEBSOCKET(pattern: String = "")(body: => Unit) =
     Route(HttpMethodWebSocket, RouteOrder.OTHER, Routes.compilePattern(withPathPrefix(pattern)), () => body, null, 0)
+
+  //----------------------------------------------------------------------------
+
+  /**
+   * Route in controller companion object or in this same controller but
+   * not the currentRoute will have null routeMethod.
+   *
+   * In that case, to create new controller instance or get controller
+   * class name & route name, call this method. It calls
+   * ControllerReflection.lookupRouteMethodForRouteWithNullRouteMethod
+   * (for route in controller companion object) then falls back to using
+   * reflection to find inside this controller.
+   */
+  def nonNullRouteMethodFromRoute(route: Route): Method = {
+    if (route.routeMethod != null) {  // currentRoute
+      route.routeMethod
+    } else {
+      val fromControllerReflection = ControllerReflection.lookupRouteMethodForRouteWithNullRouteMethod(route)
+      if (fromControllerReflection != null)
+        fromControllerReflection
+      else
+        lookupRouteMethodForRouteWithNullRouteMethod(route)
+    }
+  }
+
+  private val routeWithNullRouteMethod_to_RouteMethod_cache = MMap[Route, Method]()
+
+  private def lookupRouteMethodForRouteWithNullRouteMethod(route: Route): Method = synchronized {
+    if (routeWithNullRouteMethod_to_RouteMethod_cache.isDefinedAt(route))
+      return routeWithNullRouteMethod_to_RouteMethod_cache(route)
+
+    // Use reflection on this controller to find, and cache the result if any
+    // Cannot use getFields because route fields are "val"s which are private in Java
+    // Must use getDeclaredFields and set fields to public
+    val controllerClass = getClass
+    val fields          = controllerClass.getDeclaredFields
+    fields.foreach { field =>
+      if (field.getType == classOf[Route]) {
+        field.setAccessible(true)
+        val any = field.get(this)
+        if (any == route) {
+          val methodName = field.getName
+          val routeMethod = controllerClass.getMethod(methodName)
+          routeWithNullRouteMethod_to_RouteMethod_cache(route) = routeMethod  // Cache it
+          return routeMethod
+        }
+      }
+    }
+    null
+  }
 }
 
 object PathPrefix {

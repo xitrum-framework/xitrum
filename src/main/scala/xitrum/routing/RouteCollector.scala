@@ -7,7 +7,7 @@ import java.util.{List => JList}
 import scala.collection.JavaConversions
 
 import sclasner.{FileEntry, Scanner}
-import javassist.bytecode.{ClassFile, FieldInfo}
+import javassist.bytecode.{ClassFile, FieldInfo, AccessFlag}
 
 import xitrum.{Config, Logger}
 
@@ -64,7 +64,17 @@ class RouteCollector(cachedFileName: String) extends Logger {
           } else {
             val routeMethodNames = JavaConversions.asScalaBuffer(fieldInfoList).foldLeft(Seq[String]()) { (acc2, fi) =>
               if (fi.getDescriptor == routeClassDescriptor) {
-                acc2 :+ fi.getName  // Scala "val" creates method with the same name
+                val methodName = fi.getName  // Scala "val" creates method with the same name
+                val mi = cf.getMethod(methodName)
+                if (mi == null) {
+                  acc2
+                } else {
+                  // This method should be public but not static
+                  val accessFlags = mi.getAccessFlags
+                  val isPublic = (accessFlags & AccessFlag.PUBLIC) == 1
+                  val isStatic = (accessFlags & AccessFlag.STATIC) == 1
+                  if (isPublic && !isStatic) acc2 :+ methodName else acc2
+                }
               } else {
                 acc2
               }

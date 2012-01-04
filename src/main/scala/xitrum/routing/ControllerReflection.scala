@@ -11,8 +11,8 @@ object ControllerReflection {
   private val classResolver = ClassResolvers.softCachingConcurrentResolver(getClass.getClassLoader)
 
   // Routes in controller companion object will have null routeMethod.
-  // To create new controller instances, these routes need lookup this map to
-  // get non-null routeMethods.
+  // To create new controller instances or get controller class name & route name,
+  // these routes need lookup this map to get non-null routeMethods.
   private val routeWithNullRouteMethod_to_RouteMethod = MMap[Route, Method]()
 
   /** @return controller#route */
@@ -63,22 +63,11 @@ object ControllerReflection {
     newControllerAndRoute(routeo.get)
   }
 
-  /** Called by Renderer and newControllerAndRoute */
+  /** Called by newControllerAndRoute and RouteFactory#nonNullRouteMethodFromRoute */
   def lookupRouteMethodForRouteWithNullRouteMethod(route: Route): Method = {
     routeWithNullRouteMethod_to_RouteMethod.get(route) match {
       case Some(method) => method
-      case None => throw new Exception("""Please use route from companion object of the controller class, like:
-class MyController extends xitrum.Controller {
-  // A route:
-  val index = GET() {...}
-}
-
-// Companion object of the controller class
-object MyController extends MyController
-
-// Refer to the route:
-MyController.index
-""")
+      case None => null
     }
   }
 
