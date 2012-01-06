@@ -162,6 +162,6 @@ class AjaxUploadTempFileServerController extends Controller {
     val tempFilePath          = SecureBase64.decrypt(encryptedTempFilePath).toString
 
     XSendFile.setHeader(response, tempFilePath)
-    respond
+    respond()
   }
 }

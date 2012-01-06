@@ -86,7 +86,7 @@ object Etag extends Logger {
       response.setStatus(NOT_MODIFIED)
       HttpHeaders.setContentLength(response, 0)
       response.setContent(ChannelBuffers.EMPTY_BUFFER)
-      controller.respond
+      controller.respond()
       true
     } else {
       request.setHeader(ETAG, etag)

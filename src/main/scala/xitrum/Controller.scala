@@ -20,7 +20,7 @@ trait Controller extends ExtEnv with RouteFactory with Logger with Net with Filt
 
   def isResponded = responded
 
-  def respond = synchronized {
+  def respond() {
     if (responded) {
       // Print the stack trace so that application developers know where to fix
       try {

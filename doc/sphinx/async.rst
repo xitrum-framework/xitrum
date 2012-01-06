@@ -38,7 +38,7 @@ file that does may not fit memory.
     respondText(line)
   }
 
-  respondLastChunk
+  respondLastChunk()
 
 1. Call ``response.setChunked(true)``
 2. Call respondXXX as many times as you want
@@ -90,7 +90,7 @@ Chat example
 ::
 
   import xitrum.Controller
-  import xitrum.comet.CometPublishAction
+  import xitrum.comet.CometPublishController
   import xitrum.validator.{Required, Validated}
 
   class ChatController {

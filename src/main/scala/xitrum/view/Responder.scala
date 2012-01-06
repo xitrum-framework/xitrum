@@ -26,7 +26,7 @@ trait Responder extends JS with Flash with Knockout with I18n {
     if (!isResponded) {
       response.removeHeader(CONTENT_LENGTH)
       response.setHeader(TRANSFER_ENCODING, CHUNKED)
-      respond
+      respond()
     }
   }
 
@@ -34,11 +34,11 @@ trait Responder extends JS with Flash with Knockout with I18n {
    * To respond chunks (http://en.wikipedia.org/wiki/Chunked_transfer_encoding):
    * 1. Call response.setChunked(true)
    * 2. Call respondXXX as many times as you want
-   * 3. Lastly, call respondLastChunk
+   * 3. Lastly, call respondLastChunk()
    *
    * Headers are only sent on the first respondXXX call.
    */
-  def respondLastChunk {
+  def respondLastChunk() {
     channel.write(HttpChunk.LAST_CHUNK)
   }
 
@@ -86,7 +86,7 @@ trait Responder extends JS with Flash with Knockout with I18n {
       // Content length is number of bytes, not characters!
       HttpHeaders.setContentLength(response, cb.readableBytes)
       response.setContent(cb)
-      respond
+      respond()
     }
 
     ret
@@ -126,40 +126,67 @@ trait Responder extends JS with Flash with Knockout with I18n {
 
   //----------------------------------------------------------------------------
 
-  def renderScalate(path: String) = Scalate.renderFile(this, path)
+  /**
+   * Renders Scalate template file relative to src/main/view/scalate directory.
+   * The current controller instance will be imported in the template as "helper".
+   */
+  def renderScalate(relPath: String) = Scalate.renderFile(this, relPath)
 
+  /**
+   * Renders Scalate template file with the path:
+   * src/main/view/scalate/<the/given/controller/Class>.<templateType>
+   *
+   * @param controllerClass should be one of the parent classes of the current controller
+   *                        because the current controller instance will be imported
+   *                        in the template as "helper"
+   * @param templateType "jade", "mustache", "scaml", or "ssp"
+   */
   def renderScalate(controllerClass: Class[_], templateType: String): String = {
-    val path = "src/main/scalate/" + controllerClass.getName.replace(".", "/") + "." + templateType
-    renderScalate(path)
+    val relPath = controllerClass.getName.replace('.', File.separatorChar) + "." + templateType
+    renderScalate(relPath)
   }
 
-  def renderScalate(controllerClass: Class[_]): String = {
+  /**
+   * Same as renderScalate(controllerClass, templateType),
+   * where templateType is as configured in xitrum.json.
+   */
+  def renderScalate(controllerClass: Class[_]): String =
     renderScalate(controllerClass, Config.config.scalate)
+
+  /**
+   * Renders Scalate template file with the path:
+   * src/main/view/scalate/<the/given/controller/Class>/_<fragment>.<templateType>
+   *
+   * @param controllerClass should be one of the parent classes of the current controller
+   *                        because the current controller instance will be imported
+   *                        in the template as "helper"
+   * @param templateType "jade", "mustache", "scaml", or "ssp"
+   */
+  def renderFragment(controllerClass: Class[_], fragment: String, templateType: String): String = {
+    val relPath = controllerClass.getName.replace('.', File.separatorChar) + File.separatorChar + "_" + fragment + "." + templateType
+    renderScalate(relPath)
   }
 
-  def respondView(templateType: String) {
-    respondView(currentRoute, templateType)
-  }
+  /**
+   * Same as renderFragment(controllerClass, fragment, templateType),
+   * where templateType is as configured in xitrum.json.
+   */
+  def renderFragment(controllerClass: Class[_], fragment: String): String =
+    renderFragment(controllerClass, fragment, Config.config.scalate)
 
-  def respondView() {
-    respondView(currentRoute, Config.config.scalate)
-  }
-
-  def respondView(route: Route, templateType: String) {
-    respondView(route, layout _, templateType)
-  }
-
-  def respondView(route: Route) {
-    respondView(route, layout _, Config.config.scalate)
-  }
-
+  /**
+   * Responds Scalate template file with the path:
+   * src/main/view/scalate/<the/class/of/the/controller/of/the/given/route>/<route name>.<templateType>
+   *
+   * @param templateType "jade", "mustache", "scaml", or "ssp"
+   */
   def respondView(route: Route, customLayout: () => Any, templateType: String) {
     val nonNullRouteMethod = nonNullRouteMethodFromRoute(route)
     val controllerClass    = nonNullRouteMethod.getDeclaringClass
     val routeName          = nonNullRouteMethod.getName
-    val path = "src/main/scalate/" + controllerClass.getName.replace(".", "/") + "/" + routeName + "." + templateType
+    val relPath            = controllerClass.getName.replace('.', File.separatorChar) + File.separator + routeName + "." + templateType
 
-    renderedView = renderScalate(path)
+    renderedView = renderScalate(relPath)
     val respondedLayout = customLayout.apply
     if (respondedLayout == null)
       respondText(renderedView, "text/html; charset=" + Config.config.request.charset)
@@ -167,8 +194,46 @@ trait Responder extends JS with Flash with Knockout with I18n {
       respondText(respondedLayout, "text/html; charset=" + Config.config.request.charset)
   }
 
+  /**
+   * Same as respondView(route, customLayout, templateType),
+   * where templateType is as configured in xitrum.json.
+   */
   def respondView(route: Route, customLayout: () => Any) {
     respondView(route, customLayout, Config.config.scalate)
+  }
+
+  /**
+   * Same as respondView(route, customLayout, templateType),
+   * where customLayout is from the controller's layout method.
+   */
+  def respondView(route: Route, templateType: String) {
+    respondView(route, layout _, templateType)
+  }
+
+  /**
+   * Same as respondView(route, customLayout, templateType),
+   * where route is currentRoute and customLayout is from the controller's layout method.
+   */
+  def respondView(templateType: String) {
+    respondView(currentRoute, templateType)
+  }
+
+  /**
+   * Same as respondView(route, customLayout, templateType),
+   * where customLayout is from the controller's layout method and
+   * templateType is as configured in xitrum.json.
+   */
+  def respondView(route: Route) {
+    respondView(route, layout _, Config.config.scalate)
+  }
+
+  /**
+   * Same as respondView(route, customLayout, templateType),
+   * where route is currentRoute, customLayout is from the controller's layout method and
+   * templateType is as configured in xitrum.json.
+   */
+  def respondView() {
+    respondView(currentRoute, Config.config.scalate)
   }
 
   //----------------------------------------------------------------------------
@@ -186,7 +251,7 @@ trait Responder extends JS with Flash with Knockout with I18n {
     } else {
       HttpHeaders.setContentLength(response, bytes.length)
       response.setContent(cb)
-      respond
+      respond()
     }
   }
 
@@ -205,7 +270,7 @@ trait Responder extends JS with Flash with Knockout with I18n {
    */
   def respondFile(path: String) {
     XSendFile.setHeader(response, path)
-    respond
+    respond()
   }
 
   /**
@@ -217,19 +282,19 @@ trait Responder extends JS with Flash with Knockout with I18n {
    */
   def respondResource(path: String) {
     XSendResource.setHeader(response, path)
-    respond
+    respond()
   }
 
   //----------------------------------------------------------------------------
 
   def respondDefault404Page {
     XSendFile.set404Page(response)
-    respond
+    respond()
   }
 
   def respondDefault500Page {
     XSendFile.set500Page(response)
-    respond
+    respond()
   }
 
   //----------------------------------------------------------------------------

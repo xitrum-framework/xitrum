@@ -88,7 +88,7 @@ Articles.scala
     val show = GET(":id") {
       val (title, body) = ...  // Get from DB
       RVar.title.set(title)
-      renderInlineView(body)
+      respondInlineView(body)
     }
   }
 

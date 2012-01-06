@@ -17,7 +17,7 @@ trait Redirect {
     response.setStatus(status)
     HttpHeaders.setContentLength(response, 0)
     response.setHeader(LOCATION, location)
-    respond
+    respond()
   }
 
   def redirectTo(route: Route, params: (String, Any)*) { redirectTo(route.url(params: _*)) }

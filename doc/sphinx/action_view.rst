@@ -123,7 +123,7 @@ scr/main/scala/quickstart/controller/AppController.scala:
   import xitrum.Controller
 
   trait AppController extends Controller {
-    override def layout = renderScalate(classOf[AppAction])
+    override def layout = respondScalate(classOf[AppAction])
   }
 
 scr/main/scala/quickstart/action/MyController.scala:
@@ -179,5 +179,5 @@ or "ssp" as the last parameter to `respondScalateTemplateToString` or `respondSc
 
 ::
 
-  renderScalate(classOf[AppAction], "mustache")
+  respondScalate(classOf[AppAction], "mustache")
   respondView("scaml")
