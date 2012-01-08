@@ -1,9 +1,8 @@
 2.1 (planned):
+* Make extensive use of Knockout.js and Scala delimited continuation
+* Integrate WebSocket to Comet; use WebSocket if available, or fall back to Ajax
 * Add Ajax style upload based on iframe
 * Add digest authentication
-* Make extensive use of Knockout.js and Scala delimited continuation
-* Integrate WebSocket to Comet
-  Comet uses WebSocket if available, or falls back to Ajax
 * Add Akka
 * Typesafe routes using Scala compiler plugin
 * wro4j
