@@ -7,32 +7,28 @@
 * Add Akka
 * Typesafe routes using Scala compiler plugin
 * wro4j
-* RESTful actions now can use validators:
-    val username = param("username") :: Required :: MaxLength(32)
 * Middleware architecture based on Netty handlers
 
 2.0 (planned):
-* Add Scalate back
-* Remove all annotations
-* Put related actions into controller
+* Add Scalate back, with precompilation
+* Remove annotations and put related actions into controller
+* Remove server-side auto-validation for postback requests and
+  rewrite validators so that they can be used for any kind of requests;
+  You can still use postback APIs on browser side, postback requests are easier
+  to debug with Firebug or Chrome, because parameter names are no longer encrypted
+* Improve data-after, now you can write
+    data-after="$('#chatInput').val('')"
+  instead of
+    data-after="function () { $('#chatInput').val('') }"
 * Add Knockout.js
-* Update jQuery from 1.6.4 to 1.7.1
 * Add Scala delimited continuation
   See:
     http://www.earldouglas.com/continuation-based-web-workflows-part-two/
     http://stackoverflow.com/questions/6062003/event-listeners-with-scala-continuations
     http://jim-mcbeath.blogspot.com/2010/08/delimited-continuations.html
-* Expose APIs for routing and action/page caching, for cases you don't want
-  to use annotation
-  See:
-    http://ngocdaothanh.github.com/xitrum/restful.html#routing-without-using-annotation
-    http://ngocdaothanh.github.com/xitrum/cache.html#cache-page-or-action-without-using-annotation
-* Improve Quickstart: https://github.com/ngocdaothanh/xitrum-quickstart
-* Improve data-after, now you can write
-    data-after="$('#chatInput').val('')"
-  instead of
-    data-after="function () { $('#chatInput').val('') }"
+* Update jQuery from 1.6.4 to 1.7.1
 * Fix urlForPublic bug, resulted URL now has the leading "/"
+* Improve Quickstart: https://github.com/ngocdaothanh/xitrum-quickstart
 
 1.7:
 * WebSocket, see:
