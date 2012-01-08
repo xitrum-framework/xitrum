@@ -146,7 +146,7 @@ object Routes extends Logger {
 
   private def fromCacheFileOrRecollectWithRetry(cachedFileName: String) {
     try {
-      logger.info("Load " + cachedFileName + "/collect routes and action/page cache config from cotrollers...")
+      logger.info("Load " + cachedFileName + "/collect routes and action/page cache config from controllers...")
       fromCacheFileOrRecollectReal(cachedFileName)
     } catch {
       case e =>
