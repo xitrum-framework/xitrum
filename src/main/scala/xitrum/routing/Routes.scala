@@ -232,14 +232,13 @@ object Routes extends Logger {
     if (!routes.isDefinedAt(httpMethod)) return None
 
     val tokens = pathInfo.tokens
-    val max1 = tokens.size
+    val max1   = tokens.size
 
     var pathParams: Params = null
 
     def finder(route: Route): Boolean = {
       val compiledPattern = route.compiledPattern
-
-      val max2 = compiledPattern.size
+      val max2            = compiledPattern.size
 
       // Check the number of tokens
       // max2 must be <= max1
@@ -261,7 +260,6 @@ object Routes extends Logger {
           pathParams = MMap[String, List[String]]()
           return true
         }
-
         return false
       }
 
@@ -270,9 +268,7 @@ object Routes extends Logger {
       pathParams = MMap[String, List[String]]()
       var i = 0 // i will go from 0 until max1
 
-      compiledPattern.forall { tc =>
-        val (token, fixed) = tc
-
+      compiledPattern.forall { case (token, fixed) =>
         val ret = if (fixed)
           (token == tokens(i))
         else {
@@ -304,10 +300,21 @@ object Routes extends Logger {
       }
     }
 
-    val (firsts, others, lasts) = routes(httpMethod)
-    (firsts ++ others ++ lasts).find(finder) match {
+    routes.get(httpMethod) match {
       case None => None
-      case Some(route) => Some((route, pathParams))
+      case Some((firsts, others, lasts)) =>
+        firsts.find(finder) match {
+          case Some(route) => Some((route, pathParams))
+          case None =>
+            others.find(finder) match {
+              case Some(route) => Some((route, pathParams))
+              case None =>
+                lasts.find(finder) match {
+                  case Some(route) => Some((route, pathParams))
+                  case None => None
+                }
+            }
+        }
     }
   }
 }
