@@ -33,7 +33,7 @@ class CookieSessionStore extends SessionStore {
     val immutableMap = session.toMap
 
     val s = SecureBase64.encrypt(immutableMap)
-    val cookiePath = Config.withBaseUri("/")
+    val cookiePath = Config.withBaseUrl("/")
     extEnv.cookies.get(Config.config.session.cookieName) match {
       case Some(cookie) =>
         cookie.setHttpOnly(true)

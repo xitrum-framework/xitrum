@@ -5,10 +5,10 @@ import scala.collection.mutable.ListBuffer
 import xitrum.Controller
 import xitrum.scope.request.Params
 
-object CometGetController extends CometGetController
+object CometController extends CometController
 
-class CometGetController extends Controller {
-  val postback = indirectRoute {
+class CometController extends Controller {
+  val index = GET("xitrum/comet/:channel/:lastTimestamp") {
     val channel       = param("channel")
     val lastTimestamp = param[Long]("lastTimestamp")
 
@@ -33,6 +33,12 @@ class CometGetController extends Controller {
     } else {
       respondMessages(channel, messages)
     }
+  }
+
+  val publish = POST("xiturm/comet/:channel") {
+    val channel = param("channel")
+    Comet.publish(channel, textParams - "channel")  // Save some space
+    respondText("")
   }
 
   //----------------------------------------------------------------------------

@@ -16,7 +16,7 @@ case class HttpConfig(port: Int)
 case class KeyStoreConfig(path: String, password: String, certificatePassword: String)
 case class HttpsConfig(port: Int, keystore: KeyStoreConfig)
 
-case class ReverseProxyConfig(ips: List[String], baseUri: String)
+case class ReverseProxyConfig(ips: List[String], baseUrl: String)
 
 case class SessionConfig(store: String, cookieName: String, secureKey: String)
 
@@ -77,7 +77,7 @@ object Config extends Logger {
 
   //----------------------------------------------------------------------------
 
-  val baseUri = if (config.reverseProxy.isDefined) config.reverseProxy.get.baseUri else ""
+  val baseUrl = if (config.reverseProxy.isDefined) config.reverseProxy.get.baseUrl else ""
 
   /**
    * @param path with leading "/"
@@ -86,11 +86,11 @@ object Config extends Logger {
    * //xitrum/postback/zOIc0v...
    * will cause the browser to send request to http://xitrum/postback/zOIc0v...
    */
-  def withBaseUri(path: String) = {
-    if (Config.baseUri.isEmpty) {
+  def withBaseUrl(path: String) = {
+    if (Config.baseUrl.isEmpty) {
       path
     } else {
-      if (path.isEmpty) Config.baseUri else Config.baseUri + "/" + path
+      if (path.isEmpty) Config.baseUrl else Config.baseUrl + "/" + path
     }
   }
 

@@ -37,8 +37,8 @@ trait RouteFactory {
   //----------------------------------------------------------------------------
 
   /**
-   * Creates route which is not for direct routing for HTTP client,
-   * like postback, 404 or 500 error handler.
+   * Creates route which is not for direct routing for HTTP clients,
+   * like 404 or 500 error handler.
    */
   def indirectRoute(body: => Unit) = Route(null, null, null, () => body, null, 0)
 
@@ -109,11 +109,10 @@ trait RouteFactory {
   def nonNullRouteMethodFromRoute(route: Route): Method = {
     // Route in controller companion object is OK, see
     // ControllerReflection.cacheRouteMethodToRouteInCompanionControllerObject
-    if (route.routeMethod != null) {  // currentRoute
+    if (route.routeMethod != null)  // currentRoute
       route.routeMethod
-    } else {
+    else
       lookupRouteMethodForRouteWithNullRouteMethod(route)
-    }
   }
 
   private def lookupRouteMethodForRouteWithNullRouteMethod(route: Route): Method = synchronized {

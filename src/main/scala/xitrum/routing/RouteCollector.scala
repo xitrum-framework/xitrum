@@ -1,6 +1,6 @@
 package xitrum.routing
 
-import java.io.{ByteArrayInputStream, DataInputStream, File}
+import java.io.{ByteArrayInputStream, DataInputStream}
 import java.lang.reflect.Method
 import java.util.{List => JList}
 
@@ -17,32 +17,8 @@ class RouteCollector(cachedFileName: String) extends Logger {
    * Because java.lang.reflect.Method is not serializable, we return a map of
    * controller class name -> route method names.
    */
-  def fromCacheFileOrRecollect(): Map[String, Seq[String]] = {
-    logger.info("Load " + cachedFileName + "/recollect routes and action/page cache config from cotrollers...")
-
-    try {
-      Scanner.foldLeft(cachedFileName, Map[String, Seq[String]](), discovered _)
-    } catch {
-      case e =>
-        // Maybe routes.sclasner could not be loaded because dependencies have changed.
-        // Try deleting routes.sclasner and scan again.
-        val f = new File(cachedFileName)
-        if (f.exists) {
-          logger.warn("Error loading " + cachedFileName + ". Delete the file and recollect routes...")
-          f.delete()
-          try {
-            Scanner.foldLeft(cachedFileName, Map[String, Seq[String]](), discovered _)
-          } catch {
-            case e2 =>
-              Config.exitOnError("Could not collect routes", e2)
-              throw e2
-          }
-        } else {
-          Config.exitOnError("Could not collect routes", e)
-          throw e
-        }
-    }
-  }
+  def fromCacheFileOrRecollect(): Map[String, Seq[String]] =
+    Scanner.foldLeft(cachedFileName, Map[String, Seq[String]](), discovered _)
 
   //----------------------------------------------------------------------------
 

@@ -1,6 +1,6 @@
 package xitrum.view
 
-import java.io.{File, ByteArrayOutputStream, PrintWriter}
+import java.io.{File, PrintWriter, StringWriter}
 
 import org.fusesource.scalate.{Binding, DefaultRenderContext, TemplateEngine}
 import org.fusesource.scalate.scaml.ScamlOptions
@@ -25,12 +25,12 @@ object Scalate {
    */
   def renderFile(controller: Controller, relPath: String): String = {
     val path    = DIR + File.separator + relPath
-    val os      = new ByteArrayOutputStream
-    val writer  = new PrintWriter(os)
-    val context = new DefaultRenderContext(relPath, engine, writer)
+    val buffer  = new StringWriter
+    val out     = new PrintWriter(buffer)
+    val context = new DefaultRenderContext(relPath, engine, out)
     context.attributes.update(CONTROLLER_BINDING_ID, controller)
     engine.layout(path, context)
-    writer.close()
-    os.toString(Config.config.request.charset)
+    out.close()
+    buffer.toString
   }
 }

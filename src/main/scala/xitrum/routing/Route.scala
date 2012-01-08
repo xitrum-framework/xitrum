@@ -79,7 +79,7 @@ case class Route(httpMethod: HttpMethod, order: RouteOrder.RouteOrder, compiledP
         ret
       }
     }
-    val url = Config.withBaseUri("/" + tokens.mkString("/"))
+    val url = Config.withBaseUrl("/" + tokens.mkString("/"))
 
     val qse = new QueryStringEncoder(url, Config.requestCharset)
     for ((k, v) <- map) qse.addParam(k, v.toString)
@@ -87,12 +87,4 @@ case class Route(httpMethod: HttpMethod, order: RouteOrder.RouteOrder, compiledP
   }
 
   lazy val url: String = url()
-
-  def postbackUrl(implicit currentController: Controller): String = {
-    val nonNullRouteMethod = currentController.nonNullRouteMethodFromRoute(this)
-    // routeMethod (thus Route) is not serializable
-    // Use controllerRouteName instead
-    val encryptedControllerRouteName = SecureBase64.encrypt(ControllerReflection.controllerRouteName(nonNullRouteMethod))
-    PostbackController.postback.url("ecr" -> encryptedControllerRouteName)
-  }
 }

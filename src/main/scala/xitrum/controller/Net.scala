@@ -90,7 +90,7 @@ trait Net {
         ""
       else
         ":" + serverPort
-    serverName + portSuffix + Config.baseUri
+    serverName + portSuffix + Config.baseUrl
   }
 
   // TODO: inetSocketAddress can be Inet4Address or Inet6Address

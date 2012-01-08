@@ -1,18 +1,14 @@
 package xitrum.validator
 
-import scala.xml.Elem
-import xitrum.Controller
+class ValidationError(message: String) extends Error(message)
 
-trait Validator extends Serializable {
-  def render(controller: Controller, elem: Elem, paramName: String, secureParamName: String): Elem
-  def validate(controller: Controller, paramName: String, secureParamName: String): Boolean
+trait Validator {
+  def v(name: String, value: Any): Option[String]
 
-  //----------------------------------------------------------------------------
-
-  def ::(other: Validator) = new Validators(List(other, this))
-
-  def ::(elem: Elem)(implicit controller: Controller): Elem = {
-    val validators = new Validators(List(this))
-    elem :: validators
+  def e(name: String, value: Any) {
+    v(name, value) match {
+      case None =>
+      case Some(message) => throw new ValidationError(message)
+    }
   }
 }

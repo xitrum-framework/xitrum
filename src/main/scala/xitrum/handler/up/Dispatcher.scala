@@ -10,7 +10,7 @@ import HttpResponseStatus._
 import HttpVersion._
 
 import xitrum.{Config, Controller, SkipCSRFCheck, Cache, Logger}
-import xitrum.routing.{Route, Routes, PostbackController}
+import xitrum.routing.{Route, Routes}
 import xitrum.exception.{InvalidAntiCSRFToken, MissingParam, SessionExpired}
 import xitrum.handler.HandlerEnv
 import xitrum.handler.down.ResponseCacher
@@ -143,9 +143,6 @@ object Dispatcher extends Logger {
   }
 
   private def logAccess(controller: Controller, postback: Boolean, beginTimestamp: Long, cacheSecs: Int, hit: Boolean, e: Throwable = null) {
-    // PostbackAction is a gateway, skip it to avoid noisy log if there is no error
-    if (controller.isInstanceOf[PostbackController] && e == null) return
-
     def msgWithTime = {
       val endTimestamp = System.currentTimeMillis()
       val dt           = endTimestamp - beginTimestamp

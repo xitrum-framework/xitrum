@@ -1,4 +1,5 @@
 2.1 (planned):
+* Add Ajax style upload based on iframe
 * Add digest authentication
 * Make extensive use of Knockout.js and Scala delimited continuation
 * Integrate WebSocket to Comet

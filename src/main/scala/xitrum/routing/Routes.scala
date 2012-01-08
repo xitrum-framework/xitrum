@@ -1,5 +1,6 @@
 package xitrum.routing
 
+import java.io.File
 import java.lang.reflect.Method
 import scala.collection.mutable.{ArrayBuffer, Map => MMap, StringBuilder}
 import io.netty.handler.codec.http.{HttpMethod, QueryStringEncoder}
@@ -140,7 +141,37 @@ object Routes extends Logger {
   //----------------------------------------------------------------------------
 
   def fromCacheFileOrRecollect() {
-    val routeCollector                          = new RouteCollector("routes.sclasner")
+    fromCacheFileOrRecollectWithRetry("routes.sclasner")
+  }
+
+  private def fromCacheFileOrRecollectWithRetry(cachedFileName: String) {
+    try {
+      logger.info("Load " + cachedFileName + "/collect routes and action/page cache config from cotrollers...")
+      fromCacheFileOrRecollectReal(cachedFileName)
+    } catch {
+      case e =>
+        // Maybe routes.sclasner could not be loaded because dependencies have changed.
+        // Try deleting routes.sclasner and scan again.
+        val f = new File(cachedFileName)
+        if (f.exists) {
+          logger.warn("Error loading " + cachedFileName + ". Delete the file and recollect...")
+          f.delete()
+          try {
+            fromCacheFileOrRecollectReal("routes.sclasner")
+          } catch {
+            case e2 =>
+              Config.exitOnError("Could not collect routes", e2)
+              throw e2
+          }
+        } else {
+          Config.exitOnError("Could not collect routes", e)
+          throw e
+        }
+    }
+  }
+
+  private def fromCacheFileOrRecollectReal(cachedFileName: String) {
+    val routeCollector                          = new RouteCollector(cachedFileName)
     val controllerClassName_to_routeMethodNames = routeCollector.fromCacheFileOrRecollect()
 
     for ((controllerClassName, routeMethodNames) <- controllerClassName_to_routeMethodNames) {

@@ -8,7 +8,7 @@ import xitrum.Config
 import xitrum.handler.down.XSendFile
 
 @Sharable
-class BaseUriRemover extends SimpleChannelUpstreamHandler with BadClientSilencer {
+class BaseUrlRemover extends SimpleChannelUpstreamHandler with BadClientSilencer {
   override def messageReceived(ctx: ChannelHandlerContext, e: MessageEvent) {
     val m = e.getMessage
     if (!m.isInstanceOf[HttpRequest]) {
@@ -38,10 +38,10 @@ class BaseUriRemover extends SimpleChannelUpstreamHandler with BadClientSilencer
    * @return None if the original URL does not start with the base URI
    */
   private def remove(originalUri: String): Option[String] = {
-    if (originalUri == Config.baseUri)
+    if (originalUri == Config.baseUrl)
       Some("/")
-    else if (originalUri.startsWith(Config.baseUri + "/"))
-      Some(originalUri.substring(Config.baseUri.length))
+    else if (originalUri.startsWith(Config.baseUrl + "/"))
+      Some(originalUri.substring(Config.baseUrl.length))
     else
       None
   }

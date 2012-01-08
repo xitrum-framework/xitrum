@@ -10,7 +10,7 @@ import xitrum.handler.down._
 
 object ChannelPipelineFactory {
   def removeUnusedDefaultHttpHandlersForWebSocket(pipeline: ChannelPipeline) {
-    pipeline.remove(classOf[BaseUriRemover])
+    pipeline.remove(classOf[BaseUrlRemover])
     pipeline.remove(classOf[PublicFileServer])
     pipeline.remove(classOf[PublicResourceServer])
     pipeline.remove(classOf[Request2Env])
@@ -30,7 +30,7 @@ object ChannelPipelineFactory {
 class ChannelPipelineFactory(https: Boolean) extends CPF {
   // Sharable handlers
 
-  private val baseUriRemover       = new BaseUriRemover
+  private val baseUrlRemover       = new BaseUrlRemover
   private val publicFileServer     = new PublicFileServer
   private val publicResourceServer = new PublicResourceServer
   private val request2Env          = new Request2Env
@@ -92,7 +92,7 @@ class ChannelPipelineFactory(https: Boolean) extends CPF {
     // Up
     new HttpRequestDecoder,
     new HttpChunkAggregator(Config.config.request.maxSizeInMB * 1024 * 1024),
-    baseUriRemover,  // HttpRequest is attached to the channel here
+    baseUrlRemover,  // HttpRequest is attached to the channel here
     publicFileServer,
     publicResourceServer,
     request2Env,

@@ -6,7 +6,7 @@ import HttpHeaders.Values._
 import HttpResponseStatus._
 
 import xitrum.{Controller, Config}
-import xitrum.comet.CometGetController
+import xitrum.comet.CometController
 import xitrum.etag.{Etag, NotModified}
 import xitrum.util.Gzip
 
@@ -20,9 +20,9 @@ object JSRoutesController extends JSRoutesController {
   def jsRoutes(controller: Controller) = synchronized {
     if (js == null) {
       js =
-        "var XITRUM_BASE_URI = '" + Config.baseUri + "';\n" +
+        "var XITRUM_BASE_URL = '" + Config.baseUrl + "';\n" +
         "var XITRUM_ROUTES = " + Routes.jsRoutes + ";\n" +
-        "var XITRUM_COMET_GET_ACTION = '" + CometGetController.postback.postbackUrl + "';"
+        "var XITRUM_COMET_GET_URL = '" + CometController.index.url("channel" -> ":channel", "lastTimestamp" -> ":lastTimestamp") + "';"
     }
     js
   }
@@ -38,7 +38,7 @@ object JSRoutesController extends JSRoutesController {
 class JSRoutesController extends Controller {
   import JSRoutesController._
 
-  val serve: Route = GET("xitrum/routes.js") {
+  val serve = GET("xitrum/routes.js") {
     if (!Etag.respondIfEtagsIdentical(this, etag)) {
       NotModified.setClientCacheAggressively(response)
       response.setHeader(CONTENT_TYPE, "text/javascript")

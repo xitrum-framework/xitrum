@@ -38,7 +38,7 @@ class HazelcastSessionStore extends SessionStore {
   }
 
   def store(session: Session, extEnv: ExtEnv) {
-    val cookiePath = Config.withBaseUri("/")
+    val cookiePath = Config.withBaseUrl("/")
 
     val sessionId = extEnv.cookies.get(Config.config.session.cookieName) match {
       case Some(cookie) =>

@@ -14,7 +14,7 @@ var xitrum = {
 
     var compiledRoute = find();
 
-    var ret = XITRUM_BASE_URI;
+    var ret = XITRUM_BASE_URL;
     for (var i = 0; i < compiledRoute.length; i++) {
       var xs       = compiledRoute[i];
       var token    = xs[0];
@@ -67,7 +67,7 @@ var xitrum = {
     }
 
     target1.hide();
-    target1.after('<img src="' + XITRUM_BASE_URI + '/resources/public/xitrum/ajax-loader.gif" />');
+    target1.after('<img src="' + XITRUM_BASE_URL + '/resources/public/xitrum/ajax-loader.gif" />');
 
     $.ajax({
       type: "POST",
@@ -109,17 +109,15 @@ var xitrum = {
     $("#flash").append($(div).hide().fadeIn(1000));
   },
 
-  cometGet: function(encryptedChannel, channel, encryptedLastTimestamp, lastTimestamp, callback) {
-    var data = {};
-    data[encryptedChannel]       = channel;
-    data[encryptedLastTimestamp] = lastTimestamp;
+  cometGet: function(channel, lastTimestamp, callback) {
+    var url = XITRUM_COMET_GET_URL.replace(":channel", channel).replace(":lastTimestamp", lastTimestamp);
+    if (lastTimestamp == 0) url += "?" + Math.random();
     $.ajax({
-      type: "POST",
-      url: XITRUM_COMET_GET_ACTION,
-      data: data,
+      type: "GET",
+      url: url,
       error: function() {
         // Wait for some time before the next retry
-        setTimeout(function() { xitrum.cometGet(encryptedChannel, channel, encryptedLastTimestamp, lastTimestamp, callback) }, 3000);
+        setTimeout(function() { xitrum.cometGet(channel, lastTimestamp, callback) }, 10000);
       },
       success: function(message) {
         var timestamps = message.timestamps;
@@ -128,7 +126,7 @@ var xitrum = {
         for (var i = 0; i < length; i++) {
           callback(channel, timestamps[i], bodies[i]);
         }
-        xitrum.cometGet(encryptedChannel, channel, encryptedLastTimestamp, timestamps[length - 1], callback);
+        xitrum.cometGet(channel, timestamps[length - 1], callback);
       }
     });
   },
