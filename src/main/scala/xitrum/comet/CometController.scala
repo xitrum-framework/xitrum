@@ -2,13 +2,17 @@ package xitrum.comet
 
 import scala.collection.mutable.ListBuffer
 
+import io.netty.handler.codec.http.HttpHeaders
+import HttpHeaders.Names._
+import HttpHeaders.Values._
+
 import xitrum.Controller
 import xitrum.scope.request.Params
 
 object CometController extends CometController
 
 class CometController extends Controller {
-  val index = GET("xitrum/comet/:channel/:lastTimestamp") {
+  def index = GET("xitrum/comet/:channel/:lastTimestamp") {
     val channel       = param("channel")
     val lastTimestamp = param[Long]("lastTimestamp")
 
@@ -31,11 +35,18 @@ class CometController extends Controller {
       // Avoid memory leak when messagePublished is never removed, e.g. no message is published
       addConnectionClosedListener(() => Comet.removeMessageListener(channel, messagePublished))
     } else {
+      // lastTimestamp = 0 is a fixed GET URL
+      // We should prevent browser side caching
+      if (lastTimestamp == 0) {
+        response.setHeader(CACHE_CONTROL, "no-cache")
+        response.setHeader(PRAGMA, "no-cache")
+      }
+
       respondMessages(channel, messages)
     }
   }
 
-  val publish = POST("xiturm/comet/:channel") {
+  def publish = POST("xiturm/comet/:channel") {
     val channel = param("channel")
     Comet.publish(channel, textParams - "channel")  // Save some space
     respondText("")

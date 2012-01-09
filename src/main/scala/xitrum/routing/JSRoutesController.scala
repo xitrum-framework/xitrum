@@ -38,7 +38,7 @@ object JSRoutesController extends JSRoutesController {
 class JSRoutesController extends Controller {
   import JSRoutesController._
 
-  val serve = GET("xitrum/routes.js") {
+  def serve = GET("xitrum/routes.js") {
     if (!Etag.respondIfEtagsIdentical(this, etag)) {
       NotModified.setClientCacheAggressively(response)
       response.setHeader(CONTENT_TYPE, "text/javascript")

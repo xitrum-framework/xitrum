@@ -69,4 +69,7 @@ case class Action(route: Route, body: () => Unit, var method: Method, cacheSecon
 
   def url(params: (String, Any)*) = route.url(params:_*)
   lazy val url: String = url()
+
+  def absoluteUrl(params: (String, Any)*)(implicit controller: Controller) = controller.absoluteUrlPrefix + url(params:_*)
+  def absoluteUrl(implicit controller: Controller): String = absoluteUrl()(controller)
 }

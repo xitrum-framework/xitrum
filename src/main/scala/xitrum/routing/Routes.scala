@@ -5,7 +5,7 @@ import java.lang.reflect.Method
 import scala.collection.mutable.{ArrayBuffer, Map => MMap, StringBuilder}
 import io.netty.handler.codec.http.{HttpMethod, QueryStringEncoder}
 
-import xitrum.{Config, Logger}
+import xitrum.{Config, Logger, Controller, ErrorController}
 import xitrum.controller.Action
 import xitrum.scope.request.{Params, PathInfo}
 
@@ -14,14 +14,13 @@ object Routes extends Logger {
 
   /**
    * Route matching: httpMethod -> order -> pattern
-   * When matched, routeMethod is used for creating a new controller instance,
-   * then routeMethod is invoked on that instance.
+   * When matched, method is used for creating a new controller instance,
+   * then the method is invoked on that instance to get the action.
    */
   val actions = MMap[HttpMethod, First_Other_Last]()
 
   /** 404.html and 500.html is used by default */
-  var error404: Action = _
-  var error500: Action = _
+  var error: Class[_ <: ErrorController] = _
 
   //----------------------------------------------------------------------------
 
@@ -172,13 +171,14 @@ object Routes extends Logger {
   }
 
   private def fromCacheFileOrRecollectReal(cachedFileName: String) {
-    val routeCollector                          = new RouteCollector(cachedFileName)
-    val controllerClassName_to_routeMethodNames = routeCollector.fromCacheFileOrRecollect()
+    val routeCollector                        = new RouteCollector(cachedFileName)
+    val controllerClassName_actionMethodNames = routeCollector.fromCacheFileOrRecollect()
 
-    for ((controllerClassName, routeMethodNames) <- controllerClassName_to_routeMethodNames) {
-      for (routeMethodName <- routeMethodNames) {
-        ControllerReflection.getActionMethod(controllerClassName, routeMethodName) match {
+    for ((controllerClassName, actionMethodNames) <- controllerClassName_actionMethodNames) {
+      for (actionMethodName <- actionMethodNames) {
+        getActionMethod(controllerClassName, actionMethodName) match {
           case None =>
+
           case Some(actionMethod) =>
             val controllerClass = actionMethod.getDeclaringClass
             val controller      = controllerClass.newInstance()
@@ -205,6 +205,23 @@ object Routes extends Logger {
             }
         }
       }
+    }
+  }
+
+  private def getActionMethod(className: String, methodName: String): Option[Method] = {
+    val klass = Class.forName(className)
+    if (classOf[Controller].isAssignableFrom(klass)) {  // Should be a subclass of Controller
+      // Should be "def", not "val"
+      try {
+        klass.getDeclaredField(methodName)
+        None
+      } catch {
+        case _ =>  // NoSuchFieldException
+          val actionMethod = klass.getMethod(methodName)
+          Some(actionMethod)
+      }
+    } else {
+      None
     }
   }
 

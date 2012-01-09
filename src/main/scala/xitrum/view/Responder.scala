@@ -183,8 +183,8 @@ trait Responder extends JS with Flash with Knockout with I18n {
   def respondView(action: Action, customLayout: () => Any, templateType: String) {
     val nonNullActionMethod = nonNullMethodFromAction(action)
     val controllerClass     = nonNullActionMethod.getDeclaringClass
-    val routeName           = nonNullActionMethod.getName
-    val relPath             = controllerClass.getName.replace('.', File.separatorChar) + File.separator + routeName + "." + templateType
+    val actionName          = nonNullActionMethod.getName
+    val relPath             = controllerClass.getName.replace('.', File.separatorChar) + File.separator + actionName + "." + templateType
 
     renderedView = renderScalate(relPath)
     val respondedLayout = customLayout.apply

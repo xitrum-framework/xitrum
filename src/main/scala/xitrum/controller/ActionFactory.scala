@@ -35,19 +35,16 @@ trait ActionFactory {
 
   //----------------------------------------------------------------------------
 
-  /**
-   * Creates route which is not for direct routing for HTTP clients,
-   * like 404 or 500 error handler.
-   */
-  def indirectAction(body: => Unit) = Action(null, () => body, null, 0)
+  /** Creates route for 404 or 500 error handler. */
+  def errorAction(body: => Unit) = Action(null, () => body, null, 0)
 
   //----------------------------------------------------------------------------
 
-  // first and last should be lazy val or def so that they are run after
+  // first and last should be "lazy val" or "def" so that they are run after
   // pathPrefix has been set
 
-  def first = Action(Route(null, RouteOrder.FIRST, PathPrefix.toCompiledPattern(pathPrefix)), null, null, 0)
-  def last  = Action(Route(null, RouteOrder.LAST,  PathPrefix.toCompiledPattern(pathPrefix)), null, null, 0)
+  lazy val first = Action(Route(null, RouteOrder.FIRST, PathPrefix.toCompiledPattern(pathPrefix)), null, null, 0)
+  lazy val last  = Action(Route(null, RouteOrder.LAST,  PathPrefix.toCompiledPattern(pathPrefix)), null, null, 0)
 
   def cacheActionSecond(seconds: Int) = Action(Route(null, RouteOrder.OTHER, PathPrefix.toCompiledPattern(pathPrefix)), null, null, -seconds)
   def cacheActionMinute(minutes: Int) = Action(Route(null, RouteOrder.OTHER, PathPrefix.toCompiledPattern(pathPrefix)), null, null, -minutes * 60)

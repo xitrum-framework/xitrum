@@ -111,7 +111,6 @@ var xitrum = {
 
   cometGet: function(channel, lastTimestamp, callback) {
     var url = XITRUM_COMET_GET_URL.replace(":channel", channel).replace(":lastTimestamp", lastTimestamp);
-    if (lastTimestamp == 0) url += "?" + Math.random();
     $.ajax({
       type: "GET",
       url: url,

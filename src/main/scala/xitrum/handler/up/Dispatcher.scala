@@ -21,20 +21,18 @@ import xitrum.scope.request.RequestEnv
 import xitrum.scope.session.CSRF
 
 object Dispatcher extends Logger {
-  def dispatchWithFailsafe(action: Action, env: HandlerEnv, postback: Boolean) {
+  def dispatchWithFailsafe(actionMethod: Method, env: HandlerEnv) {
     val beginTimestamp = System.currentTimeMillis()
     var hit            = false
 
-    val (controller, withActionMethod) = ControllerReflection.newControllerAndAction(action)
+    val (controller, withActionMethod) = ControllerReflection.newControllerAndAction(actionMethod)
     controller(env)
-    controller.setPostback(postback)
 
     env.action     = withActionMethod
     env.controller = controller
     try {
       // Check for CSRF (CSRF has been checked if "postback" is true)
-      if (!postback &&
-          controller.request.getMethod != HttpMethod.GET &&
+      if (controller.request.getMethod != HttpMethod.GET &&
           controller.request.getMethod != HttpMethodWebSocket &&
           !controller.isInstanceOf[SkipCSRFCheck] &&
           !CSRF.isValidToken(controller)) throw new InvalidAntiCSRFToken
@@ -57,7 +55,7 @@ object Dispatcher extends Logger {
         }
       }
 
-      logAccess(controller, postback, beginTimestamp, cacheSeconds, hit)
+      logAccess(controller, beginTimestamp, cacheSeconds, hit)
     } catch {
       case e =>
         // End timestamp
@@ -66,7 +64,7 @@ object Dispatcher extends Logger {
         // These exceptions are special cases:
         // We know that the exception is caused by the client (bad request)
         if (e.isInstanceOf[SessionExpired] || e.isInstanceOf[InvalidAntiCSRFToken] || e.isInstanceOf[MissingParam]) {
-          logAccess(controller, postback, beginTimestamp, 0, false)
+          logAccess(controller, beginTimestamp, 0, false)
 
           controller.response.setStatus(BAD_REQUEST)
           val msg = if (e.isInstanceOf[SessionExpired] || e.isInstanceOf[InvalidAntiCSRFToken]) {
@@ -82,21 +80,21 @@ object Dispatcher extends Logger {
           else
             controller.respondText(msg)
         } else {
-          logAccess(controller, postback, beginTimestamp, 0, false, e)
+          logAccess(controller, beginTimestamp, 0, false, e)
 
           if (Config.isProductionMode) {
             if (controller.isAjax) {
               controller.response.setStatus(INTERNAL_SERVER_ERROR)
               controller.jsRespond("alert(" + controller.jsEscape("Internal Server Error") + ")")
             } else {
-              if (Routes.error500 == null || Routes.error500 == action) {
+              if (Routes.error == null || Routes.error == withActionMethod.method.getDeclaringClass) {
                 val response = new DefaultHttpResponse(HTTP_1_1, INTERNAL_SERVER_ERROR)
                 XSendFile.set500Page(response)
                 env.response = response
                 env.channel.write(env)
               } else {
                 controller.response.setStatus(INTERNAL_SERVER_ERROR)
-                controller.forward(Routes.error500, false)
+                dispatchWithFailsafe(Routes.error.getMethod("error500"), env)
               }
             }
           } else {
@@ -143,13 +141,13 @@ object Dispatcher extends Logger {
     controller.callAfterFilters()
   }
 
-  private def logAccess(controller: Controller, postback: Boolean, beginTimestamp: Long, cacheSecs: Int, hit: Boolean, e: Throwable = null) {
+  private def logAccess(controller: Controller, beginTimestamp: Long, cacheSecs: Int, hit: Boolean, e: Throwable = null) {
     def msgWithTime = {
       val endTimestamp = System.currentTimeMillis()
       val dt           = endTimestamp - beginTimestamp
       val env          = controller.handlerEnv
 
-      (if (postback) "POSTBACK" else controller.request.getMethod) + " " + ControllerReflection.controllerActionName(controller.handlerEnv.action)                         +
+      (controller.request.getMethod) + " " + ControllerReflection.controllerActionName(controller.handlerEnv.action)                                                       +
       (if (!env.uriParams.isEmpty)        ", uriParams: "        + RequestEnv.inspectParamsWithFilter(env.uriParams       .asInstanceOf[MMap[String, List[Any]]]) else "") +
       (if (!env.bodyParams.isEmpty)       ", bodyParams: "       + RequestEnv.inspectParamsWithFilter(env.bodyParams      .asInstanceOf[MMap[String, List[Any]]]) else "") +
       (if (!env.pathParams.isEmpty)       ", pathParams: "       + RequestEnv.inspectParamsWithFilter(env.pathParams      .asInstanceOf[MMap[String, List[Any]]]) else "") +
@@ -197,10 +195,10 @@ class Dispatcher extends SimpleChannelUpstreamHandler with BadClientSilencer {
     Routes.matchRoute(request.getMethod, pathInfo) match {
       case Some((action, pathParams)) =>
         env.pathParams = pathParams
-        dispatchWithFailsafe(action, env, false)
+        dispatchWithFailsafe(action.method, env)
 
       case None =>
-        if (Routes.error404 == null) {
+        if (Routes.error == null) {
           val response = new DefaultHttpResponse(HTTP_1_1, NOT_FOUND)
           XSendFile.set404Page(response)
           env.response = response
@@ -208,7 +206,7 @@ class Dispatcher extends SimpleChannelUpstreamHandler with BadClientSilencer {
         } else {
           env.pathParams = MMap.empty
           env.response.setStatus(NOT_FOUND)
-          dispatchWithFailsafe(Routes.error404, env, false)
+          dispatchWithFailsafe(Routes.error.getMethod("error404"), env)
         }
     }
   }

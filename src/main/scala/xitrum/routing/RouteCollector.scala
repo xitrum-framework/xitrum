@@ -7,7 +7,7 @@ import java.util.{List => JList}
 import scala.collection.JavaConversions
 
 import sclasner.{FileEntry, Scanner}
-import javassist.bytecode.{ClassFile, FieldInfo, AccessFlag}
+import javassist.bytecode.{ClassFile, MethodInfo, AccessFlag}
 
 import xitrum.{Config, Logger}
 import xitrum.controller.Action
@@ -35,23 +35,19 @@ class RouteCollector(cachedFileName: String) extends Logger {
         if (className.contains("$")) {  // Ignore Scala objects
           acc
         } else {
-          val fieldInfoList = cf.getFields.asInstanceOf[JList[FieldInfo]]
-          if (fieldInfoList == null) {
+          val methodInfoList = cf.getMethods.asInstanceOf[JList[MethodInfo]]
+          if (methodInfoList == null) {
             acc
           } else {
-            val actionNames = JavaConversions.asScalaBuffer(fieldInfoList).foldLeft(Seq[String]()) { (acc2, fi) =>
-              if (fi.getDescriptor == actionClassDescriptor) {
-                val methodName = fi.getName  // Scala "val" creates method with the same name
-                val mi = cf.getMethod(methodName)
-                if (mi == null) {
-                  acc2
-                } else {
-                  // This method should be public but not static
-                  val accessFlags = mi.getAccessFlags
-                  val isPublic = (accessFlags & AccessFlag.PUBLIC) == 1
-                  val isStatic = (accessFlags & AccessFlag.STATIC) == 1
-                  if (isPublic && !isStatic) acc2 :+ methodName else acc2
-                }
+            val actionNames = JavaConversions.asScalaBuffer(methodInfoList).foldLeft(Seq[String]()) { (acc2, mi) =>
+              if (mi.getDescriptor == actionMethodDescriptor) {
+                val methodName = mi.getName
+
+                // This method should be public but not static
+                val accessFlags = mi.getAccessFlags
+                val isPublic = (accessFlags & AccessFlag.PUBLIC) == 1
+                val isStatic = (accessFlags & AccessFlag.STATIC) == 1
+                if (isPublic && !isStatic) acc2 :+ methodName else acc2
               } else {
                 acc2
               }
@@ -69,8 +65,8 @@ class RouteCollector(cachedFileName: String) extends Logger {
     }
   }
 
-  private lazy val actionClassDescriptor = {
-    // Something like "Lxitrum/controller/Action;"
-    "L" + classOf[Action].getName.replace('.', '/') + ";"
+  private lazy val actionMethodDescriptor = {
+    // Something like "()Lxitrum/controller/Action;"
+    "()L" + classOf[Action].getName.replace('.', '/') + ";"
   }
 }

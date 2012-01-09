@@ -20,18 +20,4 @@ trait Redirect {
   }
 
   def redirectTo(action: Action, params: (String, Any)*) { redirectTo(action.url(params: _*)) }
-
-  //----------------------------------------------------------------------------
-
-  private var postback = false
-
-  def isPostback: Boolean = postback
-
-  def setPostback(postback: Boolean) {
-    this.postback = postback
-  }
-
-  def forward(action: Action, postback: Boolean) {
-    Dispatcher.dispatchWithFailsafe(action, handlerEnv, postback)
-  }
 }
