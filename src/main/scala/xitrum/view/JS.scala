@@ -3,8 +3,9 @@ package xitrum.view
 import scala.xml.Unparsed
 
 import xitrum.{Config, Controller}
+import xitrum.controller.Action
 import xitrum.etag.{Etag, NotModified}
-import xitrum.routing.{Route, Routes, JSRoutesController}
+import xitrum.routing.{Routes, JSRoutesController}
 
 trait JS {
   this: Controller =>
@@ -54,7 +55,7 @@ trait JS {
     jsRespond("window.location.href = " + jsEscape(location))
   }
 
-  def jsRedirectTo(route: Route) { jsRedirectTo(route.url) }
+  def jsRedirectTo(action: Action, params: (String, Any)*) { jsRedirectTo(action.url(params:_*)) }
 
   def jsCometGet(channel: String, callback: String) {
     // http://stackoverflow.com/questions/2703861/chromes-loading-indicator-keeps-spinning-during-xmlhttprequest

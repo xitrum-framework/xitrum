@@ -5,22 +5,23 @@ import java.lang.reflect.Method
 import scala.collection.mutable.{ArrayBuffer, Map => MMap, StringBuilder}
 import io.netty.handler.codec.http.{HttpMethod, QueryStringEncoder}
 
-import xitrum.{Controller, Config, Logger}
+import xitrum.{Config, Logger}
+import xitrum.controller.Action
 import xitrum.scope.request.{Params, PathInfo}
 
 object Routes extends Logger {
-  type First_Other_Last = (ArrayBuffer[Route], ArrayBuffer[Route], ArrayBuffer[Route])
+  type First_Other_Last = (ArrayBuffer[Action], ArrayBuffer[Action], ArrayBuffer[Action])
 
   /**
    * Route matching: httpMethod -> order -> pattern
    * When matched, routeMethod is used for creating a new controller instance,
    * then routeMethod is invoked on that instance.
    */
-  val routes = MMap[HttpMethod, First_Other_Last]()
+  val actions = MMap[HttpMethod, First_Other_Last]()
 
   /** 404.html and 500.html is used by default */
-  var error404: Route = _
-  var error500: Route = _
+  var error404: Action = _
+  var error500: Action = _
 
   //----------------------------------------------------------------------------
 
@@ -53,10 +54,10 @@ object Routes extends Logger {
     val firsts = ArrayBuffer[(String, String, String)]()
     var others = ArrayBuffer[(String, String, String)]()
     val lasts  = ArrayBuffer[(String, String, String)]()
-    for ((httpMethod, (fs, os, ls)) <- routes) {
-      for (r <- fs) firsts.append((httpMethod.toString, decompiledPattern(r.compiledPattern), ControllerReflection.controllerRouteName(r)))
-      for (r <- os) others.append((httpMethod.toString, decompiledPattern(r.compiledPattern), ControllerReflection.controllerRouteName(r)))
-      for (r <- ls) lasts.append ((httpMethod.toString, decompiledPattern(r.compiledPattern), ControllerReflection.controllerRouteName(r)))
+    for ((httpMethod, (fs, os, ls)) <- actions) {
+      for (a <- fs) firsts.append((httpMethod.toString, decompiledPattern(a.route.compiledPattern), ControllerReflection.controllerActionName(a)))
+      for (a <- os) others.append((httpMethod.toString, decompiledPattern(a.route.compiledPattern), ControllerReflection.controllerActionName(a)))
+      for (a <- ls) lasts.append ((httpMethod.toString, decompiledPattern(a.route.compiledPattern), ControllerReflection.controllerActionName(a)))
     }
 
     var all = firsts ++ others ++ lasts
@@ -79,27 +80,27 @@ object Routes extends Logger {
   def printActionPageCaches() {
     // This method is only run once on start, speed is not a problem
 
-    var actions = ArrayBuffer[(String, Int)]()
-    var actionMaxControllerRouteNameLength = 0
+    var actionCaches = ArrayBuffer[(String, Int)]()
+    var actionMaxControllerActionNameLength = 0
 
-    var pages = ArrayBuffer[(String, Int)]()
-    var pageMaxControllerRouteNameLength = 0
+    var pageCaches = ArrayBuffer[(String, Int)]()
+    var pageMaxControllerActionNameLength = 0
 
-    for ((httpMethod, (fs, os, ls)) <- routes) {
+    for ((httpMethod, (fs, os, ls)) <- actions) {
       val all = fs ++ os ++ ls
-      for (r <- all) {
-        if (r.cacheSeconds < 0) {
-          val n = ControllerReflection.controllerRouteName(r)
-          actions.append((n, -r.cacheSeconds))
+      for (a <- all) {
+        if (a.cacheSeconds < 0) {
+          val n = ControllerReflection.controllerActionName(a)
+          actionCaches.append((n, -a.cacheSeconds))
 
           val nLength = n.length
-          if (nLength > actionMaxControllerRouteNameLength) actionMaxControllerRouteNameLength = nLength
-        } else if (r.cacheSeconds > 0) {
-          val n = ControllerReflection.controllerRouteName(r)
-          pages.append((n, r.cacheSeconds))
+          if (nLength > actionMaxControllerActionNameLength) actionMaxControllerActionNameLength = nLength
+        } else if (a.cacheSeconds > 0) {
+          val n = ControllerReflection.controllerActionName(a)
+          pageCaches.append((n, a.cacheSeconds))
 
           val nLength = n.length
-          if (nLength > pageMaxControllerRouteNameLength) pageMaxControllerRouteNameLength = nLength
+          if (nLength > pageMaxControllerActionNameLength) pageMaxControllerActionNameLength = nLength
         }
       }
     }
@@ -123,17 +124,17 @@ object Routes extends Logger {
       }
     }
 
-    if (!actions.isEmpty) {
-      actions = actions.sortBy(_._1)
-      val logFormat = "%-" + actionMaxControllerRouteNameLength + "s    %s"
-      val strings = actions.map { case (n, s) => logFormat.format(n, formatTime(s)) }
+    if (!actionCaches.isEmpty) {
+      actionCaches = actionCaches.sortBy(_._1)
+      val logFormat = "%-" + actionMaxControllerActionNameLength + "s    %s"
+      val strings = actionCaches.map { case (n, s) => logFormat.format(n, formatTime(s)) }
       logger.info("Action cache:\n" + strings.mkString("\n"))
     }
 
-    if (!pages.isEmpty) {
-      pages = pages.sortBy(_._1)
-      val logFormat = "%-" + pageMaxControllerRouteNameLength + "s    %s"
-      val strings = pages.map { case (n, s) => logFormat.format(n, formatTime(s)) }
+    if (!pageCaches.isEmpty) {
+      pageCaches = pageCaches.sortBy(_._1)
+      val logFormat = "%-" + pageMaxControllerActionNameLength + "s    %s"
+      val strings = pageCaches.map { case (n, s) => logFormat.format(n, formatTime(s)) }
       logger.info("Page cache:\n" + strings.mkString("\n"))
     }
   }
@@ -176,31 +177,31 @@ object Routes extends Logger {
 
     for ((controllerClassName, routeMethodNames) <- controllerClassName_to_routeMethodNames) {
       for (routeMethodName <- routeMethodNames) {
-        ControllerReflection.getRouteMethod(controllerClassName, routeMethodName) match {
+        ControllerReflection.getActionMethod(controllerClassName, routeMethodName) match {
           case None =>
-          case Some(routeMethod) =>
-            val controllerClass = routeMethod.getDeclaringClass
+          case Some(actionMethod) =>
+            val controllerClass = actionMethod.getDeclaringClass
             val controller      = controllerClass.newInstance()
-            val route           = routeMethod.invoke(controller).asInstanceOf[Route]
-            if (route.httpMethod != null) {  // Routes created by indirectRoute do not have httpMethod
-              route.routeMethod = routeMethod  // Cache it
+            val action          = actionMethod.invoke(controller).asInstanceOf[Action]
+            if (action.route != null && action.route.httpMethod != null) {  // Actions created by indirectAction do not have route
+              action.method = actionMethod  // Cache it
 
               val firsts_others_lasts =
-                if (routes.isDefinedAt(route.httpMethod)) {
-                  routes(route.httpMethod)
+                if (actions.isDefinedAt(action.route.httpMethod)) {
+                  actions(action.route.httpMethod)
                 } else {
-                  val ret = (ArrayBuffer[Route](), ArrayBuffer[Route](), ArrayBuffer[Route]())
-                  routes(route.httpMethod) = ret
+                  val ret = (ArrayBuffer[Action](), ArrayBuffer[Action](), ArrayBuffer[Action]())
+                  actions(action.route.httpMethod) = ret
                   ret
                 }
 
-              val arrayBuffer = route.order match {
+              val arrayBuffer = action.route.order match {
                 case RouteOrder.FIRST => firsts_others_lasts._1
                 case RouteOrder.OTHER => firsts_others_lasts._2
                 case RouteOrder.LAST  => firsts_others_lasts._3
               }
 
-              arrayBuffer.append(route)
+              arrayBuffer.append(action)
             }
         }
       }
@@ -209,35 +210,35 @@ object Routes extends Logger {
 
   /** For use from browser */
   lazy val jsRoutes = {
-    val routeArray = ArrayBuffer[Route]()
-    for ((httpMethod, (firsts, others, lasts)) <- routes) {
+    val actionArray = ArrayBuffer[Action]()
+    for ((httpMethod, (firsts, others, lasts)) <- actions) {
       val all = firsts ++ others ++ lasts
-      routeArray.appendAll(all)
+      actionArray.appendAll(all)
     }
 
-    val xs = routeArray.map { route =>
-      val ys = route.compiledPattern.map { case (token, constant) =>
+    val xs = actionArray.map { action =>
+      val ys = action.route.compiledPattern.map { case (token, constant) =>
         "['" + token + "', " + constant + "]"
       }
-      "[[" + ys.mkString(", ") + "], '" + ControllerReflection.controllerRouteName(route) + "']"
+      "[[" + ys.mkString(", ") + "], '" + ControllerReflection.controllerActionName(action) + "']"
     }
     "[" + xs.mkString(", ") + "]"
   }
 
   //----------------------------------------------------------------------------
 
-  def matchRoute(httpMethod: HttpMethod, pathInfo: PathInfo): Option[(Route, Params)] = {
+  def matchRoute(httpMethod: HttpMethod, pathInfo: PathInfo): Option[(Action, Params)] = {
     // This method is only run for every request, speed is a problem
 
-    if (!routes.isDefinedAt(httpMethod)) return None
+    if (!actions.isDefinedAt(httpMethod)) return None
 
     val tokens = pathInfo.tokens
     val max1   = tokens.size
 
     var pathParams: Params = null
 
-    def finder(route: Route): Boolean = {
-      val compiledPattern = route.compiledPattern
+    def finder(action: Action): Boolean = {
+      val compiledPattern = action.route.compiledPattern
       val max2            = compiledPattern.size
 
       // Check the number of tokens
@@ -300,17 +301,17 @@ object Routes extends Logger {
       }
     }
 
-    routes.get(httpMethod) match {
+    actions.get(httpMethod) match {
       case None => None
       case Some((firsts, others, lasts)) =>
         firsts.find(finder) match {
-          case Some(route) => Some((route, pathParams))
+          case Some(action) => Some((action, pathParams))
           case None =>
             others.find(finder) match {
-              case Some(route) => Some((route, pathParams))
+              case Some(action) => Some((action, pathParams))
               case None =>
                 lasts.find(finder) match {
-                  case Some(route) => Some((route, pathParams))
+                  case Some(action) => Some((action, pathParams))
                   case None => None
                 }
             }

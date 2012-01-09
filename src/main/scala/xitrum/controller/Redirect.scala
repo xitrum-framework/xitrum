@@ -8,7 +8,6 @@ import HttpResponseStatus.FOUND
 
 import xitrum.Controller
 import xitrum.handler.up.Dispatcher
-import xitrum.routing.{Route, Routes, ControllerReflection}
 
 trait Redirect {
   this: Controller =>
@@ -20,7 +19,7 @@ trait Redirect {
     respond()
   }
 
-  def redirectTo(route: Route, params: (String, Any)*) { redirectTo(route.url(params: _*)) }
+  def redirectTo(action: Action, params: (String, Any)*) { redirectTo(action.url(params: _*)) }
 
   //----------------------------------------------------------------------------
 
@@ -32,7 +31,7 @@ trait Redirect {
     this.postback = postback
   }
 
-  def forward(route: Route, postback: Boolean) {
-    Dispatcher.dispatchWithFailsafe(route, handlerEnv, postback)
+  def forward(action: Action, postback: Boolean) {
+    Dispatcher.dispatchWithFailsafe(action, handlerEnv, postback)
   }
 }

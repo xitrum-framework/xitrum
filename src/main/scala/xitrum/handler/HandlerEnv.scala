@@ -6,7 +6,7 @@ import io.netty.channel.Channel
 import io.netty.handler.codec.http.{HttpRequest, HttpResponse}
 
 import xitrum.Controller
-import xitrum.routing.Route
+import xitrum.controller.Action
 import xitrum.scope.request.{FileUploadParams, Params, PathInfo}
 
 /**
@@ -28,7 +28,7 @@ class HandlerEnv extends MHashMap[String, Any] {
   var fileUploadParams: FileUploadParams = null  // The filename has been sanitized for insecure character
 
   // Set by Dispatcher
-  var route:            Route            = null
+  var action:           Action           = null
   var pathParams:       Params           = null  // The above params are real from the request, this one is logical from the route
   var controller:       Controller       = null
 }

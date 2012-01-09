@@ -6,7 +6,8 @@ import java.util.concurrent.TimeUnit
 import com.hazelcast.core.{IMap, MapEntry}
 import com.hazelcast.query.Predicate
 
-import xitrum.routing.{Route, Routes, ControllerReflection}
+import xitrum.controller.Action
+import xitrum.routing.ControllerReflection
 
 object Cache extends Logger {
   val cache = Config.hazelcastInstance.getMap("xitrum/cache").asInstanceOf[IMap[String, Any]]
@@ -15,18 +16,18 @@ object Cache extends Logger {
     cache.removeAsync(key.toString)
   }
 
-  def removeAction(route: Route) {
-    val keyPrefix = pageActionPrefix(route)
+  def removeAction(action: Action) {
+    val keyPrefix = pageActionPrefix(action)
     removePrefix(keyPrefix)
   }
 
   def pageActionPrefix(controller: Controller): String = {
-    val route = controller.handlerEnv.route
-    pageActionPrefix(route)
+    val action = controller.handlerEnv.action
+    pageActionPrefix(action)
   }
 
-  private def pageActionPrefix(route: Route): String =
-    "xitrum/page-action/" + ControllerReflection.controllerRouteName(route)
+  private def pageActionPrefix(action: Action): String =
+    "xitrum/page-action/" + ControllerReflection.controllerActionName(action)
 
   private def removePrefix(keyPrefix: Any) {
     val keyPrefixS = keyPrefix.toString

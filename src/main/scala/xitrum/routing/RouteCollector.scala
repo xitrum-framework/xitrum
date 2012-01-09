@@ -10,6 +10,7 @@ import sclasner.{FileEntry, Scanner}
 import javassist.bytecode.{ClassFile, FieldInfo, AccessFlag}
 
 import xitrum.{Config, Logger}
+import xitrum.controller.Action
 
 /** Scan all classes to collect routes from controllers. */
 class RouteCollector(cachedFileName: String) extends Logger {
@@ -38,8 +39,8 @@ class RouteCollector(cachedFileName: String) extends Logger {
           if (fieldInfoList == null) {
             acc
           } else {
-            val routeMethodNames = JavaConversions.asScalaBuffer(fieldInfoList).foldLeft(Seq[String]()) { (acc2, fi) =>
-              if (fi.getDescriptor == routeClassDescriptor) {
+            val actionNames = JavaConversions.asScalaBuffer(fieldInfoList).foldLeft(Seq[String]()) { (acc2, fi) =>
+              if (fi.getDescriptor == actionClassDescriptor) {
                 val methodName = fi.getName  // Scala "val" creates method with the same name
                 val mi = cf.getMethod(methodName)
                 if (mi == null) {
@@ -55,7 +56,7 @@ class RouteCollector(cachedFileName: String) extends Logger {
                 acc2
               }
             }
-            if (routeMethodNames.isEmpty) acc else acc + (className -> routeMethodNames)
+            if (actionNames.isEmpty) acc else acc + (className -> actionNames)
           }
         }
       } else {
@@ -68,8 +69,8 @@ class RouteCollector(cachedFileName: String) extends Logger {
     }
   }
 
-  private lazy val routeClassDescriptor = {
-    // Something like "Lxitrum/routing/Route;"
-    "L" + classOf[Route].getName.replace('.', '/') + ";"
+  private lazy val actionClassDescriptor = {
+    // Something like "Lxitrum/controller/Action;"
+    "L" + classOf[Action].getName.replace('.', '/') + ";"
   }
 }

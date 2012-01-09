@@ -10,7 +10,8 @@ import HttpResponseStatus._
 import HttpVersion._
 
 import xitrum.{Config, Controller, SkipCSRFCheck, Cache, Logger}
-import xitrum.routing.{Route, Routes}
+import xitrum.controller.Action
+import xitrum.routing.Routes
 import xitrum.exception.{InvalidAntiCSRFToken, MissingParam, SessionExpired}
 import xitrum.handler.HandlerEnv
 import xitrum.handler.down.ResponseCacher
@@ -20,15 +21,15 @@ import xitrum.scope.request.RequestEnv
 import xitrum.scope.session.CSRF
 
 object Dispatcher extends Logger {
-  def dispatchWithFailsafe(route: Route, env: HandlerEnv, postback: Boolean) {
+  def dispatchWithFailsafe(action: Action, env: HandlerEnv, postback: Boolean) {
     val beginTimestamp = System.currentTimeMillis()
     var hit            = false
 
-    val (controller, withRouteMethod) = ControllerReflection.newControllerAndRoute(route)
+    val (controller, withActionMethod) = ControllerReflection.newControllerAndAction(action)
     controller(env)
     controller.setPostback(postback)
 
-    env.route      = withRouteMethod
+    env.action     = withActionMethod
     env.controller = controller
     try {
       // Check for CSRF (CSRF has been checked if "postback" is true)
@@ -38,20 +39,20 @@ object Dispatcher extends Logger {
           !controller.isInstanceOf[SkipCSRFCheck] &&
           !CSRF.isValidToken(controller)) throw new InvalidAntiCSRFToken
 
-      val cacheSeconds = withRouteMethod.cacheSeconds
+      val cacheSeconds = withActionMethod.cacheSeconds
 
       if (cacheSeconds > 0) {             // Page cache
         tryCache(controller) {
           val passed = controller.callBeforeFilters()
-          if (passed) runAroundAndAfterFilters(controller, withRouteMethod)
+          if (passed) runAroundAndAfterFilters(controller, withActionMethod)
         }
       } else {
         val passed = controller.callBeforeFilters()
         if (passed) {
           if (cacheSeconds == 0) {        // No cache
-            runAroundAndAfterFilters(controller, withRouteMethod)
+            runAroundAndAfterFilters(controller, withActionMethod)
           } else if (cacheSeconds < 0) {  // Action cache
-            tryCache(controller) { runAroundAndAfterFilters(controller, withRouteMethod) }
+            tryCache(controller) { runAroundAndAfterFilters(controller, withActionMethod) }
           }
         }
       }
@@ -88,7 +89,7 @@ object Dispatcher extends Logger {
               controller.response.setStatus(INTERNAL_SERVER_ERROR)
               controller.jsRespond("alert(" + controller.jsEscape("Internal Server Error") + ")")
             } else {
-              if (Routes.error500 == null || Routes.error500 == route) {
+              if (Routes.error500 == null || Routes.error500 == action) {
                 val response = new DefaultHttpResponse(HTTP_1_1, INTERNAL_SERVER_ERROR)
                 XSendFile.set500Page(response)
                 env.response = response
@@ -137,8 +138,8 @@ object Dispatcher extends Logger {
     }
   }
 
-  private def runAroundAndAfterFilters(controller: Controller, route: Route) {
-    controller.callAroundFilters(route)
+  private def runAroundAndAfterFilters(controller: Controller, action: Action) {
+    controller.callAroundFilters(action)
     controller.callAfterFilters()
   }
 
@@ -148,7 +149,7 @@ object Dispatcher extends Logger {
       val dt           = endTimestamp - beginTimestamp
       val env          = controller.handlerEnv
 
-      (if (postback) "POSTBACK" else controller.request.getMethod) + " " + ControllerReflection.controllerRouteName(controller.handlerEnv.route)                           +
+      (if (postback) "POSTBACK" else controller.request.getMethod) + " " + ControllerReflection.controllerActionName(controller.handlerEnv.action)                         +
       (if (!env.uriParams.isEmpty)        ", uriParams: "        + RequestEnv.inspectParamsWithFilter(env.uriParams       .asInstanceOf[MMap[String, List[Any]]]) else "") +
       (if (!env.bodyParams.isEmpty)       ", bodyParams: "       + RequestEnv.inspectParamsWithFilter(env.bodyParams      .asInstanceOf[MMap[String, List[Any]]]) else "") +
       (if (!env.pathParams.isEmpty)       ", pathParams: "       + RequestEnv.inspectParamsWithFilter(env.pathParams      .asInstanceOf[MMap[String, List[Any]]]) else "") +
@@ -194,9 +195,9 @@ class Dispatcher extends SimpleChannelUpstreamHandler with BadClientSilencer {
     val bodyParams = env.bodyParams
 
     Routes.matchRoute(request.getMethod, pathInfo) match {
-      case Some((route, pathParams)) =>
+      case Some((action, pathParams)) =>
         env.pathParams = pathParams
-        dispatchWithFailsafe(route, env, false)
+        dispatchWithFailsafe(action, env, false)
 
       case None =>
         if (Routes.error404 == null) {

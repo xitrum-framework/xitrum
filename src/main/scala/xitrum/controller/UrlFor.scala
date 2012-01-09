@@ -8,8 +8,8 @@ import xitrum.etag.Etag
 trait UrlFor {
   this: Controller =>
 
-  // Use "def" instead of "lazy val" to prevent this route from being picked by RouteCollector
-  def currentRoute = handlerEnv.route
+  // Use "def" instead of "lazy val" to prevent this action from being picked by RouteCollector
+  def currentAction = handlerEnv.action
 
   /** @param path Relative to the "public" directory, without leading "/" */
   def urlForPublic(path: String) = {

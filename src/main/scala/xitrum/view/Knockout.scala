@@ -4,33 +4,33 @@ import com.codahale.jerkson.Json
 import org.fusesource.scalate.filter.CoffeeScriptCompiler
 
 import xitrum.Controller
-import xitrum.routing.Route
+import xitrum.controller.Action
 
 /** Support for Knockout.js */
 trait Knockout {
   this: Controller =>
 
-  def koApplyBindingsCs(model: Any, syncRoute: Route, cs: String) {
+  def koApplyBindingsCs(model: Any, syncAction: Action, cs: String) {
     val js = CoffeeScriptCompiler.compile(cs).right.get
-    koApplyBindingsJs(model, syncRoute, js)
+    koApplyBindingsJs(model, syncAction, js)
   }
 
-  def koApplyBindingsCs(model: Any, scopeSelector: String, syncRoute: Route, cs: String) {
+  def koApplyBindingsCs(model: Any, scopeSelector: String, syncAction: Action, cs: String) {
     val js = CoffeeScriptCompiler.compile(cs).right.get
-    koApplyBindingsJs(model, scopeSelector, syncRoute, js)
+    koApplyBindingsJs(model, scopeSelector, syncAction, js)
   }
 
-  def koApplyBindingsJs(model: Any, syncRoute: Route, js: String) {
-    koApplyBindingsJs(model, null, syncRoute, js)
+  def koApplyBindingsJs(model: Any, syncAction: Action, js: String) {
+    koApplyBindingsJs(model, null, syncAction, js)
   }
 
-  def koApplyBindingsJs(model: Any, scopeSelector: String, syncRoute: Route, js: String) {
+  def koApplyBindingsJs(model: Any, scopeSelector: String, syncAction: Action, js: String) {
     val prepareModel =
       "var model = ko.mapping.fromJS(" + Json.generate(model) + ");\n" +
       (if (scopeSelector == null) "ko.applyBindings(model);\n" else "ko.applyBindings(model, " + scopeSelector + "[0]);\n")
     val prepareSync =
       "var sync = function() {\n" +
-        "$.post('" + syncRoute.url + """', {model: ko.mapping.toJSON(model)}, function(data) {
+        "$.post('" + syncAction.url + """', {model: ko.mapping.toJSON(model)}, function(data) {
           // jQuery automatically detects and converts the response based on the content type header
           if (typeof(data) === 'object') {
             model = ko.mapping.fromJS(data);

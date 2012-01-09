@@ -12,7 +12,7 @@ import HttpHeaders.Values.CHUNKED
 import com.codahale.jerkson.Json
 
 import xitrum.{Controller, Config}
-import xitrum.routing.Route
+import xitrum.controller.Action
 import xitrum.handler.down.{XSendFile, XSendResource}
 
 /**
@@ -180,11 +180,11 @@ trait Responder extends JS with Flash with Knockout with I18n {
    *
    * @param templateType "jade", "mustache", "scaml", or "ssp"
    */
-  def respondView(route: Route, customLayout: () => Any, templateType: String) {
-    val nonNullRouteMethod = nonNullRouteMethodFromRoute(route)
-    val controllerClass    = nonNullRouteMethod.getDeclaringClass
-    val routeName          = nonNullRouteMethod.getName
-    val relPath            = controllerClass.getName.replace('.', File.separatorChar) + File.separator + routeName + "." + templateType
+  def respondView(action: Action, customLayout: () => Any, templateType: String) {
+    val nonNullActionMethod = nonNullMethodFromAction(action)
+    val controllerClass     = nonNullActionMethod.getDeclaringClass
+    val routeName           = nonNullActionMethod.getName
+    val relPath             = controllerClass.getName.replace('.', File.separatorChar) + File.separator + routeName + "." + templateType
 
     renderedView = renderScalate(relPath)
     val respondedLayout = customLayout.apply
@@ -195,45 +195,45 @@ trait Responder extends JS with Flash with Knockout with I18n {
   }
 
   /**
-   * Same as respondView(route, customLayout, templateType),
+   * Same as respondView(action, customLayout, templateType),
    * where templateType is as configured in xitrum.json.
    */
-  def respondView(route: Route, customLayout: () => Any) {
-    respondView(route, customLayout, Config.config.scalate)
+  def respondView(action: Action, customLayout: () => Any) {
+    respondView(action, customLayout, Config.config.scalate)
   }
 
   /**
-   * Same as respondView(route, customLayout, templateType),
+   * Same as respondView(action, customLayout, templateType),
    * where customLayout is from the controller's layout method.
    */
-  def respondView(route: Route, templateType: String) {
-    respondView(route, layout _, templateType)
+  def respondView(action: Action, templateType: String) {
+    respondView(action, layout _, templateType)
   }
 
   /**
-   * Same as respondView(route, customLayout, templateType),
-   * where route is currentRoute and customLayout is from the controller's layout method.
+   * Same as respondView(action, customLayout, templateType),
+   * where route is currentAction and customLayout is from the controller's layout method.
    */
   def respondView(templateType: String) {
-    respondView(currentRoute, templateType)
+    respondView(currentAction, templateType)
   }
 
   /**
-   * Same as respondView(route, customLayout, templateType),
+   * Same as respondView(action, customLayout, templateType),
    * where customLayout is from the controller's layout method and
    * templateType is as configured in xitrum.json.
    */
-  def respondView(route: Route) {
-    respondView(route, layout _, Config.config.scalate)
+  def respondView(action: Action) {
+    respondView(action, layout _, Config.config.scalate)
   }
 
   /**
-   * Same as respondView(route, customLayout, templateType),
-   * where route is currentRoute, customLayout is from the controller's layout method and
+   * Same as respondView(action, customLayout, templateType),
+   * where route is currentAction, customLayout is from the controller's layout method and
    * templateType is as configured in xitrum.json.
    */
   def respondView() {
-    respondView(currentRoute, Config.config.scalate)
+    respondView(currentAction, Config.config.scalate)
   }
 
   //----------------------------------------------------------------------------

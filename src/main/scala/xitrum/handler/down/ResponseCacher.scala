@@ -21,7 +21,7 @@ object ResponseCacher extends Logger {
   private type CachedResponse = (Int, Array[(String, String)], Array[Byte])
 
   def cacheResponse(controller: Controller) {
-    val cacheSeconds = controller.handlerEnv.route.cacheSeconds
+    val cacheSeconds = controller.handlerEnv.action.cacheSeconds
     if (cacheSeconds == 0) return
 
     val key = makeCacheKey(controller)

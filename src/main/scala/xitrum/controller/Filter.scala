@@ -1,7 +1,6 @@
 package xitrum.controller
 
 import scala.collection.mutable.ArrayBuffer
-import xitrum.routing.Route
 
 trait Filter {
   private val beforeFilters = ArrayBuffer[() => Boolean]()
@@ -50,8 +49,8 @@ trait Filter {
   }
 
   /** Called by Dispatcher */
-  def callAroundFilters(route: Route) {
-    val initialWrapper = () => route.body()
+  def callAroundFilters(action: Action) {
+    val initialWrapper = () => action.body()
     val bigWrapper = aroundFilters.foldLeft(initialWrapper) { (wrapper, f) =>
       () => f(wrapper)
     }
