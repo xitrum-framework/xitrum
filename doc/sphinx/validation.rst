@@ -3,89 +3,29 @@ Validation
 
 .. image:: http://www.bdoubliees.com/journalspirou/sfigures6/schtroumpfs/s5.jpg
 
-Xitrum is not a full-stack web framework like `Rails <http://rubyonrails.org/>`_
-because it does not provide M (in MVC). However, it does provide validation
-feature at Action (Controller) and View. You can use any database access library
-you want, while still can validate user input easily.
-
-Xitrum integrates with `jQuery Validation plugin <http://bassistance.de/jquery-plugins/jquery-plugin-validation/>`_.
-Validation is performed at both browser side and server side.
-
-::
-
-  User input -> Validation at View (browser side) -> Validation before Action (server side) -> Action
-                              |                                         |
-                            FAILED                                    FAILED
-                       <------+                                  <------+
+Xitrum includes `jQuery Validation plugin <http://bassistance.de/jquery-plugins/jquery-plugin-validation/>`_
+and provides validation helpers for server side.
 
 Default validators
 ------------------
 
-Xitrum provides a lot of default validators. You can use them right away.
-
 ::
 
-  // See this package for a complete list of avaiable default validators
-  // https://github.com/ngocdaothanh/xitrum/tree/master/src/main/scala/xitrum/validation
   import xitrum.validator._
 
-  <form data-postback="submit" action={Users.niw.postbackUrl}>
-    Username:
-    {<input type="text" name="username" /> :: MinLength(5) :: MaxLength(10)}<br />
+  case class Article(id: Int = 0, title: String = "", body: String = "") {
+    // Returns Some(error message) or None
+    def v =
+      // Chain validators together
+      Required.v("Title", title) orElse
+      Required.v("Body",  body)
+  }
 
-    Password:
-    {<input type="password" name="password" /> :: Required}<br />
-
-    Password confirmation:
-    {<input type="password" name="password_confirm" /> :: EqualTo("password")}<br />
-
-    Memo:
-    {<textarea name="memo"></textarea> :: Validated}<br />
-
-    <input type="submit" value="Register" />
-  </form>
-
-Names of inputs will be encrypted to include the serialized validators. They will
-be automatically decrypted when the form is posted back to the server.
-
-**Note**
-
-  Technically, for the server side to ensure that hackers cannot bypass validators,
-  all input names must be encrypted. This means that even inputs that do not need
-  validation must be marked with ``Validated``. See ``textarea name="memo"`` above.
-  We will try to remove this is inconvenience.
-
-  The philosophy behind the ``::`` syntax is "decoration". Given the HTML element
-  ``<input type="password" name="password" />``, you want to decorate it with
-  ``Required``, thus ``Required`` should come after the element.
+See `xitrum.validator pakage <https://github.com/ngocdaothanh/xitrum/tree/master/src/main/scala/xitrum/validator>`_
+for the full list of default validators.
 
 Write custom validators
 -----------------------
 
-You can also write your own custom validators very easily. See the source code
-of `existing validators <https://github.com/ngocdaothanh/xitrum/tree/master/src/main/scala/xitrum/validation>`_
-as a guide.
-
-::
-
-  import scala.xml.Elem
-  import xitrum.validation.Validator
-
-  class MyValidator extends Validator {
-    // Client side validation
-    //
-    // This method should output JS that uses jQuery Validation plugin to validate securedParamName
-    def render(action: Action, elem: Elem, paramName: String, securedParamName: String): Elem = {
-      // Call jsAddToView(<JS that uses jQuery Validation plugin>)
-      // to add JS to the end of the web page
-
-      // Change elem if you wish
-      elem
-    }
-
-    // Server side validation
-    // As a rule for secure applications, client side validation may be optional
-    // but server side validation is a "must"
-    def validate(action: Action, paramName: String, securedParamName: String): Boolean = {
-    }
-  }
+Extend `xitrum.validator.Validator <https://github.com/ngocdaothanh/xitrum/blob/master/src/main/scala/xitrum/validator/Validator.scala>`_
+and implement ``v`` method. This method should returns Some(error message) or None.

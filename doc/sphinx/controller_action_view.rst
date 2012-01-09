@@ -1,5 +1,5 @@
-Action and View
-===============
+Controller, action, and view
+============================
 
 .. image:: http://www.bdoubliees.com/journalspirou/sfigures6/schtroumpfs/s7.jpg
 
@@ -123,7 +123,7 @@ scr/main/scala/quickstart/controller/AppController.scala:
   import xitrum.Controller
 
   trait AppController extends Controller {
-    override def layout = respondScalate(classOf[AppAction])
+    override def layout = renderScalate(classOf[AppAction])
   }
 
 scr/main/scala/quickstart/action/MyController.scala:
@@ -162,11 +162,11 @@ scr/main/scalate/quickstart/controller/MyController/index.jade:
   - import quickstart.controller.MyController
 
   a(href={currentRoute.url}) Path to current action
-  p= helper.asInstanceOf[MyController].hello("World")
+  p= currentController.asInstanceOf[MyController].hello("World")
 
 In views you can use all methods of the class `xitrum.Controller <https://github.com/ngocdaothanh/xitrum/blob/master/src/main/scala/xitrum/Controller.scala>`_.
-If you want to have exactly instance of the current action, cast ``helper`` to
-the action you wish.
+If you want to have exactly instance of the current controller, cast ``currentController`` to
+the controller you wish.
 
 The default Scalate template type is `Jade <http://scalate.fusesource.org/documentation/jade.html>`_.
 You can also use `Mustache <http://scalate.fusesource.org/documentation/mustache.html>`_,
@@ -175,9 +175,9 @@ You can also use `Mustache <http://scalate.fusesource.org/documentation/mustache
 To config the default template type, see `scalate` in xitrum.json.
 
 You can override the default template type by passing "jade", "mustache", "scamal",
-or "ssp" as the last parameter to `respondScalateTemplateToString` or `respondScalateView`.
+or "ssp" as the last parameter to `renderScalate` or `respondView`.
 
 ::
 
-  respondScalate(classOf[AppAction], "mustache")
+  renderScalate(classOf[AppAction], "mustache")
   respondView("scaml")

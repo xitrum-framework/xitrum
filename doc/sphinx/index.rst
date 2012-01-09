@@ -14,7 +14,7 @@ Xitrum's documentation
    intro
    tutorial
    dev
-   action_view
+   controller_action_view
    restful
    postback
    xml

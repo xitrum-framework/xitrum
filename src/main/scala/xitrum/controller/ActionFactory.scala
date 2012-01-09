@@ -10,7 +10,7 @@ import xitrum.routing.{HttpMethodWebSocket, Route, RouteOrder, Routes}
  * val action1 = GET("pattern") {
  * }
  *
- * val action2 = GET() {
+ * val action2 = GET {
  * }
  *
  * val action3 = first.cacheActionSecond(30).GET("pattern") {

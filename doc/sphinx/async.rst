@@ -106,9 +106,9 @@ Chat example
       respondInlineView(
         <div id="chatOutput"></div>
 
-        <form data-postback="submit" action={CometPublishController.postback.postbackUrl} data-after="$('#chatInput').value('')">
-          {<input type="hidden" name="channel" value="chat" /> :: Validated}
-          {<input type="text" id="chatInput" name="chatInput" /> :: Required}
+        <form data-postback="submit" action={CometController.publish.url} data-after="$('#chatInput').value('')">
+          <input type="hidden" name="channel" value="chat" class="required" />
+          <input type="text" id="chatInput" name="chatInput" class="required" />
         </form>
       )
     }
@@ -128,19 +128,18 @@ the message for you. If you want to publish the message yourself, call ``Comet.p
 
   import xitrum.Controller
   import xitrum.comet.Comet
-  import xitrum.validator.Required
 
   class AdminController extends Controller {
     val index = GET("admin") {
       respondInlineView(
-        <form data-postback="submit" action={postback.postbackUrl}>
-          Message from admin:
-          <input type="text" name={validate("body", Required)} />
+        <form data-postback="submit" action={publish.url}>
+          <label>Message from admin:</label>
+          <input type="text" name="body" class="required" />
         </form>
       )
     }
 
-    val postback = indirectRoute {
+    val publish = POST("admin/chat") {
       val body = param("body")
       Comet.publish("chat", "[From admin]: " + body)
       respondText("")
