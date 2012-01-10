@@ -141,7 +141,9 @@ object Routes extends Logger {
   //----------------------------------------------------------------------------
 
   def fromCacheFileOrRecollect() {
-    fromCacheFileOrRecollectWithRetry("routes.sclasner")
+    // Avoid running twice, older version of Xitrum (v1.8) needs apps to
+    // call this method explicitly
+    if (actions.isEmpty) fromCacheFileOrRecollectWithRetry("routes.sclasner")
   }
 
   private def fromCacheFileOrRecollectWithRetry(cachedFileName: String) {

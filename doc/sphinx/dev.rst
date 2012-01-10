@@ -81,9 +81,4 @@ automatically reload the generated .class files.
 ``sbt ~compile`` works fine in bash and sh shell. In zsh shell, you need to use
 ``sbt "~compile"``, or it will complain "no such user or named directory: compile".
 
-Routes are not reloaded
-~~~~~~~~~~~~~~~~~~~~~~~
-
-Routes like ``@GET("/")`` are not reloaded when you change them. Routes are only
-scanned when the web server starts. It it because it takes several seconds to
-rescan all routes.
+Currently routes are not reloaded, even in development mode with JRebel.

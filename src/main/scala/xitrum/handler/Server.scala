@@ -14,9 +14,9 @@ object Server extends Logger {
     // Because Hazelcast takes serveral seconds to start, we force it to
     // start before the web server begins receiving requests, instead of
     // letting it start lazily
-    Cache.cache.size
+    Cache.cache.size()
 
-    // Routes.fromCacheFileOrRecollect() should have been called
+    Routes.fromCacheFileOrRecollect()
     Routes.printRoutes()
     Routes.printActionPageCaches()
 

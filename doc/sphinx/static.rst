@@ -55,13 +55,11 @@ your own handler, configure before starting web server:
 
 ::
 
-  import xitrum.Config
   import xitrum.routing.Routes
   import xitrum.handler.Server
 
   object Boot {
     def main(args: Array[String]) {
-      Routes.fromCacheFileOrRecollect()
       Routes.error = classOf[My404And500ErrorHandlerController]
       Server.start()
     }
