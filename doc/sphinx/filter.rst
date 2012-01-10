@@ -59,7 +59,11 @@ You can use ``only`` or ``except`` with ``beforeFilter``.
 
 ::
 
-  import xitrum.Controller
+  import xitrum.{Controller, SessionVar}
+
+  object SVar {
+    object username extends SessionVar[String]
+  }
 
   class Admins extends Controller {
     pathPrefix = "admin"
@@ -85,6 +89,17 @@ You can use ``only`` or ``except`` with ``beforeFilter``.
     // Process login form
     def doLogin = POST("login") {
       ...
+      // After success login
+      resetSession()
+      SVar.username.set(myusername)
+      flash("You have successfully logged in.")
+      redirectTo(index)
+    }
+
+    def logout = GET("logout") {
+      resetSession()
+      flash("You have logged out.")
+      jsRedirectTo(Site.index)
     }
   }
 
