@@ -28,7 +28,7 @@ object ControllerReflection {
     val controllerClass  = actionMethod.getDeclaringClass
     val controller       = controllerClass.newInstance().asInstanceOf[Controller]
     val newAction        = actionMethod.invoke(controller).asInstanceOf[Action]
-    val withActionMethod = Action(newAction.route, newAction.body, actionMethod, newAction.cacheSeconds)
+    val withActionMethod = Action(newAction.route, actionMethod, newAction.body, newAction.cacheSeconds)
     (controller, withActionMethod)
   }
 }

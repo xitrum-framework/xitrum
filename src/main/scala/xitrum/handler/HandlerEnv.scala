@@ -29,6 +29,6 @@ class HandlerEnv extends MHashMap[String, Any] {
 
   // Set by Dispatcher
   var action:           Action           = null
-  var pathParams:       Params           = null  // The above params are real from the request, this one is logical from the route
+  var pathParams:       Params           = null  // The above params are real from the request, this one is logical from the request URL
   var controller:       Controller       = null
 }

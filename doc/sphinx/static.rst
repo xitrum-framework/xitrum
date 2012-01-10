@@ -61,15 +61,34 @@ your own handler, configure before starting web server:
 
   object Boot {
     def main(args: Array[String]) {
-      Routes.route404 = MyController.route404
-      Routes.route500 = MyController.route500
       Routes.fromCacheFileOrRecollect()
+      Routes.error = classOf[My404And500ErrorHandlerController]
       Server.start()
     }
   }
 
 Response status is set to 404 or 500 before the actions are executed, so you
 don't have to set yourself.
+
+::
+
+  import xitrum.{Controller, ErrorController}
+
+  class My404And500ErrorHandlerController extends Controller with ErrorController {
+    def error404 = errorAction {
+      if (isAjax)
+        jsRespond("alert(" + jsEscape("Not Found") + ")")
+      else
+        renderInlineView("Not Found")
+    }
+
+    def error500 = errorAction {
+      if (isAjax)
+        jsRespond("alert(" + jsEscape("Internal Server Error") + ")")
+      else
+        renderInlineView("Internal Server Error")
+    }
+  }
 
 Serve resource files in classpath
 ---------------------------------

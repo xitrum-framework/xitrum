@@ -82,24 +82,20 @@ object Dispatcher extends Logger {
         } else {
           logAccess(controller, beginTimestamp, 0, false, e)
 
+          controller.response.setStatus(INTERNAL_SERVER_ERROR)
           if (Config.isProductionMode) {
-            if (controller.isAjax) {
-              controller.response.setStatus(INTERNAL_SERVER_ERROR)
-              controller.jsRespond("alert(" + controller.jsEscape("Internal Server Error") + ")")
-            } else {
-              if (Routes.error == null || Routes.error == withActionMethod.method.getDeclaringClass) {
-                val response = new DefaultHttpResponse(HTTP_1_1, INTERNAL_SERVER_ERROR)
-                XSendFile.set500Page(response)
-                env.response = response
-                env.channel.write(env)
-              } else {
-                controller.response.setStatus(INTERNAL_SERVER_ERROR)
-                dispatchWithFailsafe(Routes.error.getMethod("error500"), env)
-              }
+            Routes.action500Method match {
+              case None => respondDefault500AlertOrPage(controller)
+
+              case Some(action500Method) =>
+                if (action500Method == actionMethod) {
+                  respondDefault500AlertOrPage(controller)
+                } else {
+                  controller.response.setStatus(INTERNAL_SERVER_ERROR)
+                  dispatchWithFailsafe(action500Method, env)
+                }
             }
           } else {
-            controller.response.setStatus(INTERNAL_SERVER_ERROR)
-
             val normalErrorMsg = e.toString + "\n\n" + e.getStackTraceString
             val errorMsg = if (e.isInstanceOf[org.fusesource.scalate.InvalidSyntaxException]) {
               val ise = e.asInstanceOf[org.fusesource.scalate.InvalidSyntaxException]
@@ -111,17 +107,28 @@ object Dispatcher extends Logger {
               normalErrorMsg
             }
 
-            if (controller.isAjax) {
+            if (controller.isAjax)
               controller.jsRespond("alert(" + controller.jsEscape(errorMsg) + ")")
-            } else {
+            else
               controller.respondText(errorMsg)
-            }
           }
         }
     }
   }
 
   //----------------------------------------------------------------------------
+
+  private def respondDefault500AlertOrPage(controller: Controller) {
+    if (controller.isAjax) {
+      controller.jsRespond("alert(" + controller.jsEscape("Internal Server Error") + ")")
+    } else {
+      val response = new DefaultHttpResponse(HTTP_1_1, INTERNAL_SERVER_ERROR)
+      XSendFile.set500Page(response)
+      val env = controller.handlerEnv
+      env.response = response
+      env.channel.write(env)
+    }
+  }
 
   /** @return true if the cache was hit */
   private def tryCache(controller: Controller)(f: => Unit): Boolean = {
@@ -193,20 +200,22 @@ class Dispatcher extends SimpleChannelUpstreamHandler with BadClientSilencer {
     val bodyParams = env.bodyParams
 
     Routes.matchRoute(request.getMethod, pathInfo) match {
-      case Some((action, pathParams)) =>
+      case Some((actionMethod, pathParams)) =>
         env.pathParams = pathParams
-        dispatchWithFailsafe(action.method, env)
+        dispatchWithFailsafe(actionMethod, env)
 
       case None =>
-        if (Routes.error == null) {
-          val response = new DefaultHttpResponse(HTTP_1_1, NOT_FOUND)
-          XSendFile.set404Page(response)
-          env.response = response
-          ctx.getChannel.write(env)
-        } else {
-          env.pathParams = MMap.empty
-          env.response.setStatus(NOT_FOUND)
-          dispatchWithFailsafe(Routes.error.getMethod("error404"), env)
+        Routes.action404Method match {
+          case None =>
+            val response = new DefaultHttpResponse(HTTP_1_1, NOT_FOUND)
+            XSendFile.set404Page(response)
+            env.response = response
+            ctx.getChannel.write(env)
+
+          case Some(actionMethod) =>
+            env.pathParams = MMap.empty
+            env.response.setStatus(NOT_FOUND)
+            dispatchWithFailsafe(actionMethod, env)
         }
     }
   }

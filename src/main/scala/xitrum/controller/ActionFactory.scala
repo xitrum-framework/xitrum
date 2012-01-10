@@ -36,7 +36,7 @@ trait ActionFactory {
   //----------------------------------------------------------------------------
 
   /** Creates route for 404 or 500 error handler. */
-  def errorAction(body: => Unit) = Action(null, () => body, null, 0)
+  def errorAction(body: => Unit) = Action(null, null, () => body, 0)
 
   //----------------------------------------------------------------------------
 
@@ -63,74 +63,34 @@ trait ActionFactory {
   }
 
   def GET(pattern: String)(body: => Any) =
-    Action(Route(HttpMethod.GET, RouteOrder.OTHER, Routes.compilePattern(withPathPrefix(pattern))), () => body, null, 0)
+    Action(Route(HttpMethod.GET, RouteOrder.OTHER, Routes.compilePattern(withPathPrefix(pattern))), null, () => body, 0)
 
   def GET(body: => Any) =
-    Action(Route(HttpMethod.GET, RouteOrder.OTHER, Routes.compilePattern(withPathPrefix(""))), () => body, null, 0)
+    Action(Route(HttpMethod.GET, RouteOrder.OTHER, Routes.compilePattern(withPathPrefix(""))), null, () => body, 0)
 
   def POST(pattern: String)(body: => Any) =
-    Action(Route(HttpMethod.POST, RouteOrder.OTHER, Routes.compilePattern(withPathPrefix(pattern))), () => body, null, 0)
+    Action(Route(HttpMethod.POST, RouteOrder.OTHER, Routes.compilePattern(withPathPrefix(pattern))), null, () => body, 0)
 
   def POST(body: => Any) =
-    Action(Route(HttpMethod.POST, RouteOrder.OTHER, Routes.compilePattern(withPathPrefix(""))), () => body, null, 0)
+    Action(Route(HttpMethod.POST, RouteOrder.OTHER, Routes.compilePattern(withPathPrefix(""))), null, () => body, 0)
 
   def PUT(pattern: String)(body: => Any) =
-    Action(Route(HttpMethod.PUT, RouteOrder.OTHER, Routes.compilePattern(withPathPrefix(pattern))), () => body, null, 0)
+    Action(Route(HttpMethod.PUT, RouteOrder.OTHER, Routes.compilePattern(withPathPrefix(pattern))), null, () => body, 0)
 
   def PUT(body: => Any) =
-    Action(Route(HttpMethod.PUT, RouteOrder.OTHER, Routes.compilePattern(withPathPrefix(""))), () => body, null, 0)
+    Action(Route(HttpMethod.PUT, RouteOrder.OTHER, Routes.compilePattern(withPathPrefix(""))), null, () => body, 0)
 
   def DELETE(pattern: String)(body: => Any) =
-    Action(Route(HttpMethod.DELETE, RouteOrder.OTHER, Routes.compilePattern(withPathPrefix(pattern))), () => body, null, 0)
+    Action(Route(HttpMethod.DELETE, RouteOrder.OTHER, Routes.compilePattern(withPathPrefix(pattern))), null, () => body, 0)
 
   def DELETE(body: => Any) =
-    Action(Route(HttpMethod.DELETE, RouteOrder.OTHER, Routes.compilePattern(withPathPrefix(""))), () => body, null, 0)
+    Action(Route(HttpMethod.DELETE, RouteOrder.OTHER, Routes.compilePattern(withPathPrefix(""))), null, () => body, 0)
 
   def WEBSOCKET(pattern: String)(body: => Any) =
-    Action(Route(HttpMethodWebSocket, RouteOrder.OTHER, Routes.compilePattern(withPathPrefix(pattern))), () => body, null, 0)
+    Action(Route(HttpMethodWebSocket, RouteOrder.OTHER, Routes.compilePattern(withPathPrefix(pattern))), null, () => body, 0)
 
   def WEBSOCKET(body: => Any) =
-    Action(Route(HttpMethodWebSocket, RouteOrder.OTHER, Routes.compilePattern(withPathPrefix(""))), () => body, null, 0)
-
-  //----------------------------------------------------------------------------
-
-  /**
-   * Action in this same controller instance but not the currentAction will have
-   * null method.
-   *
-   * In that case, to create new controller instance or get controller
-   * class name & route name, call this method. It falls back to using
-   * reflection to find inside this controller instance.
-   */
-  def nonNullMethodFromAction(action: Action): Method = {
-    // Action in controller companion object is OK, see
-    // ControllerReflection.cacheActionMethodToActionInCompanionControllerObject
-    if (action.method != null)  // currentAction
-      action.method
-    else
-      lookupMethodForActionWithNullMethod(action)
-  }
-
-  private def lookupMethodForActionWithNullMethod(action: Action): Method = synchronized {
-    // Use reflection on this controller to find, and cache the result if any
-    // Cannot use getFields because route fields are "val"s which are private in Java
-    // Must use getDeclaredFields and set fields to public
-    val controllerClass = getClass
-    val fields          = controllerClass.getDeclaredFields
-    fields.foreach { field =>
-      if (field.getType == classOf[Action]) {
-        field.setAccessible(true)
-        val any = field.get(this)
-        if (any == action) {
-          val methodName = field.getName
-          val method = controllerClass.getMethod(methodName)
-          action.method = method  // Cache it
-          return method
-        }
-      }
-    }
-    null
-  }
+    Action(Route(HttpMethodWebSocket, RouteOrder.OTHER, Routes.compilePattern(withPathPrefix(""))), null, () => body, 0)
 }
 
 object PathPrefix {

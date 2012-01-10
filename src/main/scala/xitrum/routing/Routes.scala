@@ -225,6 +225,16 @@ object Routes extends Logger {
     }
   }
 
+  //----------------------------------------------------------------------------
+
+  def lookupMethod(route: Route): Method = {
+    val (firsts, others, lasts) = actions(route.httpMethod)
+    firsts.foreach { a => if (a.route == route) return a.method }
+    others.foreach { a => if (a.route == route) return a.method }
+    lasts .foreach { a => if (a.route == route) return a.method }
+    throw new Exception("Route not found: " + route)
+  }
+
   /** For use from browser */
   lazy val jsRoutes = {
     val actionArray = ArrayBuffer[Action]()
@@ -244,7 +254,7 @@ object Routes extends Logger {
 
   //----------------------------------------------------------------------------
 
-  def matchRoute(httpMethod: HttpMethod, pathInfo: PathInfo): Option[(Action, Params)] = {
+  def matchRoute(httpMethod: HttpMethod, pathInfo: PathInfo): Option[(Method, Params)] = {
     // This method is only run for every request, speed is a problem
 
     if (!actions.isDefinedAt(httpMethod)) return None
@@ -318,21 +328,25 @@ object Routes extends Logger {
       }
     }
 
-    actions.get(httpMethod) match {
-      case None => None
-      case Some((firsts, others, lasts)) =>
-        firsts.find(finder) match {
-          case Some(action) => Some((action, pathParams))
+    // actions.isDefinedAt(httpMethod) has been checked above
+    val (firsts, others, lasts) = actions(httpMethod)
+    firsts.find(finder) match {
+      case Some(action) => Some((action.method, pathParams))
+      case None =>
+        others.find(finder) match {
+          case Some(action) => Some((action.method, pathParams))
           case None =>
-            others.find(finder) match {
-              case Some(action) => Some((action, pathParams))
-              case None =>
-                lasts.find(finder) match {
-                  case Some(action) => Some((action, pathParams))
-                  case None => None
-                }
+            lasts.find(finder) match {
+              case Some(action) => Some((action.method, pathParams))
+              case None => None
             }
         }
     }
   }
+
+  lazy val action404Method: Option[Method] =
+    if (error == null) None else Some(error.getMethod("error404"))
+
+  lazy val action500Method: Option[Method] =
+    if (error == null) None else Some(error.getMethod("error500"))
 }

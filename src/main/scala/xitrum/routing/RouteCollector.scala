@@ -16,7 +16,7 @@ import xitrum.controller.Action
 class RouteCollector(cachedFileName: String) extends Logger {
   /**
    * Because java.lang.reflect.Method is not serializable, we return a map of
-   * controller class name -> route method names.
+   * controller class name -> action method names.
    */
   def fromCacheFileOrRecollect(): Map[String, Seq[String]] =
     Scanner.foldLeft(cachedFileName, Map[String, Seq[String]](), discovered _)

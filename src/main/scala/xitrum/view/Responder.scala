@@ -14,6 +14,7 @@ import com.codahale.jerkson.Json
 import xitrum.{Controller, Config}
 import xitrum.controller.Action
 import xitrum.handler.down.{XSendFile, XSendResource}
+import xitrum.routing.Routes
 
 /**
  * When responding text, charset is automatically set, as advised by Google:
@@ -176,18 +177,18 @@ trait Responder extends JS with Flash with Knockout with I18n {
 
   /**
    * Responds Scalate template file with the path:
-   * src/main/view/scalate/<the/class/of/the/controller/of/the/given/route>/<route name>.<templateType>
+   * src/main/view/scalate/</class/name/of/the/controller/of/the/given/action>/<action name>.<templateType>
    *
    * @param templateType "jade", "mustache", "scaml", or "ssp"
    */
   def respondView(action: Action, customLayout: () => Any, templateType: String) {
-    val nonNullActionMethod = nonNullMethodFromAction(action)
+    val nonNullActionMethod = if (action.method == null) Routes.lookupMethod(action.route) else action.method
     val controllerClass     = nonNullActionMethod.getDeclaringClass
     val actionName          = nonNullActionMethod.getName
     val relPath             = controllerClass.getName.replace('.', File.separatorChar) + File.separator + actionName + "." + templateType
 
     renderedView = renderScalate(relPath)
-    val respondedLayout = customLayout.apply
+    val respondedLayout = customLayout.apply()
     if (respondedLayout == null)
       respondText(renderedView, "text/html; charset=" + Config.config.request.charset)
     else
@@ -212,7 +213,7 @@ trait Responder extends JS with Flash with Knockout with I18n {
 
   /**
    * Same as respondView(action, customLayout, templateType),
-   * where route is currentAction and customLayout is from the controller's layout method.
+   * where action is currentAction and customLayout is from the controller's layout method.
    */
   def respondView(templateType: String) {
     respondView(currentAction, templateType)
@@ -229,7 +230,7 @@ trait Responder extends JS with Flash with Knockout with I18n {
 
   /**
    * Same as respondView(action, customLayout, templateType),
-   * where route is currentAction, customLayout is from the controller's layout method and
+   * where action is currentAction, customLayout is from the controller's layout method and
    * templateType is as configured in xitrum.json.
    */
   def respondView() {

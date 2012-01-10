@@ -161,7 +161,7 @@ scr/main/scalate/quickstart/controller/MyController/index.jade:
 
   - import quickstart.controller.MyController
 
-  a(href={currentRoute.url}) Path to current action
+  a(href={currentAction.url}) Path to current action
   p= currentController.asInstanceOf[MyController].hello("World")
 
 In views you can use all methods of the class `xitrum.Controller <https://github.com/ngocdaothanh/xitrum/blob/master/src/main/scala/xitrum/Controller.scala>`_.

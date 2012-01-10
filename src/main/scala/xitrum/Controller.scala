@@ -31,7 +31,7 @@ trait Controller extends ExtEnv with ActionFactory with Logger with Net with Fil
       }
     } else {
       responded = true
-      prepareWhenRespond
+      prepareWhenRespond()
       channel.write(handlerEnv)
     }
   }
