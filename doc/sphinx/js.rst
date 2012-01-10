@@ -14,7 +14,7 @@ In your action, call ``jsAddToView`` (multiple times if you need):
 ::
 
   class MyController extends AppController {
-    val index = GET {
+    def index = GET {
       ...
       jsAddToView("alert('Hello')")
       ...

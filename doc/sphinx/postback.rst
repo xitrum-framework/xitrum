@@ -48,7 +48,7 @@ Articles.scala
   class Articles extends AppController {
     pathPrefix = "articles"
 
-    val show = GET(":id") {
+    def show = GET(":id") {
       val id = param("id")
       val article = Article.find(id)
       respondInlineView(
@@ -57,7 +57,7 @@ Articles.scala
       )
     }
 
-    val niw = first.GET("niw") {  // first: force this route to be matched before "show"
+    def niw = first.GET("niw") {  // first: force this route to be matched before "show"
       respondInlineView(
         <form data-postback="submit" action={create.url}>
           <label>Title</label>
@@ -71,7 +71,7 @@ Articles.scala
       )
     }
 
-    val create = POST {
+    def create = POST {
       val title   = param("title")
       val body    = param("body")
       val article = Article.save(title, body)

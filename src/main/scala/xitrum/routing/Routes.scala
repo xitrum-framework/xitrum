@@ -123,14 +123,14 @@ object Routes extends Logger {
       }
     }
 
-    if (!actionCaches.isEmpty) {
+    if (actionCaches.nonEmpty) {
       actionCaches = actionCaches.sortBy(_._1)
       val logFormat = "%-" + actionMaxControllerActionNameLength + "s    %s"
       val strings = actionCaches.map { case (n, s) => logFormat.format(n, formatTime(s)) }
       logger.info("Action cache:\n" + strings.mkString("\n"))
     }
 
-    if (!pageCaches.isEmpty) {
+    if (pageCaches.nonEmpty) {
       pageCaches = pageCaches.sortBy(_._1)
       val logFormat = "%-" + pageMaxControllerActionNameLength + "s    %s"
       val strings = pageCaches.map { case (n, s) => logFormat.format(n, formatTime(s)) }

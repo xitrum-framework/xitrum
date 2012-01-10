@@ -94,7 +94,7 @@ Chat example
   import xitrum.validator.{Required, Validated}
 
   class ChatController {
-    val index = GET("chat") {
+    def index = GET("chat") {
       jsCometGet("chat", """
         function(channel, timestamp, body) {
           var wasScrollAtBottom = xitrum.isScrollAtBottom('#chatOutput');
@@ -130,7 +130,7 @@ the message for you. If you want to publish the message yourself, call ``Comet.p
   import xitrum.comet.Comet
 
   class AdminController extends Controller {
-    val index = GET("admin") {
+    def index = GET("admin") {
       respondInlineView(
         <form data-postback="submit" action={publish.url}>
           <label>Message from admin:</label>
@@ -139,7 +139,7 @@ the message for you. If you want to publish the message yourself, call ``Comet.p
       )
     }
 
-    val publish = POST("admin/chat") {
+    def publish = POST("admin/chat") {
       val body = param("body")
       Comet.publish("chat", "[From admin]: " + body)
       respondText("")

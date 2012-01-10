@@ -15,7 +15,7 @@ There are 3 kinds of textual params, of type ``scala.collection.mutable.Map[Stri
 
 1. ``uriParams``: params after the ? mark in the URL, example: http://example.com/blah?x=1&y=2
 2. ``bodyParams``: params in POST request body
-3. ``pathParams``: params embedded in the URL, example: ``@GET("/articles/:id/:title")``
+3. ``pathParams``: params embedded in the URL, example: ``GET("articles/:id/:title")``
 
 These params are merged in the above order as ``textParams``
 (from 1 to 3, the latter will override the former).
@@ -85,7 +85,7 @@ Articles.scala
 ::
 
   class Articles extends AppController {
-    val show = GET(":id") {
+    def show = GET(":id") {
       val (title, body) = ...  // Get from DB
       RVar.title.set(title)
       respondInlineView(body)
@@ -138,10 +138,10 @@ attack, in the action that lets users login, call ``resetSession``.
 
 ::
 
-  class LoginAction extends Action {
-    override def execute {
+  class LoginController extends Controller {
+    def login = GET("login") {
       ...
-      resetSession  // Reset first before doing anything else with the session
+      resetSession()  // Reset first before doing anything else with the session
       session("username") = username
     }
   }

@@ -58,7 +58,7 @@ trait Flash {
    */
   def jsRenderFlash() {
     val msg = flash()
-    if (!msg.isEmpty) jsRenderFlash(msg)
+    if (msg.nonEmpty) jsRenderFlash(msg)
   }
 
   lazy val xitrumCSS = <link href={urlForResource("xitrum/xitrum.css")} type="text/css" rel="stylesheet" media="all"></link>

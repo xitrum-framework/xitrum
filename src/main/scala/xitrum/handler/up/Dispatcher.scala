@@ -155,10 +155,10 @@ object Dispatcher extends Logger {
       val env          = controller.handlerEnv
 
       (controller.request.getMethod) + " " + ControllerReflection.controllerActionName(controller.handlerEnv.action)                                                       +
-      (if (!env.uriParams.isEmpty)        ", uriParams: "        + RequestEnv.inspectParamsWithFilter(env.uriParams       .asInstanceOf[MMap[String, List[Any]]]) else "") +
-      (if (!env.bodyParams.isEmpty)       ", bodyParams: "       + RequestEnv.inspectParamsWithFilter(env.bodyParams      .asInstanceOf[MMap[String, List[Any]]]) else "") +
-      (if (!env.pathParams.isEmpty)       ", pathParams: "       + RequestEnv.inspectParamsWithFilter(env.pathParams      .asInstanceOf[MMap[String, List[Any]]]) else "") +
-      (if (!env.fileUploadParams.isEmpty) ", fileUploadParams: " + RequestEnv.inspectParamsWithFilter(env.fileUploadParams.asInstanceOf[MMap[String, List[Any]]]) else "") +
+      (if (env.uriParams.nonEmpty)        ", uriParams: "        + RequestEnv.inspectParamsWithFilter(env.uriParams       .asInstanceOf[MMap[String, List[Any]]]) else "") +
+      (if (env.bodyParams.nonEmpty)       ", bodyParams: "       + RequestEnv.inspectParamsWithFilter(env.bodyParams      .asInstanceOf[MMap[String, List[Any]]]) else "") +
+      (if (env.pathParams.nonEmpty)       ", pathParams: "       + RequestEnv.inspectParamsWithFilter(env.pathParams      .asInstanceOf[MMap[String, List[Any]]]) else "") +
+      (if (env.fileUploadParams.nonEmpty) ", fileUploadParams: " + RequestEnv.inspectParamsWithFilter(env.fileUploadParams.asInstanceOf[MMap[String, List[Any]]]) else "") +
       ", " + dt + " [ms]"
     }
 

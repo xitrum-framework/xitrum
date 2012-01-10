@@ -12,8 +12,8 @@ You can write RESTful APIs for iPhone, Android applications etc. very easily.
   class Articles extends Controller {
     pathPrefix = "articles"
 
-    val index = GET {...}
-    val show  = GET(":id) {...}
+    def index = GET {...}
+    def show  = GET(":id) {...}
   }
 
 The same for POST, PUT, and DELETE.
@@ -65,8 +65,8 @@ You must make sure the second route be checked first. ``first`` is for this purp
   class Articles extends Controller {
     pathPrefix = "articles"
 
-    val show = GET(":id") {...}
-    val niw  = first.GET("new") {...}
+    def show = GET(":id") {...}
+    def niw  = first.GET("new") {...}
   }
 
 ``last`` is similar.
@@ -132,10 +132,10 @@ trait xitrum.SkipCSRFCheck:
 
   class LogPositionAPI extends API {
     pathPrefix = "api/positions"
-    val log = POST {...}
+    def log = POST {...}
   }
 
   class CreateTodoAPI extends API {
     pathPrefix = "api/todos"
-    val create = POST {...}
+    def create = POST {...}
   }

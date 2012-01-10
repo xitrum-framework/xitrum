@@ -13,14 +13,14 @@ not be run.
 
   import xitrum.Controller
 
-  class MyController extends Action {
+  class MyController extends Controller {
     beforeFilter {
       logger.info("I run therefore I am")
       true
     }
 
     // This method is run after the above filters
-    val index =   @GET("before_filter") {
+    def index = GET("before_filter") {
       respondInlineText("Before filters should have been run, please check the log")
     }
   }
@@ -41,7 +41,7 @@ Before filters can be skipped using ``skipBeforeFilter``.
 
   // This controller is protected by authentication
   class AController extends AppController {
-    val index = GET("secretplace") {
+    def index = GET("secretplace") {
       respondText("secretplace")
     }
   }
@@ -50,10 +50,45 @@ Before filters can be skipped using ``skipBeforeFilter``.
   class AnotherController extends AppController {
     skipBeforeFilter(authenticate)
 
-    val index = GET("nothingspecial") {
+    def index = GET("nothingspecial") {
       respondText("nothingspecial")
     }
   }
+
+You can use ``only`` or ``except`` with ``beforeFilter``.
+
+::
+
+  import xitrum.Controller
+
+  class Admins extends Controller {
+    pathPrefix = "admin"
+
+    beforeFilter(except = Seq(login, doLogin)) {
+      val ret = SVar.username.isDefined
+      if (!ret) {
+        flash("Please login.")
+        redirectTo(login)
+      }
+      ret
+    }
+
+    def index = GET {
+      ...
+    }
+
+    // Display login form
+    def login = GET("login") {
+      ...
+    }
+
+    // Process login form
+    def doLogin = POST("login") {
+      ...
+    }
+  }
+
+``only`` and ``except`` can also be used  with ``skipBeforeFilter``.
 
 After filters
 -------------
@@ -66,7 +101,7 @@ They are functions that take no argument. Their return value will be ignored.
   import xitrum.Controller
 
   class MyController extends Controller {
-    val index = GET("after_filter") {
+    def index = GET("after_filter") {
       respondText("After filter should have been run, please check the log")
     }
 
@@ -76,6 +111,7 @@ They are functions that take no argument. Their return value will be ignored.
   }
 
 After filters can be skipped using ``skipAfterFilter``.
+You can use ``only`` and ``except`` with ``afterFilter`` and ``skipAfterFilter``.
 
 Around filters
 ---------------
@@ -92,13 +128,14 @@ Around filters
       logger.info("The action took " + (end - begin) + " [ms]")
     }
 
-    val index = GET("around_filter") {
+    def index = GET("around_filter") {
       respondText("Around filter should have been run, please check the log")
     }
   }
 
 If there are many around filters, they will be nested.
 Around filters can be skipped using ``skipAroundFilter``.
+You can use ``only`` and ``except`` with ``aroundFilter`` and ``skipAroundFilter``.
 
 Priority
 --------
