@@ -1,6 +1,6 @@
 package xitrum.validator
 
-class ValidationError(message: String) extends Error(message)
+import xitrum.exception.ValidationError
 
 trait Validator {
   def v(name: String, value: Any): Option[String]

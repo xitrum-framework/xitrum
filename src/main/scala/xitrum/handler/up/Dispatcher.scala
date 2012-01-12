@@ -12,7 +12,7 @@ import HttpVersion._
 import xitrum.{Config, Controller, SkipCSRFCheck, Cache, Logger}
 import xitrum.controller.Action
 import xitrum.routing.Routes
-import xitrum.exception.{InvalidAntiCSRFToken, MissingParam, SessionExpired}
+import xitrum.exception.{InvalidAntiCSRFToken, MissingParam, SessionExpired, ValidationError}
 import xitrum.handler.HandlerEnv
 import xitrum.handler.down.ResponseCacher
 import xitrum.handler.down.XSendFile
@@ -63,7 +63,7 @@ object Dispatcher extends Logger {
 
         // These exceptions are special cases:
         // We know that the exception is caused by the client (bad request)
-        if (e.isInstanceOf[SessionExpired] || e.isInstanceOf[InvalidAntiCSRFToken] || e.isInstanceOf[MissingParam]) {
+        if (e.isInstanceOf[SessionExpired] || e.isInstanceOf[InvalidAntiCSRFToken] || e.isInstanceOf[MissingParam] || e.isInstanceOf[ValidationError]) {
           logAccess(controller, beginTimestamp, 0, false)
 
           controller.response.setStatus(BAD_REQUEST)
@@ -72,9 +72,12 @@ object Dispatcher extends Logger {
             "Session expired. Please refresh your browser."
           } else if (e.isInstanceOf[MissingParam]) {
             val mp  = e.asInstanceOf[MissingParam]
-            val key = mp.key
-            "Missing param: " + key
+            "Missing param: " + mp.key
+          } else {
+            val ve = e.asInstanceOf[ValidationError]
+            "Validation error: " + ve.message
           }
+
           if (controller.isAjax)
             controller.jsRespond("alert(" + controller.jsEscape(msg) + ")")
           else

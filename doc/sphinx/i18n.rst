@@ -15,22 +15,19 @@ Write internationalized messages in source code
   t("Message")
   tc("Context", "Message")
 
-In other places like models, you need to pass the action to them and call
-``t`` and ``tc`` on it:
+In a controller or action, just call them.
+In other places like models, you need to pass the current controller to them and
+call ``t`` and ``tc`` on it:
 
 ::
 
   // In an action
-  val errorMessageo = MyModel.validate(this, data)
+  respondText(MyModel.hello(this))
 
   // In the model
   import xitrum.I18n
   object MyModel {
-    // Returns None on success or Some(error message) on failure
-    def validate(i18n: I18n, data: Data): Option[String] = {
-      if (...) return Some(i18n.t("An error message))
-      ...
-    }
+    def hello(i18n) = i18n.t("Hello World")
   }
 
 Extract messages to pot files
@@ -76,7 +73,7 @@ translate.
   src
     main
       scala
-        ...
+      view
       resources
         i18n
           en.po
@@ -107,6 +104,9 @@ Validation messages
 
 jQuery Validation plugin provides `i18n error messages <https://github.com/jzaefferer/jquery-validation/tree/master/localization>`_.
 Xitrum automatically include the message file corresponding to the current language.
+
+For server side default validators in ``xitrum.validator`` package, Xitrum also
+provide translation for them.
 
 Plural forms
 ------------
