@@ -1,11 +1,5 @@
 1.9 (planned):
-* Filters now have "only" and "except"
-  http://ngocdaothanh.github.com/xitrum/filter.html
-* Optimize routing by using methods instead of vals
-  http://ngocdaothanh.github.com/xitrum/controller_action_view.html
-
 * I18n for validation messages
-
 * Make extensive use of Knockout.js and Scala delimited continuation
 * Integrate WebSocket to Comet; use WebSocket if available, or fall back to Ajax
 * Add Ajax style upload based on iframe
@@ -15,6 +9,12 @@
 * wro4j
 * Middleware architecture based on Netty handlers
 * Reload routes when in development mode with JRebel
+
+1.8.1:
+* Filters now have "only" and "except"
+  http://ngocdaothanh.github.com/xitrum/filter.html
+* Optimize routing by using methods instead of vals
+  http://ngocdaothanh.github.com/xitrum/controller_action_view.html
 
 1.8:
 * Add Scalate back, with precompilation
