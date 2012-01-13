@@ -5,10 +5,13 @@ import scala.collection.mutable.ArrayBuffer
 import xitrum.Controller
 import xitrum.routing.Route
 
+case class BeforeFilter(body: ()          => Boolean, only: ArrayBuffer[Route], except: ArrayBuffer[Route])
+case class AfterFilter (body: ()          => Any,     only: ArrayBuffer[Route], except: ArrayBuffer[Route])
+case class AroundFilter(body: (() => Any) => Any,     only: ArrayBuffer[Route], except: ArrayBuffer[Route])
+
 trait Filter {
   this: Controller =>
 
-  case class BeforeFilter(body: () => Boolean, only: ArrayBuffer[Route], except: ArrayBuffer[Route])
   private val beforeFilters = ArrayBuffer[BeforeFilter]()
 
   def beforeFilter(f: => Boolean): () => Boolean = {
@@ -74,7 +77,6 @@ trait Filter {
 
   //----------------------------------------------------------------------------
 
-  case class AfterFilter(body: () => Any, only: ArrayBuffer[Route], except: ArrayBuffer[Route])
   private val afterFilters = ArrayBuffer[AfterFilter]()
 
   def afterFilter(f: => Any): () => Any = {
@@ -142,7 +144,6 @@ trait Filter {
 
   //----------------------------------------------------------------------------
 
-  case class AroundFilter(body: (() => Any) => Any, only: ArrayBuffer[Route], except: ArrayBuffer[Route])
   private val aroundFilters = ArrayBuffer[AroundFilter]()
 
   def aroundFilter(f: (() => Any) => Any): (() => Any) => Any = {
