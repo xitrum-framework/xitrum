@@ -106,7 +106,7 @@ object XSendFile extends Logger {
             val future = Channels.write(ctx.getChannel, new ChunkedFile(raf, 0, raf.length, CHUNK_SIZE))
             future.addListener(new ChannelFutureListener {
               def operationComplete(f: ChannelFuture) {
-                raf.close
+                raf.close()
               }
             })
             if (!HttpHeaders.isKeepAlive(request)) future.addListener(ChannelFutureListener.CLOSE)
@@ -121,7 +121,7 @@ object XSendFile extends Logger {
             future.addListener(new ChannelFutureListener {
               def operationComplete(f: ChannelFuture) {
                 region.releaseExternalResources
-                raf.close
+                raf.close()
               }
             })
             if (!HttpHeaders.isKeepAlive(request)) future.addListener(ChannelFutureListener.CLOSE)

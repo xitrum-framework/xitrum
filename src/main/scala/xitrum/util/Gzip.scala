@@ -21,7 +21,7 @@ object Gzip {
     g.write(bytes)
     g.finish
     val gzippedBytes = b.toByteArray
-    g.close
+    g.close()
     gzippedBytes
   }
 

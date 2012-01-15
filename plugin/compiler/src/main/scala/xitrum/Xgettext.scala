@@ -119,7 +119,7 @@ msgstr ""
 
           val out = new BufferedWriter(new FileWriter(outputFile))
           out.write(builder.toString)
-          out.close
+          out.close()
 
           reduced = true
         }

@@ -30,7 +30,7 @@ class WebSocketDispatcher(handshaker: WebSocketServerHandshaker, controller: Con
 
     if (!(frame.isInstanceOf[TextWebSocketFrame])) {
       logger.warn("Frame type not supported: " + frame.getClass.getName)
-      ctx.getChannel.close
+      ctx.getChannel.close()
       return
     }
 

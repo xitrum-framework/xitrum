@@ -8,8 +8,8 @@ object SeriDeseri {
     val oos   = new ObjectOutputStream(baos)
     oos.writeObject(value)
     val bytes = baos.toByteArray
-    oos.close
-    baos.close
+    oos.close()
+    baos.close()
     bytes
   }
 
@@ -18,8 +18,8 @@ object SeriDeseri {
       val bais  = new ByteArrayInputStream(bytes)
       val ois   = new ObjectInputStream(bais)
       val value = ois.readObject
-      ois.close
-      bais.close
+      ois.close()
+      bais.close()
       Some(value)
     } catch {
       case _ => None

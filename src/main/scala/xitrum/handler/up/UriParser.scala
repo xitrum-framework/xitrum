@@ -32,7 +32,7 @@ class UriParser extends SimpleChannelUpstreamHandler with BadClientSilencer {
         val msg = "Could not parse URI: " + request.getUri
         logger.warn(msg, t)
 
-        ctx.getChannel.close
+        ctx.getChannel.close()
         return
     }
 

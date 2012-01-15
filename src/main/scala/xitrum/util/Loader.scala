@@ -12,15 +12,13 @@ object Loader {
   def bytesFromInputStream(is: InputStream): Array[Byte] = {
     if (is == null) return null
 
-    var ret = Array[Byte]()
-
+    var ret    = Array[Byte]()
     var buffer = new Array[Byte](BUFFER_SIZE)
     while (is.available > 0) {  // "available" is not always the exact size
       val bytesRead = is.read(buffer)
       ret = ret ++ buffer.take(bytesRead)
     }
-    is.close
-
+    is.close()
     ret
   }
 
@@ -56,7 +54,7 @@ object Loader {
     val stream = new FileInputStream(path)
     val ret = new Properties
     ret.load(stream)
-    stream.close
+    stream.close()
     ret
   }
 
@@ -69,7 +67,7 @@ object Loader {
 
     val ret = new Properties
     ret.load(stream)
-    stream.close
+    stream.close()
     ret
   }
 

@@ -78,7 +78,7 @@ class BodyParser extends SimpleChannelUpstreamHandler with BadClientSilencer {
           val msg = "Could not parse POST body, URI: " + request.getUri
           logger.warn(msg, t)
 
-          ctx.getChannel.close
+          ctx.getChannel.close()
           return
       }
     }
