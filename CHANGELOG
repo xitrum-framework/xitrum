@@ -10,6 +10,9 @@
 * Middleware architecture based on Netty handlers
 * Reload routes when in development mode with JRebel
 
+1.8.3:
+* Fix https://github.com/ngocdaothanh/xitrum/issues/60
+
 1.8.2:
 * Filters now have "only" and "except"
   http://ngocdaothanh.github.com/xitrum/filter.html
