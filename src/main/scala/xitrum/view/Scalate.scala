@@ -2,7 +2,7 @@ package xitrum.view
 
 import java.io.{File, PrintWriter, StringWriter}
 
-import org.fusesource.scalate.{Binding, DefaultRenderContext, Template, TemplateEngine}
+import org.fusesource.scalate.{Binding, DefaultRenderContext, RenderContext, Template, TemplateEngine}
 import org.fusesource.scalate.scaml.ScamlOptions
 import io.netty.handler.codec.serialization.ClassResolvers
 
@@ -11,6 +11,7 @@ import xitrum.{Config, Controller}
 object Scalate {
   private val DIR                   = "src/main/view/scalate"
   private val CONTROLLER_BINDING_ID = "helper"
+  private val CONTEXT_BINDING_ID    = "context"
 
   private val classResolver = ClassResolvers.softCachingConcurrentResolver(getClass.getClassLoader)
 
@@ -18,7 +19,9 @@ object Scalate {
     val ret = new TemplateEngine
     ret.allowReload   = !Config.isProductionMode
     ScamlOptions.ugly = Config.isProductionMode
-    ret.bindings      = List(Binding(CONTROLLER_BINDING_ID, classOf[Controller].getName, true))
+    ret.bindings      = List(
+      Binding(CONTEXT_BINDING_ID,    classOf[RenderContext].getName, true),  // import Scalate utilities like "unescape"
+      Binding(CONTROLLER_BINDING_ID, classOf[Controller].getName,    true))  // import current controller
     ret
   }
 
@@ -30,6 +33,7 @@ object Scalate {
     val buffer  = new StringWriter
     val out     = new PrintWriter(buffer)
     val context = new DefaultRenderContext(relPath, engine, out)
+    context.attributes.update(CONTEXT_BINDING_ID,    context)
     context.attributes.update(CONTROLLER_BINDING_ID, controller)
 
     if (Config.isProductionMode) {

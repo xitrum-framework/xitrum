@@ -28,8 +28,8 @@ object Server extends Logger {
   }
 
   private def start(https: Boolean) {
-    val bossExecutor    = Executors.newCachedThreadPool
-    val workerExecutor  = Executors.newCachedThreadPool
+    val bossExecutor    = Executors.newCachedThreadPool()
+    val workerExecutor  = Executors.newCachedThreadPool()
     val channelFactory  = new NioServerSocketChannelFactory(bossExecutor, workerExecutor)
     val bootstrap       = new ServerBootstrap(channelFactory)
     val pipelineFactory = new ChannelPipelineFactory(https)
