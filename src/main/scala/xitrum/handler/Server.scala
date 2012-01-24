@@ -36,6 +36,7 @@ object Server extends Logger {
     val (kind, port)    = if (https) ("HTTPS", Config.config.https.get.port) else ("HTTP", Config.config.http.get.port)
 
     bootstrap.setPipelineFactory(pipelineFactory)
+    bootstrap.setOption("backlog",          128)  // 128 is a sweet spot, http://lionet.livejournal.com/42016.html
     bootstrap.setOption("reuseAddress",     true)
     bootstrap.setOption("child.tcpNoDelay", true)
     bootstrap.setOption("child.keepAlive",  true)
