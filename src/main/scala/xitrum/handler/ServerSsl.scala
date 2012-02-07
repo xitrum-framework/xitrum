@@ -39,7 +39,7 @@ object ServerSsl {
 
   // Engine must be recreated everytime
   private def engine: SSLEngine = {
-    val ret = context.createSSLEngine
+    val ret = context.createSSLEngine()
     ret.setUseClientMode(false)
     ret
   }
