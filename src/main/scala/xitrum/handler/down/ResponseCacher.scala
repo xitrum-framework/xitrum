@@ -1,20 +1,20 @@
 package xitrum.handler.down
 
-import scala.collection.immutable.{ SortedMap, TreeMap }
+import scala.collection.immutable.{SortedMap, TreeMap}
 
-import io.netty.channel.{ ChannelHandler, SimpleChannelDownstreamHandler, ChannelHandlerContext, MessageEvent, Channels, ChannelFutureListener }
+import io.netty.channel.{ChannelHandler, SimpleChannelDownstreamHandler, ChannelHandlerContext, MessageEvent, Channels, ChannelFutureListener}
 import io.netty.buffer.ChannelBuffers
 import ChannelHandler.Sharable
-import io.netty.handler.codec.http.{ DefaultHttpResponse, HttpHeaders, HttpRequest, HttpResponse, HttpResponseStatus, HttpVersion }
+import io.netty.handler.codec.http.{DefaultHttpResponse, HttpHeaders, HttpRequest, HttpResponse, HttpResponseStatus, HttpVersion}
 import HttpResponseStatus.OK
-import HttpHeaders.Names.{ CONTENT_ENCODING, CONTENT_TYPE }
+import HttpHeaders.Names.{CONTENT_ENCODING, CONTENT_TYPE}
 
-import xitrum.{ Cache, Config, Logger }
+import xitrum.{Cache, Config, Logger}
 import xitrum.Controller
 import xitrum.routing.Routes
 import xitrum.scope.request.RequestEnv
 import xitrum.handler.HandlerEnv
-import xitrum.util.{ Gzip, Mime }
+import xitrum.util.{Gzip, Mime}
 
 object ResponseCacher extends Logger {
   //                             statusCode  headers                  content
@@ -22,9 +22,7 @@ object ResponseCacher extends Logger {
 
   def cacheResponse(controller: Controller) {
     val cacheSeconds = controller.handlerEnv.action.cacheSeconds
-    if (cacheSeconds == 0) return
-
-    val key = makeCacheKey(controller)
+    val key          = makeCacheKey(controller)
     if (!Cache.cache.containsKey(key)) { // Check to avoid the cost of serializing
       val response = controller.response
       val cachedResponse = serializeResponse(controller.request, response)
@@ -133,7 +131,7 @@ class ResponseCacher extends SimpleChannelDownstreamHandler with Logger {
       return
     }
 
-    val env = m.asInstanceOf[HandlerEnv]
+    val env        = m.asInstanceOf[HandlerEnv]
     val controller = env.controller
 
     // controller may be null when the request could not go to Dispatcher, for
@@ -144,7 +142,7 @@ class ResponseCacher extends SimpleChannelDownstreamHandler with Logger {
     }
 
     val response = controller.response
-    if (response.getStatus == OK && !response.isChunked) cacheResponse(controller)
+    if (response.getStatus == OK && !response.isChunked && env.action.cacheSeconds != 0) cacheResponse(controller)
 
     ctx.sendDownstream(e)
   }

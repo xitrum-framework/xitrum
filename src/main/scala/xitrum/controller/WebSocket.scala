@@ -16,7 +16,7 @@ trait WebSocket {
     if (handshaker == null) {
       factory.sendUnsupportedWebSocketVersionResponse(channel)
     } else {
-      handshaker.performOpeningHandshake(channel, request)
+      handshaker.handshake(channel, request)
       val pipeline = channel.getPipeline
       ChannelPipelineFactory.removeUnusedDefaultHttpHandlersForWebSocket(pipeline)
       pipeline.addLast("webSocketDispatcher", new WebSocketDispatcher(handshaker, this))

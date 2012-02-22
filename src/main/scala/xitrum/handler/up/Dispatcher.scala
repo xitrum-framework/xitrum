@@ -30,6 +30,7 @@ object Dispatcher extends Logger {
 
     env.action     = withActionMethod
     env.controller = controller
+
     try {
       // Check for CSRF (CSRF has been checked if "postback" is true)
       if (controller.request.getMethod != HttpMethod.GET &&
@@ -39,7 +40,7 @@ object Dispatcher extends Logger {
 
       val cacheSeconds = withActionMethod.cacheSeconds
 
-      if (cacheSeconds > 0) {             // Page cache
+      if (cacheSeconds > 0) {     // Page cache
         tryCache(controller) {
           val passed = controller.callBeforeFilters()
           if (passed) runAroundAndAfterFilters(controller, withActionMethod)
@@ -47,11 +48,10 @@ object Dispatcher extends Logger {
       } else {
         val passed = controller.callBeforeFilters()
         if (passed) {
-          if (cacheSeconds == 0) {        // No cache
-            runAroundAndAfterFilters(controller, withActionMethod)
-          } else if (cacheSeconds < 0) {  // Action cache
+          if (cacheSeconds < 0)  // Action cache
             tryCache(controller) { runAroundAndAfterFilters(controller, withActionMethod) }
-          }
+          else                   // No cache
+            runAroundAndAfterFilters(controller, withActionMethod)
         }
       }
 

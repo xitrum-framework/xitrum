@@ -18,7 +18,7 @@ class WebSocketDispatcher(handshaker: WebSocketServerHandshaker, controller: Con
     val frame = m.asInstanceOf[WebSocketFrame]
 
     if (frame.isInstanceOf[CloseWebSocketFrame]) {
-      handshaker.performClosingHandshake(ctx.getChannel, frame.asInstanceOf[CloseWebSocketFrame])
+      handshaker.close(ctx.getChannel, frame.asInstanceOf[CloseWebSocketFrame])
       controller.onWebSocketClose()
       return
     }

@@ -67,15 +67,7 @@ class ChannelPipelineFactory(https: Boolean) extends CPF {
     val handlers1 = httpHandlers
     val handlers2 = if (https) ServerSsl.handler +: handlers1 else handlers1
 
-    // StaticChannelPipeline provides extreme performance at the cost of
-    // disabled dynamic manipulation of pipeline
-    //
-    // Creating StaticChannelPipeline with empty constructor will cause
-    // java.lang.IllegalArgumentException: no handlers specified
-    //new StaticChannelPipeline(handlers2:_*)
-
-    // Cannot use StaticChannelPipeline because WebSocket handshaker in Netty
-    // dynamically changes the pipeline like this:
+    // WebSocket handshaker in Netty dynamically changes the pipeline like this:
     // pipeline.remove(classOf[HttpChunkAggregator])
     // pipeline.replace(classOf[HttpRequestDecoder], "wsdecoder", new WebSocket08FrameDecoder(true, this.allowExtensions))
     // pipeline.replace(classOf[HttpResponseEncoder], "wsencoder", new WebSocket08FrameEncoder(false))
