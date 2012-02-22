@@ -9,6 +9,7 @@ import io.netty.util.CharsetUtil.UTF_8
 object Loader {
   private val BUFFER_SIZE = 1024
 
+  /** The input stream will be closed by this method after reading */
   def bytesFromInputStream(is: InputStream): Array[Byte] = {
     if (is == null) return null
 
@@ -51,10 +52,10 @@ object Loader {
   //----------------------------------------------------------------------------
 
   def propertiesFromFile(path: String): Properties = {
-    val stream = new FileInputStream(path)
+    val is  = new FileInputStream(path)
     val ret = new Properties
-    ret.load(stream)
-    stream.close()
+    ret.load(is)
+    is.close()
     ret
   }
 
@@ -63,11 +64,10 @@ object Loader {
    */
   def propertiesFromClasspath(path: String): Properties = {
     // http://www.javaworld.com/javaworld/javaqa/2003-08/01-qa-0808-property.html?page=2
-    val stream = getClass.getClassLoader.getResourceAsStream(path)
-
+    val is = getClass.getClassLoader.getResourceAsStream(path)
     val ret = new Properties
-    ret.load(stream)
-    stream.close()
+    ret.load(is)
+    is.close()
     ret
   }
 

@@ -30,6 +30,7 @@ class RouteCollector(cachedFileName: String) extends Logger {
         val dis  = new DataInputStream(bais)
         val cf   = new ClassFile(dis)
         dis.close()
+        bais.close()
 
         val className  = cf.getName
         if (className.contains("$")) {  // Ignore Scala objects

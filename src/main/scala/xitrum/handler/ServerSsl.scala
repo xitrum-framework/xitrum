@@ -25,7 +25,9 @@ object ServerSsl {
   // Context can be created only once
   private lazy val context: SSLContext = {
     val ks = KeyStore.getInstance("JKS")
-    ks.load(new FileInputStream(Config.config.https.get.keystore.path), Config.config.https.get.keystore.password.toCharArray)
+    val is = new FileInputStream(Config.config.https.get.keystore.path)
+    ks.load(is, Config.config.https.get.keystore.password.toCharArray)
+    is.close()
 
     // Set up key manager factory to use our key store
     val kmf = KeyManagerFactory.getInstance(ALGORITHM)
