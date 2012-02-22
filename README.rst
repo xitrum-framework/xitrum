@@ -86,7 +86,7 @@ Create new empty Xitrum project
 
 To create a new empty project, in Rails you have ``rails new``, in Cake you have
 ``cake new``. In `Xitrum <http://ngocdaothanh.github.com/xitrum>`_ you download
-a `xitrum-new.zip <http://cloud.github.com/downloads/ngocdaothanh/xitrum-new/xitrum-new.zip>`_:
+`xitrum-new.zip <http://cloud.github.com/downloads/ngocdaothanh/xitrum-new/xitrum-new.zip>`_:
 
 ::
 
