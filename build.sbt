@@ -6,7 +6,7 @@ organization := "tv.cntt"
 
 name := "xitrum"
 
-version := "1.9-SNAPSHOT"
+version := "1.8.4-SNAPSHOT"
 
 scalacOptions ++= Seq(
   "-deprecation",
@@ -32,11 +32,11 @@ libraryDependencies += "io.netty" % "netty" % "4.0.0.Alpha1-SNAPSHOT" from "http
 // For distributed cache and Comet
 // Infinispan is good but much heavier, and the logging is bad:
 // https://github.com/infinispan/infinispan/blob/master/core/src/main/java/org/infinispan/util/logging/LogFactory.java
-libraryDependencies += "com.hazelcast" % "hazelcast" % "1.9.4.8"
+libraryDependencies += "com.hazelcast" % "hazelcast" % "2.0"
 
 // http://www.hazelcast.com/documentation.jsp#Clients
 // Hazelcast can be configured in Xitrum as super client or native client
-libraryDependencies += "com.hazelcast" % "hazelcast-client" % "1.9.4.8"
+libraryDependencies += "com.hazelcast" % "hazelcast-client" % "2.0"
 
 // Jerkson ---------------------------------------------------------------------
 
@@ -73,20 +73,43 @@ addCompilerPlugin("org.scala-lang.plugins" % "continuations" % "2.9.1")
 
 scalacOptions += "-P:continuations:enable"
 
-// Publish ---------------------------------------------------------------------
+// Publish to Sonatype -------------------------------------------------------
+// https://github.com/sbt/sbt.github.com/blob/gen-master/src/jekyll/using_sonatype.md
 
 // https://github.com/harrah/xsbt/wiki/Cross-Build
 //crossScalaVersions := Seq("2.9.0-1", "2.9.1")
 scalaVersion := "2.9.1"
 
 publishTo <<= (version) { version: String =>
-  val nexus = "http://nexus.scala-tools.org/content/repositories/"
-  if (version.trim.endsWith("SNAPSHOT")) Some("snapshots" at nexus + "snapshots/")
-  else                                   Some("releases"  at nexus + "releases/")
+  val nexus = "https://oss.sonatype.org/"
+  if (version.trim.endsWith("SNAPSHOT")) Some("snapshots" at nexus + "content/repositories/snapshots")
+  else                                   Some("releases"  at nexus + "service/local/staging/deploy/maven2")
 }
 
-credentials += Credentials(Path.userHome / ".ivy2" / ".credentials")
+publishMavenStyle := true
 
-// There is error with sbt doc
-// TODO: fix it
-publishArtifact in (Compile, packageDoc) := false
+publishArtifact in Test := false
+
+pomIncludeRepository := { _ => false }
+
+pomExtra := (
+  <url>http://ngocdaothanh.github.com/xitrum/</url>
+  <licenses>
+    <license>
+      <name>MIT</name>
+      <url>https://github.com/ngocdaothanh/xitrum/blob/master/MIT-LICENSE</url>
+      <distribution>repo</distribution>
+    </license>
+  </licenses>
+  <scm>
+    <url>git@github.com:ngocdaothanh/xitrum.git</url>
+    <connection>scm:git:git@github.com:ngocdaothanh/xitrum.git</connection>
+  </scm>
+  <developers>
+    <developer>
+      <id>ngocdaothanh</id>
+      <name>Ngoc Dao</name>
+      <url>http://cntt.tv</url>
+    </developer>
+  </developers>
+)
