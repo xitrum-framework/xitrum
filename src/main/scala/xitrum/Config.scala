@@ -98,7 +98,7 @@ object Config extends Logger {
 
   val sessionStore  = {
     val className = config.session.store
-    Class.forName(className).newInstance.asInstanceOf[SessionStore]
+    Class.forName(className).newInstance().asInstanceOf[SessionStore]
   }
 
   //----------------------------------------------------------------------------

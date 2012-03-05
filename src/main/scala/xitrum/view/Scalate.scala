@@ -47,7 +47,7 @@ object Scalate {
       val prefix       = xs.take(xs.length - 2).mkString(".")
       val className    = "scalate." + prefix + ".$_scalate_$" + baseFileName + "_" + extension
       val klass        = classResolver.resolve(className)
-      val template     = klass.asInstanceOf[Class[Template]].newInstance
+      val template     = klass.asInstanceOf[Class[Template]].newInstance()
       engine.layout(template, context)
     } else {
       val path = DIR + File.separator + relPath
