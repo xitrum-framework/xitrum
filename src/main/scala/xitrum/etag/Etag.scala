@@ -24,7 +24,7 @@ object Etag extends Logger {
 
   def forBytes(bytes: Array[Byte]): String = {
     val md5 = MessageDigest.getInstance("MD5")  // MD5 is fastest
-    md5.reset
+    md5.reset()
     md5.update(bytes)
     Base64.encode(md5.digest)
   }

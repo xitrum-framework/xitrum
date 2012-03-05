@@ -51,7 +51,10 @@ object XSendResource extends Logger {
           response.setContent(ChannelBuffers.wrappedBuffer(bytes))
         }
 
-        if (!HttpHeaders.isKeepAlive(request)) e.getFuture.addListener(ChannelFutureListener.CLOSE)
+        if (HttpHeaders.isKeepAlive(request))
+          ctx.getChannel.setReadable(true)  // Resume reading paused at NoPipelining
+        else
+          e.getFuture.addListener(ChannelFutureListener.CLOSE)
     }
     ctx.sendDownstream(e)
   }

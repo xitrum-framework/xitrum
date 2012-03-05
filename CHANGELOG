@@ -1,4 +1,5 @@
 1.9 (planned):
+* An action can have multiple views more easily
 * I18n for validation messages
 * Make extensive use of Knockout.js and Scala delimited continuation
 * Integrate WebSocket to Comet; use WebSocket if available, or fall back to Ajax
@@ -9,6 +10,25 @@
 * wro4j
 * Middleware architecture based on Netty handlers
 * Reload routes when in development mode with JRebel
+* Support big file upload
+
+1.8.4:
+* Update Hazelcast from 1.9.4.8 to 2.0
+* Remove ExecutionHandler.
+  If your action performs a blocking operation that
+  takes long time or accesses a resource which is not CPU-bound business logic
+  such as DB access, you should do it in the async style (better) or use a separate
+  thread pool to avoid unwanted hiccup during I/O because an I/O thread cannot
+  perform I/O until your action returns the control to the I/O thread.
+* For each connection, requests will be processed one by one.
+  From Mongrel2: http://mongrel2.org/static/book-finalch6.html
+  Where problems come in is with pipe-lined requests, meaning a browser sends a
+  bunch of requests in a big blast, then hangs out for all the responses. This
+  was such a horrible stupid idea that pretty much everone gets it wrong and
+  doesn’t support it fully, if at all. The reason is it’s much too easy to blast
+  a server with a ton of request, wait a bit so they hit proxied backends, and
+  then close the socket. The web server and the backends are now screwed having
+  to handle these requests which will go nowhere.
 
 1.8.3:
 * Fix https://github.com/ngocdaothanh/xitrum/issues/60

@@ -10,6 +10,7 @@ import xitrum.handler.down._
 
 object ChannelPipelineFactory {
   def removeUnusedDefaultHttpHandlersForWebSocket(pipeline: ChannelPipeline) {
+    pipeline.remove(classOf[NoPipelining])
     pipeline.remove(classOf[BaseUrlRemover])
     pipeline.remove(classOf[PublicFileServer])
     pipeline.remove(classOf[PublicResourceServer])
@@ -30,6 +31,7 @@ object ChannelPipelineFactory {
 class ChannelPipelineFactory(https: Boolean) extends CPF {
   // Sharable handlers
 
+  private val noPipelining         = new NoPipelining
   private val baseUrlRemover       = new BaseUrlRemover
   private val publicFileServer     = new PublicFileServer
   private val publicResourceServer = new PublicResourceServer
@@ -43,25 +45,6 @@ class ChannelPipelineFactory(https: Boolean) extends CPF {
   private val xSendResource        = new XSendResource
   private val env2Response         = new Env2Response
   private val responseCacher       = new ResponseCacher
-
-  /*
-  From Netty's documentation about ExecutionHandler:
-  Used when your ChannelHandler
-  performs a blocking operation that takes long time or accesses a resource
-  which is not CPU-bound business logic such as DB access. Running such
-  operations in a pipeline without an ExecutionHandler will result in
-  unwanted hiccup during I/O because an I/O thread cannot perform I/O until
-  your handler returns the control to the I/O thread.
-
-  We put this right before Dispatcher to avoid request/response I/O hiccup.
-  */
-  private val executionHandler = {
-    val corePoolSize         = Runtime.getRuntime.availableProcessors * Config.EXECUTIORS_PER_CORE
-    val maxTotalMemorySize   = Runtime.getRuntime.maxMemory / 2
-    val maxChannelMemorySize = maxTotalMemorySize
-    new ExecutionHandler(new OrderedMemoryAwareThreadPoolExecutor(
-          corePoolSize, maxChannelMemorySize, maxTotalMemorySize))
-  }
 
   def getPipeline: ChannelPipeline = {
     val handlers1 = httpHandlers
@@ -84,6 +67,7 @@ class ChannelPipelineFactory(https: Boolean) extends CPF {
     // Up
     new HttpRequestDecoder,
     new HttpChunkAggregator(Config.config.request.maxSizeInMB * 1024 * 1024),
+    noPipelining,
     baseUrlRemover,  // HttpRequest is attached to the channel here
     publicFileServer,
     publicResourceServer,
@@ -91,7 +75,6 @@ class ChannelPipelineFactory(https: Boolean) extends CPF {
     uriParser,
     bodyParser,
     methodOverrider,
-    executionHandler,  // Must be shared
     dispatcher,
 
     // Down

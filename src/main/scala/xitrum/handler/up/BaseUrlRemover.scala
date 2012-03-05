@@ -16,15 +16,17 @@ class BaseUrlRemover extends SimpleChannelUpstreamHandler with BadClientSilencer
       return
     }
 
-    // Attach HttpRequest to the channel so that other handlers can reuse
     val request = m.asInstanceOf[HttpRequest]
-    ctx.getChannel.setAttachment(request)
+    val channel = ctx.getChannel
+
+    // Attach HttpRequest to the channel so that other handlers can reuse
+    channel.setAttachment(request)
 
     remove(request.getUri) match {
       case None =>
         val response = new DefaultHttpResponse(HttpVersion.HTTP_1_1, HttpResponseStatus.NOT_FOUND)
         XSendFile.set404Page(response)
-        ctx.getChannel.write(response)
+        channel.write(response)
 
       case Some(withoutBaseUri) =>
         request.setUri(withoutBaseUri)

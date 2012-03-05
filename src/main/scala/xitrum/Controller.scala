@@ -23,6 +23,7 @@ trait Controller extends ExtEnv with ActionFactory with Logger with Net with Fil
 
   def respond() {
     if (responded) {
+      // Double response error
       // Print the stack trace so that application developers know where to fix
       try {
         throw new Exception

@@ -35,8 +35,12 @@ class Env2Response extends SimpleChannelDownstreamHandler {
 
       // Do not handle keep alive if XSendFile or XSendResource is used
       // because it is handled by them in their own way
-      if (!XSendFile.isHeaderSet(response) && !XSendResource.isHeaderSet(response) && !HttpHeaders.isKeepAlive(request))
-        future.addListener(ChannelFutureListener.CLOSE)
+      if (!XSendFile.isHeaderSet(response) && !XSendResource.isHeaderSet(response)) {
+        if (HttpHeaders.isKeepAlive(request))
+          ctx.getChannel.setReadable(true)  // Resume reading paused at NoPipelining
+        else
+          future.addListener(ChannelFutureListener.CLOSE)
+      }
     }
 
     Channels.write(ctx, future, response)

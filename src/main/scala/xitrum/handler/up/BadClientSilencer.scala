@@ -17,7 +17,7 @@ trait BadClientSilencer extends Logger {
   this: SimpleChannelUpstreamHandler =>
 
   override def exceptionCaught(ctx: ChannelHandlerContext, e: ExceptionEvent) {
-    e.getChannel.close()
+    ctx.getChannel.close()
 
     val cause = e.getCause
     val s     = cause.toString

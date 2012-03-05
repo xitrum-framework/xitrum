@@ -19,9 +19,10 @@ object Gzip {
     val b = new ByteArrayOutputStream
     val g = new GZIPOutputStream(b)
     g.write(bytes)
-    g.finish
+    g.finish()
     val gzippedBytes = b.toByteArray
     g.close()
+    b.close()
     gzippedBytes
   }
 

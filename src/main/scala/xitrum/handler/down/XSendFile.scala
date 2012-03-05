@@ -49,6 +49,8 @@ object XSendFile extends Logger {
 
   /** @param path see Renderer#renderFile */
   def sendFile(ctx: ChannelHandlerContext, e: ChannelEvent, request: HttpRequest, response: HttpResponse, path: String) {
+    val channel = ctx.getChannel
+
     // Try to serve from cache
     Etag.forFile(path, Gzip.isAccepted(request)) match {
       case Etag.NotFound =>
@@ -58,7 +60,11 @@ object XSendFile extends Logger {
         if (path.startsWith(abs404)) {  // Even 404.html is not found!
           HttpHeaders.setContentLength(response, 0)
           ctx.sendDownstream(e)
-          if (!HttpHeaders.isKeepAlive(request)) e.getFuture.addListener(ChannelFutureListener.CLOSE)
+
+          if (HttpHeaders.isKeepAlive(request))
+            channel.setReadable(true)  // Resume reading paused at NoPipelining
+          else
+            e.getFuture.addListener(ChannelFutureListener.CLOSE)
         } else {
           sendFile(ctx, e, request, response, abs404)
         }
@@ -78,8 +84,10 @@ object XSendFile extends Logger {
         }
         ctx.sendDownstream(e)
 
-        // Keep alive
-        if (!HttpHeaders.isKeepAlive(request)) e.getFuture.addListener(ChannelFutureListener.CLOSE)
+        if (HttpHeaders.isKeepAlive(request))
+          channel.setReadable(true)  // Resume reading paused at NoPipelining
+        else
+          e.getFuture.addListener(ChannelFutureListener.CLOSE)
 
       case Etag.TooBig(file) =>
         // LAST_MODIFIED is not reliable as ETAG when this is a cluster of web servers,
@@ -103,13 +111,18 @@ object XSendFile extends Logger {
           // Write the content
           if (ctx.getPipeline.get(classOf[SslHandler]) != null) {
             // Cannot use zero-copy with HTTPS
-            val future = Channels.write(ctx.getChannel, new ChunkedFile(raf, 0, raf.length, CHUNK_SIZE))
+            val future = Channels.write(channel, new ChunkedFile(raf, 0, raf.length, CHUNK_SIZE))
             future.addListener(new ChannelFutureListener {
               def operationComplete(f: ChannelFuture) {
                 raf.close()
               }
             })
-            if (!HttpHeaders.isKeepAlive(request)) future.addListener(ChannelFutureListener.CLOSE)
+
+            // Keep alive
+            if (HttpHeaders.isKeepAlive(request))
+              channel.setReadable(true)  // Resume reading paused at NoPipelining
+            else
+              future.addListener(ChannelFutureListener.CLOSE)
           } else {
             // No encryption - use zero-copy
             val region = new DefaultFileRegion(raf.getChannel, 0, raf.length)
@@ -117,14 +130,18 @@ object XSendFile extends Logger {
             // This will cause ClosedChannelException:
             // Channels.write(ctx, e.getFuture, region)
 
-            val future = Channels.write(ctx.getChannel, region)
+            val future = Channels.write(channel, region)
             future.addListener(new ChannelFutureListener {
               def operationComplete(f: ChannelFuture) {
                 region.releaseExternalResources
                 raf.close()
               }
             })
-            if (!HttpHeaders.isKeepAlive(request)) future.addListener(ChannelFutureListener.CLOSE)
+
+            if (HttpHeaders.isKeepAlive(request))
+              channel.setReadable(true)  // Resume reading paused at NoPipelining
+            else
+              future.addListener(ChannelFutureListener.CLOSE)
           }
         }
     }
