@@ -17,7 +17,7 @@ trait Controller extends ExtEnv with ActionFactory with Logger with Net with Fil
 
   //----------------------------------------------------------------------------
 
-  private var responded = false
+  private[this] var responded = false
 
   def isResponded = responded
 
@@ -40,7 +40,7 @@ trait Controller extends ExtEnv with ActionFactory with Logger with Net with Fil
   //----------------------------------------------------------------------------
 
   def addConnectionClosedListener(listener: () => Unit) {
-    val dispatcher = channel.getCloseFuture.addListener(new ChannelFutureListener {
+    channel.getCloseFuture.addListener(new ChannelFutureListener {
       def operationComplete(future: ChannelFuture) {
         listener()
       }

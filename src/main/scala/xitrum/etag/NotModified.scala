@@ -11,19 +11,15 @@ import HttpResponseStatus._
 import xitrum.Controller
 
 object NotModified {
-  private val SECS_IN_A_YEAR = 365 * 24 * 60 * 60
+  private[this] val SECS_IN_A_YEAR = 365 * 24 * 60 * 60
 
   // SimpleDateFormat is locale dependent
   // Avoid the case when Xitrum is run on for example Japanese platform
-  private val rfc2822 = {
+  private[this] val rfc2822 = {
     val ret = new SimpleDateFormat("EEE, dd MMM yyyy HH:mm:ss zzz", Locale.US)
     ret.setTimeZone(TimeZone.getTimeZone("GMT"))
     ret
   }
-
-  // See PublicResourceServerController, JSRoutesController
-  val serverStartupTimestamp        = System.currentTimeMillis()
-  val serverStartupTimestampRfc2822 = formatRfc2822(serverStartupTimestamp)
 
   def formatRfc2822(timestamp: Long) = rfc2822.format(timestamp)
 

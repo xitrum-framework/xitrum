@@ -11,8 +11,8 @@ import xitrum.etag.{Etag, NotModified}
 import xitrum.util.Gzip
 
 object JSRoutesController extends JSRoutesController {
-  private var js:        String      = null
-  private var gzippedJs: Array[Byte] = null
+  private[this] var js:        String      = null
+  private[this] var gzippedJs: Array[Byte] = null
 
   // This value is stable, even across different servers in a cluster
   private lazy val etag = Etag.forString(Routes.jsRoutes)

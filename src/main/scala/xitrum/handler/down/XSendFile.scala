@@ -22,12 +22,11 @@ object XSendFile extends Logger {
   // here because XSendFile may be used by applications which does not want
   // to clients to cache.
 
-  val CHUNK_SIZE = 8 * 1024
+  val CHUNK_SIZE        = 8 * 1024
+  val X_SENDFILE_HEADER = "X-Sendfile"
 
-  private val X_SENDFILE_HEADER = "X-Sendfile"
-
-  private val abs404 = Config.root + "/public/404.html"
-  private val abs500 = Config.root + "/public/500.html"
+  private[this] val abs404 = Config.root + "/public/404.html"
+  private[this] val abs500 = Config.root + "/public/500.html"
 
   /** @param path see Renderer#renderFile */
   def setHeader(response: HttpResponse, path: String) {

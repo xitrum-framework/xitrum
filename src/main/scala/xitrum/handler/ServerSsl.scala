@@ -19,8 +19,8 @@ object ServerSsl {
 
   //----------------------------------------------------------------------------
 
-  private val PROTOCOL  = "TLS"
-  private val ALGORITHM = "SunX509"
+  private[this] val PROTOCOL  = "TLS"
+  private[this] val ALGORITHM = "SunX509"
 
   // Context can be created only once
   private lazy val context: SSLContext = {

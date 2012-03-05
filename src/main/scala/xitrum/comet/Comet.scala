@@ -13,14 +13,14 @@ import xitrum.scope.request.Params
 
 // TODO: presense
 object Comet {
-  private val TTL_SECONDS = 60
+  private[this] val TTL_SECONDS = 60
 
-  private val map = Config.hazelcastInstance.getMap("xitrum/comet").asInstanceOf[IMap[Long, CometMessage]]
+  private[this] val map = Config.hazelcastInstance.getMap("xitrum/comet").asInstanceOf[IMap[Long, CometMessage]]
 
   /** The listener returns true if it wants itself to be removed. */
   type MessageListener = (CometMessage) => Boolean
 
-  private val messageListeners = MMap[String, ArrayBuffer[MessageListener]]()
+  private[this] val messageListeners = MMap[String, ArrayBuffer[MessageListener]]()
 
   //----------------------------------------------------------------------------
 
@@ -31,17 +31,14 @@ object Comet {
     def entryAdded(event: EntryEvent[Long, CometMessage]) {
       messageListeners.synchronized {
         val cm = event.getValue
-        messageListeners.get(cm.channel) match {
-          case None =>
+        messageListeners.get(cm.channel).foreach { arrayBuffer =>
+          val tobeRemoved = ArrayBuffer[MessageListener]()
 
-          case Some(arrayBuffer) =>
-            val tobeRemoved = ArrayBuffer[MessageListener]()
+          arrayBuffer.foreach { listener =>
+            if (listener.apply(cm)) tobeRemoved.append(listener)
+          }
 
-            arrayBuffer.foreach { listener =>
-              if (listener.apply(cm)) tobeRemoved.append(listener)
-            }
-
-            arrayBuffer --= tobeRemoved
+          arrayBuffer --= tobeRemoved
         }
       }
     }
@@ -81,14 +78,11 @@ object Comet {
 
   def removeMessageListener(channel: String, listener: MessageListener) {
     messageListeners.synchronized {
-      messageListeners.get(channel) match {
-        case None =>
+      messageListeners.get(channel).foreach { arrayBuffer =>
+        arrayBuffer -= listener
 
-        case Some(arrayBuffer) =>
-          arrayBuffer -= listener
-
-          // Avoid memory leak when there are too many empty entries
-          if (arrayBuffer.isEmpty) messageListeners -= channel
+        // Avoid memory leak when there are too many empty entries
+        if (arrayBuffer.isEmpty) messageListeners -= channel
       }
     }
   }

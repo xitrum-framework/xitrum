@@ -1,7 +1,7 @@
 package xitrum
 
 class SessionVar[T] {
-  private val key = this.getClass.getName
+  private[this] val key = this.getClass.getName
 
   def get(implicit controller: Controller) = controller.session(key).asInstanceOf[T]
 

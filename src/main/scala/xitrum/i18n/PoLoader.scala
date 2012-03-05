@@ -24,16 +24,10 @@ object PoLoader {
       val is     = url.openStream
       val bytes  = Loader.bytesFromInputStream(is)
       val string = new String(bytes, UTF_8)
-      val poo    = Parser.parsePo(string)
-      if (poo.isDefined) buffer.append(poo.get)
+      Parser.parsePo(string).foreach(buffer.append(_))
     }
 
-    val ret = if (buffer.isEmpty) {
-      new Po(Map())
-    } else {
-      buffer.reduce { (po1, po2) => po1 ++ po2 }
-    }
-
+    val ret = buffer.foldLeft(new Po(Map())) { (acc, e) => acc ++ e }
     cache(language) = ret
     ret
   }

@@ -20,9 +20,8 @@ object XSendResource extends Logger {
   // here because XSendResource may be used by applications which does not want
   // to clients to cache.
 
-  val CHUNK_SIZE = 8 * 1024
-
-  private val X_SENDRESOURCE_HEADER = "X-Sendresource"
+  val CHUNK_SIZE            = 8 * 1024
+  val X_SENDRESOURCE_HEADER = "X-Sendresource"
 
   def setHeader(response: HttpResponse, path: String) {
     response.setHeader(X_SENDRESOURCE_HEADER, path)

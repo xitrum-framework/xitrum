@@ -77,7 +77,7 @@ object Config extends Logger {
 
   //----------------------------------------------------------------------------
 
-  val baseUrl = if (config.reverseProxy.isDefined) config.reverseProxy.get.baseUrl else ""
+  val baseUrl = config.reverseProxy.map(_.baseUrl).getOrElse("")
 
   /**
    * @param path with leading "/"
@@ -103,9 +103,11 @@ object Config extends Logger {
 
   //----------------------------------------------------------------------------
 
-  // Use lazy to avoid starting Hazelcast if it is not used
-  // (starting Hazelcast takes several seconds, sometimes we want to work in
-  // sbt console mode and don't like this overhead)
+  /**
+   * Use lazy to avoid starting Hazelcast if it is not used
+   * (starting Hazelcast takes several seconds, sometimes we want to work in
+   * sbt console mode and don't like this overhead)
+   */
   lazy val hazelcastInstance: HazelcastInstance = {
     // http://code.google.com/p/hazelcast/issues/detail?id=94
     // http://code.google.com/p/hazelcast/source/browse/trunk/hazelcast/src/main/java/com/hazelcast/logging/Logger.java
@@ -137,7 +139,7 @@ object Config extends Logger {
    */
   def exitOnError(msg: String, e: Throwable) {
     logger.error(msg, e)
-    Hazelcast.shutdownAll
+    Hazelcast.shutdownAll()
     System.exit(-1)
   }
 }

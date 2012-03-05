@@ -34,7 +34,7 @@ trait ExtEnv extends RequestEnv with ParamAccess with CSRF {
   }
 
   def resetSession() {
-    session.clear
-    cookies.clear  // This will clear the session cookie
+    session.clear()
+    cookies.clear()  // This will clear the session cookie
   }
 }

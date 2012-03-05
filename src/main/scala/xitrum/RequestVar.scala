@@ -1,7 +1,7 @@
 package xitrum
 
 class RequestVar[T] {
-  private val key = this.getClass.getName
+  private[this] val key = this.getClass.getName
 
   def get(implicit controller: Controller) = {
     controller.at[T](key)

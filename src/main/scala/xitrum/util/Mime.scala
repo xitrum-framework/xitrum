@@ -9,17 +9,11 @@ import javax.activation.MimetypesFileTypeMap
 //   http://download.oracle.com/javaee/5/api/javax/activation/MimetypesFileTypeMap.html
 //   src/main/resources/META-INF/mime.types
 object Mime {
-  private val map = new MimetypesFileTypeMap
+  private[this] val map = new MimetypesFileTypeMap
 
-  def get(file: String): Option[String] = {
-    val mime = map.getContentType(file)
-    if (mime == null) None else Some(mime)
-  }
+  def get(file: String) = Option(map.getContentType(file))
 
-  def get(file: File): Option[String] = {
-    val mime = map.getContentType(file)
-    if (mime == null) None else Some(mime)
-  }
+  def get(file: File) = Option(map.getContentType(file))
 
   def isTextual(mime: String) = {
     if (mime == null) {

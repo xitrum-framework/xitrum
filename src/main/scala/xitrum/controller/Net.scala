@@ -29,9 +29,9 @@ trait Net {
 
   /** @return IP of the HTTP client, X-Forwarded-For is supported */
   lazy val remoteIp = {
-    if (proxyNotAllowed)
+    if (proxyNotAllowed) {
       clientIp
-    else {
+    } else {
       val xForwardedFor = request.getHeader("X-Forwarded-For")
       if (xForwardedFor == null)
         clientIp
@@ -44,9 +44,9 @@ trait Net {
     if (channel.getPipeline.get(classOf[SslHandler]) != null) {
       true
     } else {
-      if (proxyNotAllowed)
+      if (proxyNotAllowed) {
         false
-      else {
+      } else {
         val xForwardedProto = request.getHeader("X-Forwarded-Proto")
         if (xForwardedProto != null)
           (xForwardedProto == "https")
@@ -75,8 +75,9 @@ trait Net {
     if (xs.length == 1) {
       val port = if (isSsl) 443 else 80
       (xs(0), port)
-    } else
+    } else {
       (xs(0), xs(1).toInt)
+    }
   }
 
   lazy val absoluteUrlPrefix          = scheme          + "://" + absoluteUrlPrefixWithoutScheme

@@ -43,7 +43,7 @@ trait ParamAccess {
     } else {
       val coll2  = if (coll == null) textParams else coll
       val values = coll2.get(key)
-      val valueo = if (values.isEmpty) None else Some((values.get)(0))
+      val valueo = values.map(_(0))
       valueo.map(convertText[T](_))
     }
   }
@@ -66,10 +66,7 @@ trait ParamAccess {
       fileUploadParams.get(key).asInstanceOf[Option[List[T]]]
     } else {
       val coll2 = if (coll == null) textParams else coll
-      coll2.get(key) match {
-        case None         => None
-        case Some(values) => Some(values.map(convertText[T](_)))
-      }
+      coll2.get(key).map { values => values.map(convertText[T](_)) }
     }
   }
 

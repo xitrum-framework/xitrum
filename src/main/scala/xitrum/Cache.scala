@@ -82,8 +82,7 @@ object Cache extends Logger {
     if (!Config.isProductionMode) return None
 
     try {
-      val value = cache.get(key)
-      if (value != null) Some(value.asInstanceOf[T]) else None
+      Option(cache.get(key)).map(_.asInstanceOf[T])
     } catch {
       case _ =>
         logger.warn("Cache data restoring failed, will now remove it, key: {}", key)
@@ -93,13 +92,10 @@ object Cache extends Logger {
   }
 
   def tryCacheSecond[T](key: Any, secs: Int)(f: => T): T = {
-    getAs[T](key) match {
-      case Some(t) => t
-
-      case None =>
-        val value = f
-        putIfAbsentSecond(key, value, secs)
-        value
+    getAs[T](key).getOrElse {
+      val value = f
+      putIfAbsentSecond(key, value, secs)
+      value
     }
   }
 

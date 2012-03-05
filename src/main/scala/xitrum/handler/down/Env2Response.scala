@@ -61,12 +61,7 @@ class Env2Response extends SimpleChannelDownstreamHandler {
     if (channelBuffer.readableBytes > Config.config.response.smallStaticFileSizeInKB * 1024) return false
 
     val etag1 = response.getHeader(ETAG)
-    val etag2 =
-      if (etag1 != null) {
-        etag1
-      } else {
-        Etag.forBytes(ChannelBufferToBytes(channelBuffer))
-      }
+    val etag2 = if (etag1 != null) etag1 else Etag.forBytes(ChannelBufferToBytes(channelBuffer))
 
     if (request.getHeader(IF_NONE_MATCH) == etag2) {
       // Only send headers, the content is empty

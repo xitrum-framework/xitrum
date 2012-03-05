@@ -346,9 +346,7 @@ object Routes extends Logger {
     }
   }
 
-  lazy val action404Method: Option[Method] =
-    if (error == null) None else Some(error.getMethod("error404"))
+  lazy val action404Method: Option[Method] = Option(error).map(_.getMethod("error404"))
 
-  lazy val action500Method: Option[Method] =
-    if (error == null) None else Some(error.getMethod("error500"))
+  lazy val action500Method: Option[Method] = Option(error).map(_.getMethod("error500"))
 }
