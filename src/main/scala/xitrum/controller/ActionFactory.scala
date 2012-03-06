@@ -4,7 +4,7 @@ import java.lang.reflect.Method
 import io.netty.handler.codec.http.HttpMethod
 
 import xitrum.Controller
-import xitrum.routing.{HttpMethodWebSocket, Route, RouteOrder, Routes}
+import xitrum.routing.{HttpMethodWebSocket, Route, RouteCompiler, RouteOrder, Routes, RouteToken}
 
 /**
  * val action1 = GET("pattern") {
@@ -63,40 +63,40 @@ trait ActionFactory {
   }
 
   def GET(pattern: String)(body: => Any) =
-    Action(Route(HttpMethod.GET, RouteOrder.OTHER, Routes.compilePattern(withPathPrefix(pattern))), null, () => body, 0)
+    Action(Route(HttpMethod.GET, RouteOrder.OTHER, RouteCompiler.compile(withPathPrefix(pattern))), null, () => body, 0)
 
   def GET(body: => Any) =
-    Action(Route(HttpMethod.GET, RouteOrder.OTHER, Routes.compilePattern(withPathPrefix(""))), null, () => body, 0)
+    Action(Route(HttpMethod.GET, RouteOrder.OTHER, RouteCompiler.compile(withPathPrefix(""))), null, () => body, 0)
 
   def POST(pattern: String)(body: => Any) =
-    Action(Route(HttpMethod.POST, RouteOrder.OTHER, Routes.compilePattern(withPathPrefix(pattern))), null, () => body, 0)
+    Action(Route(HttpMethod.POST, RouteOrder.OTHER, RouteCompiler.compile(withPathPrefix(pattern))), null, () => body, 0)
 
   def POST(body: => Any) =
-    Action(Route(HttpMethod.POST, RouteOrder.OTHER, Routes.compilePattern(withPathPrefix(""))), null, () => body, 0)
+    Action(Route(HttpMethod.POST, RouteOrder.OTHER, RouteCompiler.compile(withPathPrefix(""))), null, () => body, 0)
 
   def PUT(pattern: String)(body: => Any) =
-    Action(Route(HttpMethod.PUT, RouteOrder.OTHER, Routes.compilePattern(withPathPrefix(pattern))), null, () => body, 0)
+    Action(Route(HttpMethod.PUT, RouteOrder.OTHER, RouteCompiler.compile(withPathPrefix(pattern))), null, () => body, 0)
 
   def PUT(body: => Any) =
-    Action(Route(HttpMethod.PUT, RouteOrder.OTHER, Routes.compilePattern(withPathPrefix(""))), null, () => body, 0)
+    Action(Route(HttpMethod.PUT, RouteOrder.OTHER, RouteCompiler.compile(withPathPrefix(""))), null, () => body, 0)
 
   def DELETE(pattern: String)(body: => Any) =
-    Action(Route(HttpMethod.DELETE, RouteOrder.OTHER, Routes.compilePattern(withPathPrefix(pattern))), null, () => body, 0)
+    Action(Route(HttpMethod.DELETE, RouteOrder.OTHER, RouteCompiler.compile(withPathPrefix(pattern))), null, () => body, 0)
 
   def DELETE(body: => Any) =
-    Action(Route(HttpMethod.DELETE, RouteOrder.OTHER, Routes.compilePattern(withPathPrefix(""))), null, () => body, 0)
+    Action(Route(HttpMethod.DELETE, RouteOrder.OTHER, RouteCompiler.compile(withPathPrefix(""))), null, () => body, 0)
 
   def WEBSOCKET(pattern: String)(body: => Any) =
-    Action(Route(HttpMethodWebSocket, RouteOrder.OTHER, Routes.compilePattern(withPathPrefix(pattern))), null, () => body, 0)
+    Action(Route(HttpMethodWebSocket, RouteOrder.OTHER, RouteCompiler.compile(withPathPrefix(pattern))), null, () => body, 0)
 
   def WEBSOCKET(body: => Any) =
-    Action(Route(HttpMethodWebSocket, RouteOrder.OTHER, Routes.compilePattern(withPathPrefix(""))), null, () => body, 0)
+    Action(Route(HttpMethodWebSocket, RouteOrder.OTHER, RouteCompiler.compile(withPathPrefix(""))), null, () => body, 0)
 }
 
 object PathPrefix {
   // Used by ActionFactory
-  def toCompiledPattern(pathPrefix: String) = Seq((pathPrefix, true))
+  def toCompiledPattern(pathPrefix: String) = Seq(RouteToken(pathPrefix, true, None))
 
   // Used by Action
-  def fromCompiledPattern(compiledPattern: Seq[(String, Boolean)]) = compiledPattern.head._1
+  def fromCompiledPattern(routeToken: Seq[RouteToken]) = routeToken.head.value
 }

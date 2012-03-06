@@ -1,5 +1,4 @@
 1.9 (planned):
-* An action can have multiple views more easily
 * I18n for validation messages
 * Make extensive use of Knockout.js and Scala delimited continuation
 * Integrate WebSocket to Comet; use WebSocket if available, or fall back to Ajax
@@ -11,6 +10,11 @@
 * Middleware architecture based on Netty handlers
 * Reload routes when in development mode with JRebel
 * Support big file upload
+
+1.8.5 (planned):
+* Regex can be used in routes to specify requirements:
+  def show = GET("/articles/:id<[0-9]+>") { ... }
+* An action can have multiple Scalate view files more easily
 
 1.8.4:
 * Update Hazelcast from 1.9.4.8 to 2.0

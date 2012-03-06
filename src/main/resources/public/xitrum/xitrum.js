@@ -16,18 +16,18 @@ var xitrum = {
 
     var ret = XITRUM_BASE_URL;
     for (var i = 0; i < compiledRoute.length; i++) {
-      var xs       = compiledRoute[i];
-      var token    = xs[0];
-      var constant = xs[1];
-      if (constant) {
-        ret += "/" + token;
-      } else {
+      var xs            = compiledRoute[i];
+      var token         = xs[0];
+      var isPlaceHolder = xs[1];
+      if (isPlaceHolder) {
         var s = params[token];
         if (s) {
           ret += "/" + s;
         } else {
           throw "[urlFor] Missing key: " + token + ", for: " + actionClassName;
         }
+      } else {
+        ret += "/" + token;
       }
     }
 

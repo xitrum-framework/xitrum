@@ -4,7 +4,7 @@ import java.lang.reflect.Method
 import io.netty.handler.codec.http.HttpMethod
 
 import xitrum.Controller
-import xitrum.routing.{Route, RouteOrder, Routes, HttpMethodWebSocket}
+import xitrum.routing.{Route, RouteCompiler, RouteOrder, Routes, HttpMethodWebSocket}
 
 /**
  * @param method    for creating new controller instance,
@@ -36,34 +36,34 @@ case class Action(route: Route, var method: Method, body: () => Unit, cacheSecon
   }
 
   def GET(pattern: String)(body: => Any) =
-    Action(Route(HttpMethod.GET, route.order, Routes.compilePattern(withPathPrefix(pattern))), method, () => body, cacheSeconds)
+    Action(Route(HttpMethod.GET, route.order, RouteCompiler.compile(withPathPrefix(pattern))), method, () => body, cacheSeconds)
 
   def GET(body: => Any) =
-    Action(Route(HttpMethod.GET, route.order, Routes.compilePattern(withPathPrefix(""))), method, () => body, cacheSeconds)
+    Action(Route(HttpMethod.GET, route.order, RouteCompiler.compile(withPathPrefix(""))), method, () => body, cacheSeconds)
 
   def POST(pattern: String)(body: => Any) =
-    Action(Route(HttpMethod.POST, route.order, Routes.compilePattern(withPathPrefix(pattern))), method, () => body, cacheSeconds)
+    Action(Route(HttpMethod.POST, route.order, RouteCompiler.compile(withPathPrefix(pattern))), method, () => body, cacheSeconds)
 
   def POST(body: => Any) =
-    Action(Route(HttpMethod.POST, route.order, Routes.compilePattern(withPathPrefix(""))), method, () => body, cacheSeconds)
+    Action(Route(HttpMethod.POST, route.order, RouteCompiler.compile(withPathPrefix(""))), method, () => body, cacheSeconds)
 
   def PUT(pattern: String)(body: => Any) =
-    Action(Route(HttpMethod.PUT, route.order, Routes.compilePattern(withPathPrefix(pattern))), method, () => body, cacheSeconds)
+    Action(Route(HttpMethod.PUT, route.order, RouteCompiler.compile(withPathPrefix(pattern))), method, () => body, cacheSeconds)
 
   def PUT(body: => Any) =
-    Action(Route(HttpMethod.PUT, route.order, Routes.compilePattern(withPathPrefix(""))), method, () => body, cacheSeconds)
+    Action(Route(HttpMethod.PUT, route.order, RouteCompiler.compile(withPathPrefix(""))), method, () => body, cacheSeconds)
 
   def DELETE(pattern: String)(body: => Any) =
-    Action(Route(HttpMethod.DELETE, route.order, Routes.compilePattern(withPathPrefix(pattern))), method, () => body, cacheSeconds)
+    Action(Route(HttpMethod.DELETE, route.order, RouteCompiler.compile(withPathPrefix(pattern))), method, () => body, cacheSeconds)
 
   def DELETE(body: => Any) =
-    Action(Route(HttpMethod.DELETE, route.order, Routes.compilePattern(withPathPrefix(""))), method, () => body, cacheSeconds)
+    Action(Route(HttpMethod.DELETE, route.order, RouteCompiler.compile(withPathPrefix(""))), method, () => body, cacheSeconds)
 
   def WEBSOCKET(pattern: String)(body: => Any) =
-    Action(Route(HttpMethodWebSocket, route.order, Routes.compilePattern(withPathPrefix(pattern))), method, () => body, cacheSeconds)
+    Action(Route(HttpMethodWebSocket, route.order, RouteCompiler.compile(withPathPrefix(pattern))), method, () => body, cacheSeconds)
 
   def WEBSOCKET(body: => Any) =
-    Action(Route(HttpMethodWebSocket, route.order, Routes.compilePattern(withPathPrefix(""))), method, () => body, cacheSeconds)
+    Action(Route(HttpMethodWebSocket, route.order, RouteCompiler.compile(withPathPrefix(""))), method, () => body, cacheSeconds)
 
   //----------------------------------------------------------------------------
 

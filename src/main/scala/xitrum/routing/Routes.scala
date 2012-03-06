@@ -2,7 +2,10 @@ package xitrum.routing
 
 import java.io.File
 import java.lang.reflect.Method
+
 import scala.collection.mutable.{ArrayBuffer, Map => MMap, StringBuilder}
+import scala.util.matching.Regex
+
 import io.netty.handler.codec.http.{HttpMethod, QueryStringEncoder}
 
 import xitrum.{Config, Logger, Controller, ErrorController}
@@ -24,29 +27,6 @@ object Routes extends Logger {
 
   //----------------------------------------------------------------------------
 
-  def compilePattern(pattern: String): CompiledPattern = {
-    val tokens = pattern.split('/').filter(_ != "")
-    tokens.map { e: String =>
-      val constant = !e.startsWith(":")
-      val token = if (constant) e else e.substring(1)
-      (token, constant)
-    }
-  }
-
-  def decompiledPattern(compiledPattern: CompiledPattern): String = {
-    if (compiledPattern.isEmpty) {
-      "/"
-    } else {
-      compiledPattern.foldLeft("") { (acc, tc) =>
-        val (token, isConstant) = tc
-        val rawToken = if (isConstant) token else ":" + token
-        acc + "/" + rawToken
-      }
-    }
-  }
-
-  //----------------------------------------------------------------------------
-
   def printRoutes() {
     // This method is only run once on start, speed is not a problem
 
@@ -54,9 +34,9 @@ object Routes extends Logger {
     var others = ArrayBuffer[(String, String, String)]()
     val lasts  = ArrayBuffer[(String, String, String)]()
     for ((httpMethod, (fs, os, ls)) <- actions) {
-      for (a <- fs) firsts.append((httpMethod.toString, decompiledPattern(a.route.compiledPattern), ControllerReflection.controllerActionName(a)))
-      for (a <- os) others.append((httpMethod.toString, decompiledPattern(a.route.compiledPattern), ControllerReflection.controllerActionName(a)))
-      for (a <- ls) lasts.append ((httpMethod.toString, decompiledPattern(a.route.compiledPattern), ControllerReflection.controllerActionName(a)))
+      for (a <- fs) firsts.append((httpMethod.toString, RouteCompiler.decompile(a.route.compiledPattern), ControllerReflection.controllerActionName(a)))
+      for (a <- os) others.append((httpMethod.toString, RouteCompiler.decompile(a.route.compiledPattern), ControllerReflection.controllerActionName(a)))
+      for (a <- ls) lasts.append ((httpMethod.toString, RouteCompiler.decompile(a.route.compiledPattern), ControllerReflection.controllerActionName(a)))
     }
 
     var all = firsts ++ others ++ lasts
@@ -246,8 +226,8 @@ object Routes extends Logger {
     }
 
     val xs = actionArray.map { action =>
-      val ys = action.route.compiledPattern.map { case (token, constant) =>
-        "['" + token + "', " + constant + "]"
+      val ys = action.route.compiledPattern.map { rt =>
+        "['" + rt.value + "', " + rt.isPlaceHolder + "]"
       }
       "[[" + ys.mkString(", ") + "], '" + ControllerReflection.controllerActionName(action) + "']"
     }
@@ -267,8 +247,8 @@ object Routes extends Logger {
     var pathParams: Params = null
 
     def finder(action: Action): Boolean = {
-      val compiledPattern = action.route.compiledPattern
-      val max2            = compiledPattern.size
+      val routeTokens = action.route.compiledPattern
+      val max2        = routeTokens.size
 
       // Check the number of tokens
       // max2 must be <= max1
@@ -279,8 +259,8 @@ object Routes extends Logger {
       if (max2 < max1) {
         if (max2 == 0) return false
 
-        val lastToken = compiledPattern.last
-        if (lastToken._2) return false
+        val lastToken = routeTokens.last
+        if (!lastToken.isPlaceHolder) return false
       }
 
       // Special case
@@ -298,31 +278,44 @@ object Routes extends Logger {
       pathParams = MMap[String, List[String]]()
       var i = 0 // i will go from 0 until max1
 
-      compiledPattern.forall { case (token, fixed) =>
-        val ret = if (fixed)
-          (token == tokens(i))
-        else {
+      def matchRegex(rt: RouteToken, value: String): Boolean = {
+        rt.regex match {
+          case None =>
+            pathParams(rt.value) = List(value)
+            true
+          case Some(r) =>
+            r.findFirstIn(value) match {
+              case None =>
+                false
+              case _ =>
+                pathParams(rt.value) = List(value)
+                true
+            }
+        }
+      }
+
+      routeTokens.forall { rt =>
+        val ret = if (rt.isPlaceHolder) {
           if (i == max2 - 1) { // The last token
-            if (token == "*") {
+            if (rt.value == "*") {
               val value = tokens.slice(i, max1).mkString("/")
-              pathParams(token) = List(value)
-              true
+              matchRegex(rt, value)
             } else {
               if (max2 < max1) {
                 false
               } else { // max2 = max1
-                pathParams(token) = List(tokens(i))
-                true
+                matchRegex(rt, tokens(i))
               }
             }
           } else {
-            if (token == "*") {
+            if (rt.value == "*") {
               false
             } else {
-              pathParams(token) = List(tokens(i))
-              true
+              matchRegex(rt, tokens(i))
             }
           }
+        } else {
+          (rt.value == tokens(i))
         }
 
         i += 1

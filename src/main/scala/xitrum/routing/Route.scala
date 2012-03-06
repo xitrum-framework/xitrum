@@ -3,16 +3,16 @@ package xitrum.routing
 import io.netty.handler.codec.http.{HttpMethod, QueryStringEncoder}
 import xitrum.Config
 
-case class Route(httpMethod: HttpMethod, order: RouteOrder.RouteOrder, compiledPattern: CompiledPattern) {
+case class Route(httpMethod: HttpMethod, order: RouteOrder.RouteOrder, compiledPattern: Seq[RouteToken]) {
   def url(params: (String, Any)*) = {
     var map = params.toMap
-    val tokens = compiledPattern.map { case (token, constant) =>
-      if (constant) {
-        token
-      } else {
-        val ret = map(token)
-        map = map - token
+    val tokens = compiledPattern.map { rt =>
+      if (rt.isPlaceHolder) {
+        val ret = map(rt.value)
+        map = map - rt.value
         ret
+      } else {
+        rt.value
       }
     }
     val url = Config.withBaseUrl("/" + tokens.mkString("/"))
