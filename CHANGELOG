@@ -12,6 +12,7 @@
 * Support big file upload
 
 1.8.5 (planned):
+* Update Hazelcast from 2.0 to 2.0.1
 * Regex can be used in routes to specify requirements:
   def show = GET("/articles/:id<[0-9]+>") { ... }
 * An action can have multiple Scalate view files more easily
