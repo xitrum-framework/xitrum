@@ -1,13 +1,19 @@
 Notes for Xitrum developers.
 
-Delete snapshots
-----------------
+Publish to Sonatype
+-------------------
 
-While developing, you may need to publish and delete published snapshots.
+Run ``sbt publish`` or ``sbt`` then from SBT command prompt run ``+ publish``.
+Login at https://oss.sonatype.org/ and from "Staging Repositories" select the
+newly published item, then click "Close".
 
-To publish, run ``sbt`` then from SBT command prompt run ``+ publish``.
+Delete local snapshots
+----------------------
 
-To delete snapshots:
+While developing, you may need do local publish.
+Run ``sbt publish-local`` or ``sbt`` then from SBT command prompt run ``+ publish-local``.
+
+To delete:
 
 ::
 
@@ -19,7 +25,5 @@ Netty 4
 **This part will be removed when Netty 4 is officially released.**
 
 File upload feature in Xitrum needs `Netty <https://github.com/netty/netty>`_ 4,
-which has not been released.
-
-You can use `nightly builds <http://www.jboss.org/netty/downloads.html`_
-instead of `building it yourself <http://www.jboss.org/netty/build>`_.
+which has not been released. Netty 4 is built and put at
+https://github.com/ngocdaothanh/xitrum/downloads
