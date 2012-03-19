@@ -1,4 +1,4 @@
-1.8.6 (planned):
+1.8.7 (planned):
 * An action can have multiple Scalate view files more easily
 * I18n for validation messages
 * Make extensive use of Knockout.js and Scala delimited continuation
@@ -11,6 +11,14 @@
 * Middleware architecture based on Netty handlers
 * Reload routes when in development mode with JRebel
 * Support big file upload
+
+1.8.6 (planned):
+* Fix WebSocket bug introduced in Xitrum 1.8.4, now WebSocket frame receiving works again
+* To easily put JS fragments to Scalate views, jsAtBottom is split to jsDefaults and jsForView.
+  jsDefaults containing jQuery, Knockout.js etc. should be put at layout's <head>.
+  jsForView containing JS fragments added by jsAddToView should be put at layout's bottom.
+* Add JS utility: xitrum.appendAndScroll, see example:
+  https://github.com/ngocdaothanh/xitrum-demos/blob/master/src/main/view/scalate/quickstart/controller/CometChat/index.jade
 
 1.8.5:
 * Regex can be used in routes to specify requirements:

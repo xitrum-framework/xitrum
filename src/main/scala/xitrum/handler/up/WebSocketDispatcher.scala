@@ -7,6 +7,9 @@ import io.netty.handler.codec.http.websocketx.{
 
 import xitrum.Controller
 
+/**
+ * See https://github.com/netty/netty/blob/master/example/src/main/java/io/netty/example/http/websocketx/server/WebSocketServerHandler.java
+ */
 class WebSocketDispatcher(handshaker: WebSocketServerHandshaker, controller: Controller) extends SimpleChannelUpstreamHandler with BadClientSilencer {
   override def messageReceived(ctx: ChannelHandlerContext, e: MessageEvent) {
     val m = e.getMessage
@@ -16,7 +19,6 @@ class WebSocketDispatcher(handshaker: WebSocketServerHandshaker, controller: Con
     }
 
     val frame = m.asInstanceOf[WebSocketFrame]
-
     if (frame.isInstanceOf[CloseWebSocketFrame]) {
       handshaker.close(ctx.getChannel, frame.asInstanceOf[CloseWebSocketFrame])
       controller.onWebSocketClose()
@@ -28,8 +30,8 @@ class WebSocketDispatcher(handshaker: WebSocketServerHandshaker, controller: Con
       return
     }
 
-    if (!(frame.isInstanceOf[TextWebSocketFrame])) {
-      logger.warn("Frame type not supported: " + frame.getClass.getName)
+    if (!frame.isInstanceOf[TextWebSocketFrame]) {
+      logger.warn("WebSocket frame type not supported: " + frame.getClass.getName)
       ctx.getChannel.close()
       return
     }

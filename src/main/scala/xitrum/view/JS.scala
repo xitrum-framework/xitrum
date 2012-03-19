@@ -65,10 +65,9 @@ trait JS {
 
   //----------------------------------------------------------------------------
 
-  def jsAtBottom = {
+  lazy val jsDefaults = {
     val validatei18n = if (getLanguage == "en") "" else <script type="text/javascript" src={urlForResource("xitrum/jquery.validate-1.9.0/localization/messages_"+ getLanguage +".js")}></script>
     val jsRoutesAction = <script type="text/javascript" src={JSRoutesController.serve.url + "?" + Etag.forString(Routes.jsRoutes)}></script>
-    val jsForView = if (buffer.isEmpty) "" else <script type="text/javascript">{Unparsed("\n//<![CDATA[\n$(function() {\n" + buffer.toString + "});\n//]]>\n")}</script>
 
     if (Config.isProductionMode)
       <xml:group>
@@ -80,7 +79,6 @@ trait JS {
         <script type="text/javascript" src={urlForResource("xitrum/knockout/knockout.mapping-2.0.3.min.js")}></script>
         <script type="text/javascript" src={urlForResource("xitrum/xitrum.js")}></script>
         {jsRoutesAction}
-        {jsForView}
       </xml:group>
     else
       <xml:group>
@@ -92,7 +90,8 @@ trait JS {
         <script type="text/javascript" src={urlForResource("xitrum/knockout/knockout.mapping-2.0.3.js")}></script>
         <script type="text/javascript" src={urlForResource("xitrum/xitrum.js")}></script>
         {jsRoutesAction}
-        {jsForView}
       </xml:group>
   }
+
+  lazy val jsForView = if (buffer.isEmpty) "" else <script type="text/javascript">{Unparsed("\n//<![CDATA[\n$(function() {\n" + buffer.toString + "});\n//]]>\n")}</script>
 }

@@ -138,6 +138,12 @@ var xitrum = {
     $(selector).scrollTop($(selector)[0].scrollHeight);
   },
 
+  appendAndScroll: function(selector, text) {
+    var wasScrollAtBottom = this.isScrollAtBottom(selector);
+    $(selector).append(text);
+    if (wasScrollAtBottom) this.scrollToBottom(selector);
+  },
+
   escapeHtml: function(html) {
     return $('<div/>').text(html).html();
   }
