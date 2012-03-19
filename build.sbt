@@ -6,7 +6,7 @@ organization := "tv.cntt"
 
 name := "xitrum"
 
-version := "1.8.5-SNAPSHOT"
+version := "1.8.6-SNAPSHOT"
 
 scalacOptions ++= Seq(
   "-deprecation",
@@ -60,7 +60,7 @@ libraryDependencies += "tv.cntt" %% "scaposer" % "1.0"
 
 libraryDependencies += "tv.cntt" %% "sclasner" % "1.0"
 
-libraryDependencies += "org.javassist" % "javassist" % "3.15.0-GA"
+libraryDependencies += "org.javassist" % "javassist" % "3.16.1-GA"
 
 // Projects using Xitrum must provide a concrete implentation of SLF4J (Logback etc.)
 libraryDependencies += "org.slf4j" % "slf4j-api" % "1.6.4" % "provided"
