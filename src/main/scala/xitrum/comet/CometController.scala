@@ -16,50 +16,32 @@ class CometController extends Controller {
     val topic         = param("topic")
     val lastTimestamp = param[Long]("lastTimestamp")
 
-    val messages = Comet.getMessages(topic, lastTimestamp)
-
-    // When there is no message, the connection is kept and the response will
-    // be sent as soon as there a message arrives
-
-    if (messages.isEmpty) {
-      val listener = (message: CometMessage) => {
-        respondMessages(topic, List(message))
-
-        // Return true for Comet to automatically remove this listener.
-        // With HTTP the reponse can only be sent once.
-        true
+    val listener = (messages: Seq[CometMessage]) => {
+      val (timestamps, bodies) = messages.foldLeft((ListBuffer[Long](), ListBuffer[Params]())) { case ((ts, bs), m) =>
+        ts.append(m.timestamp)
+        bs.append(m.body)
+        (ts, bs)
       }
 
-      Comet.subscribe(topic, listener)
+      // Prevent browser side caching
+      response.setHeader(CACHE_CONTROL, "no-cache")
+      response.setHeader(PRAGMA, "no-cache")
 
+      respondJson(Map("topic" -> topic, "timestamps" -> timestamps.toList, "bodies" -> bodies.toList))
+
+      // Return true for Comet to automatically remove this listener.
+      // With normal HTTP (nonwebsocket) the response can only be sent once.
+      true
+    }
+
+    if (Comet.subscribe(topic, listener, lastTimestamp))
       // Avoid memory leak when messagePublished is never removed, e.g. no message is published
       addConnectionClosedListener { Comet.unsubscribe(topic, listener) }
-    } else {
-      // lastTimestamp = 0 is a fixed GET URL
-      // We should prevent browser side caching
-      if (lastTimestamp == 0) {
-        response.setHeader(CACHE_CONTROL, "no-cache")
-        response.setHeader(PRAGMA, "no-cache")
-      }
-
-      respondMessages(topic, messages)
-    }
   }
 
   def publish = POST("xiturm/comet/:topic") {
     val topic = param("topic")
-    Comet.publish(topic, textParams - "topic")  // Save some space
+    Comet.publish(topic, textParams - "topic")  // Save some memory
     respondText("")
-  }
-
-  //----------------------------------------------------------------------------
-
-  private def respondMessages(channel: String, messages: Iterable[CometMessage]) {
-    val (timestamps, bodies) = messages.foldLeft((ListBuffer[Long](), ListBuffer[Params]())) { case ((ts, bs), m) =>
-      ts.append(m.timestamp)
-      bs.append(m.body)
-      (ts, bs)
-    }
-    respondJson(Map("channel" -> channel, "timestamps" -> timestamps.toList, "bodies" -> bodies.toList))
   }
 }
