@@ -6,7 +6,7 @@ organization := "tv.cntt"
 
 name := "xitrum"
 
-version := "1.8.6-SNAPSHOT"
+version := "1.8.7-SNAPSHOT"
 
 scalacOptions ++= Seq(
   "-deprecation",
