@@ -1,4 +1,4 @@
-1.8.7 (planned):
+1.8.8 (planned):
 * An action can have multiple Scalate view files more easily
 * I18n for validation messages
 * Make extensive use of Knockout.js and Scala delimited continuation
@@ -11,6 +11,10 @@
 * Middleware architecture based on Netty handlers
 * Reload routes when in development mode with JRebel
 * Support big file upload
+
+1.8.7 (planned):
+* To get URL to WebSocket action:
+  ControllerObject.action.webSocketAbsoluteUrl
 
 1.8.6:
 * Fix WebSocket bug introduced in Xitrum 1.8.4, now WebSocket frame receiving works again

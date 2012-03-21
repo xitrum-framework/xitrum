@@ -72,4 +72,7 @@ case class Action(route: Route, var method: Method, body: () => Unit, cacheSecon
 
   def absoluteUrl(params: (String, Any)*)(implicit controller: Controller) = controller.absoluteUrlPrefix + url(params:_*)
   def absoluteUrl(implicit controller: Controller): String = absoluteUrl()(controller)
+
+  def webSocketAbsoluteUrl(params: (String, Any)*)(implicit controller: Controller) = controller.webSocketAbsoluteUrlPrefix + url(params:_*)
+  def webSocketAbsoluteUrl(implicit controller: Controller): String = webSocketAbsoluteUrl()(controller)
 }
