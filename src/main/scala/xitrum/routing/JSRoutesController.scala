@@ -22,7 +22,7 @@ object JSRoutesController extends JSRoutesController {
       js =
         "var XITRUM_BASE_URL = '" + Config.baseUrl + "';\n" +
         "var XITRUM_ROUTES = " + Routes.jsRoutes + ";\n" +
-        "var XITRUM_COMET_GET_URL = '" + CometController.index.url("channel" -> ":channel", "lastTimestamp" -> ":lastTimestamp") + "';"
+        "var XITRUM_COMET_GET_URL = '" + CometController.index.url("topic" -> ":topic", "lastTimestamp" -> ":lastTimestamp") + "';"
     }
     js
   }

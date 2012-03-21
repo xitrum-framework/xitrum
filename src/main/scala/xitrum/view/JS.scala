@@ -57,10 +57,10 @@ trait JS {
 
   def jsRedirectTo(action: Action, params: (String, Any)*) { jsRedirectTo(action.url(params:_*)) }
 
-  def jsCometGet(channel: String, callback: String) {
+  def jsCometGet(topic: String, callback: String) {
     // http://stackoverflow.com/questions/2703861/chromes-loading-indicator-keeps-spinning-during-xmlhttprequest
     // http://stackoverflow.com/questions/1735560/stop-the-browser-throbber-of-doom-while-loading-comet-server-push-xmlhttpreques
-    jsAddToView("setTimeout(function () { xitrum.cometGet('" + channel + "', 0, " + callback + ") }, 1000)")
+    jsAddToView("setTimeout(function () { xitrum.cometGet('" + topic + "', 0, " + callback + ") }, 1000)")
   }
 
   //----------------------------------------------------------------------------

@@ -109,23 +109,23 @@ var xitrum = {
     $("#flash").append($(div).hide().fadeIn(1000));
   },
 
-  cometGet: function(channel, lastTimestamp, callback) {
-    var url = XITRUM_COMET_GET_URL.replace(":channel", channel).replace(":lastTimestamp", lastTimestamp);
+  cometGet: function(topic, lastTimestamp, callback) {
+    var url = XITRUM_COMET_GET_URL.replace(":topic", topic).replace(":lastTimestamp", lastTimestamp);
     $.ajax({
       type: "GET",
       url: url,
       error: function() {
         // Wait for some time before the next retry
-        setTimeout(function() { xitrum.cometGet(channel, lastTimestamp, callback) }, 10000);
+        setTimeout(function() { xitrum.cometGet(topic, lastTimestamp, callback) }, 10000);
       },
       success: function(message) {
         var timestamps = message.timestamps;
         var bodies     = message.bodies;
         var length     = timestamps.length;
         for (var i = 0; i < length; i++) {
-          callback(channel, timestamps[i], bodies[i]);
+          callback(topic, timestamps[i], bodies[i]);
         }
-        xitrum.cometGet(channel, timestamps[length - 1], callback);
+        xitrum.cometGet(topic, timestamps[length - 1], callback);
       }
     });
   },

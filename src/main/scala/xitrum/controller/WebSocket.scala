@@ -12,11 +12,24 @@ import xitrum.handler.up.WebSocketDispatcher
 trait WebSocket {
   this: Controller =>
 
+  trait WebSocketHandler {
+    def onOpen()
+
+    /** Called when the websocket or the network connection is closed. */
+    def onClose()
+
+    /**
+     * Called when the client sends data (only text is supported).
+     * You may call respondWebSocket(string) to send data to the client.
+     */
+    def onMessage(text: String)
+  }
+
   /**
    * In the websocket entry point action, call this method if you want to accept
    * the connection.
    */
-  def webSocketHandshake() {
+  def acceptWebSocket(handler: WebSocketHandler) {
     val url     = webSocketScheme + "://" + serverName + ":" + serverPort + request.getUri
     val factory = new WebSocketServerHandshakerFactory(url, null, false)
     val handshaker = factory.newHandshaker(request)
@@ -27,17 +40,10 @@ trait WebSocket {
 
       val pipeline = channel.getPipeline
       ChannelPipelineFactory.removeUnusedDefaultHttpHandlersForWebSocket(pipeline)
-      pipeline.addLast("webSocketDispatcher", new WebSocketDispatcher(handshaker, this))
+      pipeline.addLast("webSocketDispatcher", new WebSocketDispatcher(handshaker, handler))
 
+      handler.onOpen();
       channel.setReadable(true)  // Resume reading paused at NoPipelining
     }
   }
-
-  /**
-   * This method will be called when the client sends data (only text is supported).
-   * You may call respondWebSocket(string) to send data to the client.
-   */
-  def onWebSocketFrame(text: String) {}
-
-  def onWebSocketClose() {}
 }

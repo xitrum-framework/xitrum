@@ -24,21 +24,21 @@ object Comet {
 
   //----------------------------------------------------------------------------
 
-  map.addIndex("channel",   false)  // Comparison: =
+  map.addIndex("topic",     false)    // Comparison: =
   map.addIndex("timestamp", true)   // Comparison: >
 
   map.addEntryListener(new EntryListener[Long, CometMessage] {
     def entryAdded(event: EntryEvent[Long, CometMessage]) {
       messageListeners.synchronized {
         val cm = event.getValue
-        messageListeners.get(cm.channel).foreach { arrayBuffer =>
-          val tobeRemoved = ArrayBuffer[MessageListener]()
+        messageListeners.get(cm.topic).foreach { arrayBuffer =>
+          val tobeRemoveds = ArrayBuffer[MessageListener]()
 
           arrayBuffer.foreach { listener =>
-            if (listener.apply(cm)) tobeRemoved.append(listener)
+            if (listener.apply(cm)) tobeRemoveds.append(listener)
           }
 
-          arrayBuffer --= tobeRemoved
+          arrayBuffer --= tobeRemoveds
         }
       }
     }
@@ -50,16 +50,16 @@ object Comet {
 
   //----------------------------------------------------------------------------
 
-  def publish(channel: String, message: Params) {
+  def publish(topic: String, message: Params) {
     val timestamp = System.currentTimeMillis()
-    val cm        = new CometMessage(channel, timestamp, message)
+    val cm        = new CometMessage(topic, timestamp, message)
     map.put(timestamp, cm, TTL_SECONDS, TimeUnit.SECONDS)
   }
 
   def getMessages(channel: String, lastTimestamp: Long): Iterable[CometMessage] = {
     val pb = new PredicateBuilder
     val eo = pb.getEntryObject
-    val p  = eo.get("channel").equal(channel).and(eo.get("timestamp").greaterThan(long2Long(lastTimestamp)))
+    val p  = eo.get("topic").equal(channel).and(eo.get("timestamp").greaterThan(long2Long(lastTimestamp)))
 
     val javaCollection = map.values(p)
     javaCollection.asScala.toList.sortBy(_.timestamp)
@@ -67,16 +67,16 @@ object Comet {
 
   //----------------------------------------------------------------------------
 
-  def addMessageListener(channel: String, listener: MessageListener) {
+  def subscribe(topic: String, listener: MessageListener) {
     messageListeners.synchronized {
-      messageListeners.get(channel) match {
-        case None              => messageListeners(channel) = ArrayBuffer(listener)
+      messageListeners.get(topic) match {
+        case None              => messageListeners(topic) = ArrayBuffer(listener)
         case Some(arrayBuffer) => arrayBuffer.append(listener)
       }
     }
   }
 
-  def removeMessageListener(channel: String, listener: MessageListener) {
+  def unsubscribe(channel: String, listener: MessageListener) {
     messageListeners.synchronized {
       messageListeners.get(channel).foreach { arrayBuffer =>
         arrayBuffer -= listener

@@ -39,10 +39,10 @@ trait Controller extends ExtEnv with ActionFactory with Logger with Net with Fil
 
   //----------------------------------------------------------------------------
 
-  def addConnectionClosedListener(listener: () => Unit) {
+  def addConnectionClosedListener(listener: => Unit) {
     channel.getCloseFuture.addListener(new ChannelFutureListener {
       def operationComplete(future: ChannelFuture) {
-        listener()
+        listener
       }
     })
   }

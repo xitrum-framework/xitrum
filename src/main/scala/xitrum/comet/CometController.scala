@@ -12,28 +12,28 @@ import xitrum.scope.request.Params
 object CometController extends CometController
 
 class CometController extends Controller {
-  def index = GET("xitrum/comet/:channel/:lastTimestamp") {
-    val channel       = param("channel")
+  def index = GET("xitrum/comet/:topic/:lastTimestamp") {
+    val topic         = param("topic")
     val lastTimestamp = param[Long]("lastTimestamp")
 
-    val messages = Comet.getMessages(channel, lastTimestamp)
+    val messages = Comet.getMessages(topic, lastTimestamp)
 
     // When there is no message, the connection is kept and the response will
     // be sent as soon as there a message arrives
 
     if (messages.isEmpty) {
-      val messagePublished = (message: CometMessage) => {
-        respondMessages(channel, List(message))
+      val listener = (message: CometMessage) => {
+        respondMessages(topic, List(message))
 
         // Return true for Comet to automatically remove this listener.
         // With HTTP the reponse can only be sent once.
         true
       }
 
-      Comet.addMessageListener(channel, messagePublished)
+      Comet.subscribe(topic, listener)
 
       // Avoid memory leak when messagePublished is never removed, e.g. no message is published
-      addConnectionClosedListener(() => Comet.removeMessageListener(channel, messagePublished))
+      addConnectionClosedListener { Comet.unsubscribe(topic, listener) }
     } else {
       // lastTimestamp = 0 is a fixed GET URL
       // We should prevent browser side caching
@@ -42,13 +42,13 @@ class CometController extends Controller {
         response.setHeader(PRAGMA, "no-cache")
       }
 
-      respondMessages(channel, messages)
+      respondMessages(topic, messages)
     }
   }
 
-  def publish = POST("xiturm/comet/:channel") {
-    val channel = param("channel")
-    Comet.publish(channel, textParams - "channel")  // Save some space
+  def publish = POST("xiturm/comet/:topic") {
+    val topic = param("topic")
+    Comet.publish(topic, textParams - "topic")  // Save some space
     respondText("")
   }
 
