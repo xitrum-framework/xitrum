@@ -14,6 +14,8 @@
 
 1.8.6:
 * Fix WebSocket bug introduced in Xitrum 1.8.4, now WebSocket frame receiving works again
+* Cleaner API for WebSocket:
+  http://ngocdaothanh.github.com/xitrum/doc/async.html#websocket
 * To easily put JS fragments to Scalate views, jsAtBottom is split to jsDefaults and jsForView.
   jsDefaults containing jQuery, Knockout.js etc. should be put at layout's <head>.
   jsForView containing JS fragments added by jsAddToView should be put at layout's bottom.
