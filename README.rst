@@ -1,5 +1,7 @@
 .. image:: http://www.bdoubliees.com/journalspirou/sfigures6/schtroumpfs/s3.jpg
 
+`Demos <http://ec2-50-18-141-176.us-west-1.compute.amazonaws.com/>`_
+
 `Xitrum <http://ngocdaothanh.github.com/xitrum>`_
 is an async and clustered Scala web framework
 and HTTP(S) server on top of `Netty <http://www.jboss.org/netty>`_
