@@ -13,6 +13,7 @@ import com.codahale.jerkson.Json
 
 import xitrum.{Controller, Config}
 import xitrum.controller.Action
+import xitrum.handler.up.NoPipelining
 import xitrum.handler.down.{XSendFile, XSendResource}
 import xitrum.routing.Routes
 
@@ -22,6 +23,37 @@ import xitrum.routing.Routes
  */
 trait Responder extends JS with Flash with Knockout with I18n {
   this: Controller =>
+
+  //----------------------------------------------------------------------------
+
+  private var responded = false
+
+  def isResponded = responded
+
+  def respond() {
+    if (responded) {
+      // Double response error
+      // Print the stack trace so that application developers know where to fix
+      try {
+        throw new Exception
+      } catch {
+        case e => logger.warn("Double response", e)
+      }
+    } else {
+      responded = true
+      NoPipelining.setResponseHeaderForKeepAliveRequest(request, response)
+      setCookieAndSessionIfTouchedOnRespond()
+      val future = channel.write(handlerEnv)
+
+      // Do not handle keep alive if XSendFile or XSendResource is used
+      // because it is handled by them in their own way
+      if (!XSendFile.isHeaderSet(response) && !XSendResource.isHeaderSet(response)) {
+        NoPipelining.resumeReadingForKeepAliveRequestOrCloseOnComplete(request, channel, future)
+      }
+    }
+  }
+
+  //----------------------------------------------------------------------------
 
   private def writeHeaderOnFirstChunk {
     if (!isResponded) {
@@ -40,7 +72,8 @@ trait Responder extends JS with Flash with Knockout with I18n {
    * Headers are only sent on the first respondXXX call.
    */
   def respondLastChunk() {
-    channel.write(HttpChunk.LAST_CHUNK)
+    val future = channel.write(HttpChunk.LAST_CHUNK)
+    NoPipelining.resumeReadingForKeepAliveRequestOrCloseOnComplete(request, channel, future)
   }
 
   //----------------------------------------------------------------------------

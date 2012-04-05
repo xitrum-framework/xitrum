@@ -10,6 +10,7 @@ import HttpResponseStatus._
 import xitrum.Config
 import xitrum.etag.Etag
 import xitrum.handler.HandlerEnv
+import xitrum.handler.up.NoPipelining
 import xitrum.util.{ChannelBufferToBytes, Gzip, Mime}
 
 @Sharable
@@ -26,23 +27,15 @@ class Env2Response extends SimpleChannelDownstreamHandler {
     val response = env.response
     val future   = e.getFuture
 
-    // If HttpHeaders.getContentLength(response) > response.getContent.readableBytes,
-    // it is because the response body will be sent later and the channel will
-    // be closed later by the code that sends the response body
+    // If HttpHeaders.getContentLength(response) != response.getContent.readableBytes,
+    // it is because the response is sent in async mode.
     if (HttpHeaders.getContentLength(response) == response.getContent.readableBytes) {
       // Only effective for dynamic response, static file response has already been handled
       if (!tryEtag(request, response)) Gzip.tryCompressBigTextualResponse(request, response)
-
-      // Do not handle keep alive if XSendFile or XSendResource is used
-      // because it is handled by them in their own way
-      if (!XSendFile.isHeaderSet(response) && !XSendResource.isHeaderSet(response)) {
-        if (HttpHeaders.isKeepAlive(request))
-          ctx.getChannel.setReadable(true)  // Resume reading paused at NoPipelining
-        else
-          future.addListener(ChannelFutureListener.CLOSE)
-      }
     }
 
+    // Keep alive, channel reading resuming/closing etc. are handled
+    // by the code that sends the response (Responder#respond)
     Channels.write(ctx, future, response)
   }
 

@@ -15,6 +15,7 @@ import io.netty.buffer.ChannelBuffers
 
 import xitrum.{Config, Logger}
 import xitrum.etag.{Etag, NotModified}
+import xitrum.handler.up.NoPipelining
 import xitrum.util.{Gzip, Mime}
 
 object XSendFile extends Logger {
@@ -58,12 +59,8 @@ object XSendFile extends Logger {
 
         if (path.startsWith(abs404)) {  // Even 404.html is not found!
           HttpHeaders.setContentLength(response, 0)
+          NoPipelining.setResponseHeaderAndResumeReadingForKeepAliveRequestOrCloseOnComplete(request, response, channel, e.getFuture)
           ctx.sendDownstream(e)
-
-          if (HttpHeaders.isKeepAlive(request))
-            channel.setReadable(true)  // Resume reading paused at NoPipelining
-          else
-            e.getFuture.addListener(ChannelFutureListener.CLOSE)
         } else {
           sendFile(ctx, e, request, response, abs404)
         }
@@ -81,12 +78,8 @@ object XSendFile extends Logger {
           HttpHeaders.setContentLength(response, bytes.length)
           response.setContent(ChannelBuffers.wrappedBuffer(bytes))
         }
+        NoPipelining.setResponseHeaderAndResumeReadingForKeepAliveRequestOrCloseOnComplete(request, response, channel, e.getFuture)
         ctx.sendDownstream(e)
-
-        if (HttpHeaders.isKeepAlive(request))
-          channel.setReadable(true)  // Resume reading paused at NoPipelining
-        else
-          e.getFuture.addListener(ChannelFutureListener.CLOSE)
 
       case Etag.TooBig(file) =>
         // LAST_MODIFIED is not reliable as ETAG when this is a cluster of web servers,
@@ -95,16 +88,18 @@ object XSendFile extends Logger {
         if (request.getHeader(IF_MODIFIED_SINCE) == lastModifiedRfc2822) {
           response.setStatus(NOT_MODIFIED)
           HttpHeaders.setContentLength(response, 0)
+          NoPipelining.setResponseHeaderAndResumeReadingForKeepAliveRequestOrCloseOnComplete(request, response, channel, e.getFuture)
           response.setContent(ChannelBuffers.EMPTY_BUFFER)
           ctx.sendDownstream(e)
         } else {
           val mimeo = Mime.get(path)
           val raf   = new RandomAccessFile(path, "r")
 
-          // Write the initial line and the header
+          // Send the initial line and headers
           HttpHeaders.setContentLength(response, raf.length)
           response.setHeader(LAST_MODIFIED, lastModifiedRfc2822)
           if (mimeo.isDefined) response.setHeader(CONTENT_TYPE, mimeo.get)
+          NoPipelining.setResponseHeaderForKeepAliveRequest(request, response)
           ctx.sendDownstream(e)
 
           // Write the content
@@ -117,11 +112,7 @@ object XSendFile extends Logger {
               }
             })
 
-            // Keep alive
-            if (HttpHeaders.isKeepAlive(request))
-              channel.setReadable(true)  // Resume reading paused at NoPipelining
-            else
-              future.addListener(ChannelFutureListener.CLOSE)
+            NoPipelining.resumeReadingForKeepAliveRequestOrCloseOnComplete(request, channel, future)
           } else {
             // No encryption - use zero-copy
             val region = new DefaultFileRegion(raf.getChannel, 0, raf.length)
@@ -137,10 +128,7 @@ object XSendFile extends Logger {
               }
             })
 
-            if (HttpHeaders.isKeepAlive(request))
-              channel.setReadable(true)  // Resume reading paused at NoPipelining
-            else
-              future.addListener(ChannelFutureListener.CLOSE)
+            NoPipelining.resumeReadingForKeepAliveRequestOrCloseOnComplete(request, channel, future)
           }
         }
     }

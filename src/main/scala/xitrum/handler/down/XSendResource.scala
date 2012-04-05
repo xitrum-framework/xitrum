@@ -13,6 +13,7 @@ import io.netty.buffer.ChannelBuffers
 
 import xitrum.{Config, Logger}
 import xitrum.etag.{Etag, NotModified}
+import xitrum.handler.up.NoPipelining
 import xitrum.util.{Gzip, Mime}
 
 object XSendResource extends Logger {
@@ -50,10 +51,7 @@ object XSendResource extends Logger {
           response.setContent(ChannelBuffers.wrappedBuffer(bytes))
         }
 
-        if (HttpHeaders.isKeepAlive(request))
-          ctx.getChannel.setReadable(true)  // Resume reading paused at NoPipelining
-        else
-          e.getFuture.addListener(ChannelFutureListener.CLOSE)
+        NoPipelining.setResponseHeaderAndResumeReadingForKeepAliveRequestOrCloseOnComplete(request, response, ctx.getChannel, e.getFuture)
     }
     ctx.sendDownstream(e)
   }

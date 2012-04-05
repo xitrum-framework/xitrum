@@ -28,7 +28,7 @@ trait ExtEnv extends RequestEnv with ParamAccess with CSRF {
 
   def sessiono[T](key: String): Option[T] = session.get(key).map(_.asInstanceOf[T])
 
-  def prepareWhenRespond() {
+  def setCookieAndSessionIfTouchedOnRespond() {
     if (sessionTouched) Config.sessionStore.store(session, this)
     if (cookiesTouched) cookies.setCookiesWhenRespond(this)
   }
