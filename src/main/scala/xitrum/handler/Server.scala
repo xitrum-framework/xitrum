@@ -1,7 +1,6 @@
 package xitrum.handler
 
 import java.net.InetSocketAddress
-import java.util.concurrent.Executors
 
 import io.netty.bootstrap.ServerBootstrap
 import io.netty.channel.socket.nio.NioServerSocketChannelFactory
@@ -28,9 +27,7 @@ object Server extends Logger {
   }
 
   private def start(https: Boolean) {
-    val bossExecutor    = Executors.newCachedThreadPool()
-    val workerExecutor  = Executors.newCachedThreadPool()
-    val channelFactory  = new NioServerSocketChannelFactory(bossExecutor, workerExecutor)
+    val channelFactory  = new NioServerSocketChannelFactory
     val bootstrap       = new ServerBootstrap(channelFactory)
     val pipelineFactory = new ChannelPipelineFactory(https)
     val (kind, port)    = if (https) ("HTTPS", Config.config.https.get.port) else ("HTTP", Config.config.http.get.port)
