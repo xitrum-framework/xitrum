@@ -45,7 +45,7 @@ libraryDependencies += "com.hazelcast" % "hazelcast-client" % "2.0.2"
 //   List(Map("user" -> List("langtu"), "body" -> List("hello world")))
 resolvers += "repo.codahale.com" at "http://repo.codahale.com"
 
-libraryDependencies += "com.codahale" %% "jerkson" % "0.5.0"
+libraryDependencies += "com.codahale" % "jerkson_2.9.1" % "0.5.0"
 
 // Scalate ---------------------------------------------------------------------
 
@@ -58,7 +58,7 @@ libraryDependencies += "org.mozilla" % "rhino" % "1.7R3"
 
 libraryDependencies += "tv.cntt" %% "scaposer" % "1.0"
 
-libraryDependencies += "tv.cntt" %% "sclasner" % "1.0"
+libraryDependencies += "tv.cntt" %% "sclasner" % "1.1"
 
 libraryDependencies += "org.javassist" % "javassist" % "3.16.1-GA"
 
@@ -69,7 +69,7 @@ libraryDependencies += "org.slf4j" % "slf4j-api" % "1.6.4" % "provided"
 
 autoCompilerPlugins := true
 
-addCompilerPlugin("org.scala-lang.plugins" % "continuations" % "2.9.1")
+addCompilerPlugin("org.scala-lang.plugins" % "continuations" % "2.9.2")
 
 scalacOptions += "-P:continuations:enable"
 
@@ -77,8 +77,8 @@ scalacOptions += "-P:continuations:enable"
 // https://github.com/sbt/sbt.github.com/blob/gen-master/src/jekyll/using_sonatype.md
 
 // https://github.com/harrah/xsbt/wiki/Cross-Build
-//crossScalaVersions := Seq("2.9.0-1", "2.9.1")
-scalaVersion := "2.9.1"
+//crossScalaVersions := Seq("2.9.1", "2.9.2")
+scalaVersion := "2.9.2"
 
 publishTo <<= (version) { version: String =>
   val nexus = "https://oss.sonatype.org/"

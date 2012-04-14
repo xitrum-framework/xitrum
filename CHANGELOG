@@ -13,6 +13,7 @@
 * Support big file upload
 
 1.8.7:
+* Add build for Scala 2.9.2
 * To get URL to WebSocket action:
   ControllerObject.action.webSocketAbsoluteUrl
 * Update Hazelcast from 2.0.1 to 2.0.2
