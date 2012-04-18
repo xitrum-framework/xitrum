@@ -11,7 +11,7 @@ trait BasicAuthentication {
   /**
    * f takes username and password, and returns true if it want to let the user in.
    */
-  def basicAuthenticate(realm: String)(f: (String, String) => Boolean): () => Boolean = () => {
+  def basicAuthenticate(realm: String)(f: (String, String) => Boolean): Boolean = {
     getUsernameAndPassword match {
       case None =>
         respondBasic(realm)
