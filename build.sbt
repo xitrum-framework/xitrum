@@ -19,12 +19,9 @@ unmanagedBase in Runtime <<= baseDirectory { base => base / "config" }
 // Netty -----------------------------------------------------------------------
 
 // Use this when Netty 4 is released
-//resolvers += "JBoss Repository" at "https://repository.jboss.org/nexus/content/groups/public/"
 //libraryDependencies += "io.netty" % "netty" % "4"
 
 // Remove this when Netty 4 is released
-// The nightly build site of JBoss is not always online
-// GitHub is more stable
 libraryDependencies += "io.netty" % "netty" % "4.0.0.Alpha1-SNAPSHOT" from "http://cloud.github.com/downloads/ngocdaothanh/xitrum/netty-4.0.0.Alpha1-SNAPSHOT.jar"
 
 // Hazelcast -------------------------------------------------------------------

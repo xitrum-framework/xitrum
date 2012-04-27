@@ -4,7 +4,7 @@
 
 `Xitrum <http://ngocdaothanh.github.com/xitrum>`_
 is an async and clustered Scala web framework
-and HTTP(S) server on top of `Netty <http://www.jboss.org/netty>`_
+and HTTP(S) server on top of `Netty <http://netty.io/>`_
 and `Hazelcast <http://www.hazelcast.com/>`_.
 From `a user <https://groups.google.com/group/xitrum-framework/msg/d6de4865a8576d39>`_:
 
@@ -21,7 +21,7 @@ From `a user <https://groups.google.com/group/xitrum-framework/msg/d6de4865a8576
 
 Features:
 
-* Fast built-in HTTP and HTTPS web server based on `Netty <http://www.jboss.org/netty>`_.
+* Fast built-in HTTP and HTTPS web server based on `Netty <http://netty.io/>`_.
 * The framework tries to fill the spectrum between `Scalatra <https://github.com/scalatra/scalatra>`_
   and `Lift <http://liftweb.net/>`_: more powerful than Scalatra and easier to
   use than Lift. You can easily create both RESTful APIs and postbacks. `Xitrum <http://ngocdaothanh.github.com/xitrum>`_
