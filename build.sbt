@@ -29,11 +29,11 @@ libraryDependencies += "io.netty" % "netty" % "4.0.0.Alpha1-SNAPSHOT" from "http
 // For distributed cache and Comet
 // Infinispan is good but much heavier, and the logging is bad:
 // https://github.com/infinispan/infinispan/blob/master/core/src/main/java/org/infinispan/util/logging/LogFactory.java
-libraryDependencies += "com.hazelcast" % "hazelcast" % "2.0.2"
+libraryDependencies += "com.hazelcast" % "hazelcast" % "2.1"
 
 // http://www.hazelcast.com/documentation.jsp#Clients
 // Hazelcast can be configured in Xitrum as super client or native client
-libraryDependencies += "com.hazelcast" % "hazelcast-client" % "2.0.2"
+libraryDependencies += "com.hazelcast" % "hazelcast-client" % "2.1"
 
 // Jerkson ---------------------------------------------------------------------
 
