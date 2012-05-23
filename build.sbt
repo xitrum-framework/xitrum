@@ -24,6 +24,10 @@ unmanagedBase in Runtime <<= baseDirectory { base => base / "config" }
 // Remove this when Netty 4 is released
 libraryDependencies += "io.netty" % "netty" % "4.0.0.Alpha1-SNAPSHOT" from "http://cloud.github.com/downloads/ngocdaothanh/xitrum/netty-4.0.0.Alpha1-SNAPSHOT.jar"
 
+//resolvers += "Netty-4.0.0.Alpha1-SNAPSHOT" at "http://repository-netty.forge.cloudbees.com/snapshot"
+
+//libraryDependencies += "io.netty" % "netty" % "4.0.0.Alpha1-SNAPSHOT"
+
 // Hazelcast -------------------------------------------------------------------
 
 // For distributed cache and Comet

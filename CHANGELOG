@@ -1,4 +1,6 @@
 1.8.9 (planned):
+* Use Netty 3.5.Final instead of 4.0 SNAPSHOT
+* Remove HttpChunkAggregator to support big file upload
 * An action can have multiple Scalate view files more easily
 * I18n for validation messages
 * Make extensive use of Knockout.js and Scala delimited continuation
@@ -10,7 +12,6 @@
 * wro4j
 * Middleware architecture based on Netty handlers
 * Reload routes when in development mode with JRebel
-* Support big file upload
 
 1.8.8 (planned):
 * basicAuthenticate now works as documented:
