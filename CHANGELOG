@@ -1,5 +1,6 @@
 1.9.1 (planned):
 * Remove HttpChunkAggregator to support big file upload
+* Improve I18n#tf, tcf, tnf, tcnf to support changing order of placeholders
 * An action can have multiple Scalate view files more easily
 * I18n for validation messages
 * Make extensive use of Knockout.js and Scala delimited continuation
@@ -17,7 +18,9 @@
 * basicAuthenticate now works as documented:
   http://ngocdaothanh.github.com/xitrum/guide/howto.html#basic-authentication
 * Update Hazelcast from 2.0.2 to 2.1
-* Add I18n#tf, tcf, tnf, tcnf for formatted strings
+* Add I18n#tf, tcf, tnf, tcnf for formatted string;
+  Standard placeholders %d, %s etc. work, but if the formatted string contains
+  many of them, their order should not be changed
 
 1.8.7:
 * Add build for Scala 2.9.2
