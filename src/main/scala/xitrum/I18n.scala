@@ -37,11 +37,13 @@ trait I18n {
     highFirst.map { case (lang, _) => lang }
   }
 
-  def t(singular: String): String = po.t(singular)
-
+  def t(singular: String) = po.t(singular)
   def tc(ctx: String, singular: String) = po.t(ctx, singular)
-
   def tn(singular: String, plural: String, n: Long) = po.t(singular, plural, n)
-
   def tcn(ctx: String, singular: String, plural: String, n: Long) = po.t(ctx, singular, plural, n)
+
+  def tf(singular: String, args: Any*) = t(singular).format(args:_*)
+  def tcf(ctx: String, singular: String, args: Any*) = tc(ctx, singular).format(args:_*)
+  def tnf(singular: String, plural: String, n: Long, args: Any*) = tn(singular, plural, n).format(args:_*)
+  def tcnf(ctx: String, singular: String, plural: String, n: Long, args: Any*) = tcn(ctx, singular, plural, n).format(args:_*)
 }

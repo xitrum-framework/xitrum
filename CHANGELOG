@@ -1,5 +1,4 @@
-1.8.9 (planned):
-* Use Netty 3.5.Final instead of 4.0 SNAPSHOT
+1.9.1 (planned):
 * Remove HttpChunkAggregator to support big file upload
 * An action can have multiple Scalate view files more easily
 * I18n for validation messages
@@ -13,10 +12,12 @@
 * Middleware architecture based on Netty handlers
 * Reload routes when in development mode with JRebel
 
-1.8.8 (planned):
+1.9 (planned):
+* Use Netty 3.5.Final instead of 4.0 SNAPSHOT
 * basicAuthenticate now works as documented:
   http://ngocdaothanh.github.com/xitrum/guide/howto.html#basic-authentication
 * Update Hazelcast from 2.0.2 to 2.1
+* Add I18n#tf, tcf, tnf, tcnf for formatted strings
 
 1.8.7:
 * Add build for Scala 2.9.2

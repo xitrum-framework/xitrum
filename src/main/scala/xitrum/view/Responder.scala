@@ -21,7 +21,7 @@ import xitrum.routing.Routes
  * When responding text, charset is automatically set, as advised by Google:
  * http://code.google.com/speed/page-speed/docs/rendering.html#SpecifyCharsetEarly
  */
-trait Responder extends JS with Flash with Knockout with I18n {
+trait Responder extends JS with Flash with Knockout {
   this: Controller =>
 
   //----------------------------------------------------------------------------
