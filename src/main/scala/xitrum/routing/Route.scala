@@ -8,8 +8,12 @@ case class Route(httpMethod: HttpMethod, order: RouteOrder.RouteOrder, compiledP
     var map = params.toMap
     val tokens = compiledPattern.map { rt =>
       if (rt.isPlaceHolder) {
-        val ret = map(rt.value)
-        map = map - rt.value
+        val key = rt.value
+        if (!map.isDefinedAt(key))
+          throw new Exception("Cannot compute reverse URL because there's no required key \"" + key + "\"")
+
+        val ret = map(key)
+        map = map - key
         ret
       } else {
         rt.value
