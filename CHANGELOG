@@ -14,13 +14,14 @@
 * Reload routes when in development mode with JRebel
 
 1.9 (planned):
-* Use Netty 3.5.Final instead of 4.0 SNAPSHOT
+* Use Netty 3.5.Final instead of 4.0 SNAPSHOT for file upload
 * basicAuthenticate now works as documented:
   http://ngocdaothanh.github.com/xitrum/guide/howto.html#basic-authentication
 * Update Hazelcast from 2.0.2 to 2.1
 * Add I18n#tf, tcf, tnf, tcnf for formatted string;
   Standard placeholders %d, %s etc. work, but if the formatted string contains
   many of them, their order should not be changed
+* sbt publish-local can be run easily by anyone, not only core developers
 
 1.8.7:
 * Add build for Scala 2.9.2
