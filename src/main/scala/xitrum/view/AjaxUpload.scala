@@ -3,7 +3,7 @@
 //import java.io.File
 //import java.util.UUID
 //import scala.xml.Node
-//import io.netty.handler.codec.http.FileUpload
+//import org.jboss.netty.handler.codec.http.multipart.FileUpload
 //
 //import xitrum.Controller
 //import xitrum.handler.down.XSendFile

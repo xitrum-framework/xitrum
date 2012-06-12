@@ -1,7 +1,7 @@
 package xitrum.controller
 
 import java.lang.reflect.Method
-import io.netty.handler.codec.http.HttpMethod
+import org.jboss.netty.handler.codec.http.HttpMethod
 
 import xitrum.Controller
 import xitrum.routing.{Route, RouteCompiler, RouteOrder, Routes, HttpMethodWebSocket}

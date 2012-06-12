@@ -1,6 +1,6 @@
 package xitrum.controller
 
-import io.netty.handler.codec.http.{HttpHeaders, HttpResponseStatus}
+import org.jboss.netty.handler.codec.http.{HttpHeaders, HttpResponseStatus}
 
 import xitrum.Controller
 import xitrum.util.Base64

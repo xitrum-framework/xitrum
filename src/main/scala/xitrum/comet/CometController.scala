@@ -2,7 +2,7 @@ package xitrum.comet
 
 import scala.collection.mutable.ListBuffer
 
-import io.netty.handler.codec.http.HttpHeaders
+import org.jboss.netty.handler.codec.http.HttpHeaders
 import HttpHeaders.Names._
 import HttpHeaders.Values._
 

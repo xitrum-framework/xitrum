@@ -2,8 +2,8 @@ package xitrum.handler
 
 import java.net.InetSocketAddress
 
-import io.netty.bootstrap.ServerBootstrap
-import io.netty.channel.socket.nio.NioServerSocketChannelFactory
+import org.jboss.netty.bootstrap.ServerBootstrap
+import org.jboss.netty.channel.socket.nio.NioServerSocketChannelFactory
 
 import xitrum.{Cache, Config, Logger}
 import xitrum.routing.Routes

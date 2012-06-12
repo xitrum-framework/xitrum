@@ -1,8 +1,8 @@
 package xitrum.handler.up
 
-import io.netty.channel.{ChannelHandler, SimpleChannelUpstreamHandler, ChannelHandlerContext, MessageEvent, ExceptionEvent, Channels}
+import org.jboss.netty.channel.{ChannelHandler, SimpleChannelUpstreamHandler, ChannelHandlerContext, MessageEvent, ExceptionEvent, Channels}
 import ChannelHandler.Sharable
-import io.netty.handler.codec.http.{HttpHeaders, HttpMethod}
+import org.jboss.netty.handler.codec.http.{HttpHeaders, HttpMethod}
 
 import HttpHeaders.Names.UPGRADE
 import HttpHeaders.Values.WEBSOCKET

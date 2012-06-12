@@ -2,8 +2,8 @@ package xitrum.handler
 
 import scala.collection.mutable.{HashMap => MHashMap}
 
-import io.netty.channel.Channel
-import io.netty.handler.codec.http.{HttpRequest, HttpResponse}
+import org.jboss.netty.channel.Channel
+import org.jboss.netty.handler.codec.http.{HttpRequest, HttpResponse}
 
 import xitrum.Controller
 import xitrum.controller.Action

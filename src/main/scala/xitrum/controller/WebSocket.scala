@@ -1,6 +1,6 @@
 package xitrum.controller
 
-import io.netty.handler.codec.http.websocketx.WebSocketServerHandshakerFactory
+import org.jboss.netty.handler.codec.http.websocketx.WebSocketServerHandshakerFactory
 
 import xitrum.Controller
 import xitrum.handler.ChannelPipelineFactory

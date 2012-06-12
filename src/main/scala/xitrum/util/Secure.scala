@@ -7,7 +7,7 @@ import java.util.Arrays
 import javax.crypto.{Cipher, Mac}
 import javax.crypto.spec.{SecretKeySpec, IvParameterSpec}
 
-import io.netty.util.CharsetUtil.UTF_8
+import org.jboss.netty.util.CharsetUtil.UTF_8
 import xitrum.Config
 
 /**

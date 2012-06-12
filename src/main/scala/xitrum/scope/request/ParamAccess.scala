@@ -1,6 +1,6 @@
 package xitrum.scope.request
 
-import io.netty.handler.codec.http.FileUpload
+import org.jboss.netty.handler.codec.http.multipart.FileUpload
 
 import xitrum.Controller
 import xitrum.exception.MissingParam

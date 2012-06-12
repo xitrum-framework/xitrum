@@ -16,28 +16,16 @@ scalacOptions ++= Seq(
 // Put config directory in classpath for easier development (sbt console etc.)
 unmanagedBase in Runtime <<= baseDirectory { base => base / "config" }
 
-// Netty -----------------------------------------------------------------------
-
-// Use this when Netty 4 is released
-//libraryDependencies += "io.netty" % "netty" % "4"
-
-// Remove this when Netty 4 is released
-libraryDependencies += "io.netty" % "netty" % "4.0.0.Alpha1-SNAPSHOT" from "http://cloud.github.com/downloads/ngocdaothanh/xitrum/netty-4.0.0.Alpha1-SNAPSHOT.jar"
-
-//resolvers += "Netty-4.0.0.Alpha1-SNAPSHOT" at "http://repository-netty.forge.cloudbees.com/snapshot"
-
-//libraryDependencies += "io.netty" % "netty" % "4.0.0.Alpha1-SNAPSHOT"
-
 // Hazelcast -------------------------------------------------------------------
 
 // For distributed cache and Comet
 // Infinispan is good but much heavier, and the logging is bad:
 // https://github.com/infinispan/infinispan/blob/master/core/src/main/java/org/infinispan/util/logging/LogFactory.java
-libraryDependencies += "com.hazelcast" % "hazelcast" % "2.1"
+libraryDependencies += "com.hazelcast" % "hazelcast" % "2.1.2"
 
 // http://www.hazelcast.com/documentation.jsp#Clients
 // Hazelcast can be configured in Xitrum as super client or native client
-libraryDependencies += "com.hazelcast" % "hazelcast-client" % "2.1"
+libraryDependencies += "com.hazelcast" % "hazelcast-client" % "2.1.2"
 
 // Jerkson ---------------------------------------------------------------------
 
@@ -57,6 +45,8 @@ libraryDependencies += "org.mozilla" % "rhino" % "1.7R3"
 
 // Other dependencies ----------------------------------------------------------
 
+libraryDependencies += "io.netty" % "netty" % "3.5.0.Final"
+
 libraryDependencies += "tv.cntt" %% "scaposer" % "1.0"
 
 libraryDependencies += "tv.cntt" %% "sclasner" % "1.1"
@@ -64,7 +54,7 @@ libraryDependencies += "tv.cntt" %% "sclasner" % "1.1"
 libraryDependencies += "org.javassist" % "javassist" % "3.16.1-GA"
 
 // Projects using Xitrum must provide a concrete implentation of SLF4J (Logback etc.)
-libraryDependencies += "org.slf4j" % "slf4j-api" % "1.6.4" % "provided"
+libraryDependencies += "org.slf4j" % "slf4j-api" % "1.6.6" % "provided"
 
 // xitrum.imperatively uses Scala continuation, a compiler plugin --------------
 

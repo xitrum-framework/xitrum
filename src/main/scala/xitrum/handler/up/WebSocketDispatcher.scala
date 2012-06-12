@@ -1,7 +1,7 @@
 package xitrum.handler.up
 
-import io.netty.channel.{ChannelHandler, ChannelHandlerContext, ChannelFuture, ChannelFutureListener, SimpleChannelUpstreamHandler, MessageEvent}
-import io.netty.handler.codec.http.websocketx.{
+import org.jboss.netty.channel.{ChannelHandler, ChannelHandlerContext, ChannelFuture, ChannelFutureListener, SimpleChannelUpstreamHandler, MessageEvent}
+import org.jboss.netty.handler.codec.http.websocketx.{
   CloseWebSocketFrame, PingWebSocketFrame, PongWebSocketFrame, TextWebSocketFrame, WebSocketFrame, WebSocketServerHandshaker
 }
 

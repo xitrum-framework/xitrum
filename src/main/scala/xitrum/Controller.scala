@@ -1,6 +1,6 @@
 package xitrum
 
-import io.netty.channel.{ChannelFuture, ChannelFutureListener}
+import org.jboss.netty.channel.{ChannelFuture, ChannelFutureListener}
 
 import xitrum.controller._
 import xitrum.scope.request.ExtEnv

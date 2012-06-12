@@ -2,7 +2,7 @@ package xitrum.scope.session
 
 import scala.collection.mutable.{Map => MMap}
 
-import io.netty.handler.codec.http.DefaultCookie
+import org.jboss.netty.handler.codec.http.DefaultCookie
 
 import xitrum.Config
 import xitrum.scope.request.ExtEnv

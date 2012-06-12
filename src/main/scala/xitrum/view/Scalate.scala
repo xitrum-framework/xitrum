@@ -4,7 +4,7 @@ import java.io.{File, PrintWriter, StringWriter}
 
 import org.fusesource.scalate.{Binding, DefaultRenderContext, RenderContext, Template, TemplateEngine}
 import org.fusesource.scalate.scaml.ScamlOptions
-import io.netty.handler.codec.serialization.ClassResolvers
+import org.jboss.netty.handler.codec.serialization.ClassResolvers
 
 import xitrum.{Config, Controller}
 

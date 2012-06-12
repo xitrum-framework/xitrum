@@ -15,13 +15,19 @@
 
 1.9 (planned):
 * Use Netty 3.5.Final instead of 4.0 SNAPSHOT for file upload
+  To upgrade, in your project in most cases just replace
+  io.netty.xxx with org.jboss.netty.xxx
+  Ex:
+    Old code: import io.netty.util.CharsetUtil.UTF_8
+    New code: import org.jboss.netty.util.CharsetUtil.UTF_8
 * basicAuthenticate now works as documented:
   http://ngocdaothanh.github.com/xitrum/guide/howto.html#basic-authentication
-* Update Hazelcast from 2.0.2 to 2.1
 * Add I18n#tf, tcf, tnf, tcnf for formatted string;
   Standard placeholders %d, %s etc. work, but if the formatted string contains
   many of them, their order should not be changed
 * sbt publish-local can be run easily by anyone, not only core developers
+* Update Hazelcast from 2.0.2 to 2.1.2
+* Update SLF4J from 1.6.4 to 1.6.6
 
 1.8.7:
 * Add build for Scala 2.9.2

@@ -1,6 +1,6 @@
 package xitrum.routing
 
-import io.netty.handler.codec.http.{HttpMethod, QueryStringEncoder}
+import org.jboss.netty.handler.codec.http.{HttpMethod, QueryStringEncoder}
 import xitrum.Config
 
 case class Route(httpMethod: HttpMethod, order: RouteOrder.RouteOrder, compiledPattern: Seq[RouteToken]) {

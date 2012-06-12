@@ -2,7 +2,7 @@ package xitrum.i18n
 
 import scala.collection.mutable.{ListBuffer, Map => MMap}
 
-import io.netty.util.CharsetUtil.UTF_8
+import org.jboss.netty.util.CharsetUtil.UTF_8
 import scaposer.{Po, Parser}
 
 import xitrum.util.Loader

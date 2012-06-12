@@ -3,9 +3,9 @@ package xitrum.handler.up
 import java.util.{Map => JMap, List => JList, LinkedHashMap => JLinkedHashMap}
 import scala.collection.mutable.{ArrayBuffer, Map => MMap}
 
-import io.netty.channel.{ChannelHandler, SimpleChannelUpstreamHandler, ChannelHandlerContext, MessageEvent, Channels}
+import org.jboss.netty.channel.{ChannelHandler, SimpleChannelUpstreamHandler, ChannelHandlerContext, MessageEvent, Channels}
 import ChannelHandler.Sharable
-import io.netty.handler.codec.http.QueryStringDecoder
+import org.jboss.netty.handler.codec.http.QueryStringDecoder
 
 import xitrum.Config
 import xitrum.handler.HandlerEnv

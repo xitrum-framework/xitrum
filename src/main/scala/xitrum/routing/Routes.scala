@@ -6,7 +6,7 @@ import java.lang.reflect.Method
 import scala.collection.mutable.{ArrayBuffer, Map => MMap, StringBuilder}
 import scala.util.matching.Regex
 
-import io.netty.handler.codec.http.{HttpMethod, QueryStringEncoder}
+import org.jboss.netty.handler.codec.http.{HttpMethod, QueryStringEncoder}
 
 import xitrum.{Config, Logger, Controller, ErrorController}
 import xitrum.controller.Action

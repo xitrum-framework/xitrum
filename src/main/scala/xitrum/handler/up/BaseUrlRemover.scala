@@ -1,8 +1,8 @@
 package xitrum.handler.up
 
-import io.netty.channel.{ChannelHandler, SimpleChannelUpstreamHandler, ChannelHandlerContext, MessageEvent}
+import org.jboss.netty.channel.{ChannelHandler, SimpleChannelUpstreamHandler, ChannelHandlerContext, MessageEvent}
 import ChannelHandler.Sharable
-import io.netty.handler.codec.http.{DefaultHttpResponse, HttpResponseStatus, HttpRequest, HttpVersion}
+import org.jboss.netty.handler.codec.http.{DefaultHttpResponse, HttpResponseStatus, HttpRequest, HttpVersion}
 
 import xitrum.Config
 import xitrum.handler.down.XSendFile

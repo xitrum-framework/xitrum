@@ -1,6 +1,6 @@
 package xitrum.routing
 
-import io.netty.handler.codec.http.{HttpHeaders, HttpResponseStatus}
+import org.jboss.netty.handler.codec.http.{HttpHeaders, HttpResponseStatus}
 import HttpHeaders.Names._
 import HttpHeaders.Values._
 import HttpResponseStatus._

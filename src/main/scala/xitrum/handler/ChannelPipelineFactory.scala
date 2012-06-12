@@ -1,8 +1,8 @@
 package xitrum.handler
 
-import io.netty.channel.{Channels, ChannelPipeline, ChannelPipelineFactory => CPF}
-import io.netty.handler.codec.http.{HttpRequestDecoder, HttpChunkAggregator, HttpResponseEncoder}
-import io.netty.handler.execution.{ExecutionHandler, OrderedMemoryAwareThreadPoolExecutor}
+import org.jboss.netty.channel.{Channels, ChannelPipeline, ChannelPipelineFactory => CPF}
+import org.jboss.netty.handler.codec.http.{HttpRequestDecoder, HttpChunkAggregator, HttpResponseEncoder}
+import org.jboss.netty.handler.execution.{ExecutionHandler, OrderedMemoryAwareThreadPoolExecutor}
 
 import xitrum.Config
 import xitrum.handler.up._

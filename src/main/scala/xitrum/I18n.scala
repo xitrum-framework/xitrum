@@ -1,6 +1,6 @@
 package xitrum
 
-import io.netty.handler.codec.http.HttpHeaders.Names
+import org.jboss.netty.handler.codec.http.HttpHeaders.Names
 import xitrum.i18n.PoLoader
 
 trait I18n {

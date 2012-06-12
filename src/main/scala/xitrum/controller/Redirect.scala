@@ -2,7 +2,7 @@ package xitrum.controller
 
 import java.lang.reflect.Method
 
-import io.netty.handler.codec.http.{ HttpHeaders, HttpResponseStatus }
+import org.jboss.netty.handler.codec.http.{ HttpHeaders, HttpResponseStatus }
 import HttpHeaders.Names.LOCATION
 import HttpResponseStatus.FOUND
 

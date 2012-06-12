@@ -1,9 +1,9 @@
 package xitrum.util
 
 import java.nio.charset.Charset
-import io.netty.buffer.ChannelBuffers
-import io.netty.handler.codec.base64.{Base64 => B64, Base64Dialect}
-import io.netty.util.CharsetUtil.UTF_8
+import org.jboss.netty.buffer.ChannelBuffers
+import org.jboss.netty.handler.codec.base64.{Base64 => B64, Base64Dialect}
+import org.jboss.netty.util.CharsetUtil.UTF_8
 
 object Base64 {
   /**

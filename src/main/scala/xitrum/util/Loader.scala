@@ -4,7 +4,7 @@ import java.io.{FileInputStream, InputStream}
 import java.util.Properties
 
 import com.codahale.jerkson.Json
-import io.netty.util.CharsetUtil.UTF_8
+import org.jboss.netty.util.CharsetUtil.UTF_8
 
 object Loader {
   private val BUFFER_SIZE = 1024

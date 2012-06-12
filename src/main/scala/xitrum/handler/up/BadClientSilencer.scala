@@ -1,6 +1,6 @@
 package xitrum.handler.up
 
-import io.netty.channel.{ChannelHandlerContext, ExceptionEvent, SimpleChannelUpstreamHandler}
+import org.jboss.netty.channel.{ChannelHandlerContext, ExceptionEvent, SimpleChannelUpstreamHandler}
 import xitrum.Logger
 
 /**

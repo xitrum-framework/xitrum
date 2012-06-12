@@ -1,7 +1,7 @@
 package xitrum.handler.up
 
-import io.netty.channel.{Channel, ChannelHandler, ChannelFuture, ChannelFutureListener, ChannelHandlerContext, MessageEvent, SimpleChannelUpstreamHandler}
-import io.netty.handler.codec.http.{HttpHeaders, HttpRequest, HttpResponse}
+import org.jboss.netty.channel.{Channel, ChannelHandler, ChannelFuture, ChannelFutureListener, ChannelHandlerContext, MessageEvent, SimpleChannelUpstreamHandler}
+import org.jboss.netty.handler.codec.http.{HttpHeaders, HttpRequest, HttpResponse}
 import ChannelHandler.Sharable
 
 object NoPipelining {

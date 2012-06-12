@@ -3,8 +3,8 @@ package xitrum.handler.up
 import java.lang.reflect.Method
 import scala.collection.mutable.{ArrayBuffer, Map => MMap}
 
-import io.netty.channel._
-import io.netty.handler.codec.http._
+import org.jboss.netty.channel._
+import org.jboss.netty.handler.codec.http._
 import ChannelHandler.Sharable
 import HttpResponseStatus._
 import HttpVersion._
