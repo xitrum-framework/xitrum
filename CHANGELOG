@@ -14,7 +14,7 @@
 * Reload routes when in development mode with JRebel
 
 1.9:
-* Use Netty 3.5.Final instead of 4.0 SNAPSHOT for file upload
+* Use Netty 3.5.0.Final instead of 4.0.0.Alpha1-SNAPSHOT for file upload
   To upgrade, in your project in most cases just replace
   io.netty.xxx with org.jboss.netty.xxx
   Ex:
