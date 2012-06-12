@@ -27,12 +27,3 @@ To delete:
 ::
 
   $ find ~/.ivy2 -name *xitrum* -delete
-
-Netty 4 SNAPSHOT
-----------------
-
-**This part will be removed when Netty 3.5.Final is officially released.**
-
-File upload feature in Xitrum needs `Netty <https://github.com/netty/netty>`_ 3.5.Final,
-which has not been released. Netty 4 SNAPSHOT is built and put at
-https://github.com/ngocdaothanh/xitrum/downloads

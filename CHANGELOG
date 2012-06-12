@@ -13,7 +13,7 @@
 * Middleware architecture based on Netty handlers
 * Reload routes when in development mode with JRebel
 
-1.9 (planned):
+1.9:
 * Use Netty 3.5.Final instead of 4.0 SNAPSHOT for file upload
   To upgrade, in your project in most cases just replace
   io.netty.xxx with org.jboss.netty.xxx
