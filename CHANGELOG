@@ -1,4 +1,4 @@
-1.9.1 (planned):
+1.9.2 (planned):
 * Remove HttpChunkAggregator to support big file upload
 * Improve I18n#tf, tcf, tnf, tcnf to support changing order of placeholders
 * An action can have multiple Scalate view files more easily
@@ -12,6 +12,10 @@
 * wro4j
 * Middleware architecture based on Netty handlers
 * Reload routes when in development mode with JRebel
+
+1.9.1 (planned):
+* Update Netty from 3.5.0.Final to Netty 3.5.1.Final:
+  https://netty.io/Blog/Announcing+the+new+web+site+and+Netty+351Final
 
 1.9:
 * Use Netty 3.5.0.Final instead of 4.0.0.Alpha1-SNAPSHOT for file upload
