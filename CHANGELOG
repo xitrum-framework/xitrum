@@ -14,6 +14,8 @@
 * Reload routes when in development mode with JRebel
 
 1.9.1 (planned):
+* Support "Range" request
+  Xitrum can now be used to serve movies for iOS
 * Update Netty from 3.5.0.Final to Netty 3.5.1.Final:
   https://netty.io/Blog/Announcing+the+new+web+site+and+Netty+351Final
 

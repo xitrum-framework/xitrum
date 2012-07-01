@@ -16,8 +16,8 @@ class Request2Env extends SimpleChannelUpstreamHandler with BadClientSilencer {
     }
 
     val env = new HandlerEnv
-    env.channel = ctx.getChannel
-    env.request = m.asInstanceOf[HttpRequest]
+    env.channel  = ctx.getChannel
+    env.request  = m.asInstanceOf[HttpRequest]
     env.response = {  /** The default response is empty 200 OK */
       // http://en.wikipedia.org/wiki/HTTP_persistent_connection
       // In HTTP 1.1 all connections are considered persistent unless declared otherwise

@@ -95,8 +95,18 @@ object XSendFile extends Logger {
           val mimeo = Mime.get(path)
           val raf   = new RandomAccessFile(path, "r")
 
+          val (offset, length) = getRangeFromRequest(request) match {
+            case None =>
+              (0L, raf.length)  // 0L is for avoiding "type mismatch" compile error
+            case Some((startIndex, endIndex)) =>
+              response.setStatus(PARTIAL_CONTENT)
+              response.setHeader(ACCEPT_RANGES, BYTES)
+              response.setHeader(CONTENT_RANGE, "bytes " + startIndex + "-" + endIndex + "/" + raf.length)
+              (startIndex, endIndex - startIndex + 1)
+          }
+
           // Send the initial line and headers
-          HttpHeaders.setContentLength(response, raf.length)
+          HttpHeaders.setContentLength(response, length)
           response.setHeader(LAST_MODIFIED, lastModifiedRfc2822)
           if (mimeo.isDefined) response.setHeader(CONTENT_TYPE, mimeo.get)
           NoPipelining.setResponseHeaderForKeepAliveRequest(request, response)
@@ -105,7 +115,7 @@ object XSendFile extends Logger {
           // Write the content
           if (ctx.getPipeline.get(classOf[SslHandler]) != null) {
             // Cannot use zero-copy with HTTPS
-            val future = Channels.write(channel, new ChunkedFile(raf, 0, raf.length, CHUNK_SIZE))
+            val future = Channels.write(channel, new ChunkedFile(raf, offset, length, CHUNK_SIZE))
             future.addListener(new ChannelFutureListener {
               def operationComplete(f: ChannelFuture) {
                 raf.close()
@@ -115,7 +125,7 @@ object XSendFile extends Logger {
             NoPipelining.resumeReadingForKeepAliveRequestOrCloseOnComplete(request, channel, future)
           } else {
             // No encryption - use zero-copy
-            val region = new DefaultFileRegion(raf.getChannel, 0, raf.length)
+            val region = new DefaultFileRegion(raf.getChannel, offset, length)
 
             // This will cause ClosedChannelException:
             // Channels.write(ctx, e.getFuture, region)
@@ -131,6 +141,22 @@ object XSendFile extends Logger {
             NoPipelining.resumeReadingForKeepAliveRequestOrCloseOnComplete(request, channel, future)
           }
         }
+    }
+  }
+
+  // "Range" request: http://tools.ietf.org/html/rfc2616#section-14.35
+  // For simplicity only this spec is supported:
+  // bytes=123-456
+  private def getRangeFromRequest(request: HttpRequest): Option[(Long, Long)] = {
+    val spec = request.getHeader(RANGE)
+    if (spec == null) {
+      None
+    } else {
+      val range = spec.substring(6)
+      val se    = range.split('-')
+      val s = se(0).toLong
+      val e = se(1).toLong
+      Some((s, e))
     }
   }
 }
@@ -157,7 +183,7 @@ class XSendFile extends ChannelDownstreamHandler {
     }
 
     val response = m.asInstanceOf[HttpResponse]
-    val path      = response.getHeader(X_SENDFILE_HEADER)
+    val path     = response.getHeader(X_SENDFILE_HEADER)
     if (path == null) {
       ctx.sendDownstream(e)
       return
