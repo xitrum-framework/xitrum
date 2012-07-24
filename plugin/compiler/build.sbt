@@ -15,4 +15,4 @@ scalaVersion := "2.9.2"
 
 libraryDependencies += "org.scala-lang" % "scala-compiler" % "2.9.2"
 
-// Copy dev/build.sbt.end here when publishing
+// Copy dev/build.sbt.end here when publishing to Sonatype

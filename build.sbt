@@ -67,3 +67,5 @@ scalacOptions += "-P:continuations:enable"
 // https://github.com/harrah/xsbt/wiki/Cross-Build
 //crossScalaVersions := Seq("2.9.1", "2.9.2")
 scalaVersion := "2.9.2"
+
+// Copy dev/build.sbt.end here when publishing to Sonatype
