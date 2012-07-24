@@ -86,8 +86,7 @@ its `Google group <http://groups.google.com/group/xitrum-framework>`_.
 Create new empty Xitrum project
 -------------------------------
 
-To create a new empty project, in Rails you have ``rails new``, in Cake you have
-``cake new``. In `Xitrum <http://ngocdaothanh.github.com/xitrum>`_ you download
+To create a new empty project, download
 `xitrum-new.zip <http://cloud.github.com/downloads/ngocdaothanh/xitrum-new/xitrum-new.zip>`_:
 
 ::
