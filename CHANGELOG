@@ -1,4 +1,5 @@
 1.9.2 (planned):
+* Support "Range" request to dynamic content, not only to static files
 * Remove HttpChunkAggregator to support big file upload
 * Improve I18n#tf, tcf, tnf, tcnf to support changing order of placeholders
 * An action can have multiple Scalate view files more easily
@@ -13,10 +14,12 @@
 * Middleware architecture based on Netty handlers
 * Reload routes when in development mode with JRebel
 
-1.9.1 (planned):
-* Support "Range" request
+1.9.1:
+* Support "Range" request to static files
   Xitrum can now be used to serve movies for iOS
 * Update Netty from 3.5.0.Final to 3.5.3.Final:
+  https://netty.io/Blog/Announcing+the+new+web+site+and+Netty+351Final
+  https://netty.io/Blog/Netty+352Final+is+out
   https://netty.io/Blog/Say+Hello+to+Netty+353Final+
 * Update Rhino from 1.7R3 to 1.7R4:
   https://developer.mozilla.org/en/New_in_Rhino_1.7R4
