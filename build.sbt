@@ -19,13 +19,12 @@ unmanagedBase in Runtime <<= baseDirectory { base => base / "config" }
 // Hazelcast -------------------------------------------------------------------
 
 // For distributed cache and Comet
-// Infinispan is good but much heavier, and the logging is bad:
-// https://github.com/infinispan/infinispan/blob/master/core/src/main/java/org/infinispan/util/logging/LogFactory.java
-libraryDependencies += "com.hazelcast" % "hazelcast" % "2.1.2"
+// Infinispan is good but much heavier
+libraryDependencies += "com.hazelcast" % "hazelcast" % "2.2"
 
 // http://www.hazelcast.com/documentation.jsp#Clients
 // Hazelcast can be configured in Xitrum as super client or native client
-libraryDependencies += "com.hazelcast" % "hazelcast-client" % "2.1.2"
+libraryDependencies += "com.hazelcast" % "hazelcast-client" % "2.2"
 
 // Jerkson ---------------------------------------------------------------------
 

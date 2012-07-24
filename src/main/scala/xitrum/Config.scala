@@ -109,20 +109,20 @@ object Config extends Logger {
    * sbt console mode and don't like this overhead)
    */
   lazy val hazelcastInstance: HazelcastInstance = {
-    // http://code.google.com/p/hazelcast/issues/detail?id=94
-    // http://code.google.com/p/hazelcast/source/browse/trunk/hazelcast/src/main/java/com/hazelcast/logging/Logger.java
+    // http://hazelcast.com/docs/2.2/manual/single_html/#Logging
     System.setProperty("hazelcast.logging.type", "slf4j")
 
     // http://www.hazelcast.com/documentation.jsp#SuperClient
     if (config.hazelcastMode == "superClient")
       System.setProperty("hazelcast.super.client", "true")
 
-    // http://code.google.com/p/hazelcast/wiki/Config
-    // http://code.google.com/p/hazelcast/source/browse/trunk/hazelcast/src/main/java/com/hazelcast/config/XmlConfigBuilder.java
     if (config.hazelcastMode == "superClient" || config.hazelcastMode == "clusterMember") {
       val path = Config.root + File.separator + "config" + File.separator + "hazelcast_cluster_member_or_super_client.xml"
       System.setProperty("hazelcast.config", path)
-      Hazelcast.getDefaultInstance
+
+      // null: load from "hazelcast.config" system property above
+      // http://hazelcast.com/docs/2.2/manual/multi_html/ch12.html
+      Hazelcast.newHazelcastInstance(null)
     } else {
       val c = Loader.jsonFromClasspath[HazelcastJavaClientConfig]("hazelcast_java_client.json")
       val clientConfig = new ClientConfig
