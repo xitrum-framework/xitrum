@@ -41,11 +41,11 @@ libraryDependencies += "com.codahale" % "jerkson_2.9.1" % "0.5.0"
 libraryDependencies += "org.fusesource.scalate" % "scalate-core" % "1.5.3"
 
 // For Scalate to compile CoffeeScript to JavaScript
-libraryDependencies += "org.mozilla" % "rhino" % "1.7R3"
+libraryDependencies += "org.mozilla" % "rhino" % "1.7R4"
 
 // Other dependencies ----------------------------------------------------------
 
-libraryDependencies += "io.netty" % "netty" % "3.5.2.Final"
+libraryDependencies += "io.netty" % "netty" % "3.5.3.Final"
 
 libraryDependencies += "tv.cntt" %% "scaposer" % "1.0"
 

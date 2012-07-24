@@ -16,8 +16,10 @@
 1.9.1 (planned):
 * Support "Range" request
   Xitrum can now be used to serve movies for iOS
-* Update Netty from 3.5.0.Final to Netty 3.5.2.Final:
-  https://netty.io/Blog/Announcing+the+new+web+site+and+Netty+351Final
+* Update Netty from 3.5.0.Final to 3.5.3.Final:
+  https://netty.io/Blog/Say+Hello+to+Netty+353Final+
+* Update Rhino from 1.7R3 to 1.7R4:
+  https://developer.mozilla.org/en/New_in_Rhino_1.7R4
 
 1.9:
 * Use Netty 3.5.0.Final instead of 4.0.0.Alpha1-SNAPSHOT for file upload
