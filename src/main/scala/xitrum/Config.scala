@@ -3,7 +3,7 @@ package xitrum
 import java.io.File
 import java.nio.charset.Charset
 
-import com.hazelcast.client.{ClientConfig, HazelcastClient}
+import com.hazelcast.client.{ClientConfig, ClientConfigBuilder, HazelcastClient}
 import com.hazelcast.core.{Hazelcast, HazelcastInstance}
 
 import xitrum.scope.session.SessionStore
@@ -124,10 +124,8 @@ object Config extends Logger {
       // http://hazelcast.com/docs/2.2/manual/multi_html/ch12.html
       Hazelcast.newHazelcastInstance(null)
     } else {
-      val c = Loader.jsonFromClasspath[HazelcastJavaClientConfig]("hazelcast_java_client.json")
-      val clientConfig = new ClientConfig
-      clientConfig.getGroupConfig.setName(c.groupName).setPassword(c.groupPassword)
-      clientConfig.addAddress(c.addresses:_*)
+      // https://github.com/hazelcast/hazelcast/issues/93
+      val clientConfig = new ClientConfigBuilder("hazelcast_java_client.properties").build()
       HazelcastClient.newHazelcastClient(clientConfig)
     }
   }
