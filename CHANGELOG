@@ -20,6 +20,7 @@
   https://netty.io/Blog/Say+Hello+to+Netty+353Final+
 * Update Rhino from 1.7R3 to 1.7R4:
   https://developer.mozilla.org/en/New_in_Rhino_1.7R4
+* Update SBT from 0.11.2 to 0.11.3-2
 
 1.9:
 * Use Netty 3.5.0.Final instead of 4.0.0.Alpha1-SNAPSHOT for file upload

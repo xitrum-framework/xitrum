@@ -7,7 +7,7 @@ Publish to Sonatype
 2. Copy content of dev/build.sbt.end to the end of build.sbt.
 3. Run ``sbt publish`` or ``sbt`` then from SBT command prompt run ``+ publish``.
 4. Login at https://oss.sonatype.org/ and from "Staging Repositories" select the
-   newly published item, then click "Close".
+   newly published item, then click "Close" then "Release".
 
 This workflow is for others to easily do ``sbt publish-local`` without PGP key.
 Otherwise there will be error:
@@ -15,6 +15,9 @@ Otherwise there will be error:
 ::
 
   java.io.FileNotFoundException: ~/.sbt/gpg/secring.asc (No such file or directory)
+
+There are 2 plugins in "plugins" directory.
+Publish them the same way as with Xitrum above.
 
 Delete local snapshots
 ----------------------
