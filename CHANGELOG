@@ -1,7 +1,9 @@
 1.9.2 (planned):
-* Update Hazelcast from 2.1.2 to 2.2
+* Update Hazelcast from 2.1.2 to 2.2:
   http://hazelcast.com/docs/2.2/manual/multi_html/ch18s04.html
   hazelcast_java_client.json is changed to hazelcast_java_client.properties
+* Update Scaposer from 1.0 to 1.1:
+  https://github.com/ngocdaothanh/scaposer/pull/2
 * Support "Range" request to dynamic content, not only to static files
 * Remove HttpChunkAggregator to support big file upload
 * Improve I18n#tf, tcf, tnf, tcnf to support changing order of placeholders
