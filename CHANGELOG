@@ -1,4 +1,5 @@
 1.9.2 (planned):
+* Update SBT from 0.11.3-2 to 0.12.0
 * Update Hazelcast from 2.1.2 to 2.2:
   http://hazelcast.com/docs/2.2/manual/multi_html/ch18s04.html
   hazelcast_java_client.json is changed to hazelcast_java_client.properties
