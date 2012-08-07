@@ -8,38 +8,6 @@ import org.jboss.netty.handler.ssl.SslHandler
 
 import xitrum.{Controller, Config}
 
-object Net {
-  // These are not put in trait Net so that they can be reuse at AccessLog
-
-  def remoteIp(remoteAddress: SocketAddress, request: HttpRequest): String = {
-    val ip = clientIp(remoteAddress)
-
-    if (proxyNotAllowed(ip)) {
-      ip
-    } else {
-      val xForwardedFor = request.getHeader("X-Forwarded-For")
-      if (xForwardedFor == null)
-        ip
-      else
-        xForwardedFor.split(",")(0).trim
-    }
-  }
-
-  // TODO: inetSocketAddress can be Inet4Address or Inet6Address
-  // See java.net.preferIPv6Addresses
-  def clientIp(remoteAddress: SocketAddress): String = {
-    val inetSocketAddress = remoteAddress.asInstanceOf[InetSocketAddress]
-    inetSocketAddress.getAddress.getHostAddress
-  }
-
-  def proxyNotAllowed(clientIp: String): Boolean = {
-    Config.config.reverseProxy match {
-      case None      => false
-      case Some(reverseProxy) => reverseProxy.ips.contains(clientIp)
-    }
-  }
-}
-
 // See:
 //   http://httpd.apache.org/docs/2.2/mod/mod_proxy.html
 //   http://en.wikipedia.org/wiki/X-Forwarded-For
@@ -55,27 +23,61 @@ object Net {
 // Note:
 //   X-Forwarded-Server is the hostname of the proxy server, not the same as
 //   X-Forwarded-Host.
+object Net {
+  // These are not put in trait Net so that they can be reused at AccessLog
+
+  /** See reverseProxy in config/xitrum.json */
+  def proxyNotAllowed(clientIp: String): Boolean = {
+    Config.config.reverseProxy match {
+      case None      => false
+      case Some(reverseProxy) => reverseProxy.ips.contains(clientIp)
+    }
+  }
+
+  /**
+   * TODO: inetSocketAddress can be Inet4Address or Inet6Address
+   * See java.net.preferIPv6Addresses
+   * @return IP of the direct HTTP client (may be the proxy)
+   */
+  def clientIp(remoteAddress: SocketAddress): String = {
+    val inetSocketAddress = remoteAddress.asInstanceOf[InetSocketAddress]
+    inetSocketAddress.getAddress.getHostAddress
+  }
+
+  /** @return IP of the HTTP client, X-Forwarded-For is supported */
+  def remoteIp(remoteAddress: SocketAddress, request: HttpRequest): String = {
+    val ip = clientIp(remoteAddress)
+
+    if (proxyNotAllowed(ip)) {
+      ip
+    } else {
+      val xForwardedFor = request.getHeader("X-Forwarded-For")
+      if (xForwardedFor == null)
+        ip
+      else
+        xForwardedFor.split(",")(0).trim
+    }
+  }
+}
+
 trait Net {
   this: Controller =>
 
   // The "val"s must be "lazy", because when the controller is constructed, the
   // "request" object is null
 
-  private lazy val clientIp        = Net.clientIp(channel.getRemoteAddress)
+  /** See reverseProxy in config/xitrum.json */
   private lazy val proxyNotAllowed = Net.proxyNotAllowed(clientIp)
 
-  /** @return IP of the HTTP client, X-Forwarded-For is supported */
-  lazy val remoteIp = {
-    if (proxyNotAllowed) {
-      clientIp
-    } else {
-      val xForwardedFor = request.getHeader("X-Forwarded-For")
-      if (xForwardedFor == null)
-        clientIp
-      else
-        xForwardedFor.split(",")(0).trim
-    }
-  }
+  /**
+   * TODO: inetSocketAddress can be Inet4Address or Inet6Address
+   * See java.net.preferIPv6Addresses
+   * @return IP of the direct HTTP client (may be the proxy)
+   */
+  private lazy val clientIp = Net.clientIp(channel.getRemoteAddress)
+
+  /** @return IP of the original remote HTTP client (not the proxy), X-Forwarded-For is supported */
+  lazy val remoteIp = Net.remoteIp(channel.getRemoteAddress, request)
 
   lazy val isSsl = {
     if (channel.getPipeline.get(classOf[SslHandler]) != null) {
