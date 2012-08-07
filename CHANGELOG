@@ -1,5 +1,11 @@
 1.9.2 (planned):
 * Improve access log
+* Support "Range" request to static files
+  Xitrum can now be used to serve interleaved MP4 movies
+  (tested on iOS, Safari, Firefox, and Chrome)
+  For simplicity only these specs are supported:
+  bytes=123-456
+  bytes=123-
 * Update SBT from 0.11.3-2 to 0.12.0
 * Update Hazelcast from 2.1.2 to 2.2:
   http://hazelcast.com/docs/2.2/manual/multi_html/ch18s04.html
@@ -23,7 +29,10 @@
 
 1.9.1:
 * Support "Range" request to static files
-  Xitrum can now be used to serve movies for iOS
+  Xitrum can now be used to serve interleaved MP4 movies
+  (tested on iOS and Firefox)
+  For simplicity only this spec is supported:
+  bytes=123-456
 * Update Netty from 3.5.0.Final to 3.5.3.Final:
   https://netty.io/Blog/Announcing+the+new+web+site+and+Netty+351Final
   https://netty.io/Blog/Netty+352Final+is+out

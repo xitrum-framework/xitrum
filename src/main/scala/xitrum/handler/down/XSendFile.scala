@@ -66,7 +66,7 @@ object XSendFile extends Logger {
           ctx.sendDownstream(e)
           AccessLog.logStaticContentAccess(remoteAddress, request, response)
         } else {
-          sendFile(ctx, e, request, response, abs404)
+          sendFile(ctx, e, request, response, abs404)  // Recursive
         }
 
       case Etag.Small(bytes, etag, mimeo, gzipped) =>
@@ -105,10 +105,11 @@ object XSendFile extends Logger {
             case None =>
               (0L, raf.length)  // 0L is for avoiding "type mismatch" compile error
             case Some((startIndex, endIndex)) =>
+              val endIndex2 = if (endIndex >= 0) endIndex else raf.length - 1
               response.setStatus(PARTIAL_CONTENT)
               response.setHeader(ACCEPT_RANGES, BYTES)
-              response.setHeader(CONTENT_RANGE, "bytes " + startIndex + "-" + endIndex + "/" + raf.length)
-              (startIndex, endIndex - startIndex + 1)
+              response.setHeader(CONTENT_RANGE, "bytes " + startIndex + "-" + endIndex2 + "/" + raf.length)
+              (startIndex, endIndex2 - startIndex + 1)
           }
 
           // Send the initial line and headers
@@ -151,19 +152,41 @@ object XSendFile extends Logger {
     }
   }
 
-  // "Range" request: http://tools.ietf.org/html/rfc2616#section-14.35
-  // For simplicity only this spec is supported:
-  // bytes=123-456
+  /**
+   * "Range" request: http://tools.ietf.org/html/rfc2616#section-14.35
+   * For simplicity only these specs are supported:
+   * bytes=123-456
+   * bytes=123-
+   */
   private def getRangeFromRequest(request: HttpRequest): Option[(Long, Long)] = {
     val spec = request.getHeader(RANGE)
-    if (spec == null) {
-      None
-    } else {
-      val range = spec.substring(6)
-      val se    = range.split('-')
-      val s = se(0).toLong
-      val e = se(1).toLong
-      Some((s, e))
+
+    try {
+      if (spec == null) {
+        None
+      } else {
+        if (spec.length <= 6) {
+          None
+        } else {
+          val range = spec.substring(6)  // Skip "bytes="
+          val se    = range.split('-')
+          if (se.length == 2) {
+            val s = se(0).toLong
+            val e = se(1).toLong
+            Some((s, e))
+          } else if (se.length != 1) {
+            None
+          } else {
+            val s = se(0).toLong
+            val e = -1
+            Some((s, e))
+          }
+        }
+      }
+    } catch {
+      case e =>
+        logger.warn("Unsupported Range spec: " + spec)
+        None
     }
   }
 }
