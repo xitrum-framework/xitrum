@@ -1,5 +1,22 @@
+1.9.3 (planned):
+* Support "Range" request to dynamic content, not only to static files
+* Remove HttpChunkAggregator to support big file upload
+* Improve I18n#tf, tcf, tnf, tcnf to support changing order of placeholders
+* An action can have multiple Scalate view files more easily
+* I18n for validation messages
+* Make extensive use of Knockout.js and Scala delimited continuation
+* Integrate WebSocket to Comet; use WebSocket if available, or fall back to Ajax,
+  similar to Socket.IO: http://socket.io/
+* Add Ajax style upload based on iframe
+* Add digest authentication
+* Add Akka
+* Typesafe routes using Scala compiler plugin
+* wro4j
+* Middleware architecture based on Netty handlers
+* Reload routes when in development mode with JRebel
+
 1.9.2 (planned):
-* Improve access log
+* Improve access log to include remote IP
 * Support "Range" request to static files
   Xitrum can now be used to serve interleaved MP4 movies
   (tested on iOS, Safari, Firefox, and Chrome)
@@ -12,20 +29,6 @@
   hazelcast_java_client.json is changed to hazelcast_java_client.properties
 * Update Scaposer from 1.0 to 1.1:
   https://github.com/ngocdaothanh/scaposer/pull/2
-* Support "Range" request to dynamic content, not only to static files
-* Remove HttpChunkAggregator to support big file upload
-* Improve I18n#tf, tcf, tnf, tcnf to support changing order of placeholders
-* An action can have multiple Scalate view files more easily
-* I18n for validation messages
-* Make extensive use of Knockout.js and Scala delimited continuation
-* Integrate WebSocket to Comet; use WebSocket if available, or fall back to Ajax
-* Add Ajax style upload based on iframe
-* Add digest authentication
-* Add Akka
-* Typesafe routes using Scala compiler plugin
-* wro4j
-* Middleware architecture based on Netty handlers
-* Reload routes when in development mode with JRebel
 
 1.9.1:
 * Support "Range" request to static files
