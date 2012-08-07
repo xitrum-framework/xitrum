@@ -11,12 +11,10 @@ import HttpVersion._
 
 import xitrum.{Config, Controller, SkipCSRFCheck, Cache, Logger}
 import xitrum.controller.Action
-import xitrum.routing.Routes
 import xitrum.exception.{InvalidAntiCSRFToken, MissingParam, SessionExpired, ValidationError}
-import xitrum.handler.HandlerEnv
-import xitrum.handler.down.ResponseCacher
-import xitrum.handler.down.XSendFile
-import xitrum.routing.{ControllerReflection, HttpMethodWebSocket}
+import xitrum.handler.{AccessLog, HandlerEnv}
+import xitrum.handler.down.{ResponseCacher, XSendFile}
+import xitrum.routing.{ControllerReflection, HttpMethodWebSocket, Routes}
 import xitrum.scope.request.RequestEnv
 import xitrum.scope.session.CSRF
 
@@ -55,7 +53,7 @@ object Dispatcher extends Logger {
         }
       }
 
-      logAccess(controller, beginTimestamp, cacheSeconds, hit)
+      AccessLog.logDynamicContentAccess(controller, beginTimestamp, cacheSeconds, hit)
     } catch {
       case e =>
         // End timestamp
@@ -64,7 +62,7 @@ object Dispatcher extends Logger {
         // These exceptions are special cases:
         // We know that the exception is caused by the client (bad request)
         if (e.isInstanceOf[SessionExpired] || e.isInstanceOf[InvalidAntiCSRFToken] || e.isInstanceOf[MissingParam] || e.isInstanceOf[ValidationError]) {
-          logAccess(controller, beginTimestamp, 0, false)
+          AccessLog.logDynamicContentAccess(controller, beginTimestamp, 0, false)
 
           controller.response.setStatus(BAD_REQUEST)
           val msg = if (e.isInstanceOf[SessionExpired] || e.isInstanceOf[InvalidAntiCSRFToken]) {
@@ -83,7 +81,7 @@ object Dispatcher extends Logger {
           else
             controller.respondText(msg)
         } else {
-          logAccess(controller, beginTimestamp, 0, false, e)
+          AccessLog.logDynamicContentAccess(controller, beginTimestamp, 0, false, e)
 
           controller.response.setStatus(INTERNAL_SERVER_ERROR)
           if (Config.isProductionMode) {
@@ -149,39 +147,6 @@ object Dispatcher extends Logger {
   private def runAroundAndAfterFilters(controller: Controller, action: Action) {
     controller.callAroundFilters(action)
     controller.callAfterFilters()
-  }
-
-  private def logAccess(controller: Controller, beginTimestamp: Long, cacheSecs: Int, hit: Boolean, e: Throwable = null) {
-    def msgWithTime = {
-      val endTimestamp = System.currentTimeMillis()
-      val dt           = endTimestamp - beginTimestamp
-      val env          = controller.handlerEnv
-
-      (controller.request.getMethod) + " " + ControllerReflection.controllerActionName(controller.handlerEnv.action)                                                       +
-      (if (env.uriParams.nonEmpty)        ", uriParams: "        + RequestEnv.inspectParamsWithFilter(env.uriParams       .asInstanceOf[MMap[String, List[Any]]]) else "") +
-      (if (env.bodyParams.nonEmpty)       ", bodyParams: "       + RequestEnv.inspectParamsWithFilter(env.bodyParams      .asInstanceOf[MMap[String, List[Any]]]) else "") +
-      (if (env.pathParams.nonEmpty)       ", pathParams: "       + RequestEnv.inspectParamsWithFilter(env.pathParams      .asInstanceOf[MMap[String, List[Any]]]) else "") +
-      (if (env.fileUploadParams.nonEmpty) ", fileUploadParams: " + RequestEnv.inspectParamsWithFilter(env.fileUploadParams.asInstanceOf[MMap[String, List[Any]]]) else "") +
-      ", " + dt + " [ms]"
-    }
-
-    def extraInfo = {
-      if (cacheSecs == 0) {
-        if (controller.isResponded) "" else " (async)"
-      } else {
-        if (hit) {
-          if (cacheSecs < 0) " (action cache hit)"  else " (page cache hit)"
-        } else {
-          if (cacheSecs < 0) " (action cache miss)" else " (page cache miss)"
-        }
-      }
-    }
-
-    if (e == null) {
-      if (logger.isDebugEnabled) logger.debug(msgWithTime + extraInfo)
-    } else {
-      if (logger.isErrorEnabled) logger.error("Dispatching error " + msgWithTime + extraInfo, e)
-    }
   }
 }
 

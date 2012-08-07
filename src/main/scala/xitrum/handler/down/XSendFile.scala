@@ -4,17 +4,19 @@ import java.io.{File, RandomAccessFile}
 
 import org.jboss.netty.channel.{ChannelEvent, ChannelDownstreamHandler, Channels, ChannelHandler, ChannelHandlerContext, DownstreamMessageEvent, UpstreamMessageEvent, ChannelFuture, DefaultFileRegion, ChannelFutureListener}
 import org.jboss.netty.handler.codec.http.{HttpHeaders, HttpRequest, HttpResponse, HttpResponseStatus, HttpVersion}
+import org.jboss.netty.handler.ssl.SslHandler
+import org.jboss.netty.handler.stream.ChunkedFile
+import org.jboss.netty.buffer.ChannelBuffers
+
 import ChannelHandler.Sharable
 import HttpResponseStatus._
 import HttpVersion._
 import HttpHeaders.Names._
 import HttpHeaders.Values._
-import org.jboss.netty.handler.ssl.SslHandler
-import org.jboss.netty.handler.stream.ChunkedFile
-import org.jboss.netty.buffer.ChannelBuffers
 
 import xitrum.{Config, Logger}
 import xitrum.etag.{Etag, NotModified}
+import xitrum.handler.AccessLog
 import xitrum.handler.up.NoPipelining
 import xitrum.util.{Gzip, Mime}
 
@@ -49,7 +51,8 @@ object XSendFile extends Logger {
 
   /** @param path see Renderer#renderFile */
   def sendFile(ctx: ChannelHandlerContext, e: ChannelEvent, request: HttpRequest, response: HttpResponse, path: String) {
-    val channel = ctx.getChannel
+    val channel       = ctx.getChannel
+    val remoteAddress = channel.getRemoteAddress
 
     // Try to serve from cache
     Etag.forFile(path, Gzip.isAccepted(request)) match {
@@ -61,6 +64,7 @@ object XSendFile extends Logger {
           HttpHeaders.setContentLength(response, 0)
           NoPipelining.setResponseHeaderAndResumeReadingForKeepAliveRequestOrCloseOnComplete(request, response, channel, e.getFuture)
           ctx.sendDownstream(e)
+          AccessLog.logStaticContentAccess(remoteAddress, request, response)
         } else {
           sendFile(ctx, e, request, response, abs404)
         }
@@ -80,6 +84,7 @@ object XSendFile extends Logger {
         }
         NoPipelining.setResponseHeaderAndResumeReadingForKeepAliveRequestOrCloseOnComplete(request, response, channel, e.getFuture)
         ctx.sendDownstream(e)
+        AccessLog.logStaticContentAccess(remoteAddress, request, response)
 
       case Etag.TooBig(file) =>
         // LAST_MODIFIED is not reliable as ETAG when this is a cluster of web servers,
@@ -91,6 +96,7 @@ object XSendFile extends Logger {
           NoPipelining.setResponseHeaderAndResumeReadingForKeepAliveRequestOrCloseOnComplete(request, response, channel, e.getFuture)
           response.setContent(ChannelBuffers.EMPTY_BUFFER)
           ctx.sendDownstream(e)
+          AccessLog.logStaticContentAccess(remoteAddress, request, response)
         } else {
           val mimeo = Mime.get(path)
           val raf   = new RandomAccessFile(path, "r")
@@ -111,6 +117,7 @@ object XSendFile extends Logger {
           if (mimeo.isDefined) response.setHeader(CONTENT_TYPE, mimeo.get)
           NoPipelining.setResponseHeaderForKeepAliveRequest(request, response)
           ctx.sendDownstream(e)
+          AccessLog.logStaticContentAccess(remoteAddress, request, response)
 
           // Write the content
           if (ctx.getPipeline.get(classOf[SslHandler]) != null) {

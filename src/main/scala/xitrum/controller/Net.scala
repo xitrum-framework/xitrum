@@ -1,10 +1,44 @@
 package xitrum.controller
 
-import java.net.InetSocketAddress
+import java.net.{InetSocketAddress, SocketAddress}
+
+import org.jboss.netty.handler.codec.http.HttpRequest
 import org.jboss.netty.handler.codec.http.HttpHeaders.Names.HOST
 import org.jboss.netty.handler.ssl.SslHandler
 
 import xitrum.{Controller, Config}
+
+object Net {
+  // These are not put in trait Net so that they can be reuse at AccessLog
+
+  def remoteIp(remoteAddress: SocketAddress, request: HttpRequest): String = {
+    val ip = clientIp(remoteAddress)
+
+    if (proxyNotAllowed(ip)) {
+      ip
+    } else {
+      val xForwardedFor = request.getHeader("X-Forwarded-For")
+      if (xForwardedFor == null)
+        ip
+      else
+        xForwardedFor.split(",")(0).trim
+    }
+  }
+
+  // TODO: inetSocketAddress can be Inet4Address or Inet6Address
+  // See java.net.preferIPv6Addresses
+  def clientIp(remoteAddress: SocketAddress): String = {
+    val inetSocketAddress = remoteAddress.asInstanceOf[InetSocketAddress]
+    inetSocketAddress.getAddress.getHostAddress
+  }
+
+  def proxyNotAllowed(clientIp: String): Boolean = {
+    Config.config.reverseProxy match {
+      case None      => false
+      case Some(reverseProxy) => reverseProxy.ips.contains(clientIp)
+    }
+  }
+}
 
 // See:
 //   http://httpd.apache.org/docs/2.2/mod/mod_proxy.html
@@ -26,6 +60,9 @@ trait Net {
 
   // The "val"s must be "lazy", because when the controller is constructed, the
   // "request" object is null
+
+  private lazy val clientIp        = Net.clientIp(channel.getRemoteAddress)
+  private lazy val proxyNotAllowed = Net.proxyNotAllowed(clientIp)
 
   /** @return IP of the HTTP client, X-Forwarded-For is supported */
   lazy val remoteIp = {
@@ -83,8 +120,6 @@ trait Net {
   lazy val absoluteUrlPrefix          = scheme          + "://" + absoluteUrlPrefixWithoutScheme
   lazy val webSocketAbsoluteUrlPrefix = webSocketScheme + "://" + absoluteUrlPrefixWithoutScheme
 
-  //----------------------------------------------------------------------------
-
   lazy val absoluteUrlPrefixWithoutScheme = {
     val portSuffix =
       if ((isSsl && serverPort == 443) || (!isSsl && serverPort == 80))
@@ -92,19 +127,5 @@ trait Net {
       else
         ":" + serverPort
     serverName + portSuffix + Config.baseUrl
-  }
-
-  // TODO: inetSocketAddress can be Inet4Address or Inet6Address
-  // See java.net.preferIPv6Addresses
-  private lazy val clientIp = {
-    val inetSocketAddress = channel.getRemoteAddress.asInstanceOf[InetSocketAddress]
-    inetSocketAddress.getAddress.getHostAddress
-  }
-
-  private lazy val proxyNotAllowed = {
-    Config.config.reverseProxy match {
-      case None      => false
-      case Some(reverseProxy) => reverseProxy.ips.contains(clientIp)
-    }
   }
 }
