@@ -157,6 +157,8 @@ object XSendFile extends Logger {
    * For simplicity only these specs are supported:
    * bytes=123-456
    * bytes=123-
+   *
+   * @return None or Some((start index, end index)), negative end index means file length - 1
    */
   private def getRangeFromRequest(request: HttpRequest): Option[(Long, Long)] = {
     val spec = request.getHeader(RANGE)
