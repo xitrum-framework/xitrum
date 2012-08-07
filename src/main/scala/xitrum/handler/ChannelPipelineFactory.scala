@@ -31,20 +31,21 @@ object ChannelPipelineFactory {
 class ChannelPipelineFactory(https: Boolean) extends CPF {
   // Sharable handlers
 
-  private val noPipelining         = new NoPipelining
-  private val baseUrlRemover       = new BaseUrlRemover
-  private val publicFileServer     = new PublicFileServer
-  private val publicResourceServer = new PublicResourceServer
-  private val request2Env          = new Request2Env
-  private val uriParser            = new UriParser
-  private val bodyParser           = new BodyParser
-  private val methodOverrider      = new MethodOverrider
-  private val dispatcher           = new Dispatcher
+  private val noPipelining              = new NoPipelining
+  private val globalBasicAuthentication = new GlobalBasicAuthentication
+  private val baseUrlRemover            = new BaseUrlRemover
+  private val publicFileServer          = new PublicFileServer
+  private val publicResourceServer      = new PublicResourceServer
+  private val request2Env               = new Request2Env
+  private val uriParser                 = new UriParser
+  private val bodyParser                = new BodyParser
+  private val methodOverrider           = new MethodOverrider
+  private val dispatcher                = new Dispatcher
 
-  private val xSendFile            = new XSendFile
-  private val xSendResource        = new XSendResource
-  private val env2Response         = new Env2Response
-  private val responseCacher       = new ResponseCacher
+  private val xSendFile                 = new XSendFile
+  private val xSendResource             = new XSendResource
+  private val env2Response              = new Env2Response
+  private val responseCacher            = new ResponseCacher
 
   def getPipeline: ChannelPipeline = {
     val handlers1 = httpHandlers
@@ -68,6 +69,7 @@ class ChannelPipelineFactory(https: Boolean) extends CPF {
     new HttpRequestDecoder,
     new HttpChunkAggregator(Config.config.request.maxSizeInMB * 1024 * 1024),
     noPipelining,
+    globalBasicAuthentication,
     baseUrlRemover,  // HttpRequest is attached to the channel here
     publicFileServer,
     publicResourceServer,

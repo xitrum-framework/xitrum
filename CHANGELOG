@@ -16,6 +16,9 @@
 * Reload routes when in development mode with JRebel
 
 1.9.2 (planned):
+* Add global basic authentication to protect the whole site.
+  This is usually needed when putting an unfinished site to the Internet.
+  See https://github.com/ngocdaothanh/xitrum-new/blob/master/config/xitrum.json
 * Improve access log to include remote IP
 * Support "Range" request to static files
   Xitrum can now be used to serve interleaved MP4 movies
@@ -27,6 +30,7 @@
 * Update Hazelcast from 2.1.2 to 2.2:
   http://hazelcast.com/docs/2.2/manual/multi_html/ch18s04.html
   hazelcast_java_client.json is changed to hazelcast_java_client.properties
+  See https://github.com/ngocdaothanh/xitrum-new/blob/master/config/hazelcast_java_client.properties
 * Update Scaposer from 1.0 to 1.1:
   https://github.com/ngocdaothanh/scaposer/pull/2
 

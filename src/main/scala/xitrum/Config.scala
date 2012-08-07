@@ -11,6 +11,8 @@ import xitrum.util.Loader
 
 //----------------------------------------------------------------------------
 
+case class GlobalBasicAuthenticationConfig(realm: String, username: String, password: String)
+
 case class HttpConfig(port: Int)
 
 case class KeyStoreConfig(path: String, password: String, certificatePassword: String)
@@ -24,14 +26,15 @@ case class RequestConfig(maxSizeInMB: Int, charset: String, filteredParams: List
 case class ResponseConfig(smallStaticFileSizeInKB: Int, maxCachedSmallStaticFiles: Int)
 
 case class Config(
-  http:          Option[HttpConfig],
-  https:         Option[HttpsConfig],
-  reverseProxy:  Option[ReverseProxyConfig],
-  scalate:       String,
-  hazelcastMode: String,
-  session:       SessionConfig,
-  request:       RequestConfig,
-  response:      ResponseConfig)
+  globalBasicAuthentication: Option[GlobalBasicAuthenticationConfig],
+  http:                      Option[HttpConfig],
+  https:                     Option[HttpsConfig],
+  reverseProxy:              Option[ReverseProxyConfig],
+  scalate:                   String,
+  hazelcastMode:             String,
+  session:                   SessionConfig,
+  request:                   RequestConfig,
+  response:                  ResponseConfig)
 
 case class HazelcastJavaClientConfig(groupName: String, groupPassword: String, addresses: List[String])
 
