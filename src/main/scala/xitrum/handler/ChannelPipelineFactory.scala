@@ -11,6 +11,7 @@ import xitrum.handler.down._
 object ChannelPipelineFactory {
   def removeUnusedDefaultHttpHandlersForWebSocket(pipeline: ChannelPipeline) {
     pipeline.remove(classOf[NoPipelining])
+    pipeline.remove(classOf[GlobalBasicAuthentication])
     pipeline.remove(classOf[BaseUrlRemover])
     pipeline.remove(classOf[PublicFileServer])
     pipeline.remove(classOf[PublicResourceServer])
