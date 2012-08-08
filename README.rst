@@ -36,10 +36,12 @@ Features:
 * Fast built-in HTTP and HTTPS web server based on `Netty <http://netty.io/>`_.
 * Extensive caching for faster responding.
   At the web server layer, small files are cached in memory, big files are sent
-  using NIO's zero copy. `All Google's best practices <http://code.google.com/speed/page-speed/docs/rules_intro.html>`_
-  like conditional GET are applied.
+  using NIO's zero copy. Xitrum's static file serving speed is
+  `similar to that of Nginx <https://gist.github.com/3293596>`_.
   At the web framework layer you have can declare page, action, and object cache
   in the Rails style.
+  `All Google's best practices <http://code.google.com/speed/page-speed/docs/rules_intro.html>`_
+  like conditional GET are applied.
 * The framework tries to fill the spectrum between `Scalatra <https://github.com/scalatra/scalatra>`_
   and `Lift <http://liftweb.net/>`_: more powerful than Scalatra and easier to
   use than Lift. You can easily create both RESTful APIs and postbacks. `Xitrum <http://ngocdaothanh.github.com/xitrum>`_
