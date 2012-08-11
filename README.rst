@@ -1,18 +1,15 @@
 ::
 
-  +------------------+
-  |     Your app     |
-  +------------------+
-  |      Xitrum      |  <-- Hazelcast --> Other instances
-  | +--------------+ |
-  | | Action/View  | |
-  | +--------------+ |
-  +------------------+
-  |       Netty      |
-  | +--------------+ |
-  | |HTTP(S) Server| |
-  | +--------------+ |
-  +------------------+
+  +--------------------+
+  |      Your app      |
+  +--------------------+
+  |       Xitrum       |
+  | +----------------+ |
+  | | Web framework  | |  <-- Hazelcast --> Other instances
+  | |----------------| |
+  | | HTTP(S) Server | |
+  | +----------------+ |
+  +--------------------+
 
 `Xitrum <http://ngocdaothanh.github.com/xitrum>`_
 is an async and clustered Scala web framework
