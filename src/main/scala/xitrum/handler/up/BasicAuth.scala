@@ -8,9 +8,9 @@ import ChannelHandler.Sharable
 import xitrum.Config
 import xitrum.util.Base64
 
-object GlobalBasicAuthentication {
+object BasicAuth {
   /** f takes username and password, and returns true if it want to let the user in. */
-  def basicAuthenticate(channel: Channel, request: HttpRequest, response: HttpResponse, realm: String)(f: (String, String) => Boolean): Boolean = {
+  def basicAuth(channel: Channel, request: HttpRequest, response: HttpResponse, realm: String)(f: (String, String) => Boolean): Boolean = {
     getUsernameAndPassword(request) match {
       case None =>
         respondBasic(channel, request, response, realm)
@@ -59,7 +59,7 @@ object GlobalBasicAuthentication {
 }
 
 @Sharable
-class GlobalBasicAuthentication extends SimpleChannelUpstreamHandler with BadClientSilencer {
+class BasicAuth extends SimpleChannelUpstreamHandler with BadClientSilencer {
   override def messageReceived(ctx: ChannelHandlerContext, e: MessageEvent) {
     val m = e.getMessage
     if (!m.isInstanceOf[HttpRequest]) {
@@ -67,7 +67,7 @@ class GlobalBasicAuthentication extends SimpleChannelUpstreamHandler with BadCli
       return
     }
 
-    val go = Config.config.globalBasicAuthentication
+    val go = Config.config.basicAuth
     if (go.isEmpty) {
       ctx.sendUpstream(e)
       return
@@ -78,7 +78,7 @@ class GlobalBasicAuthentication extends SimpleChannelUpstreamHandler with BadCli
     val response = new DefaultHttpResponse(HttpVersion.HTTP_1_1, HttpResponseStatus.UNAUTHORIZED)
     val g        = go.get
 
-    val passed = GlobalBasicAuthentication.basicAuthenticate(channel, request, response, g.realm) { (username, password) =>
+    val passed = BasicAuth.basicAuth(channel, request, response, g.realm) { (username, password) =>
       g.username == username && g.password == password
     }
     if (passed) ctx.sendUpstream(e)

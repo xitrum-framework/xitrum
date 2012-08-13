@@ -11,30 +11,30 @@ import xitrum.util.Loader
 
 //----------------------------------------------------------------------------
 
-case class GlobalBasicAuthenticationConfig(realm: String, username: String, password: String)
+case class BasicAuthConfig(realm: String, username: String, password: String)
 
-case class HttpConfig(port: Int)
+case class PortConfig(http: Option[Int], https: Option[Int], flashSocketPolicy: Option[Int])
 
 case class KeyStoreConfig(path: String, password: String, certificatePassword: String)
-case class HttpsConfig(port: Int, keystore: KeyStoreConfig)
 
 case class ReverseProxyConfig(ips: List[String], baseUrl: String)
 
 case class SessionConfig(store: String, cookieName: String, secureKey: String)
 
 case class RequestConfig(maxSizeInMB: Int, charset: String, filteredParams: List[String])
+
 case class ResponseConfig(smallStaticFileSizeInKB: Int, maxCachedSmallStaticFiles: Int)
 
 case class Config(
-  globalBasicAuthentication: Option[GlobalBasicAuthenticationConfig],
-  http:                      Option[HttpConfig],
-  https:                     Option[HttpsConfig],
-  reverseProxy:              Option[ReverseProxyConfig],
-  scalate:                   String,
-  hazelcastMode:             String,
-  session:                   SessionConfig,
-  request:                   RequestConfig,
-  response:                  ResponseConfig)
+  basicAuth:     Option[BasicAuthConfig],
+  port:          PortConfig,
+  keystore:      KeyStoreConfig,
+  reverseProxy:  Option[ReverseProxyConfig],
+  scalate:       String,
+  hazelcastMode: String,
+  session:       SessionConfig,
+  request:       RequestConfig,
+  response:      ResponseConfig)
 
 case class HazelcastJavaClientConfig(groupName: String, groupPassword: String, addresses: List[String])
 

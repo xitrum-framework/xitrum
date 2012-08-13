@@ -1,4 +1,4 @@
-1.9.3 (planned):
+1.9.4 (planned):
 * Support "Range" request to dynamic content, not only to static files
 * Remove HttpChunkAggregator to support big file upload
 * Improve I18n#tf, tcf, tnf, tcnf to support changing order of placeholders
@@ -14,6 +14,12 @@
 * wro4j
 * Middleware architecture based on Netty handlers
 * Reload routes when in development mode with JRebel
+
+1.9.3 (planned):
+* Xitrum now can serve flash socket policy file:
+  http://www.lightsphere.com/dev/articles/flash_socket_policy.html
+* config/xitrum.json is slightly improved:
+  https://github.com/ngocdaothanh/xitrum-new/blob/master/config/xitrum.json
 
 1.9.2:
 * Add global basic authentication to protect the whole site.
