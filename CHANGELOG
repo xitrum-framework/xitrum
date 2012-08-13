@@ -1,4 +1,5 @@
 1.9.4 (planned):
+* With flash socket policy file feature, add support for Socket.IO
 * Support "Range" request to dynamic content, not only to static files
 * Remove HttpChunkAggregator to support big file upload
 * Improve I18n#tf, tcf, tnf, tcnf to support changing order of placeholders
@@ -17,6 +18,7 @@
 
 1.9.3 (planned):
 * Xitrum now can serve flash socket policy file:
+  http://www.adobe.com/devnet/flashplayer/articles/socket_policy_files.html
   http://www.lightsphere.com/dev/articles/flash_socket_policy.html
 * config/xitrum.json is slightly improved:
   https://github.com/ngocdaothanh/xitrum-new/blob/master/config/xitrum.json
