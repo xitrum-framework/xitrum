@@ -19,8 +19,9 @@ object Server extends Logger {
     Routes.printRoutes()
     Routes.printActionPageCaches()
 
-    if (Config.config.http.isDefined)  start(false)
-    if (Config.config.https.isDefined) start(true)
+    if (Config.config.port.http.isDefined)  start(false)
+    if (Config.config.port.https.isDefined) start(true)
+    if (Config.config.port.flashSocketPolicy.isDefined) FlashSocketPolicyServer.start()
 
     val mode = if (Config.isProductionMode) "production" else "development"
     logger.info("Xitrum started in {} mode", mode)
@@ -30,13 +31,14 @@ object Server extends Logger {
     val channelFactory  = new NioServerSocketChannelFactory
     val bootstrap       = new ServerBootstrap(channelFactory)
     val pipelineFactory = new ChannelPipelineFactory(https)
-    val (kind, port)    = if (https) ("HTTPS", Config.config.https.get.port) else ("HTTP", Config.config.http.get.port)
+    val (kind, port)    = if (https) ("HTTPS", Config.config.port.https.get) else ("HTTP", Config.config.port.http.get)
 
     bootstrap.setPipelineFactory(pipelineFactory)
     bootstrap.setOption("backlog",          128)  // 128 is a sweet spot, http://lionet.livejournal.com/42016.html
     bootstrap.setOption("reuseAddress",     true)
     bootstrap.setOption("child.tcpNoDelay", true)
     bootstrap.setOption("child.keepAlive",  true)
+
     try {
       bootstrap.bind(new InetSocketAddress(port))
       logger.info("{} server started on port {}", kind, port)
