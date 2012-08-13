@@ -1,6 +1,6 @@
 package xitrum.handler.up
 
-import org.jboss.netty.buffer.ChannelBuffer
+import org.jboss.netty.buffer.ChannelBuffers
 import org.jboss.netty.channel.{ChannelHandler, SimpleChannelUpstreamHandler, ChannelHandlerContext, MessageEvent}
 import ChannelHandler.Sharable
 
@@ -12,7 +12,9 @@ object FlashSocketPolicyResponseSender {
 
 @Sharable
 class FlashSocketPolicyResponseSender extends SimpleChannelUpstreamHandler with BadClientSilencer {
+  import FlashSocketPolicyResponseSender._
+
   override def messageReceived(ctx: ChannelHandlerContext, e: MessageEvent) {
-    ctx.getChannel.write(FlashSocketPolicyResponseSender.RESPONSE)
+    ctx.getChannel.write(ChannelBuffers.wrappedBuffer(RESPONSE))
   }
 }

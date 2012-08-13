@@ -6,9 +6,9 @@ import org.jboss.netty.handler.codec.frame.FrameDecoder
 
 object FlashSocketPolicyRequestDecoder {
   // The request must be exactly "<policy-file-request/>\0"
-  val REQUEST        = "<policy-file-request/>\0".getBytes
-  val REQUEST_LENGTH = REQUEST.length
-  val DUMMY = new Object
+  val REQUEST                = "<policy-file-request/>\0".getBytes
+  val REQUEST_LENGTH         = REQUEST.length
+  val TICKET_TO_NEXT_HANDLER = new Object
 }
 
 // See the Netty Guide
@@ -24,13 +24,15 @@ class FlashSocketPolicyRequestDecoder extends FrameDecoder {
       // Check if the request is exactly "<policy-file-request/>\0"
       var i = 0
       while (i < REQUEST_LENGTH) {
-        if (REQUEST(i) != channelBuffer.readByte()) {
+        val expectedByte = REQUEST(i)
+        val receivedByte = channelBuffer.readByte()
+        if (receivedByte != expectedByte) {
           channel.close()
           return null
         }
         i += 1
       }
-      DUMMY
+      TICKET_TO_NEXT_HANDLER
     }
   }
 }
