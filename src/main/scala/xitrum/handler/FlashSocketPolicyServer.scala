@@ -2,12 +2,10 @@ package xitrum.handler
 
 import java.net.InetSocketAddress
 
-import org.jboss.netty.channel.{Channels, ChannelPipeline, ChannelPipelineFactory => CPF}
 import org.jboss.netty.channel.socket.nio.NioServerSocketChannelFactory
 import org.jboss.netty.bootstrap.ServerBootstrap
 
 import xitrum.{Config, Logger}
-import xitrum.handler.up.FlashSocketPolicy
 
 object FlashSocketPolicyServer extends Logger {
   def start() {
@@ -29,13 +27,5 @@ object FlashSocketPolicyServer extends Logger {
       case e =>
         Config.exitOnError("Check to see if there's another process running on port " + port, e)
     }
-  }
-}
-
-class FlashSocketChannelPipelineFactory extends CPF {
-  private val flashSocketPolicy = new FlashSocketPolicy
-
-  def getPipeline: ChannelPipeline = {
-    Channels.pipeline(flashSocketPolicy)
   }
 }
