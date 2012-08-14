@@ -4,10 +4,11 @@ import org.jboss.netty.buffer.ChannelBuffers
 import org.jboss.netty.channel.{ChannelHandler, SimpleChannelUpstreamHandler, ChannelHandlerContext, MessageEvent}
 import ChannelHandler.Sharable
 
+import xitrum.handler.AccessLog
 import xitrum.util.Loader
 
 object FlashSocketPolicyResponseSender {
-  val RESPONSE = Loader.bytesFromClasspath("flash_socket_policy.xml")
+  val RESPONSE = ChannelBuffers.wrappedBuffer(Loader.bytesFromClasspath("flash_socket_policy.xml"))
 }
 
 @Sharable
@@ -15,6 +16,8 @@ class FlashSocketPolicyResponseSender extends SimpleChannelUpstreamHandler with 
   import FlashSocketPolicyResponseSender._
 
   override def messageReceived(ctx: ChannelHandlerContext, e: MessageEvent) {
-    ctx.getChannel.write(ChannelBuffers.wrappedBuffer(RESPONSE))
+    val channel = ctx.getChannel
+    channel.write(RESPONSE)
+    AccessLog.logFlashSocketPolicyFileAccess(channel.getRemoteAddress)
   }
 }

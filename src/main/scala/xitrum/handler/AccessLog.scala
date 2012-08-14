@@ -10,6 +10,12 @@ import xitrum.scope.request.RequestEnv
 import xitrum.controller.Net
 
 object AccessLog extends Logger {
+  def logFlashSocketPolicyFileAccess(remoteAddress: SocketAddress) {
+    if (logger.isDebugEnabled) {
+      logger.debug(Net.clientIp(remoteAddress) + " (flash socket policy file)")
+    }
+  }
+
   def logStaticContentAccess(remoteAddress: SocketAddress, request: HttpRequest, response: HttpResponse) {
     if (logger.isDebugEnabled) {
       logger.debug(
