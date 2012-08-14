@@ -24,8 +24,8 @@ class CometController extends Controller {
       }
 
       // Prevent browser side caching
-      response.setHeader(CACHE_CONTROL, "no-cache")
-      response.setHeader(PRAGMA, "no-cache")
+      response.setHeader(CACHE_CONTROL, NO_CACHE)
+      response.setHeader(PRAGMA, NO_CACHE)
 
       respondJson(Map("topic" -> topic, "timestamps" -> timestamps.toList, "bodies" -> bodies.toList))
 
