@@ -3,11 +3,11 @@ package xitrum.view
 import java.io.File
 import scala.xml.{Node, NodeSeq, Xhtml}
 
-import org.jboss.netty.buffer.ChannelBuffers
+import org.jboss.netty.buffer.{ChannelBuffer, ChannelBuffers}
 import org.jboss.netty.handler.codec.http.{DefaultHttpChunk, HttpChunk, HttpHeaders}
 import org.jboss.netty.handler.codec.http.websocketx.TextWebSocketFrame
-import HttpHeaders.Names.{CONTENT_TYPE, CONTENT_LENGTH, TRANSFER_ENCODING}
-import HttpHeaders.Values.CHUNKED
+import HttpHeaders.Names.{CACHE_CONTROL, CONTENT_TYPE, CONTENT_LENGTH, PRAGMA, TRANSFER_ENCODING}
+import HttpHeaders.Values.{CHUNKED, NO_CACHE}
 
 import com.codahale.jerkson.Json
 
@@ -57,8 +57,15 @@ trait Responder extends JS with Flash with Knockout {
 
   private def writeHeaderOnFirstChunk {
     if (!isResponded) {
-      response.removeHeader(CONTENT_LENGTH)
       response.setHeader(TRANSFER_ENCODING, CHUNKED)
+
+      // There should be no CONTENT_LENGTH header
+      response.removeHeader(CONTENT_LENGTH)
+
+      // Prevent client cache
+      response.setHeader(CACHE_CONTROL, NO_CACHE)
+      response.setHeader(PRAGMA, NO_CACHE)
+
       respond()
     }
   }
@@ -276,15 +283,18 @@ trait Responder extends JS with Flash with Knockout {
   def respondBinary(bytes: Array[Byte]) {
     if (!response.containsHeader(CONTENT_TYPE))
       response.setHeader(CONTENT_TYPE, "application/octet-stream")
+    respondBinary(ChannelBuffers.wrappedBuffer(bytes))
+  }
 
-    val cb = ChannelBuffers.wrappedBuffer(bytes)
+  /** If Content-Type header is not set, it is set to "application/octet-stream" */
+  def respondBinary(channelBuffer: ChannelBuffer) {
     if (response.isChunked) {
       writeHeaderOnFirstChunk
-      val chunk = new DefaultHttpChunk(cb)
+      val chunk = new DefaultHttpChunk(channelBuffer)
       channel.write(chunk)
     } else {
-      HttpHeaders.setContentLength(response, bytes.length)
-      response.setContent(cb)
+      HttpHeaders.setContentLength(response, channelBuffer.readableBytes)
+      response.setContent(channelBuffer)
       respond()
     }
   }
@@ -335,5 +345,9 @@ trait Responder extends JS with Flash with Knockout {
 
   def respondWebSocket(text: String) {
     channel.write(new TextWebSocketFrame(text))
+  }
+
+  def respondWebSocket(channelBuffer: ChannelBuffer) {
+    channel.write(new TextWebSocketFrame(channelBuffer))
   }
 }
