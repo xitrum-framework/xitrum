@@ -139,6 +139,7 @@ object Routes extends Logger {
           logger.warn("Error loading " + cachedFileName + ". Delete the file and recollect...")
           f.delete()
           try {
+            actions.clear()  // Reset partly-collected routes
             fromCacheFileOrRecollectReal("routes.sclasner")
           } catch {
             case e2 =>

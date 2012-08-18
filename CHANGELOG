@@ -29,6 +29,7 @@
   http://www.lightsphere.com/dev/articles/flash_socket_policy.html
 * config/xitrum.json is slightly improved:
   https://github.com/ngocdaothanh/xitrum-new/blob/master/config/xitrum.json
+* Avoid duplicate routes when deleting and recreating routes.sclasner
 
 1.9.2:
 * Add global basic authentication to protect the whole site.
