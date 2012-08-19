@@ -17,8 +17,10 @@
 * Reload routes when in development mode with JRebel
 
 1.9.3 (planned):
-* Update Netty from 3.5.3.Final to 3.5.4.Final:
+* Update Netty from 3.5.3.Final to 3.5.5.Final:
   https://netty.io/Blog/Netty+354Final+out+now
+  Note that to delete cookie when the browser closes windows, set max age to
+  Integer.MIN_VALUE, not -1 as before
 * "Cache-Control" and "Pragma" headers will be automatically set to "no-cache"
   for chunked response, e.g. when response.setChunked(true) is called
 * Add:

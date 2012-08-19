@@ -10,20 +10,27 @@ import xitrum.util.SecureBase64
 
 class CookieSessionStore extends SessionStore {
   def restore(extEnv: ExtEnv): Session = {
-    try {
-      val cookie = extEnv.cookies.get(Config.config.session.cookieName).get
-      val base64String = cookie.getValue
-      val value = SecureBase64.decrypt(base64String).get
-
-      // See "store" method below
-      val immutableMap = value.asInstanceOf[Map[String, Any]]
-      val ret = MMap[String, Any]()
-      ret ++= immutableMap
-      ret
-    } catch {
-      case _ =>
-        // Cannot always get cookie, decrypt, deserialize, and type casting due to program changes etc.
+    // Cannot always get cookie, decrypt, deserialize, and type casting due to program changes etc.
+    extEnv.cookies.get(Config.config.session.cookieName) match {
+      case None =>
         MMap[String, Any]()
+      case Some(cookie) =>
+        val base64String = cookie.getValue
+        SecureBase64.decrypt(base64String) match {
+          case None =>
+            MMap[String, Any]()
+          case Some(value) =>
+            try {
+              // See "store" method below
+              val immutableMap = value.asInstanceOf[Map[String, Any]]
+              val ret          = MMap[String, Any]()
+              ret ++= immutableMap
+              ret
+            } catch {
+              case e =>
+                MMap[String, Any]()
+            }
+       }
     }
   }
 
@@ -32,7 +39,7 @@ class CookieSessionStore extends SessionStore {
     // Convert to immutable because mutable cannot always be deserialize later!
     val immutableMap = session.toMap
 
-    val s = SecureBase64.encrypt(immutableMap)
+    val s          = SecureBase64.encrypt(immutableMap)
     val cookiePath = Config.withBaseUrl("/")
     extEnv.cookies.get(Config.config.session.cookieName) match {
       case Some(cookie) =>
@@ -41,6 +48,8 @@ class CookieSessionStore extends SessionStore {
         cookie.setValue(s)
 
       case None =>
+        // DefaultCookie has max age of Integer.MIN_VALUE by default,
+        // which means the cookie will be removed when user terminates browser
         val cookie = new DefaultCookie(Config.config.session.cookieName, s)
         cookie.setHttpOnly(true)
         cookie.setPath(cookiePath)
