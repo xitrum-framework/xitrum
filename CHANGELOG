@@ -30,6 +30,18 @@
 * config/xitrum.json is slightly improved:
   https://github.com/ngocdaothanh/xitrum-new/blob/master/config/xitrum.json
 * Avoid duplicate routes when deleting and recreating routes.sclasner
+* Remove </meta>, </input>, and </link> at:
+  <meta name="csrf-token" content="d1d50807-5a0a-4d42-830a-a01a3628f2c8"></meta>
+  <input name="csrf-token" type="hidden" value="d1d50807-5a0a-4d42-830a-a01a3628f2c8"></input>
+  <link type="text/css" media="all" rel="stylesheet" href="/resources/public/xitrum/xitrum.css?DMtin-KdUgKxwWIyHp3E4A"></link>
+  You should use
+    != antiCSRFMeta
+    != xitrumCSS
+    != antiCSRFInput
+  instead of:
+    = antiCSRFMeta
+    = xitrumCSS
+    = antiCSRFInput
 
 1.9.2:
 * Add global basic authentication to protect the whole site.
