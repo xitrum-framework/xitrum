@@ -61,5 +61,7 @@ trait Flash {
     if (msg.nonEmpty) jsRenderFlash(msg)
   }
 
-  lazy val xitrumCSS = <link href={urlForResource("xitrum/xitrum.css")} type="text/css" rel="stylesheet" media="all"></link>
+  // Use String instead of Scala XML to avoid generating this (</link>):
+  // <link type="text/css" media="all" rel="stylesheet" href="/resources/public/xitrum/xitrum.css?DMtin-KdUgKxwWIyHp3E4A"></link>
+  lazy val xitrumCSS = "<link href=\"" + urlForResource("xitrum/xitrum.css") + "\" type=\"text/css\" rel=\"stylesheet\" media=\"all\" />"
 }

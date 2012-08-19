@@ -58,7 +58,11 @@ trait CSRF {
     }
   }
 
-  lazy val antiCSRFMeta  = <meta name={CSRF.TOKEN} content={antiCSRFToken} />
+  // Use String instead of Scala XML to avoid generating this (</meta>):
+  // <meta name="csrf-token" content="d1d50807-5a0a-4d42-830a-a01a3628f2c8"></meta>
+  lazy val antiCSRFMeta  = "<meta name=\"" + TOKEN + "\" content=\"" + antiCSRFToken + "\" />"
 
-  lazy val antiCSRFInput = <input type="hidden" name={CSRF.TOKEN} value={antiCSRFToken} />
+  // Use String instead of Scala XML to avoid generating this (</input>):
+  // <input name="csrf-token" type="hidden" value="d1d50807-5a0a-4d42-830a-a01a3628f2c8"></input>
+  lazy val antiCSRFInput = "<input type=\"hidden\" name=\"" + TOKEN + "\" value=\"" + antiCSRFToken + "\"/>"
 }
