@@ -62,8 +62,6 @@ object Dispatcher extends Logger {
         // These exceptions are special cases:
         // We know that the exception is caused by the client (bad request)
         if (e.isInstanceOf[SessionExpired] || e.isInstanceOf[InvalidAntiCSRFToken] || e.isInstanceOf[MissingParam] || e.isInstanceOf[ValidationError]) {
-          AccessLog.logDynamicContentAccess(controller, beginTimestamp, 0, false)
-
           controller.response.setStatus(BAD_REQUEST)
           val msg = if (e.isInstanceOf[SessionExpired] || e.isInstanceOf[InvalidAntiCSRFToken]) {
             controller.resetSession()
@@ -80,9 +78,9 @@ object Dispatcher extends Logger {
             controller.jsRespond("alert(" + controller.jsEscape(msg) + ")")
           else
             controller.respondText(msg)
-        } else {
-          AccessLog.logDynamicContentAccess(controller, beginTimestamp, 0, false, e)
 
+          AccessLog.logDynamicContentAccess(controller, beginTimestamp, 0, false)
+        } else {
           controller.response.setStatus(INTERNAL_SERVER_ERROR)
           if (Config.isProductionMode) {
             Routes.action500Method match {
@@ -112,6 +110,8 @@ object Dispatcher extends Logger {
               controller.jsRespond("alert(" + controller.jsEscape(errorMsg) + ")")
             else
               controller.respondText(errorMsg)
+
+            AccessLog.logDynamicContentAccess(controller, beginTimestamp, 0, false, e)
           }
         }
     }
