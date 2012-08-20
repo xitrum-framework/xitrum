@@ -24,8 +24,9 @@ class CometController extends Controller {
       }
 
       // Prevent browser side caching
+      // Notice that "pragma: no-cache" is linked to requests, not responses
+      // http://palizine.plynt.com/issues/2008Jul/cache-control-attributes/
       response.setHeader(CACHE_CONTROL, NO_CACHE)
-      response.setHeader(PRAGMA, NO_CACHE)
 
       respondJson(Map("topic" -> topic, "timestamps" -> timestamps.toList, "bodies" -> bodies.toList))
 
