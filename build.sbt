@@ -44,7 +44,7 @@ libraryDependencies += "org.mozilla" % "rhino" % "1.7R4"
 
 // Other dependencies ----------------------------------------------------------
 
-libraryDependencies += "io.netty" % "netty" % "3.5.4.Final"
+libraryDependencies += "io.netty" % "netty" % "3.5.5.Final"
 
 libraryDependencies += "tv.cntt" %% "scaposer" % "1.1"
 

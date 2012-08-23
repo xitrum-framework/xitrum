@@ -50,7 +50,7 @@ class ChannelPipelineFactory(https: Boolean) extends CPF {
 
   def getPipeline: ChannelPipeline = {
     val handlers1 = httpHandlers
-    val handlers2 = if (https) ServerSsl.handler +: handlers1 else handlers1
+    val handlers2 = if (https) ServerSsl.handler() +: handlers1 else handlers1
 
     // WebSocket handshaker in Netty dynamically changes the pipeline like this:
     // pipeline.remove(classOf[HttpChunkAggregator])

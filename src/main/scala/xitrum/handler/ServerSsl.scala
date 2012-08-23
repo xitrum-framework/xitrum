@@ -15,7 +15,11 @@ import xitrum.Config
 
 object ServerSsl {
   // Handler cannot be shared
-  def handler = new SslHandler(engine)
+  def handler() = {
+    val ret = new SslHandler(engine)
+    ret.setCloseOnSSLException(true)  // https://netty.io/Blog/Netty+355Final+released
+    ret
+  }
 
   //----------------------------------------------------------------------------
 
