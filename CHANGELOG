@@ -1,4 +1,5 @@
 1.9.4 (planned):
+* Support SPDY
 * With flash socket policy file feature, add support for Socket.IO
 * Support "Range" request to dynamic content, not only to static files
 * Remove HttpChunkAggregator to support big file upload
