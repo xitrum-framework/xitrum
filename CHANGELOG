@@ -16,12 +16,17 @@
 * Middleware architecture based on Netty handlers
 * Reload routes when in development mode with JRebel
 
-1.9.3 (planned):
+1.9.3:
 * Update Netty from 3.5.3.Final to 3.5.5.Final:
   https://netty.io/Blog/Netty+355Final+released
   https://netty.io/Blog/Netty+354Final+out+now
-* To delete cookie when the browser closes windows, set max age to
-  Integer.MIN_VALUE, not -1 as before
+* From Netty 3.5.5.Final, to delete cookie when the browser closes windows,
+  set max age to Integer.MIN_VALUE, not -1 as before
+* Xitrum now can serve flash socket policy file:
+  http://www.adobe.com/devnet/flashplayer/articles/socket_policy_files.html
+  http://www.lightsphere.com/dev/articles/flash_socket_policy.html
+* config/xitrum.json is slightly improved:
+  https://github.com/ngocdaothanh/xitrum-new/blob/master/config/xitrum.json
 * "Cache-Control" header will be automatically set to "no-cache"
   for chunked response, e.g. when response.setChunked(true) is called
   Note that "Pragma" will not be sent because this header is for request, not response:
@@ -29,11 +34,6 @@
 * Add:
     respondBinary(channelBuffer: ChannelBuffer)
     respondWebSocket(channelBuffer: ChannelBuffer)
-* Xitrum now can serve flash socket policy file:
-  http://www.adobe.com/devnet/flashplayer/articles/socket_policy_files.html
-  http://www.lightsphere.com/dev/articles/flash_socket_policy.html
-* config/xitrum.json is slightly improved:
-  https://github.com/ngocdaothanh/xitrum-new/blob/master/config/xitrum.json
 * Avoid duplicate routes when deleting and recreating routes.sclasner
 * Remove </meta>, </input>, and </link> at:
   <meta name="csrf-token" content="d1d50807-5a0a-4d42-830a-a01a3628f2c8"></meta>
