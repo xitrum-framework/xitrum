@@ -55,8 +55,12 @@ trait Responder extends JS with Flash with Knockout {
 
   //----------------------------------------------------------------------------
 
-  private def writeHeaderOnFirstChunk {
+  /** If Content-Type header is not set, it is set to "application/octet-stream" */
+  private def writeHeaderIfFirstChunk() {
     if (!isResponded) {
+      if (!response.containsHeader(CONTENT_TYPE))
+        response.setHeader(CONTENT_TYPE, "application/octet-stream")
+
       response.setHeader(TRANSFER_ENCODING, CHUNKED)
 
       // There should be no CONTENT_LENGTH header
@@ -121,9 +125,8 @@ trait Responder extends JS with Flash with Knockout {
 
     val cb = ChannelBuffers.copiedBuffer(ret, Config.requestCharset)
     if (response.isChunked) {
-      writeHeaderOnFirstChunk
-      val chunk = new DefaultHttpChunk(cb)
-      channel.write(chunk)
+      writeHeaderIfFirstChunk()
+      channel.write(new DefaultHttpChunk(cb))
     } else {
       // Content length is number of bytes, not characters!
       HttpHeaders.setContentLength(response, cb.readableBytes)
@@ -282,18 +285,17 @@ trait Responder extends JS with Flash with Knockout {
 
   /** If Content-Type header is not set, it is set to "application/octet-stream" */
   def respondBinary(bytes: Array[Byte]) {
-    if (!response.containsHeader(CONTENT_TYPE))
-      response.setHeader(CONTENT_TYPE, "application/octet-stream")
     respondBinary(ChannelBuffers.wrappedBuffer(bytes))
   }
 
   /** If Content-Type header is not set, it is set to "application/octet-stream" */
   def respondBinary(channelBuffer: ChannelBuffer) {
     if (response.isChunked) {
-      writeHeaderOnFirstChunk
-      val chunk = new DefaultHttpChunk(channelBuffer)
-      channel.write(chunk)
+      writeHeaderIfFirstChunk()
+      channel.write(new DefaultHttpChunk(channelBuffer))
     } else {
+      if (!response.containsHeader(CONTENT_TYPE))
+        response.setHeader(CONTENT_TYPE, "application/octet-stream")
       HttpHeaders.setContentLength(response, channelBuffer.readableBytes)
       response.setContent(channelBuffer)
       respond()
@@ -332,12 +334,12 @@ trait Responder extends JS with Flash with Knockout {
 
   //----------------------------------------------------------------------------
 
-  def respondDefault404Page {
+  def respondDefault404Page() {
     XSendFile.set404Page(response)
     respond()
   }
 
-  def respondDefault500Page {
+  def respondDefault500Page() {
     XSendFile.set500Page(response)
     respond()
   }
