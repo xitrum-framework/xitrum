@@ -27,12 +27,7 @@ class Env2Response extends SimpleChannelDownstreamHandler {
     val response = env.response
     val future   = e.getFuture
 
-    // If HttpHeaders.getContentLength(response) != response.getContent.readableBytes,
-    // it is because the response is sent in async mode.
-    if (HttpHeaders.getContentLength(response) == response.getContent.readableBytes) {
-      // Only effective for dynamic response, static file response has already been handled
-      if (!tryEtag(request, response)) Gzip.tryCompressBigTextualResponse(request, response)
-    }
+    if (!tryEtag(request, response)) Gzip.tryCompressBigTextualResponse(request, response)
 
     // Keep alive, channel reading resuming/closing etc. are handled
     // by the code that sends the response (Responder#respond)
@@ -45,12 +40,22 @@ class Env2Response extends SimpleChannelDownstreamHandler {
    * This does not make the server faster, but decrease the response transmission
    * time through the network to the browser.
    *
+   * Only effective for non-empty non-async dynamic response,
+   * e.g. not for static file (has alredy been handled and does not go throught
+   * this handler) or X-SendFile response (empty dynamic response).
+   *
+   * If HttpHeaders.getContentLength(response) != response.getContent.readableBytes,
+   * it is because the response is sent in async mode.
+   *
    * @return true if the NO_MODIFIED response is set by this method
    */
   private def tryEtag(request: HttpRequest, response: HttpResponse): Boolean = {
     if (response.getStatus != OK) return false
 
-    val channelBuffer = response.getContent
+    val contentLengthInHeader = HttpHeaders.getContentLength(response)
+    val channelBuffer         = response.getContent
+    if (contentLengthInHeader == 0 || contentLengthInHeader != channelBuffer.readableBytes) return false
+
     if (channelBuffer.readableBytes > Config.config.response.smallStaticFileSizeInKB * 1024) return false
 
     val etag1 = response.getHeader(ETAG)
