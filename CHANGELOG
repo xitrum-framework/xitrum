@@ -17,7 +17,7 @@
 * Middleware architecture based on Netty handlers
 * Reload routes when in development mode with JRebel
 
-1.9.4 (planned):
+1.9.4:
 * Fix bug that causes non-empty 304 Not Modified response to be sent.
   This buggy response will be sent when respondFile is used in your controllers.
   You should upgrade to Xitrum 1.9.4 as soon as possible because Chrome cannot
