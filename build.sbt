@@ -24,7 +24,7 @@ libraryDependencies += "com.hazelcast" % "hazelcast" % "2.3.1"
 
 // http://www.hazelcast.com/documentation.jsp#Clients
 // Hazelcast can be configured in Xitrum as super client or native client
-libraryDependencies += "com.hazelcast" % "hazelcast-client" % "2.2"
+libraryDependencies += "com.hazelcast" % "hazelcast-client" % "2.3.1"
 
 // Jerkson ---------------------------------------------------------------------
 
