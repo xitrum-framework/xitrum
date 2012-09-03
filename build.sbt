@@ -20,7 +20,7 @@ unmanagedBase in Runtime <<= baseDirectory { base => base / "config" }
 
 // For distributed cache and Comet
 // Infinispan is good but much heavier
-libraryDependencies += "com.hazelcast" % "hazelcast" % "2.2"
+libraryDependencies += "com.hazelcast" % "hazelcast" % "2.3.1"
 
 // http://www.hazelcast.com/documentation.jsp#Clients
 // Hazelcast can be configured in Xitrum as super client or native client
@@ -44,7 +44,7 @@ libraryDependencies += "org.mozilla" % "rhino" % "1.7R4"
 
 // Other dependencies ----------------------------------------------------------
 
-libraryDependencies += "io.netty" % "netty" % "3.5.5.Final"
+libraryDependencies += "io.netty" % "netty" % "3.5.6.Final"
 
 libraryDependencies += "tv.cntt" %% "scaposer" % "1.1"
 

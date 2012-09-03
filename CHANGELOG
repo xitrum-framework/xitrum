@@ -1,14 +1,12 @@
-1.9.5 (planned):
-* Support SPDY
-* With flash socket policy file feature, add support for Socket.IO
+1.9.6 (planned):
+* Make extensive use of Knockout.js and Scala delimited continuation
+* Support Socket.IO
+* With flash socket policy file feature, add support for 
 * Support "Range" request to dynamic content, not only to static files
 * Remove HttpChunkAggregator to support big file upload
 * Improve I18n#tf, tcf, tnf, tcnf to support changing order of placeholders
 * An action can have multiple Scalate view files more easily
 * I18n for validation messages
-* Make extensive use of Knockout.js and Scala delimited continuation
-* Integrate WebSocket to Comet; use WebSocket if available, or fall back to Ajax,
-  similar to Socket.IO: http://socket.io/
 * Add Ajax style upload based on iframe
 * Add digest authentication
 * Add Akka
@@ -16,6 +14,15 @@
 * wro4j
 * Middleware architecture based on Netty handlers
 * Reload routes when in development mode with JRebel
+* Support SPDY
+
+1.9.5 (planned):
+* You should upgrade to Xitrum 1.9.5 as soon as possible because there's a bug
+  with file upload in Netty 3.5.5.Final 
+* Update Netty from 3.5.5.Final to 3.5.7.Final:
+  https://netty.io/Blog/Netty+356Final+released
+* Update Hazelcast from 2.2 to 2.3.1:
+  http://www.hazelcast.com/docs/2.3/manual/multi_html/ch18s04.html 
 
 1.9.4:
 * Fix bug that causes non-empty 304 Not Modified response to be sent.
