@@ -28,7 +28,8 @@ From `a user <https://groups.google.com/group/xitrum-framework/msg/d6de4865a8576
   layer (`Hazelcast <http://www.hazelcast.com/>`_), i18n a la GNU gettext, Netty (with Nginx, hello
   blazing fast), etc. and you have, wow.
 
-Features:
+Features
+--------
 
 * Fast built-in HTTP and HTTPS web server based on `Netty <http://netty.io/>`_.
 * Extensive caching for faster responding.
