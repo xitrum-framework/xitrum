@@ -4,7 +4,7 @@ import org.jboss.netty.channel.{Channels, ChannelPipeline, ChannelPipelineFactor
 import xitrum.handler.up.{FlashSocketPolicyRequestDecoder, FlashSocketPolicyResponseSender}
 
 class FlashSocketChannelPipelineFactory extends CPF {
-  private val flashSocketPolicyResponseSender = new FlashSocketPolicyResponseSender
+  private[this] val flashSocketPolicyResponseSender = new FlashSocketPolicyResponseSender
 
   def getPipeline: ChannelPipeline = {
     Channels.pipeline(

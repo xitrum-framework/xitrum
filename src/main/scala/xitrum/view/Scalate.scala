@@ -9,11 +9,11 @@ import org.jboss.netty.handler.codec.serialization.ClassResolvers
 import xitrum.{Config, Controller}
 
 object Scalate {
-  private val DIR                   = "src/main/view/scalate"
-  private val CONTROLLER_BINDING_ID = "helper"
-  private val CONTEXT_BINDING_ID    = "context"
+  private[this] val DIR                   = "src/main/view/scalate"
+  private[this] val CONTROLLER_BINDING_ID = "helper"
+  private[this] val CONTEXT_BINDING_ID    = "context"
 
-  private val classResolver = ClassResolvers.softCachingConcurrentResolver(getClass.getClassLoader)
+  private[this] val classResolver = ClassResolvers.softCachingConcurrentResolver(getClass.getClassLoader)
 
   private lazy val engine = {
     val ret = new TemplateEngine

@@ -32,21 +32,21 @@ object ChannelPipelineFactory {
 class ChannelPipelineFactory(https: Boolean) extends CPF {
   // Sharable handlers
 
-  private val noPipelining         = new NoPipelining
-  private val basicAuth            = new BasicAuth
-  private val baseUrlRemover       = new BaseUrlRemover
-  private val publicFileServer     = new PublicFileServer
-  private val publicResourceServer = new PublicResourceServer
-  private val request2Env          = new Request2Env
-  private val uriParser            = new UriParser
-  private val bodyParser           = new BodyParser
-  private val methodOverrider      = new MethodOverrider
-  private val dispatcher           = new Dispatcher
+  private[this] val noPipelining         = new NoPipelining
+  private[this] val basicAuth            = new BasicAuth
+  private[this] val baseUrlRemover       = new BaseUrlRemover
+  private[this] val publicFileServer     = new PublicFileServer
+  private[this] val publicResourceServer = new PublicResourceServer
+  private[this] val request2Env          = new Request2Env
+  private[this] val uriParser            = new UriParser
+  private[this] val bodyParser           = new BodyParser
+  private[this] val methodOverrider      = new MethodOverrider
+  private[this] val dispatcher           = new Dispatcher
 
-  private val xSendFile            = new XSendFile
-  private val xSendResource        = new XSendResource
-  private val env2Response         = new Env2Response
-  private val responseCacher       = new ResponseCacher
+  private[this] val xSendFile            = new XSendFile
+  private[this] val xSendResource        = new XSendResource
+  private[this] val env2Response         = new Env2Response
+  private[this] val responseCacher       = new ResponseCacher
 
   def getPipeline: ChannelPipeline = {
     val handlers1 = httpHandlers

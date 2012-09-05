@@ -44,16 +44,16 @@ object Secure {
   //----------------------------------------------------------------------------
 
   // Algorithm to generate a HMAC
-  private val HMAC_ALGORITHM = "HmacSHA256"
+  private[this] val HMAC_ALGORITHM = "HmacSHA256"
 
   // Type of encryption to use
-  private val CRYPT_TYPE = "AES"
+  private[this] val CRYPT_TYPE = "AES"
 
   // Full algorithm to encrypt data with
-  private val CRYPT_ALGORITHM = "AES/CBC/PKCS5Padding"
+  private[this] val CRYPT_ALGORITHM = "AES/CBC/PKCS5Padding"
 
   // Cache for speed because this key is used most of the time
-  private val defaultKey = makeKey(Config.config.session.secureKey)
+  private[this] val defaultKey = makeKey(Config.config.session.secureKey)
 
   // We need 16 bytes array for AES
   // MD5 => 16 bytes, SHA-256 => 32 bytes

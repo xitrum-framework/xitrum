@@ -7,7 +7,7 @@ import com.codahale.jerkson.Json
 import org.jboss.netty.util.CharsetUtil.UTF_8
 
 object Loader {
-  private val BUFFER_SIZE = 1024
+  private[this] val BUFFER_SIZE = 1024
 
   /** The input stream will be closed by this method after reading */
   def bytesFromInputStream(is: InputStream): Array[Byte] = {
