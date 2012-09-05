@@ -34,17 +34,14 @@ object Server extends Logger {
     val (kind, port)    = if (https) ("HTTPS", Config.config.port.https.get) else ("HTTP", Config.config.port.http.get)
 
     bootstrap.setPipelineFactory(pipelineFactory)
-    bootstrap.setOption("backlog",          128)  // 128 is a sweet spot, http://lionet.livejournal.com/42016.html
-    bootstrap.setOption("reuseAddress",     true)
-    bootstrap.setOption("child.tcpNoDelay", true)
-    bootstrap.setOption("child.keepAlive",  true)
-
+    NetOption.set(bootstrap)
     try {
       bootstrap.bind(new InetSocketAddress(port))
       logger.info("{} server started on port {}", kind, port)
     } catch {
       case e =>
-        Config.exitOnError("Check to see if there's another process running on port " + port, e)
+        val msg = "Could not open port for %s server. Check to see if there's another process running on port %d.".format(kind, port)
+        Config.exitOnError(msg, e)
     }
   }
 }
