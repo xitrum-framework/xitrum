@@ -1,7 +1,7 @@
 1.9.6 (planned):
 * Flash socket policy server can use the same port with HTTP server
+* Support SockJS or Socket.IO
 * Support HEAD request
-* Support Socket.IO
 * Add Ajax style upload based on iframe
 * Make extensive use of Knockout.js and Scala delimited continuation
 * wro4j
