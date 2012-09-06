@@ -3,6 +3,7 @@
 * Support SockJS or Socket.IO
 * Support HEAD request
 * Add Ajax style upload based on iframe
+* Support routing by domain name ("Host" header)
 * Make extensive use of Knockout.js and Scala delimited continuation
 * wro4j
 * An action can have multiple Scalate view files more easily
