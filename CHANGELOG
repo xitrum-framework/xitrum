@@ -24,7 +24,8 @@
 
 1.9.5:
 * You should upgrade to Xitrum 1.9.5 as soon as possible because there's a bug
-  with file upload in Netty 3.5.5.Final
+  with file upload in Netty 3.5.5.Final:
+  https://github.com/netty/netty/issues/569
 * Update Netty from 3.5.5.Final to 3.5.7.Final:
   https://netty.io/Blog/Netty+357Final+released
   https://netty.io/Blog/Netty+356Final+released
