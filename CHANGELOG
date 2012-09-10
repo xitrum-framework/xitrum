@@ -1,6 +1,5 @@
-1.9.6 (planned):
+1.9.7 (planned):
 * Flash socket policy server can use the same port with HTTP server
-* Support SockJS or Socket.IO
 * Support HEAD request
 * Add Ajax style upload based on iframe
 * Support routing by domain name ("Host" header)
@@ -12,13 +11,18 @@
 * Improve I18n#tf, tcf, tnf, tcnf to support changing order of placeholders
 * I18n for validation messages
 * Add digest authentication
-* Add Akka
+* Use Akka
 * Typesafe routes using Scala compiler plugin
 * Middleware architecture based on Netty handlers
 * Reload routes when in development mode with JRebel
 * Support SPDY
 
-1.9.5 (planned):
+1.9.6 (planned):
+* Support SockJS or Socket.IO
+* Improve i18n feature:
+  http://ngocdaothanh.github.com/xitrum/guide/i18n.html
+
+1.9.5:
 * You should upgrade to Xitrum 1.9.5 as soon as possible because there's a bug
   with file upload in Netty 3.5.5.Final
 * Update Netty from 3.5.5.Final to 3.5.7.Final:
@@ -26,8 +30,6 @@
   https://netty.io/Blog/Netty+356Final+released
 * Update Hazelcast from 2.2 to 2.3.1:
   http://www.hazelcast.com/docs/2.3/manual/multi_html/ch18s04.html
-* Improve i18n feature:
-  http://ngocdaothanh.github.com/xitrum/guide/i18n.html
 
 1.9.4:
 * Fix bug that causes non-empty 304 Not Modified response to be sent.
