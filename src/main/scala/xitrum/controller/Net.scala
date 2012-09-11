@@ -119,9 +119,6 @@ trait Net {
     }
   }
 
-  lazy val absoluteUrlPrefix          = scheme          + "://" + absoluteUrlPrefixWithoutScheme
-  lazy val webSocketAbsoluteUrlPrefix = webSocketScheme + "://" + absoluteUrlPrefixWithoutScheme
-
   lazy val absoluteUrlPrefixWithoutScheme = {
     val portSuffix =
       if ((isSsl && serverPort == 443) || (!isSsl && serverPort == 80))
@@ -130,4 +127,13 @@ trait Net {
         ":" + serverPort
     serverName + portSuffix + Config.baseUrl
   }
+
+  lazy val absoluteUrlPrefix          = scheme          + "://" + absoluteUrlPrefixWithoutScheme
+  lazy val webSocketAbsoluteUrlPrefix = webSocketScheme + "://" + absoluteUrlPrefixWithoutScheme
+
+  // iPhone Safari throws error "location mismatch" if the request URL is
+  // http://example.com/ws
+  // but the response URL here is
+  // ws://example.com:80/ws
+  lazy val webSocketAbsoluteRequestUrl = webSocketAbsoluteUrlPrefix + request.getUri
 }

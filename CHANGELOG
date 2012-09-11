@@ -1,4 +1,5 @@
 1.9.7 (planned):
+* Support SockJS or Socket.IO
 * Flash socket policy server can use the same port with HTTP server
 * Support HEAD request
 * Add Ajax style upload based on iframe
@@ -18,7 +19,8 @@
 * Support SPDY
 
 1.9.6 (planned):
-* Support SockJS or Socket.IO
+* Support WebSocket for iPhone Safari when running on port 80 (HTTP) or 443 (HTTPS);
+  previous Xitrum versions work OK for iPhone Safari when non-standard ports are used
 * Improve i18n feature:
   http://ngocdaothanh.github.com/xitrum/guide/i18n.html
 
