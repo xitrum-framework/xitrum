@@ -9,15 +9,11 @@ trait I18n {
   private var language = "en"
   private var po       = PoLoader.load("en")
 
+  /** Default language is "en". */
   def getLanguage = language
 
-  def setLanguage(language: String) {
-    this.language = language
-    po = PoLoader.load(language)
-  }
-
-  /** @return List of languages, high priority first */
-  def detectBrowserLanguages: Array[String] = {
+  /** @return List of languages sorted by priority from high to low */
+  def browserLanguages: Array[String] = {
     val header = request.getHeader(Names.ACCEPT_LANGUAGE)
     if (header == null) return Array()
 
@@ -35,6 +31,21 @@ trait I18n {
 
     val highFirst = lang_priorityList.sortBy { case (_, priority) => -priority }
     highFirst.map { case (lang, _) => lang }
+  }
+
+  def setLanguage(language: String) {
+    this.language = language
+    po = PoLoader.load(language)
+  }
+
+  /** If there's no suitable language, language is still the default "en". */
+  def autosetLanguage(resourceLanguages: String*) {
+    for (lang <- browserLanguages) {
+      if (resourceLanguages.contains(lang)) {
+        setLanguage(lang)
+        return
+      }
+    }
   }
 
   def t(singular: String) = po.t(singular)

@@ -18,10 +18,10 @@
 * Reload routes when in development mode with JRebel
 * Support SPDY
 
-1.9.6 (planned):
+1.9.6:
 * Support WebSocket for iPhone Safari when running on port 80 (HTTP) or 443 (HTTPS);
   previous Xitrum versions work OK for iPhone Safari when non-standard ports are used
-* Improve i18n feature:
+* Improve i18n feature, e.g. add autosetLanguage method:
   http://ngocdaothanh.github.com/xitrum/guide/i18n.html
 
 1.9.5:

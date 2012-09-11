@@ -8,7 +8,7 @@ import scaposer.{Po, Parser}
 import xitrum.util.Loader
 
 object PoLoader {
-  private val cache = MMap[String, Po]()
+  private[this] val cache = MMap[String, Po]()
 
   /**
    * @return Merge of all po files of the language, or an empty Po when there's
