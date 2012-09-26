@@ -71,23 +71,23 @@ trait JS {
 
     if (Config.isProductionMode)
       <xml:group>
-        <script type="text/javascript" src={urlForResource("xitrum/jquery-1.7.2.min.js")}></script>
-        <script type="text/javascript" src={urlForResource("xitrum/jquery.validate-1.9.0/jquery.validate.min.js")}></script>
-        <script type="text/javascript" src={urlForResource("xitrum/jquery.validate-1.9.0/additional-methods.min.js")}></script>
+        <script type="text/javascript" src={urlForResource("xitrum/jquery-1.8.2.min.js")}></script>
+        <script type="text/javascript" src={urlForResource("xitrum/jquery.validate-1.10.0/jquery.validate.min.js")}></script>
+        <script type="text/javascript" src={urlForResource("xitrum/jquery.validate-1.10.0/additional-methods.min.js")}></script>
         {validatei18n}
-        <script type="text/javascript" src={urlForResource("xitrum/knockout/knockout-2.0.0.min.js")}></script>
-        <script type="text/javascript" src={urlForResource("xitrum/knockout/knockout.mapping-2.0.3.min.js")}></script>
+        <script type="text/javascript" src={urlForResource("xitrum/knockout/knockout-2.1.0.min.js")}></script>
+        <script type="text/javascript" src={urlForResource("xitrum/knockout/knockout.mapping-2.3.2.min.js")}></script>
         <script type="text/javascript" src={urlForResource("xitrum/xitrum.js")}></script>
         {jsRoutesAction}
       </xml:group>
     else
       <xml:group>
-        <script type="text/javascript" src={urlForResource("xitrum/jquery-1.7.2.js")}></script>
-        <script type="text/javascript" src={urlForResource("xitrum/jquery.validate-1.9.0/jquery.validate.js")}></script>
-        <script type="text/javascript" src={urlForResource("xitrum/jquery.validate-1.9.0/additional-methods.js")}></script>
+        <script type="text/javascript" src={urlForResource("xitrum/jquery-1.8.2.js")}></script>
+        <script type="text/javascript" src={urlForResource("xitrum/jquery.validate-1.10.0/jquery.validate.js")}></script>
+        <script type="text/javascript" src={urlForResource("xitrum/jquery.validate-1.10.0/additional-methods.js")}></script>
         {validatei18n}
-        <script type="text/javascript" src={urlForResource("xitrum/knockout/knockout-2.0.0.js")}></script>
-        <script type="text/javascript" src={urlForResource("xitrum/knockout/knockout.mapping-2.0.3.js")}></script>
+        <script type="text/javascript" src={urlForResource("xitrum/knockout/knockout-2.1.0.js")}></script>
+        <script type="text/javascript" src={urlForResource("xitrum/knockout/knockout.mapping-2.3.2.js")}></script>
         <script type="text/javascript" src={urlForResource("xitrum/xitrum.js")}></script>
         {jsRoutesAction}
       </xml:group>
