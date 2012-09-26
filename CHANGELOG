@@ -20,6 +20,10 @@
 1.9.7 (planned):
 * Support SockJS 0.3
   https://github.com/sockjs/sockjs-protocol
+* "Cache-Control" header is automatically set to "no-cache" for POST response
+  to fix iOS6 Safari POST problem:
+  http://www.mnot.net/blog/2012/09/24/caching_POST
+  http://stackoverflow.com/questions/12506897/is-safari-on-ios-6-caching-ajax-results
 * In your controller, to prevent client-side caching,
   call setNoCacheHeader() to set "Cache-Control" header to:
   "no-store, no-cache, must-revalidate, max-age=0"

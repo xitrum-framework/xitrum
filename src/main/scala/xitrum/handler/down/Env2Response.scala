@@ -36,12 +36,12 @@ class Env2Response extends SimpleChannelDownstreamHandler {
 
   //----------------------------------------------------------------------------
 
- /**
-   * This does not make the server faster, but decrease the response transmission
+  /**
+   * This does not make the server faster, but decreases the response transmission
    * time through the network to the browser.
    *
    * Only effective for non-empty non-async dynamic response,
-   * e.g. not for static file (has alredy been handled and does not go throught
+   * e.g. not for static file (has alredy been handled and does not go through
    * this handler) or X-SendFile response (empty dynamic response).
    *
    * If HttpHeaders.getContentLength(response) != response.getContent.readableBytes,
@@ -56,19 +56,29 @@ class Env2Response extends SimpleChannelDownstreamHandler {
     val channelBuffer         = response.getContent
     if (contentLengthInHeader == 0 || contentLengthInHeader != channelBuffer.readableBytes) return false
 
-    if (channelBuffer.readableBytes > Config.config.response.smallStaticFileSizeInKB * 1024) return false
-
+    // No need to calculate ETag if it has been set, e.g. by the controller
     val etag1 = response.getHeader(ETAG)
-    val etag2 = if (etag1 != null) etag1 else Etag.forBytes(ChannelBufferToBytes(channelBuffer))
+    if (etag1 != null) {
+      compareAndSetETag(request, response, etag1)
+    } else {
+      // It's not useful to calculate ETag for big response
+      if (channelBuffer.readableBytes > Config.config.response.smallStaticFileSizeInKB * 1024) return false
 
-    if (request.getHeader(IF_NONE_MATCH) == etag2) {
-      // Only send headers, the content is empty
+      val etag2 = Etag.forBytes(ChannelBufferToBytes(channelBuffer))
+      compareAndSetETag(request, response, etag2)
+    }
+  }
+
+  private def compareAndSetETag(request: HttpRequest, response: HttpResponse, etag: String): Boolean = {
+    if (request.getHeader(IF_NONE_MATCH) == etag) {
+      // Only send headers, the response content is set to empty
+      // (decrease response transmission time)
       response.setStatus(NOT_MODIFIED)
       HttpHeaders.setContentLength(response, 0)
       response.setContent(ChannelBuffers.EMPTY_BUFFER)
       true
     } else {
-      response.setHeader(ETAG, etag2)
+      response.setHeader(ETAG, etag)
       false
     }
   }

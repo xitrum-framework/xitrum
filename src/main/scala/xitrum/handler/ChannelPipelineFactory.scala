@@ -21,6 +21,7 @@ object ChannelPipelineFactory {
     pipeline.remove(classOf[MethodOverrider])
     pipeline.remove(classOf[Dispatcher])
 
+    pipeline.remove(classOf[FixiOS6SafariPOST])
     pipeline.remove(classOf[XSendFile])
     pipeline.remove(classOf[XSendResource])
     pipeline.remove(classOf[Env2Response])
@@ -43,6 +44,7 @@ class ChannelPipelineFactory(https: Boolean) extends CPF {
   private[this] val methodOverrider      = new MethodOverrider
   private[this] val dispatcher           = new Dispatcher
 
+  private[this] val fixiOS6SafariPOST    = new FixiOS6SafariPOST
   private[this] val xSendFile            = new XSendFile
   private[this] val xSendResource        = new XSendResource
   private[this] val env2Response         = new Env2Response
@@ -82,6 +84,7 @@ class ChannelPipelineFactory(https: Boolean) extends CPF {
 
     // Down
     new HttpResponseEncoder,
+    fixiOS6SafariPOST,
     xSendFile,
     xSendResource,
     env2Response,

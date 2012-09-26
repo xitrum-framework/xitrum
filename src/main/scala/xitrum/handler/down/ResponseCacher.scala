@@ -17,15 +17,15 @@ import xitrum.handler.HandlerEnv
 import xitrum.util.{Gzip, Mime}
 
 object ResponseCacher extends Logger {
-  //                             statusCode  headers                  content
+  //                             statusCode  headers           content
   private type CachedResponse = (Int, Array[(String, String)], Array[Byte])
 
   def cacheResponse(controller: Controller) {
     val cacheSeconds = controller.handlerEnv.action.cacheSeconds
     val key          = makeCacheKey(controller)
     if (!Cache.cache.containsKey(key)) { // Check to avoid the cost of serializing
-      val response = controller.response
-      val cachedResponse = serializeResponse(controller.request, response)
+      val response             = controller.response
+      val cachedResponse       = serializeResponse(controller.request, response)
       val positiveCacheSeconds = if (cacheSeconds < 0) -cacheSeconds else cacheSeconds
       Cache.putIfAbsentSecond(key, cachedResponse, positiveCacheSeconds)
     }
