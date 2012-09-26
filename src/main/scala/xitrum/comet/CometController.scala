@@ -2,11 +2,8 @@ package xitrum.comet
 
 import scala.collection.mutable.ListBuffer
 
-import org.jboss.netty.handler.codec.http.HttpHeaders
-import HttpHeaders.Names._
-import HttpHeaders.Values._
-
 import xitrum.Controller
+import xitrum.etag.NotModified
 import xitrum.scope.request.Params
 
 object CometController extends CometController
@@ -23,11 +20,7 @@ class CometController extends Controller {
         (ts, bs)
       }
 
-      // Prevent browser side caching
-      // Notice that "pragma: no-cache" is linked to requests, not responses
-      // http://palizine.plynt.com/issues/2008Jul/cache-control-attributes/
-      response.setHeader(CACHE_CONTROL, NO_CACHE)
-
+      NotModified.setNoCacheHeader(response)
       respondJson(Map("topic" -> topic, "timestamps" -> timestamps.toList, "bodies" -> bodies.toList))
 
       // Return true for Comet to automatically remove this listener.

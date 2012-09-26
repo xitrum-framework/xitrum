@@ -47,8 +47,15 @@ object NotModified {
       response.setHeader(EXPIRES, formatRfc2822(System.currentTimeMillis() + SECS_IN_A_YEAR * 1000l))
   }
 
-  def removeClientCache(response: HttpResponse) {
-    response.removeHeader(CACHE_CONTROL)
+  /**
+   * Prevents client cache.
+   * Note that "pragma: no-cache" is linked to requests, not responses:
+   * http://palizine.plynt.com/issues/2008Jul/cache-control-attributes/
+   */
+  def setNoCacheHeader(response: HttpResponse) {
+    // http://sockjs.github.com/sockjs-protocol/sockjs-protocol-0.3.html#section-11
     response.removeHeader(EXPIRES)
+    response.removeHeader(LAST_MODIFIED)
+    response.setHeader(CACHE_CONTROL, "no-store, no-cache, must-revalidate, max-age=0")
   }
 }

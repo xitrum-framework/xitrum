@@ -6,13 +6,14 @@ import scala.xml.{Node, NodeSeq, Xhtml}
 import org.jboss.netty.buffer.{ChannelBuffer, ChannelBuffers}
 import org.jboss.netty.handler.codec.http.{DefaultHttpChunk, HttpChunk, HttpHeaders}
 import org.jboss.netty.handler.codec.http.websocketx.TextWebSocketFrame
-import HttpHeaders.Names.{CACHE_CONTROL, CONTENT_TYPE, CONTENT_LENGTH, TRANSFER_ENCODING}
+import HttpHeaders.Names.{CONTENT_TYPE, CONTENT_LENGTH, TRANSFER_ENCODING}
 import HttpHeaders.Values.{CHUNKED, NO_CACHE}
 
 import com.codahale.jerkson.Json
 
 import xitrum.{Controller, Config}
 import xitrum.controller.Action
+import xitrum.etag.NotModified
 import xitrum.handler.up.NoPipelining
 import xitrum.handler.down.{XSendFile, XSendResource}
 import xitrum.routing.Routes
@@ -62,14 +63,10 @@ trait Responder extends JS with Flash with Knockout {
         response.setHeader(CONTENT_TYPE, "application/octet-stream")
 
       response.setHeader(TRANSFER_ENCODING, CHUNKED)
+      NotModified.setNoCacheHeader(response)
 
       // There should be no CONTENT_LENGTH header
       response.removeHeader(CONTENT_LENGTH)
-
-      // Prevent client cache
-      // Notice that "pragma: no-cache" is linked to requests, not responses
-      // http://palizine.plynt.com/issues/2008Jul/cache-control-attributes/
-      response.setHeader(CACHE_CONTROL, NO_CACHE)
 
       respond()
     }
@@ -352,5 +349,11 @@ trait Responder extends JS with Flash with Knockout {
 
   def respondWebSocket(channelBuffer: ChannelBuffer) {
     channel.write(new TextWebSocketFrame(channelBuffer))
+  }
+
+  //----------------------------------------------------------------------------
+
+  def setNoCacheHeader() {
+    NotModified.setNoCacheHeader(response)
   }
 }

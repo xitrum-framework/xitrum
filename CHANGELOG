@@ -1,5 +1,4 @@
-1.9.7 (planned):
-* Support SockJS or Socket.IO
+1.9.8 (planned):
 * Flash socket policy server can use the same port with HTTP server
 * Support HEAD request
 * Add Ajax style upload based on iframe
@@ -17,6 +16,14 @@
 * Middleware architecture based on Netty handlers
 * Reload routes when in development mode with JRebel
 * Support SPDY
+
+1.9.7 (planned):
+* Support SockJS 0.3
+  https://github.com/sockjs/sockjs-protocol
+* In your controller, to prevent client-side caching,
+  call setNoCacheHeader() to set "Cache-Control" header to:
+  "no-store, no-cache, must-revalidate, max-age=0"
+* Update slf4j-api from 1.6.6 to 1.7.1
 
 1.9.6:
 * Support WebSocket for iPhone Safari when running on port 80 (HTTP) or 443 (HTTPS);
