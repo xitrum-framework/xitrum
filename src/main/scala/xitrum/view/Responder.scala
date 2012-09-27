@@ -136,14 +136,40 @@ trait Responder extends JS with Flash with Knockout {
 
   //----------------------------------------------------------------------------
 
+  /** Content-Type header is set to "text/html". */
+  def respondHtml(any: Any) {
+    respondText(any, "text/html; charset=" + Config.config.request.charset)
+  }
+
+  /** Content-Type header is set to "application/javascript". */
+  def respondJs(any: Any) {
+    respondText(any, "application/javascript; charset=" + Config.config.request.charset)
+  }
+
   /**
+   * Converts the given Scala object to JSON object, and responds it.
+   * If you just want to respond a text with "application/json" as content type,
+   * use respondText(text, "application/json") directly.
+   *
    * Content-Type header is set to "application/json".
-   * With text/json browser downloads it instead of displaying it,
-   * which makes debugging a pain.
+   * "text/json" would make the browser download instead of displaying the content.
+   * It makes debugging a pain.
    */
-  def respondJson(any: Any) {
-    val json = Json.generate(any)
+  def respondJson(obj: Any) {
+    val json = Json.generate(obj)
     respondText(json, "application/json; charset=" + Config.config.request.charset)
+  }
+
+  /**
+   * Converts the given Scala object to JSON object, wraps it with with the given
+   * JavaScript function name, and responds.
+   *
+   * Content-Type header is set to "application/javascript".
+   */
+  def respondJsonP(obj: Any, function: String) {
+    val json = Json.generate(obj)
+    val text = function + "(" + json + ")"
+    respondJs(text)
   }
 
   //----------------------------------------------------------------------------

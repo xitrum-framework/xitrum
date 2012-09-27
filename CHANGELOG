@@ -21,12 +21,17 @@
 * Support SockJS 0.3
   https://github.com/sockjs/sockjs-protocol
 * "Cache-Control" header is automatically set to "no-cache" for POST response
-  to fix iOS6 Safari POST problem:
+  to handle iOS6 Safari POST problem:
   http://www.mnot.net/blog/2012/09/24/caching_POST
   http://stackoverflow.com/questions/12506897/is-safari-on-ios-6-caching-ajax-results
 * In your controller, to prevent client-side caching,
   call setNoCacheHeader() to set "Cache-Control" header to:
   "no-store, no-cache, must-revalidate, max-age=0"
+* Other new methods:
+  respondHtml("<html></html>")
+  respondJsonP(List(1, 2, 3), "myFunction")
+* Update Netty from 3.5.7.Final to 3.5.8.Final:
+  <INSERT ANNOUCEMENT URL HERE>
 * Update slf4j-api from 1.6.6 to 1.7.1
 * Update jQuery from 1.7.2 to 1.8.2
 * Update jQuery Validate from 1.9.0 to 1.10.0:
