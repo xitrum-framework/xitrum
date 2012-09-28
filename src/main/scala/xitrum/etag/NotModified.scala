@@ -41,6 +41,11 @@ object NotModified {
     if (!response.containsHeader(CACHE_CONTROL))
       response.setHeader(CACHE_CONTROL, "public, " + MAX_AGE + "=" + SECS_IN_A_YEAR)
 
+    // CORS:
+    // http://sockjs.github.com/sockjs-protocol/sockjs-protocol-0.3.3.html#section-7
+    if (!response.containsHeader("Access-Control-Max-Age"))
+      response.setHeader("Access-Control-Max-Age", SECS_IN_A_YEAR)
+
     // Note that SECS_IN_A_YEAR * 1000 is different from SECS_IN_A_YEAR * 1000l
     // because of integer overflow!
     if (!response.containsHeader(EXPIRES))
@@ -52,7 +57,7 @@ object NotModified {
    * Note that "pragma: no-cache" is linked to requests, not responses:
    * http://palizine.plynt.com/issues/2008Jul/cache-control-attributes/
    */
-  def setNoCacheHeader(response: HttpResponse) {
+  def setNoClientCache(response: HttpResponse) {
     // http://sockjs.github.com/sockjs-protocol/sockjs-protocol-0.3.html#section-11
     response.removeHeader(EXPIRES)
     response.removeHeader(LAST_MODIFIED)

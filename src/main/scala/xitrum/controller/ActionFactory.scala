@@ -4,7 +4,7 @@ import java.lang.reflect.Method
 import org.jboss.netty.handler.codec.http.HttpMethod
 
 import xitrum.Controller
-import xitrum.routing.{HttpMethodWebSocket, Route, RouteCompiler, RouteOrder, Routes, RouteToken}
+import xitrum.routing.{HttpMethodSockJS, HttpMethodWebSocket, Route, RouteCompiler, RouteOrder, Routes, RouteToken}
 
 /**
  * val action1 = GET("pattern") {
@@ -86,11 +86,23 @@ trait ActionFactory {
   def DELETE(body: => Any) =
     Action(Route(HttpMethod.DELETE, RouteOrder.OTHER, RouteCompiler.compile(withPathPrefix(""))), null, () => body, 0)
 
+  def OPTIONS(pattern: String)(body: => Any) =
+    Action(Route(HttpMethod.OPTIONS, RouteOrder.OTHER, RouteCompiler.compile(withPathPrefix(pattern))), null, () => body, 0)
+
+  def OPTIONS(body: => Any) =
+    Action(Route(HttpMethod.OPTIONS, RouteOrder.OTHER, RouteCompiler.compile(withPathPrefix(""))), null, () => body, 0)
+
   def WEBSOCKET(pattern: String)(body: => Any) =
     Action(Route(HttpMethodWebSocket, RouteOrder.OTHER, RouteCompiler.compile(withPathPrefix(pattern))), null, () => body, 0)
 
   def WEBSOCKET(body: => Any) =
     Action(Route(HttpMethodWebSocket, RouteOrder.OTHER, RouteCompiler.compile(withPathPrefix(""))), null, () => body, 0)
+
+  def SOCKJS(pattern: String)(body: => Any) =
+    Action(Route(HttpMethodSockJS, RouteOrder.OTHER, RouteCompiler.compile(withPathPrefix(pattern))), null, () => body, 0)
+
+  def SOCKJS(body: => Any) =
+    Action(Route(HttpMethodSockJS, RouteOrder.OTHER, RouteCompiler.compile(withPathPrefix(""))), null, () => body, 0)
 }
 
 object PathPrefix {

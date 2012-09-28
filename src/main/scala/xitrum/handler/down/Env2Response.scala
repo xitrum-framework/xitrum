@@ -74,6 +74,7 @@ class Env2Response extends SimpleChannelDownstreamHandler {
       // Only send headers, the response content is set to empty
       // (decrease response transmission time)
       response.setStatus(NOT_MODIFIED)
+      response.removeHeader(CONTENT_TYPE)  // http://sockjs.github.com/sockjs-protocol/sockjs-protocol-0.3.3.html#section-25
       HttpHeaders.setContentLength(response, 0)
       response.setContent(ChannelBuffers.EMPTY_BUFFER)
       true

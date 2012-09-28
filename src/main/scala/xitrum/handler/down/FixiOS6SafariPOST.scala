@@ -29,7 +29,7 @@ class FixiOS6SafariPOST extends ChannelDownstreamHandler {
     val response = m.asInstanceOf[HttpResponse]
     val request  = ctx.getChannel.getAttachment.asInstanceOf[HttpRequest]
     if (request.getMethod == HttpMethod.POST && !response.containsHeader(HttpHeaders.Names.CACHE_CONTROL))
-      NotModified.setNoCacheHeader(response)
+      NotModified.setNoClientCache(response)
 
     ctx.sendDownstream(e)
   }

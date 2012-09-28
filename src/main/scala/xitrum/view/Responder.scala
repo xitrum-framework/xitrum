@@ -63,7 +63,7 @@ trait Responder extends JS with Flash with Knockout {
         response.setHeader(CONTENT_TYPE, "application/octet-stream")
 
       response.setHeader(TRANSFER_ENCODING, CHUNKED)
-      NotModified.setNoCacheHeader(response)
+      setNoClientCache()
 
       // There should be no CONTENT_LENGTH header
       response.removeHeader(CONTENT_LENGTH)
@@ -379,7 +379,11 @@ trait Responder extends JS with Flash with Knockout {
 
   //----------------------------------------------------------------------------
 
-  def setNoCacheHeader() {
-    NotModified.setNoCacheHeader(response)
+  def setClientCacheAggressively() {
+    NotModified.setClientCacheAggressively(response)
+  }
+
+  def setNoClientCache() {
+    NotModified.setNoClientCache(response)
   }
 }

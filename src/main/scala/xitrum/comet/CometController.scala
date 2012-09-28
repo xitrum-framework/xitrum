@@ -20,7 +20,7 @@ class CometController extends Controller {
         (ts, bs)
       }
 
-      NotModified.setNoCacheHeader(response)
+      setNoClientCache()
       respondJson(Map("topic" -> topic, "timestamps" -> timestamps.toList, "bodies" -> bodies.toList))
 
       // Return true for Comet to automatically remove this listener.

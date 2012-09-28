@@ -31,8 +31,9 @@ object Dispatcher extends Logger {
 
     try {
       // Check for CSRF (CSRF has been checked if "postback" is true)
-      if (controller.request.getMethod != HttpMethod.GET &&
-          controller.request.getMethod != HttpMethodWebSocket &&
+      if ((controller.request.getMethod == HttpMethod.POST ||
+           controller.request.getMethod == HttpMethod.PUT ||
+           controller.request.getMethod == HttpMethod.DELETE) &&
           !controller.isInstanceOf[SkipCSRFCheck] &&
           !CSRF.isValidToken(controller)) throw new InvalidAntiCSRFToken
 

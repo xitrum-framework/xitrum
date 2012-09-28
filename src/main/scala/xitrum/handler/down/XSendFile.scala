@@ -58,7 +58,7 @@ object XSendFile extends Logger {
     Etag.forFile(path, Gzip.isAccepted(request)) match {
       case Etag.NotFound =>
         response.setStatus(NOT_FOUND)
-        NotModified.setNoCacheHeader(response)
+        NotModified.setNoClientCache(response)
 
         if (path.startsWith(abs404)) {  // Even 404.html is not found!
           HttpHeaders.setContentLength(response, 0)
