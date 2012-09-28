@@ -31,7 +31,9 @@
 * Other new methods:
   setClientCacheAggressively()
   respondHtml("<html></html>")
+  respondJsonText("[1, 2, 3]")
   respondJsonP(List(1, 2, 3), "myFunction")
+  respondJsonPText("[1, 2, 3]", "myFunction")
 * Update Netty from 3.5.7.Final to 3.5.8.Final:
   <INSERT ANNOUCEMENT URL HERE>
 * Update slf4j-api from 1.6.6 to 1.7.1
