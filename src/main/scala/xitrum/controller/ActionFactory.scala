@@ -80,6 +80,12 @@ trait ActionFactory {
   def PUT(body: => Any) =
     Action(Route(HttpMethod.PUT, RouteOrder.OTHER, RouteCompiler.compile(withPathPrefix(""))), null, () => body, 0)
 
+  def PATCH(pattern: String)(body: => Any) =
+    Action(Route(HttpMethod.PATCH, RouteOrder.OTHER, RouteCompiler.compile(withPathPrefix(pattern))), null, () => body, 0)
+
+  def PATCH(body: => Any) =
+    Action(Route(HttpMethod.PATCH, RouteOrder.OTHER, RouteCompiler.compile(withPathPrefix(""))), null, () => body, 0)
+
   def DELETE(pattern: String)(body: => Any) =
     Action(Route(HttpMethod.DELETE, RouteOrder.OTHER, RouteCompiler.compile(withPathPrefix(pattern))), null, () => body, 0)
 

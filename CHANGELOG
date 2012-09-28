@@ -18,7 +18,7 @@
 * Support SPDY
 
 1.9.7 (planned):
-* Support "OPTIONS" HTTP method
+* Support OPTIONS and PATCH HTTP method
 * Support SockJS 0.3.3
   https://github.com/sockjs/sockjs-protocol
 * "Cache-Control" header is automatically set to "no-cache" for POST response
