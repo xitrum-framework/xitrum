@@ -4,10 +4,9 @@ import java.nio.charset.Charset
 import scala.collection.mutable.{Map => MMap}
 
 import org.jboss.netty.channel.{ChannelHandler, SimpleChannelUpstreamHandler, ChannelHandlerContext, MessageEvent, ExceptionEvent, Channels}
-import ChannelHandler.Sharable
-import org.jboss.netty.handler.codec.http.{HttpRequest, HttpMethod}
+import org.jboss.netty.handler.codec.http.HttpHeaders
 import org.jboss.netty.handler.codec.http.multipart.{Attribute, DefaultHttpDataFactory, DiskAttribute, DiskFileUpload, FileUpload, HttpPostRequestDecoder, InterfaceHttpData}
-import HttpMethod._
+import ChannelHandler.Sharable
 import InterfaceHttpData.HttpDataType
 
 import xitrum.Config
@@ -45,44 +44,47 @@ class BodyParser extends SimpleChannelUpstreamHandler with BadClientSilencer {
     val handlerEnv = m.asInstanceOf[HandlerEnv]
     val request    = handlerEnv.request
 
-    val (bodyParams, fileUploadParams) = if (request.getMethod != POST) {
-      (MMap[String, List[String]](), MMap[String, List[FileUpload]]())
-    } else {
-      try {
-        val bodyParams = MMap[String, List[String]]()
-        val fileParams = MMap[String, List[FileUpload]]()
+    val requestContentType = request.getHeader(HttpHeaders.Names.CONTENT_TYPE)
+    val (bodyParams, fileUploadParams) =
+      if (requestContentType == HttpHeaders.Values.APPLICATION_X_WWW_FORM_URLENCODED ||
+          requestContentType == HttpHeaders.Values.MULTIPART_FORM_DATA) {
+        try {
+          val bodyParams = MMap[String, List[String]]()
+          val fileParams = MMap[String, List[FileUpload]]()
 
-        val decoder = new HttpPostRequestDecoder(factory, request)
-        val datas   = decoder.getBodyHttpDatas
+          val decoder = new HttpPostRequestDecoder(factory, request)
+          val datas   = decoder.getBodyHttpDatas
 
-        val it = datas.iterator
-        while (it.hasNext) {
-          val data = it.next
-          if (data.getHttpDataType == HttpDataType.Attribute) {
-            val attribute = data.asInstanceOf[Attribute]
-            val name      = attribute.getName
-            val value     = attribute.getValue
-            putOrAppendString(bodyParams, name, value)
-          } else if (data.getHttpDataType == HttpDataType.FileUpload) {
-            val fileUpload = data.asInstanceOf[FileUpload]
-            if (fileUpload.isCompleted && fileUpload.length > 0) {  // Skip empty file
-              val name = fileUpload.getName
-              sanitizeFileUploadFilename(fileUpload)
-              putOrAppendFileUpload(fileParams, name, fileUpload)
+          val it = datas.iterator
+          while (it.hasNext) {
+            val data = it.next
+            if (data.getHttpDataType == HttpDataType.Attribute) {
+              val attribute = data.asInstanceOf[Attribute]
+              val name      = attribute.getName
+              val value     = attribute.getValue
+              putOrAppendString(bodyParams, name, value)
+            } else if (data.getHttpDataType == HttpDataType.FileUpload) {
+              val fileUpload = data.asInstanceOf[FileUpload]
+              if (fileUpload.isCompleted && fileUpload.length > 0) {  // Skip empty file
+                val name = fileUpload.getName
+                sanitizeFileUploadFilename(fileUpload)
+                putOrAppendFileUpload(fileParams, name, fileUpload)
+              }
             }
           }
+
+          (bodyParams, fileParams)
+        } catch {
+          case t =>
+            val msg = "Could not parse POST body, URI: " + request.getUri
+            logger.warn(msg, t)
+
+            ctx.getChannel.close()
+            return
         }
-
-        (bodyParams, fileParams)
-      } catch {
-        case t =>
-          val msg = "Could not parse POST body, URI: " + request.getUri
-          logger.warn(msg, t)
-
-          ctx.getChannel.close()
-          return
+      } else {
+        (MMap[String, List[String]](), MMap[String, List[FileUpload]]())
       }
-    }
 
     handlerEnv.bodyParams       = bodyParams
     handlerEnv.fileUploadParams = fileUploadParams

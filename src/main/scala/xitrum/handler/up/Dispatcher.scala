@@ -14,7 +14,7 @@ import xitrum.controller.Action
 import xitrum.exception.{InvalidAntiCSRFToken, MissingParam, SessionExpired, ValidationError}
 import xitrum.handler.{AccessLog, HandlerEnv}
 import xitrum.handler.down.{ResponseCacher, XSendFile}
-import xitrum.routing.{ControllerReflection, HttpMethodWebSocket, Routes}
+import xitrum.routing.{ControllerReflection, Routes}
 import xitrum.scope.request.RequestEnv
 import xitrum.scope.session.CSRF
 

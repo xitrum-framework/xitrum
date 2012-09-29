@@ -4,7 +4,7 @@ import java.lang.reflect.Method
 import org.jboss.netty.handler.codec.http.HttpMethod
 
 import xitrum.Controller
-import xitrum.routing.{Route, RouteCompiler, RouteOrder, Routes, HttpMethodWebSocket}
+import xitrum.routing.{HttpMethodSockJs, HttpMethodWebSocket, Route, RouteCompiler, RouteOrder, Routes}
 
 /**
  * @param method    for creating new controller instance,
@@ -53,17 +53,35 @@ case class Action(route: Route, var method: Method, body: () => Unit, cacheSecon
   def PUT(body: => Any) =
     Action(Route(HttpMethod.PUT, route.order, RouteCompiler.compile(withPathPrefix(""))), method, () => body, cacheSeconds)
 
+  def PATCH(pattern: String)(body: => Any) =
+    Action(Route(HttpMethod.PATCH, route.order, RouteCompiler.compile(withPathPrefix(pattern))), method, () => body, cacheSeconds)
+
+  def PATCH(body: => Any) =
+    Action(Route(HttpMethod.PATCH, route.order, RouteCompiler.compile(withPathPrefix(""))), method, () => body, cacheSeconds)
+
   def DELETE(pattern: String)(body: => Any) =
     Action(Route(HttpMethod.DELETE, route.order, RouteCompiler.compile(withPathPrefix(pattern))), method, () => body, cacheSeconds)
 
   def DELETE(body: => Any) =
     Action(Route(HttpMethod.DELETE, route.order, RouteCompiler.compile(withPathPrefix(""))), method, () => body, cacheSeconds)
 
+  def OPTIONS(pattern: String)(body: => Any) =
+    Action(Route(HttpMethod.OPTIONS, route.order, RouteCompiler.compile(withPathPrefix(pattern))), method, () => body, cacheSeconds)
+
+  def OPTIONS(body: => Any) =
+    Action(Route(HttpMethod.OPTIONS, route.order, RouteCompiler.compile(withPathPrefix(""))), method, () => body, cacheSeconds)
+
   def WEBSOCKET(pattern: String)(body: => Any) =
     Action(Route(HttpMethodWebSocket, route.order, RouteCompiler.compile(withPathPrefix(pattern))), method, () => body, cacheSeconds)
 
   def WEBSOCKET(body: => Any) =
     Action(Route(HttpMethodWebSocket, route.order, RouteCompiler.compile(withPathPrefix(""))), method, () => body, cacheSeconds)
+
+  def SOCKJS(pattern: String)(body: => Any) =
+    Action(Route(HttpMethodSockJs, route.order, RouteCompiler.compile(withPathPrefix(pattern))), method, () => body, cacheSeconds)
+
+  def SOCKJS(body: => Any) =
+    Action(Route(HttpMethodSockJs, route.order, RouteCompiler.compile(withPathPrefix(""))), method, () => body, cacheSeconds)
 
   //----------------------------------------------------------------------------
 
