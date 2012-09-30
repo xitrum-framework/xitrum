@@ -28,7 +28,7 @@ class PublicResourceServer extends SimpleChannelUpstreamHandler with BadClientSi
     }
 
     val request = m.asInstanceOf[HttpRequest]
-    if (request.getMethod != GET) {
+    if (request.getMethod != GET && request.getMethod != HEAD) {
       ctx.sendUpstream(e)
       return
     }

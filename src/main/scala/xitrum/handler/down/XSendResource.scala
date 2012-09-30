@@ -2,14 +2,16 @@ package xitrum.handler.down
 
 import java.io.{File, RandomAccessFile}
 
+import org.jboss.netty.buffer.ChannelBuffers
 import org.jboss.netty.channel.{ChannelEvent, ChannelDownstreamHandler, Channels, ChannelHandler, ChannelHandlerContext, DownstreamMessageEvent, UpstreamMessageEvent, ChannelFuture, DefaultFileRegion, ChannelFutureListener}
-import org.jboss.netty.handler.codec.http.{HttpHeaders, HttpRequest, HttpResponse, HttpResponseStatus, HttpVersion}
+import org.jboss.netty.handler.codec.http.{HttpHeaders, HttpMethod, HttpRequest, HttpResponse, HttpResponseStatus, HttpVersion}
+
 import ChannelHandler.Sharable
-import HttpResponseStatus._
-import HttpVersion._
 import HttpHeaders.Names._
 import HttpHeaders.Values._
-import org.jboss.netty.buffer.ChannelBuffers
+import HttpMethod._
+import HttpResponseStatus._
+import HttpVersion._
 
 import xitrum.{Config, Logger}
 import xitrum.etag.{Etag, NotModified}
@@ -48,7 +50,11 @@ object XSendResource extends Logger {
           if (gzipped)         response.setHeader(CONTENT_ENCODING, "gzip")
 
           HttpHeaders.setContentLength(response, bytes.length)
-          response.setContent(ChannelBuffers.wrappedBuffer(bytes))
+          if (request.getMethod == HEAD && response.getStatus == OK)
+            // http://stackoverflow.com/questions/3854842/content-length-header-with-head-requests
+            response.setContent(ChannelBuffers.EMPTY_BUFFER)
+          else
+            response.setContent(ChannelBuffers.wrappedBuffer(bytes))
         }
 
         NoPipelining.setResponseHeaderAndResumeReadingForKeepAliveRequestOrCloseOnComplete(request, response, ctx.getChannel, e.getFuture)

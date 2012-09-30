@@ -2,9 +2,11 @@ package xitrum.handler.down
 
 import org.jboss.netty.buffer.ChannelBuffers
 import org.jboss.netty.channel.{ChannelHandler, SimpleChannelDownstreamHandler, ChannelHandlerContext, MessageEvent, Channels, ChannelFutureListener}
+import org.jboss.netty.handler.codec.http.{HttpHeaders, HttpMethod, HttpRequest, HttpResponse, HttpResponseStatus}
+
 import ChannelHandler.Sharable
-import org.jboss.netty.handler.codec.http.{HttpHeaders, HttpRequest, HttpResponse, HttpResponseStatus}
 import HttpHeaders.Names._
+import HttpMethod._
 import HttpResponseStatus._
 
 import xitrum.Config
@@ -27,7 +29,11 @@ class Env2Response extends SimpleChannelDownstreamHandler {
     val response = env.response
     val future   = e.getFuture
 
-    if (!tryEtag(request, response)) Gzip.tryCompressBigTextualResponse(request, response)
+    if (request.getMethod == HEAD && response.getStatus == OK)
+      // http://stackoverflow.com/questions/3854842/content-length-header-with-head-requests
+      response.setContent(ChannelBuffers.EMPTY_BUFFER)
+    else if (!tryEtag(request, response))
+      Gzip.tryCompressBigTextualResponse(request, response)
 
     // Keep alive, channel reading resuming/closing etc. are handled
     // by the code that sends the response (Responder#respond)

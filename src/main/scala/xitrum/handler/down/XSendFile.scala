@@ -3,16 +3,17 @@ package xitrum.handler.down
 import java.io.{File, RandomAccessFile}
 
 import org.jboss.netty.channel.{ChannelEvent, ChannelDownstreamHandler, Channels, ChannelHandler, ChannelHandlerContext, DownstreamMessageEvent, UpstreamMessageEvent, ChannelFuture, DefaultFileRegion, ChannelFutureListener}
-import org.jboss.netty.handler.codec.http.{HttpHeaders, HttpRequest, HttpResponse, HttpResponseStatus, HttpVersion}
+import org.jboss.netty.handler.codec.http.{HttpHeaders, HttpMethod, HttpRequest, HttpResponse, HttpResponseStatus, HttpVersion}
 import org.jboss.netty.handler.ssl.SslHandler
 import org.jboss.netty.handler.stream.ChunkedFile
 import org.jboss.netty.buffer.ChannelBuffers
 
 import ChannelHandler.Sharable
-import HttpResponseStatus._
-import HttpVersion._
 import HttpHeaders.Names._
 import HttpHeaders.Values._
+import HttpMethod._
+import HttpResponseStatus._
+import HttpVersion._
 
 import xitrum.{Config, Logger}
 import xitrum.etag.{Etag, NotModified}
@@ -80,7 +81,11 @@ object XSendFile extends Logger {
           if (gzipped)         response.setHeader(CONTENT_ENCODING, "gzip")
 
           HttpHeaders.setContentLength(response, bytes.length)
-          response.setContent(ChannelBuffers.wrappedBuffer(bytes))
+          if (request.getMethod == HttpMethod.HEAD && response.getStatus == OK)
+            // http://stackoverflow.com/questions/3854842/content-length-header-with-head-requests
+            response.setContent(ChannelBuffers.EMPTY_BUFFER)
+          else
+            response.setContent(ChannelBuffers.wrappedBuffer(bytes))
         }
         NoPipelining.setResponseHeaderAndResumeReadingForKeepAliveRequestOrCloseOnComplete(request, response, channel, e.getFuture)
         ctx.sendDownstream(e)
@@ -112,41 +117,50 @@ object XSendFile extends Logger {
               (startIndex, endIndex2 - startIndex + 1)
           }
 
-          // Send the initial line and headers
           HttpHeaders.setContentLength(response, length)
           response.setHeader(LAST_MODIFIED, lastModifiedRfc2822)
           if (mimeo.isDefined) response.setHeader(CONTENT_TYPE, mimeo.get)
           NoPipelining.setResponseHeaderForKeepAliveRequest(request, response)
-          ctx.sendDownstream(e)
           AccessLog.logStaticContentAccess(remoteAddress, request, response)
 
           // Write the content
-          if (ctx.getPipeline.get(classOf[SslHandler]) != null) {
-            // Cannot use zero-copy with HTTPS
-            val future = Channels.write(channel, new ChunkedFile(raf, offset, length, CHUNK_SIZE))
-            future.addListener(new ChannelFutureListener {
-              def operationComplete(f: ChannelFuture) {
-                raf.close()
-              }
-            })
 
-            NoPipelining.resumeReadingForKeepAliveRequestOrCloseOnComplete(request, channel, future)
+          if (request.getMethod == HEAD && response.getStatus == OK) {
+            // http://stackoverflow.com/questions/3854842/content-length-header-with-head-requests
+            response.setContent(ChannelBuffers.EMPTY_BUFFER)
+            ctx.sendDownstream(e)
+            NoPipelining.resumeReadingForKeepAliveRequestOrCloseOnComplete(request, channel, e.getFuture)
           } else {
-            // No encryption - use zero-copy
-            val region = new DefaultFileRegion(raf.getChannel, offset, length)
+            // Send the initial line and headers
+            ctx.sendDownstream(e)
 
-            // This will cause ClosedChannelException:
-            // Channels.write(ctx, e.getFuture, region)
+            if (ctx.getPipeline.get(classOf[SslHandler]) != null) {
+              // Cannot use zero-copy with HTTPS
+              val future = Channels.write(channel, new ChunkedFile(raf, offset, length, CHUNK_SIZE))
+              future.addListener(new ChannelFutureListener {
+                def operationComplete(f: ChannelFuture) {
+                  raf.close()
+                }
+              })
 
-            val future = Channels.write(channel, region)
-            future.addListener(new ChannelFutureListener {
-              def operationComplete(f: ChannelFuture) {
-                region.releaseExternalResources
-                raf.close()
-              }
-            })
+              NoPipelining.resumeReadingForKeepAliveRequestOrCloseOnComplete(request, channel, future)
+            } else {
+              // No encryption - use zero-copy
+              val region = new DefaultFileRegion(raf.getChannel, offset, length)
 
-            NoPipelining.resumeReadingForKeepAliveRequestOrCloseOnComplete(request, channel, future)
+              // This will cause ClosedChannelException:
+              // Channels.write(ctx, e.getFuture, region)
+
+              val future = Channels.write(channel, region)
+              future.addListener(new ChannelFutureListener {
+                def operationComplete(f: ChannelFuture) {
+                  region.releaseExternalResources
+                  raf.close()
+                }
+              })
+
+              NoPipelining.resumeReadingForKeepAliveRequestOrCloseOnComplete(request, channel, future)
+            }
           }
         }
     }

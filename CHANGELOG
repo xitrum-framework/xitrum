@@ -1,6 +1,5 @@
 1.9.8 (planned):
 * Flash socket policy server can use the same port with HTTP server
-* Support HEAD request
 * Add Ajax style upload based on iframe
 * Support routing by domain name ("Host" header)
 * Make extensive use of Knockout.js and Scala delimited continuation
@@ -18,7 +17,7 @@
 * Support SPDY
 
 1.9.7 (planned):
-* Support OPTIONS and PATCH HTTP method
+* Support HEAD (automatically handled by Xitrum as GET), OPTIONS, and PATCH
 * Support SockJS 0.3.3
   https://github.com/sockjs/sockjs-protocol
 * "Cache-Control" header is automatically set to "no-cache" for POST response

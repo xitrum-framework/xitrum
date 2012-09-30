@@ -4,6 +4,7 @@ import java.io.File
 
 import org.jboss.netty.channel.{ChannelHandler, SimpleChannelUpstreamHandler, ChannelHandlerContext, MessageEvent}
 import org.jboss.netty.handler.codec.http.{HttpMethod, HttpResponseStatus, HttpRequest, DefaultHttpResponse, HttpHeaders, HttpVersion}
+
 import ChannelHandler.Sharable
 import HttpMethod._
 import HttpResponseStatus._
@@ -28,7 +29,7 @@ class PublicFileServer extends SimpleChannelUpstreamHandler with BadClientSilenc
     }
 
     val request = m.asInstanceOf[HttpRequest]
-    if (request.getMethod != GET) {
+    if (request.getMethod != GET && request.getMethod != HEAD) {
       ctx.sendUpstream(e)
       return
     }
