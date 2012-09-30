@@ -44,7 +44,7 @@ libraryDependencies += "org.mozilla" % "rhino" % "1.7R4"
 
 // Other dependencies ----------------------------------------------------------
 
-libraryDependencies += "io.netty" % "netty" % "3.5.7.Final"
+libraryDependencies += "io.netty" % "netty" % "3.5.8.Final"
 
 libraryDependencies += "tv.cntt" %% "scaposer" % "1.1"
 
@@ -53,7 +53,7 @@ libraryDependencies += "tv.cntt" %% "sclasner" % "1.1"
 libraryDependencies += "org.javassist" % "javassist" % "3.16.1-GA"
 
 // Projects using Xitrum must provide a concrete implentation of SLF4J (Logback etc.)
-libraryDependencies += "org.slf4j" % "slf4j-api" % "1.6.6" % "provided"
+libraryDependencies += "org.slf4j" % "slf4j-api" % "1.7.1" % "provided"
 
 // xitrum.imperatively uses Scala continuation, a compiler plugin --------------
 
