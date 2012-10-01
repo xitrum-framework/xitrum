@@ -4,6 +4,7 @@ import java.io.File
 import scala.xml.{Node, NodeSeq, Xhtml}
 
 import org.jboss.netty.buffer.{ChannelBuffer, ChannelBuffers}
+import org.jboss.netty.channel.ChannelFuture
 import org.jboss.netty.handler.codec.http.{DefaultHttpChunk, HttpChunk, HttpHeaders}
 import org.jboss.netty.handler.codec.http.websocketx.TextWebSocketFrame
 import HttpHeaders.Names.{CONTENT_TYPE, CONTENT_LENGTH, TRANSFER_ENCODING}
@@ -31,15 +32,9 @@ trait Responder extends JS with Flash with Knockout {
 
   def isResponded = responded
 
-  def respond() {
+  def respond(): ChannelFuture = {
     if (responded) {
-      // Double response error
-      // Print the stack trace so that application developers know where to fix
-      try {
-        throw new Exception
-      } catch {
-        case e => logger.warn("Double response", e)
-      }
+      printDoubleResponseErrorStackTrace()
     } else {
       responded = true
       NoPipelining.setResponseHeaderForKeepAliveRequest(request, response)
@@ -51,14 +46,18 @@ trait Responder extends JS with Flash with Knockout {
       if (!XSendFile.isHeaderSet(response) && !XSendResource.isHeaderSet(response)) {
         NoPipelining.resumeReadingForKeepAliveRequestOrCloseOnComplete(request, channel, future)
       }
+
+      future
     }
   }
 
   //----------------------------------------------------------------------------
 
   /** If Content-Type header is not set, it is set to "application/octet-stream" */
-  private def writeHeaderIfFirstChunk() {
-    if (!isResponded) {
+  private def writeHeaderIfFirstChunk(): ChannelFuture = {
+    if (responded) {
+      printDoubleResponseErrorStackTrace()
+    } else {
       if (!response.containsHeader(CONTENT_TYPE))
         response.setHeader(CONTENT_TYPE, "application/octet-stream")
 
@@ -80,9 +79,15 @@ trait Responder extends JS with Flash with Knockout {
    *
    * Headers are only sent on the first respondXXX call.
    */
-  def respondLastChunk() {
-    val future = channel.write(HttpChunk.LAST_CHUNK)
-    NoPipelining.resumeReadingForKeepAliveRequestOrCloseOnComplete(request, channel, future)
+  def respondLastChunk(): ChannelFuture = {
+    if (responded) {
+      printDoubleResponseErrorStackTrace()
+    } else {
+      responded = true
+      val future = channel.write(HttpChunk.LAST_CHUNK)
+      NoPipelining.resumeReadingForKeepAliveRequestOrCloseOnComplete(request, channel, future)
+      future
+    }
   }
 
   //----------------------------------------------------------------------------
@@ -92,13 +97,13 @@ trait Responder extends JS with Flash with Knockout {
    * set to "application/xml" if text param is Node or NodeSeq, otherwise it is
    * set to "text/plain".
    */
-  def respondText(text: Any, contentType: String = null): String = {
+  def respondText(text: Any, contentType: String = null): ChannelFuture = {
     val textIsXml = text.isInstanceOf[Node] || text.isInstanceOf[NodeSeq]
 
     // <br />.toString will create <br></br> which responds as 2 <br /> on some browsers!
     // http://www.scala-lang.org/node/492
     // http://www.ne.jp/asahi/hishidama/home/tech/scala/xml.html
-    val ret =
+    val respondedText =
       if (textIsXml) {
         if (text.isInstanceOf[Node])
           Xhtml.toXhtml(text.asInstanceOf[Node])
@@ -108,7 +113,7 @@ trait Responder extends JS with Flash with Knockout {
         text.toString
       }
 
-    if (!isResponded) {
+    if (!responded) {
       // Set content type automatically
       if (contentType != null)
         response.setHeader(CONTENT_TYPE, contentType)
@@ -120,7 +125,7 @@ trait Responder extends JS with Flash with Knockout {
       }
     }
 
-    val cb = ChannelBuffers.copiedBuffer(ret, Config.requestCharset)
+    val cb = ChannelBuffers.copiedBuffer(respondedText, Config.requestCharset)
     if (response.isChunked) {
       writeHeaderIfFirstChunk()
       channel.write(new DefaultHttpChunk(cb))
@@ -130,24 +135,22 @@ trait Responder extends JS with Flash with Knockout {
       response.setContent(cb)
       respond()
     }
-
-    ret
   }
 
   //----------------------------------------------------------------------------
 
   /** Content-Type header is set to "text/html". */
-  def respondHtml(any: Any) {
+  def respondHtml(any: Any): ChannelFuture = {
     respondText(any, "text/html; charset=" + Config.config.request.charset)
   }
 
   /** Content-Type header is set to "application/javascript". */
-  def respondJs(any: Any) {
+  def respondJs(any: Any): ChannelFuture = {
     respondText(any, "application/javascript; charset=" + Config.config.request.charset)
   }
 
   /** Content-Type header is set to "application/json". */
-  def respondJsonText(any: Any) {
+  def respondJsonText(any: Any): ChannelFuture = {
     respondText(any, "application/json; charset=" + Config.config.request.charset)
   }
 
@@ -160,7 +163,7 @@ trait Responder extends JS with Flash with Knockout {
    * "text/json" would make the browser download instead of displaying the content.
    * It makes debugging a pain.
    */
-  def respondJson(obj: Any) {
+  def respondJson(obj: Any): ChannelFuture = {
     val json = Json.generate(obj)
     respondText(json, "application/json; charset=" + Config.config.request.charset)
   }
@@ -172,7 +175,7 @@ trait Responder extends JS with Flash with Knockout {
    *
    * Content-Type header is set to "application/javascript".
    */
-  def respondJsonP(obj: Any, function: String) {
+  def respondJsonP(obj: Any, function: String): ChannelFuture = {
     val json = Json.generate(obj)
     val text = function + "(" + json + ")"
     respondJs(text)
@@ -183,7 +186,7 @@ trait Responder extends JS with Flash with Knockout {
    *
    * Content-Type header is set to "application/javascript".
    */
-  def respondJsonPText(any: Any, function: String) {
+  def respondJsonPText(any: Any, function: String): ChannelFuture = {
     val text = function + "(" + any + ")"
     respondJs(text)
   }
@@ -194,12 +197,12 @@ trait Responder extends JS with Flash with Knockout {
 
   def layout = renderedView
 
-  def respondInlineView(view: Any) {
+  def respondInlineView(view: Any): ChannelFuture = {
     respondInlineView(view, layout _)
   }
 
   /** Content-Type header is set to "text/html" */
-  def respondInlineView(view: Any, customLayout: () => Any) {
+  def respondInlineView(view: Any, customLayout: () => Any): ChannelFuture = {
     renderedView = view
     val respondedLayout = customLayout.apply()
     if (respondedLayout == null)
@@ -264,7 +267,7 @@ trait Responder extends JS with Flash with Knockout {
    *
    * @param templateType "jade", "mustache", "scaml", or "ssp"
    */
-  def respondView(action: Action, customLayout: () => Any, templateType: String) {
+  def respondView(action: Action, customLayout: () => Any, templateType: String): ChannelFuture = {
     val nonNullActionMethod = if (action.method == null) Routes.lookupMethod(action.route) else action.method
     val controllerClass     = nonNullActionMethod.getDeclaringClass
     val actionName          = nonNullActionMethod.getName
@@ -282,7 +285,7 @@ trait Responder extends JS with Flash with Knockout {
    * Same as respondView(action, customLayout, templateType),
    * where templateType is as configured in xitrum.json.
    */
-  def respondView(action: Action, customLayout: () => Any) {
+  def respondView(action: Action, customLayout: () => Any): ChannelFuture = {
     respondView(action, customLayout, Config.config.scalate)
   }
 
@@ -290,7 +293,7 @@ trait Responder extends JS with Flash with Knockout {
    * Same as respondView(action, customLayout, templateType),
    * where customLayout is from the controller's layout method.
    */
-  def respondView(action: Action, templateType: String) {
+  def respondView(action: Action, templateType: String): ChannelFuture = {
     respondView(action, layout _, templateType)
   }
 
@@ -298,7 +301,7 @@ trait Responder extends JS with Flash with Knockout {
    * Same as respondView(action, customLayout, templateType),
    * where action is currentAction and customLayout is from the controller's layout method.
    */
-  def respondView(templateType: String) {
+  def respondView(templateType: String): ChannelFuture = {
     respondView(currentAction, templateType)
   }
 
@@ -307,7 +310,7 @@ trait Responder extends JS with Flash with Knockout {
    * where customLayout is from the controller's layout method and
    * templateType is as configured in xitrum.json.
    */
-  def respondView(action: Action) {
+  def respondView(action: Action): ChannelFuture = {
     respondView(action, layout _, Config.config.scalate)
   }
 
@@ -316,19 +319,19 @@ trait Responder extends JS with Flash with Knockout {
    * where action is currentAction, customLayout is from the controller's layout method and
    * templateType is as configured in xitrum.json.
    */
-  def respondView() {
+  def respondView(): ChannelFuture = {
     respondView(currentAction, Config.config.scalate)
   }
 
   //----------------------------------------------------------------------------
 
   /** If Content-Type header is not set, it is set to "application/octet-stream" */
-  def respondBinary(bytes: Array[Byte]) {
+  def respondBinary(bytes: Array[Byte]): ChannelFuture = {
     respondBinary(ChannelBuffers.wrappedBuffer(bytes))
   }
 
   /** If Content-Type header is not set, it is set to "application/octet-stream" */
-  def respondBinary(channelBuffer: ChannelBuffer) {
+  def respondBinary(channelBuffer: ChannelBuffer): ChannelFuture = {
     if (response.isChunked) {
       writeHeaderIfFirstChunk()
       channel.write(new DefaultHttpChunk(channelBuffer))
@@ -354,7 +357,7 @@ trait Responder extends JS with Flash with Knockout {
    *
    * To sanitize the path, use xitrum.util.PathSanitizer.
    */
-  def respondFile(path: String) {
+  def respondFile(path: String): ChannelFuture = {
     XSendFile.setHeader(response, path)
     respond()
   }
@@ -366,30 +369,30 @@ trait Responder extends JS with Flash with Knockout {
    *
    * @param path Relative to an entry in classpath, without leading "/"
    */
-  def respondResource(path: String) {
+  def respondResource(path: String): ChannelFuture = {
     XSendResource.setHeader(response, path)
     respond()
   }
 
   //----------------------------------------------------------------------------
 
-  def respondDefault404Page() {
+  def respondDefault404Page(): ChannelFuture = {
     XSendFile.set404Page(response)
     respond()
   }
 
-  def respondDefault500Page() {
+  def respondDefault500Page(): ChannelFuture = {
     XSendFile.set500Page(response)
     respond()
   }
 
   //----------------------------------------------------------------------------
 
-  def respondWebSocket(text: String) {
+  def respondWebSocket(text: String): ChannelFuture = {
     channel.write(new TextWebSocketFrame(text))
   }
 
-  def respondWebSocket(channelBuffer: ChannelBuffer) {
+  def respondWebSocket(channelBuffer: ChannelBuffer): ChannelFuture = {
     channel.write(new TextWebSocketFrame(channelBuffer))
   }
 
@@ -401,5 +404,21 @@ trait Responder extends JS with Flash with Knockout {
 
   def setNoClientCache() {
     NotModified.setNoClientCache(response)
+  }
+
+  //----------------------------------------------------------------------------
+
+  /**
+   * Prints the stack trace so that application developers know where to fix
+   * the double response error.
+   */
+  private def printDoubleResponseErrorStackTrace(): ChannelFuture = {
+    try {
+      throw new Exception
+    } catch {
+      case e =>
+        logger.warn("Double response! This response is ignored.", e)
+    }
+    null  // This may cause NPE on double response if the ChannelFuture result is used
   }
 }

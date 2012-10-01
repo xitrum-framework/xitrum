@@ -2,6 +2,8 @@ package xitrum.view
 
 import scala.xml.Unparsed
 
+import org.jboss.netty.channel.ChannelFuture
+
 import xitrum.{Config, Controller}
 import xitrum.controller.Action
 import xitrum.etag.{Etag, NotModified}
@@ -45,17 +47,17 @@ trait JS {
 
   //----------------------------------------------------------------------------
 
-  def jsRespond(fragments: Any*) {
+  def jsRespond(fragments: Any*): ChannelFuture = {
     val js = fragments.mkString(";\n") + ";\n"
     respondText(js, "text/javascript; charset=" + Config.config.request.charset)
   }
 
   /** See http://stackoverflow.com/questions/503093/how-can-i-make-a-redirect-page-in-jquery */
-  def jsRedirectTo(location: Any) {
+  def jsRedirectTo(location: Any): ChannelFuture = {
     jsRespond("window.location.href = " + jsEscape(location))
   }
 
-  def jsRedirectTo(action: Action, params: (String, Any)*) { jsRedirectTo(action.url(params:_*)) }
+  def jsRedirectTo(action: Action, params: (String, Any)*): ChannelFuture = { jsRedirectTo(action.url(params:_*)) }
 
   def jsCometGet(topic: String, callback: String) {
     // http://stackoverflow.com/questions/2703861/chromes-loading-indicator-keeps-spinning-during-xmlhttprequest
