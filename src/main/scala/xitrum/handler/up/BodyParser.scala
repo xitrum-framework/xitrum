@@ -45,9 +45,13 @@ class BodyParser extends SimpleChannelUpstreamHandler with BadClientSilencer {
     val request    = handlerEnv.request
 
     val requestContentType = request.getHeader(HttpHeaders.Names.CONTENT_TYPE)
+    val requestContentTypeLowerCase = if (requestContentType == null) null else requestContentType.toLowerCase
     val (bodyParams, fileUploadParams) =
-      if (requestContentType == HttpHeaders.Values.APPLICATION_X_WWW_FORM_URLENCODED ||
-          requestContentType == HttpHeaders.Values.MULTIPART_FORM_DATA) {
+      // Use startWith because requestContentType can be:
+      // application/x-www-form-urlencoded; charset=UTF-8
+      if (requestContentTypeLowerCase != null &&
+          (requestContentTypeLowerCase.startsWith(HttpHeaders.Values.APPLICATION_X_WWW_FORM_URLENCODED) ||
+           requestContentTypeLowerCase.startsWith(HttpHeaders.Values.MULTIPART_FORM_DATA))) {
         try {
           val bodyParams = MMap[String, List[String]]()
           val fileParams = MMap[String, List[FileUpload]]()
