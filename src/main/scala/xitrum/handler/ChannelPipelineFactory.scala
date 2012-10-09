@@ -3,6 +3,7 @@ package xitrum.handler
 import org.jboss.netty.channel.{Channels, ChannelPipeline, ChannelPipelineFactory => CPF}
 import org.jboss.netty.handler.codec.http.{HttpRequestDecoder, HttpChunkAggregator, HttpResponseEncoder}
 import org.jboss.netty.handler.execution.{ExecutionHandler, OrderedMemoryAwareThreadPoolExecutor}
+import org.jboss.netty.handler.stream.ChunkedWriteHandler
 
 import xitrum.Config
 import xitrum.handler.up._
@@ -21,6 +22,7 @@ object ChannelPipelineFactory {
     pipeline.remove(classOf[MethodOverrider])
     pipeline.remove(classOf[Dispatcher])
 
+    pipeline.remove(classOf[ChunkedWriteHandler])
     pipeline.remove(classOf[FixiOS6SafariPOST])
     pipeline.remove(classOf[XSendFile])
     pipeline.remove(classOf[XSendResource])
@@ -84,6 +86,7 @@ class ChannelPipelineFactory(https: Boolean) extends CPF {
 
     // Down
     new HttpResponseEncoder,
+    new ChunkedWriteHandler,  // For writing ChunkedFile, at XSendFile
     fixiOS6SafariPOST,
     xSendFile,
     xSendResource,
