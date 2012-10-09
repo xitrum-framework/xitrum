@@ -1,4 +1,4 @@
-1.9.8 (planned):
+1.9.9 (planned):
 * Flash socket policy server can use the same port with HTTP server
 * Add Ajax style upload based on iframe
 * Support routing by domain name ("Host" header)
@@ -16,20 +16,27 @@
 * Reload routes when in development mode with JRebel
 * Support SPDY
 
-1.9.7 (planned):
-* Support HEAD (automatically handled by Xitrum as GET), OPTIONS, and PATCH
+1.9.8 (planned):
 * Support SockJS 0.3.3
   https://github.com/sockjs/sockjs-protocol
-* "Cache-Control" header is automatically set to "no-cache" for POST response
-  to handle iOS6 Safari POST problem:
+* Support automatic CORS headers
+
+1.9.7:
+* Fix problem when HTTPS is used and static file is bigger than
+  "smallStaticFileSizeInKB" in config/xitrum.js:
+  https://github.com/ngocdaothanh/xitrum/issues/64
+* Fix iOS6 Safari POST caching problem by automatically setting "Cache-Control"
+  header to "no-cache" for POST response:
   http://www.mnot.net/blog/2012/09/24/caching_POST
   http://stackoverflow.com/questions/12506897/is-safari-on-ios-6-caching-ajax-results
-* In your controller, to prevent client-side caching,
-  call setNoClientCache() to set "Cache-Control" header to:
+* Support HEAD (automatically handled by Xitrum as GET), OPTIONS, and PATCH
+* In your controller, to prevent client-side caching, call setNoClientCache();
+  It will set "Cache-Control" header to:
   "no-store, no-cache, must-revalidate, max-age=0"
 * Other new methods:
+  isTablet: returns true if the request is from tablet
   setClientCacheAggressively()
-  respondHtml("<html></html>")
+  respondHtml("<html>...</html>")
   respondJsonText("[1, 2, 3]")
   respondJsonP(List(1, 2, 3), "myFunction")
   respondJsonPText("[1, 2, 3]", "myFunction")
