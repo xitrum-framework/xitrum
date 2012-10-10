@@ -57,6 +57,8 @@ object Config extends Logger {
    */
   val EXECUTIORS_PER_CORE = 64
 
+  private val DEFAULT_SECURE_KEY = "ajconghoaofuxahoi92chunghiaujivietnamlasdoclapjfltudoil98hanhphucup8"
+
   /**
    * Path to the root directory of the current project.
    * If you're familiar with Rails, this is the same as Rails.root.
@@ -75,8 +77,22 @@ object Config extends Logger {
   /** See bin/runner.sh */
   val isProductionMode = (System.getProperty("xitrum.mode") == "production")
 
-  /** Taken from xitrum.json */
-  val config = Loader.jsonFromClasspath[Config]("xitrum.json")
+  /** Loaded from xitrum.json */
+  val config = {
+    var ret: Config = null
+    try {
+      ret = Loader.jsonFromClasspath[Config]("xitrum.json")
+    } catch {
+      case e =>
+        exitOnError("Could not load config/xitrum.json. For an example, see https://github.com/ngocdaothanh/xitrum-new/blob/master/config/xitrum.json", e)
+    }
+    ret
+  }
+
+  def warnOnDefaultSecureKey() {
+    if (config.session.secureKey == DEFAULT_SECURE_KEY)
+      logger.warn("For security, change secureKey in config/xitrum.json to your own!")
+  }
 
   //----------------------------------------------------------------------------
 

@@ -1,7 +1,3 @@
-// To build Xitrum from source code:
-// 1. From Xitrum source code directory, run SBT without any argument
-// 2. From SBT prompt, run + publish-local (yes, with the plus sign)
-
 organization := "tv.cntt"
 
 name := "xitrum"
@@ -15,6 +11,12 @@ scalacOptions ++= Seq(
 
 // Put config directory in classpath for easier development (sbt console etc.)
 unmanagedBase in Runtime <<= baseDirectory { base => base / "config" }
+
+// Akka ------------------------------------------------------------------------
+
+resolvers += "Typesafe" at "http://repo.typesafe.com/typesafe/releases/"
+
+libraryDependencies += "com.typesafe.akka" % "akka-actor" % "2.0.3"
 
 // Hazelcast -------------------------------------------------------------------
 

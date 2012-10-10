@@ -25,6 +25,9 @@ object Server extends Logger {
 
     val mode = if (Config.isProductionMode) "production" else "development"
     logger.info("Xitrum started in {} mode", mode)
+
+    // This is a good timing to warn
+    Config.warnOnDefaultSecureKey()
   }
 
   private def start(https: Boolean) {
