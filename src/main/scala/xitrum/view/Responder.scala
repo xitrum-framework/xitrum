@@ -180,7 +180,7 @@ trait Responder extends JS with Flash with Knockout {
    */
   def respondJsonP(obj: Any, function: String): ChannelFuture = {
     val json = Json.generate(obj)
-    val text = function + "(" + json + ")"
+    val text = function + "(" + json + ");\r\n"
     respondJs(text)
   }
 
@@ -190,7 +190,7 @@ trait Responder extends JS with Flash with Knockout {
    * Content-Type header is set to "application/javascript".
    */
   def respondJsonPText(any: Any, function: String): ChannelFuture = {
-    val text = function + "(" + any + ")"
+    val text = function + "(" + jsEscape(any) + ");\r\n"
     respondJs(text)
   }
 
@@ -379,18 +379,6 @@ trait Responder extends JS with Flash with Knockout {
 
   //----------------------------------------------------------------------------
 
-  def respondDefault404Page(): ChannelFuture = {
-    XSendFile.set404Page(response)
-    respond()
-  }
-
-  def respondDefault500Page(): ChannelFuture = {
-    XSendFile.set500Page(response)
-    respond()
-  }
-
-  //----------------------------------------------------------------------------
-
   def respondWebSocket(text: String): ChannelFuture = {
     channel.write(new TextWebSocketFrame(text))
   }
@@ -439,6 +427,18 @@ trait Responder extends JS with Flash with Knockout {
 
     builder.append("\r\n\r\n")
     respondText(builder.toString)
+  }
+
+  //----------------------------------------------------------------------------
+
+  def respondDefault404Page(): ChannelFuture = {
+    XSendFile.set404Page(response)
+    respond()
+  }
+
+  def respondDefault500Page(): ChannelFuture = {
+    XSendFile.set500Page(response)
+    respond()
   }
 
   //----------------------------------------------------------------------------

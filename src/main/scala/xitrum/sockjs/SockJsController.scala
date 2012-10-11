@@ -85,7 +85,7 @@ class SockJsController extends Controller with SkipCSRFCheck {
 
   //----------------------------------------------------------------------------
 
-  def xhrTransportOPTIONSReceive = OPTIONS(":serverId/:sessionId/xhr") {
+  def xhrPollingTransportOPTIONSReceive = OPTIONS(":serverId/:sessionId/xhr") {
     xhrTransportOPTIONS()
   }
 
@@ -93,7 +93,7 @@ class SockJsController extends Controller with SkipCSRFCheck {
     xhrTransportOPTIONS()
   }
 
-  def xhrTransportReceive = POST(":serverId/:sessionId/xhr") {
+  def xhrPollingTransportReceive = POST(":serverId/:sessionId/xhr") {
     val sessionId = param("sessionId")
 
     SockJsPollingSessions.subscribeOnceByClient(pathPrefix, sessionId, { resulto =>
@@ -127,8 +127,6 @@ class SockJsController extends Controller with SkipCSRFCheck {
           }
       }
     })
-
-    addConnectionClosedListener{ SockJsPollingSessions.unsubscribeByClient(sessionId) }
   }
 
   def xhrTransportSend = POST(":serverId/:sessionId/xhr_send") {
@@ -218,6 +216,103 @@ class SockJsController extends Controller with SkipCSRFCheck {
     })
 
     addConnectionClosedListener{ SockJsPollingSessions.unsubscribeByClient(sessionId) }
+  }
+
+  //----------------------------------------------------------------------------
+
+  def jsonPPollingTransportReceive = GET(":serverId/:sessionId/jsonp") {
+    paramo("c") match {
+      case None =>
+        response.setStatus(HttpResponseStatus.INTERNAL_SERVER_ERROR)
+        val future = respondText("\"callback\" parameter required")
+        future.addListener(new ChannelFutureListener {
+          def operationComplete(f: ChannelFuture) {
+            channel.close()
+          }
+        })
+
+      case Some(callback) =>
+        val sessionId = param("sessionId")
+        SockJsPollingSessions.subscribeOnceByClient(pathPrefix, sessionId, { resulto =>
+          resulto match {
+            case None =>
+              setCORS()
+              setNoClientCache()
+              respondJs(callback + "(\"o\");\r\n")
+
+            case Some(result) =>
+              result match {
+                case SubscribeOnceByClientResultAnotherConnectionStillOpen =>
+                  setCORS()
+                  setNoClientCache()
+                  val future = respondJsonPText("c[2010,\"Another connection still open\"]", callback)
+                  future.addListener(new ChannelFutureListener {
+                    def operationComplete(f: ChannelFuture) {
+                      channel.close()
+                    }
+                  })
+
+                case SubscribeOnceByClientResultMessages(messages) =>
+                  setCORS()
+                  setNoClientCache()
+                  if (messages.isEmpty) {
+                    respondJsonPText("h", callback)
+                  } else {
+                    val json = Json.generate(messages)
+                    respondJsonPText("a" + json, callback)
+                  }
+              }
+          }
+        })
+    }
+  }
+
+  def jsonPTransportSend = POST(":serverId/:sessionId/jsonp_send") {
+    val body: String = try {
+      val contentType = request.getHeader(HttpHeaders.Names.CONTENT_TYPE)
+      if (contentType != null && contentType.toLowerCase.startsWith(HttpHeaders.Values.APPLICATION_X_WWW_FORM_URLENCODED)) {
+        param("d")
+      } else {
+        request.getContent().toString(Config.requestCharset)
+      }
+    } catch {
+      case _ =>
+        ""
+    }
+
+    if (body.isEmpty) {
+      response.setStatus(HttpResponseStatus.INTERNAL_SERVER_ERROR)
+      respondText("Payload expected.")
+    } else {
+      val sessionId = param("sessionId")
+
+      val messages: Seq[String] = try {
+        // body: ["m1", "m2"]
+        Json.parse[Seq[String]](body)
+      } catch {
+        case _ =>
+          response.setStatus(HttpResponseStatus.INTERNAL_SERVER_ERROR)
+          val future = respondText("Broken JSON encoding.")
+          future.addListener(new ChannelFutureListener {
+            def operationComplete(f: ChannelFuture) {
+              channel.close()
+            }
+          })
+          null
+      }
+
+      if (messages != null) {
+        if (SockJsPollingSessions.sendMessagesByClient(sessionId, messages)) {
+          // Konqueror does weird things on 204.
+          // As a workaround we need to respond with something - let it be the string "ok".
+          setCORS()
+          setNoClientCache()
+          respondText("ok")
+        } else {
+          respondDefault404Page()
+        }
+      }
+    }
   }
 
   //----------------------------------------------------------------------------
