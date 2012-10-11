@@ -14,9 +14,10 @@ case class  SendMessagesByHandler(messages: Seq[String]) extends SockJsPollingSe
 case object SubscribeOnceByClient                        extends SockJsPollingSessionActorMessage
 case object UnsubscribeByClient                          extends SockJsPollingSessionActorMessage
 
-sealed trait SockJsSubscribeOnceByClientResult
-case class  SubscribeOnceByClientResultMessages(messages: List[String]) extends SockJsSubscribeOnceByClientResult
-case object SubscribeOnceByClientResultAnotherConnectionStillOpen       extends SockJsSubscribeOnceByClientResult
+sealed trait SockJsSubscribeByClientResult
+case object SubscribeByClientResultAnotherConnectionStillOpen       extends SockJsSubscribeByClientResult
+case object SubscribeByClientResultOpen                             extends SockJsSubscribeByClientResult
+case class  SubscribeByClientResultMessages(messages: List[String]) extends SockJsSubscribeByClientResult
 
 /**
  * There should be at most one subscriber:
@@ -57,7 +58,7 @@ class SockJsPollingSession(sockJsHandler: SockJsHandler) extends Actor {
         }
       } else {
         // buffer is empty at this moment
-        clientSender ! SubscribeOnceByClientResultMessages(messages.toList)
+        clientSender ! SubscribeByClientResultMessages(messages.toList)
         clientSender = null
       }
 
@@ -67,11 +68,11 @@ class SockJsPollingSession(sockJsHandler: SockJsHandler) extends Actor {
         if (buffer.isEmpty) {
           clientSender = sender
         } else {
-          sender ! SubscribeOnceByClientResultMessages(buffer.toList)
+          sender ! SubscribeByClientResultMessages(buffer.toList)
           buffer.clear()
         }
       } else {
-        sender ! SubscribeOnceByClientResultAnotherConnectionStillOpen
+        sender ! SubscribeByClientResultAnotherConnectionStillOpen
       }
 
     case UnsubscribeByClient =>
@@ -83,7 +84,7 @@ class SockJsPollingSession(sockJsHandler: SockJsHandler) extends Actor {
         context.stop(self)
       } else {
         // No message for subscriber for a long time
-        clientSender ! SubscribeOnceByClientResultMessages(Nil)
+        clientSender ! SubscribeByClientResultMessages(Nil)
         clientSender = null
       }
   }

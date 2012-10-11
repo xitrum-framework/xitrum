@@ -1,6 +1,6 @@
 package xitrum.sockjs
 
-import java.util.Random
+import java.util.{Arrays, Random}
 
 import org.jboss.netty.channel.{ChannelFuture, ChannelFutureListener}
 import org.jboss.netty.buffer.ChannelBuffers
@@ -13,20 +13,55 @@ import xitrum.etag.NotModified
 import xitrum.routing.Routes
 import xitrum.view.DocType
 
+// General info:
+// http://sockjs.github.com/sockjs-protocol/sockjs-protocol-0.3.html
+// http://en.wikipedia.org/wiki/Cross-origin_resource_sharing
+// https://developer.mozilla.org/en-US/docs/HTTP_access_control
+//
+// Reference implementation (need to read when in doubt):
+// https://github.com/sockjs/sockjs-node/tree/master/src
 object SockJsController {
-  val random = new Random
+  private val random = new Random
+  def randomLong() = random.nextLong()
 
-  val h2KiB = {
+  /** 2KB of 'h' characters */
+  val h2KB = {
     val ret = ChannelBuffers.buffer(2048 + 1)
     for (i <- 1 to 2048) ret.writeByte('h')
     ret.writeByte('\n')
     ret
   }
+
+  /** Template for htmlfile transport */
+  def htmlfile(callback: String, with1024: Boolean): String = {
+    val template = """<!doctype html>
+<html><head>
+  <meta http-equiv="X-UA-Compatible" content="IE=edge" />
+  <meta http-equiv="Content-Type" content="text/html; charset=UTF-8" />
+</head><body><h2>Don't panic!</h2>
+  <script>
+    document.domain = document.domain;
+    var c = parent.""" + callback + """;
+    c.start();
+    function p(d) {c.message(d);};
+    window.onload = function() {c.stop();};
+  </script>"""
+
+    // Safari needs at least 1024 bytes to parse the website:
+    // http://code.google.com/p/browsersec/wiki/Part2#Survey_of_content_sniffing_behaviors
+
+    // https://github.com/sockjs/sockjs-node/blob/master/src/trans-htmlfile.coffee#L29
+    // http://stackoverflow.com/questions/2804827/create-a-string-with-n-characters
+    if (with1024) {
+      val spaces = new Array[Char](1024 - template.length + 14)
+      Arrays.fill(spaces, ' ')
+      template + new String(spaces) + "\r\n\r\n"
+    } else {
+      template
+    }
+  }
 }
 
-// http://sockjs.github.com/sockjs-protocol/sockjs-protocol-0.3.html
-// http://en.wikipedia.org/wiki/Cross-origin_resource_sharing
-// https://developer.mozilla.org/en-US/docs/HTTP_access_control
 class SockJsController extends Controller with SkipCSRFCheck {
   pathPrefix = "echo"
 
@@ -69,10 +104,9 @@ class SockJsController extends Controller with SkipCSRFCheck {
   }
 
   def infoGET = GET("info") {
-    val random = SockJsController.random.nextLong()
     setCORS()
     setNoClientCache()
-    respondJsonText("""{"websocket": true, "cookie_needed": false, "origins": ["*:*"], "entropy": """ + random + "}")
+    respondJsonText("""{"websocket": true, "cookie_needed": false, "origins": ["*:*"], "entropy": """ + SockJsController.randomLong() + "}")
   }
 
   def infoOPTIONS = OPTIONS("info") {
@@ -97,33 +131,27 @@ class SockJsController extends Controller with SkipCSRFCheck {
     val sessionId = param("sessionId")
 
     SockJsPollingSessions.subscribeOnceByClient(pathPrefix, sessionId, { resulto =>
+      setCORS()
+      setNoClientCache()
+
       resulto match {
-        case None =>
-          setCORS()
-          setNoClientCache()
+        case SubscribeByClientResultAnotherConnectionStillOpen =>
+          val future = respondJs("c[2010,\"Another connection still open\"]\n")
+          future.addListener(new ChannelFutureListener {
+            def operationComplete(f: ChannelFuture) {
+              channel.close()
+            }
+          })
+
+        case SubscribeByClientResultOpen =>
           respondJs("o\n")
 
-        case Some(result) =>
-          result match {
-            case SubscribeOnceByClientResultAnotherConnectionStillOpen =>
-              setCORS()
-              setNoClientCache()
-              val future = respondJs("c[2010,\"Another connection still open\"]\n")
-              future.addListener(new ChannelFutureListener {
-                def operationComplete(f: ChannelFuture) {
-                  channel.close()
-                }
-              })
-
-            case SubscribeOnceByClientResultMessages(messages) =>
-              setCORS()
-              setNoClientCache()
-              if (messages.isEmpty) {
-                respondJs("h\n")
-              } else {
-                val json = messages.map(jsEscape(_)).mkString("a[", ",", "]\n")
-                respondJs(json)
-              }
+        case SubscribeByClientResultMessages(messages) =>
+          if (messages.isEmpty) {
+            respondJs("h\n")
+          } else {
+            val json = messages.map(jsEscape(_)).mkString("a[", ",", "]\n")
+            respondJs(json)
           }
       }
     })
@@ -176,94 +204,127 @@ class SockJsController extends Controller with SkipCSRFCheck {
 
     SockJsPollingSessions.subscribeStreamingByClient(pathPrefix, sessionId, { resulto =>
       resulto match {
-        case None =>
+        case SubscribeByClientResultAnotherConnectionStillOpen =>
+          setCORS()
+          setNoClientCache()
+          val future = respondJs("c[2010,\"Another connection still open\"]\n")
+          future.addListener(new ChannelFutureListener {
+            def operationComplete(f: ChannelFuture) {
+              channel.close()
+            }
+          })
+          false
+
+        case SubscribeByClientResultOpen =>
+          setCORS()
+          setNoClientCache()
+          response.setChunked(true)
+          respondBinary(SockJsController.h2KB)
+          respondJs("o\n")
+
+          addConnectionClosedListener{ SockJsPollingSessions.unsubscribeByClient(sessionId) }
+          true
+
+        case SubscribeByClientResultMessages(messages) =>
           if (channel.isOpen()) {
-            setCORS()
-            setNoClientCache()
-
-            response.setChunked(true)
-            respondBinary(SockJsController.h2KiB)
-            respondJs("o\n")
-
+            if (messages.isEmpty) {
+              respondText("h\n")
+            } else {
+              val json = messages.map(jsEscape(_)).mkString("a[", ",", "]\n")
+              respondText(json)
+            }
             true
           } else {
             false
           }
-
-        case Some(result) =>
-          result match {
-            case SubscribeOnceByClientResultAnotherConnectionStillOpen =>
-              setCORS()
-              setNoClientCache()
-              respondJs("c[2010,\"Another connection still open\"]\n")
-              false
-
-            case SubscribeOnceByClientResultMessages(messages) =>
-              if (channel.isOpen()) {
-                if (messages.isEmpty) {
-                  respondJs("h\n")
-                } else {
-                  val json = messages.map(jsEscape(_)).mkString("a[", ",", "]\n")
-                  respondJs(json)
-                }
-
-                true
-              } else {
-                false
-              }
-          }
       }
     })
+  }
 
-    addConnectionClosedListener{ SockJsPollingSessions.unsubscribeByClient(sessionId) }
+  //----------------------------------------------------------------------------
+
+  def htmlfileTransportReceive = GET(":serverId/:sessionId/htmlfile") {
+    val callbacko = callbackParam()
+    if (callbacko.isDefined) {
+      val callback  = callbacko.get
+      val sessionId = param("sessionId")
+
+      SockJsPollingSessions.subscribeStreamingByClient(pathPrefix, sessionId, { resulto =>
+        resulto match {
+          case SubscribeByClientResultAnotherConnectionStillOpen =>
+            setCORS()
+            setNoClientCache()
+            val future = respondHtml(
+              SockJsController.htmlfile(callback, false) +
+              "<script>\np('c[2010,\"Another connection still open\"]');\n</script>\r\n"
+            )
+            future.addListener(new ChannelFutureListener {
+              def operationComplete(f: ChannelFuture) {
+                channel.close()
+              }
+            })
+            false
+
+          case SubscribeByClientResultOpen =>
+            setCORS()
+            setNoClientCache()
+            response.setChunked(true)
+            respondHtml(SockJsController.htmlfile(callback, true))
+            respondText("<script>\np(\"o\");\n</script>\r\n")
+
+            addConnectionClosedListener{ SockJsPollingSessions.unsubscribeByClient(sessionId) }
+            true
+
+          case SubscribeByClientResultMessages(messages) =>
+            if (channel.isOpen()) {
+              if (messages.isEmpty) {
+                respondText("<script>\np(\"h\");\n</script>\r\n")
+              } else {
+                val json = Json.generate(messages)
+                respondText("<script>\np(" + jsEscape("a" + json) + ");\n</script>\r\n")
+              }
+              true
+            } else {
+              false
+            }
+        }
+      })
+    }
   }
 
   //----------------------------------------------------------------------------
 
   def jsonPPollingTransportReceive = GET(":serverId/:sessionId/jsonp") {
-    paramo("c") match {
-      case None =>
-        response.setStatus(HttpResponseStatus.INTERNAL_SERVER_ERROR)
-        val future = respondText("\"callback\" parameter required")
-        future.addListener(new ChannelFutureListener {
-          def operationComplete(f: ChannelFuture) {
-            channel.close()
-          }
-        })
+    val callbacko = callbackParam()
+    if (callbacko.isDefined) {
+      val callback  = callbacko.get
+      val sessionId = param("sessionId")
 
-      case Some(callback) =>
-        val sessionId = param("sessionId")
-        SockJsPollingSessions.subscribeOnceByClient(pathPrefix, sessionId, { resulto =>
-          resulto match {
-            case None =>
-              setCORS()
-              setNoClientCache()
-              respondJs(callback + "(\"o\");\r\n")
+      SockJsPollingSessions.subscribeOnceByClient(pathPrefix, sessionId, { resulto =>
+        setCORS()
+        setNoClientCache()
 
-            case Some(result) =>
-              result match {
-                case SubscribeOnceByClientResultAnotherConnectionStillOpen =>
-                  setCORS()
-                  setNoClientCache()
-                  val future = respondJsonPText("c[2010,\"Another connection still open\"]", callback)
-                  future.addListener(new ChannelFutureListener {
-                    def operationComplete(f: ChannelFuture) {
-                      channel.close()
-                    }
-                  })
-
-                case SubscribeOnceByClientResultMessages(messages) =>
-                  setCORS()
-                  setNoClientCache()
-                  if (messages.isEmpty) {
-                    respondJsonPText("h", callback)
-                  } else {
-                    val json = Json.generate(messages)
-                    respondJsonPText("a" + json, callback)
-                  }
+        resulto match {
+          case SubscribeByClientResultAnotherConnectionStillOpen =>
+            val future = respondJsonPText("c[2010,\"Another connection still open\"]", callback)
+            future.addListener(new ChannelFutureListener {
+              def operationComplete(f: ChannelFuture) {
+                channel.close()
               }
-          }
-        })
+            })
+
+          case SubscribeByClientResultOpen =>
+            respondJs(callback + "(\"o\");\r\n")
+
+          case SubscribeByClientResultMessages(messages) =>
+            if (messages.isEmpty) {
+              respondJsonPText("h", callback)
+            } else {
+              val json = Json.generate(messages)
+              respondJsonPText("a" + json, callback)
+            }
+        }
+      })
     }
   }
 
@@ -322,40 +383,33 @@ class SockJsController extends Controller with SkipCSRFCheck {
 
     SockJsPollingSessions.subscribeStreamingByClient(pathPrefix, sessionId, { resulto =>
       resulto match {
-        case None =>
+        case SubscribeByClientResultAnotherConnectionStillOpen =>
+          setCORS()
+          setNoClientCache()
+          respondJs("c[2010,\"Another connection still open\"]\n")
+          false
+
+        case SubscribeByClientResultOpen =>
+          setCORS()
+          respondEventSource("o")
+
+          addConnectionClosedListener{ SockJsPollingSessions.unsubscribeByClient(sessionId) }
+          true
+
+        case SubscribeByClientResultMessages(messages) =>
           if (channel.isOpen()) {
-            setCORS()
-            respondEventSource("o")
+            if (messages.isEmpty) {
+              respondEventSource("h")
+            } else {
+              val json = messages.map(jsEscape(_)).mkString("a[", ",", "]")
+              respondEventSource(json)
+            }
             true
           } else {
             false
           }
-
-        case Some(result) =>
-          result match {
-            case SubscribeOnceByClientResultAnotherConnectionStillOpen =>
-              setCORS()
-              setNoClientCache()
-              respondJs("c[2010,\"Another connection still open\"]\n")
-              false
-
-            case SubscribeOnceByClientResultMessages(messages) =>
-              if (channel.isOpen()) {
-                if (messages.isEmpty) {
-                  respondEventSource("h")
-                } else {
-                  val json = messages.map(jsEscape(_)).mkString("a[", ",", "]")
-                  respondEventSource(json)
-                }
-                true
-              } else {
-                false
-              }
-          }
       }
     })
-
-    addConnectionClosedListener{ SockJsPollingSessions.unsubscribeByClient(sessionId) }
   }
 
   //----------------------------------------------------------------------------
@@ -436,5 +490,20 @@ class SockJsController extends Controller with SkipCSRFCheck {
     setCORS()
     setClientCacheAggressively()
     respond()
+  }
+
+  private def callbackParam(): Option[String] = {
+    val paramName = if (uriParams.isDefinedAt("c")) "c" else "callback"
+    val ret = paramo(paramName)
+    if (ret == None) {
+      response.setStatus(HttpResponseStatus.INTERNAL_SERVER_ERROR)
+      val future = respondText("\"callback\" parameter required")
+      future.addListener(new ChannelFutureListener {
+        def operationComplete(f: ChannelFuture) {
+          channel.close()
+        }
+      })
+    }
+    ret
   }
 }

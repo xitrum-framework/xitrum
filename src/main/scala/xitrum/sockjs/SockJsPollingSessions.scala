@@ -15,20 +15,20 @@ object SockJsPollingSessions {
    * callback:
    * - arg: None means the session has just been openned
    */
-  def subscribeOnceByClient(pathPrefix: String, sockJsSessionId: String, callback: (Option[SockJsSubscribeOnceByClientResult]) => Unit) {
+  def subscribeOnceByClient(pathPrefix: String, sockJsSessionId: String, callback: (SockJsSubscribeByClientResult) => Unit) {
     val ref = system.actorFor("/user/" + sockJsSessionId)
     if (ref.isTerminated) {
       val handler = Routes.createSockJsHandler(pathPrefix)
       val ref     = system.actorOf(Props(new SockJsPollingSession(handler)), sockJsSessionId)
       handler.sockJsPollingSessionActorRef = ref
-      callback(None)
+      callback(SubscribeByClientResultOpen)
     } else {
-      val future = ref.ask(SubscribeOnceByClient)(25 seconds).mapTo[SockJsSubscribeOnceByClientResult]
+      val future = ref.ask(SubscribeOnceByClient)(25 seconds).mapTo[SockJsSubscribeByClientResult]
       future.onComplete {
         case Left(e) =>
-          callback(Some(SubscribeOnceByClientResultMessages(Nil)))
+          callback(SubscribeByClientResultMessages(Nil))
         case Right(result) =>
-          callback(Some(result))
+          callback(result)
       }
     }
   }
@@ -38,13 +38,13 @@ object SockJsPollingSessions {
    * - arg: None means the session has just been openned
    * - result: true means subscribeStreaming should be called again to get more messages
    */
-  def subscribeStreamingByClient(pathPrefix: String, sockJsSessionId: String, callback: (Option[SockJsSubscribeOnceByClientResult]) => Boolean) {
+  def subscribeStreamingByClient(pathPrefix: String, sockJsSessionId: String, callback: (SockJsSubscribeByClientResult) => Boolean) {
     val ref = system.actorFor("/user/" + sockJsSessionId)
     if (ref.isTerminated) {
       val handler = Routes.createSockJsHandler(pathPrefix)
       val ref     = system.actorOf(Props(new SockJsPollingSession(handler)), sockJsSessionId)
       handler.sockJsPollingSessionActorRef = ref
-      if (callback(None))
+      if (callback(SubscribeByClientResultOpen))
         subscribeStreamingByClient(ref, callback)
     } else {
       subscribeStreamingByClient(ref, callback)
@@ -52,14 +52,14 @@ object SockJsPollingSessions {
   }
 
   // Called by subscribeStreaming above, but uses ref to avoid actor lookup cost. */
-  private def subscribeStreamingByClient(actorRef: ActorRef, callback: (Option[SockJsSubscribeOnceByClientResult]) => Boolean) {
-    val future = actorRef.ask(SubscribeOnceByClient)(25 seconds).mapTo[SockJsSubscribeOnceByClientResult]
+  private def subscribeStreamingByClient(actorRef: ActorRef, callback: (SockJsSubscribeByClientResult) => Boolean) {
+    val future = actorRef.ask(SubscribeOnceByClient)(25 seconds).mapTo[SockJsSubscribeByClientResult]
     future.onComplete {
       case Left(e) =>
-        if (callback(Some(SubscribeOnceByClientResultMessages(Nil))))
+        if (callback(SubscribeByClientResultMessages(Nil)))
           subscribeStreamingByClient(actorRef, callback)
       case Right(result) =>
-        if (callback(Some(result)) && result != SubscribeOnceByClientResultAnotherConnectionStillOpen)
+        if (callback(result) && result != SubscribeByClientResultAnotherConnectionStillOpen)
           subscribeStreamingByClient(actorRef, callback)
     }
   }
