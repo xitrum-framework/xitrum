@@ -11,7 +11,7 @@ import org.jboss.netty.handler.codec.http.{HttpMethod, QueryStringEncoder}
 import xitrum.{Config, Logger, Controller, ErrorController}
 import xitrum.controller.Action
 import xitrum.scope.request.{Params, PathInfo}
-import xitrum.sockjs.SockJsHandler
+import xitrum.sockjs.{SockJsController, SockJsHandler}
 
 object Routes extends Logger {
   type First_Other_Last = (ArrayBuffer[Action], ArrayBuffer[Action], ArrayBuffer[Action])
@@ -21,20 +21,25 @@ object Routes extends Logger {
    * When matched, method is used for creating a new controller instance,
    * then the method is invoked on that instance to get the action.
    */
-  val actions = MMap[HttpMethod, First_Other_Last]()
+  private val actions = MMap[HttpMethod, First_Other_Last]()
+
+  /** Collected from xitrum.sockjs.SockJsController */
+  private val sockJsActions = MMap[HttpMethod, First_Other_Last]()
 
   /** 404.html and 500.html is used by default */
   var error: Class[_ <: ErrorController] = _
 
   //----------------------------------------------------------------------------
 
-  def printRoutes() {
+  def printRoutes(forSockJs: Boolean) {
     // This method is only run once on start, speed is not a problem
+
+    val theActions = if (forSockJs) sockJsActions else actions
 
     val firsts = ArrayBuffer[(String, String, String)]()
     var others = ArrayBuffer[(String, String, String)]()
     val lasts  = ArrayBuffer[(String, String, String)]()
-    for ((httpMethod, (fs, os, ls)) <- actions) {
+    for ((httpMethod, (fs, os, ls)) <- theActions) {
       for (a <- fs) firsts.append((httpMethod.toString, RouteCompiler.decompile(a.route.compiledPattern), ControllerReflection.controllerActionName(a)))
       for (a <- os) others.append((httpMethod.toString, RouteCompiler.decompile(a.route.compiledPattern), ControllerReflection.controllerActionName(a)))
       for (a <- ls) lasts.append ((httpMethod.toString, RouteCompiler.decompile(a.route.compiledPattern), ControllerReflection.controllerActionName(a)))
@@ -54,7 +59,8 @@ object Routes extends Logger {
     all = firsts ++ others ++ lasts
 
     val strings = all.map { case (m, p, cr) => logFormat.format(m, p, cr) }
-    logger.info("Route:\n" + strings.mkString("\n"))
+    val title   = if (forSockJs) "SockJS routes" else "Routes"
+    logger.info(title + ":\n" + strings.mkString("\n"))
   }
 
   def printActionPageCaches() {
@@ -119,13 +125,19 @@ object Routes extends Logger {
     }
   }
 
-  //----------------------------------------------------------------------------
-
   def fromCacheFileOrRecollect() {
     // Avoid running twice, older version of Xitrum (v1.8) needs apps to
     // call this method explicitly
     if (actions.isEmpty) fromCacheFileOrRecollectWithRetry("routes.sclasner")
   }
+
+  def fromSockJsController() {
+    val routeCollector                        = new RouteCollector
+    val controllerClassName_actionMethodNames = routeCollector.fromSockJsController
+    fromControllerClassName_ActionMethodNames(controllerClassName_actionMethodNames, true)
+  }
+
+  //----------------------------------------------------------------------------
 
   private def fromCacheFileOrRecollectWithRetry(cachedFileName: String) {
     try {
@@ -155,8 +167,13 @@ object Routes extends Logger {
   }
 
   private def fromCacheFileOrRecollectReal(cachedFileName: String) {
-    val routeCollector                        = new RouteCollector(cachedFileName)
-    val controllerClassName_actionMethodNames = routeCollector.fromCacheFileOrRecollect()
+    val routeCollector                        = new RouteCollector
+    val controllerClassName_actionMethodNames = routeCollector.fromCacheFileOrRecollect(cachedFileName)
+    fromControllerClassName_ActionMethodNames(controllerClassName_actionMethodNames, false)
+  }
+
+  private def fromControllerClassName_ActionMethodNames(controllerClassName_actionMethodNames: Map[String, Seq[String]], forSockJsController: Boolean) {
+    val results = if (forSockJsController) sockJsActions else actions
 
     for ((controllerClassName, actionMethodNames) <- controllerClassName_actionMethodNames) {
       for (actionMethodName <- actionMethodNames) {
@@ -171,11 +188,11 @@ object Routes extends Logger {
               action.method = actionMethod  // Cache it
 
               val firsts_others_lasts =
-                if (actions.isDefinedAt(action.route.httpMethod)) {
-                  actions(action.route.httpMethod)
+                if (results.isDefinedAt(action.route.httpMethod)) {
+                  results(action.route.httpMethod)
                 } else {
                   val ret = (ArrayBuffer[Action](), ArrayBuffer[Action](), ArrayBuffer[Action]())
-                  actions(action.route.httpMethod) = ret
+                  results(action.route.httpMethod) = ret
                   ret
                 }
 

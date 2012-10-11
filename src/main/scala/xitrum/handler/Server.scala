@@ -16,7 +16,9 @@ object Server extends Logger {
     Cache.cache.size()
 
     Routes.fromCacheFileOrRecollect()
-    Routes.printRoutes()
+    Routes.fromSockJsController()
+    Routes.printRoutes(false)
+    Routes.printRoutes(true)
     Routes.printActionPageCaches()
 
     if (Config.config.port.http.isDefined)  start(false)
