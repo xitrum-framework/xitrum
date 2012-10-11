@@ -23,23 +23,18 @@ object Routes extends Logger {
    */
   private val actions = MMap[HttpMethod, First_Other_Last]()
 
-  /** Collected from xitrum.sockjs.SockJsController */
-  private val sockJsActions = MMap[HttpMethod, First_Other_Last]()
-
   /** 404.html and 500.html is used by default */
   var error: Class[_ <: ErrorController] = _
 
   //----------------------------------------------------------------------------
 
-  def printRoutes(forSockJs: Boolean) {
+  def printRoutes() {
     // This method is only run once on start, speed is not a problem
-
-    val theActions = if (forSockJs) sockJsActions else actions
 
     val firsts = ArrayBuffer[(String, String, String)]()
     var others = ArrayBuffer[(String, String, String)]()
     val lasts  = ArrayBuffer[(String, String, String)]()
-    for ((httpMethod, (fs, os, ls)) <- theActions) {
+    for ((httpMethod, (fs, os, ls)) <- actions) {
       for (a <- fs) firsts.append((httpMethod.toString, RouteCompiler.decompile(a.route.compiledPattern), ControllerReflection.controllerActionName(a)))
       for (a <- os) others.append((httpMethod.toString, RouteCompiler.decompile(a.route.compiledPattern), ControllerReflection.controllerActionName(a)))
       for (a <- ls) lasts.append ((httpMethod.toString, RouteCompiler.decompile(a.route.compiledPattern), ControllerReflection.controllerActionName(a)))
@@ -59,8 +54,17 @@ object Routes extends Logger {
     all = firsts ++ others ++ lasts
 
     val strings = all.map { case (m, p, cr) => logFormat.format(m, p, cr) }
-    val title   = if (forSockJs) "SockJS routes" else "Routes"
-    logger.info(title + ":\n" + strings.mkString("\n"))
+    logger.info("Routes:\n" + strings.mkString("\n"))
+  }
+
+  def printSockJsRoutes() {
+    if (!sockJsRoutes.isEmpty) {
+      val strings = ArrayBuffer[String]()
+      for ((pathPrefix, handlerClass) <- sockJsRoutes) {
+        strings += pathPrefix + " -> " + handlerClass.getName
+      }
+      logger.info("SockJS routes:\n" + strings.mkString("\n"))
+    }
   }
 
   def printActionPageCaches() {
@@ -173,8 +177,6 @@ object Routes extends Logger {
   }
 
   private def fromControllerClassName_ActionMethodNames(controllerClassName_actionMethodNames: Map[String, Seq[String]], forSockJsController: Boolean) {
-    val results = if (forSockJsController) sockJsActions else actions
-
     for ((controllerClassName, actionMethodNames) <- controllerClassName_actionMethodNames) {
       for (actionMethodName <- actionMethodNames) {
         getActionMethod(controllerClassName, actionMethodName) match {
@@ -182,30 +184,42 @@ object Routes extends Logger {
 
           case Some(actionMethod) =>
             val controllerClass = actionMethod.getDeclaringClass
-            val controller      = controllerClass.newInstance()
-            val action          = actionMethod.invoke(controller).asInstanceOf[Action]
-            if (action.route != null && action.route.httpMethod != null) {  // Actions created by indirectAction do not have route
-              action.method = actionMethod  // Cache it
+            val controller      = controllerClass.newInstance().asInstanceOf[Controller]
 
-              val firsts_others_lasts =
-                if (results.isDefinedAt(action.route.httpMethod)) {
-                  results(action.route.httpMethod)
-                } else {
-                  val ret = (ArrayBuffer[Action](), ArrayBuffer[Action](), ArrayBuffer[Action]())
-                  results(action.route.httpMethod) = ret
-                  ret
-                }
-
-              val arrayBuffer = action.route.order match {
-                case RouteOrder.FIRST => firsts_others_lasts._1
-                case RouteOrder.OTHER => firsts_others_lasts._2
-                case RouteOrder.LAST  => firsts_others_lasts._3
+            if (forSockJsController) {
+              for (pathPrefix <- sockJsRoutes.keys) {
+                controller.pathPrefix = pathPrefix
+                populateActions(controller, actionMethod)
               }
-
-              arrayBuffer.append(action)
+            } else {
+              populateActions(controller, actionMethod)
             }
         }
       }
+    }
+  }
+
+  private def populateActions(controller: Controller, actionMethod: Method) {
+    val action          = actionMethod.invoke(controller).asInstanceOf[Action]
+    if (action.route != null && action.route.httpMethod != null) {  // Actions created by indirectAction do not have route
+      action.method = actionMethod  // Cache it
+
+      val firsts_others_lasts =
+        if (actions.isDefinedAt(action.route.httpMethod)) {
+          actions(action.route.httpMethod)
+        } else {
+          val ret = (ArrayBuffer[Action](), ArrayBuffer[Action](), ArrayBuffer[Action]())
+          actions(action.route.httpMethod) = ret
+          ret
+        }
+
+      val arrayBuffer = action.route.order match {
+        case RouteOrder.FIRST => firsts_others_lasts._1
+        case RouteOrder.OTHER => firsts_others_lasts._2
+        case RouteOrder.LAST  => firsts_others_lasts._3
+      }
+
+      arrayBuffer.append(action)
     }
   }
 
