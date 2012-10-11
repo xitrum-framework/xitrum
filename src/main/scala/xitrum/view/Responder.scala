@@ -389,21 +389,7 @@ trait Responder extends JS with Flash with Knockout {
 
   //----------------------------------------------------------------------------
 
-  /**
-   * To respond event source, call this method as many time as you want.
-   * Event Source response is a special kind of chunked response.
-   * Data must be Must be  UTF-8.
-   * See:
-   * - http://sockjs.github.com/sockjs-protocol/sockjs-protocol-0.3.3.html#section-94
-   * - http://dev.w3.org/html5/eventsource/
-   */
-  def respondEventSource(data: String, event: String = "message"): ChannelFuture = {
-    if (!responded) {
-      response.setHeader(CONTENT_TYPE, "text/event-stream; charset=UTF-8")
-      response.setChunked(true)
-      respondText("\r\n")  // Send a new line prelude, due to a bug in Opera
-    }
-
+  def renderEventSource(data: String, event: String = "message"): String = {
     val builder = new StringBuilder
 
     if (event != "message") {
@@ -426,7 +412,24 @@ trait Responder extends JS with Flash with Knockout {
     }
 
     builder.append("\r\n\r\n")
-    respondText(builder.toString)
+    builder.toString
+  }
+
+  /**
+   * To respond event source, call this method as many time as you want.
+   * Event Source response is a special kind of chunked response.
+   * Data must be Must be  UTF-8.
+   * See:
+   * - http://sockjs.github.com/sockjs-protocol/sockjs-protocol-0.3.3.html#section-94
+   * - http://dev.w3.org/html5/eventsource/
+   */
+  def respondEventSource(data: String, event: String = "message"): ChannelFuture = {
+    if (!responded) {
+      response.setHeader(CONTENT_TYPE, "text/event-stream; charset=UTF-8")
+      response.setChunked(true)
+      respondText("\r\n")  // Send a new line prelude, due to a bug in Opera
+    }
+    respondText(renderEventSource(data, event))
   }
 
   //----------------------------------------------------------------------------

@@ -1,5 +1,7 @@
 package xitrum.sockjs
 
+import java.net.URLEncoder
+
 import akka.actor.{Actor, ActorRef, ActorSystem, Props, ReceiveTimeout}
 import akka.pattern.ask
 import akka.util.duration._
@@ -16,10 +18,11 @@ object SockJsPollingSessions {
    * - arg: None means the session has just been openned
    */
   def subscribeOnceByClient(pathPrefix: String, sockJsSessionId: String, callback: (SockJsSubscribeByClientResult) => Unit) {
-    val ref = system.actorFor("/user/" + sockJsSessionId)
+    val escaped = escapeActorPath(sockJsSessionId)
+    val ref     = system.actorFor("/user/" + escaped)
     if (ref.isTerminated) {
       val handler = Routes.createSockJsHandler(pathPrefix)
-      val ref     = system.actorOf(Props(new SockJsPollingSession(handler)), sockJsSessionId)
+      val ref     = system.actorOf(Props(new SockJsPollingSession(handler)), escaped)
       handler.sockJsPollingSessionActorRef = ref
       callback(SubscribeByClientResultOpen)
     } else {
@@ -39,10 +42,11 @@ object SockJsPollingSessions {
    * - result: true means subscribeStreaming should be called again to get more messages
    */
   def subscribeStreamingByClient(pathPrefix: String, sockJsSessionId: String, callback: (SockJsSubscribeByClientResult) => Boolean) {
-    val ref = system.actorFor("/user/" + sockJsSessionId)
+    val escaped = escapeActorPath(sockJsSessionId)
+    val ref     = system.actorFor("/user/" + escaped)
     if (ref.isTerminated) {
       val handler = Routes.createSockJsHandler(pathPrefix)
-      val ref     = system.actorOf(Props(new SockJsPollingSession(handler)), sockJsSessionId)
+      val ref     = system.actorOf(Props(new SockJsPollingSession(handler)), escaped)
       handler.sockJsPollingSessionActorRef = ref
       if (callback(SubscribeByClientResultOpen))
         subscribeStreamingByClient(ref, callback)
@@ -66,7 +70,8 @@ object SockJsPollingSessions {
 
   /** @return false means session not found */
   def sendMessagesByClient(sockJsSessionId: String, messages: Seq[String]): Boolean = {
-    val ref = system.actorFor("/user/" + sockJsSessionId)
+    val escaped = escapeActorPath(sockJsSessionId)
+    val ref     = system.actorFor("/user/" + escaped)
     if (ref.isTerminated) {
       false
     } else {
@@ -76,12 +81,14 @@ object SockJsPollingSessions {
   }
 
   def unsubscribeByClient(sockJsSessionId: String) {
-    val ref = system.actorFor("/user/" + sockJsSessionId)
+    val escaped = escapeActorPath(sockJsSessionId)
+    val ref     = system.actorFor("/user/" + escaped)
     ref ! UnsubscribeByClient
   }
 
   def closeByClient(sockJsSessionId: String) {
-    val ref = system.actorFor("/user/" + sockJsSessionId)
+    val escaped = escapeActorPath(sockJsSessionId)
+    val ref     = system.actorFor("/user/" + escaped)
     system.stop(ref)
   }
 
@@ -98,5 +105,15 @@ object SockJsPollingSessions {
 
   def closeByHandler(actorRef: ActorRef) {
     system.stop(actorRef)
+  }
+
+  //----------------------------------------------------------------------------
+
+  /**
+   * Need this because java.net.URISyntaxException will be thrown if
+   * sockJsSessionId contains strange charater.
+   */
+  private def escapeActorPath(sockJsSessionId: String) = {
+    URLEncoder.encode(sockJsSessionId, "UTF-8")
   }
 }

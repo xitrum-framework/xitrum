@@ -398,12 +398,11 @@ class SockJsController extends Controller with SkipCSRFCheck {
         case SubscribeByClientResultMessages(messages) =>
           if (channel.isOpen()) {
             if (messages.isEmpty) {
-              respondEventSource("h")
+              respondStreamingWithLimit(renderEventSource("h"))
             } else {
               val json = messages.map(jsEscape(_)).mkString("a[", ",", "]")
-              respondEventSource(json)
+              respondStreamingWithLimit(renderEventSource(json))
             }
-            true
           } else {
             false
           }
