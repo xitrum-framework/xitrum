@@ -52,7 +52,7 @@ trait CSRF {
         x.toString
 
       case None =>
-        val y = UUID.randomUUID.toString
+        val y = UUID.randomUUID().toString
         session(TOKEN) = y
         y
     }

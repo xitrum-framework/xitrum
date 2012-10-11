@@ -47,7 +47,7 @@ class HazelcastSessionStore extends SessionStore {
           SecureBase64.decrypt(base64String).get.asInstanceOf[String]
         } catch {
           case _ =>
-            UUID.randomUUID.toString
+            UUID.randomUUID().toString
         }
         cookie.setHttpOnly(true)
         cookie.setPath(cookiePath)
@@ -55,7 +55,7 @@ class HazelcastSessionStore extends SessionStore {
         ret
 
       case None =>
-        val ret = UUID.randomUUID.toString
+        val ret = UUID.randomUUID().toString
         val cookie = new DefaultCookie(Config.config.session.cookieName, SecureBase64.encrypt(ret))
         cookie.setHttpOnly(true)
         cookie.setPath(cookiePath)

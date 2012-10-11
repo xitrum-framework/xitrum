@@ -1,0 +1,290 @@
+package xitrum.sockjs
+
+import java.util.Random
+
+import org.jboss.netty.buffer.ChannelBuffers
+import org.jboss.netty.handler.codec.http.{HttpHeaders, HttpResponseStatus}
+
+import xitrum.{Config, Controller, SkipCSRFCheck}
+import xitrum.etag.NotModified
+import xitrum.routing.Routes
+import xitrum.view.DocType
+
+import com.codahale.jerkson.Json
+import com.hazelcast.core.ItemListener
+import com.hazelcast.core.ItemEvent
+
+
+object SockJsController {
+  val random = new Random
+
+  val h2KiB = {
+    val ret = ChannelBuffers.buffer(2048 + 1)
+    for (i <- 1 to 2048) ret.writeByte('h')
+    ret.writeByte('\n')
+    ret
+  }
+}
+
+// http://sockjs.github.com/sockjs-protocol/sockjs-protocol-0.3.html
+// http://en.wikipedia.org/wiki/Cross-origin_resource_sharing
+// https://developer.mozilla.org/en-US/docs/HTTP_access_control
+class SockJsController extends Controller with SkipCSRFCheck {
+  pathPrefix = "echo"
+
+  //----------------------------------------------------------------------------
+
+  def greeting = GET("") {
+    respondText("Welcome to SockJS!\n")
+  }
+
+  def iframe = last.GET(":iframe") {
+    val iframe = param("iframe")
+    if (iframe.startsWith("iframe") && iframe.endsWith(".html")) {
+      val src =
+        if (xitrum.Config.isProductionMode)
+          "xitrum/sockjs-0.3.min.js"
+        else
+          "xitrum/sockjs-0.3.js"
+
+      setClientCacheAggressively()
+      respondHtml(DocType.html5(
+<html>
+<head>
+  <meta http-equiv="X-UA-Compatible" content="IE=edge" />
+  <meta http-equiv="Content-Type" content="text/html; charset=UTF-8" />
+  <script><xml:unparsed>
+    document.domain = document.domain;
+    _sockjs_onload = function(){SockJS.bootstrap_iframe();};
+  </xml:unparsed></script>
+  <script src={urlForResource(src)}></script>
+</head>
+<body>
+  <h2>Don't panic!</h2>
+  <p>This is a SockJS hidden iframe. It's used for cross domain magic.</p>
+</body>
+</html>
+      ))
+    } else {
+      respondDefault404Page()
+    }
+  }
+
+  def infoGET = GET("info") {
+    val random = SockJsController.random.nextLong()
+    setCORS()
+    setNoClientCache()
+    respondJsonText("""{"websocket": true, "cookie_needed": false, "origins": ["*:*"], "entropy": """ + random + "}")
+  }
+
+  def infoOPTIONS = OPTIONS("info") {
+    response.setStatus(HttpResponseStatus.NO_CONTENT)
+    response.setHeader("Access-Control-Allow-Methods", "OPTIONS, GET")
+    setCORS()
+    setClientCacheAggressively()
+    respond()
+  }
+
+  //----------------------------------------------------------------------------
+
+  def xhrTransportOPTIONSReceive = OPTIONS(":serverId/:sessionId/xhr") {
+    xhrTransportOPTIONS()
+  }
+
+  def xhrTransportOPTIONSSend = OPTIONS(":serverId/:sessionId/xhr_send") {
+    xhrTransportOPTIONS()
+  }
+
+  def xhrTransportReceive = POST(":serverId/:sessionId/xhr") {
+    val sessionId = param("sessionId")
+
+    SockJsPollingSessions.subscribeOnceByClient(pathPrefix, sessionId, { resulto =>
+      resulto match {
+        case None =>
+          setCORS()
+          setNoClientCache()
+          respondJs("o\n")
+
+        case Some(result) =>
+          result match {
+            case SubscribeOnceByClientResultAnotherConnectionStillOpen =>
+              setCORS()
+              setNoClientCache()
+              respondJs("c[2010,\"Another connection still open\"]\n")
+
+            case SubscribeOnceByClientResultMessages(messages) =>
+              val json = messages.map(jsEscape(_)).mkString("a[", ",", "]\n")
+              setCORS()
+              setNoClientCache()
+              respondJs(json)
+          }
+      }
+    })
+
+    addConnectionClosedListener{ SockJsPollingSessions.unsubscribeByClient(sessionId) }
+  }
+
+  def xhrTransportSend = POST(":serverId/:sessionId/xhr_send") {
+    val body = request.getContent().toString(Config.requestCharset)
+    if (body.isEmpty) {
+      response.setStatus(HttpResponseStatus.INTERNAL_SERVER_ERROR)
+      respondText("Payload expected.")
+    } else {
+      val sessionId = param("sessionId")
+
+      val messages: Seq[String] = try {
+        Json.parse[Seq[String]](body)
+      } catch {
+        case _ =>
+          response.setStatus(HttpResponseStatus.INTERNAL_SERVER_ERROR)
+          respondText("Broken JSON encoding.")
+          null
+      }
+
+      if (messages != null) {
+        if (SockJsPollingSessions.sendMessagesByClient(sessionId, messages)) {
+          response.setStatus(HttpResponseStatus.NO_CONTENT)
+          response.setHeader(HttpHeaders.Names.CONTENT_TYPE, "text/plain; charset=UTF-8")
+          setCORS()
+          respond()
+        } else {
+          respondDefault404Page()
+        }
+      }
+    }
+  }
+
+  //----------------------------------------------------------------------------
+
+  def xhrStreamingTransportOPTIONSReceive = OPTIONS(":serverId/:sessionId/xhr_streaming") {
+    xhrTransportOPTIONS()
+  }
+
+  def xhrStreamingTransportReceive = POST(":serverId/:sessionId/xhr_streaming") {
+    val sessionId = param("sessionId")
+
+    SockJsPollingSessions.subscribeStreamingByClient(pathPrefix, sessionId, { resulto =>
+      resulto match {
+        case None =>
+          if (channel.isOpen()) {
+            setCORS()
+            setNoClientCache()
+
+            response.setChunked(true)
+            respondBinary(SockJsController.h2KiB)
+            respondJs("o\n")
+
+            true
+          } else {
+            false
+          }
+
+        case Some(result) =>
+          result match {
+            case SubscribeOnceByClientResultAnotherConnectionStillOpen =>
+              setCORS()
+              setNoClientCache()
+              respondJs("c[2010,\"Another connection still open\"]\n")
+              false
+
+            case SubscribeOnceByClientResultMessages(messages) =>
+              if (channel.isOpen()) {
+                setCORS()
+                setNoClientCache()
+
+                response.setChunked(true)
+                respondBinary(SockJsController.h2KiB)
+
+                val json = messages.map(jsEscape(_)).mkString("a[", ",", "]\n")
+                respondJs(json)
+
+                true
+              } else {
+                false
+              }
+          }
+      }
+    })
+
+    addConnectionClosedListener{ SockJsPollingSessions.unsubscribeByClient(sessionId) }
+  }
+
+  //----------------------------------------------------------------------------
+
+  def websocketTransport = WEBSOCKET(":serverId/:sessionId/websocket") {
+    // Ignored
+    //val sessionId = param("sessionId")
+
+    acceptWebSocket(new WebSocketHandler {
+      val sockJsHandler = Routes.createSockJsHandler(pathPrefix)
+      sockJsHandler.webSocketController = SockJsController.this
+      sockJsHandler.rawWebSocket        = false
+
+      def onOpen() {
+        respondWebSocket("o")
+        sockJsHandler.onOpen()
+      }
+
+      def onMessage(body: String) {
+        val messages: Seq[String] = try {
+          Json.parse[Seq[String]](body)
+        } catch {
+          case _ =>
+            response.setStatus(HttpResponseStatus.INTERNAL_SERVER_ERROR)
+            respondText("Broken JSON encoding.")
+            null
+        }
+        if (messages != null) messages.foreach(sockJsHandler.onMessage(_))
+      }
+
+      def onClose() {
+        sockJsHandler.onClose()
+      }
+    })
+  }
+
+  def rawWebsocketTransport = WEBSOCKET("websocket") {
+    acceptWebSocket(new WebSocketHandler {
+      val sockJsHandler = Routes.createSockJsHandler(pathPrefix)
+      sockJsHandler.webSocketController = SockJsController.this
+      sockJsHandler.rawWebSocket        = true
+
+      def onOpen() {
+        sockJsHandler.onOpen()
+      }
+
+      def onMessage(message: String) {
+        sockJsHandler.onMessage(message)
+      }
+
+      def onClose() {
+        sockJsHandler.onClose()
+      }
+    })
+  }
+
+  //----------------------------------------------------------------------------
+
+  private def setCORS() {
+    val requestOrigin  = request.getHeader(HttpHeaders.Names.ORIGIN)
+    val responseOrigin =
+      if (requestOrigin == null || requestOrigin == "null")
+        "*"
+      else
+        requestOrigin
+    response.setHeader("Access-Control-Allow-Origin",      responseOrigin)
+    response.setHeader("Access-Control-Allow-Credentials", "true")
+
+    val accessControlRequestHeaders = request.getHeader("Access-Control-Request-Headers")
+    if (accessControlRequestHeaders != null)
+      response.setHeader("Access-Control-Allow-Headers", accessControlRequestHeaders)
+  }
+
+  private def xhrTransportOPTIONS() {
+    response.setStatus(HttpResponseStatus.NO_CONTENT)
+    response.setHeader("Access-Control-Allow-Methods", "OPTIONS, POST")
+    setCORS()
+    setClientCacheAggressively()
+    respond()
+  }
+}

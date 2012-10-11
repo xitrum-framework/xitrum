@@ -11,6 +11,7 @@ import org.jboss.netty.handler.codec.http.{HttpMethod, QueryStringEncoder}
 import xitrum.{Config, Logger, Controller, ErrorController}
 import xitrum.controller.Action
 import xitrum.scope.request.{Params, PathInfo}
+import xitrum.sockjs.SockJsHandler
 
 object Routes extends Logger {
   type First_Other_Last = (ArrayBuffer[Action], ArrayBuffer[Action], ArrayBuffer[Action])
@@ -343,4 +344,17 @@ object Routes extends Logger {
   lazy val action404Method: Option[Method] = Option(error).map(_.getMethod("error404"))
 
   lazy val action500Method: Option[Method] = Option(error).map(_.getMethod("error500"))
+
+  //----------------------------------------------------------------------------
+
+  private val sockJsRoutes = MMap[String, Class[_ <: SockJsHandler]]()
+
+  def sockJs(SockJsHandlerClass: Class[_ <: SockJsHandler], pathPrefix: String) {
+    sockJsRoutes(pathPrefix) = SockJsHandlerClass
+  }
+
+  def createSockJsHandler(pathPrefix: String): SockJsHandler = {
+    val klass = sockJsRoutes(pathPrefix)
+    klass.newInstance()
+  }
 }

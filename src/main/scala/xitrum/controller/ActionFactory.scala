@@ -4,7 +4,7 @@ import java.lang.reflect.Method
 import org.jboss.netty.handler.codec.http.HttpMethod
 
 import xitrum.Controller
-import xitrum.routing.{HttpMethodSockJs, HttpMethodWebSocket, Route, RouteCompiler, RouteOrder, Routes, RouteToken}
+import xitrum.routing.{HttpMethodWebSocket, Route, RouteCompiler, RouteOrder, Routes, RouteToken}
 
 /**
  * val action1 = GET("pattern") {
@@ -103,12 +103,6 @@ trait ActionFactory {
 
   def WEBSOCKET(body: => Any) =
     Action(Route(HttpMethodWebSocket, RouteOrder.OTHER, RouteCompiler.compile(withPathPrefix(""))), null, () => body, 0)
-
-  def SOCKJS(pattern: String)(body: => Any) =
-    Action(Route(HttpMethodSockJs, RouteOrder.OTHER, RouteCompiler.compile(withPathPrefix(pattern))), null, () => body, 0)
-
-  def SOCKJS(body: => Any) =
-    Action(Route(HttpMethodSockJs, RouteOrder.OTHER, RouteCompiler.compile(withPathPrefix(""))), null, () => body, 0)
 }
 
 object PathPrefix {

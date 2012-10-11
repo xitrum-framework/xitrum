@@ -11,7 +11,7 @@
 //
 //object AjaxUpload {
 //  def ::(elem: Node)(implicit controller: Controller) = {
-//    val uuid = UUID.randomUUID.toString
+//    val uuid = UUID.randomUUID().toString
 //    <xml:group>
 //      <iframe id={uuid} name={uuid} src={/*controller.currentAction.postbackUrl*/"FIXME"} style="display:none; width:1px; height:1px;"></iframe>
 //      <form method="post" enctype="multipart/form-data" target={uuid}>
@@ -88,7 +88,7 @@
 //   * the whole form.
 //   */
 //  def ajaxUpload = {
-//    val uuid = UUID.randomUUID.toString
+//    val uuid = UUID.randomUUID().toString
 //    <xml:group>
 //      <iframe id={uuid} name={uuid} src={currentAction.url} style="display:none; width:1px; height:1px;"></iframe>
 //      <form method="post" enctype="multipart/form-data" target={uuid}>

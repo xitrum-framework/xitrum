@@ -4,7 +4,7 @@ import java.lang.reflect.Method
 import org.jboss.netty.handler.codec.http.HttpMethod
 
 import xitrum.Controller
-import xitrum.routing.{HttpMethodSockJs, HttpMethodWebSocket, Route, RouteCompiler, RouteOrder, Routes}
+import xitrum.routing.{HttpMethodWebSocket, Route, RouteCompiler, RouteOrder, Routes}
 
 /**
  * @param method    for creating new controller instance,
@@ -76,12 +76,6 @@ case class Action(route: Route, var method: Method, body: () => Unit, cacheSecon
 
   def WEBSOCKET(body: => Any) =
     Action(Route(HttpMethodWebSocket, route.order, RouteCompiler.compile(withPathPrefix(""))), method, () => body, cacheSeconds)
-
-  def SOCKJS(pattern: String)(body: => Any) =
-    Action(Route(HttpMethodSockJs, route.order, RouteCompiler.compile(withPathPrefix(pattern))), method, () => body, cacheSeconds)
-
-  def SOCKJS(body: => Any) =
-    Action(Route(HttpMethodSockJs, route.order, RouteCompiler.compile(withPathPrefix(""))), method, () => body, cacheSeconds)
 
   //----------------------------------------------------------------------------
 
