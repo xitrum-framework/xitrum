@@ -219,6 +219,7 @@ class SockJsController extends Controller with SkipCSRFCheck {
           setCORS()
           setNoClientCache()
           response.setChunked(true)
+          response.setHeader(HttpHeaders.Names.CONTENT_TYPE, "application/javascript; charset=" + Config.config.request.charset)
           respondBinary(SockJsController.h2KB)
           respondJs("o\n")
 
@@ -228,12 +229,11 @@ class SockJsController extends Controller with SkipCSRFCheck {
         case SubscribeByClientResultMessages(messages) =>
           if (channel.isOpen()) {
             if (messages.isEmpty) {
-              respondText("h\n")
+              respondStreamingWithLimit("h\n")
             } else {
               val json = messages.map(jsEscape(_)).mkString("a[", ",", "]\n")
-              respondText(json)
+              respondStreamingWithLimit(json)
             }
-            true
           } else {
             false
           }
@@ -266,24 +266,23 @@ class SockJsController extends Controller with SkipCSRFCheck {
             false
 
           case SubscribeByClientResultOpen =>
+            addConnectionClosedListener{ SockJsPollingSessions.unsubscribeByClient(sessionId) }
+
             setCORS()
             setNoClientCache()
             response.setChunked(true)
             respondHtml(SockJsController.htmlfile(callback, true))
             respondText("<script>\np(\"o\");\n</script>\r\n")
-
-            addConnectionClosedListener{ SockJsPollingSessions.unsubscribeByClient(sessionId) }
             true
 
           case SubscribeByClientResultMessages(messages) =>
             if (channel.isOpen()) {
               if (messages.isEmpty) {
-                respondText("<script>\np(\"h\");\n</script>\r\n")
+                respondStreamingWithLimit("<script>\np(\"h\");\n</script>\r\n")
               } else {
                 val json = Json.generate(messages)
-                respondText("<script>\np(" + jsEscape("a" + json) + ");\n</script>\r\n")
+                respondStreamingWithLimit("<script>\np(" + jsEscape("a" + json) + ");\n</script>\r\n")
               }
-              true
             } else {
               false
             }
@@ -505,5 +504,35 @@ class SockJsController extends Controller with SkipCSRFCheck {
       })
     }
     ret
+  }
+
+  //----------------------------------------------------------------------------
+
+  /**
+   * We should close a streaming request every 128KB messages was send.
+   * The test server should have this limit decreased to 4096B.
+   */
+  private var streamingBytesSent = 0
+
+  private val LIMIT = if (xitrum.Config.isProductionMode) 128 * 1024 else 4 * 1024
+
+  /** @return false if the channel will be closed when the channel write completes */
+  private def respondStreamingWithLimit(text: String): Boolean = {
+    // This is length in characters, not bytes,
+    // but in this case the result don't have to be precise
+    val size = text.length
+    streamingBytesSent += size
+    if (streamingBytesSent < LIMIT) {
+      respondText(text)
+      true
+    } else {
+      val future = respondText(text)
+      future.addListener(new ChannelFutureListener {
+        def operationComplete(f: ChannelFuture) {
+          channel.close()
+        }
+      })
+      false
+    }
   }
 }
