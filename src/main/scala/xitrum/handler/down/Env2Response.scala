@@ -1,7 +1,7 @@
 package xitrum.handler.down
 
 import org.jboss.netty.buffer.ChannelBuffers
-import org.jboss.netty.channel.{ChannelHandler, SimpleChannelDownstreamHandler, ChannelHandlerContext, MessageEvent, Channels, ChannelFutureListener}
+import org.jboss.netty.channel.{ChannelHandler, SimpleChannelDownstreamHandler, ChannelHandlerContext, MessageEvent, Channels}
 import org.jboss.netty.handler.codec.http.{HttpHeaders, HttpMethod, HttpRequest, HttpResponse, HttpResponseStatus}
 
 import ChannelHandler.Sharable
@@ -56,7 +56,12 @@ class Env2Response extends SimpleChannelDownstreamHandler {
    * @return true if the NO_MODIFIED response is set by this method
    */
   private def tryEtag(request: HttpRequest, response: HttpResponse): Boolean = {
-    if (response.getStatus != OK) return false
+    if (response.containsHeader(CACHE_CONTROL) &&
+        response.getHeader(CACHE_CONTROL).toLowerCase().contains("no-cache"))
+      return false
+
+    if (response.getStatus != OK)
+      return false
 
     val contentLengthInHeader = HttpHeaders.getContentLength(response)
     val channelBuffer         = response.getContent

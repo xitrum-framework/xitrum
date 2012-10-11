@@ -2,7 +2,7 @@ package xitrum.handler.down
 
 import scala.collection.immutable.{SortedMap, TreeMap}
 
-import org.jboss.netty.channel.{ChannelHandler, SimpleChannelDownstreamHandler, ChannelHandlerContext, MessageEvent, Channels, ChannelFutureListener}
+import org.jboss.netty.channel.{ChannelHandler, SimpleChannelDownstreamHandler, ChannelHandlerContext, MessageEvent, Channels}
 import org.jboss.netty.buffer.ChannelBuffers
 import ChannelHandler.Sharable
 import org.jboss.netty.handler.codec.http.{DefaultHttpResponse, HttpHeaders, HttpRequest, HttpResponse, HttpResponseStatus, HttpVersion}

@@ -7,6 +7,7 @@ import org.jboss.netty.buffer.{ChannelBuffer, ChannelBuffers}
 import org.jboss.netty.channel.ChannelFuture
 import org.jboss.netty.handler.codec.http.{DefaultHttpChunk, HttpChunk, HttpHeaders}
 import org.jboss.netty.handler.codec.http.websocketx.TextWebSocketFrame
+import org.jboss.netty.util.CharsetUtil
 import HttpHeaders.Names.{CONTENT_TYPE, CONTENT_LENGTH, TRANSFER_ENCODING}
 import HttpHeaders.Values.{CHUNKED, NO_CACHE}
 
@@ -41,9 +42,13 @@ trait Responder extends JS with Flash with Knockout {
       setCookieAndSessionIfTouchedOnRespond()
       val future = channel.write(handlerEnv)
 
-      // Do not handle keep alive if XSendFile or XSendResource is used
-      // because it is handled by them in their own way
-      if (!XSendFile.isHeaderSet(response) && !XSendResource.isHeaderSet(response)) {
+      // Do not handle keep alive:
+      // * If XSendFile or XSendResource is used because it is handled by them
+      //   in their own way
+      // * If the response is chunked because it will be handled by respondLastChunk
+      if (!XSendFile.isHeaderSet(response) &&
+          !XSendResource.isHeaderSet(response) &&
+          !response.isChunked) {
         NoPipelining.resumeReadingForKeepAliveRequestOrCloseOnComplete(request, channel, future)
       }
 
@@ -54,10 +59,8 @@ trait Responder extends JS with Flash with Knockout {
   //----------------------------------------------------------------------------
 
   /** If Content-Type header is not set, it is set to "application/octet-stream" */
-  private def writeHeaderIfFirstChunk(): ChannelFuture = {
-    if (responded) {
-      printDoubleResponseErrorStackTrace()
-    } else {
+  private def writeHeaderIfFirstChunk() {
+    if (!responded) {
       if (!response.containsHeader(CONTENT_TYPE))
         response.setHeader(CONTENT_TYPE, "application/octet-stream")
 
@@ -394,6 +397,48 @@ trait Responder extends JS with Flash with Knockout {
 
   def respondWebSocket(channelBuffer: ChannelBuffer): ChannelFuture = {
     channel.write(new TextWebSocketFrame(channelBuffer))
+  }
+
+  //----------------------------------------------------------------------------
+
+  /**
+   * To respond event source, call this method as many time as you want.
+   * Event Source response is a special kind of chunked response.
+   * Data must be Must be  UTF-8.
+   * See:
+   * - http://sockjs.github.com/sockjs-protocol/sockjs-protocol-0.3.3.html#section-94
+   * - http://dev.w3.org/html5/eventsource/
+   */
+  def respondEventSource(data: String, event: String = "message"): ChannelFuture = {
+    if (!responded) {
+      response.setHeader(CONTENT_TYPE, "text/event-stream; charset=UTF-8")
+      response.setChunked(true)
+      respondText("\r\n")  // Send a new line prelude, due to a bug in Opera
+    }
+
+    val builder = new StringBuilder
+
+    if (event != "message") {
+      builder.append("event: ")
+      builder.append(event)
+      builder.append("\n")
+    }
+
+    val lines = data.split("\n")
+    val n = lines.length
+    for (i <- 0 until n) {
+      if (i < n - 1) {
+        builder.append("data: ")
+        builder.append(lines(i))
+        builder.append("\n")
+      } else {
+        builder.append("data: ")
+        builder.append(lines(i))
+      }
+    }
+
+    builder.append("\r\n\r\n")
+    respondText(builder.toString)
   }
 
   //----------------------------------------------------------------------------

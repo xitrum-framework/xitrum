@@ -2,18 +2,16 @@ package xitrum.sockjs
 
 import java.util.Random
 
+import org.jboss.netty.channel.{ChannelFuture, ChannelFutureListener}
 import org.jboss.netty.buffer.ChannelBuffers
 import org.jboss.netty.handler.codec.http.{HttpHeaders, HttpResponseStatus}
+
+import com.codahale.jerkson.Json
 
 import xitrum.{Config, Controller, SkipCSRFCheck}
 import xitrum.etag.NotModified
 import xitrum.routing.Routes
 import xitrum.view.DocType
-
-import com.codahale.jerkson.Json
-import com.hazelcast.core.ItemListener
-import com.hazelcast.core.ItemEvent
-
 
 object SockJsController {
   val random = new Random
@@ -110,13 +108,22 @@ class SockJsController extends Controller with SkipCSRFCheck {
             case SubscribeOnceByClientResultAnotherConnectionStillOpen =>
               setCORS()
               setNoClientCache()
-              respondJs("c[2010,\"Another connection still open\"]\n")
+              val future = respondJs("c[2010,\"Another connection still open\"]\n")
+              future.addListener(new ChannelFutureListener {
+                def operationComplete(f: ChannelFuture) {
+                  channel.close()
+                }
+              })
 
             case SubscribeOnceByClientResultMessages(messages) =>
-              val json = messages.map(jsEscape(_)).mkString("a[", ",", "]\n")
               setCORS()
               setNoClientCache()
-              respondJs(json)
+              if (messages.isEmpty) {
+                respondJs("h\n")
+              } else {
+                val json = messages.map(jsEscape(_)).mkString("a[", ",", "]\n")
+                respondJs(json)
+              }
           }
       }
     })
@@ -133,11 +140,17 @@ class SockJsController extends Controller with SkipCSRFCheck {
       val sessionId = param("sessionId")
 
       val messages: Seq[String] = try {
+        // body: ["m1", "m2"]
         Json.parse[Seq[String]](body)
       } catch {
         case _ =>
           response.setStatus(HttpResponseStatus.INTERNAL_SERVER_ERROR)
-          respondText("Broken JSON encoding.")
+          val future = respondText("Broken JSON encoding.")
+          future.addListener(new ChannelFutureListener {
+            def operationComplete(f: ChannelFuture) {
+              channel.close()
+            }
+          })
           null
       }
 
@@ -189,15 +202,56 @@ class SockJsController extends Controller with SkipCSRFCheck {
 
             case SubscribeOnceByClientResultMessages(messages) =>
               if (channel.isOpen()) {
-                setCORS()
-                setNoClientCache()
+                if (messages.isEmpty) {
+                  respondJs("h\n")
+                } else {
+                  val json = messages.map(jsEscape(_)).mkString("a[", ",", "]\n")
+                  respondJs(json)
+                }
 
-                response.setChunked(true)
-                respondBinary(SockJsController.h2KiB)
+                true
+              } else {
+                false
+              }
+          }
+      }
+    })
 
-                val json = messages.map(jsEscape(_)).mkString("a[", ",", "]\n")
-                respondJs(json)
+    addConnectionClosedListener{ SockJsPollingSessions.unsubscribeByClient(sessionId) }
+  }
 
+  //----------------------------------------------------------------------------
+
+  def eventSourceTransportReceive = GET(":serverId/:sessionId/eventsource") {
+    val sessionId = param("sessionId")
+
+    SockJsPollingSessions.subscribeStreamingByClient(pathPrefix, sessionId, { resulto =>
+      resulto match {
+        case None =>
+          if (channel.isOpen()) {
+            setCORS()
+            respondEventSource("o")
+            true
+          } else {
+            false
+          }
+
+        case Some(result) =>
+          result match {
+            case SubscribeOnceByClientResultAnotherConnectionStillOpen =>
+              setCORS()
+              setNoClientCache()
+              respondJs("c[2010,\"Another connection still open\"]\n")
+              false
+
+            case SubscribeOnceByClientResultMessages(messages) =>
+              if (channel.isOpen()) {
+                if (messages.isEmpty) {
+                  respondEventSource("h")
+                } else {
+                  val json = messages.map(jsEscape(_)).mkString("a[", ",", "]")
+                  respondEventSource(json)
+                }
                 true
               } else {
                 false
@@ -227,11 +281,12 @@ class SockJsController extends Controller with SkipCSRFCheck {
 
       def onMessage(body: String) {
         val messages: Seq[String] = try {
+          // body: ["m1", "m2"]
           Json.parse[Seq[String]](body)
         } catch {
           case _ =>
-            response.setStatus(HttpResponseStatus.INTERNAL_SERVER_ERROR)
-            respondText("Broken JSON encoding.")
+            logger.warn("Broken JSON-encoded SockJS message: " + body)
+            channel.close()
             null
         }
         if (messages != null) messages.foreach(sockJsHandler.onMessage(_))

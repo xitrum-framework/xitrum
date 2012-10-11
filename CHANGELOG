@@ -17,6 +17,7 @@
 * Support SPDY
 
 1.9.8 (planned):
+* Add respondEventSource(data: String, event: String = "message")
 * Support SockJS 0.3.3
   https://github.com/sockjs/sockjs-protocol
 * Add Akka 2.0.3 as a dependency (for use in SockJS)
