@@ -3,7 +3,6 @@ package xitrum.sockjs
 import scala.collection.mutable.ArrayBuffer
 
 import akka.actor.{Actor, ActorRef, ActorSystem, Props, ReceiveTimeout}
-import akka.pattern.ask
 import akka.util.duration._
 
 import xitrum.Controller
