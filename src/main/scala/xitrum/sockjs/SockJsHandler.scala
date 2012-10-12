@@ -1,9 +1,9 @@
 package xitrum.sockjs
 
 import akka.actor.ActorRef
-import xitrum.Controller
+import xitrum.{Controller, Logger}
 
-abstract class SockJsHandler {
+abstract class SockJsHandler extends Logger {
   /** Set by SockJsController; null if WebSocket is used (polling is not used) */
   var sockJsPollingSessionActorRef: ActorRef = null
 
