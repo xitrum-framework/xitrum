@@ -17,6 +17,7 @@ import xitrum.handler.down.{ResponseCacher, XSendFile}
 import xitrum.routing.{ControllerReflection, Routes}
 import xitrum.scope.request.RequestEnv
 import xitrum.scope.session.CSRF
+import xitrum.sockjs.SockJsController
 
 object Dispatcher extends Logger {
   def dispatchWithFailsafe(actionMethod: Method, env: HandlerEnv) {
@@ -25,6 +26,10 @@ object Dispatcher extends Logger {
 
     val (controller, withActionMethod) = ControllerReflection.newControllerAndAction(actionMethod)
     controller(env)
+
+    // Set pathPrefix for SockJsController
+    if (controller.isInstanceOf[SockJsController])
+      controller.pathPrefix = controller.pathInfo.tokens(0)
 
     env.action     = withActionMethod
     env.controller = controller

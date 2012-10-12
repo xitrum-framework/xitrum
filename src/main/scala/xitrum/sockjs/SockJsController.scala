@@ -63,10 +63,6 @@ object SockJsController {
 }
 
 class SockJsController extends Controller with SkipCSRFCheck {
-  pathPrefix = "echo"
-
-  //----------------------------------------------------------------------------
-
   def greeting = GET("") {
     respondText("Welcome to SockJS!\n")
   }

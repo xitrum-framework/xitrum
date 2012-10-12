@@ -200,7 +200,7 @@ object Routes extends Logger {
   }
 
   private def populateActions(controller: Controller, actionMethod: Method) {
-    val action          = actionMethod.invoke(controller).asInstanceOf[Action]
+    val action = actionMethod.invoke(controller).asInstanceOf[Action]
     if (action.route != null && action.route.httpMethod != null) {  // Actions created by indirectAction do not have route
       action.method = actionMethod  // Cache it
 
