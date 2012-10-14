@@ -5,8 +5,24 @@ import org.jboss.netty.handler.codec.http.multipart.FileUpload
 import xitrum.Controller
 import xitrum.exception.MissingParam
 
+/**
+ * Cache manifests because manifest[T] is a rather expensive operation
+ * (several nested objects are created), the same caveat applies at the sender:
+ * http://groups.google.com/group/akka-user/browse_thread/thread/ee07764dfc1ac794
+ */
+object ParamAccess {
+  val manifestFileUpload = manifest[FileUpload]
+  val manifestString     = manifest[String]
+  val manifestInt        = manifest[Int]
+  val manifestLong       = manifest[Long]
+  val manifestFloat      = manifest[Float]
+  val manifestDouble     = manifest[Double]
+}
+
 trait ParamAccess {
   this: Controller =>
+
+  import ParamAccess._
 
   //----------------------------------------------------------------------------
 
@@ -25,7 +41,7 @@ trait ParamAccess {
   //----------------------------------------------------------------------------
 
   def param[T](key: String, coll: Params = null)(implicit e: T DefaultsTo String, m: Manifest[T]): T = {
-    if (m <:< manifest[FileUpload]) {
+    if (m <:< manifestFileUpload) {
       fileUploadParams.get(key) match {
         case None         => throw new MissingParam(key)
         case Some(values) => values(0).asInstanceOf[T]
@@ -38,7 +54,7 @@ trait ParamAccess {
   }
 
   def paramo[T](key: String, coll: Params = null)(implicit e: T DefaultsTo String, m: Manifest[T]): Option[T] = {
-    if (m <:< manifest[FileUpload]) {
+    if (m <:< manifestFileUpload) {
       fileUploadParams.get(key).map { values => values(0).asInstanceOf[T] }
     } else {
       val coll2  = if (coll == null) textParams else coll
@@ -49,7 +65,7 @@ trait ParamAccess {
   }
 
   def params[T](key: String, coll: Params = null)(implicit e: T DefaultsTo String, m: Manifest[T]): List[T] = {
-    if (m <:< manifest[FileUpload]) {
+    if (m <:< manifestFileUpload) {
       fileUploadParams.get(key) match {
         case None         => throw new MissingParam(key)
         case Some(values) => values.asInstanceOf[List[T]]
@@ -62,7 +78,7 @@ trait ParamAccess {
   }
 
   def paramso[T](key: String, coll: Params = null)(implicit e: T DefaultsTo String, m: Manifest[T]): Option[List[T]] = {
-    if (m <:< manifest[FileUpload]) {
+    if (m <:< manifestFileUpload) {
       fileUploadParams.get(key).asInstanceOf[Option[List[T]]]
     } else {
       val coll2 = if (coll == null) textParams else coll
@@ -75,11 +91,11 @@ trait ParamAccess {
   /** Applications may override this method to convert to more types. */
   def convertText[T](value: String)(implicit m: Manifest[T]): T = {
     val any: Any =
-           if (m <:< manifest[String]) value
-      else if (m <:< manifest[Int])    value.toInt
-      else if (m <:< manifest[Long])   value.toLong
-      else if (m <:< manifest[Float])  value.toFloat
-      else if (m <:< manifest[Double]) value.toDouble
+           if (m <:< manifestString) value
+      else if (m <:< manifestInt)    value.toInt
+      else if (m <:< manifestLong)   value.toLong
+      else if (m <:< manifestFloat)  value.toFloat
+      else if (m <:< manifestDouble) value.toDouble
       else throw new Exception("Cannot covert " + value + " to " + m)
 
     any.asInstanceOf[T]
