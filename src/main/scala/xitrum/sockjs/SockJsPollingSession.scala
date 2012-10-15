@@ -5,7 +5,7 @@ import scala.collection.mutable.ArrayBuffer
 import akka.actor.{Actor, ActorRef, ActorSystem, Props, ReceiveTimeout}
 import akka.util.duration._
 
-import xitrum.Controller
+import xitrum.SockJsHandler
 
 sealed trait SockJsPollingSessionActorMessage
 case class  SendMessagesByClient (messages: Seq[String]) extends SockJsPollingSessionActorMessage
@@ -39,7 +39,6 @@ class SockJsPollingSession(sockJsHandler: SockJsHandler) extends Actor {
 
   override def preStart() {
     lastSubscribedAt = System.currentTimeMillis()
-    sockJsHandler.onOpen()
   }
 
   def receive = {

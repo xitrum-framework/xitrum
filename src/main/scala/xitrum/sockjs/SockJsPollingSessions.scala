@@ -17,11 +17,13 @@ object SockJsPollingSessions {
    * callback:
    * - arg: None means the session has just been openned
    */
-  def subscribeOnceByClient(pathPrefix: String, sockJsSessionId: String, callback: (SockJsSubscribeByClientResult) => Unit) {
+  def subscribeOnceByClient(controller: SockJsController, sockJsSessionId: String, callback: (SockJsSubscribeByClientResult) => Unit) {
     val escaped = escapeActorPath(sockJsSessionId)
     val ref     = system.actorFor("/user/" + escaped)
     if (ref.isTerminated) {
-      val handler = Routes.createSockJsHandler(pathPrefix)
+      val handler = Routes.createSockJsHandler(controller.pathPrefix)
+      handler.onOpen(controller)
+
       val ref     = system.actorOf(Props(new SockJsPollingSession(handler)), escaped)
       handler.sockJsPollingSessionActorRef = ref
       callback(SubscribeByClientResultOpen)
@@ -41,11 +43,13 @@ object SockJsPollingSessions {
    * - arg: None means the session has just been openned
    * - result: true means subscribeStreaming should be called again to get more messages
    */
-  def subscribeStreamingByClient(pathPrefix: String, sockJsSessionId: String, callback: (SockJsSubscribeByClientResult) => Boolean) {
+  def subscribeStreamingByClient(controller: SockJsController, sockJsSessionId: String, callback: (SockJsSubscribeByClientResult) => Boolean) {
     val escaped = escapeActorPath(sockJsSessionId)
     val ref     = system.actorFor("/user/" + escaped)
     if (ref.isTerminated) {
-      val handler = Routes.createSockJsHandler(pathPrefix)
+      val handler = Routes.createSockJsHandler(controller.pathPrefix)
+      handler.onOpen(controller)
+
       val ref     = system.actorOf(Props(new SockJsPollingSession(handler)), escaped)
       handler.sockJsPollingSessionActorRef = ref
       if (callback(SubscribeByClientResultOpen))

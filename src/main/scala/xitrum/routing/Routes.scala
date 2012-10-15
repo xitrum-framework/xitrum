@@ -8,10 +8,10 @@ import scala.util.matching.Regex
 
 import org.jboss.netty.handler.codec.http.{HttpMethod, QueryStringEncoder}
 
-import xitrum.{Config, Logger, Controller, ErrorController}
+import xitrum.{Config, Controller, ErrorController, Logger, SockJsHandler}
 import xitrum.controller.Action
 import xitrum.scope.request.{Params, PathInfo}
-import xitrum.sockjs.{SockJsController, SockJsHandler}
+import xitrum.sockjs.SockJsController
 
 object Routes extends Logger {
   type First_Other_Last = (ArrayBuffer[Action], ArrayBuffer[Action], ArrayBuffer[Action])

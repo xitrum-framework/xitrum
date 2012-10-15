@@ -1,7 +1,7 @@
-package xitrum.sockjs
+package xitrum
 
 import akka.actor.ActorRef
-import xitrum.{Controller, Logger}
+import xitrum.sockjs.SockJsPollingSessions
 
 abstract class SockJsHandler extends Logger {
   /** Set by SockJsController; null if WebSocket is used (polling is not used) */
@@ -16,7 +16,7 @@ abstract class SockJsHandler extends Logger {
   //----------------------------------------------------------------------------
   // Abstract methods that must be implemented by apps
 
-  def onOpen()
+  def onOpen(controller: Controller)
   def onMessage(message: String)
   def onClose()
 

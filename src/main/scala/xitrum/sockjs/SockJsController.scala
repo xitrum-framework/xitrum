@@ -126,7 +126,7 @@ class SockJsController extends Controller with SkipCSRFCheck {
   def xhrPollingTransportReceive = POST(":serverId/:sessionId/xhr") {
     val sessionId = param("sessionId")
 
-    SockJsPollingSessions.subscribeOnceByClient(pathPrefix, sessionId, { resulto =>
+    SockJsPollingSessions.subscribeOnceByClient(this, sessionId, { resulto =>
       setCORS()
       setNoClientCache()
 
@@ -198,7 +198,7 @@ class SockJsController extends Controller with SkipCSRFCheck {
   def xhrStreamingTransportReceive = POST(":serverId/:sessionId/xhr_streaming") {
     val sessionId = param("sessionId")
 
-    SockJsPollingSessions.subscribeStreamingByClient(pathPrefix, sessionId, { resulto =>
+    SockJsPollingSessions.subscribeStreamingByClient(this, sessionId, { resulto =>
       resulto match {
         case SubscribeByClientResultAnotherConnectionStillOpen =>
           setCORS()
@@ -245,7 +245,7 @@ class SockJsController extends Controller with SkipCSRFCheck {
       val callback  = callbacko.get
       val sessionId = param("sessionId")
 
-      SockJsPollingSessions.subscribeStreamingByClient(pathPrefix, sessionId, { resulto =>
+      SockJsPollingSessions.subscribeStreamingByClient(this, sessionId, { resulto =>
         resulto match {
           case SubscribeByClientResultAnotherConnectionStillOpen =>
             setCORS()
@@ -295,7 +295,7 @@ class SockJsController extends Controller with SkipCSRFCheck {
       val callback  = callbacko.get
       val sessionId = param("sessionId")
 
-      SockJsPollingSessions.subscribeOnceByClient(pathPrefix, sessionId, { resulto =>
+      SockJsPollingSessions.subscribeOnceByClient(this, sessionId, { resulto =>
         setCORS()
         setNoClientCache()
 
@@ -376,7 +376,7 @@ class SockJsController extends Controller with SkipCSRFCheck {
   def eventSourceTransportReceive = GET(":serverId/:sessionId/eventsource") {
     val sessionId = param("sessionId")
 
-    SockJsPollingSessions.subscribeStreamingByClient(pathPrefix, sessionId, { resulto =>
+    SockJsPollingSessions.subscribeStreamingByClient(this, sessionId, { resulto =>
       resulto match {
         case SubscribeByClientResultAnotherConnectionStillOpen =>
           setCORS()
@@ -419,7 +419,7 @@ class SockJsController extends Controller with SkipCSRFCheck {
 
       def onOpen() {
         respondWebSocket("o")
-        sockJsHandler.onOpen()
+        sockJsHandler.onOpen(SockJsController.this)
       }
 
       def onMessage(body: String) {
@@ -448,7 +448,7 @@ class SockJsController extends Controller with SkipCSRFCheck {
       sockJsHandler.rawWebSocket        = true
 
       def onOpen() {
-        sockJsHandler.onOpen()
+        sockJsHandler.onOpen(SockJsController.this)
       }
 
       def onMessage(message: String) {
