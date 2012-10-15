@@ -13,16 +13,18 @@
 * Add digest authentication
 * Typesafe routes using Scala compiler plugin
 * Middleware architecture based on Netty handlers
-* Reload routes when in development mode with JRebel
+* Reload classes in development mode using Javassist
+* Reload routes when in development mode using Javassist
 * Support SPDY
 
 1.9.8 (planned):
-* Add respondEventSource(data: String, event: String = "message")
-  http://dev.w3.org/html5/eventsource/
 * Support SockJS 0.3.3
   https://github.com/sockjs/sockjs-client
   https://github.com/sockjs/sockjs-protocol
+* Add respondEventSource(data: String, event: String = "message")
+  http://dev.w3.org/html5/eventsource/
 * Add Akka 2.0.3 as a dependency (for use in SockJS)
+* Remove xitrum.comet.CometController
 
 1.9.7:
 * Fix problem when HTTPS is used and static file is bigger than

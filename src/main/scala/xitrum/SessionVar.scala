@@ -12,7 +12,7 @@ class SessionVar[T] {
 
   def isDefined(implicit controller: Controller) = controller.session.isDefinedAt(key)
 
-  def remove(implicit controller: Controller) {
+  def remove()(implicit controller: Controller) {
     controller.session.remove(key)
   }
 }
