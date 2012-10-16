@@ -50,7 +50,7 @@ libraryDependencies += "jboss" % "jboss-serialization" % "4.2.2.GA"
 
 libraryDependencies += "net.sf.trove4j" % "trove4j" % "3.0.3"
 
-libraryDependencies += "org.slf4j" % "log4j-over-slf4j" % "1.6.6"
+libraryDependencies += "org.slf4j" % "log4j-over-slf4j" % "1.7.2"
 
 // Other dependencies ----------------------------------------------------------
 
@@ -59,7 +59,7 @@ libraryDependencies += "io.netty" % "netty" % "3.5.8.Final"
 libraryDependencies += "org.javassist" % "javassist" % "3.16.1-GA"
 
 // Projects using Xitrum must provide a concrete implentation of SLF4J (Logback etc.)
-libraryDependencies += "org.slf4j" % "slf4j-api" % "1.7.1" % "provided"
+libraryDependencies += "org.slf4j" % "slf4j-api" % "1.7.2" % "provided"
 
 libraryDependencies += "tv.cntt" %% "scaposer" % "1.1"
 
