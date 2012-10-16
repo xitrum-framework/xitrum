@@ -44,18 +44,26 @@ libraryDependencies += "org.fusesource.scalate" % "scalate-core" % "1.5.3"
 // For Scalate to compile CoffeeScript to JavaScript
 libraryDependencies += "org.mozilla" % "rhino" % "1.7R4"
 
+// JBoss Serialization ---------------------------------------------------------
+
+libraryDependencies += "jboss" % "jboss-serialization" % "4.2.2.GA"
+
+libraryDependencies += "trove" % "trove" % "1.0.2"
+
+libraryDependencies += "org.slf4j" % "log4j-over-slf4j" % "1.6.6"
+
 // Other dependencies ----------------------------------------------------------
 
 libraryDependencies += "io.netty" % "netty" % "3.5.8.Final"
-
-libraryDependencies += "tv.cntt" %% "scaposer" % "1.1"
-
-libraryDependencies += "tv.cntt" %% "sclasner" % "1.1"
 
 libraryDependencies += "org.javassist" % "javassist" % "3.16.1-GA"
 
 // Projects using Xitrum must provide a concrete implentation of SLF4J (Logback etc.)
 libraryDependencies += "org.slf4j" % "slf4j-api" % "1.7.1" % "provided"
+
+libraryDependencies += "tv.cntt" %% "scaposer" % "1.1"
+
+libraryDependencies += "tv.cntt" %% "sclasner" % "1.1"
 
 // xitrum.imperatively uses Scala continuation, a compiler plugin --------------
 
