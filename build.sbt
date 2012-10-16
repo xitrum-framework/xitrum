@@ -48,7 +48,7 @@ libraryDependencies += "org.mozilla" % "rhino" % "1.7R4"
 
 libraryDependencies += "jboss" % "jboss-serialization" % "4.2.2.GA"
 
-libraryDependencies += "trove" % "trove" % "1.0.2"
+libraryDependencies += "net.sf.trove4j" % "trove4j" % "3.0.3"
 
 libraryDependencies += "org.slf4j" % "log4j-over-slf4j" % "1.6.6"
 
