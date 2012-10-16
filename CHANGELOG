@@ -27,8 +27,11 @@
 * Add clientMustRevalidateStaticFiles option to config/xitrum.json;
   you can force browsers to always send request to server to revalidate cache before using
 * Remove xitrum.comet.CometController
-* Use JBoss Serialization library for faster session cookie storing/restoring
-  http://www.jboss.org/serialization
+* Use JBoss Marshalling library for faster/smaller session cookie storing/restoring
+  http://www.jboss.org/jbossmarshalling
+  It features the advanced River serialization protocol which is far more
+  space- and computation-efficient. It can be found in use within the excellent
+  Infinispan project as well as finding heavy use in the upcoming JBoss AS 7 release.
 * Compress session cookie to try to avoid the 4KB limit
   Display error log when cookie is bigger than 4KB
 
