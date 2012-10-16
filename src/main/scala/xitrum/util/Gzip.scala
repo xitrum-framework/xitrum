@@ -1,7 +1,7 @@
 package xitrum.util
 
-import java.io.ByteArrayOutputStream
-import java.util.zip.GZIPOutputStream
+import java.io.{ByteArrayInputStream, ByteArrayOutputStream}
+import java.util.zip.{GZIPInputStream, GZIPOutputStream}
 
 import org.jboss.netty.handler.codec.http.{HttpHeaders, HttpRequest, HttpResponse}
 import HttpHeaders.Names.{ACCEPT_ENCODING, CONTENT_ENCODING, CONTENT_TYPE}
@@ -10,20 +10,39 @@ import org.jboss.netty.buffer.ChannelBuffers
 import xitrum.Config
 
 object Gzip {
-  def isAccepted(request: HttpRequest) = {
-    val acceptEncoding = request.getHeader(ACCEPT_ENCODING)
-    (acceptEncoding != null && acceptEncoding.contains("gzip"))
-  }
-
   def compress(bytes: Array[Byte]) = {
     val b = new ByteArrayOutputStream
     val g = new GZIPOutputStream(b)
     g.write(bytes)
     g.finish()
-    val gzippedBytes = b.toByteArray
+    val ret = b.toByteArray
     g.close()
     b.close()
-    gzippedBytes
+    ret
+  }
+
+  def uncompress(bytes: Array[Byte]) = {
+    val b = new ByteArrayInputStream(bytes)
+    val g = new GZIPInputStream(b)
+
+    val acc = new ByteArrayOutputStream
+    val tmp = new Array[Byte](1024)
+    var len = 0
+    do {
+      len = g.read(tmp)
+      if (len > 0) acc.write(tmp, 0, len)
+    } while (len > 0)
+    val ret = acc.toByteArray
+    acc.close()
+
+    g.close()
+    b.close()
+    ret
+  }
+
+  def isAccepted(request: HttpRequest) = {
+    val acceptEncoding = request.getHeader(ACCEPT_ENCODING)
+    (acceptEncoding != null && acceptEncoding.contains("gzip"))
   }
 
   /**
