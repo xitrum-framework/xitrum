@@ -40,6 +40,7 @@ Features
   in the Rails style.
   `All Google's best practices <http://code.google.com/speed/page-speed/docs/rules_intro.html>`_
   like conditional GET are applied for client-side caching.
+  You can also force browsers to always send request to server to revalidate cache before using.
 * The framework tries to fill the spectrum between `Scalatra <https://github.com/scalatra/scalatra>`_
   and `Lift <http://liftweb.net/>`_: more powerful than Scalatra and easier to
   use than Lift. You can easily create both RESTful APIs and postbacks. `Xitrum <http://ngocdaothanh.github.com/xitrum>`_

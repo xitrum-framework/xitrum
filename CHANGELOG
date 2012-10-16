@@ -24,7 +24,11 @@
 * Add respondEventSource(data: String, event: String = "message")
   http://dev.w3.org/html5/eventsource/
 * Add Akka 2.0.3 as a dependency (for use in SockJS)
+* Add clientMustRevalidateStaticFiles option to config/xitrum.json;
+  you can force browsers to always send request to server to revalidate cache before using
 * Remove xitrum.comet.CometController
+* Compress session cookie to try to avoid the 4KB limit
+  Display error log when cookie is bigger than 4KB
 
 1.9.7:
 * Fix problem when HTTPS is used and static file is bigger than

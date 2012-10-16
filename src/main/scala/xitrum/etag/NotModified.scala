@@ -46,10 +46,10 @@ object NotModified {
     if (!response.containsHeader("Access-Control-Max-Age"))
       response.setHeader("Access-Control-Max-Age", SECS_IN_A_YEAR)
 
-    // Note that SECS_IN_A_YEAR * 1000 is different from SECS_IN_A_YEAR * 1000l
+    // Note that SECS_IN_A_YEAR * 1000 is different from SECS_IN_A_YEAR * 1000L
     // because of integer overflow!
     if (!response.containsHeader(EXPIRES))
-      response.setHeader(EXPIRES, formatRfc2822(System.currentTimeMillis() + SECS_IN_A_YEAR * 1000l))
+      response.setHeader(EXPIRES, formatRfc2822(System.currentTimeMillis() + SECS_IN_A_YEAR * 1000L))
   }
 
   /**

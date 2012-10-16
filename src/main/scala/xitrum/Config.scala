@@ -23,7 +23,7 @@ case class SessionConfig(store: String, cookieName: String, secureKey: String)
 
 case class RequestConfig(maxSizeInMB: Int, charset: String, filteredParams: List[String])
 
-case class ResponseConfig(smallStaticFileSizeInKB: Int, maxCachedSmallStaticFiles: Int)
+case class ResponseConfig(maxSizeInKBOfCachedStaticFiles: Int, maxNumberOfCachedStaticFiles: Int, clientMustRevalidateStaticFiles: Boolean)
 
 case class Config(
   basicAuth:     Option[BasicAuthConfig],
