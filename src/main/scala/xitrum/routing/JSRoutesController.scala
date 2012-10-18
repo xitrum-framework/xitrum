@@ -6,7 +6,6 @@ import HttpHeaders.Values._
 import HttpResponseStatus._
 
 import xitrum.{Controller, Config}
-import xitrum.comet.CometController
 import xitrum.etag.{Etag, NotModified}
 import xitrum.util.Gzip
 
@@ -20,9 +19,8 @@ object JSRoutesController extends JSRoutesController {
   def jsRoutes(controller: Controller) = synchronized {
     if (js == null) {
       js =
-        "var XITRUM_BASE_URL = '" + Config.baseUrl + "';\n" +
-        "var XITRUM_ROUTES = " + Routes.jsRoutes + ";\n" +
-        "var XITRUM_COMET_GET_URL = '" + CometController.index.url("topic" -> ":topic", "lastTimestamp" -> ":lastTimestamp") + "';"
+        "var XITRUM_BASE_URL = '" + Config.baseUrl  + "';\n" +
+        "var XITRUM_ROUTES   = "  + Routes.jsRoutes + ";\n"
     }
     js
   }
