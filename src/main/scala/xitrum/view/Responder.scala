@@ -37,10 +37,10 @@ trait Responder extends JS with Flash with Knockout {
     if (responded) {
       printDoubleResponseErrorStackTrace()
     } else {
-      responded = true
       NoPipelining.setResponseHeaderForKeepAliveRequest(request, response)
       setCookieAndSessionIfTouchedOnRespond()
       val future = channel.write(handlerEnv)
+      responded = true
 
       // Do not handle keep alive:
       // * If XSendFile or XSendResource is used because it is handled by them
