@@ -16,6 +16,8 @@ import xitrum.sockjs.SockJsController
 object Routes extends Logger {
   type First_Other_Last = (ArrayBuffer[Action], ArrayBuffer[Action], ArrayBuffer[Action])
 
+  private val ROUTES_CACHE = "routes.cache"
+
   /**
    * Route matching: httpMethod -> order -> pattern
    * When matched, method is used for creating a new controller instance,
@@ -132,7 +134,7 @@ object Routes extends Logger {
   def fromCacheFileOrRecollect() {
     // Avoid running twice, older version of Xitrum (v1.8) needs apps to
     // call this method explicitly
-    if (actions.isEmpty) fromCacheFileOrRecollectWithRetry("routes.sclasner")
+    if (actions.isEmpty) fromCacheFileOrRecollectWithRetry()
   }
 
   def fromSockJsController() {
@@ -143,21 +145,21 @@ object Routes extends Logger {
 
   //----------------------------------------------------------------------------
 
-  private def fromCacheFileOrRecollectWithRetry(cachedFileName: String) {
+  private def fromCacheFileOrRecollectWithRetry() {
     try {
-      logger.info("Load " + cachedFileName + "/collect routes and action/page cache config from controllers...")
-      fromCacheFileOrRecollectReal(cachedFileName)
+      logger.info("Load " + ROUTES_CACHE + "/collect routes and action/page cache config from controllers...")
+      fromCacheFileOrRecollectReal()
     } catch {
       case e =>
-        // Maybe routes.sclasner could not be loaded because dependencies have changed.
-        // Try deleting routes.sclasner and scan again.
-        val f = new File(cachedFileName)
+        // Maybe ROUTES_CACHE file could not be loaded because dependencies have changed.
+        // Try deleting and scanning again.
+        val f = new File(ROUTES_CACHE)
         if (f.exists) {
-          logger.warn("Error loading " + cachedFileName + ". Delete the file and recollect...")
+          logger.warn("Error loading " + ROUTES_CACHE + ". Delete the file and recollect...")
           f.delete()
           try {
             actions.clear()  // Reset partly-collected routes
-            fromCacheFileOrRecollectReal("routes.sclasner")
+            fromCacheFileOrRecollectReal()
           } catch {
             case e2 =>
               Config.exitOnError("Could not collect routes", e2)
@@ -170,9 +172,9 @@ object Routes extends Logger {
     }
   }
 
-  private def fromCacheFileOrRecollectReal(cachedFileName: String) {
+  private def fromCacheFileOrRecollectReal() {
     val routeCollector                        = new RouteCollector
-    val controllerClassName_actionMethodNames = routeCollector.fromCacheFileOrRecollect(cachedFileName)
+    val controllerClassName_actionMethodNames = routeCollector.fromCacheFileOrRecollect(ROUTES_CACHE)
     fromControllerClassName_ActionMethodNames(controllerClassName_actionMethodNames, false)
   }
 

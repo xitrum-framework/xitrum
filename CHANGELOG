@@ -34,6 +34,7 @@
   Infinispan project as well as finding heavy use in the upcoming JBoss AS 7 release.
 * Compress session cookie to try to avoid the 4KB limit
   Display error log when cookie is bigger than 4KB
+* Rename routes.sclasner to routes.cache
 * Update Scaposer to 1.2
   https://github.com/ngocdaothanh/scaposer/pull/3
 
