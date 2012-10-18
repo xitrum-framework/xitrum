@@ -12,6 +12,10 @@ scalacOptions ++= Seq(
 // Put config directory in classpath for easier development (sbt console etc.)
 unmanagedBase in Runtime <<= baseDirectory { base => base / "config" }
 
+// Most Scala projects are published to Sonatype, but Sonatype is not default
+// and it takes several hours to sync from Sonatype to Maven Central
+resolvers += "SonatypeReleases" at "http://oss.sonatype.org/content/repositories/releases/"
+
 // Akka ------------------------------------------------------------------------
 
 resolvers += "Typesafe" at "http://repo.typesafe.com/typesafe/releases/"
@@ -57,7 +61,7 @@ libraryDependencies += "org.jboss.marshalling" % "jboss-marshalling" % "1.3.15.G
 
 libraryDependencies += "org.jboss.marshalling" % "jboss-marshalling-river" % "1.3.15.GA"
 
-libraryDependencies += "tv.cntt" %% "scaposer" % "1.1"
+libraryDependencies += "tv.cntt" %% "scaposer" % "1.2"
 
 libraryDependencies += "tv.cntt" %% "sclasner" % "1.1"
 
