@@ -29,8 +29,8 @@ object Net {
   /** See reverseProxy in config/xitrum.json */
   def proxyNotAllowed(clientIp: String): Boolean = {
     Config.config.reverseProxy match {
-      case None      => false
-      case Some(reverseProxy) => reverseProxy.ips.contains(clientIp)
+      case None               => false
+      case Some(reverseProxy) => !reverseProxy.ips.contains(clientIp)
     }
   }
 
