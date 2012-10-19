@@ -19,14 +19,17 @@
 
 1.9.8 (planned):
 * Fix bug at remoteIp when reverseProxy is enabled in config/xitrum.json
-* Support SockJS 0.3.3
+* Add clientMustRevalidateStaticFiles option to config/xitrum.json
+  You can force browsers to always send request to server to revalidate cache before using
+  To update your existing project to use Xitrum 1.9.8, you must update "response"
+  part in your xitrum.json file, example:
+  https://github.com/ngocdaothanh/xitrum-new/blob/master/config/xitrum.json
+* Add support SockJS 0.3.3
   https://github.com/sockjs/sockjs-client
   https://github.com/sockjs/sockjs-protocol
 * Add respondEventSource(data: String, event: String = "message")
   http://dev.w3.org/html5/eventsource/
 * Add Akka 2.0.3 as a dependency (for use in SockJS)
-* Add clientMustRevalidateStaticFiles option to config/xitrum.json;
-  you can force browsers to always send request to server to revalidate cache before using
 * Remove xitrum.comet.CometController
 * Use JBoss Marshalling library for faster/smaller session cookie storing/restoring
   http://www.jboss.org/jbossmarshalling
