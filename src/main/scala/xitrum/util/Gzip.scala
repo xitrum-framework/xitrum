@@ -10,6 +10,17 @@ import org.jboss.netty.buffer.ChannelBuffers
 import xitrum.Config
 
 object Gzip {
+  // http://stackoverflow.com/questions/4818468/how-to-check-if-inputstream-is-gzipped
+  private val GZIP_SIGNATURE_BYTE1 = GZIPInputStream.GZIP_MAGIC.toByte
+  private val GZIP_SIGNATURE_BYTE2 = (GZIPInputStream.GZIP_MAGIC >> 8).toByte
+
+  def isCompressed(bytes: Array[Byte]) = {
+    if (bytes.length < 2)
+      false
+    else
+      bytes(0) == GZIP_SIGNATURE_BYTE1 && bytes(1) == GZIP_SIGNATURE_BYTE2
+  }
+
   def compress(bytes: Array[Byte]) = {
     val b = new ByteArrayOutputStream
     val g = new GZIPOutputStream(b)
@@ -39,6 +50,10 @@ object Gzip {
     b.close()
     ret
   }
+
+  /** @return The uncompressed bytes, or the input itself if it's not compressed */
+  def mayUncompress(maybeCompressed: Array[Byte]) =
+    if (isCompressed(maybeCompressed)) uncompress(maybeCompressed) else maybeCompressed
 
   def isAccepted(request: HttpRequest) = {
     val acceptEncoding = request.getHeader(ACCEPT_ENCODING)

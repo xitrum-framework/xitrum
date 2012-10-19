@@ -3,24 +3,26 @@ package xitrum.util
 import xitrum.Config
 
 object SecureBase64 {
-  def encrypt(value: Any, compress: Boolean = false): String =
-    encrypt(value, Config.config.session.secureKey, compress)
+  /** @param forCookie If true, tries to GZIP compress if > 4KB */
+  def encrypt(value: Any, forCookie: Boolean = false): String =
+    encrypt(value, Config.config.session.secureKey, forCookie)
 
-  def decrypt(base64String: String, compress: Boolean = false): Option[Any] =
-    decrypt(base64String, Config.config.session.secureKey, compress)
-
-  def encrypt(value: Any, key: String, compress: Boolean): String = {
-    val bytes      = SeriDeseri.serialize(value)
-    val compressed = if (compress) Gzip.compress(bytes) else bytes
-    val encrypted  = Secure.encrypt(compressed, key)
+  def encrypt(value: Any, key: String, forCookie: Boolean): String = {
+    val bytes           = SeriDeseri.serialize(value)
+    val maybeCompressed = if (bytes.length > 4 * 1024 && forCookie) Gzip.compress(bytes) else bytes
+    val encrypted       = Secure.encrypt(maybeCompressed, key)
     Base64.encode(encrypted)
   }
 
-  def decrypt(base64String: String, key: String, compress: Boolean): Option[Any] = {
+  /** @param forCookie If true, tries to GZIP uncompress if the input is compressed */
+  def decrypt(base64String: String, forCookie: Boolean = false): Option[Any] =
+    decrypt(base64String, Config.config.session.secureKey, forCookie)
+
+  def decrypt(base64String: String, key: String, forCookie: Boolean): Option[Any] = {
     try {
       Base64.decode(base64String).flatMap { encrypted =>
-        Secure.decrypt(encrypted, key).flatMap { compressed =>
-          val bytes = if (compress) Gzip.uncompress(compressed) else compressed
+        Secure.decrypt(encrypted, key).flatMap { maybeCompressed =>
+          val bytes = if (forCookie) Gzip.mayUncompress(maybeCompressed) else maybeCompressed
           SeriDeseri.deserialize(bytes)
         }
       }

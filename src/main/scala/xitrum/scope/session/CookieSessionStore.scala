@@ -8,33 +8,8 @@ import xitrum.{Config, Logger}
 import xitrum.scope.request.ExtEnv
 import xitrum.util.SecureBase64
 
-/** Compress session cookie to try to avoid the 4KB limit. */
+/** Compress big session cookie to try to avoid the 4KB limit. */
 class CookieSessionStore extends SessionStore with Logger {
-  def restore(extEnv: ExtEnv): Session = {
-    // Cannot always get cookie, decrypt, deserialize, and type casting due to program changes etc.
-    extEnv.cookies.get(Config.config.session.cookieName) match {
-      case None =>
-        MMap[String, Any]()
-      case Some(cookie) =>
-        val base64String = cookie.getValue
-        SecureBase64.decrypt(base64String, true) match {
-          case None =>
-            MMap[String, Any]()
-          case Some(value) =>
-            val immutableMap = try {
-              // See "store" method below
-              value.asInstanceOf[Map[String, Any]]
-            } catch {
-              case _ =>
-                MMap[String, Any]()
-            }
-            val ret = MMap[String, Any]()
-            ret ++= immutableMap
-            ret
-       }
-    }
-  }
-
   def store(session: Session, extEnv: ExtEnv) {
     // See "restore" method above
     // Convert to immutable because mutable cannot always be deserialize later!
@@ -62,6 +37,31 @@ class CookieSessionStore extends SessionStore with Logger {
         cookie.setHttpOnly(true)
         cookie.setPath(cookiePath)
         extEnv.cookies.add(cookie)
+    }
+  }
+
+  def restore(extEnv: ExtEnv): Session = {
+    // Cannot always get cookie, decrypt, deserialize, and type casting due to program changes etc.
+    extEnv.cookies.get(Config.config.session.cookieName) match {
+      case None =>
+        MMap[String, Any]()
+      case Some(cookie) =>
+        val base64String = cookie.getValue
+        SecureBase64.decrypt(base64String, true) match {
+          case None =>
+            MMap[String, Any]()
+          case Some(value) =>
+            val immutableMap = try {
+              // See "store" method below
+              value.asInstanceOf[Map[String, Any]]
+            } catch {
+              case _ =>
+                MMap[String, Any]()
+            }
+            val ret = MMap[String, Any]()
+            ret ++= immutableMap
+            ret
+       }
     }
   }
 }

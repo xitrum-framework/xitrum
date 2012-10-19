@@ -36,8 +36,8 @@
   It features the advanced River serialization protocol which is far more
   space- and computation-efficient. It can be found in use within the excellent
   Infinispan project as well as finding heavy use in the upcoming JBoss AS 7 release.
-* Compress session cookie to try to avoid the 4KB limit
-  Display error log when cookie is bigger than 4KB
+* Try GZIP compressing session cookie bigger than 4KB (limit of most browsers)
+  Display error log when session cookie is still bigger than 4KB after compressing
 * Rename routes.sclasner to routes.cache
 * Update Scaposer to 1.2
   https://github.com/ngocdaothanh/scaposer/pull/3
