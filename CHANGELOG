@@ -39,7 +39,8 @@
 * Try GZIP compressing session cookie bigger than 4KB (limit of most browsers)
   Display error log when session cookie is still bigger than 4KB after compressing
 * Rename routes.sclasner to routes.cache
-* Update Scaposer to 1.2
+* Update Hazelcast from 2.3.1 to 2.4
+* Update Scaposer from 1.1 to 1.2
   https://github.com/ngocdaothanh/scaposer/pull/3
 
 1.9.7:
