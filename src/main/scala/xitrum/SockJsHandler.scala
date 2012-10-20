@@ -4,14 +4,14 @@ import akka.actor.ActorRef
 import xitrum.sockjs.SockJsPollingSessions
 
 abstract class SockJsHandler extends Logger {
-  /** Set by SockJsController; null if WebSocket is used (polling is not used) */
-  var sockJsPollingSessionActorRef: ActorRef = null
-
-  /** Set by SockJsController; null if WebSocket is not used (polling is used) */
-  var webSocketController: Controller = null
-
   /** Set by SockJsController; true if raw WebSocket transport is used */
   var rawWebSocket = false
+
+  /** Set by SockJsController; null if WebSocket (raw or not) is used (polling is not used) */
+  var sockJsPollingSessionActorRef: ActorRef = null
+
+  /** Set by SockJsController; null if WebSocket (raw or not) is not used (polling is used) */
+  var webSocketController: Controller = null
 
   //----------------------------------------------------------------------------
   // Abstract methods that must be implemented by apps
@@ -29,14 +29,21 @@ abstract class SockJsHandler extends Logger {
 
   def sendMessages(messages: List[String]) {
     if (webSocketController == null) {
-      if (!SockJsPollingSessions.sendMessagesByHandler(sockJsPollingSessionActorRef, messages))
-        onClose()
-    } else if (rawWebSocket) {
-      for (message <- messages)
-        webSocketController.respondWebSocket(message)
+      // FIXME: Ugly code
+      // sockJsPollingSessionActorRef is set to null by SockJsPollingSession on postStop
+      if (sockJsPollingSessionActorRef != null) {
+        if (!SockJsPollingSessions.sendMessagesByHandler(sockJsPollingSessionActorRef, messages))
+          onClose()
+      }
     } else {
-      val json = messages.map(webSocketController.jsEscape(_)).mkString("a[", ",", "]\n")
-      webSocketController.respondWebSocket(json)
+      // WebSocket is used, but it may be raw or not raw
+      if (rawWebSocket) {
+        for (message <- messages)
+          webSocketController.respondWebSocket(message)
+      } else {
+        val json = messages.map(webSocketController.jsEscape(_)).mkString("a[", ",", "]\n")
+        webSocketController.respondWebSocket(json)
+      }
     }
   }
 
