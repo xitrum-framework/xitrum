@@ -20,6 +20,7 @@
 
 1.9.8 (planned):
 * Fix bug at remoteIp when reverseProxy is enabled in config/xitrum.json
+* Remove double quotes around the result of jsEscape
 * Add clientMustRevalidateStaticFiles option to config/xitrum.json
   You can force browsers to always send request to server to revalidate cache before using
   To update your existing project to use Xitrum 1.9.8, you must update "response"
