@@ -102,7 +102,9 @@ class SockJsController extends Controller with SkipCSRFCheck {
   def infoGET = GET("info") {
     setCORS()
     setNoClientCache()
-    respondJsonText("""{"websocket": true, "cookie_needed": false, "origins": ["*:*"], "entropy": """ + SockJsController.randomLong() + "}")
+    // Set cookie_needed to true for session cookie to be sent
+    // Some browsers like IE do not send any cookie if cookie_needed is false
+    respondJsonText("""{"websocket": true, "cookie_needed": true, "origins": ["*:*"], "entropy": """ + SockJsController.randomLong() + "}")
   }
 
   def infoOPTIONS = OPTIONS("info") {
