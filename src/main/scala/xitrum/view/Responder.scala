@@ -461,10 +461,10 @@ trait Responder extends JS with Flash with Knockout {
    */
   private def printDoubleResponseErrorStackTrace(): ChannelFuture = {
     try {
-      throw new Exception
+      throw new IllegalStateException("Double response")
     } catch {
       case e =>
-        logger.warn("Double response! This response is ignored.", e)
+        logger.warn("Double response! This double response is ignored.", e)
     }
     null  // This may cause NPE on double response if the ChannelFuture result is used
   }
