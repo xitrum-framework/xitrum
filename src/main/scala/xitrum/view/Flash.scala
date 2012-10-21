@@ -32,7 +32,7 @@ trait Flash {
 
   //----------------------------------------------------------------------------
 
-  private def jsFlashCall(msg: Any) = "xitrum.flash(" + jsEscape(msg) + ")"
+  private def jsFlashCall(msg: Any) = "xitrum.flash(\"" + jsEscape(msg) + "\")"
 
   /**
    * For web 2.0 style application.

@@ -24,19 +24,19 @@ trait JS {
 
   //----------------------------------------------------------------------------
 
-  /** See escape_javascript of Rails */
+  /**
+   * See escape_javascript of Rails.
+   * The result needs to be wrapped with double quote, not single quote.
+   */
   def jsEscape(string: Any) = {
-    val escaped = string.toString
-      .replace("\\\\", "\\0\\0")
+    string.toString
+      .replace("\\",   "\\\\")
       .replace("</",   "<\\/")
       .replace("\r\n", "\\n")
       .replace("\n",   "\\n")
       .replace("\r",   "\\n")
       .replace("\"",   "\\\"")
       .replace("'",    "\\'")
-
-    // The result needs to be wrapped with double quote, not single quote
-    "\"" + escaped + "\""
   }
 
   def js$(selector: String) = "$(\"" + selector + "\")"
@@ -54,7 +54,7 @@ trait JS {
 
   /** See http://stackoverflow.com/questions/503093/how-can-i-make-a-redirect-page-in-jquery */
   def jsRedirectTo(location: Any): ChannelFuture = {
-    jsRespond("window.location.href = " + jsEscape(location))
+    jsRespond("window.location.href = \"" + jsEscape(location) + "\"")
   }
 
   def jsRedirectTo(action: Action, params: (String, Any)*): ChannelFuture = { jsRedirectTo(action.url(params:_*)) }

@@ -189,9 +189,8 @@ trait Responder extends JS with Flash with Knockout {
    *
    * Content-Type header is set to "application/javascript".
    */
-  def respondJsonPText(any: Any, function: String): ChannelFuture = {
-    val text = function + "(" + jsEscape(any) + ");\r\n"
-    respondJs(text)
+  def respondJsonPText(text: Any, function: String): ChannelFuture = {
+    respondJs(function + "(" + text + ");\r\n")
   }
 
   //----------------------------------------------------------------------------

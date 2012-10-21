@@ -148,7 +148,7 @@ class SockJsController extends Controller with SkipCSRFCheck {
           if (messages.isEmpty) {
             respondJs("h\n")
           } else {
-            val json = messages.map(jsEscape(_)).mkString("a[", ",", "]\n")
+            val json = messages.map(jsEscape(_)).mkString("a[\"", "\",\"", "\"]\n")
             respondJs(json)
           }
       }
@@ -229,7 +229,7 @@ class SockJsController extends Controller with SkipCSRFCheck {
             if (messages.isEmpty) {
               respondStreamingWithLimit("h\n")
             } else {
-              val json = messages.map(jsEscape(_)).mkString("a[", ",", "]\n")
+              val json = messages.map(jsEscape(_)).mkString("a[\"", "\",\"", "\"]\n")
               respondStreamingWithLimit(json)
             }
           } else {
@@ -278,8 +278,13 @@ class SockJsController extends Controller with SkipCSRFCheck {
               if (messages.isEmpty) {
                 respondStreamingWithLimit("<script>\np(\"h\");\n</script>\r\n")
               } else {
-                val json = Json.generate(messages)
-                respondStreamingWithLimit("<script>\np(" + jsEscape("a" + json) + ");\n</script>\r\n")
+                val buffer = new StringBuilder
+                messages.foreach { message =>
+                  buffer.append("<script>\np(\"a[")
+                  buffer.append(jsEscape("\"" + jsEscape(message) + "\""))
+                  buffer.append("]\");\n</script>\r\n")
+                }
+                respondStreamingWithLimit(buffer.toString)
               }
             } else {
               false
@@ -303,7 +308,7 @@ class SockJsController extends Controller with SkipCSRFCheck {
 
         resulto match {
           case SubscribeByClientResultAnotherConnectionStillOpen =>
-            val future = respondJsonPText("c[2010,\"Another connection still open\"]", callback)
+            val future = respondJs(callback + "(\"c[2010,\\\"Another connection still open\\\"]\");\r\n")
             future.addListener(new ChannelFutureListener {
               def operationComplete(f: ChannelFuture) {
                 channel.close()
@@ -315,10 +320,15 @@ class SockJsController extends Controller with SkipCSRFCheck {
 
           case SubscribeByClientResultMessages(messages) =>
             if (messages.isEmpty) {
-              respondJsonPText("h", callback)
+              respondJs(callback + "(\"h\");\r\n")
             } else {
-              val json = Json.generate(messages)
-              respondJsonPText("a" + json, callback)
+              val buffer = new StringBuilder
+              messages.foreach { message =>
+                buffer.append(callback + "(\"a[")
+                buffer.append(jsEscape("\"" + jsEscape(message) + "\""))
+                buffer.append("]\");\r\n")
+              }
+              respondStreamingWithLimit(buffer.toString)
             }
         }
       })
@@ -398,7 +408,7 @@ class SockJsController extends Controller with SkipCSRFCheck {
             if (messages.isEmpty) {
               respondStreamingWithLimit(renderEventSource("h"))
             } else {
-              val json = messages.map(jsEscape(_)).mkString("a[", ",", "]")
+              val json = messages.map(jsEscape(_)).mkString("a[\"", "\",\"", "\"]")
               respondStreamingWithLimit(renderEventSource(json))
             }
           } else {
@@ -488,6 +498,7 @@ class SockJsController extends Controller with SkipCSRFCheck {
     respond()
   }
 
+  /** Connection is closed if there's no c or callback parameter */
   private def callbackParam(): Option[String] = {
     val paramName = if (uriParams.isDefinedAt("c")) "c" else "callback"
     val ret = paramo(paramName)

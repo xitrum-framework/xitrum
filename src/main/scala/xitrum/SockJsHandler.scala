@@ -41,7 +41,7 @@ abstract class SockJsHandler extends Logger {
         for (message <- messages)
           webSocketController.respondWebSocket(message)
       } else {
-        val json = messages.map(webSocketController.jsEscape(_)).mkString("a[", ",", "]\n")
+        val json = messages.map(webSocketController.jsEscape(_)).mkString("a[\"", "\",\"", "\"]\n")
         webSocketController.respondWebSocket(json)
       }
     }

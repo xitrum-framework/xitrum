@@ -81,7 +81,7 @@ object Dispatcher extends Logger {
           }
 
           if (controller.isAjax)
-            controller.jsRespond("alert(" + controller.jsEscape(msg) + ")")
+            controller.jsRespond("alert(\"" + controller.jsEscape(msg) + "\")")
           else
             controller.respondText(msg)
 
@@ -113,7 +113,7 @@ object Dispatcher extends Logger {
             }
 
             if (controller.isAjax)
-              controller.jsRespond("alert(" + controller.jsEscape(errorMsg) + ")")
+              controller.jsRespond("alert(\"" + controller.jsEscape(errorMsg) + "\")")
             else
               controller.respondText(errorMsg)
 
@@ -127,7 +127,7 @@ object Dispatcher extends Logger {
 
   private def respondDefault500AlertOrPage(controller: Controller) {
     if (controller.isAjax) {
-      controller.jsRespond("alert(" + controller.jsEscape("Internal Server Error") + ")")
+      controller.jsRespond("alert(\"" + controller.jsEscape("Internal Server Error") + "\")")
     } else {
       val response = new DefaultHttpResponse(HTTP_1_1, INTERNAL_SERVER_ERROR)
       XSendFile.set500Page(response)
