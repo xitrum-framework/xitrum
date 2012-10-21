@@ -56,7 +56,7 @@ object SockJsPollingSessions {
     }
   }
 
-  // Called by subscribeStreaming above, but uses ref to avoid actor lookup cost. */
+  /** Called by subscribeStreaming above, but uses ref to avoid actor lookup cost. */
   private def subscribeStreamingByClient(actorRef: ActorRef, callback: (SockJsSubscribeByClientResult) => Boolean) {
     val future = actorRef.ask(SubscribeOnceByClient)(25 seconds).mapTo[SockJsSubscribeByClientResult]
     future.onComplete {
