@@ -161,8 +161,6 @@ class SockJsController extends Controller with SkipCSRFCheck {
       response.setStatus(HttpResponseStatus.INTERNAL_SERVER_ERROR)
       respondText("Payload expected.")
     } else {
-      val sessionId = param("sessionId")
-
       val messages: Seq[String] = try {
         // body: ["m1", "m2"]
         Json.parse[Seq[String]](body)
@@ -179,6 +177,7 @@ class SockJsController extends Controller with SkipCSRFCheck {
       }
 
       if (messages != null) {
+        val sessionId = param("sessionId")
         if (SockJsPollingSessions.sendMessagesByClient(sessionId, messages)) {
           response.setStatus(HttpResponseStatus.NO_CONTENT)
           response.setHeader(HttpHeaders.Names.CONTENT_TYPE, "text/plain; charset=UTF-8")
@@ -328,7 +327,7 @@ class SockJsController extends Controller with SkipCSRFCheck {
                 buffer.append(jsEscape("\"" + jsEscape(message) + "\""))
                 buffer.append("]\");\r\n")
               }
-              respondStreamingWithLimit(buffer.toString)
+              respondJs(buffer.toString)
             }
         }
       })
@@ -406,10 +405,10 @@ class SockJsController extends Controller with SkipCSRFCheck {
         case SubscribeByClientResultMessages(messages) =>
           if (channel.isOpen()) {
             if (messages.isEmpty) {
-              respondStreamingWithLimit(renderEventSource("h"))
+              respondStreamingWithLimit(renderEventSource("h"), true)
             } else {
               val json = messages.map(jsEscape(_)).mkString("a[\"", "\",\"", "\"]")
-              respondStreamingWithLimit(renderEventSource(json))
+              respondStreamingWithLimit(renderEventSource(json), true)
             }
           } else {
             false
@@ -525,16 +524,23 @@ class SockJsController extends Controller with SkipCSRFCheck {
   private val LIMIT = if (xitrum.Config.isProductionMode) 128 * 1024 else 4 * 1024
 
   /** @return false if the channel will be closed when the channel write completes */
-  private def respondStreamingWithLimit(text: String): Boolean = {
+  private def respondStreamingWithLimit(text: String, isEventSource: Boolean = false): Boolean = {
     // This is length in characters, not bytes,
     // but in this case the result don't have to be precise
     val size = text.length
     streamingBytesSent += size
     if (streamingBytesSent < LIMIT) {
-      respondText(text)
+      if (isEventSource)
+        respondEventSource(text)
+      else
+        respondText(text)
       true
     } else {
-      val future = respondText(text)
+      val future =
+        if (isEventSource)
+          respondEventSource(text)
+        else
+          respondText(text)
       future.addListener(new ChannelFutureListener {
         def operationComplete(f: ChannelFuture) {
           channel.close()
