@@ -1,5 +1,6 @@
 1.9.9 (planned):
-* Support automatic CORS headers
+* Add automatic HEAD and CORS request handling
+  http://www.html5rocks.com/en/tutorials/cors/
 * Flash socket policy server can use the same port with HTTP server
 * Add Ajax style upload based on iframe
 * Support routing by domain name ("Host" header)

@@ -22,11 +22,10 @@ object SockJsPollingSessions {
     val ref     = system.actorFor("/user/" + escaped)
     if (ref.isTerminated) {
       val handler = Routes.createSockJsHandler(controller.pathPrefix)
-      handler.onOpen(controller)
-
       val ref     = system.actorOf(Props(new SockJsPollingSession(handler)), escaped)
       handler.sockJsPollingSessionActorRef = ref
       callback(SubscribeByClientResultOpen)
+      handler.onOpen(controller)  // Call opOpen after "o" frame has been sent
     } else {
       val future = ref.ask(SubscribeOnceByClient)(25 seconds).mapTo[SockJsSubscribeByClientResult]
       future.onComplete {
@@ -48,12 +47,10 @@ object SockJsPollingSessions {
     val ref     = system.actorFor("/user/" + escaped)
     if (ref.isTerminated) {
       val handler = Routes.createSockJsHandler(controller.pathPrefix)
-      handler.onOpen(controller)
-
       val ref     = system.actorOf(Props(new SockJsPollingSession(handler)), escaped)
       handler.sockJsPollingSessionActorRef = ref
-      if (callback(SubscribeByClientResultOpen))
-        subscribeStreamingByClient(ref, callback)
+      if (callback(SubscribeByClientResultOpen)) subscribeStreamingByClient(ref, callback)
+      handler.onOpen(controller)  // Call opOpen after "o" frame has been sent
     } else {
       subscribeStreamingByClient(ref, callback)
     }
