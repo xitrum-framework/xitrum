@@ -83,10 +83,11 @@ trait Responder extends JS with Flash with Knockout {
    * Headers are only sent on the first respondXXX call.
    */
   def respondLastChunk(): ChannelFuture = {
-    if (responded) {
+    if (!response.isChunked()) {
       printDoubleResponseErrorStackTrace()
     } else {
-      responded = true
+      // responded should be true here
+      response.setChunked(false)
       val future = channel.write(HttpChunk.LAST_CHUNK)
       NoPipelining.resumeReadingForKeepAliveRequestOrCloseOnComplete(request, channel, future)
       future
