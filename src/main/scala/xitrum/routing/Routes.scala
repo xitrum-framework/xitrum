@@ -190,6 +190,8 @@ object Routes extends Logger {
 
             if (forSockJsController) {
               for (pathPrefix <- sockJsRoutes.keys) {
+                // "first" and "last" can't be "lazy val" because pathPrefix is
+                // reset here
                 controller.pathPrefix = pathPrefix
                 populateActions(controller, actionMethod)
               }
@@ -203,7 +205,8 @@ object Routes extends Logger {
 
   private def populateActions(controller: Controller, actionMethod: Method) {
     val action = actionMethod.invoke(controller).asInstanceOf[Action]
-    if (action.route != null && action.route.httpMethod != null) {  // Actions created by indirectAction do not have route
+    // Actions created by indirectAction do not have route
+    if (action.route != null && action.route.httpMethod != null) {
       action.method = actionMethod  // Cache it
 
       val firsts_others_lasts =

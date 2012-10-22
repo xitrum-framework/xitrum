@@ -40,11 +40,12 @@ trait ActionFactory {
 
   //----------------------------------------------------------------------------
 
-  // first and last should be "lazy val" or "def" so that they are run after
-  // pathPrefix has been set
+  // first and last should be "def" so that they are run after pathPrefix has
+  // been set. They can't be "lazy val" for the collection of SockJsController
+  // routes to work correctly when there are many SockJS handlers.
 
-  lazy val first = Action(Route(null, RouteOrder.FIRST, PathPrefix.toCompiledPattern(pathPrefix)), null, null, 0)
-  lazy val last  = Action(Route(null, RouteOrder.LAST,  PathPrefix.toCompiledPattern(pathPrefix)), null, null, 0)
+  def first = Action(Route(null, RouteOrder.FIRST, PathPrefix.toCompiledPattern(pathPrefix)), null, null, 0)
+  def last  = Action(Route(null, RouteOrder.LAST,  PathPrefix.toCompiledPattern(pathPrefix)), null, null, 0)
 
   def cacheActionSecond(seconds: Int) = Action(Route(null, RouteOrder.OTHER, PathPrefix.toCompiledPattern(pathPrefix)), null, null, -seconds)
   def cacheActionMinute(minutes: Int) = Action(Route(null, RouteOrder.OTHER, PathPrefix.toCompiledPattern(pathPrefix)), null, null, -minutes * 60)
