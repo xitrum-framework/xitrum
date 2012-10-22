@@ -21,8 +21,10 @@ import xitrum.view.DocType
 // Reference implementation (need to read when in doubt):
 // https://github.com/sockjs/sockjs-node/tree/master/src
 object SockJsController {
-  private val random = new Random
-  def randomLong() = random.nextLong()
+  private val random = new Random(System.currentTimeMillis())
+
+  /** 0 to 2^32 - 1 */
+  def entropy() = random.nextInt().abs
 
   /** 2KB of 'h' characters */
   val h2KB = {
@@ -104,7 +106,7 @@ class SockJsController extends Controller with SkipCSRFCheck {
     setNoClientCache()
     // Set cookie_needed to true for session cookie to be sent
     // Some browsers like IE do not send any cookie if cookie_needed is false
-    respondJsonText("""{"websocket": true, "cookie_needed": true, "origins": ["*:*"], "entropy": """ + SockJsController.randomLong() + "}")
+    respondJsonText("""{"websocket": true, "cookie_needed": true, "origins": ["*:*"], "entropy": """ + SockJsController.entropy() + "}")
   }
 
   def infoOPTIONS = OPTIONS("info") {
@@ -498,11 +500,7 @@ class SockJsController extends Controller with SkipCSRFCheck {
 
   private def setCORS() {
     val requestOrigin  = request.getHeader(HttpHeaders.Names.ORIGIN)
-    val responseOrigin =
-      if (requestOrigin == null || requestOrigin == "null")
-        "*"
-      else
-        requestOrigin
+    val responseOrigin = if (requestOrigin == null || requestOrigin == "null") "*" else requestOrigin
     response.setHeader("Access-Control-Allow-Origin",      responseOrigin)
     response.setHeader("Access-Control-Allow-Credentials", "true")
 
