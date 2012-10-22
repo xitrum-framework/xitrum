@@ -71,12 +71,12 @@ object XSendFile extends Logger {
         }
 
       case Etag.Small(bytes, etag, mimeo, gzipped) =>
-        if (request.getHeader(IF_NONE_MATCH) == etag) {
+        if (Etag.areEtagsIdentical(request, etag)) {
           response.setStatus(NOT_MODIFIED)
           HttpHeaders.setContentLength(response, 0)
           response.setContent(ChannelBuffers.EMPTY_BUFFER)
         } else {
-          response.setHeader(ETAG, etag)
+          Etag.set(response, etag)
           if (mimeo.isDefined) response.setHeader(CONTENT_TYPE,     mimeo.get)
           if (gzipped)         response.setHeader(CONTENT_ENCODING, "gzip")
 

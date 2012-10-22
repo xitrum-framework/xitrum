@@ -18,9 +18,16 @@ object Etag extends Logger {
   case class  TooBig(file: File)                                                                               extends Result
   case class  Small(val bytes: Array[Byte], val etag: String, val mimeo: Option[String], val gzipped: Boolean) extends Result
 
-  //                                                     path    mtime
+  //                                                           path    mtime
   private[this] val smallFileCache        = new LocalLRUCache[(String, Long), Small](Config.config.response.maxNumberOfCachedStaticFiles)
   private[this] val gzippedSmallFileCache = new LocalLRUCache[(String, Long), Small](Config.config.response.maxNumberOfCachedStaticFiles)
+
+  /** Etag without quotes is technically illegal. */
+  def quote(etag: String) = "\"" + etag + "\""
+
+  def set(response: HttpResponse, etag: String) {
+    response.setHeader(ETAG, Etag.quote(etag))
+  }
 
   def forBytes(bytes: Array[Byte]): String = {
     val md5 = MessageDigest.getInstance("MD5")  // MD5 is fastest
@@ -76,7 +83,7 @@ object Etag extends Logger {
   //----------------------------------------------------------------------------
 
   def areEtagsIdentical(request: HttpRequest, etag: String) =
-    (request.getHeader(IF_NONE_MATCH) == etag)
+    (request.getHeader(IF_NONE_MATCH) == quote(etag))
 
   /** @return true if NOT_MODIFIED response has been sent */
   def respondIfEtagsIdentical(controller: Controller, etag: String) = {
@@ -89,7 +96,7 @@ object Etag extends Logger {
       controller.respond()
       true
     } else {
-      request.setHeader(ETAG, etag)
+      set(response, etag)
       false
     }
   }

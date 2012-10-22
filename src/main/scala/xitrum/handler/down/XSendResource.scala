@@ -45,7 +45,7 @@ object XSendResource extends Logger {
           HttpHeaders.setContentLength(response, 0)
           response.setContent(ChannelBuffers.EMPTY_BUFFER)
         } else {
-          response.setHeader(ETAG, etag)
+          Etag.set(response, etag)
           if (mimeo.isDefined) response.setHeader(CONTENT_TYPE, mimeo.get)
           if (gzipped)         response.setHeader(CONTENT_ENCODING, "gzip")
 

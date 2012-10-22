@@ -81,7 +81,7 @@ class Env2Response extends SimpleChannelDownstreamHandler {
   }
 
   private def compareAndSetETag(request: HttpRequest, response: HttpResponse, etag: String): Boolean = {
-    if (request.getHeader(IF_NONE_MATCH) == etag) {
+    if (Etag.areEtagsIdentical(request, etag)) {
       // Only send headers, the response content is set to empty
       // (decrease response transmission time)
       response.setStatus(NOT_MODIFIED)
@@ -90,7 +90,7 @@ class Env2Response extends SimpleChannelDownstreamHandler {
       response.setContent(ChannelBuffers.EMPTY_BUFFER)
       true
     } else {
-      response.setHeader(ETAG, etag)
+      Etag.set(response, etag)
       false
     }
   }
