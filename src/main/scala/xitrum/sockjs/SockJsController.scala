@@ -104,9 +104,9 @@ class SockJsController extends Controller with SkipCSRFCheck {
   def infoGET = GET("info") {
     setCORS()
     setNoClientCache()
-    // Set cookie_needed to true for session cookie to be sent
-    // Some browsers like IE do not send any cookie if cookie_needed is false
-    respondJsonText("""{"websocket": true, "cookie_needed": true, "origins": ["*:*"], "entropy": """ + SockJsController.entropy() + "}")
+    // FIXME: IE doesn't work with SockJS implementation of Xitrum when
+    // cookie_needed is set to true
+    respondJsonText("""{"websocket": true, "cookie_needed": false, "origins": ["*:*"], "entropy": """ + SockJsController.entropy() + "}")
   }
 
   def infoOPTIONS = OPTIONS("info") {
@@ -130,7 +130,7 @@ class SockJsController extends Controller with SkipCSRFCheck {
   def xhrPollingTransportReceive = POST(":serverId/:sessionId/xhr") {
     val sessionId = param("sessionId")
 
-    SockJsPollingSessions.subscribeOnceByClient(this, sessionId, { resulto =>
+    SockJsPollingSessions.subscribeOnceByClient(pathPrefix, sessionId, { resulto =>
       setCORS()
       setNoClientCache()
 
@@ -201,7 +201,7 @@ class SockJsController extends Controller with SkipCSRFCheck {
   def xhrStreamingTransportReceive = POST(":serverId/:sessionId/xhr_streaming") {
     val sessionId = param("sessionId")
 
-    SockJsPollingSessions.subscribeStreamingByClient(this, sessionId, { resulto =>
+    SockJsPollingSessions.subscribeStreamingByClient(pathPrefix, sessionId, { resulto =>
       resulto match {
         case SubscribeByClientResultAnotherConnectionStillOpen =>
           setCORS()
@@ -257,7 +257,7 @@ class SockJsController extends Controller with SkipCSRFCheck {
       val callback  = callbacko.get
       val sessionId = param("sessionId")
 
-      SockJsPollingSessions.subscribeStreamingByClient(this, sessionId, { resulto =>
+      SockJsPollingSessions.subscribeStreamingByClient(pathPrefix, sessionId, { resulto =>
         resulto match {
           case SubscribeByClientResultAnotherConnectionStillOpen =>
             setCORS()
@@ -320,7 +320,7 @@ class SockJsController extends Controller with SkipCSRFCheck {
       val callback  = callbacko.get
       val sessionId = param("sessionId")
 
-      SockJsPollingSessions.subscribeOnceByClient(this, sessionId, { resulto =>
+      SockJsPollingSessions.subscribeOnceByClient(pathPrefix, sessionId, { resulto =>
         setCORS()
         setNoClientCache()
 
@@ -406,7 +406,7 @@ class SockJsController extends Controller with SkipCSRFCheck {
   def eventSourceTransportReceive = GET(":serverId/:sessionId/eventsource") {
     val sessionId = param("sessionId")
 
-    SockJsPollingSessions.subscribeStreamingByClient(this, sessionId, { resulto =>
+    SockJsPollingSessions.subscribeStreamingByClient(pathPrefix, sessionId, { resulto =>
       resulto match {
         case SubscribeByClientResultAnotherConnectionStillOpen =>
           setCORS()
@@ -454,7 +454,7 @@ class SockJsController extends Controller with SkipCSRFCheck {
 
       def onOpen() {
         respondWebSocket("o")
-        sockJsHandler.onOpen(SockJsController.this)
+        sockJsHandler.onOpen()
       }
 
       def onMessage(body: String) {
@@ -483,7 +483,7 @@ class SockJsController extends Controller with SkipCSRFCheck {
       sockJsHandler.rawWebSocket        = true
 
       def onOpen() {
-        sockJsHandler.onOpen(SockJsController.this)
+        sockJsHandler.onOpen()
       }
 
       def onMessage(message: String) {
