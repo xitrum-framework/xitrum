@@ -378,8 +378,8 @@ trait Responder extends JS with Flash with Knockout {
 
   //----------------------------------------------------------------------------
 
-  def respondWebSocket(text: String): ChannelFuture = {
-    channel.write(new TextWebSocketFrame(text))
+  def respondWebSocket(text: Any): ChannelFuture = {
+    channel.write(new TextWebSocketFrame(text.toString))
   }
 
   def respondWebSocket(channelBuffer: ChannelBuffer): ChannelFuture = {
@@ -388,7 +388,7 @@ trait Responder extends JS with Flash with Knockout {
 
   //----------------------------------------------------------------------------
 
-  def renderEventSource(data: String, event: String = "message"): String = {
+  def renderEventSource(data: Any, event: String = "message"): String = {
     val builder = new StringBuilder
 
     if (event != "message") {
@@ -397,7 +397,7 @@ trait Responder extends JS with Flash with Knockout {
       builder.append("\n")
     }
 
-    val lines = data.split("\n")
+    val lines = data.toString.split("\n")
     val n = lines.length
     for (i <- 0 until n) {
       if (i < n - 1) {
@@ -422,7 +422,7 @@ trait Responder extends JS with Flash with Knockout {
    * - http://sockjs.github.com/sockjs-protocol/sockjs-protocol-0.3.3.html#section-94
    * - http://dev.w3.org/html5/eventsource/
    */
-  def respondEventSource(data: String, event: String = "message"): ChannelFuture = {
+  def respondEventSource(data: Any, event: String = "message"): ChannelFuture = {
     if (!responded) {
       response.setHeader(CONTENT_TYPE, "text/event-stream; charset=UTF-8")
       response.setChunked(true)

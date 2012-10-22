@@ -1,4 +1,4 @@
-package xitrum.comet
+package xitrum.sockjs
 
 import java.util.concurrent.TimeUnit
 
@@ -12,13 +12,13 @@ import xitrum.Config
 import xitrum.scope.request.Params
 
 // TODO: presense
-object Comet {
+object MessageQueue {
   private[this] val TTL_SECONDS = 60
 
-  private[this] val map = Config.hazelcastInstance.getMap("xitrum/comet").asInstanceOf[IMap[Long, CometMessage]]
+  private[this] val map = Config.hazelcastInstance.getMap("xitrum/message-queue").asInstanceOf[IMap[Long, QueueMessage]]
 
   /** The listener returns true if it wants itself to be unsubscribe. */
-  type MessageListener = (Seq[CometMessage]) => Boolean
+  type MessageListener = (Seq[QueueMessage]) => Boolean
 
   private[this] val messageListeners = MMap[String, ArrayBuffer[MessageListener]]()
 
@@ -27,8 +27,8 @@ object Comet {
   map.addIndex("topic",     false)  // Comparison: =
   map.addIndex("timestamp", true)   // Comparison: >
 
-  map.addEntryListener(new EntryListener[Long, CometMessage] {
-    def entryAdded(event: EntryEvent[Long, CometMessage]) {
+  map.addEntryListener(new EntryListener[Long, QueueMessage] {
+    def entryAdded(event: EntryEvent[Long, QueueMessage]) {
       messageListeners.synchronized {
         val cm = event.getValue
         messageListeners.get(cm.topic).foreach { arrayBuffer =>
@@ -43,20 +43,20 @@ object Comet {
       }
     }
 
-    def entryEvicted(event: EntryEvent[Long, CometMessage]) {}
-    def entryRemoved(event: EntryEvent[Long, CometMessage]) {}
-    def entryUpdated(event: EntryEvent[Long, CometMessage]) {}
+    def entryEvicted(event: EntryEvent[Long, QueueMessage]) {}
+    def entryRemoved(event: EntryEvent[Long, QueueMessage]) {}
+    def entryUpdated(event: EntryEvent[Long, QueueMessage]) {}
   }, true)
 
   //----------------------------------------------------------------------------
 
-  def publish(topic: String, message: Params) {
+  def publish(topic: String, message: Any) {
     val timestamp = System.currentTimeMillis()
-    val cm        = new CometMessage(topic, timestamp, message)
+    val cm        = new QueueMessage(topic, timestamp, message)
     map.put(timestamp, cm, TTL_SECONDS, TimeUnit.SECONDS)
   }
 
-  def getMessages(topic: String, lastTimestamp: Long): Seq[CometMessage] = {
+  def getMessages(topic: String, lastTimestamp: Long): Seq[QueueMessage] = {
     val pb = new PredicateBuilder
     val eo = pb.getEntryObject
     val p  = eo.get("topic").equal(topic).and(eo.get("timestamp").greaterThan(long2Long(lastTimestamp)))

@@ -23,26 +23,20 @@ abstract class SockJsHandler extends Logger {
   //----------------------------------------------------------------------------
   // Helper methods for apps to use
 
-  def sendMessage(message: String) {
-    sendMessages(List(message))
-  }
-
-  def sendMessages(messages: List[String]) {
+  def sendMessage(message: Any) {
     if (webSocketController == null) {
       // FIXME: Ugly code
       // sockJsPollingSessionActorRef is set to null by SockJsPollingSession on postStop
       if (sockJsPollingSessionActorRef != null) {
-        if (!SockJsPollingSessions.sendMessagesByHandler(sockJsPollingSessionActorRef, messages))
+        if (!SockJsPollingSessions.sendMessagesByHandler(sockJsPollingSessionActorRef, List(message.toString)))
           onClose()
       }
     } else {
       // WebSocket is used, but it may be raw or not raw
       if (rawWebSocket) {
-        for (message <- messages)
-          webSocketController.respondWebSocket(message)
+        webSocketController.respondWebSocket(message)
       } else {
-        val json = messages.map(webSocketController.jsEscape(_)).mkString("a[\"", "\",\"", "\"]\n")
-        webSocketController.respondWebSocket(json)
+        webSocketController.respondWebSocket("a[\"" + webSocketController.jsEscape(message) + "\"]\n")
       }
     }
   }
