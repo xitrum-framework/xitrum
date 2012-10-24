@@ -36,7 +36,11 @@ trait JS {
       .replace("\n",   "\\n")
       .replace("\r",   "\\n")
       .replace("\"",   "\\\"")
-      .replace("'",    "\\'")
+
+      // This causes problem for SockJS
+      // Doesn't need this anyway because the result needs to be wrapped
+      // with double quote, not single quote
+      //.replace("'",    "\\'")
   }
 
   def js$(selector: String) = "$(\"" + selector + "\")"
