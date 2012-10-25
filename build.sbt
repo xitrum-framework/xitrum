@@ -45,6 +45,9 @@ libraryDependencies += "com.codahale" % "jerkson_2.9.1" % "0.5.0"
 
 libraryDependencies += "org.fusesource.scalate" % "scalate-core" % "1.5.3"
 
+// For Markdown
+libraryDependencies += "org.fusesource.scalamd" % "scalamd" % "1.5"
+
 // For Scalate to compile CoffeeScript to JavaScript
 libraryDependencies += "org.mozilla" % "rhino" % "1.7R4"
 
@@ -60,6 +63,9 @@ libraryDependencies += "org.slf4j" % "slf4j-api" % "1.7.2" % "provided"
 libraryDependencies += "org.jboss.marshalling" % "jboss-marshalling" % "1.3.15.GA"
 
 libraryDependencies += "org.jboss.marshalling" % "jboss-marshalling-river" % "1.3.15.GA"
+
+// For jsEscape
+libraryDependencies += "org.apache.commons" % "commons-lang3" % "3.1"
 
 libraryDependencies += "tv.cntt" %% "scaposer" % "1.2"
 

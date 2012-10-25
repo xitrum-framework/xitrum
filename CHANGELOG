@@ -32,6 +32,11 @@
 * Add respondEventSource(data: String, event: String = "message")
   http://dev.w3.org/html5/eventsource/
 * Add Akka 2.0.3 as a dependency (for use in SockJS)
+* Add Scalate Markdown as dependency:
+  http://groups.google.com/group/xitrum-framework/browse_thread/thread/262176aa8e875940
+  http://scalate.fusesource.org/documentation/jade.html
+* Add Appache Commons Lang as dependency, to use its StringEscapeUtils in jsEscape:
+  http://commons.apache.org/lang/api-release/org/apache/commons/lang3/StringEscapeUtils.html
 * Remove xitrum.comet.CometController
 * Use JBoss Marshalling library for faster/smaller session cookie storing/restoring
   http://www.jboss.org/jbossmarshalling

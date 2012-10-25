@@ -2,6 +2,7 @@ package xitrum.view
 
 import scala.xml.Unparsed
 
+import org.apache.commons.lang3.StringEscapeUtils
 import org.jboss.netty.channel.ChannelFuture
 
 import xitrum.{Config, Controller}
@@ -9,6 +10,8 @@ import xitrum.controller.Action
 import xitrum.etag.{Etag, NotModified}
 import xitrum.routing.{Routes, JSRoutesController}
 
+// http://stackoverflow.com/questions/2703861/chromes-loading-indicator-keeps-spinning-during-xmlhttprequest
+// http://stackoverflow.com/questions/1735560/stop-the-browser-throbber-of-doom-while-loading-comet-server-push-xmlhttpreques
 trait JS {
   this: Controller =>
 
@@ -25,23 +28,14 @@ trait JS {
   //----------------------------------------------------------------------------
 
   /**
-   * See escape_javascript of Rails.
-   * The result needs to be wrapped with double quote, not single quote.
+   * Do not use this to escape JSON, because they are different! For example
+   * JSON does not escape ' character, while JavaScript does. To escape JSON,
+   * use Jerkson:
+   * com.codahale.jerkson.Json.generate(List(message))
+   *
+   * org.apache.commons.lang3.StringEscapeUtils is used internally.
    */
-  def jsEscape(string: Any) = {
-    string.toString
-      .replace("\\",   "\\\\")
-      .replace("</",   "<\\/")
-      .replace("\r\n", "\\n")
-      .replace("\n",   "\\n")
-      .replace("\r",   "\\n")
-      .replace("\"",   "\\\"")
-
-      // This causes problem for SockJS
-      // Doesn't need this anyway because the result needs to be wrapped
-      // with double quote, not single quote
-      //.replace("'",    "\\'")
-  }
+  def jsEscape(string: Any) = StringEscapeUtils.escapeEcmaScript(string.toString)
 
   def js$(selector: String) = "$(\"" + selector + "\")"
 
@@ -62,12 +56,6 @@ trait JS {
   }
 
   def jsRedirectTo(action: Action, params: (String, Any)*): ChannelFuture = { jsRedirectTo(action.url(params:_*)) }
-
-  def jsCometGet(topic: String, callback: String) {
-    // http://stackoverflow.com/questions/2703861/chromes-loading-indicator-keeps-spinning-during-xmlhttprequest
-    // http://stackoverflow.com/questions/1735560/stop-the-browser-throbber-of-doom-while-loading-comet-server-push-xmlhttpreques
-    jsAddToView("setTimeout(function () { xitrum.cometGet('" + topic + "', 0, " + callback + ") }, 1000)")
-  }
 
   //----------------------------------------------------------------------------
 
