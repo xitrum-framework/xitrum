@@ -425,10 +425,10 @@ class SockJsController extends Controller with SkipCSRFCheck {
             }
 
             if (messages.isEmpty) {
-              respondStreamingWithLimit(renderEventSource("h"), true)
+              respondStreamingWithLimit("h", true)
             } else {
               val json = "a" + Json.generate(messages)
-              respondStreamingWithLimit(renderEventSource(json), true)
+              respondStreamingWithLimit(json, true)
             }
           } else {
             false
