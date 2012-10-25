@@ -150,7 +150,7 @@ class SockJsController extends Controller with SkipCSRFCheck {
           if (messages.isEmpty) {
             respondJs("h\n")
           } else {
-            val json = messages.map(jsEscape(_)).mkString("a[\"", "\",\"", "\"]\n")
+            val json = "a" + Json.generate(messages) + "\n"
             respondJs(json)
           }
       }
@@ -239,7 +239,7 @@ class SockJsController extends Controller with SkipCSRFCheck {
             if (messages.isEmpty) {
               respondStreamingWithLimit("h\n")
             } else {
-              val json = messages.map(jsEscape(_)).mkString("a[\"", "\",\"", "\"]\n")
+              val json = "a" + Json.generate(messages) + "\n"
               respondStreamingWithLimit(json)
             }
           } else {
@@ -297,11 +297,9 @@ class SockJsController extends Controller with SkipCSRFCheck {
                 respondStreamingWithLimit("<script>\np(\"h\");\n</script>\r\n")
               } else {
                 val buffer = new StringBuilder
-                messages.foreach { message =>
-                  buffer.append("<script>\np(\"a[")
-                  buffer.append(jsEscape("\"" + jsEscape(message) + "\""))
-                  buffer.append("]\");\n</script>\r\n")
-                }
+                buffer.append("<script>\np(\"a")
+                buffer.append(jsEscape(Json.generate(messages)))
+                buffer.append("\");\n</script>\r\n")
                 respondStreamingWithLimit(buffer.toString)
               }
             } else {
@@ -341,11 +339,9 @@ class SockJsController extends Controller with SkipCSRFCheck {
               respondJs(callback + "(\"h\");\r\n")
             } else {
               val buffer = new StringBuilder
-              messages.foreach { message =>
-                buffer.append(callback + "(\"a[")
-                buffer.append(jsEscape("\"" + jsEscape(message) + "\""))
-                buffer.append("]\");\r\n")
-              }
+              buffer.append(callback + "(\"a")
+              buffer.append(jsEscape(Json.generate(messages)))
+              buffer.append("\");\r\n")
               respondJs(buffer.toString)
             }
         }
@@ -431,7 +427,7 @@ class SockJsController extends Controller with SkipCSRFCheck {
             if (messages.isEmpty) {
               respondStreamingWithLimit(renderEventSource("h"), true)
             } else {
-              val json = messages.map(jsEscape(_)).mkString("a[\"", "\",\"", "\"]")
+              val json = "a" + Json.generate(messages)
               respondStreamingWithLimit(renderEventSource(json), true)
             }
           } else {

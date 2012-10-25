@@ -1,6 +1,9 @@
 package xitrum
 
 import akka.actor.ActorRef
+import com.codahale.jerkson.Json
+
+import xitrum.routing.Routes
 import xitrum.sockjs.SockJsPollingSessions
 
 abstract class SockJsHandler extends Logger {
@@ -23,7 +26,7 @@ abstract class SockJsHandler extends Logger {
   //----------------------------------------------------------------------------
   // Helper methods for apps to use
 
-  def sendMessage(message: Any) {
+  def send(message: Any) {
     if (webSocketController == null) {
       // FIXME: Ugly code
       // sockJsPollingSessionActorRef is set to null by SockJsPollingSession on postStop
@@ -36,7 +39,7 @@ abstract class SockJsHandler extends Logger {
       if (rawWebSocket) {
         webSocketController.respondWebSocket(message)
       } else {
-        webSocketController.respondWebSocket("a[\"" + webSocketController.jsEscape(message) + "\"]\n")
+        webSocketController.respondWebSocket("a" + Json.generate(List(message)) + "\n")
       }
     }
   }
@@ -47,5 +50,9 @@ abstract class SockJsHandler extends Logger {
     } else {
       webSocketController.channel.close()
     }
+  }
+
+  def url: String = {
+    Config.withBaseUrl(Routes.sockJsPathPrefix(this.getClass))
   }
 }

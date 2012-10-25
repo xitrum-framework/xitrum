@@ -393,4 +393,12 @@ object Routes extends Logger {
     val klass = sockJsRoutes(pathPrefix)
     klass.newInstance()
   }
+
+  def sockJsPathPrefix(sockJsHandlerClass: Class[_ <: SockJsHandler]): String = {
+   val kv = sockJsRoutes.find { case (k, v) => v == sockJsHandlerClass }
+   kv match {
+     case Some((k, v)) => k
+     case None         => throw new Exception("Cannot lookup SockJS URL for class: " + sockJsHandlerClass)
+   }
+  }
 }
