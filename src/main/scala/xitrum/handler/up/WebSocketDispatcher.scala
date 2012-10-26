@@ -36,9 +36,7 @@ class WebSocketDispatcher(handshaker: WebSocketServerHandshaker, handler: WebSoc
     }
 
     ctx.getChannel.getCloseFuture.addListener(new ChannelFutureListener {
-      def operationComplete(future: ChannelFuture) {
-        callOnClose()
-      }
+      def operationComplete(future: ChannelFuture) { callOnClose() }
     })
 
     if (frame.isInstanceOf[PingWebSocketFrame]) {

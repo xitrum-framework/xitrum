@@ -8,8 +8,8 @@ import akka.util.duration._
 import xitrum.SockJsHandler
 
 sealed trait SockJsPollingSessionActorMessage
-case class  SendMessagesByClient (messages: Seq[String]) extends SockJsPollingSessionActorMessage
-case class  SendMessagesByHandler(messages: Seq[String]) extends SockJsPollingSessionActorMessage
+case class  SendMessagesByClient (messages: List[String]) extends SockJsPollingSessionActorMessage
+case class  SendMessagesByHandler(messages: List[String]) extends SockJsPollingSessionActorMessage
 case object SubscribeOnceByClient                        extends SockJsPollingSessionActorMessage
 case object UnsubscribeByClient                          extends SockJsPollingSessionActorMessage
 
@@ -17,49 +17,40 @@ sealed trait SockJsSubscribeByClientResult
 case object SubscribeByClientResultAnotherConnectionStillOpen       extends SockJsSubscribeByClientResult
 case object SubscribeByClientResultOpen                             extends SockJsSubscribeByClientResult
 case class  SubscribeByClientResultMessages(messages: List[String]) extends SockJsSubscribeByClientResult
+case object SubscribeByClientResultErrorAfterOpenHasBeenSent        extends SockJsSubscribeByClientResult
 
 /**
  * There should be at most one subscriber:
  * http://sockjs.github.com/sockjs-protocol/sockjs-protocol-0.3.3.html
  */
 class SockJsPollingSession(sockJsHandler: SockJsHandler) extends Actor {
-  private val TIMEOUT = 25  // Seconds
-
   private val buffer = ArrayBuffer[String]()
   private var clientSender: ActorRef = null
 
   // To avoid out of memory, the actor is stopped when there's no subscriber
   // for a long time. This timeout is also used to check if there's no message
   // for subscriber for a long time.
-  context.setReceiveTimeout(TIMEOUT seconds)
+  context.setReceiveTimeout(SockJsPollingSessions.TIMEOUT_FOR_SockJsPollingSession seconds)
 
   // ReceiveTimeout may not occurred if there's frequent Publish, thus we
   // need to manually check if there's no subscriber for a long time
   private var lastSubscribedAt = 0L
 
   override def preStart() {
+    // sockJsHandler.onClose is called at postStop, but sockJsHandler.onOpen
+    // is not called here, because sockJsHandler.onOpen may send messages, but
+    // "o" frame needs to be sent before all messages. sockJsHandler.onOpen will
+    // be called by SockJsPollingSessions.
     lastSubscribedAt = System.currentTimeMillis()
   }
 
+  override def postStop() {
+    sockJsHandler.onClose()
+    // Remove interdependency
+    sockJsHandler.sockJsPollingSessionActorRef = null
+  }
+
   def receive = {
-    case SendMessagesByClient(messages) =>
-      messages.foreach(sockJsHandler.onMessage(_))
-
-    case SendMessagesByHandler(messages) =>
-      if (clientSender == null) {
-        // Manually check if there's no subscriber for a long time
-        val now = System.currentTimeMillis()
-        if (now - lastSubscribedAt > TIMEOUT * 1000) {
-          context.stop(self)
-        } else {
-          buffer ++= messages
-        }
-      } else {
-        // buffer is empty at this moment
-        clientSender ! SubscribeByClientResultMessages(messages.toList)
-        clientSender = null
-      }
-
     case SubscribeOnceByClient =>
       lastSubscribedAt = System.currentTimeMillis()
       if (clientSender == null) {
@@ -76,6 +67,24 @@ class SockJsPollingSession(sockJsHandler: SockJsHandler) extends Actor {
     case UnsubscribeByClient =>
       clientSender = null
 
+    case SendMessagesByClient(messages) =>
+      messages.foreach(sockJsHandler.onMessage(_))
+
+    case SendMessagesByHandler(messages) =>
+      if (clientSender == null) {
+        // Manually check if there's no subscriber for a long time
+        val now = System.currentTimeMillis()
+        if (now - lastSubscribedAt > SockJsPollingSessions.TIMEOUT_FOR_SockJsPollingSession * 1000) {
+          context.stop(self)
+        } else {
+          buffer ++= messages
+        }
+      } else {
+        // buffer is empty at this moment
+        clientSender ! SubscribeByClientResultMessages(messages)
+        clientSender = null
+      }
+
     case ReceiveTimeout =>
       if (clientSender == null) {
         // No subscriber for a long time
@@ -85,11 +94,5 @@ class SockJsPollingSession(sockJsHandler: SockJsHandler) extends Actor {
         clientSender ! SubscribeByClientResultMessages(Nil)
         clientSender = null
       }
-  }
-
-  override def postStop() {
-    sockJsHandler.onClose()
-    // Remove interdependency
-    sockJsHandler.sockJsPollingSessionActorRef = null
   }
 }

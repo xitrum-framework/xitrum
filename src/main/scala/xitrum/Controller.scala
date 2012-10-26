@@ -24,9 +24,7 @@ trait Controller extends ExtEnv
 
   def addConnectionClosedListener(listener: => Unit) {
     channel.getCloseFuture.addListener(new ChannelFutureListener {
-      def operationComplete(future: ChannelFuture) {
-        listener
-      }
+      def operationComplete(future: ChannelFuture) { listener }
     })
   }
 }

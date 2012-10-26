@@ -20,9 +20,7 @@ object NoPipelining {
       channel: Channel, channelFuture: ChannelFuture) {
     if (HttpHeaders.isKeepAlive(request)) {
       channelFuture.addListener(new ChannelFutureListener() {
-        def operationComplete(future: ChannelFuture) {
-          channel.setReadable(true)
-        }
+        def operationComplete(future: ChannelFuture) { channel.setReadable(true) }
       })
     } else {
       channelFuture.addListener(ChannelFutureListener.CLOSE)
@@ -36,9 +34,7 @@ object NoPipelining {
     if (HttpHeaders.isKeepAlive(request)) {
       response.setHeader(HttpHeaders.Names.CONNECTION, HttpHeaders.Values.KEEP_ALIVE)
       channelFuture.addListener(new ChannelFutureListener() {
-        def operationComplete(future: ChannelFuture) {
-          channel.setReadable(true)
-        }
+        def operationComplete(future: ChannelFuture) { channel.setReadable(true) }
       })
     } else {
       channelFuture.addListener(ChannelFutureListener.CLOSE)

@@ -138,9 +138,7 @@ object XSendFile extends Logger {
               // Cannot use zero-copy with HTTPS
               val future = Channels.write(channel, new ChunkedFile(raf, offset, length, CHUNK_SIZE))
               future.addListener(new ChannelFutureListener {
-                def operationComplete(f: ChannelFuture) {
-                  raf.close()
-                }
+                def operationComplete(f: ChannelFuture) { raf.close() }
               })
 
               NoPipelining.resumeReadingForKeepAliveRequestOrCloseOnComplete(request, channel, future)
@@ -154,7 +152,7 @@ object XSendFile extends Logger {
               val future = Channels.write(channel, region)
               future.addListener(new ChannelFutureListener {
                 def operationComplete(f: ChannelFuture) {
-                  region.releaseExternalResources
+                  region.releaseExternalResources()
                   raf.close()
                 }
               })

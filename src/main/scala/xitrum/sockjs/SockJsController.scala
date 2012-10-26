@@ -73,7 +73,7 @@ class SockJsController extends Controller with SkipCSRFCheck {
     val iframe = param("iframe")
     if (iframe.startsWith("iframe") && iframe.endsWith(".html")) {
       val src =
-        if (xitrum.Config.isProductionMode)
+        if (Config.isProductionMode)
           "xitrum/sockjs-0.3.min.js"
         else
           "xitrum/sockjs-0.3.js"
@@ -136,12 +136,7 @@ class SockJsController extends Controller with SkipCSRFCheck {
 
       resulto match {
         case SubscribeByClientResultAnotherConnectionStillOpen =>
-          val future = respondJs("c[2010,\"Another connection still open\"]\n")
-          future.addListener(new ChannelFutureListener {
-            def operationComplete(f: ChannelFuture) {
-              channel.close()
-            }
-          })
+          respondJs("c[2010,\"Another connection still open\"]\n")
 
         case SubscribeByClientResultOpen =>
           respondJs("o\n")
@@ -153,6 +148,9 @@ class SockJsController extends Controller with SkipCSRFCheck {
             val json = "a" + Json.generate(messages) + "\n"
             respondJs(json)
           }
+
+        case SubscribeByClientResultErrorAfterOpenHasBeenSent =>
+          respondJs("c[2011,\"Server error\"]\n")
       }
     })
   }
@@ -163,18 +161,13 @@ class SockJsController extends Controller with SkipCSRFCheck {
       response.setStatus(HttpResponseStatus.INTERNAL_SERVER_ERROR)
       respondText("Payload expected.")
     } else {
-      val messages: Seq[String] = try {
+      val messages: List[String] = try {
         // body: ["m1", "m2"]
-        Json.parse[Seq[String]](body)
+        Json.parse[List[String]](body)
       } catch {
         case _ =>
           response.setStatus(HttpResponseStatus.INTERNAL_SERVER_ERROR)
-          val future = respondText("Broken JSON encoding.")
-          future.addListener(new ChannelFutureListener {
-            def operationComplete(f: ChannelFuture) {
-              channel.close()
-            }
-          })
+          respondText("Broken JSON encoding.")
           null
       }
 
@@ -201,17 +194,14 @@ class SockJsController extends Controller with SkipCSRFCheck {
   def xhrStreamingTransportReceive = POST(":serverId/:sessionId/xhr_streaming") {
     val sessionId = param("sessionId")
 
+    // Below can be initiated by different channels, thus channel.isOpen should
+    // be called to check if SockJsController.h2KB should be sent
     SockJsPollingSessions.subscribeStreamingByClient(pathPrefix, sessionId, { resulto =>
       resulto match {
         case SubscribeByClientResultAnotherConnectionStillOpen =>
           setCORS()
           setNoClientCache()
-          val future = respondJs("c[2010,\"Another connection still open\"]\n")
-          future.addListener(new ChannelFutureListener {
-            def operationComplete(f: ChannelFuture) {
-              channel.close()
-            }
-          })
+          respondJs("c[2010,\"Another connection still open\"]\n")
           false
 
         case SubscribeByClientResultOpen =>
@@ -221,8 +211,7 @@ class SockJsController extends Controller with SkipCSRFCheck {
           response.setChunked(true)
           response.setHeader(HttpHeaders.Names.CONTENT_TYPE, "application/javascript; charset=" + Config.config.request.charset)
           respondBinary(SockJsController.h2KB)
-
-          respondJs("o\n")
+          respondStreamingWithLimit("o\n")
           true
 
         case SubscribeByClientResultMessages(messages) =>
@@ -245,6 +234,18 @@ class SockJsController extends Controller with SkipCSRFCheck {
           } else {
             false
           }
+
+        case SubscribeByClientResultErrorAfterOpenHasBeenSent =>
+          if (!isResponded) {
+            setCORS()
+            setNoClientCache()
+            response.setHeader(HttpHeaders.Names.CONTENT_TYPE, "application/javascript; charset=" + Config.config.request.charset)
+            respondJs("c[2011,\"Server error\"]\n")
+          } else {
+            respondJs("c[2011,\"Server error\"]\n")
+            respondLastChunk()
+          }
+          false
       }
     })
   }
@@ -262,15 +263,10 @@ class SockJsController extends Controller with SkipCSRFCheck {
           case SubscribeByClientResultAnotherConnectionStillOpen =>
             setCORS()
             setNoClientCache()
-            val future = respondHtml(
+            respondHtml(
               SockJsController.htmlfile(callback, false) +
               "<script>\np(\"c[2010,\\\"Another connection still open\\\"]\");\n</script>\r\n"
             )
-            future.addListener(new ChannelFutureListener {
-              def operationComplete(f: ChannelFuture) {
-                channel.close()
-              }
-            })
             false
 
           case SubscribeByClientResultOpen =>
@@ -305,6 +301,21 @@ class SockJsController extends Controller with SkipCSRFCheck {
             } else {
               false
             }
+
+          case SubscribeByClientResultErrorAfterOpenHasBeenSent =>
+            if (!isResponded) {
+              addConnectionClosedListener{ SockJsPollingSessions.unsubscribeByClient(sessionId) }
+              setCORS()
+              setNoClientCache()
+              respondHtml(
+                SockJsController.htmlfile(callback, false) +
+                "<script>\np(\"c[2011,\\\"Server error\\\"]\");\n</script>\r\n"
+              )
+            } else {
+              respondText("<script>\np(\"c[2011,\\\"Server error\\\"]\");\n</script>\r\n")
+              respondLastChunk()
+            }
+            false
         }
       })
     }
@@ -324,12 +335,7 @@ class SockJsController extends Controller with SkipCSRFCheck {
 
         resulto match {
           case SubscribeByClientResultAnotherConnectionStillOpen =>
-            val future = respondJs(callback + "(\"c[2010,\\\"Another connection still open\\\"]\");\r\n")
-            future.addListener(new ChannelFutureListener {
-              def operationComplete(f: ChannelFuture) {
-                channel.close()
-              }
-            })
+            respondJs(callback + "(\"c[2010,\\\"Another connection still open\\\"]\");\r\n")
 
           case SubscribeByClientResultOpen =>
             respondJs(callback + "(\"o\");\r\n")
@@ -344,6 +350,9 @@ class SockJsController extends Controller with SkipCSRFCheck {
               buffer.append("\");\r\n")
               respondJs(buffer.toString)
             }
+
+          case SubscribeByClientResultErrorAfterOpenHasBeenSent =>
+            respondJs(callback + "(\"c[2011,\\\"Server error\\\"]\");\r\n")
         }
       })
     }
@@ -368,18 +377,13 @@ class SockJsController extends Controller with SkipCSRFCheck {
     } else {
       val sessionId = param("sessionId")
 
-      val messages: Seq[String] = try {
+      val messages: List[String] = try {
         // body: ["m1", "m2"]
-        Json.parse[Seq[String]](body)
+        Json.parse[List[String]](body)
       } catch {
         case _ =>
           response.setStatus(HttpResponseStatus.INTERNAL_SERVER_ERROR)
-          val future = respondText("Broken JSON encoding.")
-          future.addListener(new ChannelFutureListener {
-            def operationComplete(f: ChannelFuture) {
-              channel.close()
-            }
-          })
+          respondText("Broken JSON encoding.")
           null
       }
 
@@ -433,6 +437,17 @@ class SockJsController extends Controller with SkipCSRFCheck {
           } else {
             false
           }
+
+        case SubscribeByClientResultErrorAfterOpenHasBeenSent =>
+          if (!isResponded) {
+            setCORS()
+            setNoClientCache()
+            respondJs("c[2011,\"Server error\"]\n")
+          } else {
+            respondEventSource("c[2011,\"Server error\"]")
+            respondLastChunk()
+          }
+          false
       }
     })
   }
@@ -454,13 +469,12 @@ class SockJsController extends Controller with SkipCSRFCheck {
       }
 
       def onMessage(body: String) {
-        val messages: Seq[String] = try {
+        val messages: List[String] = try {
           // body: ["m1", "m2"]
-          Json.parse[Seq[String]](body)
+          Json.parse[List[String]](body)
         } catch {
           case _ =>
-            logger.warn("Broken JSON-encoded SockJS message: " + body)
-            channel.close()
+            respondWebSocket("c[2011,\"Broken JSON encoding.\"]")
             null
         }
         if (messages != null) messages.foreach(sockJsHandler.onMessage(_))
@@ -513,18 +527,12 @@ class SockJsController extends Controller with SkipCSRFCheck {
     respond()
   }
 
-  /** Connection is closed if there's no c or callback parameter */
   private def callbackParam(): Option[String] = {
     val paramName = if (uriParams.isDefinedAt("c")) "c" else "callback"
     val ret = paramo(paramName)
     if (ret == None) {
       response.setStatus(HttpResponseStatus.INTERNAL_SERVER_ERROR)
-      val future = respondText("\"callback\" parameter required")
-      future.addListener(new ChannelFutureListener {
-        def operationComplete(f: ChannelFuture) {
-          channel.close()
-        }
-      })
+      respondText("\"callback\" parameter required")
     }
     ret
   }
@@ -537,30 +545,21 @@ class SockJsController extends Controller with SkipCSRFCheck {
    */
   private var streamingBytesSent = 0
 
-  private val LIMIT = if (xitrum.Config.isProductionMode) 128 * 1024 else 4 * 1024
+  private val LIMIT = if (Config.isProductionMode) 128 * 1024 else 4 * 1024
 
   /** @return false if the channel will be closed when the channel write completes */
   private def respondStreamingWithLimit(text: String, isEventSource: Boolean = false): Boolean = {
     // This is length in characters, not bytes,
-    // but in this case the result don't have to be precise
+    // but in this case the result doesn't have to be precise
     val size = text.length
     streamingBytesSent += size
     if (streamingBytesSent < LIMIT) {
-      if (isEventSource)
-        respondEventSource(text)
-      else
-        respondText(text)
+      if (isEventSource) respondEventSource(text) else respondText(text)
       true
     } else {
-      val future =
-        if (isEventSource)
-          respondEventSource(text)
-        else
-          respondText(text)
+      val future = if (isEventSource) respondEventSource(text) else respondText(text)
       future.addListener(new ChannelFutureListener {
-        def operationComplete(f: ChannelFuture) {
-          channel.close()
-        }
+        def operationComplete(f: ChannelFuture) { channel.close() }
       })
       false
     }

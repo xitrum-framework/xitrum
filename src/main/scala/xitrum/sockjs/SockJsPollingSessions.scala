@@ -11,6 +11,13 @@ import xitrum.routing.Routes
 
 /** This acts the middleman between client and server SockJS handler. */
 object SockJsPollingSessions {
+  // Seconds
+  // TIMEOUT_FOR_SockJsPollingSessions needs to be bigger than
+  // TIMEOUT_FOR_SockJsPollingSession so that timeout for SockJsPollingSessions
+  // does not happen before timeout for SockJsPollingSession
+  val TIMEOUT_FOR_SockJsPollingSession  = 25
+  val TIMEOUT_FOR_SockJsPollingSessions = TIMEOUT_FOR_SockJsPollingSession * 2
+
   private val system = ActorSystem("SockJsPollingSessions")
 
   def subscribeOnceByClient(pathPrefix: String, sockJsSessionId: String, callback: (SockJsSubscribeByClientResult) => Unit) {
@@ -23,10 +30,12 @@ object SockJsPollingSessions {
       callback(SubscribeByClientResultOpen)
       handler.onOpen()  // Call opOpen after "o" frame has been sent
     } else {
-      val future = ref.ask(SubscribeOnceByClient)(25 seconds).mapTo[SockJsSubscribeByClientResult]
+      val future = ref.ask(SubscribeOnceByClient)(TIMEOUT_FOR_SockJsPollingSessions seconds).mapTo[SockJsSubscribeByClientResult]
       future.onComplete {
         case Left(e) =>
-          callback(SubscribeByClientResultMessages(Nil))
+          // The channel will be closed by SockJsController,
+          // handler.onClose is called at SockJsPollingSession#postStop
+          callback(SubscribeByClientResultErrorAfterOpenHasBeenSent)
         case Right(result) =>
           callback(result)
       }
@@ -52,11 +61,12 @@ object SockJsPollingSessions {
 
   /** Called by subscribeStreaming above, but uses ref to avoid actor lookup cost. */
   private def subscribeStreamingByClient(actorRef: ActorRef, callback: (SockJsSubscribeByClientResult) => Boolean) {
-    val future = actorRef.ask(SubscribeOnceByClient)(25 seconds).mapTo[SockJsSubscribeByClientResult]
+    val future = actorRef.ask(SubscribeOnceByClient)(TIMEOUT_FOR_SockJsPollingSessions seconds).mapTo[SockJsSubscribeByClientResult]
     future.onComplete {
       case Left(e) =>
-        if (callback(SubscribeByClientResultMessages(Nil)))
-          subscribeStreamingByClient(actorRef, callback)
+        // The channel will be closed by SockJsController,
+        // handler.onClose is called at SockJsPollingSession#postStop
+        callback(SubscribeByClientResultErrorAfterOpenHasBeenSent)
       case Right(result) =>
         if (callback(result) && result != SubscribeByClientResultAnotherConnectionStillOpen)
           subscribeStreamingByClient(actorRef, callback)
@@ -64,7 +74,7 @@ object SockJsPollingSessions {
   }
 
   /** @return false means session not found */
-  def sendMessagesByClient(sockJsSessionId: String, messages: Seq[String]): Boolean = {
+  def sendMessagesByClient(sockJsSessionId: String, messages: List[String]): Boolean = {
     val escaped = escapeActorPath(sockJsSessionId)
     val ref     = system.actorFor("/user/" + escaped)
     if (ref.isTerminated) {
@@ -89,7 +99,7 @@ object SockJsPollingSessions {
 
   //----------------------------------------------------------------------------
 
-  def sendMessagesByHandler(actorRef: ActorRef, messages: Seq[String]): Boolean = {
+  def sendMessagesByHandler(actorRef: ActorRef, messages: List[String]): Boolean = {
     if (actorRef.isTerminated) {
       false
     } else {
