@@ -19,7 +19,8 @@ See:
 https://github.com/sbt/sbt.github.com/blob/gen-master/src/jekyll/using_sonatype.md
 
 1. Copy dev/plugins.sbt to project/plugins.sbt.
-2. Copy content of dev/build.sbt.end to the end of build.sbt.
+2. Copy content of dev/build.sbt.end to the end of build.sbt,
+   copy content of dev/build.sbt.end to the end of project/plugins.sbt.
 3. Run ``sbt publish``. Alternatively you can run ``sbt`` then from SBT
    command prompt run ``+ publish``.
 4. Login at https://oss.sonatype.org/ and from "Staging Repositories" select the
