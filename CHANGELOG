@@ -1,4 +1,5 @@
 1.9.9 (planned):
+* Add cluster mode for SockJS
 * Add automatic HEAD and CORS request handling
   http://www.html5rocks.com/en/tutorials/cors/
 * Flash socket policy server can use the same port with HTTP server
@@ -18,7 +19,7 @@
 * Reload routes when in development mode using Javassist
 * Support SPDY
 
-1.9.8 (planned):
+1.9.8:
 * Fix bug at remoteIp when reverseProxy is enabled in config/xitrum.json
 * Remove double quotes around the result of jsEscape
 * Add clientMustRevalidateStaticFiles option to config/xitrum.json
@@ -27,6 +28,7 @@
   part in your xitrum.json file, example:
   https://github.com/ngocdaothanh/xitrum-new/blob/master/config/xitrum.json
 * Add support SockJS 0.3.3
+  SockJS now works on a single server, next version will add cluster mode
   https://github.com/sockjs/sockjs-client
   https://github.com/sockjs/sockjs-protocol
 * Add respondEventSource(data: String, event: String = "message")
