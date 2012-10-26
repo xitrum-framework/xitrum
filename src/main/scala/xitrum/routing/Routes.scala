@@ -6,6 +6,7 @@ import java.lang.reflect.Method
 import scala.collection.mutable.{ArrayBuffer, Map => MMap, StringBuilder}
 import scala.util.matching.Regex
 
+import org.apache.commons.lang3.ClassUtils
 import org.jboss.netty.handler.codec.http.{HttpMethod, QueryStringEncoder}
 
 import xitrum.{Config, Controller, ErrorController, Logger, SockJsHandler}
@@ -394,11 +395,23 @@ object Routes extends Logger {
     klass.newInstance()
   }
 
+  /** @param sockJsHandlerClass Normal SockJsHandler subclass or object class */
   def sockJsPathPrefix(sockJsHandlerClass: Class[_ <: SockJsHandler]): String = {
-   val kv = sockJsRoutes.find { case (k, v) => v == sockJsHandlerClass }
-   kv match {
-     case Some((k, v)) => k
-     case None         => throw new Exception("Cannot lookup SockJS URL for class: " + sockJsHandlerClass)
-   }
+    val className = sockJsHandlerClass.getName
+    if (className.endsWith("$")) {
+      val normalClassName = className.substring(0, className.length - 1)
+      val normalClass     = ClassUtils.getClass(normalClassName)
+      sockJsPathPrefixForNormalSockJsHandlerClass(normalClass.asInstanceOf[Class[_ <: SockJsHandler]])
+    } else {
+      sockJsPathPrefixForNormalSockJsHandlerClass(sockJsHandlerClass)
+    }
+  }
+
+  private def sockJsPathPrefixForNormalSockJsHandlerClass(sockJsHandlerClass: Class[_ <: SockJsHandler]): String = {
+    val kv = sockJsRoutes.find { case (k, v) => v == sockJsHandlerClass }
+    kv match {
+      case Some((k, v)) => k
+      case None         => throw new Exception("Cannot lookup SockJS URL for class: " + sockJsHandlerClass)
+    }
   }
 }
