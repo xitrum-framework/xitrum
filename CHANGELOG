@@ -20,31 +20,32 @@
 * Support SPDY
 
 1.9.8:
-* Fix bug at remoteIp when reverseProxy is enabled in config/xitrum.json
-* Remove double quotes around the result of jsEscape
-* Add clientMustRevalidateStaticFiles option to config/xitrum.json
-  You can force browsers to always send request to server to revalidate cache before using
-  To update your existing project to use Xitrum 1.9.8, you must update "response"
-  part in your xitrum.json file, example:
-  https://github.com/ngocdaothanh/xitrum-new/blob/master/config/xitrum.json
 * Add support SockJS 0.3.3
   SockJS now works on a single server, next version will add cluster mode
   https://github.com/sockjs/sockjs-client
   https://github.com/sockjs/sockjs-protocol
 * Add respondEventSource(data: String, event: String = "message")
   http://dev.w3.org/html5/eventsource/
-* Add Akka 2.0.3 as a dependency (for use in SockJS)
+* Add clientMustRevalidateStaticFiles option to config/xitrum.json
+  You can force browsers to always send request to server to revalidate cache before using
+  To update your existing project to use Xitrum 1.9.8, you must update "response"
+  part in your xitrum.json file, example:
+  https://github.com/ngocdaothanh/xitrum-new/blob/master/config/xitrum.json
+* Add Akka 2.0.3 as a dependency, for use in SockJS
+* Add JBoss Marshalling as dependency, for faster/smaller session cookie storing/restoring
+  http://www.jboss.org/jbossmarshalling
+  It features the advanced River serialization protocol which is far more
+  space- and computation-efficient. It can be found in use within the excellent
+  Infinispan project as well as finding heavy use in JBoss.
 * Add Scalate Markdown as dependency:
   http://groups.google.com/group/xitrum-framework/browse_thread/thread/262176aa8e875940
   http://scalate.fusesource.org/documentation/jade.html
 * Add Appache Commons Lang as dependency, to use its StringEscapeUtils in jsEscape:
   http://commons.apache.org/lang/api-release/org/apache/commons/lang3/StringEscapeUtils.html
+* Fix bug at remoteIp when reverseProxy is enabled in config/xitrum.json
+* Remove double quotes around the result of jsEscape
 * Remove xitrum.comet.CometController
-* Use JBoss Marshalling library for faster/smaller session cookie storing/restoring
-  http://www.jboss.org/jbossmarshalling
-  It features the advanced River serialization protocol which is far more
-  space- and computation-efficient. It can be found in use within the excellent
-  Infinispan project as well as finding heavy use in the upcoming JBoss AS 7 release.
+  Rename xitrum.comet.Comet to xitrum.sockjs.MessageQueue
 * Try GZIP compressing session cookie bigger than 4KB (limit of most browsers)
   Display error log when session cookie is still bigger than 4KB after compressing
 * Rename routes.sclasner to routes.cache
