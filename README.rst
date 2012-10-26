@@ -55,8 +55,8 @@ Features
   Routing is also two-way: you can recreate URLs (reverse routing) in a typesafe way.
 * Typesafe, in the spirit of Scala. All the APIs try to be as typesafe as possible.
 * Async, in the spirit of Netty. Your request proccessing action does not have
-  to respond immediately. Long polling, chunked response (streaming), and WebSocket
-  are supported.
+  to respond immediately. Long polling, chunked response (streaming), WebSocket,
+  and SockJS are supported.
 * Views can be written in a separate `Scalate <http://scalate.fusesource.org/>`_
   template file or Scala inline XML. Both are typesafe.
 * Sessions can be stored in cookies (more scalable) or clustered `Hazelcast <http://www.hazelcast.com/>`_ (more secure).
