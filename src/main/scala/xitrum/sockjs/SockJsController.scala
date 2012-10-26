@@ -474,7 +474,10 @@ class SockJsController extends Controller with SkipCSRFCheck {
           Json.parse[List[String]](body)
         } catch {
           case _ =>
-            respondWebSocket("c[2011,\"Broken JSON encoding.\"]")
+            val future = respondWebSocket("c[2011,\"Broken JSON encoding.\"]")
+            future.addListener(new ChannelFutureListener {
+              def operationComplete(f: ChannelFuture) { channel.close() }
+            })
             null
         }
         if (messages != null) messages.foreach(sockJsHandler.onMessage(_))
@@ -547,7 +550,12 @@ class SockJsController extends Controller with SkipCSRFCheck {
 
   private val LIMIT = if (Config.isProductionMode) 128 * 1024 else 4 * 1024
 
-  /** @return false if the channel will be closed when the channel write completes */
+  /**
+   * All the chunking transports are closed by the server after 128K was
+   * send, in order to force client to GC and reconnect. The server doesn't have
+   * to send "c" frame.
+   * @return false if the channel will be closed when the channel write completes
+   */
   private def respondStreamingWithLimit(text: String, isEventSource: Boolean = false): Boolean = {
     // This is length in characters, not bytes,
     // but in this case the result doesn't have to be precise
