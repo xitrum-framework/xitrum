@@ -111,7 +111,7 @@ class SockJsController extends Controller with SkipCSRFCheck {
 
   def infoOPTIONS = OPTIONS("info") {
     response.setStatus(HttpResponseStatus.NO_CONTENT)
-    response.setHeader("Access-Control-Allow-Methods", "OPTIONS, GET")
+    response.setHeader(HttpHeaders.Names.ACCESS_CONTROL_ALLOW_METHODS, "OPTIONS, GET")
     setCORS()
     setClientCacheAggressively()
     respond()
@@ -514,17 +514,17 @@ class SockJsController extends Controller with SkipCSRFCheck {
   private def setCORS() {
     val requestOrigin  = request.getHeader(HttpHeaders.Names.ORIGIN)
     val responseOrigin = if (requestOrigin == null || requestOrigin == "null") "*" else requestOrigin
-    response.setHeader("Access-Control-Allow-Origin",      responseOrigin)
-    response.setHeader("Access-Control-Allow-Credentials", "true")
+    response.setHeader(HttpHeaders.Names.ACCESS_CONTROL_ALLOW_ORIGIN,      responseOrigin)
+    response.setHeader(HttpHeaders.Names.ACCESS_CONTROL_ALLOW_CREDENTIALS, "true")
 
-    val accessControlRequestHeaders = request.getHeader("Access-Control-Request-Headers")
+    val accessControlRequestHeaders = request.getHeader(HttpHeaders.Names.ACCESS_CONTROL_REQUEST_HEADERS)
     if (accessControlRequestHeaders != null)
-      response.setHeader("Access-Control-Allow-Headers", accessControlRequestHeaders)
+      response.setHeader(HttpHeaders.Names.ACCESS_CONTROL_ALLOW_HEADERS, accessControlRequestHeaders)
   }
 
   private def xhrTransportOPTIONS() {
     response.setStatus(HttpResponseStatus.NO_CONTENT)
-    response.setHeader("Access-Control-Allow-Methods", "OPTIONS, POST")
+    response.setHeader(HttpHeaders.Names.ACCESS_CONTROL_ALLOW_METHODS, "OPTIONS, POST")
     setCORS()
     setClientCacheAggressively()
     respond()

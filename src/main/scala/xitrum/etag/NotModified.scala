@@ -43,8 +43,8 @@ object NotModified {
 
     // CORS:
     // http://sockjs.github.com/sockjs-protocol/sockjs-protocol-0.3.3.html#section-7
-    if (!response.containsHeader("Access-Control-Max-Age"))
-      response.setHeader("Access-Control-Max-Age", SECS_IN_A_YEAR)
+    if (!response.containsHeader(ACCESS_CONTROL_MAX_AGE))
+      response.setHeader(ACCESS_CONTROL_MAX_AGE, SECS_IN_A_YEAR)
 
     // Note that SECS_IN_A_YEAR * 1000 is different from SECS_IN_A_YEAR * 1000L
     // because of integer overflow!
