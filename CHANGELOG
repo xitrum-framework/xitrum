@@ -1,6 +1,8 @@
 1.9.9 (planned):
-* Add cluster mode for SockJS
+* Reload classes in development mode using Javassist
+* Reload routes in development mode using Javassist
 * Add automatic HEAD and CORS request handling
+* Add cluster mode for SockJS
   http://www.html5rocks.com/en/tutorials/cors/
 * Flash socket policy server can use the same port with HTTP server
 * Add Ajax style upload based on iframe
@@ -15,8 +17,6 @@
 * Add digest authentication
 * Typesafe routes using Scala compiler plugin
 * Middleware architecture based on Netty handlers
-* Reload classes in development mode using Javassist
-* Reload routes when in development mode using Javassist
 * Support SPDY
 
 1.9.8:
@@ -50,6 +50,7 @@
   Display error log when session cookie is still bigger than 4KB after compressing
 * Rename routes.sclasner to routes.cache
 * Update Netty from 3.5.8.Final to 3.5.9.Final
+  https://netty.io/Blog/Netty+359Final+is+out
 * Update Hazelcast from 2.3.1 to 2.4
 * Update Scaposer from 1.1 to 1.2
   https://github.com/ngocdaothanh/scaposer/pull/3
