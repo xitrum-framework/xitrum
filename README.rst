@@ -99,4 +99,5 @@ Samples
 -------
 
 * `Xitrum Demos <https://github.com/ngocdaothanh/xitrum-demos>`_
+* `Xitrum Modularized Demo <https://github.com/ngocdaothanh/xitrum-modularized-demo>`_
 * `Comy <https://github.com/ngocdaothanh/comy>`_
