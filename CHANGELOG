@@ -22,10 +22,10 @@
   http://groups.google.com/group/sockjs/browse_thread/thread/392cd07c4a75400b
 * SockJS: Add cluster mode
   http://www.html5rocks.com/en/tutorials/cors/
-* Update
-    Netty:            3.5.9.Final -> 3.5.10.Final
-    Knockout.js:      2.1.0       -> 2.2.0
-    Knockout.mapping: 2.3.2       -> 2.3.3
+* Update Netty from 3.5.9.Final to 3.5.10.Final
+  https://netty.io/Blog/Netty+3510Final+-+Get+it+while+it+is+hot
+* Update Knockout.js from 2.1.0 to 2.2.0, Knockout.mapping from 2.3.2 to 2.3.3
+  http://blog.stevensanderson.com/2012/10/29/knockout-2-2-0-released/
 
 1.9.8:
 * Add support SockJS 0.3.3
