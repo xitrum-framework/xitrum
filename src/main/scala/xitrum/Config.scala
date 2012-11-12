@@ -151,7 +151,7 @@ object Config extends Logger {
 
   /**
    * Shutdowns Hazelcast and call System.exit(-1).
-   * Once Hazelcast is started, calling System.exit(-1) does not make the stop
+   * Once Hazelcast is started, calling System.exit(-1) does not stop
    * the current process!
    */
   def exitOnError(msg: String, e: Throwable) {
