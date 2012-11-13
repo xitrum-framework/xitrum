@@ -4,7 +4,7 @@ import java.nio.charset.Charset
 import scala.collection.mutable.{Map => MMap}
 
 import org.jboss.netty.channel.{ChannelHandler, SimpleChannelUpstreamHandler, ChannelHandlerContext, MessageEvent, ExceptionEvent, Channels}
-import org.jboss.netty.handler.codec.http.HttpHeaders
+import org.jboss.netty.handler.codec.http.{HttpHeaders, HttpMethod, HttpRequest}
 import org.jboss.netty.handler.codec.http.multipart.{Attribute, DefaultHttpDataFactory, DiskAttribute, DiskFileUpload, FileUpload, HttpPostRequestDecoder, InterfaceHttpData}
 import ChannelHandler.Sharable
 import InterfaceHttpData.HttpDataType
@@ -44,58 +44,62 @@ class BodyParser extends SimpleChannelUpstreamHandler with BadClientSilencer {
     val handlerEnv = m.asInstanceOf[HandlerEnv]
     val request    = handlerEnv.request
 
-    val requestContentType = request.getHeader(HttpHeaders.Names.CONTENT_TYPE)
-    val requestContentTypeLowerCase = if (requestContentType == null) null else requestContentType.toLowerCase
-    val (bodyParams, fileUploadParams) =
-      // Use startWith because requestContentType can be:
-      // application/x-www-form-urlencoded; charset=UTF-8
-      if (requestContentTypeLowerCase != null &&
-          (requestContentTypeLowerCase.startsWith(HttpHeaders.Values.APPLICATION_X_WWW_FORM_URLENCODED) ||
-           requestContentTypeLowerCase.startsWith(HttpHeaders.Values.MULTIPART_FORM_DATA))) {
-        try {
-          val bodyParams = MMap[String, List[String]]()
-          val fileParams = MMap[String, List[FileUpload]]()
-
-          val decoder = new HttpPostRequestDecoder(factory, request)
-          val datas   = decoder.getBodyHttpDatas
-
-          val it = datas.iterator
-          while (it.hasNext) {
-            val data = it.next
-            if (data.getHttpDataType == HttpDataType.Attribute) {
-              val attribute = data.asInstanceOf[Attribute]
-              val name      = attribute.getName
-              val value     = attribute.getValue
-              putOrAppendString(bodyParams, name, value)
-            } else if (data.getHttpDataType == HttpDataType.FileUpload) {
-              val fileUpload = data.asInstanceOf[FileUpload]
-              if (fileUpload.isCompleted && fileUpload.length > 0) {  // Skip empty file
-                val name = fileUpload.getName
-                sanitizeFileUploadFilename(fileUpload)
-                putOrAppendFileUpload(fileParams, name, fileUpload)
-              }
-            }
-          }
-
-          (bodyParams, fileParams)
-        } catch {
-          case t =>
-            val msg = "Could not parse POST body, URI: " + request.getUri
-            logger.warn(msg, t)
-
-            ctx.getChannel.close()
-            return
-        }
-      } else {
-        (MMap[String, List[String]](), MMap[String, List[FileUpload]]())
-      }
-
-    handlerEnv.bodyParams       = bodyParams
-    handlerEnv.fileUploadParams = fileUploadParams
-    Channels.fireMessageReceived(ctx, handlerEnv)
+    try {
+      val (bodyParams, fileUploadParams) = decodeRequestBody(request)
+      handlerEnv.bodyParams       = bodyParams
+      handlerEnv.fileUploadParams = fileUploadParams
+      Channels.fireMessageReceived(ctx, handlerEnv)
+    } catch {
+      case e: Exception =>
+        val msg = "Could not parse body of request: " + request
+        logger.warn(msg, e)
+        ctx.getChannel.close()
+    }
   }
 
   //----------------------------------------------------------------------------
+
+  // May throw exception on decode error
+  private def decodeRequestBody(request: HttpRequest): (MMap[String, List[String]], MMap[String, List[FileUpload]]) = {
+    val method = request.getMethod
+    if (!method.equals(HttpMethod.POST) && !method.equals(HttpMethod.PUT) && !method.equals(HttpMethod.PATCH))
+      return (MMap[String, List[String]](), MMap[String, List[FileUpload]]())
+
+    val requestContentType = request.getHeader(HttpHeaders.Names.CONTENT_TYPE)
+    if (requestContentType == null)
+      return (MMap[String, List[String]](), MMap[String, List[FileUpload]]())
+
+    val requestContentTypeLowerCase = requestContentType.toLowerCase
+    if (!requestContentTypeLowerCase.startsWith(HttpHeaders.Values.APPLICATION_X_WWW_FORM_URLENCODED) &&
+        !requestContentTypeLowerCase.startsWith(HttpHeaders.Values.MULTIPART_FORM_DATA))
+      return (MMap[String, List[String]](), MMap[String, List[FileUpload]]())
+
+    val decoder = new HttpPostRequestDecoder(factory, request)
+    val datas   = decoder.getBodyHttpDatas
+
+    val bodyParams = MMap[String, List[String]]()
+    val fileParams = MMap[String, List[FileUpload]]()
+
+    val it = datas.iterator
+    while (it.hasNext) {
+      val data = it.next
+      if (data.getHttpDataType == HttpDataType.Attribute) {
+        val attribute = data.asInstanceOf[Attribute]
+        val name      = attribute.getName
+        val value     = attribute.getValue
+        putOrAppendString(bodyParams, name, value)
+      } else if (data.getHttpDataType == HttpDataType.FileUpload) {
+        val fileUpload = data.asInstanceOf[FileUpload]
+        if (fileUpload.isCompleted && fileUpload.length > 0) {  // Skip empty file
+          val name = fileUpload.getName
+          sanitizeFileUploadFilename(fileUpload)
+          putOrAppendFileUpload(fileParams, name, fileUpload)
+        }
+      }
+    }
+
+    (bodyParams, fileParams)
+  }
 
   private def sanitizeFileUploadFilename(fileUpload: FileUpload) {
     val filename1 = fileUpload.getFilename
