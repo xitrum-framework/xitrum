@@ -10,8 +10,8 @@ import xitrum.SockJsHandler
 sealed trait SockJsPollingSessionActorMessage
 case class  SendMessagesByClient (messages: List[String]) extends SockJsPollingSessionActorMessage
 case class  SendMessagesByHandler(messages: List[String]) extends SockJsPollingSessionActorMessage
-case object SubscribeOnceByClient                        extends SockJsPollingSessionActorMessage
-case object UnsubscribeByClient                          extends SockJsPollingSessionActorMessage
+case object SubscribeOnceByClient                         extends SockJsPollingSessionActorMessage
+case object UnsubscribeByClient                           extends SockJsPollingSessionActorMessage
 
 sealed trait SockJsSubscribeByClientResult
 case object SubscribeByClientResultAnotherConnectionStillOpen       extends SockJsSubscribeByClientResult
