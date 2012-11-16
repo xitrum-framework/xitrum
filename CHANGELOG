@@ -30,6 +30,8 @@
   http://groups.google.com/group/akka-user/browse_thread/thread/4da3849a0a5e4163
 * Update Knockout.js from 2.1.0 to 2.2.0, Knockout.mapping from 2.3.2 to 2.3.3
   http://blog.stevensanderson.com/2012/10/29/knockout-2-2-0-released/
+* Update SockJS JS library from 0.3.3 to 0.3.4
+  http://groups.google.com/group/sockjs/browse_thread/thread/e4b2c1871601f8ae
 
 1.9.8:
 * Add support SockJS 0.3.3

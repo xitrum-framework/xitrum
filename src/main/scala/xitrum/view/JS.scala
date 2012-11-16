@@ -71,7 +71,7 @@ trait JS {
         {validatei18n}
         <script type="text/javascript" src={urlForResource("xitrum/knockout/knockout-2.2.0.min.js")}></script>
         <script type="text/javascript" src={urlForResource("xitrum/knockout/knockout.mapping-2.3.3.min.js")}></script>
-        <script type="text/javascript" src={urlForResource("xitrum/sockjs-0.3.min.js")}></script>
+        <script type="text/javascript" src={urlForResource("xitrum/sockjs-0.3.4.min.js")}></script>
         <script type="text/javascript" src={urlForResource("xitrum/xitrum.js")}></script>
         {jsRoutesAction}
       </xml:group>
@@ -83,7 +83,7 @@ trait JS {
         {validatei18n}
         <script type="text/javascript" src={urlForResource("xitrum/knockout/knockout-2.2.0.js")}></script>
         <script type="text/javascript" src={urlForResource("xitrum/knockout/knockout.mapping-2.3.3.js")}></script>
-        <script type="text/javascript" src={urlForResource("xitrum/sockjs-0.3.js")}></script>
+        <script type="text/javascript" src={urlForResource("xitrum/sockjs-0.3.4.js")}></script>
         <script type="text/javascript" src={urlForResource("xitrum/xitrum.js")}></script>
         {jsRoutesAction}
       </xml:group>
