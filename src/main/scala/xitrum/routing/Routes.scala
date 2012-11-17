@@ -53,7 +53,7 @@ object Routes extends Logger {
     }
     val logFormat = "%-" + methodHttpMaxLength + "s    %-" + patternMaxLength + "s    %s"
 
-    others = others.sortBy(_._3)
+    others = others.sortBy(_._2)
     all = firsts ++ others ++ lasts
 
     val strings = all.map { case (m, p, cr) => logFormat.format(m, p, cr) }
@@ -213,7 +213,6 @@ object Routes extends Logger {
                 // pathPrefix is reset here
                 controller.pathPrefix = pathPrefix
                 populateActions(controller, actionMethod, forSockJsController)
-                println(actionMethod)
               }
             } else {
               populateActions(controller, actionMethod, forSockJsController)
