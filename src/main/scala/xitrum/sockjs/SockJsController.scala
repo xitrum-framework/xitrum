@@ -106,7 +106,12 @@ class SockJsController extends Controller with SkipCSRFCheck {
     setNoClientCache()
     // FIXME: IE doesn't work with SockJS implementation of Xitrum when
     // cookie_needed is set to true
-    respondJsonText("""{"websocket": true, "cookie_needed": false, "origins": ["*:*"], "entropy": """ + SockJsController.entropy() + "}")
+    val sockJsClassAndOptions = Routes.sockJsClassAndOptions(pathPrefix)
+    respondJsonText(
+      """{"websocket": """      + sockJsClassAndOptions.websocket +
+      """, "cookie_needed": """ + sockJsClassAndOptions.cookieNeeded +
+      """, "origins": ["*:*"], "entropy": """ + SockJsController.entropy() + "}"
+    )
   }
 
   def infoOPTIONS = OPTIONS("info") {

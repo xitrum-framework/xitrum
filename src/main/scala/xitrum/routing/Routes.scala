@@ -61,10 +61,28 @@ object Routes extends Logger {
   }
 
   def printSockJsRoutes() {
-    if (!sockJsRoutes.isEmpty) {
-      val strings = ArrayBuffer[String]()
-      for ((pathPrefix, handlerClass) <- sockJsRoutes) {
-        strings += pathPrefix + " -> " + handlerClass.getName
+    // This method is only run once on start, speed is not a problem
+
+    if (!sockJsClassAndOptionsTable.isEmpty) {
+      val (pathPrefixMaxLength, handlerClassNameMaxLength, websocketOptionMaxLength) =
+        sockJsClassAndOptionsTable.toList.foldLeft((0, 0, "websocket: true,".length)) {
+            case ((pmax, hmax, wmax), (pathPrefix, sockJsClassAndOptions)) =>
+          val plen  = pathPrefix.length
+          val hlen  = sockJsClassAndOptions.handlerClass.getName.length
+          val pmax2 = if (pmax < plen) plen else pmax
+          val hmax2 = if (hmax < hlen) hlen else hmax
+          val wmax2 = if (sockJsClassAndOptions.websocket) wmax else "websocket: false,".length
+          (pmax2, hmax2, wmax2)
+        }
+      val logFormat = "%-" + pathPrefixMaxLength + "s    %-" + handlerClassNameMaxLength + "s    %-" + websocketOptionMaxLength + "s %s"
+
+      val strings = sockJsClassAndOptionsTable.map { case (pathPrefix, sockJsClassAndOptions) =>
+        logFormat.format(
+          pathPrefix,
+          sockJsClassAndOptions.handlerClass.getName,
+          "websocket: " + sockJsClassAndOptions.websocket + ",",
+          "cookie_needed: " + sockJsClassAndOptions.cookieNeeded
+        )
       }
       logger.info("SockJS routes:\n" + strings.mkString("\n"))
     }
@@ -190,7 +208,7 @@ object Routes extends Logger {
             val controller      = controllerClass.newInstance().asInstanceOf[Controller]
 
             if (forSockJsController) {
-              for (pathPrefix <- sockJsRoutes.keys) {
+              for (pathPrefix <- sockJsClassAndOptionsTable.keys) {
                 // "first" and "last" can't be "lazy val" because pathPrefix is
                 // reset here
                 controller.pathPrefix = pathPrefix
@@ -384,19 +402,20 @@ object Routes extends Logger {
 
   //----------------------------------------------------------------------------
 
-  private val sockJsRoutes = MMap[String, Class[_ <: SockJsHandler]]()
+  class SockJsClassAndOptions(val handlerClass: Class[_ <: SockJsHandler], val websocket: Boolean, val cookieNeeded: Boolean)
+  private val sockJsClassAndOptionsTable = MMap[String, SockJsClassAndOptions]()
 
-  def sockJs(SockJsHandlerClass: Class[_ <: SockJsHandler], pathPrefix: String) {
-    sockJsRoutes(pathPrefix) = SockJsHandlerClass
+  def sockJs(handlerClass: Class[_ <: SockJsHandler], pathPrefix: String, websocket: Boolean, cookieNeeded: Boolean) {
+    sockJsClassAndOptionsTable(pathPrefix)  = new SockJsClassAndOptions(handlerClass, websocket, cookieNeeded)
   }
 
-  def createSockJsHandler(pathPrefix: String): SockJsHandler = {
-    val klass = sockJsRoutes(pathPrefix)
-    klass.newInstance()
+  def createSockJsHandler(pathPrefix: String) = {
+    val sockJsClassAndOptions = sockJsClassAndOptionsTable(pathPrefix)
+    sockJsClassAndOptions.handlerClass.newInstance()
   }
 
   /** @param sockJsHandlerClass Normal SockJsHandler subclass or object class */
-  def sockJsPathPrefix(sockJsHandlerClass: Class[_ <: SockJsHandler]): String = {
+  def sockJsPathPrefix(sockJsHandlerClass: Class[_ <: SockJsHandler]) = {
     val className = sockJsHandlerClass.getName
     if (className.endsWith("$")) {
       val normalClassName = className.substring(0, className.length - 1)
@@ -407,11 +426,15 @@ object Routes extends Logger {
     }
   }
 
-  private def sockJsPathPrefixForNormalSockJsHandlerClass(sockJsHandlerClass: Class[_ <: SockJsHandler]): String = {
-    val kv = sockJsRoutes.find { case (k, v) => v == sockJsHandlerClass }
+  def sockJsClassAndOptions(pathPrefix: String) = {
+    sockJsClassAndOptionsTable(pathPrefix)
+  }
+
+  private def sockJsPathPrefixForNormalSockJsHandlerClass(handlerClass: Class[_ <: SockJsHandler]): String = {
+    val kv = sockJsClassAndOptionsTable.find { case (k, v) => v.handlerClass == handlerClass }
     kv match {
       case Some((k, v)) => k
-      case None         => throw new Exception("Cannot lookup SockJS URL for class: " + sockJsHandlerClass)
+      case None         => throw new Exception("Cannot lookup SockJS URL for class: " + handlerClass)
     }
   }
 }
