@@ -31,7 +31,7 @@ abstract class SockJsHandler extends Logger {
       // FIXME: Ugly code
       // sockJsPollingSessionActorRef is set to null by SockJsPollingSession on postStop
       if (sockJsPollingSessionActorRef != null) {
-        if (!SockJsPollingSessions.sendMessagesByHandler(sockJsPollingSessionActorRef, List(message.toString)))
+        if (!SockJsPollingSessions.sendMessageByHandler(sockJsPollingSessionActorRef, message.toString))
           onClose()
       }
     } else {

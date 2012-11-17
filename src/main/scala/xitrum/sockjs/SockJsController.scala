@@ -135,16 +135,19 @@ class SockJsController extends Controller with SkipCSRFCheck {
   def xhrPollingTransportReceive = POST(":serverId/:sessionId/xhr") {
     val sessionId = param("sessionId")
 
-    SockJsPollingSessions.subscribeOnceByClient(pathPrefix, sessionId, { resulto =>
+    SockJsPollingSessions.subscribeOnceByClient(pathPrefix, sessionId, { result =>
       setCORS()
       setNoClientCache()
 
-      resulto match {
+      result match {
+        case SubscribeByClientResultOpen =>
+          respondJs("o\n")
+
         case SubscribeByClientResultAnotherConnectionStillOpen =>
           respondJs("c[2010,\"Another connection still open\"]\n")
 
-        case SubscribeByClientResultOpen =>
-          respondJs("o\n")
+        case SubscribeByClientResultClosed =>
+          respondJs("c[3000,\"Go away!\"]\n").addListener(ChannelFutureListener.CLOSE)
 
         case SubscribeByClientResultMessages(messages) =>
           if (messages.isEmpty) {
@@ -201,14 +204,8 @@ class SockJsController extends Controller with SkipCSRFCheck {
 
     // Below can be initiated by different channels, thus channel.isOpen should
     // be called to check if SockJsController.h2KB should be sent
-    SockJsPollingSessions.subscribeStreamingByClient(pathPrefix, sessionId, { resulto =>
-      resulto match {
-        case SubscribeByClientResultAnotherConnectionStillOpen =>
-          setCORS()
-          setNoClientCache()
-          respondJs("c[2010,\"Another connection still open\"]\n")
-          false
-
+    SockJsPollingSessions.subscribeStreamingByClient(pathPrefix, sessionId, { result =>
+      result match {
         case SubscribeByClientResultOpen =>
           addConnectionClosedListener{ SockJsPollingSessions.unsubscribeByClient(sessionId) }
           setCORS()
@@ -218,6 +215,18 @@ class SockJsController extends Controller with SkipCSRFCheck {
           respondBinary(SockJsController.h2KB)
           respondStreamingWithLimit("o\n")
           true
+
+        case SubscribeByClientResultAnotherConnectionStillOpen =>
+          setCORS()
+          setNoClientCache()
+          respondJs("c[2010,\"Another connection still open\"]\n")
+          false
+
+        case SubscribeByClientResultClosed =>
+          setCORS()
+          setNoClientCache()
+          respondJs("c[300,\"Go away!\"]\n").addListener(ChannelFutureListener.CLOSE)
+          false
 
         case SubscribeByClientResultMessages(messages) =>
           if (channel.isOpen()) {
@@ -263,17 +272,8 @@ class SockJsController extends Controller with SkipCSRFCheck {
       val callback  = callbacko.get
       val sessionId = param("sessionId")
 
-      SockJsPollingSessions.subscribeStreamingByClient(pathPrefix, sessionId, { resulto =>
-        resulto match {
-          case SubscribeByClientResultAnotherConnectionStillOpen =>
-            setCORS()
-            setNoClientCache()
-            respondHtml(
-              SockJsController.htmlfile(callback, false) +
-              "<script>\np(\"c[2010,\\\"Another connection still open\\\"]\");\n</script>\r\n"
-            )
-            false
-
+      SockJsPollingSessions.subscribeStreamingByClient(pathPrefix, sessionId, { result =>
+        result match {
           case SubscribeByClientResultOpen =>
             addConnectionClosedListener{ SockJsPollingSessions.unsubscribeByClient(sessionId) }
             setCORS()
@@ -283,6 +283,24 @@ class SockJsController extends Controller with SkipCSRFCheck {
 
             respondText("<script>\np(\"o\");\n</script>\r\n")
             true
+
+          case SubscribeByClientResultAnotherConnectionStillOpen =>
+            setCORS()
+            setNoClientCache()
+            respondHtml(
+              SockJsController.htmlfile(callback, false) +
+              "<script>\np(\"c[2010,\\\"Another connection still open\\\"]\");\n</script>\r\n"
+            )
+            false
+
+          case SubscribeByClientResultClosed =>
+            setCORS()
+            setNoClientCache()
+            respondHtml(
+              SockJsController.htmlfile(callback, false) +
+              "<script>\np(\"c[3000,\\\"Go away!\\\"]\");\n</script>\r\n"
+            ).addListener(ChannelFutureListener.CLOSE)
+            false
 
           case SubscribeByClientResultMessages(messages) =>
             if (channel.isOpen()) {
@@ -334,16 +352,19 @@ class SockJsController extends Controller with SkipCSRFCheck {
       val callback  = callbacko.get
       val sessionId = param("sessionId")
 
-      SockJsPollingSessions.subscribeOnceByClient(pathPrefix, sessionId, { resulto =>
+      SockJsPollingSessions.subscribeOnceByClient(pathPrefix, sessionId, { result =>
         setCORS()
         setNoClientCache()
 
-        resulto match {
+        result match {
+          case SubscribeByClientResultOpen =>
+            respondJs(callback + "(\"o\");\r\n")
+
           case SubscribeByClientResultAnotherConnectionStillOpen =>
             respondJs(callback + "(\"c[2010,\\\"Another connection still open\\\"]\");\r\n")
 
-          case SubscribeByClientResultOpen =>
-            respondJs(callback + "(\"o\");\r\n")
+          case SubscribeByClientResultClosed =>
+            respondJs(callback + "(\"c[3000,\\\"Go away!\\\"]\");\r\n").addListener(ChannelFutureListener.CLOSE)
 
           case SubscribeByClientResultMessages(messages) =>
             if (messages.isEmpty) {
@@ -411,20 +432,26 @@ class SockJsController extends Controller with SkipCSRFCheck {
   def eventSourceTransportReceive = GET(":serverId/:sessionId/eventsource") {
     val sessionId = param("sessionId")
 
-    SockJsPollingSessions.subscribeStreamingByClient(pathPrefix, sessionId, { resulto =>
-      resulto match {
-        case SubscribeByClientResultAnotherConnectionStillOpen =>
-          setCORS()
-          setNoClientCache()
-          respondJs("c[2010,\"Another connection still open\"]\n")
-          false
-
+    SockJsPollingSessions.subscribeStreamingByClient(pathPrefix, sessionId, { result =>
+      result match {
         case SubscribeByClientResultOpen =>
           addConnectionClosedListener{ SockJsPollingSessions.unsubscribeByClient(sessionId) }
           setCORS()
 
           respondEventSource("o")
           true
+
+        case SubscribeByClientResultAnotherConnectionStillOpen =>
+          setCORS()
+          setNoClientCache()
+          respondJs("c[2010,\"Another connection still open\"]\n")
+          false
+
+        case SubscribeByClientResultClosed =>
+          setCORS()
+          setNoClientCache()
+          respondJs("c[3000,\"Go away!\"]\n").addListener(ChannelFutureListener.CLOSE)
+          false
 
         case SubscribeByClientResultMessages(messages) =>
           if (channel.isOpen()) {
@@ -479,10 +506,7 @@ class SockJsController extends Controller with SkipCSRFCheck {
           Json.parse[List[String]](body)
         } catch {
           case _ =>
-            val future = respondWebSocket("c[2011,\"Broken JSON encoding.\"]")
-            future.addListener(new ChannelFutureListener {
-              def operationComplete(f: ChannelFuture) { channel.close() }
-            })
+            respondWebSocket("c[2011,\"Broken JSON encoding.\"]").addListener(ChannelFutureListener.CLOSE)
             null
         }
         if (messages != null) messages.foreach(sockJsHandler.onMessage(_))
@@ -571,9 +595,7 @@ class SockJsController extends Controller with SkipCSRFCheck {
       true
     } else {
       val future = if (isEventSource) respondEventSource(text) else respondText(text)
-      future.addListener(new ChannelFutureListener {
-        def operationComplete(f: ChannelFuture) { channel.close() }
-      })
+      future.addListener(ChannelFutureListener.CLOSE)
       false
     }
   }

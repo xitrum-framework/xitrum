@@ -99,17 +99,19 @@ object SockJsPollingSessions {
 
   //----------------------------------------------------------------------------
 
-  def sendMessagesByHandler(actorRef: ActorRef, messages: List[String]): Boolean = {
+  def sendMessageByHandler(actorRef: ActorRef, message: String): Boolean = {
     if (actorRef.isTerminated) {
       false
     } else {
-      actorRef ! SendMessagesByHandler(messages)
+      actorRef ! SendMessageByHandler(message)
       true
     }
   }
 
   def closeByHandler(actorRef: ActorRef) {
-    system.stop(actorRef)
+    // Can't stop actorRef right now by calling system.stop(actorRef),
+    // because until the timeout occurs, the server must serve the close message
+    actorRef ! CloseByHandler
   }
 
   //----------------------------------------------------------------------------
