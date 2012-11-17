@@ -209,21 +209,29 @@ object Routes extends Logger {
 
             if (forSockJsController) {
               for (pathPrefix <- sockJsClassAndOptionsTable.keys) {
-                // "first" and "last" can't be "lazy val" because pathPrefix is
-                // reset here
+                // "first" and "last" of Action can't be "lazy val" because
+                // pathPrefix is reset here
                 controller.pathPrefix = pathPrefix
-                populateActions(controller, actionMethod)
+                populateActions(controller, actionMethod, forSockJsController)
+                println(actionMethod)
               }
             } else {
-              populateActions(controller, actionMethod)
+              populateActions(controller, actionMethod, forSockJsController)
             }
         }
       }
     }
   }
 
-  private def populateActions(controller: Controller, actionMethod: Method) {
+  private def populateActions(controller: Controller, actionMethod: Method, forSockJsController: Boolean) {
     val action = actionMethod.invoke(controller).asInstanceOf[Action]
+
+    // Skip WEBSOCKET if websocket option is false
+    if (forSockJsController && action.route.httpMethod == HttpMethodWebSocket) {
+      val classAndOptions = sockJsClassAndOptions(controller.pathPrefix)
+      if (!classAndOptions.websocket) return
+    }
+
     // Actions created by indirectAction do not have route
     if (action.route != null && action.route.httpMethod != null) {
       action.method = actionMethod  // Cache it
