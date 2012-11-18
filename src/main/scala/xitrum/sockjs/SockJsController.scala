@@ -80,9 +80,9 @@ class SockJsController extends Controller with SkipCSRFCheck {
     if (iframe.startsWith("iframe") && iframe.endsWith(".html")) {
       val src =
         if (Config.isProductionMode)
-          "xitrum/sockjs-0.3.min.js"
+          "xitrum/sockjs-0.3.4.min.js"
         else
-          "xitrum/sockjs-0.3.js"
+          "xitrum/sockjs-0.3.4.js"
 
       setClientCacheAggressively()
       respondHtml(DocType.html5(
