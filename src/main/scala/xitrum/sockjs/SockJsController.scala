@@ -2,7 +2,7 @@ package xitrum.sockjs
 
 import java.util.{Arrays, Random}
 
-import org.jboss.netty.channel.{ChannelFuture, ChannelFutureListener}
+import org.jboss.netty.channel.ChannelFutureListener
 import org.jboss.netty.buffer.ChannelBuffers
 import org.jboss.netty.handler.codec.http.{DefaultCookie, HttpHeaders, HttpResponseStatus}
 
@@ -501,6 +501,20 @@ class SockJsController extends Controller with SkipCSRFCheck {
 
   //----------------------------------------------------------------------------
 
+  // http://sockjs.github.com/sockjs-protocol/sockjs-protocol-0.3.3.html#section-52
+  def websocketGET = last.GET(":serverId<[^\\.]+>/:sessionId<[^\\.]+>/websocket") {
+    response.setStatus(HttpResponseStatus.BAD_REQUEST)
+    respondText("""'Can "Upgrade" only to "WebSocket".'""")
+  }
+
+  // http://sockjs.github.com/sockjs-protocol/sockjs-protocol-0.3.3.html#section-54
+  // http://sockjs.github.com/sockjs-protocol/sockjs-protocol-0.3.3.html#section-6
+  def websocketPOST = last.POST(":serverId<[^\\.]+>/:sessionId<[^\\.]+>/websocket") {
+    response.setStatus(HttpResponseStatus.METHOD_NOT_ALLOWED)
+    response.setHeader(HttpHeaders.Names.ALLOW, "GET")
+    respond()
+  }
+
   def websocket = WEBSOCKET(":serverId<[^\\.]+>/:sessionId<[^\\.]+>/websocket") {
     // Ignored
     //val sessionId = param("sessionId")
@@ -516,13 +530,23 @@ class SockJsController extends Controller with SkipCSRFCheck {
       }
 
       def onMessage(body: String) {
+        // Server must ignore empty messages
+        // http://sockjs.github.com/sockjs-protocol/sockjs-protocol-0.3.3.html#section-69
+        if (body.isEmpty) return
+
         val messages: List[String] = try {
-          // body: ["m1", "m2"]
-          Json.parse[List[String]](body)
+          // body: can be ["m1", "m2"] or "m1"
+          // http://sockjs.github.com/sockjs-protocol/sockjs-protocol-0.3.3.html#section-61
+          val normalizedBody = if (body.startsWith("[")) body else "[" + body + "]"
+          Json.parse[List[String]](normalizedBody)
         } catch {
           case _ =>
-            respondWebSocket("c[2011,\"Broken JSON encoding.\"]")
-            .addListener(ChannelFutureListener.CLOSE)
+            // No c frame is sent!
+            // http://sockjs.github.com/sockjs-protocol/sockjs-protocol-0.3.3.html#section-72
+            //respondWebSocket("c[2011,\"Broken JSON encoding.\"]")
+            //.addListener(ChannelFutureListener.CLOSE)
+            channel.close()
+            sockJsHandler.onClose()
             null
         }
         if (messages != null) messages.foreach(sockJsHandler.onMessage(_))

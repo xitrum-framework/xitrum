@@ -2,6 +2,7 @@ package xitrum
 
 import akka.actor.ActorRef
 import com.codahale.jerkson.Json
+import org.jboss.netty.channel.ChannelFutureListener
 
 import xitrum.routing.Routes
 import xitrum.sockjs.SockJsPollingSessions
@@ -39,7 +40,7 @@ abstract class SockJsHandler extends Logger {
       if (rawWebSocket) {
         webSocketController.respondWebSocket(message)
       } else {
-        webSocketController.respondWebSocket("a" + Json.generate(List(message)) + "\n")
+        webSocketController.respondWebSocket("a" + Json.generate(List(message)))
       }
     }
   }
@@ -50,7 +51,14 @@ abstract class SockJsHandler extends Logger {
       SockJsPollingSessions.closeByHandler(sockJsPollingSessionActorRef)
     } else {
       // For WebSocket, must explicitly close
-      webSocketController.channel.close()
+      // WebSocket is used, but it may be raw or not raw
+      if (rawWebSocket) {
+        webSocketController.respondWebSocket("c[3000,\"Go away!\"]")
+        .addListener(ChannelFutureListener.CLOSE)
+      } else {
+        webSocketController.respondWebSocket("c[3000,\"Go away!\"]")
+        .addListener(ChannelFutureListener.CLOSE)
+      }
     }
   }
 
