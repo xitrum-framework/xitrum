@@ -52,8 +52,9 @@ object SockJsPollingSessions {
       val handler = Routes.createSockJsHandler(pathPrefix)
       val ref     = system.actorOf(Props(new SockJsPollingSession(handler)), escaped)
       handler.sockJsPollingSessionActorRef = ref
-      if (callback(SubscribeByClientResultOpen)) subscribeStreamingByClient(ref, callback)
-      handler.onOpen()  // Call opOpen after "o" frame has been sent
+      val loop = callback(SubscribeByClientResultOpen)  // "o" frame sent here
+      handler.onOpen()                                  // Call opOpen after "o" frame has been sent
+      if (loop) subscribeStreamingByClient(ref, callback)
     } else {
       subscribeStreamingByClient(ref, callback)
     }
@@ -91,7 +92,13 @@ object SockJsPollingSessions {
     ref ! UnsubscribeByClient
   }
 
-  def closeByClient(sockJsSessionId: String) {
+  /**
+   * When SockJsController wants to send keep alive message or normal message,
+   * as the result of SubscribeByClientResultMessages, but the connection has
+   * been aborted, it will call this method to remove the session.
+   * See http://groups.google.com/group/sockjs/browse_thread/thread/392cd07c4a75400b/9a4593a71e90173b#9a4593a71e90173b
+   */
+  def abortByClient(sockJsSessionId: String) {
     val escaped = escapeActorPath(sockJsSessionId)
     val ref     = system.actorFor("/user/" + escaped)
     system.stop(ref)
@@ -108,9 +115,8 @@ object SockJsPollingSessions {
     }
   }
 
+  /** Until the timeout occurs, the server must serve the close message. */
   def closeByHandler(actorRef: ActorRef) {
-    // Can't stop actorRef right now by calling system.stop(actorRef),
-    // because until the timeout occurs, the server must serve the close message
     actorRef ! CloseByHandler
   }
 

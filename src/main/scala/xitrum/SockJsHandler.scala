@@ -46,8 +46,10 @@ abstract class SockJsHandler extends Logger {
 
   def close() {
     if (webSocketController == null) {
+      // Until the timeout occurs, the server must serve the close message
       SockJsPollingSessions.closeByHandler(sockJsPollingSessionActorRef)
     } else {
+      // For WebSocket, must explicitly close
       webSocketController.channel.close()
     }
   }
