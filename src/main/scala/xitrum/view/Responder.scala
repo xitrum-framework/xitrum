@@ -361,7 +361,7 @@ trait Responder extends JS with Flash with Knockout {
    * To sanitize the path, use xitrum.util.PathSanitizer.
    */
   def respondFile(path: String): ChannelFuture = {
-    XSendFile.setHeader(response, path)
+    XSendFile.setHeader(response, path, true)
     respond()
   }
 
@@ -373,7 +373,7 @@ trait Responder extends JS with Flash with Knockout {
    * @param path Relative to an entry in classpath, without leading "/"
    */
   def respondResource(path: String): ChannelFuture = {
-    XSendResource.setHeader(response, path)
+    XSendResource.setHeader(response, path, true)
     respond()
   }
 
@@ -435,12 +435,12 @@ trait Responder extends JS with Flash with Knockout {
   //----------------------------------------------------------------------------
 
   def respondDefault404Page(): ChannelFuture = {
-    XSendFile.set404Page(response)
+    XSendFile.set404Page(response, true)
     respond()
   }
 
   def respondDefault500Page(): ChannelFuture = {
-    XSendFile.set500Page(response)
+    XSendFile.set500Page(response, true)
     respond()
   }
 

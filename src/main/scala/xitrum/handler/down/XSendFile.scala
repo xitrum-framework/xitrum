@@ -29,29 +29,35 @@ object XSendFile extends Logger {
   val CHUNK_SIZE        = 8 * 1024
   val X_SENDFILE_HEADER = "X-Sendfile"
 
+  // To avoid duplicate log like this when X_SENDFILE_HEADER is set by controller
+  // GET /echo/ -> 404 (static)
+  // GET /echo/ -> xitrum.sockjs.SockJsController#iframe, pathParams: {iframe: } -> 404, 1 [ms]
+  val X_SENDFILE_HEADER_IS_FROM_CONTROLLER = "X-Sendfile-Is-From-Controller"
+
   private[this] val abs404 = Config.root + "/public/404.html"
   private[this] val abs500 = Config.root + "/public/500.html"
 
   /** @param path see Renderer#renderFile */
-  def setHeader(response: HttpResponse, path: String) {
+  def setHeader(response: HttpResponse, path: String, fromController: Boolean) {
     response.setHeader(X_SENDFILE_HEADER, path)
+    if (fromController) response.setHeader(X_SENDFILE_HEADER_IS_FROM_CONTROLLER, "true")
     HttpHeaders.setContentLength(response, 0)  // Env2Response checks Content-Length
   }
 
   def isHeaderSet(response: HttpResponse) = response.containsHeader(X_SENDFILE_HEADER)
 
-  def set404Page(response: HttpResponse) {
+  def set404Page(response: HttpResponse, fromController: Boolean) {
     response.setStatus(NOT_FOUND)
-    setHeader(response, abs404)
+    setHeader(response, abs404, fromController)
   }
 
-  def set500Page(response: HttpResponse) {
+  def set500Page(response: HttpResponse, fromController: Boolean) {
     response.setStatus(INTERNAL_SERVER_ERROR)
-    setHeader(response, abs500)
+    setHeader(response, abs500, fromController)
   }
 
   /** @param path see Renderer#renderFile */
-  def sendFile(ctx: ChannelHandlerContext, e: ChannelEvent, request: HttpRequest, response: HttpResponse, path: String) {
+  def sendFile(ctx: ChannelHandlerContext, e: ChannelEvent, request: HttpRequest, response: HttpResponse, path: String, noLog: Boolean) {
     val channel       = ctx.getChannel
     val remoteAddress = channel.getRemoteAddress
 
@@ -65,9 +71,9 @@ object XSendFile extends Logger {
           HttpHeaders.setContentLength(response, 0)
           NoPipelining.setResponseHeaderAndResumeReadingForKeepAliveRequestOrCloseOnComplete(request, response, channel, e.getFuture)
           ctx.sendDownstream(e)
-          AccessLog.logStaticContentAccess(remoteAddress, request, response)
+          if (!noLog) AccessLog.logStaticFileAccess(remoteAddress, request, response)
         } else {
-          sendFile(ctx, e, request, response, abs404)  // Recursive
+          sendFile(ctx, e, request, response, abs404, noLog)  // Recursive
         }
 
       case Etag.Small(bytes, etag, mimeo, gzipped) =>
@@ -89,7 +95,7 @@ object XSendFile extends Logger {
         }
         NoPipelining.setResponseHeaderAndResumeReadingForKeepAliveRequestOrCloseOnComplete(request, response, channel, e.getFuture)
         ctx.sendDownstream(e)
-        AccessLog.logStaticContentAccess(remoteAddress, request, response)
+        if (!noLog) AccessLog.logStaticFileAccess(remoteAddress, request, response)
 
       case Etag.TooBig(file) =>
         // LAST_MODIFIED is not reliable as ETAG when this is a cluster of web servers,
@@ -101,7 +107,7 @@ object XSendFile extends Logger {
           NoPipelining.setResponseHeaderAndResumeReadingForKeepAliveRequestOrCloseOnComplete(request, response, channel, e.getFuture)
           response.setContent(ChannelBuffers.EMPTY_BUFFER)
           ctx.sendDownstream(e)
-          AccessLog.logStaticContentAccess(remoteAddress, request, response)
+          if (!noLog) AccessLog.logStaticFileAccess(remoteAddress, request, response)
         } else {
           val mimeo = Mime.get(path)
           val raf   = new RandomAccessFile(path, "r")
@@ -121,7 +127,7 @@ object XSendFile extends Logger {
           response.setHeader(LAST_MODIFIED, lastModifiedRfc2822)
           if (mimeo.isDefined) response.setHeader(CONTENT_TYPE, mimeo.get)
           NoPipelining.setResponseHeaderForKeepAliveRequest(request, response)
-          AccessLog.logStaticContentAccess(remoteAddress, request, response)
+          if (!noLog) AccessLog.logStaticFileAccess(remoteAddress, request, response)
 
           // Write the content
 
@@ -233,10 +239,15 @@ class XSendFile extends ChannelDownstreamHandler {
       return
     }
 
-    // X-SendFile is not standard, remove to avoid leaking information
+    // Remove non-standard header to avoid leaking information
     response.removeHeader(X_SENDFILE_HEADER)
 
+    // See comment of X_SENDFILE_HEADER_IS_FROM_CONTROLLER
+    // Remove non-standard header to avoid leaking information
+    val noLog = response.containsHeader(X_SENDFILE_HEADER_IS_FROM_CONTROLLER)
+    if (noLog) response.removeHeader(X_SENDFILE_HEADER_IS_FROM_CONTROLLER)
+
     val request = ctx.getChannel.getAttachment.asInstanceOf[HttpRequest]
-    sendFile(ctx, e, request, response, path)
+    sendFile(ctx, e, request, response, path, noLog)
   }
 }

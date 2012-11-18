@@ -16,14 +16,26 @@ object AccessLog extends Logger {
     }
   }
 
-  def logStaticContentAccess(remoteAddress: SocketAddress, request: HttpRequest, response: HttpResponse) {
+  def logStaticFileAccess(remoteAddress: SocketAddress, request: HttpRequest, response: HttpResponse) {
     if (logger.isDebugEnabled) {
       logger.debug(
         Net.remoteIp(remoteAddress, request) + " " +
         request.getMethod + " " +
         request.getUri + " -> " +
         response.getStatus.getCode +
-        " (static)"
+        " (static file)"
+      )
+    }
+  }
+
+  def logResourceInJarAccess(remoteAddress: SocketAddress, request: HttpRequest, response: HttpResponse) {
+    if (logger.isDebugEnabled) {
+      logger.debug(
+        Net.remoteIp(remoteAddress, request) + " " +
+        request.getMethod + " " +
+        request.getUri + " -> " +
+        response.getStatus.getCode +
+        " (resource in JAR)"
       )
     }
   }

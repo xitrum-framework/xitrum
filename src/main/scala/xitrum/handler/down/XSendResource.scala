@@ -15,6 +15,7 @@ import HttpVersion._
 
 import xitrum.{Config, Logger}
 import xitrum.etag.{Etag, NotModified}
+import xitrum.handler.AccessLog
 import xitrum.handler.up.NoPipelining
 import xitrum.util.{Gzip, Mime}
 
@@ -26,18 +27,22 @@ object XSendResource extends Logger {
   val CHUNK_SIZE            = 8 * 1024
   val X_SENDRESOURCE_HEADER = "X-Sendresource"
 
-  def setHeader(response: HttpResponse, path: String) {
+  // See comment of X_SENDFILE_HEADER_IS_FROM_CONTROLLER
+  val X_SENDRESOURCE_HEADER_IS_FROM_CONTROLLER = "X-Sendresource-Is-From-Controller"
+
+  def setHeader(response: HttpResponse, path: String, fromController: Boolean) {
     response.setHeader(X_SENDRESOURCE_HEADER, path)
+    if (fromController) response.setHeader(X_SENDRESOURCE_HEADER_IS_FROM_CONTROLLER, "true")
   }
 
   def isHeaderSet(response: HttpResponse) = response.containsHeader(X_SENDRESOURCE_HEADER)
 
   /** @return false if not found */
-  def sendResource(ctx: ChannelHandlerContext, e: ChannelEvent, request: HttpRequest, response: HttpResponse, path: String) {
+  def sendResource(ctx: ChannelHandlerContext, e: ChannelEvent, request: HttpRequest, response: HttpResponse, path: String, noLog: Boolean) {
     Etag.forResource(path, Gzip.isAccepted(request)) match {
       case Etag.NotFound =>
         // Keep alive is handled by XSendFile
-        XSendFile.set404Page(response)
+        XSendFile.set404Page(response, noLog)
 
       case Etag.Small(bytes, etag, mimeo, gzipped) =>
         if (Etag.areEtagsIdentical(request, etag)) {
@@ -58,6 +63,12 @@ object XSendResource extends Logger {
         }
 
         NoPipelining.setResponseHeaderAndResumeReadingForKeepAliveRequestOrCloseOnComplete(request, response, ctx.getChannel, e.getFuture)
+
+        if (!noLog) {
+          val channel       = ctx.getChannel
+          val remoteAddress = channel.getRemoteAddress
+          AccessLog.logResourceInJarAccess(remoteAddress, request, response)
+        }
     }
     ctx.sendDownstream(e)
   }
@@ -89,10 +100,15 @@ class XSendResource extends ChannelDownstreamHandler {
       return
     }
 
-    // X-SendResource is not standard, remove to avoid leaking information
+    // Remove non-standard header to avoid leaking information
     response.removeHeader(X_SENDRESOURCE_HEADER)
 
+    // See comment of X_SENDRESOURCE_HEADER_IS_FROM_CONTROLLER
+    // Remove non-standard header to avoid leaking information
+    val noLog = response.containsHeader(X_SENDRESOURCE_HEADER_IS_FROM_CONTROLLER)
+    if (noLog) response.removeHeader(X_SENDRESOURCE_HEADER_IS_FROM_CONTROLLER)
+
     val request = ctx.getChannel.getAttachment.asInstanceOf[HttpRequest]
-    sendResource(ctx, e, request, response, path)
+    sendResource(ctx, e, request, response, path, noLog)
   }
 }

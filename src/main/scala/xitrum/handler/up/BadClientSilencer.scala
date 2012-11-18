@@ -21,11 +21,10 @@ trait BadClientSilencer extends Logger {
 
     val cause = e.getCause
     val s     = cause.toString
-    if (s.startsWith("java.nio.channels.ClosedChannelException") ||
-        s.startsWith("java.io.IOException") ||
-        s.startsWith("javax.net.ssl.SSLException") ||
-        s.startsWith("java.lang.IllegalArgumentException")) return
-
-    logger.debug(getClass.getName + " -> BadClientSilencer", cause)
+    if (!s.startsWith("java.nio.channels.ClosedChannelException") &&
+        !s.startsWith("java.io.IOException") &&
+        !s.startsWith("javax.net.ssl.SSLException") &&
+        !s.startsWith("java.lang.IllegalArgumentException"))
+      logger.debug(getClass.getName + " -> BadClientSilencer", cause)
   }
 }

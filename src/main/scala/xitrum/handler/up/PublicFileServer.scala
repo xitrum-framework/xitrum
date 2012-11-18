@@ -38,7 +38,7 @@ class PublicFileServer extends SimpleChannelUpstreamHandler with BadClientSilenc
     absStaticPath(pathInfo) match {
       case None =>
         val response = new DefaultHttpResponse(HTTP_1_1, OK)
-        XSendFile.set404Page(response)
+        XSendFile.set404Page(response, false)
         ctx.getChannel.write(response)
 
       case Some(abs) =>
@@ -49,7 +49,7 @@ class PublicFileServer extends SimpleChannelUpstreamHandler with BadClientSilenc
           if (!Config.config.response.clientMustRevalidateStaticFiles)
             NotModified.setClientCacheAggressively(response)
 
-          XSendFile.setHeader(response, abs)
+          XSendFile.setHeader(response, abs, false)
           ctx.getChannel.write(response)
         } else {
           ctx.sendUpstream(e)

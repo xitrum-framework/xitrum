@@ -130,7 +130,7 @@ object Dispatcher extends Logger {
       controller.jsRespond("alert(\"" + controller.jsEscape("Internal Server Error") + "\")")
     } else {
       val response = new DefaultHttpResponse(HTTP_1_1, INTERNAL_SERVER_ERROR)
-      XSendFile.set500Page(response)
+      XSendFile.set500Page(response, true)
       val env = controller.handlerEnv
       env.response = response
       env.channel.write(env)
@@ -184,7 +184,7 @@ class Dispatcher extends SimpleChannelUpstreamHandler with BadClientSilencer {
         Routes.action404Method match {
           case None =>
             val response = new DefaultHttpResponse(HTTP_1_1, NOT_FOUND)
-            XSendFile.set404Page(response)
+            XSendFile.set404Page(response, false)
             env.response = response
             ctx.getChannel.write(env)
 
