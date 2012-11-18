@@ -130,15 +130,15 @@ class SockJsController extends Controller with SkipCSRFCheck {
 
   //----------------------------------------------------------------------------
 
-  def xhrPollingTransportOPTIONSReceive = OPTIONS(":serverId<[^\\.]+>/:sessionId<[^\\.]+>/xhr") {
-    xhrTransportOPTIONS()
+  def xhrPollingOPTIONSReceive = OPTIONS(":serverId<[^\\.]+>/:sessionId<[^\\.]+>/xhr") {
+    xhrOPTIONS()
   }
 
-  def xhrTransportOPTIONSSend = OPTIONS(":serverId<[^\\.]+>/:sessionId<[^\\.]+>/xhr_send") {
-    xhrTransportOPTIONS()
+  def xhrOPTIONSSend = OPTIONS(":serverId<[^\\.]+>/:sessionId<[^\\.]+>/xhr_send") {
+    xhrOPTIONS()
   }
 
-  def xhrPollingTransportReceive = POST(":serverId<[^\\.]+>/:sessionId<[^\\.]+>/xhr") {
+  def xhrPollingReceive = POST(":serverId<[^\\.]+>/:sessionId<[^\\.]+>/xhr") {
     val sessionId = param("sessionId")
 
     SockJsPollingSessions.subscribeOnceByClient(pathPrefix, sessionId, { result =>
@@ -172,7 +172,7 @@ class SockJsController extends Controller with SkipCSRFCheck {
     })
   }
 
-  def xhrTransportSend = POST(":serverId<[^\\.]+>/:sessionId<[^\\.]+>/xhr_send") {
+  def xhrSend = POST(":serverId<[^\\.]+>/:sessionId<[^\\.]+>/xhr_send") {
     val body = request.getContent().toString(Config.requestCharset)
     if (body.isEmpty) {
       response.setStatus(HttpResponseStatus.INTERNAL_SERVER_ERROR)
@@ -204,11 +204,11 @@ class SockJsController extends Controller with SkipCSRFCheck {
 
   //----------------------------------------------------------------------------
 
-  def xhrStreamingTransportOPTIONSReceive = OPTIONS(":serverId<[^\\.]+>/:sessionId<[^\\.]+>/xhr_streaming") {
-    xhrTransportOPTIONS()
+  def xhrStreamingOPTIONSReceive = OPTIONS(":serverId<[^\\.]+>/:sessionId<[^\\.]+>/xhr_streaming") {
+    xhrOPTIONS()
   }
 
-  def xhrStreamingTransportReceive = POST(":serverId<[^\\.]+>/:sessionId<[^\\.]+>/xhr_streaming") {
+  def xhrStreamingReceive = POST(":serverId<[^\\.]+>/:sessionId<[^\\.]+>/xhr_streaming") {
     val sessionId = param("sessionId")
 
     // Below can be initiated by different channels, thus isResponded should
@@ -259,7 +259,7 @@ class SockJsController extends Controller with SkipCSRFCheck {
 
   //----------------------------------------------------------------------------
 
-  def htmlfileTransportReceive = GET(":serverId<[^\\.]+>/:sessionId<[^\\.]+>/htmlfile") {
+  def htmlfileReceive = GET(":serverId<[^\\.]+>/:sessionId<[^\\.]+>/htmlfile") {
     val callbacko = callbackParam()
     if (callbacko.isDefined) {
       val callback  = callbacko.get
@@ -339,7 +339,7 @@ class SockJsController extends Controller with SkipCSRFCheck {
 
   //----------------------------------------------------------------------------
 
-  def jsonPPollingTransportReceive = GET(":serverId<[^\\.]+>/:sessionId<[^\\.]+>/jsonp") {
+  def jsonPPollingReceive = GET(":serverId<[^\\.]+>/:sessionId<[^\\.]+>/jsonp") {
     val callbacko = callbackParam()
     if (callbacko.isDefined) {
       val callback  = callbacko.get
@@ -380,7 +380,7 @@ class SockJsController extends Controller with SkipCSRFCheck {
     }
   }
 
-  def jsonPTransportSend = POST(":serverId<[^\\.]+>/:sessionId<[^\\.]+>/jsonp_send") {
+  def jsonPSend = POST(":serverId<[^\\.]+>/:sessionId<[^\\.]+>/jsonp_send") {
     val body: String = try {
       val contentType = request.getHeader(HttpHeaders.Names.CONTENT_TYPE)
       if (contentType != null && contentType.toLowerCase.startsWith(HttpHeaders.Values.APPLICATION_X_WWW_FORM_URLENCODED)) {
@@ -425,7 +425,7 @@ class SockJsController extends Controller with SkipCSRFCheck {
 
   //----------------------------------------------------------------------------
 
-  def eventSourceTransportReceive = GET(":serverId<[^\\.]+>/:sessionId<[^\\.]+>/eventsource") {
+  def eventSourceReceive = GET(":serverId<[^\\.]+>/:sessionId<[^\\.]+>/eventsource") {
     val sessionId = param("sessionId")
 
     SockJsPollingSessions.subscribeStreamingByClient(pathPrefix, sessionId, { result =>
@@ -484,7 +484,7 @@ class SockJsController extends Controller with SkipCSRFCheck {
 
   //----------------------------------------------------------------------------
 
-  def websocketTransport = WEBSOCKET(":serverId<[^\\.]+>/:sessionId<[^\\.]+>/websocket") {
+  def websocket = WEBSOCKET(":serverId<[^\\.]+>/:sessionId<[^\\.]+>/websocket") {
     // Ignored
     //val sessionId = param("sessionId")
 
@@ -517,7 +517,7 @@ class SockJsController extends Controller with SkipCSRFCheck {
     })
   }
 
-  def rawWebsocketTransport = WEBSOCKET("websocket") {
+  def rawWebsocket = WEBSOCKET("websocket") {
     acceptWebSocket(new WebSocketHandler {
       val sockJsHandler = Routes.createSockJsHandler(pathPrefix)
       sockJsHandler.webSocketController = SockJsController.this
@@ -550,7 +550,7 @@ class SockJsController extends Controller with SkipCSRFCheck {
       response.setHeader(HttpHeaders.Names.ACCESS_CONTROL_ALLOW_HEADERS, accessControlRequestHeaders)
   }
 
-  private def xhrTransportOPTIONS() {
+  private def xhrOPTIONS() {
     response.setStatus(HttpResponseStatus.NO_CONTENT)
     response.setHeader(HttpHeaders.Names.ACCESS_CONTROL_ALLOW_METHODS, "OPTIONS, POST")
     setCORS()
@@ -572,7 +572,7 @@ class SockJsController extends Controller with SkipCSRFCheck {
 
   /**
    * We should close a streaming request every 128KB messages was send.
-   * The test server should have this limit decreased to 4096B.
+   * The test server should have this limit decreased to 4KB.
    */
   private var streamingBytesSent = 0
 
@@ -589,12 +589,20 @@ class SockJsController extends Controller with SkipCSRFCheck {
     // but in this case the result doesn't have to be precise
     val size = text.length
     streamingBytesSent += size
+    println("streamingBytesSent: " + streamingBytesSent)
+    println("streamingBytesSent < LIMIT: " + (streamingBytesSent < LIMIT))
     if (streamingBytesSent < LIMIT) {
       if (isEventSource) respondEventSource(text) else respondText(text)
       true
     } else {
       val future = if (isEventSource) respondEventSource(text) else respondText(text)
-      future.addListener(ChannelFutureListener.CLOSE)
+      //future.addListener(ChannelFutureListener.CLOSE)
+      future.addListener(new ChannelFutureListener {
+        def operationComplete(f: ChannelFuture) {
+          println("future.addListener(ChannelFutureListener.CLOSE)")
+                  channel.close()
+                }
+      })
       false
     }
   }

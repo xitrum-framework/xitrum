@@ -51,7 +51,7 @@ object Routes extends Logger {
       val pmax2 = if (pmax < plen) plen else pmax
       (mmax2, pmax2)
     }
-    val logFormat = "%-" + methodHttpMaxLength + "s    %-" + patternMaxLength + "s    %s"
+    val logFormat = "%-" + methodHttpMaxLength + "s  %-" + patternMaxLength + "s  %s"
 
     others = others.sortBy(_._2)
     all = firsts ++ others ++ lasts
@@ -74,7 +74,7 @@ object Routes extends Logger {
           val wmax2 = if (sockJsClassAndOptions.websocket) wmax else "websocket: false,".length
           (pmax2, hmax2, wmax2)
         }
-      val logFormat = "%-" + pathPrefixMaxLength + "s    %-" + handlerClassNameMaxLength + "s    %-" + websocketOptionMaxLength + "s %s"
+      val logFormat = "%-" + pathPrefixMaxLength + "s  %-" + handlerClassNameMaxLength + "s  %-" + websocketOptionMaxLength + "s %s"
 
       val strings = sockJsClassAndOptionsTable.map { case (pathPrefix, sockJsClassAndOptions) =>
         logFormat.format(
