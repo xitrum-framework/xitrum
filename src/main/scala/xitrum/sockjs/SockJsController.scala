@@ -4,7 +4,7 @@ import java.util.{Arrays, Random}
 
 import org.jboss.netty.channel.{ChannelFuture, ChannelFutureListener}
 import org.jboss.netty.buffer.ChannelBuffers
-import org.jboss.netty.handler.codec.http.{HttpHeaders, HttpResponseStatus}
+import org.jboss.netty.handler.codec.http.{DefaultCookie, HttpHeaders, HttpResponseStatus}
 
 import com.codahale.jerkson.Json
 
@@ -66,6 +66,8 @@ object SockJsController {
 
 class SockJsController extends Controller with SkipCSRFCheck {
   // pathPrefix will be set at Routes.sockJs
+  // => filters can't be used because, for example beforeFilter is set before
+  //    pathPrefix is set
 
   def greeting = GET("") {
     respondText("Welcome to SockJS!\n")
@@ -141,6 +143,7 @@ class SockJsController extends Controller with SkipCSRFCheck {
   def xhrPollingReceive = POST(":serverId<[^\\.]+>/:sessionId<[^\\.]+>/xhr") {
     val sessionId = param("sessionId")
 
+    handleCookie()
     SockJsPollingSessions.subscribeOnceByClient(pathPrefix, sessionId, { result =>
       setCORS()
       setNoClientCache()
@@ -213,6 +216,7 @@ class SockJsController extends Controller with SkipCSRFCheck {
 
     // Below can be initiated by different channels, thus isResponded should
     // be called to check if SockJsController.h2KB should be sent
+    handleCookie()
     SockJsPollingSessions.subscribeStreamingByClient(pathPrefix, sessionId, { result =>
       if (!isResponded) {
         setCORS()
@@ -265,6 +269,7 @@ class SockJsController extends Controller with SkipCSRFCheck {
       val callback  = callbacko.get
       val sessionId = param("sessionId")
 
+      handleCookie()
       SockJsPollingSessions.subscribeStreamingByClient(pathPrefix, sessionId, { result =>
         result match {
           case SubscribeByClientResultOpen =>
@@ -345,6 +350,7 @@ class SockJsController extends Controller with SkipCSRFCheck {
       val callback  = callbacko.get
       val sessionId = param("sessionId")
 
+      handleCookie()
       SockJsPollingSessions.subscribeOnceByClient(pathPrefix, sessionId, { result =>
         setCORS()
         setNoClientCache()
@@ -393,6 +399,7 @@ class SockJsController extends Controller with SkipCSRFCheck {
         ""
     }
 
+    handleCookie()
     if (body.isEmpty) {
       response.setStatus(HttpResponseStatus.INTERNAL_SERVER_ERROR)
       respondText("Payload expected.")
@@ -428,6 +435,7 @@ class SockJsController extends Controller with SkipCSRFCheck {
   def eventSourceReceive = GET(":serverId<[^\\.]+>/:sessionId<[^\\.]+>/eventsource") {
     val sessionId = param("sessionId")
 
+    handleCookie()
     SockJsPollingSessions.subscribeStreamingByClient(pathPrefix, sessionId, { result =>
       result match {
         case SubscribeByClientResultOpen =>
@@ -538,6 +546,24 @@ class SockJsController extends Controller with SkipCSRFCheck {
   }
 
   //----------------------------------------------------------------------------
+
+  // JSESSIONID cookie must be echoed back if sent by the client, or created
+  // http://sockjs.github.com/sockjs-protocol/sockjs-protocol-0.3.3.html#section-120
+  // Can't use beforeFilter, see comment of pathPrefix at the top of this controller.
+  private def handleCookie() {
+    val sockJsClassAndOptions = Routes.sockJsClassAndOptions(pathPrefix)
+    if (sockJsClassAndOptions.cookieNeeded) {
+      cookies.get("JSESSIONID") match {
+        case None =>
+          val cookie = new DefaultCookie("JSESSIONID", "dummy")
+          cookie.setPath(Config.withBaseUrl("/"))
+          cookies.add(cookie)
+        case Some(cookie) =>
+          // Set path to Config.withBaseUrl("/")
+          cookie.setPath(Config.withBaseUrl("/"))
+      }
+    }
+  }
 
   private def setCORS() {
     val requestOrigin  = request.getHeader(HttpHeaders.Names.ORIGIN)
