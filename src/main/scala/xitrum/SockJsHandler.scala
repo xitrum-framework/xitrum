@@ -53,8 +53,7 @@ abstract class SockJsHandler extends Logger {
       // For WebSocket, must explicitly close
       // WebSocket is used, but it may be raw or not raw
       if (rawWebSocket) {
-        webSocketController.respondWebSocket("c[3000,\"Go away!\"]")
-        .addListener(ChannelFutureListener.CLOSE)
+        webSocketController.channel.close()
       } else {
         webSocketController.respondWebSocket("c[3000,\"Go away!\"]")
         .addListener(ChannelFutureListener.CLOSE)
