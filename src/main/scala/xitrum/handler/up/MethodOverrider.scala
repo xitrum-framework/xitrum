@@ -6,7 +6,7 @@ import org.jboss.netty.handler.codec.http.{HttpHeaders, HttpMethod}
 
 import HttpHeaders.Names
 import HttpHeaders.Values
-import HttpMethod.POST
+import HttpMethod.{GET, POST}
 
 import xitrum.handler.HandlerEnv
 import xitrum.routing.HttpMethodWebSocket
@@ -31,23 +31,22 @@ class MethodOverrider extends SimpleChannelUpstreamHandler with BadClientSilence
     val method     = request.getMethod
     val bodyParams = env.bodyParams
 
-    // WebSocket should only accept GET
+    // WebSocket should be GET
     // "Connection" header must contain "Upgrade" (ex: "keep-alive, Upgrade")
     // "Upgrade" header must be "WebSocket"
     // http://sockjs.github.com/sockjs-protocol/sockjs-protocol-0.3.3.html#section-51
     // http://sockjs.github.com/sockjs-protocol/sockjs-protocol-0.3.3.html#section-73
     val connectionHeader = request.getHeader(Names.CONNECTION)
     val upgradeHeader    = request.getHeader(Names.UPGRADE)
-    if (connectionHeader != null && connectionHeader.toLowerCase.contains(Values.UPGRADE.toLowerCase) &&
-        upgradeHeader    != null && upgradeHeader.toLowerCase == Values.WEBSOCKET.toLowerCase &&
-        request.getMethod.equals(HttpMethod.GET)) {
+    if (method == GET &&
+        connectionHeader != null && connectionHeader.toLowerCase.contains(Values.UPGRADE.toLowerCase) &&
+        upgradeHeader    != null && upgradeHeader.toLowerCase == Values.WEBSOCKET.toLowerCase) {
       request.setMethod(HttpMethodWebSocket)
     } else if (method == POST) {
       val _methods = bodyParams.get("_method")
       if (_methods != null && _methods.nonEmpty) {
         val _method = new HttpMethod(_methods.get(0).toUpperCase)
         request.setMethod(_method)
-
         bodyParams.remove("_method")  // Cleaner for application developers when seeing access log
       }
     }
