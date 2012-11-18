@@ -32,13 +32,14 @@ class MethodOverrider extends SimpleChannelUpstreamHandler with BadClientSilence
     val bodyParams = env.bodyParams
 
     // WebSocket should only accept GET
-    // "Connection" header must be "Upgrade"
+    // "Connection" header must contain "Upgrade" (ex: "keep-alive, Upgrade")
     // "Upgrade" header must be "WebSocket"
     // http://sockjs.github.com/sockjs-protocol/sockjs-protocol-0.3.3.html#section-51
+    // http://sockjs.github.com/sockjs-protocol/sockjs-protocol-0.3.3.html#section-73
     val connectionHeader = request.getHeader(Names.CONNECTION)
     val upgradeHeader    = request.getHeader(Names.UPGRADE)
-    if (connectionHeader != null && connectionHeader.toLowerCase == Values.UPGRADE &&
-        upgradeHeader    != null && upgradeHeader.toLowerCase    == Values.WEBSOCKET.toLowerCase &&
+    if (connectionHeader != null && connectionHeader.toLowerCase.contains(Values.UPGRADE.toLowerCase) &&
+        upgradeHeader    != null && upgradeHeader.toLowerCase == Values.WEBSOCKET.toLowerCase &&
         request.getMethod.equals(HttpMethod.GET)) {
       request.setMethod(HttpMethodWebSocket)
     } else if (method == POST) {
