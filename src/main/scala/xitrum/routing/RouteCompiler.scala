@@ -6,7 +6,11 @@ object RouteCompiler {
    * Seq(RouteToken("articles", true, None), RouteToken("id", false, Some("[0-9]+".r)))
    */
   def compile(pattern: String): Seq[RouteToken] = {
-    val fragments = pattern.split('/').filter(_ != "")
+    // See PathInfo#tokens
+    // Remove slash prefix if any so that app developers can write
+    // "/articles" or "articles" and the resuls are the same
+    val noSlashPrefix = if (pattern.startsWith("/")) pattern.substring(1) else pattern
+    val fragments     = noSlashPrefix.split("/", -1)
     fragments.map(compilePatternFragment _)
   }
 

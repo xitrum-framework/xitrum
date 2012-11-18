@@ -60,7 +60,14 @@ trait ActionFactory {
   //----------------------------------------------------------------------------
 
   private def withPathPrefix(pattern: String) = {
-    if (pathPrefix.isEmpty) pattern else pathPrefix + "/" + pattern
+    if (pathPrefix.isEmpty)
+      pattern
+    else if (pattern.isEmpty)
+      pathPrefix
+    else if (pattern == "/")
+      pathPrefix + "/"
+    else
+      pathPrefix + "/" + pattern
   }
 
   def GET(pattern: String)(body: => Any) =

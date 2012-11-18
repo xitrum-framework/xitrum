@@ -32,7 +32,14 @@ case class Action(route: Route, var method: Method, body: () => Unit, cacheSecon
 
   private def withPathPrefix(pattern: String) = {
     val pathPrefix = PathPrefix.fromCompiledPattern(route.compiledPattern)
-    if (pathPrefix.isEmpty) pattern else pathPrefix + "/" + pattern
+    if (pathPrefix.isEmpty)
+      pattern
+    else if (pattern.isEmpty)
+      pathPrefix
+    else if (pattern == "/")
+      pathPrefix + "/"
+    else
+      pathPrefix + "/" + pattern
   }
 
   def GET(pattern: String)(body: => Any) =

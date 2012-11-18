@@ -65,7 +65,13 @@ object SockJsController {
 }
 
 class SockJsController extends Controller with SkipCSRFCheck {
+  // pathPrefix will be set at Routes.sockJs
+
   def greeting = GET("") {
+    respondText("Welcome to SockJS!\n")
+  }
+
+  def greetingWithSlash = GET("/") {
     respondText("Welcome to SockJS!\n")
   }
 
