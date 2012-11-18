@@ -130,15 +130,15 @@ class SockJsController extends Controller with SkipCSRFCheck {
 
   //----------------------------------------------------------------------------
 
-  def xhrPollingTransportOPTIONSReceive = OPTIONS(":serverId/:sessionId/xhr") {
+  def xhrPollingTransportOPTIONSReceive = OPTIONS(":serverId<[^\\.]+>/:sessionId<[^\\.]+>/xhr") {
     xhrTransportOPTIONS()
   }
 
-  def xhrTransportOPTIONSSend = OPTIONS(":serverId/:sessionId/xhr_send") {
+  def xhrTransportOPTIONSSend = OPTIONS(":serverId<[^\\.]+>/:sessionId<[^\\.]+>/xhr_send") {
     xhrTransportOPTIONS()
   }
 
-  def xhrPollingTransportReceive = POST(":serverId/:sessionId/xhr") {
+  def xhrPollingTransportReceive = POST(":serverId<[^\\.]+>/:sessionId<[^\\.]+>/xhr") {
     val sessionId = param("sessionId")
 
     SockJsPollingSessions.subscribeOnceByClient(pathPrefix, sessionId, { result =>
@@ -169,7 +169,7 @@ class SockJsController extends Controller with SkipCSRFCheck {
     })
   }
 
-  def xhrTransportSend = POST(":serverId/:sessionId/xhr_send") {
+  def xhrTransportSend = POST(":serverId<[^\\.]+>/:sessionId<[^\\.]+>/xhr_send") {
     val body = request.getContent().toString(Config.requestCharset)
     if (body.isEmpty) {
       response.setStatus(HttpResponseStatus.INTERNAL_SERVER_ERROR)
@@ -201,11 +201,11 @@ class SockJsController extends Controller with SkipCSRFCheck {
 
   //----------------------------------------------------------------------------
 
-  def xhrStreamingTransportOPTIONSReceive = OPTIONS(":serverId/:sessionId/xhr_streaming") {
+  def xhrStreamingTransportOPTIONSReceive = OPTIONS(":serverId<[^\\.]+>/:sessionId<[^\\.]+>/xhr_streaming") {
     xhrTransportOPTIONS()
   }
 
-  def xhrStreamingTransportReceive = POST(":serverId/:sessionId/xhr_streaming") {
+  def xhrStreamingTransportReceive = POST(":serverId<[^\\.]+>/:sessionId<[^\\.]+>/xhr_streaming") {
     val sessionId = param("sessionId")
 
     // Below can be initiated by different channels, thus isResponded should
@@ -253,7 +253,7 @@ class SockJsController extends Controller with SkipCSRFCheck {
 
   //----------------------------------------------------------------------------
 
-  def htmlfileTransportReceive = GET(":serverId/:sessionId/htmlfile") {
+  def htmlfileTransportReceive = GET(":serverId<[^\\.]+>/:sessionId<[^\\.]+>/htmlfile") {
     val callbacko = callbackParam()
     if (callbacko.isDefined) {
       val callback  = callbacko.get
@@ -329,7 +329,7 @@ class SockJsController extends Controller with SkipCSRFCheck {
 
   //----------------------------------------------------------------------------
 
-  def jsonPPollingTransportReceive = GET(":serverId/:sessionId/jsonp") {
+  def jsonPPollingTransportReceive = GET(":serverId<[^\\.]+>/:sessionId<[^\\.]+>/jsonp") {
     val callbacko = callbackParam()
     if (callbacko.isDefined) {
       val callback  = callbacko.get
@@ -367,7 +367,7 @@ class SockJsController extends Controller with SkipCSRFCheck {
     }
   }
 
-  def jsonPTransportSend = POST(":serverId/:sessionId/jsonp_send") {
+  def jsonPTransportSend = POST(":serverId<[^\\.]+>/:sessionId<[^\\.]+>/jsonp_send") {
     val body: String = try {
       val contentType = request.getHeader(HttpHeaders.Names.CONTENT_TYPE)
       if (contentType != null && contentType.toLowerCase.startsWith(HttpHeaders.Values.APPLICATION_X_WWW_FORM_URLENCODED)) {
@@ -412,7 +412,7 @@ class SockJsController extends Controller with SkipCSRFCheck {
 
   //----------------------------------------------------------------------------
 
-  def eventSourceTransportReceive = GET(":serverId/:sessionId/eventsource") {
+  def eventSourceTransportReceive = GET(":serverId<[^\\.]+>/:sessionId<[^\\.]+>/eventsource") {
     val sessionId = param("sessionId")
 
     SockJsPollingSessions.subscribeStreamingByClient(pathPrefix, sessionId, { result =>
@@ -467,7 +467,7 @@ class SockJsController extends Controller with SkipCSRFCheck {
 
   //----------------------------------------------------------------------------
 
-  def websocketTransport = WEBSOCKET(":serverId/:sessionId/websocket") {
+  def websocketTransport = WEBSOCKET(":serverId<[^\\.]+>/:sessionId<[^\\.]+>/websocket") {
     // Ignored
     //val sessionId = param("sessionId")
 
