@@ -5,7 +5,7 @@ import scala.xml.{Node, NodeSeq, Xhtml}
 
 import org.jboss.netty.buffer.{ChannelBuffer, ChannelBuffers}
 import org.jboss.netty.channel.ChannelFuture
-import org.jboss.netty.handler.codec.http.{DefaultHttpChunk, HttpChunk, HttpHeaders}
+import org.jboss.netty.handler.codec.http.{DefaultHttpChunk, HttpChunk, HttpHeaders, HttpVersion}
 import org.jboss.netty.handler.codec.http.websocketx.TextWebSocketFrame
 import org.jboss.netty.util.CharsetUtil
 import HttpHeaders.Names.{CONTENT_TYPE, CONTENT_LENGTH, TRANSFER_ENCODING}
@@ -49,7 +49,7 @@ trait Responder extends JS with Flash with Knockout {
       if (!XSendFile.isHeaderSet(response) &&
           !XSendResource.isHeaderSet(response) &&
           !response.isChunked) {
-        NoPipelining.resumeReadingForKeepAliveRequestOrCloseOnComplete(request, channel, future)
+        NoPipelining.if_keepAliveRequest_then_resumeReading_else_closeOnComplete(request, channel, future)
       }
 
       future
@@ -64,13 +64,22 @@ trait Responder extends JS with Flash with Knockout {
       if (!response.containsHeader(CONTENT_TYPE))
         response.setHeader(CONTENT_TYPE, "application/octet-stream")
 
-      response.setHeader(TRANSFER_ENCODING, CHUNKED)
-      setNoClientCache()
-
       // There should be no CONTENT_LENGTH header
       response.removeHeader(CONTENT_LENGTH)
 
-      respond()
+      setNoClientCache()
+
+      // TRANSFER_ENCODING header is automatically set by Netty when it send the
+      // real response. We don't need to manually set it here.
+      // However, this header is not allowed in HTTP/1.0:
+      // http://sockjs.github.com/sockjs-protocol/sockjs-protocol-0.3.3.html#section-165
+      if (request.getProtocolVersion.compareTo(HttpVersion.HTTP_1_0) == 0) {
+        response.setChunked(false)
+        respond()
+        response.setChunked(true)
+      } else {
+        respond()
+      }
     }
   }
 
@@ -89,7 +98,7 @@ trait Responder extends JS with Flash with Knockout {
       // responded should be true here
       response.setChunked(false)
       val future = channel.write(HttpChunk.LAST_CHUNK)
-      NoPipelining.resumeReadingForKeepAliveRequestOrCloseOnComplete(request, channel, future)
+      NoPipelining.if_keepAliveRequest_then_resumeReading_else_closeOnComplete(request, channel, future)
       future
     }
   }

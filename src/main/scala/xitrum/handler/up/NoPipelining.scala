@@ -1,7 +1,7 @@
 package xitrum.handler.up
 
 import org.jboss.netty.channel.{Channel, ChannelHandler, ChannelFuture, ChannelFutureListener, ChannelHandlerContext, MessageEvent, SimpleChannelUpstreamHandler}
-import org.jboss.netty.handler.codec.http.{HttpHeaders, HttpRequest, HttpResponse}
+import org.jboss.netty.handler.codec.http.{HttpHeaders, HttpRequest, HttpResponse, HttpVersion}
 import ChannelHandler.Sharable
 
 object NoPipelining {
@@ -15,7 +15,12 @@ object NoPipelining {
       response.setHeader(HttpHeaders.Names.CONNECTION, HttpHeaders.Values.KEEP_ALIVE)
   }
 
-  def resumeReadingForKeepAliveRequestOrCloseOnComplete(
+  /**
+   * Handle keep alive as long as there's the request contains
+   * 'connection:Keep-Alive' header, no matter what the client is 1.0 or 1.1:
+   * http://sockjs.github.com/sockjs-protocol/sockjs-protocol-0.3.3.html#section-157
+   */
+  def if_keepAliveRequest_then_resumeReading_else_closeOnComplete(
       request: HttpRequest,
       channel: Channel, channelFuture: ChannelFuture) {
     if (HttpHeaders.isKeepAlive(request)) {

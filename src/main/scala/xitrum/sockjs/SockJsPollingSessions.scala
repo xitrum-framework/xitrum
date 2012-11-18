@@ -11,12 +11,17 @@ import xitrum.routing.Routes
 
 /** This acts the middleman between client and server SockJS handler. */
 object SockJsPollingSessions {
-  // Seconds
-  // TIMEOUT_FOR_SockJsPollingSessions needs to be bigger than
-  // TIMEOUT_FOR_SockJsPollingSession so that timeout for SockJsPollingSessions
-  // does not happen before timeout for SockJsPollingSession
-  val TIMEOUT_FOR_SockJsPollingSession  = 25
-  val TIMEOUT_FOR_SockJsPollingSessions = TIMEOUT_FOR_SockJsPollingSession * 2
+  // The session must time out after 5 seconds of not having a receiving connection
+  // http://sockjs.github.com/sockjs-protocol/sockjs-protocol-0.3.3.html#section-46
+  val TIMEOUT_CONNECTION = 5
+
+  // The server must send a heartbeat frame every 25 seconds
+  // http://sockjs.github.com/sockjs-protocol/sockjs-protocol-0.3.3.html#section-46
+  val TIMEOUT_HEARTBEAT = 25
+
+  // Must be bigger than TIMEOUT_HEARTBEAT "ask" timeout does not happen before
+  // heartbeat timeout
+  val TIMEOUT_ASK = TIMEOUT_HEARTBEAT * 2
 
   private val system = ActorSystem("SockJsPollingSessions")
 
@@ -30,7 +35,7 @@ object SockJsPollingSessions {
       callback(SubscribeByClientResultOpen)
       handler.onOpen()  // Call opOpen after "o" frame has been sent
     } else {
-      val future = ref.ask(SubscribeOnceByClient)(TIMEOUT_FOR_SockJsPollingSessions seconds).mapTo[SockJsSubscribeByClientResult]
+      val future = ref.ask(SubscribeOnceByClient)(TIMEOUT_ASK seconds).mapTo[SockJsSubscribeByClientResult]
       future.onComplete {
         case Left(e) =>
           // The channel will be closed by SockJsController,
@@ -62,7 +67,7 @@ object SockJsPollingSessions {
 
   /** Called by subscribeStreaming above, but uses ref to avoid actor lookup cost. */
   private def subscribeStreamingByClient(actorRef: ActorRef, callback: (SockJsSubscribeByClientResult) => Boolean) {
-    val future = actorRef.ask(SubscribeOnceByClient)(TIMEOUT_FOR_SockJsPollingSessions seconds).mapTo[SockJsSubscribeByClientResult]
+    val future = actorRef.ask(SubscribeOnceByClient)(TIMEOUT_ASK seconds).mapTo[SockJsSubscribeByClientResult]
     future.onComplete {
       case Left(e) =>
         // The channel will be closed by SockJsController,

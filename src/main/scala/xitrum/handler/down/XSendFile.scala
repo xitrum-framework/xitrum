@@ -135,7 +135,7 @@ object XSendFile extends Logger {
             // http://stackoverflow.com/questions/3854842/content-length-header-with-head-requests
             response.setContent(ChannelBuffers.EMPTY_BUFFER)
             ctx.sendDownstream(e)
-            NoPipelining.resumeReadingForKeepAliveRequestOrCloseOnComplete(request, channel, e.getFuture)
+            NoPipelining.if_keepAliveRequest_then_resumeReading_else_closeOnComplete(request, channel, e.getFuture)
           } else {
             // Send the initial line and headers
             ctx.sendDownstream(e)
@@ -147,7 +147,7 @@ object XSendFile extends Logger {
                 def operationComplete(f: ChannelFuture) { raf.close() }
               })
 
-              NoPipelining.resumeReadingForKeepAliveRequestOrCloseOnComplete(request, channel, future)
+              NoPipelining.if_keepAliveRequest_then_resumeReading_else_closeOnComplete(request, channel, future)
             } else {
               // No encryption - use zero-copy
               val region = new DefaultFileRegion(raf.getChannel, offset, length)
@@ -163,7 +163,7 @@ object XSendFile extends Logger {
                 }
               })
 
-              NoPipelining.resumeReadingForKeepAliveRequestOrCloseOnComplete(request, channel, future)
+              NoPipelining.if_keepAliveRequest_then_resumeReading_else_closeOnComplete(request, channel, future)
             }
           }
         }

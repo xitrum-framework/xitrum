@@ -151,9 +151,11 @@ class SockJsController extends Controller with SkipCSRFCheck {
 
         case SubscribeByClientResultAnotherConnectionStillOpen =>
           respondJs("c[2010,\"Another connection still open\"]\n")
+          .addListener(ChannelFutureListener.CLOSE)
 
         case SubscribeByClientResultClosed =>
           respondJs("c[3000,\"Go away!\"]\n")
+          .addListener(ChannelFutureListener.CLOSE)
 
         case SubscribeByClientResultMessages(messages) =>
           if (messages.isEmpty) {
@@ -165,6 +167,7 @@ class SockJsController extends Controller with SkipCSRFCheck {
 
         case SubscribeByClientResultErrorAfterOpenHasBeenSent =>
           respondJs("c[2011,\"Server error\"]\n")
+          .addListener(ChannelFutureListener.CLOSE)
       }
     })
   }
@@ -228,11 +231,13 @@ class SockJsController extends Controller with SkipCSRFCheck {
         case SubscribeByClientResultAnotherConnectionStillOpen =>
           respondJs("c[2010,\"Another connection still open\"]\n")
           respondLastChunk()
+          .addListener(ChannelFutureListener.CLOSE)
           false
 
         case SubscribeByClientResultClosed =>
           respondJs("c[3000,\"Go away!\"]\n")
           respondLastChunk()
+          .addListener(ChannelFutureListener.CLOSE)
           false
 
         case SubscribeByClientResultMessages(messages) =>
@@ -246,6 +251,7 @@ class SockJsController extends Controller with SkipCSRFCheck {
         case SubscribeByClientResultErrorAfterOpenHasBeenSent =>
           respondJs("c[2011,\"Server error\"]\n")
           respondLastChunk()
+          .addListener(ChannelFutureListener.CLOSE)
           false
       }
     })
@@ -278,6 +284,7 @@ class SockJsController extends Controller with SkipCSRFCheck {
               SockJsController.htmlfile(callback, false) +
               "<script>\np(\"c[2010,\\\"Another connection still open\\\"]\");\n</script>\r\n"
             )
+            .addListener(ChannelFutureListener.CLOSE)
             false
 
           case SubscribeByClientResultClosed =>
@@ -287,6 +294,7 @@ class SockJsController extends Controller with SkipCSRFCheck {
               SockJsController.htmlfile(callback, false) +
               "<script>\np(\"c[3000,\\\"Go away!\\\"]\");\n</script>\r\n"
             )
+            .addListener(ChannelFutureListener.CLOSE)
             false
 
           case SubscribeByClientResultMessages(messages) =>
@@ -317,9 +325,11 @@ class SockJsController extends Controller with SkipCSRFCheck {
                 SockJsController.htmlfile(callback, false) +
                 "<script>\np(\"c[2011,\\\"Server error\\\"]\");\n</script>\r\n"
               )
+              .addListener(ChannelFutureListener.CLOSE)
             } else {
               respondText("<script>\np(\"c[2011,\\\"Server error\\\"]\");\n</script>\r\n")
               respondLastChunk()
+              .addListener(ChannelFutureListener.CLOSE)
             }
             false
         }
@@ -345,9 +355,11 @@ class SockJsController extends Controller with SkipCSRFCheck {
 
           case SubscribeByClientResultAnotherConnectionStillOpen =>
             respondJs(callback + "(\"c[2010,\\\"Another connection still open\\\"]\");\r\n")
+            .addListener(ChannelFutureListener.CLOSE)
 
           case SubscribeByClientResultClosed =>
             respondJs(callback + "(\"c[3000,\\\"Go away!\\\"]\");\r\n")
+            .addListener(ChannelFutureListener.CLOSE)
 
           case SubscribeByClientResultMessages(messages) =>
             if (messages.isEmpty) {
@@ -362,6 +374,7 @@ class SockJsController extends Controller with SkipCSRFCheck {
 
           case SubscribeByClientResultErrorAfterOpenHasBeenSent =>
             respondJs(callback + "(\"c[2011,\\\"Server error\\\"]\");\r\n")
+            .addListener(ChannelFutureListener.CLOSE)
         }
       })
     }
@@ -429,12 +442,14 @@ class SockJsController extends Controller with SkipCSRFCheck {
           setCORS()
           setNoClientCache()
           respondJs("c[2010,\"Another connection still open\"]\n")
+          .addListener(ChannelFutureListener.CLOSE)
           false
 
         case SubscribeByClientResultClosed =>
           setCORS()
           setNoClientCache()
           respondJs("c[3000,\"Go away!\"]\n")
+          .addListener(ChannelFutureListener.CLOSE)
           false
 
         case SubscribeByClientResultMessages(messages) =>
@@ -456,9 +471,11 @@ class SockJsController extends Controller with SkipCSRFCheck {
             setCORS()
             setNoClientCache()
             respondJs("c[2011,\"Server error\"]\n")
+            .addListener(ChannelFutureListener.CLOSE)
           } else {
             respondEventSource("c[2011,\"Server error\"]")
             respondLastChunk()
+            .addListener(ChannelFutureListener.CLOSE)
           }
           false
       }
@@ -487,8 +504,8 @@ class SockJsController extends Controller with SkipCSRFCheck {
           Json.parse[List[String]](body)
         } catch {
           case _ =>
-            // For WebSocket, must explicitly close
-            respondWebSocket("c[2011,\"Broken JSON encoding.\"]").addListener(ChannelFutureListener.CLOSE)
+            respondWebSocket("c[2011,\"Broken JSON encoding.\"]")
+            .addListener(ChannelFutureListener.CLOSE)
             null
         }
         if (messages != null) messages.foreach(sockJsHandler.onMessage(_))
