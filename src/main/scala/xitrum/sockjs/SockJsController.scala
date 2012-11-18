@@ -624,20 +624,12 @@ class SockJsController extends Controller with SkipCSRFCheck {
     // but in this case the result doesn't have to be precise
     val size = text.length
     streamingBytesSent += size
-    println("streamingBytesSent: " + streamingBytesSent)
-    println("streamingBytesSent < LIMIT: " + (streamingBytesSent < LIMIT))
     if (streamingBytesSent < LIMIT) {
       if (isEventSource) respondEventSource(text) else respondText(text)
       true
     } else {
       val future = if (isEventSource) respondEventSource(text) else respondText(text)
-      //future.addListener(ChannelFutureListener.CLOSE)
-      future.addListener(new ChannelFutureListener {
-        def operationComplete(f: ChannelFuture) {
-          println("future.addListener(ChannelFutureListener.CLOSE)")
-                  channel.close()
-                }
-      })
+      future.addListener(ChannelFutureListener.CLOSE)
       false
     }
   }
