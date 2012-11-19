@@ -1,4 +1,10 @@
-1.10 (planned):
+1.9.10 (planned):
+* Add automatic HEAD and CORS request handling for the whole site
+  http://www.html5rocks.com/en/tutorials/cors/
+* SockJS: Add cluster mode
+* Replace Jerkson with Jacks or jackson-module-scala
+  (Jerkson has not been updated for months)
+  http://wiki.fasterxml.com/JacksonModuleScala
 * Reload classes in development mode using Javassist
 * Reload routes in development mode using Javassist
 * Flash socket policy server can use the same port with HTTP server
@@ -19,15 +25,16 @@
 1.9.9 (planned):
 * Only decode request body only when the request method is POST, PUT, or PATCH
   http://groups.google.com/group/xitrum-framework/browse_thread/thread/f343f7bc92edb39c
-* Add automatic HEAD and CORS request handling for the whole site
-* SockJS: Allow setting options websocket = false and cookie_needed = true
-  http://groups.google.com/group/sockjs/browse_thread/thread/392cd07c4a75400b
-* SockJS: Add cluster mode
-  http://www.html5rocks.com/en/tutorials/cors/
+* SockJS:
+  - Lots of minor improvements and bug fixes
+  - Allow setting options websocket = false and cookie_needed = true
+    http://groups.google.com/group/sockjs/browse_thread/thread/392cd07c4a75400b
 * Update Netty from 3.5.9.Final to 3.5.10.Final
   https://netty.io/Blog/Netty+3510Final+-+Get+it+while+it+is+hot
 * Update Akka from 2.0.3 to 2.0.4
   http://groups.google.com/group/akka-user/browse_thread/thread/4da3849a0a5e4163
+* Update Javassist from 3.16.1-GA to 3.17.0-GA
+  https://issues.jboss.org/browse/JASSIST/fixforversion/12319159
 * Update Knockout.js from 2.1.0 to 2.2.0, Knockout.mapping from 2.3.2 to 2.3.3
   http://blog.stevensanderson.com/2012/10/29/knockout-2-2-0-released/
 * Update SockJS JS library from 0.3.3 to 0.3.4
