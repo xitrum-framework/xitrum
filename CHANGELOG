@@ -22,7 +22,7 @@
 * Middleware architecture based on Netty handlers
 * Support SPDY
 
-1.9.9 (planned):
+1.9.9:
 * Only decode request body only when the request method is POST, PUT, or PATCH
   http://groups.google.com/group/xitrum-framework/browse_thread/thread/f343f7bc92edb39c
 * SockJS:
