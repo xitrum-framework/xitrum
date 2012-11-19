@@ -440,7 +440,7 @@ object Routes extends Logger {
   private def sockJsPathPrefixForNormalSockJsHandlerClass(handlerClass: Class[_ <: SockJsHandler]): String = {
     val kv = sockJsClassAndOptionsTable.find { case (k, v) => v.handlerClass == handlerClass }
     kv match {
-      case Some((k, v)) => k
+      case Some((k, v)) => "/" + k
       case None         => throw new Exception("Cannot lookup SockJS URL for class: " + handlerClass)
     }
   }
