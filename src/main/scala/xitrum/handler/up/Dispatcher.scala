@@ -70,7 +70,7 @@ object Dispatcher extends Logger {
         if (e.isInstanceOf[SessionExpired] || e.isInstanceOf[InvalidAntiCSRFToken] || e.isInstanceOf[MissingParam] || e.isInstanceOf[ValidationError]) {
           controller.response.setStatus(BAD_REQUEST)
           val msg = if (e.isInstanceOf[SessionExpired] || e.isInstanceOf[InvalidAntiCSRFToken]) {
-            controller.resetSession()
+            controller.session.clear()
             "Session expired. Please refresh your browser."
           } else if (e.isInstanceOf[MissingParam]) {
             val mp  = e.asInstanceOf[MissingParam]

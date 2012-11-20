@@ -16,11 +16,13 @@ trait ExtEnv extends RequestEnv with ParamAccess with CSRF {
   private var sessionTouched = false
   private var cookiesTouched = false
 
+  /** To reset session: session.clear() */
   lazy val session = {
     sessionTouched = true
     Config.sessionStore.restore(this)
   }
 
+  /** To reset all cookies, cannot simply call cookies.clear(), see Xitrum guide */
   lazy val cookies = {
     cookiesTouched = true
     new Cookies(request)
@@ -29,12 +31,11 @@ trait ExtEnv extends RequestEnv with ParamAccess with CSRF {
   def sessiono[T](key: String): Option[T] = session.get(key).map(_.asInstanceOf[T])
 
   def setCookieAndSessionIfTouchedOnRespond() {
-    if (sessionTouched) Config.sessionStore.store(session, this)
-    if (cookiesTouched) cookies.setCookiesWhenRespond(this)
-  }
+    if (sessionTouched)
+      // cookies is typically touched here
+      Config.sessionStore.store(session, this)
 
-  def resetSession() {
-    session.clear()
-    cookies.clear()  // This will clear the session cookie
+    if (cookiesTouched)
+      cookies.setCookiesWhenRespond(this)
   }
 }
