@@ -71,6 +71,8 @@ var xitrum = {
 
     $.ajax({
       type: "POST",
+      // Need to set explicitly because sometimes jQuery sets it to "text/plain"
+      contentType: "application/x-www-form-urlencoded; charset=UTF-8",
       url: action,
       data: data,
       error: function(jqxhr) {
