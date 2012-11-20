@@ -1,9 +1,4 @@
-1.9.11 (planned):
-* Avoid session cookie when the session is empty
-  http://groups.google.com/group/xitrum-framework/browse_thread/thread/310c61f501e0bba8
-* Remove resetSession method; to reset session, call session.clear()
-* Reload classes in development mode using Javassist
-* Reload routes in development mode using Javassist
+1.9.12 (planned):
 * Add automatic HEAD and CORS request handling for the whole site
   http://www.html5rocks.com/en/tutorials/cors/
 * SockJS: Add cluster mode
@@ -24,6 +19,15 @@
 * Typesafe routes using Scala compiler plugin
 * Middleware architecture based on Netty handlers
 * Support SPDY
+
+1.9.11 (planned):
+* Avoid session cookie when the session is empty
+  http://groups.google.com/group/xitrum-framework/browse_thread/thread/310c61f501e0bba8
+* Remove resetSession method; to reset session, call session.clear()
+* Reload classes in development mode using Javassist
+* Reload routes in development mode using Javassist
+* Fix URL to jquery.validate-1.10.0/localization/messages_<lang>.js
+  (was "jquery.validate-1.9.0/..." instead)
 
 1.9.10:
 * Revert Javassist back to 3.16.1-GA because 3.17.0-GA requires Java 7
