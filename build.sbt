@@ -2,7 +2,7 @@ organization := "tv.cntt"
 
 name := "xitrum"
 
-version := "1.9.10-SNAPSHOT"
+version := "1.9.11-SNAPSHOT"
 
 scalacOptions ++= Seq(
   "-deprecation",
@@ -55,7 +55,7 @@ libraryDependencies += "org.mozilla" % "rhino" % "1.7R4"
 
 libraryDependencies += "io.netty" % "netty" % "3.5.10.Final"
 
-libraryDependencies += "org.javassist" % "javassist" % "3.17.0-GA"
+libraryDependencies += "org.javassist" % "javassist" % "3.16.1-GA"
 
 // Projects using Xitrum must provide a concrete implentation of SLF4J (Logback etc.)
 libraryDependencies += "org.slf4j" % "slf4j-api" % "1.7.2" % "provided"
