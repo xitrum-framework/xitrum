@@ -11,12 +11,12 @@ import xitrum.scope.request.ExtEnv
 import xitrum.util.SecureBase64
 
 /**
- * sessionId is needed to save the session to Hazelcast, null means browser did
+ * sessionId is needed to save the session to Hazelcast, None means browser did
  * not send session cookie.
  *
  * Subclass of HashMap => subclass of mutable Map = Session
  */
-class HazelcastSession(val sessionId: String) extends HashMap[String, Any]
+class HazelcastSession(val sessionId: Option[String]) extends HashMap[String, Any]
 
 // We can use Cache, but we use a separate Hazelcast map to avoid the cost of
 // iterating through a big map as much as we can. Another reason is that the
@@ -35,7 +35,7 @@ class HazelcastSessionStore extends SessionStore {
 
       // See "store" method
       val immutableMap = HazelcastSessionStore.store.get(sessionId)
-      val ret          = new HazelcastSession(sessionId)
+      val ret          = new HazelcastSession(Some(sessionId))
       ret ++= immutableMap
       ret
     } catch {
@@ -53,22 +53,24 @@ class HazelcastSessionStore extends SessionStore {
           cookie.setMaxAge(0)
 
           val hSession = session.asInstanceOf[HazelcastSession]
-          if (hSession.sessionId != null) HazelcastSessionStore.store.removeAsync(hSession.sessionId)
+          hSession.sessionId.foreach(HazelcastSessionStore.store.removeAsync(_))
       }
     } else {
       val hSession   = session.asInstanceOf[HazelcastSession]
       val hSessionId =
-        if (hSession.sessionId == null) {
-          // Session cookie has not been created
-          val sessionId  = UUID.randomUUID().toString
-          val cookie     = new DefaultCookie(Config.config.session.cookieName, SecureBase64.encrypt(sessionId))
-          val cookiePath = Config.withBaseUrl("/")
-          cookie.setHttpOnly(true)
-          cookie.setPath(cookiePath)
-          extEnv.cookies.add(cookie)
-          sessionId
-        } else {
-          hSession.sessionId
+        hSession.sessionId match {
+          case Some(sid) =>
+            sid
+
+          case None =>
+            // Session cookie has not been created
+            val sessionId  = UUID.randomUUID().toString
+            val cookie     = new DefaultCookie(Config.config.session.cookieName, SecureBase64.encrypt(sessionId))
+            val cookiePath = Config.withBaseUrl("/")
+            cookie.setHttpOnly(true)
+            cookie.setPath(cookiePath)
+            extEnv.cookies.add(cookie)
+            sessionId
         }
 
       // See "restore" method
