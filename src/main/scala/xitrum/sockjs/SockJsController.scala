@@ -652,8 +652,8 @@ class SockJsController extends Controller with SkipCSRFCheck {
       if (isEventSource) respondEventSource(text) else respondText(text)
       true
     } else {
-      val future = if (isEventSource) respondEventSource(text) else respondText(text)
-      future.addListener(ChannelFutureListener.CLOSE)
+      if (isEventSource) respondEventSource(text) else respondText(text)
+      respondLastChunk().addListener(ChannelFutureListener.CLOSE)
       false
     }
   }

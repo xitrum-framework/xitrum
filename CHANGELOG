@@ -21,6 +21,7 @@
 * Support SPDY
 
 1.9.11 (planned):
+* Fix bug with sending last chunk in chunked mode
 * Avoid session cookie when the session is empty
   http://groups.google.com/group/xitrum-framework/browse_thread/thread/310c61f501e0bba8
 * Remove resetSession method; to reset session, call session.clear()

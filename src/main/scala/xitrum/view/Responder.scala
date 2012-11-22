@@ -95,10 +95,13 @@ trait Responder extends JS with Flash with Knockout {
     if (!response.isChunked()) {
       printDoubleResponseErrorStackTrace()
     } else {
-      // responded should be true here
-      response.setChunked(false)
       val future = channel.write(HttpChunk.LAST_CHUNK)
       NoPipelining.if_keepAliveRequest_then_resumeReading_else_closeOnComplete(request, channel, future)
+
+      // responded should be true here. Set chunk mode to false so that double
+      // response error will be raised if the app try to respond more.
+      response.setChunked(false)
+
       future
     }
   }
