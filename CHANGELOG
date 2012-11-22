@@ -1,4 +1,6 @@
-1.9.12 (planned):
+TODO:
+* Reload classes and routes in development mode with Javassist or Eclipse JDT
+  http://stackoverflow.com/questions/5226746/how-do-grails-or-play-detect-changes-and-hot-reload-classes
 * Add automatic HEAD and CORS request handling for the whole site
   http://www.html5rocks.com/en/tutorials/cors/
 * SockJS: Add cluster mode
@@ -21,12 +23,11 @@
 * Support SPDY
 
 1.9.11 (planned):
-* Fix bug with sending last chunk in chunked mode
+* Fix bug with sending the last chunk in chunked mode for SockJS
+  http://groups.google.com/group/sockjs/msg/d66e2978249b5f26
 * Avoid session cookie when the session is empty
   http://groups.google.com/group/xitrum-framework/browse_thread/thread/310c61f501e0bba8
 * Remove resetSession method; to reset session, call session.clear()
-* Reload classes in development mode using Javassist
-* Reload routes in development mode using Javassist
 * Fix URL to jquery.validate-1.10.0/localization/messages_<lang>.js
   (was "jquery.validate-1.9.0/..." instead)
 
