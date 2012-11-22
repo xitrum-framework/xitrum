@@ -1,3 +1,9 @@
+Debug client-server data receiving and sending
+----------------------------------------------
+
+I recommend Tcpdump / Wireshark, or even better Tcpflow:
+http://groups.google.com/group/sockjs/msg/12f28eccf1851d54
+
 Publish to local
 ----------------
 
