@@ -25,11 +25,12 @@ TODO:
 1.9.11 (planned):
 * Fix bug with sending the last chunk in chunked mode for SockJS
   http://groups.google.com/group/sockjs/msg/d66e2978249b5f26
-* Avoid session cookie when the session is empty
-  http://groups.google.com/group/xitrum-framework/browse_thread/thread/310c61f501e0bba8
-* Remove resetSession method; to reset session, call session.clear()
 * Fix URL to jquery.validate-1.10.0/localization/messages_<lang>.js
   (was "jquery.validate-1.9.0/..." instead)
+* Avoid session cookie when the session is empty
+  Remove resetSession method; to reset session, call session.clear()
+  http://groups.google.com/group/xitrum-framework/browse_thread/thread/310c61f501e0bba8
+* Update SBT from 0.12.0 to 0.12.1
 
 1.9.10:
 * Revert Javassist back to 3.16.1-GA because 3.17.0-GA requires Java 7
