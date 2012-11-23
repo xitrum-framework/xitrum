@@ -23,6 +23,8 @@ TODO:
 * Support SPDY
 
 1.9.11 (planned):
+* Support Scalate Mustache template
+  http://ngocdaothanh.github.com/xitrum/guide/controller_action_view.html#scalate
 * Fix bug with sending the last chunk in chunked mode for SockJS
   http://groups.google.com/group/sockjs/msg/d66e2978249b5f26
 * Fix URL to jquery.validate-1.10.0/localization/messages_<lang>.js
