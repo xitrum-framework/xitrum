@@ -41,7 +41,7 @@ class HazelcastSessionStore extends SessionStore {
     } catch {
       case _ =>
         // Cannot always get cookie, decrypt, deserialize, and type casting due to program changes etc.
-        new HazelcastSession(null)
+        new HazelcastSession(None)
     }
   }
 
