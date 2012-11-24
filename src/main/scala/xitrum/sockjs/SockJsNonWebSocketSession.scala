@@ -7,15 +7,16 @@ import akka.util.duration._
 
 import xitrum.SockJsHandler
 
-sealed trait SockJsPollingSessionActorMessage
-case class  SendMessagesByClient (messages: List[String]) extends SockJsPollingSessionActorMessage
-case class  SendMessageByHandler(message: String)         extends SockJsPollingSessionActorMessage
-case object SubscribeOnceByClient                         extends SockJsPollingSessionActorMessage
-case object UnsubscribeByClient                           extends SockJsPollingSessionActorMessage
-case object CloseByHandler                                extends SockJsPollingSessionActorMessage
+sealed trait SockJsNonWebSocketSessionActorMessage
+case class  SendMessagesByClient (messages: List[String]) extends SockJsNonWebSocketSessionActorMessage
+case class  SendMessageByHandler(message: String)         extends SockJsNonWebSocketSessionActorMessage
+case object SubscribeOnceByClient                         extends SockJsNonWebSocketSessionActorMessage
+case object UnsubscribeByClient                           extends SockJsNonWebSocketSessionActorMessage
+case object CloseByHandler                                extends SockJsNonWebSocketSessionActorMessage
 
 sealed trait SockJsSubscribeByClientResult
 case object SubscribeByClientResultOpen                             extends SockJsSubscribeByClientResult
+//case object SubscribeByClientResultWaitForMessages                  extends SockJsSubscribeByClientResult
 case object SubscribeByClientResultAnotherConnectionStillOpen       extends SockJsSubscribeByClientResult
 case object SubscribeByClientResultClosed                           extends SockJsSubscribeByClientResult
 case class  SubscribeByClientResultMessages(messages: List[String]) extends SockJsSubscribeByClientResult
@@ -28,9 +29,9 @@ case object SubscribeByClientResultErrorAfterOpenHasBeenSent        extends Sock
  * To avoid out of memory, the actor is stopped when there's no subscriber
  * for a long time. Timeout is also used to check if there's no message
  * for subscriber for a long time.
- * See TIMEOUT_CONNECTION and TIMEOUT_HEARTBEAT in SockJsPollingSessions.
+ * See TIMEOUT_CONNECTION and TIMEOUT_HEARTBEAT in SockJsNonWebSocketSessions.
  */
-class SockJsPollingSession(sockJsHandler: SockJsHandler) extends Actor {
+class SockJsNonWebSocketSession(sockJsHandler: SockJsHandler) extends Actor {
   private val buffer = ArrayBuffer[String]()
   private var clientSender: ActorRef = null
 
@@ -44,20 +45,20 @@ class SockJsPollingSession(sockJsHandler: SockJsHandler) extends Actor {
   // the close message
   private var closed = false
 
-  context.setReceiveTimeout(SockJsPollingSessions.TIMEOUT_CONNECTION seconds)
+  context.setReceiveTimeout(SockJsNonWebSocketSessions.TIMEOUT_CONNECTION seconds)
 
   override def preStart() {
     // sockJsHandler.onClose is called at postStop, but sockJsHandler.onOpen
     // is not called here, because sockJsHandler.onOpen may send messages, but
     // "o" frame needs to be sent before all messages. sockJsHandler.onOpen will
-    // be called by SockJsPollingSessions.
+    // be called by SockJsNonWebSocketSessions.
     lastSubscribedAt = System.currentTimeMillis()
   }
 
   override def postStop() {
     sockJsHandler.onClose()
     // Remove interdependency
-    sockJsHandler.sockJsPollingSessionActorRef = null
+    sockJsHandler.sockJsNonWebSocketSessionActorRef = null
   }
 
   def receive = {
@@ -69,7 +70,8 @@ class SockJsPollingSession(sockJsHandler: SockJsHandler) extends Actor {
         if (clientSender == null) {
           if (buffer.isEmpty) {
             clientSender = sender
-            context.setReceiveTimeout(SockJsPollingSessions.TIMEOUT_HEARTBEAT seconds)
+            context.setReceiveTimeout(SockJsNonWebSocketSessions.TIMEOUT_HEARTBEAT seconds)
+            //clientSender ! SubscribeByClientResultWaitForMessages
           } else {
             sender ! SubscribeByClientResultMessages(buffer.toList)
             buffer.clear()
@@ -81,9 +83,10 @@ class SockJsPollingSession(sockJsHandler: SockJsHandler) extends Actor {
 
     case UnsubscribeByClient =>
       clientSender = null
-      context.setReceiveTimeout(SockJsPollingSessions.TIMEOUT_CONNECTION seconds)
+      context.setReceiveTimeout(SockJsNonWebSocketSessions.TIMEOUT_CONNECTION seconds)
 
     case CloseByHandler =>
+      // Until the timeout occurs, the server must serve the close message
       closed = true
 
     case SendMessagesByClient(messages) =>
@@ -94,7 +97,7 @@ class SockJsPollingSession(sockJsHandler: SockJsHandler) extends Actor {
         if (clientSender == null) {
           // Manually check if there's no subscriber for a long time
           val now = System.currentTimeMillis()
-          if (now - lastSubscribedAt > SockJsPollingSessions.TIMEOUT_CONNECTION * 1000) {
+          if (now - lastSubscribedAt > SockJsNonWebSocketSessions.TIMEOUT_CONNECTION * 1000) {
             context.stop(self)
           } else {
             buffer += message
@@ -103,7 +106,7 @@ class SockJsPollingSession(sockJsHandler: SockJsHandler) extends Actor {
           // buffer is empty at this moment
           clientSender ! SubscribeByClientResultMessages(List(message))
           clientSender = null
-          context.setReceiveTimeout(SockJsPollingSessions.TIMEOUT_CONNECTION seconds)
+          context.setReceiveTimeout(SockJsNonWebSocketSessions.TIMEOUT_CONNECTION seconds)
         }
       }
 
@@ -115,7 +118,7 @@ class SockJsPollingSession(sockJsHandler: SockJsHandler) extends Actor {
         // No message for subscriber for a long time
         clientSender ! SubscribeByClientResultMessages(Nil)
         clientSender = null
-        context.setReceiveTimeout(SockJsPollingSessions.TIMEOUT_CONNECTION seconds)
+        context.setReceiveTimeout(SockJsNonWebSocketSessions.TIMEOUT_CONNECTION seconds)
       }
   }
 }

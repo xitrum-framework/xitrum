@@ -10,7 +10,7 @@ import xitrum.Controller
 import xitrum.routing.Routes
 
 /** This acts the middleman between client and server SockJS handler. */
-object SockJsPollingSessions {
+object SockJsNonWebSocketSessions {
   // The session must time out after 5 seconds of not having a receiving connection
   // http://sockjs.github.com/sockjs-protocol/sockjs-protocol-0.3.3.html#section-46
   val TIMEOUT_CONNECTION = 5
@@ -23,15 +23,15 @@ object SockJsPollingSessions {
   // heartbeat timeout
   val TIMEOUT_ASK = TIMEOUT_HEARTBEAT * 2
 
-  private val system = ActorSystem("SockJsPollingSessions")
+  private val system = ActorSystem("SockJsNonWebSocketSessions")
 
   def subscribeOnceByClient(pathPrefix: String, sockJsSessionId: String, callback: (SockJsSubscribeByClientResult) => Unit) {
     val escaped = escapeActorPath(sockJsSessionId)
     val ref     = system.actorFor("/user/" + escaped)
     if (ref.isTerminated) {
       val handler = Routes.createSockJsHandler(pathPrefix)
-      val ref     = system.actorOf(Props(new SockJsPollingSession(handler)), escaped)
-      handler.sockJsPollingSessionActorRef = ref
+      val ref     = system.actorOf(Props(new SockJsNonWebSocketSession(handler)), escaped)
+      handler.sockJsNonWebSocketSessionActorRef = ref
       callback(SubscribeByClientResultOpen)
       handler.onOpen()  // Call opOpen after "o" frame has been sent
     } else {
@@ -39,7 +39,7 @@ object SockJsPollingSessions {
       future.onComplete {
         case Left(e) =>
           // The channel will be closed by SockJsController,
-          // handler.onClose is called at SockJsPollingSession#postStop
+          // handler.onClose is called at SockJsNonWebSocketSession#postStop
           callback(SubscribeByClientResultErrorAfterOpenHasBeenSent)
         case Right(result) =>
           callback(result)
@@ -55,8 +55,8 @@ object SockJsPollingSessions {
     val ref     = system.actorFor("/user/" + escaped)
     if (ref.isTerminated) {
       val handler = Routes.createSockJsHandler(pathPrefix)
-      val ref     = system.actorOf(Props(new SockJsPollingSession(handler)), escaped)
-      handler.sockJsPollingSessionActorRef = ref
+      val ref     = system.actorOf(Props(new SockJsNonWebSocketSession(handler)), escaped)
+      handler.sockJsNonWebSocketSessionActorRef = ref
       val loop = callback(SubscribeByClientResultOpen)  // "o" frame sent here
       handler.onOpen()                                  // Call opOpen after "o" frame has been sent
       if (loop) subscribeStreamingByClient(ref, callback)
@@ -71,7 +71,7 @@ object SockJsPollingSessions {
     future.onComplete {
       case Left(e) =>
         // The channel will be closed by SockJsController,
-        // handler.onClose is called at SockJsPollingSession#postStop
+        // handler.onClose is called at SockJsNonWebSocketSession#postStop
         callback(SubscribeByClientResultErrorAfterOpenHasBeenSent)
       case Right(result) =>
         if (callback(result) && result != SubscribeByClientResultAnotherConnectionStillOpen)
