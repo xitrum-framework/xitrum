@@ -4,8 +4,9 @@ TODO:
 * Add automatic HEAD and CORS request handling for the whole site
   http://www.html5rocks.com/en/tutorials/cors/
 * SockJS: Add cluster mode
-* Replace Jerkson with Jacks or jackson-module-scala
+* Replace Jerkson with JSON4S, Jacks, or jackson-module-scala
   (Jerkson has not been updated for months)
+  https://github.com/json4s/json4s
   http://wiki.fasterxml.com/JacksonModuleScala
 * Flash socket policy server can use the same port with HTTP server
 * Add Ajax style upload based on iframe
