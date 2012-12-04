@@ -37,8 +37,8 @@ object Cache extends Logger {
 
     val keys = cache.keySet(prefixPredicate)
     val it = keys.iterator
-    while (it.hasNext) {
-      val key = it.next
+    while (it.hasNext()) {
+      val key = it.next()
       cache.removeAsync(key)
     }
   }

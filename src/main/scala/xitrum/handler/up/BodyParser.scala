@@ -81,8 +81,8 @@ class BodyParser extends SimpleChannelUpstreamHandler with BadClientSilencer {
     val fileParams = MMap[String, List[FileUpload]]()
 
     val it = datas.iterator
-    while (it.hasNext) {
-      val data = it.next
+    while (it.hasNext()) {
+      val data = it.next()
       if (data.getHttpDataType == HttpDataType.Attribute) {
         val attribute = data.asInstanceOf[Attribute]
         val name      = attribute.getName
