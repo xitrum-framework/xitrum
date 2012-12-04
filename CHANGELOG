@@ -38,6 +38,8 @@ TODO:
 * Update SBT from 0.12.0 to 0.12.1
 * Update Netty from 3.5.10.Final to 3.5.11.Final
   https://netty.io/Blog/Netty+3511Final+is+out
+* Update Javassist from 3.16.1-GA to 3.17.1-GA (works with Java 6; 3.17.0-GA requires Java 7)
+  https://issues.jboss.org/browse/JASSIST/fixforversion/12320652
 * Update jQuery from 1.8.2 to 1.8.3
 
 1.9.10:
