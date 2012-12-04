@@ -22,7 +22,7 @@ class CookieSessionStore extends SessionStore with Logger {
             MMap[String, Any]()
           case Some(value) =>
             val immutableMap = try {
-              // See "store" method below
+              // See "store" method to know why this map is immutable
               value.asInstanceOf[Map[String, Any]]
             } catch {
               case _ =>
@@ -36,11 +36,12 @@ class CookieSessionStore extends SessionStore with Logger {
   }
 
   def store(session: Session, extEnv: ExtEnv) {
+    val sessionCookieName = Config.config.session.cookieName
     if (session.isEmpty) {
-      extEnv.cookies.get(Config.config.session.cookieName).foreach(_.setMaxAge(0))
+      extEnv.cookies.get(sessionCookieName).foreach(_.setMaxAge(0))
     } else {
       // See "restore" method
-      // Convert to immutable because mutable cannot always be deserialize later!
+      // Convert to immutable because mutable cannot always be deserialized later!
       val immutableMap = session.toMap
 
       // Most browsers do not support cookie > 4KB
@@ -51,19 +52,17 @@ class CookieSessionStore extends SessionStore with Logger {
         return
       }
 
-      val cookiePath = Config.withBaseUrl("/")
-      extEnv.cookies.get(Config.config.session.cookieName) match {
+      extEnv.cookies.get(sessionCookieName) match {
         case Some(cookie) =>
-          cookie.setHttpOnly(true)
-          cookie.setPath(cookiePath)
           cookie.setValue(serialized)
 
         case None =>
           // DefaultCookie has max age of Integer.MIN_VALUE by default,
           // which means the cookie will be removed when user terminates browser
-          val cookie = new DefaultCookie(Config.config.session.cookieName, serialized)
-          cookie.setHttpOnly(true)
+          val cookie     = new DefaultCookie(sessionCookieName, serialized)
+          val cookiePath = Config.withBaseUrl("/")
           cookie.setPath(cookiePath)
+          cookie.setHttpOnly(true)
           extEnv.cookies.add(cookie)
       }
     }
