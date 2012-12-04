@@ -36,6 +36,8 @@ TODO:
   Remove resetSession method; to reset session, call session.clear()
   http://groups.google.com/group/xitrum-framework/browse_thread/thread/310c61f501e0bba8
 * Update SBT from 0.12.0 to 0.12.1
+* Update Netty from 3.5.10.Final to 3.5.11.Final
+  https://netty.io/Blog/Netty+3511Final+is+out
 * Update jQuery from 1.8.2 to 1.8.3
 
 1.9.10:
