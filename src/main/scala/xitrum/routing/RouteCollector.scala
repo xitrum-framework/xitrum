@@ -17,8 +17,8 @@ import xitrum.sockjs.SockJsController
 /** Scan all classes to collect routes from controllers. */
 class RouteCollector extends Logger {
   /**
-   * Because java.lang.reflect.Method is not serializable, we return a map of
-   * controller class name -> action method names.
+   * Because java.lang.reflect.Method is not serializable for saving to the
+   * cache file, we return a map of: controller class name -> action method names.
    */
   def fromCacheFileOrRecollect(cachedFileName: String): Map[String, Seq[String]] =
     Scanner.foldLeft(cachedFileName, Map[String, Seq[String]](), discovered _)
