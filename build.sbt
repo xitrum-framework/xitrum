@@ -70,7 +70,7 @@ libraryDependencies += "org.apache.commons" % "commons-lang3" % "3.1"
 
 libraryDependencies += "tv.cntt" %% "scaposer" % "1.2"
 
-libraryDependencies += "tv.cntt" %% "sclasner" % "1.1"
+libraryDependencies += "tv.cntt" %% "sclasner" % "1.2"
 
 // xitrum.imperatively uses Scala continuation, a compiler plugin --------------
 
