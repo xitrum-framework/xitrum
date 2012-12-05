@@ -25,7 +25,7 @@ TODO:
 * Middleware architecture based on Netty handlers
 * Support SPDY
 
-1.9.11 (planned):
+1.10:
 * Improve cookie API to requestCookies and responseCookies.
   Only cookies in responseCookies will be sent to browsers.
   http://ngocdaothanh.github.com/xitrum/guide/scopes.html#cookie
