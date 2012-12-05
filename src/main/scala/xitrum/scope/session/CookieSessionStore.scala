@@ -64,13 +64,16 @@ class CookieSessionStore extends SessionStore with Logger {
         return
       }
 
-      // DefaultCookie has max age of Integer.MIN_VALUE by default,
-      // which means the cookie will be removed when user terminates browser
-      val cookie     = new DefaultCookie(sessionCookieName, serialized)
-      val cookiePath = Config.withBaseUrl("/")
-      cookie.setPath(cookiePath)
-      cookie.setHttpOnly(true)
-      extEnv.responseCookies.append(cookie)
+      val previousSessionCookieValueo = extEnv.requestCookies.get(sessionCookieName)
+      if (previousSessionCookieValueo.isEmpty || previousSessionCookieValueo.get != serialized) {
+        // DefaultCookie has max age of Integer.MIN_VALUE by default,
+        // which means the cookie will be removed when user terminates browser
+        val cookie     = new DefaultCookie(sessionCookieName, serialized)
+        val cookiePath = Config.withBaseUrl("/")
+        cookie.setPath(cookiePath)
+        cookie.setHttpOnly(true)
+        extEnv.responseCookies.append(cookie)
+      }
     }
   }
 }
