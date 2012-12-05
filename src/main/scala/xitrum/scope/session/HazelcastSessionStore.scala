@@ -80,9 +80,7 @@ class HazelcastSessionStore extends SessionStore {
       // If session cookie has been sent by browser, send back session cookie
       // with max age = 0 so that browser will delete it immediately
       if (extEnv.requestCookies.isDefinedAt(sessionCookieName)) {
-        val cookie     = new DefaultCookie(sessionCookieName, "0")
-        val cookiePath = Config.withBaseUrl("/")
-        cookie.setPath(cookiePath)
+        val cookie = new DefaultCookie(sessionCookieName, "0")
         cookie.setHttpOnly(true)
         cookie.setMaxAge(0)
         extEnv.responseCookies.append(cookie)
@@ -98,9 +96,7 @@ class HazelcastSessionStore extends SessionStore {
       if (hSession.newlyCreated) {
         // DefaultCookie has max age of Integer.MIN_VALUE by default,
         // which means the cookie will be removed when user terminates browser
-        val cookie     = new DefaultCookie(sessionCookieName, SecureBase64.encrypt(hSession.sessionId))
-        val cookiePath = Config.withBaseUrl("/")
-        cookie.setPath(cookiePath)
+        val cookie = new DefaultCookie(sessionCookieName, SecureBase64.encrypt(hSession.sessionId))
         cookie.setHttpOnly(true)
         extEnv.responseCookies.append(cookie)
 

@@ -586,16 +586,13 @@ class SockJsController extends Controller with SkipCSRFCheck {
   //----------------------------------------------------------------------------
 
   // JSESSIONID cookie must be echoed back if sent by the client, or created
-  // http://sockjs.github.com/sockjs-protocol/sockjs-protocol-0.3.3.html#section-120
+  // http://groups.google.com/group/sockjs/browse_thread/thread/71dfdff6e8f1e5f7
   // Can't use beforeFilter, see comment of pathPrefix at the top of this controller.
   private def handleCookie() {
     val sockJsClassAndOptions = Routes.sockJsClassAndOptions(pathPrefix)
     if (sockJsClassAndOptions.cookieNeeded) {
-      if (!requestCookies.isDefinedAt("JSESSIONID")) {
-        val cookie = new DefaultCookie("JSESSIONID", "dummy")
-        cookie.setPath(Config.withBaseUrl("/"))
-        responseCookies.append(cookie)
-      }
+      val cookie = new DefaultCookie("JSESSIONID", "dummy")
+      responseCookies.append(cookie)
     }
   }
 

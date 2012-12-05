@@ -44,9 +44,7 @@ class CookieSessionStore extends SessionStore with Logger {
       // If session cookie has been sent by browser, send back session cookie
       // with max age = 0 so that browser will delete it immediately
       if (extEnv.requestCookies.isDefinedAt(sessionCookieName)) {
-        val cookie     = new DefaultCookie(sessionCookieName, "0")
-        val cookiePath = Config.withBaseUrl("/")
-        cookie.setPath(cookiePath)
+        val cookie = new DefaultCookie(sessionCookieName, "0")
         cookie.setHttpOnly(true)
         cookie.setMaxAge(0)
         extEnv.responseCookies.append(cookie)
@@ -68,9 +66,7 @@ class CookieSessionStore extends SessionStore with Logger {
       if (previousSessionCookieValueo.isEmpty || previousSessionCookieValueo.get != serialized) {
         // DefaultCookie has max age of Integer.MIN_VALUE by default,
         // which means the cookie will be removed when user terminates browser
-        val cookie     = new DefaultCookie(sessionCookieName, serialized)
-        val cookiePath = Config.withBaseUrl("/")
-        cookie.setPath(cookiePath)
+        val cookie = new DefaultCookie(sessionCookieName, serialized)
         cookie.setHttpOnly(true)
         extEnv.responseCookies.append(cookie)
       }
