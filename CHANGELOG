@@ -27,8 +27,8 @@ TODO:
 
 1.9.11 (planned):
 * Improve cookie API to requestCookies and responseCookies.
-  Only cookies in responseCookies will be send to browsers.
-  If you don't set anything, no cookies will be send to browser.
+  Only cookies in responseCookies will be sent to browsers.
+  http://ngocdaothanh.github.com/xitrum/guide/scopes.html#cookie
   http://groups.google.com/group/xitrum-framework/browse_thread/thread/dbb7a8e638120b09
 * Remove resetSession method. To reset session, call session.clear().
   http://groups.google.com/group/xitrum-framework/browse_thread/thread/310c61f501e0bba8

@@ -53,23 +53,20 @@ trait ExtEnv extends RequestEnv with ParamAccess with CSRF {
   def sessiono[T](key: String): Option[T] = session.get(key).map(_.asInstanceOf[T])
 
   def setCookieAndSessionIfTouchedOnRespond() {
-    if (sessionTouched)
-      // cookies is typically touched here
-      Config.sessionStore.store(session, this)
+    if (sessionTouched) Config.sessionStore.store(session, this)
 
     if (responseCookies.nonEmpty) {
-      // Cookies sent by browser do not contain path,
-      // automatically set to avoid duplicate cookies
-      val basePath = Config.withBaseUrl("/")
+      // To avoid accidental duplicate cookies, if cookie path is not set,
+      // set it to the site's root path
+      // http://groups.google.com/group/xitrum-framework/browse_thread/thread/dbb7a8e638120b09
+      val rootPath = Config.withBaseUrl("/")
 
       // http://en.wikipedia.org/wiki/HTTP_cookie
       // Server needs to SET_COOKIE multiple times
       responseCookies.foreach { cookie =>
+        if (cookie.getPath == null) cookie.setPath(rootPath)
+
         val encoder = new CookieEncoder(true)
-        if (cookie.getPath() == null) {
-          cookie.setPath(basePath)
-          cookie.setHttpOnly(true)
-        }
         encoder.addCookie(cookie)
         response.addHeader(Names.SET_COOKIE, encoder.encode())
       }
