@@ -11,12 +11,15 @@ import xitrum.scope.request.ExtEnv
 import xitrum.util.SecureBase64
 
 /**
- * sessionId is needed to save the session to Hazelcast, None means browser did
- * not send session cookie.
+ * @param sessionId needed to save the session to Hazelcast
+ *
+ * @param newlyCreated false means sessionId is taken from valid session cookie
+ * sent by browser, true means browser did not send session cookie or did send
+ * but the cookie value is not a valid encrypted session ID
  *
  * Subclass of HashMap => subclass of mutable Map = Session
  */
-class HazelcastSession(val sessionId: Option[String]) extends HashMap[String, Any]
+class HazelcastSession(val sessionId: String, val newlyCreated: Boolean) extends HashMap[String, Any]
 
 // We can use Cache, but we use a separate Hazelcast map to avoid the cost of
 // iterating through a big map as much as we can. Another reason is that the
@@ -29,18 +32,17 @@ object HazelcastSessionStore {
 class HazelcastSessionStore extends SessionStore {
   def restore(extEnv: ExtEnv): Session = {
     val sessionCookieName = Config.config.session.cookieName
-    extEnv.cookies.get(sessionCookieName) match {
+    extEnv.requestCookies.get(sessionCookieName) match {
       case None =>
-        new HazelcastSession(None)
+        val sessionId = UUID.randomUUID().toString
+        new HazelcastSession(sessionId, true)
 
-      case Some(cookie) =>
-        val base64String = cookie.getValue
-        SecureBase64.decrypt(base64String) match {
+      case Some(encryptedSessionId) =>
+        SecureBase64.decrypt(encryptedSessionId) match {
           case None =>
             // sessionId sent by browser is invalid, recreate
-            val sessionId  = UUID.randomUUID().toString
-            cookie.setValue(SecureBase64.encrypt(sessionId))
-            new HazelcastSession(Some(sessionId))
+            val sessionId = UUID.randomUUID().toString
+            new HazelcastSession(sessionId, true)
 
           case Some(any) =>
             val sessionIdo =
@@ -56,15 +58,14 @@ class HazelcastSessionStore extends SessionStore {
                 // (due to the switch from CookieSessionStore to HazelcastSessionStore etc.),
                 // recreate
                 val sessionId = UUID.randomUUID().toString
-                cookie.setValue(SecureBase64.encrypt(sessionId))
-                new HazelcastSession(Some(sessionId))
+                new HazelcastSession(sessionId, true)
 
               case Some(sessionId) =>
                 // See "store" method to know why this map is immutable
                 // immutableMap can be null because Hazelcast does not have it
                 val immutableMap = HazelcastSessionStore.store.get(sessionId)
 
-                val ret = new HazelcastSession(Some(sessionId))
+                val ret = new HazelcastSession(sessionId, false)
                 if (immutableMap != null) ret ++= immutableMap
                 ret
             }
@@ -72,46 +73,43 @@ class HazelcastSessionStore extends SessionStore {
     }
   }
 
+  /** @param session has been restored by "restore" method */
   def store(session: Session, extEnv: ExtEnv) {
     val sessionCookieName = Config.config.session.cookieName
     if (session.isEmpty) {
-      // Remove session cookie
-      extEnv.cookies.get(sessionCookieName) match {
-        case None =>
-          // Session cookie has not been sent by browser, no need to send anything back
+      // If session cookie has been sent by browser, send back session cookie
+      // with max age = 0 so that browser will delete it immediately
+      if (extEnv.requestCookies.isDefinedAt(sessionCookieName)) {
+        val cookie     = new DefaultCookie(sessionCookieName, "0")
+        val cookiePath = Config.withBaseUrl("/")
+        cookie.setPath(cookiePath)
+        cookie.setHttpOnly(true)
+        cookie.setMaxAge(0)
+        extEnv.responseCookies.append(cookie)
 
-        case Some(cookie) =>
-          // Set max age to 0 so that browser will delete it immediately
-          cookie.setMaxAge(0)
-
-          val hSession = session.asInstanceOf[HazelcastSession]
-          hSession.sessionId.foreach(HazelcastSessionStore.store.removeAsync(_))
+        // Remove session in Hazelcast if any
+        val hSession = session.asInstanceOf[HazelcastSession]
+        if (!hSession.newlyCreated) HazelcastSessionStore.store.removeAsync(hSession.sessionId)
       }
     } else {
-      val hSession   = session.asInstanceOf[HazelcastSession]
-      val hSessionId =
-        // See "restore", None means browser did not send session cookie
-        hSession.sessionId match {
-          case Some(sid) =>
-            sid
+      val hSession = session.asInstanceOf[HazelcastSession]
+      // newlyCreated: true means browser did not send session cookie or did send
+      // but the cookie value is not a valid encrypted session ID
+      if (hSession.newlyCreated) {
+        // DefaultCookie has max age of Integer.MIN_VALUE by default,
+        // which means the cookie will be removed when user terminates browser
+        val cookie     = new DefaultCookie(sessionCookieName, SecureBase64.encrypt(hSession.sessionId))
+        val cookiePath = Config.withBaseUrl("/")
+        cookie.setPath(cookiePath)
+        cookie.setHttpOnly(true)
+        extEnv.responseCookies.append(cookie)
 
-          case None =>
-            // Session cookie has not been created, create it
-            // DefaultCookie has max age of Integer.MIN_VALUE by default,
-            // which means the cookie will be removed when user terminates browser
-            val sessionId  = UUID.randomUUID().toString
-            val cookie     = new DefaultCookie(sessionCookieName, SecureBase64.encrypt(sessionId))
-            val cookiePath = Config.withBaseUrl("/")
-            cookie.setPath(cookiePath)
-            cookie.setHttpOnly(true)
-            extEnv.cookies.add(cookie)
-            sessionId
-        }
+      }
 
       // See "restore" method
       // Convert to immutable because mutable cannot always be deserialized later!
       val immutableMap = session.toMap
-      HazelcastSessionStore.store.put(hSessionId, immutableMap)
+      HazelcastSessionStore.store.put(hSession.sessionId, immutableMap)
     }
   }
 }

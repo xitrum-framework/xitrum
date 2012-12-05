@@ -591,14 +591,10 @@ class SockJsController extends Controller with SkipCSRFCheck {
   private def handleCookie() {
     val sockJsClassAndOptions = Routes.sockJsClassAndOptions(pathPrefix)
     if (sockJsClassAndOptions.cookieNeeded) {
-      cookies.get("JSESSIONID") match {
-        case None =>
-          val cookie = new DefaultCookie("JSESSIONID", "dummy")
-          cookie.setPath(Config.withBaseUrl("/"))
-          cookies.add(cookie)
-        case Some(cookie) =>
-          // Set path to Config.withBaseUrl("/")
-          cookie.setPath(Config.withBaseUrl("/"))
+      if (!requestCookies.isDefinedAt("JSESSIONID")) {
+        val cookie = new DefaultCookie("JSESSIONID", "dummy")
+        cookie.setPath(Config.withBaseUrl("/"))
+        responseCookies.append(cookie)
       }
     }
   }

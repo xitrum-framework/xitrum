@@ -26,15 +26,18 @@ TODO:
 * Support SPDY
 
 1.9.11 (planned):
+* Improve cookie API to requestCookies and responseCookies.
+  Only cookies in responseCookies will be send to browsers.
+  If you don't set anything, no cookies will be send to browser.
+  http://groups.google.com/group/xitrum-framework/browse_thread/thread/dbb7a8e638120b09
+* Remove resetSession method. To reset session, call session.clear().
+  http://groups.google.com/group/xitrum-framework/browse_thread/thread/310c61f501e0bba8
 * Support Scalate Mustache template
   http://ngocdaothanh.github.com/xitrum/guide/controller_action_view.html#scalate
 * Fix bug with sending the last chunk in chunked mode for SockJS
   http://groups.google.com/group/sockjs/msg/d66e2978249b5f26
 * Fix URL to jquery.validate-1.10.0/localization/messages_<lang>.js
   (was "jquery.validate-1.9.0/..." instead)
-* Avoid session cookie when the session is empty
-  Remove resetSession method; to reset session, call session.clear()
-  http://groups.google.com/group/xitrum-framework/browse_thread/thread/310c61f501e0bba8
 * Update SBT from 0.12.0 to 0.12.1
 * Update Netty from 3.5.10.Final to 3.5.11.Final
   https://netty.io/Blog/Netty+3511Final+is+out

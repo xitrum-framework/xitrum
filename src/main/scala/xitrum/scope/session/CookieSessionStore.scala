@@ -12,22 +12,25 @@ import xitrum.util.SecureBase64
 class CookieSessionStore extends SessionStore with Logger {
   def restore(extEnv: ExtEnv): Session = {
     // Cannot always get cookie, decrypt, deserialize, and type casting due to program changes etc.
-    extEnv.cookies.get(Config.config.session.cookieName) match {
+    extEnv.requestCookies.get(Config.config.session.cookieName) match {
       case None =>
         MMap[String, Any]()
-      case Some(cookie) =>
-        val base64String = cookie.getValue
-        SecureBase64.decrypt(base64String, true) match {
+
+      // See "store" method to know why this map needs to be immutable
+      case Some(encryptedImmutableMap) =>
+        SecureBase64.decrypt(encryptedImmutableMap, true) match {
           case None =>
             MMap[String, Any]()
-          case Some(value) =>
+
+          case Some(any) =>
             val immutableMap = try {
-              // See "store" method to know why this map is immutable
-              value.asInstanceOf[Map[String, Any]]
+              any.asInstanceOf[Map[String, Any]]
             } catch {
               case _ =>
                 MMap[String, Any]()
             }
+
+            // Convert to mutable map
             val ret = MMap[String, Any]()
             ret ++= immutableMap
             ret
@@ -38,7 +41,16 @@ class CookieSessionStore extends SessionStore with Logger {
   def store(session: Session, extEnv: ExtEnv) {
     val sessionCookieName = Config.config.session.cookieName
     if (session.isEmpty) {
-      extEnv.cookies.get(sessionCookieName).foreach(_.setMaxAge(0))
+      // If session cookie has been sent by browser, send back session cookie
+      // with max age = 0 so that browser will delete it immediately
+      if (extEnv.requestCookies.isDefinedAt(sessionCookieName)) {
+        val cookie     = new DefaultCookie(sessionCookieName, "0")
+        val cookiePath = Config.withBaseUrl("/")
+        cookie.setPath(cookiePath)
+        cookie.setHttpOnly(true)
+        cookie.setMaxAge(0)
+        extEnv.responseCookies.append(cookie)
+      }
     } else {
       // See "restore" method
       // Convert to immutable because mutable cannot always be deserialized later!
@@ -52,19 +64,13 @@ class CookieSessionStore extends SessionStore with Logger {
         return
       }
 
-      extEnv.cookies.get(sessionCookieName) match {
-        case Some(cookie) =>
-          cookie.setValue(serialized)
-
-        case None =>
-          // DefaultCookie has max age of Integer.MIN_VALUE by default,
-          // which means the cookie will be removed when user terminates browser
-          val cookie     = new DefaultCookie(sessionCookieName, serialized)
-          val cookiePath = Config.withBaseUrl("/")
-          cookie.setPath(cookiePath)
-          cookie.setHttpOnly(true)
-          extEnv.cookies.add(cookie)
-      }
+      // DefaultCookie has max age of Integer.MIN_VALUE by default,
+      // which means the cookie will be removed when user terminates browser
+      val cookie     = new DefaultCookie(sessionCookieName, serialized)
+      val cookiePath = Config.withBaseUrl("/")
+      cookie.setPath(cookiePath)
+      cookie.setHttpOnly(true)
+      extEnv.responseCookies.append(cookie)
     }
   }
 }

@@ -1,5 +1,10 @@
 package xitrum.scope.request
 
+import scala.collection.mutable.{ArrayBuffer, HashMap}
+
+import org.jboss.netty.handler.codec.http.{HttpRequest, Cookie, CookieDecoder, CookieEncoder, HttpHeaders}
+import HttpHeaders.Names
+
 import xitrum.{Config, Controller}
 import xitrum.scope.session.CSRF
 
@@ -12,20 +17,37 @@ trait ExtEnv extends RequestEnv with ParamAccess with CSRF {
 
   lazy val at = new At
 
-  // Avoid encoding, decoding when cookies/session is not touched by the application
+  /**
+   * Browsers will not send cookie attributes back to the server. They will only
+   * send the cookie’s name-value pair.
+   * http://en.wikipedia.org/wiki/HTTP_cookie#Cookie_attributes
+   */
+  lazy val requestCookies: Map[String, String] = {
+    val decoder = new CookieDecoder
+    val header  = request.getHeader(Names.COOKIE)
+    if (header != null) {
+      Map[String, String]()
+    } else {
+      val cookies  = decoder.decode(header)
+      val iterator = cookies.iterator
+      val acc      = new HashMap[String, String]
+      while (iterator.hasNext()) {
+        val cookie = iterator.next()
+        acc(cookie.getName) = cookie.getValue
+      }
+      acc.toMap
+    }
+  }
+
+  val responseCookies = new ArrayBuffer[Cookie]
+
+  // Avoid encoding, decoding cookies when session is not touched by the application
   private var sessionTouched = false
-  private var cookiesTouched = false
 
   /** To reset session: session.clear() */
   lazy val session = {
     sessionTouched = true
     Config.sessionStore.restore(this)
-  }
-
-  /** To reset all cookies, cannot simply call cookies.clear(), see Xitrum guide */
-  lazy val cookies = {
-    cookiesTouched = true
-    new Cookies(request)
   }
 
   def sessiono[T](key: String): Option[T] = session.get(key).map(_.asInstanceOf[T])
@@ -35,7 +57,22 @@ trait ExtEnv extends RequestEnv with ParamAccess with CSRF {
       // cookies is typically touched here
       Config.sessionStore.store(session, this)
 
-    if (cookiesTouched)
-      cookies.setCookiesWhenRespond(this)
+    if (responseCookies.nonEmpty) {
+      // Cookies sent by browser do not contain path,
+      // automatically set to avoid duplicate cookies
+      val basePath = Config.withBaseUrl("/")
+
+      // http://en.wikipedia.org/wiki/HTTP_cookie
+      // Server needs to SET_COOKIE multiple times
+      responseCookies.foreach { cookie =>
+        val encoder = new CookieEncoder(true)
+        if (cookie.getPath() == null) {
+          cookie.setPath(basePath)
+          cookie.setHttpOnly(true)
+        }
+        encoder.addCookie(cookie)
+        response.addHeader(Names.SET_COOKIE, encoder.encode())
+      }
+    }
   }
 }
