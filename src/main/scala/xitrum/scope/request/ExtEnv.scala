@@ -25,7 +25,7 @@ trait ExtEnv extends RequestEnv with ParamAccess with CSRF {
   lazy val requestCookies: Map[String, String] = {
     val decoder = new CookieDecoder
     val header  = request.getHeader(Names.COOKIE)
-    if (header != null) {
+    if (header == null) {
       Map[String, String]()
     } else {
       val cookies  = decoder.decode(header)
