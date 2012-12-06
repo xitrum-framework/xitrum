@@ -19,12 +19,13 @@ trait BadClientSilencer extends Logger {
   override def exceptionCaught(ctx: ChannelHandlerContext, e: ExceptionEvent) {
     ctx.getChannel.close()
 
-    val cause = e.getCause
-    val s     = cause.toString
-    if (!s.startsWith("java.nio.channels.ClosedChannelException") &&
+    val throwable = e.getCause
+    val s         = throwable.toString
+    if (!s.startsWith("scala.runtime.NonLocalReturnControl") &&
+        !s.startsWith("java.nio.channels.ClosedChannelException") &&
         !s.startsWith("java.io.IOException") &&
         !s.startsWith("javax.net.ssl.SSLException") &&
         !s.startsWith("java.lang.IllegalArgumentException"))
-      logger.debug(getClass.getName + " -> BadClientSilencer", cause)
+      logger.debug(getClass.getName + " -> BadClientSilencer", throwable)
   }
 }
