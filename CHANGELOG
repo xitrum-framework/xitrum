@@ -25,6 +25,13 @@ TODO:
 * Middleware architecture based on Netty handlers
 * Support SPDY
 
+1.10.1 (planned):
+* Improve exception handling by catching only Exception, Error and control flow
+  Throwable like scala.runtime.NonLocalReturnControl will not be catched.
+  An Error is a subclass of Throwable that indicates serious problems that a
+  reasonable application should not try to catch.
+  http://docs.oracle.com/javase/6/docs/api/java/lang/Error.html
+
 1.10:
 * Improve cookie API to requestCookies and responseCookies.
   Only cookies in responseCookies will be sent to browsers.
