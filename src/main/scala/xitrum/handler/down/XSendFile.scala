@@ -204,7 +204,7 @@ object XSendFile extends Logger {
         }
       }
     } catch {
-      case e =>
+      case e: Exception =>
         logger.warn("Unsupported Range spec: " + spec)
         None
     }

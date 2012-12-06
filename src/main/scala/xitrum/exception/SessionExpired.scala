@@ -1,3 +1,3 @@
 package xitrum.exception
 
-class SessionExpired extends Throwable
+class SessionExpired extends Exception

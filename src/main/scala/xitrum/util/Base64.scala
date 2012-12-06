@@ -25,7 +25,7 @@ object Base64 {
       val buffer      = B64.decode(ChannelBuffers.copiedBuffer(withPadding, UTF_8), Base64Dialect.URL_SAFE)
       Some(ChannelBufferToBytes(buffer))
     } catch {
-      case _ => None
+      case e: Exception => None
     }
   }
 

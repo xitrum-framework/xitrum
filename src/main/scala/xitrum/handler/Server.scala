@@ -44,7 +44,7 @@ object Server extends Logger {
       bootstrap.bind(new InetSocketAddress(port))
       logger.info("{} server started on port {}", kind, port)
     } catch {
-      case e =>
+      case e: Exception =>
         val msg = "Could not open port for %s server. Check to see if there's another process running on port %d.".format(kind, port)
         Config.exitOnError(msg, e)
     }

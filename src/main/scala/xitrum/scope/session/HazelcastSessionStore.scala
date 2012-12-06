@@ -49,7 +49,7 @@ class HazelcastSessionStore extends SessionStore {
               try {
                 Some(any.asInstanceOf[String])
               } catch {
-                case _ => None
+                case e: Exception => None
               }
 
             sessionIdo match {

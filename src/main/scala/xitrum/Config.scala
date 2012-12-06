@@ -83,7 +83,7 @@ object Config extends Logger {
     try {
       ret = Loader.jsonFromClasspath[Config]("xitrum.json")
     } catch {
-      case e =>
+      case e: Exception =>
         exitOnError("Could not load config/xitrum.json. For an example, see https://github.com/ngocdaothanh/xitrum-new/blob/master/config/xitrum.json", e)
     }
     ret

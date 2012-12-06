@@ -1,3 +1,3 @@
 package xitrum.exception
 
-class InvalidAntiCSRFToken extends Throwable
+class InvalidAntiCSRFToken extends Exception

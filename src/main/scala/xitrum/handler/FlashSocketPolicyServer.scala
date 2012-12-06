@@ -20,7 +20,7 @@ object FlashSocketPolicyServer extends Logger {
       bootstrap.bind(new InetSocketAddress(port))
       logger.info("Flash socket policy server started on port {}", port)
     } catch {
-      case e =>
+      case e: Exception =>
         val msg = "Could not open port for flash socket server. Check to see if there's another process running on port %d.".format(port)
         Config.exitOnError(msg, e)
     }

@@ -35,7 +35,7 @@ object SeriDeseri {
       bais.close()
       Some(value)
     } catch {
-      case _ => None
+      case e: Exception => None
     }
   }
 }

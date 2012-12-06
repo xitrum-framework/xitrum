@@ -48,7 +48,7 @@ object SecureBase64 {
         }
       }
     } catch {
-      case _ =>
+      case e: Exception =>
         None
     }
   }

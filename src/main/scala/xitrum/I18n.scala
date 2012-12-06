@@ -22,7 +22,7 @@ trait I18n {
       val lang_priority = lang.split(";")
       if (lang_priority.size == 2) {
         val lang2    = lang_priority(0).trim
-        val priority = try { lang_priority(1).trim.toFloat } catch { case _ => 1.0 }
+        val priority = try { lang_priority(1).trim.toFloat } catch { case e: Exception => 1.0 }
         (lang2, priority)
       } else {
         (lang.trim, 1.0)

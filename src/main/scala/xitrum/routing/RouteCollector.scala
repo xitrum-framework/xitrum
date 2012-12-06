@@ -45,7 +45,7 @@ class RouteCollector extends Logger {
         acc
       }
     } catch {
-      case e =>
+      case e: Exception =>
         logger.debug("Could not scan route for " + entry.relPath + " in " + entry.container, e)
         acc
     }

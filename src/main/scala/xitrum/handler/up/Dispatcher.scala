@@ -11,7 +11,7 @@ import HttpVersion._
 
 import xitrum.{Config, Controller, SkipCSRFCheck, Cache, Logger}
 import xitrum.controller.Action
-import xitrum.exception.{InvalidAntiCSRFToken, MissingParam, SessionExpired, ValidationError}
+import xitrum.exception.{InvalidAntiCSRFToken, InvalidInput, MissingParam, SessionExpired}
 import xitrum.handler.{AccessLog, HandlerEnv}
 import xitrum.handler.down.{ResponseCacher, XSendFile}
 import xitrum.routing.{ControllerReflection, Routes}
@@ -61,13 +61,13 @@ object Dispatcher extends Logger {
 
       AccessLog.logDynamicContentAccess(controller, beginTimestamp, cacheSeconds, hit)
     } catch {
-      case e =>
+      case e: Exception =>
         // End timestamp
         val t2 = System.currentTimeMillis()
 
         // These exceptions are special cases:
         // We know that the exception is caused by the client (bad request)
-        if (e.isInstanceOf[SessionExpired] || e.isInstanceOf[InvalidAntiCSRFToken] || e.isInstanceOf[MissingParam] || e.isInstanceOf[ValidationError]) {
+        if (e.isInstanceOf[SessionExpired] || e.isInstanceOf[InvalidAntiCSRFToken] || e.isInstanceOf[MissingParam] || e.isInstanceOf[InvalidInput]) {
           controller.response.setStatus(BAD_REQUEST)
           val msg = if (e.isInstanceOf[SessionExpired] || e.isInstanceOf[InvalidAntiCSRFToken]) {
             controller.session.clear()
@@ -76,7 +76,7 @@ object Dispatcher extends Logger {
             val mp  = e.asInstanceOf[MissingParam]
             "Missing param: " + mp.key
           } else {
-            val ve = e.asInstanceOf[ValidationError]
+            val ve = e.asInstanceOf[InvalidInput]
             "Validation error: " + ve.message
           }
 

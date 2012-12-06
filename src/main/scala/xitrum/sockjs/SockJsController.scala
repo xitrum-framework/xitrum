@@ -190,7 +190,7 @@ class SockJsController extends Controller with SkipCSRFCheck {
         // body: ["m1", "m2"]
         Json.parse[List[String]](body)
       } catch {
-        case _ =>
+        case e: Exception =>
           response.setStatus(HttpResponseStatus.INTERNAL_SERVER_ERROR)
           respondText("Broken JSON encoding.")
           null
@@ -421,7 +421,7 @@ class SockJsController extends Controller with SkipCSRFCheck {
         // body: ["m1", "m2"]
         Json.parse[List[String]](body)
       } catch {
-        case _ =>
+        case e: Exception =>
           response.setStatus(HttpResponseStatus.INTERNAL_SERVER_ERROR)
           respondText("Broken JSON encoding.")
           null
@@ -545,7 +545,7 @@ class SockJsController extends Controller with SkipCSRFCheck {
           val normalizedBody = if (body.startsWith("[")) body else "[" + body + "]"
           Json.parse[List[String]](normalizedBody)
         } catch {
-          case _ =>
+          case e: Exception =>
             // No c frame is sent!
             // http://sockjs.github.com/sockjs-protocol/sockjs-protocol-0.3.3.html#section-72
             //respondWebSocket("c[2011,\"Broken JSON encoding.\"]")

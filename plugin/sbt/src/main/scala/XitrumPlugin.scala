@@ -52,7 +52,7 @@ object XitrumPlugin extends Plugin {
 
       println("Please see target/xitrum directory")
     } catch {
-      case e => e.printStackTrace
+      case e: Exception => e.printStackTrace
     }
   }
 
