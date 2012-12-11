@@ -42,6 +42,10 @@ case class HazelcastJavaClientConfig(groupName: String, groupPassword: String, a
 
 /** See config/xitrum.properties */
 object Config extends Logger {
+  private val HAZELCAST_MODE_CLUSTER_MEMBER = "clusterMember"
+  private val HAZELCAST_MODE_LITE_MEMBER    = "liteMember"
+  private val HAZELCAST_MODE_JAVA_CLIENT    = "javaClient"
+
   /**
    * Static textual files are always compressed
    * Dynamic textual responses are only compressed if they are big
@@ -128,19 +132,19 @@ object Config extends Logger {
    * sbt console mode and don't like this overhead)
    */
   lazy val hazelcastInstance: HazelcastInstance = {
-    // http://hazelcast.com/docs/2.2/manual/single_html/#Logging
+    // http://www.hazelcast.com/docs/2.4/manual/multi_html/ch12s07.html
     System.setProperty("hazelcast.logging.type", "slf4j")
 
-    // http://www.hazelcast.com/documentation.jsp#SuperClient
-    if (config.hazelcastMode == "superClient")
-      System.setProperty("hazelcast.super.client", "true")
+    // http://www.hazelcast.com/docs/2.4/manual/multi_html/ch07s03.html
+    if (config.hazelcastMode == HAZELCAST_MODE_LITE_MEMBER)
+      System.setProperty("hazelcast.lite.member", "true")
 
-    if (config.hazelcastMode == "superClient" || config.hazelcastMode == "clusterMember") {
-      val path = Config.root + File.separator + "config" + File.separator + "hazelcast_cluster_member_or_super_client.xml"
+    if (config.hazelcastMode == HAZELCAST_MODE_LITE_MEMBER || config.hazelcastMode == HAZELCAST_MODE_CLUSTER_MEMBER) {
+      val path = Config.root + File.separator + "config" + File.separator + "hazelcast_cluster_or_lite_member.xml"
       System.setProperty("hazelcast.config", path)
 
       // null: load from "hazelcast.config" system property above
-      // http://hazelcast.com/docs/2.2/manual/multi_html/ch12.html
+      // http://www.hazelcast.com/docs/2.4/manual/multi_html/ch12.html
       Hazelcast.newHazelcastInstance(null)
     } else {
       // https://github.com/hazelcast/hazelcast/issues/93
