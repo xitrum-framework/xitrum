@@ -4,7 +4,7 @@ import org.jboss.netty.channel.{ChannelFuture, ChannelFutureListener}
 
 import xitrum.controller._
 import xitrum.scope.request.ExtEnv
-import xitrum.view.Responder
+import xitrum.view.{Renderer, Responder}
 
 trait Controller extends ExtEnv
     with ActionFactory
@@ -15,6 +15,7 @@ trait Controller extends ExtEnv
     with WebSocket
     with Redirect
     with UrlFor
+    with Renderer
     with Responder
     with I18n {
 
