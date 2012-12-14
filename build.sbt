@@ -26,11 +26,11 @@ libraryDependencies += "com.typesafe.akka" % "akka-actor" % "2.0.4"
 
 // For distributed cache and Comet
 // Infinispan is good but much heavier
-libraryDependencies += "com.hazelcast" % "hazelcast" % "2.4"
+libraryDependencies += "com.hazelcast" % "hazelcast" % "2.4.1"
 
 // http://www.hazelcast.com/documentation.jsp#Clients
 // Hazelcast can be configured in Xitrum as super client or native client
-libraryDependencies += "com.hazelcast" % "hazelcast-client" % "2.4"
+libraryDependencies += "com.hazelcast" % "hazelcast-client" % "2.4.1"
 
 // Jerkson ---------------------------------------------------------------------
 
