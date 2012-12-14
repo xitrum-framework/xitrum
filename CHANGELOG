@@ -25,7 +25,7 @@ TODO:
 * Middleware architecture based on Netty handlers
 * Support SPDY
 
-1.11 (planned):
+1.11:
 * Add renderFragment(fragment: String) which renders a fragment of the current controller
 * Improve exception handling by catching only Exception, Error and control flow
   Throwable like scala.runtime.NonLocalReturnControl will not be catched.
