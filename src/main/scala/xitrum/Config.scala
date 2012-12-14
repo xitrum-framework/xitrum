@@ -135,6 +135,7 @@ object Config extends Logger {
     // http://www.hazelcast.com/docs/2.4/manual/multi_html/ch12s07.html
     System.setProperty("hazelcast.logging.type", "slf4j")
 
+    // http://www.hazelcast.com/docs/2.4/manual/multi_html/ch15.html
     // http://www.hazelcast.com/docs/2.4/manual/multi_html/ch07s03.html
     if (config.hazelcastMode == HAZELCAST_MODE_LITE_MEMBER)
       System.setProperty("hazelcast.lite.member", "true")
