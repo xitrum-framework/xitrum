@@ -25,6 +25,9 @@ TODO:
 * Middleware architecture based on Netty handlers
 * Support SPDY
 
+1.11.1 (planned):
+* Update Knockout.mapping from 2.3.3 to 2.3.5
+
 1.11:
 * Add renderFragment(fragment: String) which renders a fragment of the current controller
 * Improve exception handling by catching only Exception, Error and control flow
