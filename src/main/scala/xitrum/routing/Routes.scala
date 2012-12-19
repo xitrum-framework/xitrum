@@ -409,7 +409,10 @@ object Routes extends Logger {
 
   //----------------------------------------------------------------------------
 
+  // "websocket" and "cookieNeeded" members are named after SockJS option:
+  // {"websocket": true/false, "cookie_needed": true/false, "origins": ["*:*"], "entropy": integer}
   class SockJsClassAndOptions(val handlerClass: Class[_ <: SockJsHandler], val websocket: Boolean, val cookieNeeded: Boolean)
+
   private val sockJsClassAndOptionsTable = MMap[String, SockJsClassAndOptions]()
 
   /**
