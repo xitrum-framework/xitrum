@@ -412,6 +412,12 @@ object Routes extends Logger {
   class SockJsClassAndOptions(val handlerClass: Class[_ <: SockJsHandler], val websocket: Boolean, val cookieNeeded: Boolean)
   private val sockJsClassAndOptionsTable = MMap[String, SockJsClassAndOptions]()
 
+  /**
+   * Mounts SockJS handler at the path prefix.
+   *
+   * @param websocket set to true to enable WebSocket
+   * @param cookieNeeded set to true for load balancers that needs JSESSION cookie
+   */
   def sockJs(handlerClass: Class[_ <: SockJsHandler], pathPrefix: String, websocket: Boolean = true, cookieNeeded: Boolean = false) {
     sockJsClassAndOptionsTable(pathPrefix) = new SockJsClassAndOptions(handlerClass, websocket, cookieNeeded)
   }
