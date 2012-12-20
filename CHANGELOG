@@ -27,6 +27,8 @@ TODO:
 1.12 (planned):
 * Add automatic CORS request handling for the whole site
   http://www.html5rocks.com/en/tutorials/cors/
+* Update Netty from 3.5.11.Final to 3.6.0.Final
+  https://netty.io/Blog/Netty+360Final+released+-+Keep+on+moving
 * Update Knockout.mapping from 2.3.3 to 2.3.5
 
 1.11:
@@ -39,7 +41,7 @@ TODO:
 * Rename hazelcast_cluster_or_super_client.xml to hazelcast_cluster_or_lite_member.xml
   From Hazelcast 2.0, SuperClient is renamed to LiteMember to avoid confusion:
   http://www.hazelcast.com/docs/2.4/manual/multi_html/ch18s04.html
-* Update Hazelcast from 2.4 to 2.4.1.
+* Update Hazelcast from 2.4 to 2.4.1
   This version fixes Out of Memory Error every few days:
   http://groups.google.com/group/hazelcast/browse_thread/thread/31f69d0eb89440b5/1d9ce430deffb575
 

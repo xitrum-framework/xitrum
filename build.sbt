@@ -53,7 +53,7 @@ libraryDependencies += "org.mozilla" % "rhino" % "1.7R4"
 
 // Other dependencies ----------------------------------------------------------
 
-libraryDependencies += "io.netty" % "netty" % "3.5.11.Final"
+libraryDependencies += "io.netty" % "netty" % "3.6.0.Final"
 
 libraryDependencies += "org.javassist" % "javassist" % "3.17.1-GA"
 
