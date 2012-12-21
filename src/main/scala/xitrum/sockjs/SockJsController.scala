@@ -21,10 +21,16 @@ import xitrum.view.DocType
 // Reference implementation (need to read when in doubt):
 // https://github.com/sockjs/sockjs-node/tree/master/src
 object SockJsController {
+  val LIMIT = if (Config.isProductionMode) 128 * 1024 else 4 * 1024
+
+  //----------------------------------------------------------------------------
+
   private val random = new Random(System.currentTimeMillis())
 
   /** 0 to 2^32 - 1 */
   def entropy() = random.nextInt().abs
+
+  //----------------------------------------------------------------------------
 
   /** 2KB of 'h' characters */
   val h2KB = {
@@ -61,6 +67,40 @@ object SockJsController {
     } else {
       template
     }
+  }
+
+  //----------------------------------------------------------------------------
+
+  // https://groups.google.com/group/sockjs/msg/9da24b0dde8916e4
+  // https://groups.google.com/group/sockjs/msg/b63cd4555bd69ae4
+  // https://github.com/sockjs/sockjs-node/blob/master/src/utils.coffee#L87-L109
+
+  def quoteUnicode(string: String): String = {
+    val b = new StringBuilder
+    string.foreach { c =>
+      if (('\u0000' <= c && c <= '\u001f') ||
+          ('\ud800' <= c && c <= '\udfff') ||
+          ('\u200c' <= c && c <= '\u200f') ||
+          ('\u2028' <= c && c <= '\u202f') ||
+          ('\u2060' <= c && c <= '\u206f') ||
+          ('\ufff0' <= c && c <= '\uffff')) {
+        val hex = Integer.toHexString(c)
+        val len = hex.length
+
+        b.append("\\u")
+        if (len == 1)
+          b.append("000")
+        else if (len == 2)
+          b.append("00")
+        else if (len == 3)
+          b.append("0")
+
+        b.append(hex)
+      } else {
+        b.append(c)
+      }
+    }
+    b.toString
   }
 }
 
@@ -169,8 +209,9 @@ class SockJsController extends Controller with SkipCSRFCheck {
           if (messages.isEmpty) {
             respondJs("h\n")
           } else {
-            val json = "a" + Json.generate(messages) + "\n"
-            respondJs(json)
+            val json   = Json.generate(messages)
+            val quoted = SockJsController.quoteUnicode(json)
+            respondJs("a" + quoted + "\n")
           }
 
         case SubscribeByClientResultErrorAfterOpenHasBeenSent =>
@@ -634,8 +675,6 @@ class SockJsController extends Controller with SkipCSRFCheck {
    */
   private var streamingBytesSent = 0
 
-  private val LIMIT = if (Config.isProductionMode) 128 * 1024 else 4 * 1024
-
   /**
    * All the chunking transports are closed by the server after 128K was
    * send, in order to force client to GC and reconnect. The server doesn't have
@@ -647,7 +686,7 @@ class SockJsController extends Controller with SkipCSRFCheck {
     // but in this case the result doesn't have to be precise
     val size = text.length
     streamingBytesSent += size
-    if (streamingBytesSent < LIMIT) {
+    if (streamingBytesSent < SockJsController.LIMIT) {
       if (isEventSource) respondEventSource(text) else respondText(text)
       true
     } else {

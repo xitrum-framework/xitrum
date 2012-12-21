@@ -27,6 +27,8 @@ TODO:
 1.12 (planned):
 * Add automatic CORS request handling for the whole site
   http://www.html5rocks.com/en/tutorials/cors/
+* Improve Unicode handling of SockJS
+  https://groups.google.com/group/sockjs/msg/9da24b0dde8916e4
 * Update Netty from 3.5.11.Final to 3.6.0.Final
   https://netty.io/Blog/Netty+360Final+released+-+Keep+on+moving
 * Update Knockout.mapping from 2.3.3 to 2.3.5
