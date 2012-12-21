@@ -25,12 +25,16 @@ TODO:
 * Support SPDY
 
 1.12 (planned):
-* Add methods to render Scalate template directly from String (non-file):
-  renderScalateString(templateContent, templateType); templateType: "jade", "mustache", "scaml", "ssp"
-  renderJadeString(templateContent)
-  renderMustacheString(templateContent)
-  renderScamlString(templateContent)
-  renderSspString(templateContent)
+* Add methods to render Scalate templates directly from strings (non-file):
+    renderScalateString(templateContent, templateType); templateType: "jade", "mustache", "scaml", "ssp"
+    renderJadeString(templateContent)
+    renderMustacheString(templateContent)
+    renderScamlString(templateContent)
+    renderSspString(templateContent)
+  The compiled templates are not cached. If you want to control the caching, see
+  Scalate doc to know how to do it yourself:
+    http://scalate.fusesource.org/documentation/scalate-embedding-guide.html
+    http://scalate.fusesource.org/developers.html
 * Add automatic CORS request handling for the whole site
   http://www.html5rocks.com/en/tutorials/cors/
 * Improve Unicode handling of SockJS
