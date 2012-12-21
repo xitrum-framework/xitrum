@@ -25,6 +25,12 @@ TODO:
 * Support SPDY
 
 1.12 (planned):
+* Add methods to render Scalate template directly from String (non-file):
+  renderScalateString(templateContent, templateType); templateType: "jade", "mustache", "scaml", "ssp"
+  renderJadeString(templateContent)
+  renderMustacheString(templateContent)
+  renderScamlString(templateContent)
+  renderSspString(templateContent)
 * Add automatic CORS request handling for the whole site
   http://www.html5rocks.com/en/tutorials/cors/
 * Improve Unicode handling of SockJS

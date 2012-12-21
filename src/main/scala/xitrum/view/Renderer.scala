@@ -17,7 +17,7 @@ trait Renderer {
    * Renders Scalate template file relative to src/main/view/scalate directory.
    * The current controller instance will be imported in the template as "helper".
    */
-  def renderScalate(relPath: String) = Scalate.renderFile(this, relPath)
+  def renderScalateFile(relPath: String) = Scalate.renderFile(this, relPath)
 
   /**
    * Renders Scalate template file with the path:
@@ -30,7 +30,7 @@ trait Renderer {
    */
   def renderScalate(controllerClass: Class[_], templateType: String): String = {
     val relPath = controllerClass.getName.replace('.', File.separatorChar) + "." + templateType
-    renderScalate(relPath)
+    renderScalateFile(relPath)
   }
 
   /**
@@ -53,7 +53,7 @@ trait Renderer {
    */
   def renderFragment(controllerClass: Class[_], fragment: String, templateType: String): String = {
     val relPath = controllerClass.getName.replace('.', File.separatorChar) + File.separatorChar + "_" + fragment + "." + templateType
-    renderScalate(relPath)
+    renderScalateFile(relPath)
   }
 
   /**
@@ -66,6 +66,24 @@ trait Renderer {
   /** Renders a fragment of the current controller. */
   def renderFragment(fragment: String): String =
     renderFragment(getClass, fragment)
+
+  //----------------------------------------------------------------------------
+
+  /** @param templateType jade, mustache, scaml, ssp */
+  def renderScalateString(templateContent: String, templateType: String): String =
+    Scalate.renderString(this, templateContent, templateType)
+
+  def renderJadeString(templateContent: String): String =
+    Scalate.renderJadeString(this, templateContent)
+
+  def renderMustacheString(templateContent: String): String =
+    Scalate.renderMustacheString(this, templateContent)
+
+  def renderScamlString(templateContent: String): String =
+    Scalate.renderScamlString(this, templateContent)
+
+  def renderSspString(templateContent: String): String =
+    Scalate.renderSspString(this, templateContent)
 
   //----------------------------------------------------------------------------
 

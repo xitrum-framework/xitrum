@@ -236,7 +236,7 @@ trait Responder extends JS with Flash with Knockout {
     val actionName          = nonNullActionMethod.getName
     val relPath             = controllerClass.getName.replace('.', File.separatorChar) + File.separator + actionName + "." + templateType
 
-    renderedView = renderScalate(relPath)
+    renderedView = renderScalateFile(relPath)
     val respondedLayout = customLayout.apply()
     if (respondedLayout == null)
       respondText(renderedView, "text/html; charset=" + Config.config.request.charset)
