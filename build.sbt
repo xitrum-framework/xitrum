@@ -43,7 +43,7 @@ libraryDependencies += "com.codahale" % "jerkson_2.9.1" % "0.5.0"
 
 // Scalate ---------------------------------------------------------------------
 
-libraryDependencies += "org.fusesource.scalate" % "scalate-core" % "1.5.3"
+libraryDependencies += "org.fusesource.scalate" % "scalate-core_2.9" % "1.6.0"
 
 // For Markdown
 libraryDependencies += "org.fusesource.scalamd" % "scalamd" % "1.5"
@@ -79,8 +79,6 @@ addCompilerPlugin("org.scala-lang.plugins" % "continuations" % "2.9.2")
 
 scalacOptions += "-P:continuations:enable"
 
-// https://github.com/harrah/xsbt/wiki/Cross-Build
-//crossScalaVersions := Seq("2.9.1", "2.9.2")
+// http://www.scala-sbt.org/release/docs/Detailed-Topics/Cross-Build
+//crossScalaVersions := Seq("2.9.2", "2.10.0")
 scalaVersion := "2.9.2"
-
-// Copy dev/build.sbt.end here when publishing to Sonatype

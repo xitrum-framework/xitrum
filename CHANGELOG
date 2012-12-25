@@ -1,14 +1,15 @@
 TODO:
+* Update Scala from 2.9.2 to 2.10
+* Replace Jerkson with JSON4S, Jacks, or jackson-module-scala
+  (Jerkson has not been updated for months)
+  https://github.com/json4s/json4s
+  http://wiki.fasterxml.com/JacksonModuleScala
 * Reload classes and routes in development mode with Javassist or Eclipse JDT
   http://stackoverflow.com/questions/5226746/how-do-grails-or-play-detect-changes-and-hot-reload-classes
 * SockJS: Add cluster mode
 * Add automatic HEAD request handling for the whole site
 * Integrate Metrics
   http://metrics.codahale.com/
-* Replace Jerkson with JSON4S, Jacks, or jackson-module-scala
-  (Jerkson has not been updated for months)
-  https://github.com/json4s/json4s
-  http://wiki.fasterxml.com/JacksonModuleScala
 * Flash socket policy server can use the same port with HTTP server
 * Add Ajax style upload based on iframe
 * Support routing by domain name ("Host" header)
@@ -37,10 +38,13 @@ TODO:
     http://scalate.fusesource.org/developers.html
 * Add automatic CORS request handling for the whole site
   http://www.html5rocks.com/en/tutorials/cors/
-* Improve Unicode handling of SockJS
+* Add Unicode quoting for SockJS
   https://groups.google.com/group/sockjs/msg/9da24b0dde8916e4
+* Add connection close handling for SockJS
 * Update Netty from 3.5.11.Final to 3.6.0.Final
   https://netty.io/Blog/Netty+360Final+released+-+Keep+on+moving
+* Update Scalate from 1.5.3 to 1.6.0
+  http://scalate.fusesource.org/blog/releases/release-1.6.0.html
 * Update Knockout.mapping from 2.3.3 to 2.3.5
 
 1.11:
