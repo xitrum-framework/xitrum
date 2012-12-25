@@ -6,8 +6,6 @@ name := "xitrum-plugin"
 
 version := "1.3"
 
-// https://github.com/harrah/xsbt/wiki/Cross-Build
-//crossScalaVersions := Seq("2.9.1", "2.9.2")
-scalaVersion := "2.9.2"
-
-// Copy dev/build.sbt.end here when publishing to Sonatype
+// http://www.scala-sbt.org/release/docs/Detailed-Topics/Cross-Build
+//scalaVersion := "2.10.0"
+crossScalaVersions := Seq("2.9.2", "2.10.0")
