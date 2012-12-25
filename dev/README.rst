@@ -12,7 +12,7 @@ While developing, you may need do local publish. Run
 Alternatively you can run ``sbt`` then from SBT command prompt run
 ``+ publish-local``.
 
-To delete local publish:
+To delete the local publish:
 
 ::
 
