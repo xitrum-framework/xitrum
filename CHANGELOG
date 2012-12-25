@@ -1,5 +1,6 @@
 TODO:
-* Update Scala from 2.9.2 to 2.10
+* Update Scala to 2.10 and Akka to 2.1
+  https://groups.google.com/group/akka-user/browse_thread/thread/77e1f134b5134c70
 * Replace Jerkson with JSON4S, Jacks, or jackson-module-scala
   (Jerkson has not been updated for months)
   https://github.com/json4s/json4s
