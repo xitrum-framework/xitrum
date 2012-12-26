@@ -35,7 +35,7 @@ trait Renderer {
 
   /**
    * Same as renderScalate(controllerClass, templateType),
-   * where templateType is as configured in xitrum.json.
+   * where templateType is as configured in xitrum.conf.
    */
   def renderScalate(controllerClass: Class[_]): String =
     renderScalate(controllerClass, Config.config.scalate)
@@ -58,7 +58,7 @@ trait Renderer {
 
   /**
    * Same as renderFragment(controllerClass, fragment, templateType),
-   * where templateType is as configured in xitrum.json.
+   * where templateType is as configured in xitrum.conf.
    */
   def renderFragment(controllerClass: Class[_], fragment: String): String =
     renderFragment(controllerClass, fragment, Config.config.scalate)

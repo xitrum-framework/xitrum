@@ -6,37 +6,87 @@ import java.nio.charset.Charset
 import com.hazelcast.client.{ClientConfig, ClientConfigBuilder, HazelcastClient}
 import com.hazelcast.core.{Hazelcast, HazelcastInstance}
 
+import com.typesafe.config.{Config => TConfig, ConfigFactory}
+
 import xitrum.scope.session.SessionStore
 import xitrum.util.Loader
 
 //----------------------------------------------------------------------------
 
-case class BasicAuthConfig(realm: String, username: String, password: String)
+class BasicAuthConfig(config: TConfig) {
+  val realm    = config.getString("realm")
+  val username = config.getString("username")
+  val password = config.getString("password")
+}
 
-case class PortConfig(http: Option[Int], https: Option[Int], flashSocketPolicy: Option[Int])
+class PortConfig(config: TConfig) {
+  val http  = if (config.hasPath("http"))  Some(config.getInt("http"))  else None
+  val https = if (config.hasPath("https")) Some(config.getInt("https")) else None
+  val flashSocketPolicy =
+    if (config.hasPath("flashSocketPolicy"))
+      Some(config.getInt("flashSocketPolicy"))
+    else
+      None
+}
 
-case class KeyStoreConfig(path: String, password: String, certificatePassword: String)
+class KeystoreConfig(config: TConfig) {
+  val path                = config.getString("path")
+  val password            = config.getString("password")
+  val certificatePassword = config.getString("certificatePassword")
+}
 
-case class ReverseProxyConfig(ips: List[String], baseUrl: String)
+class ReverseProxyConfig(config: TConfig) {
+  val ips     = config.getStringList("ips")
+  val baseUrl = config.getString("baseUrl")
+}
 
-case class SessionConfig(store: String, cookieName: String, secureKey: String)
+class SessionConfig(config: TConfig) {
+  val store      = config.getString("store")
+  val cookieName = config.getString("cookieName")
+  val secureKey  = config.getString("secureKey")
+}
 
-case class RequestConfig(maxSizeInMB: Int, charset: String, filteredParams: List[String])
+class RequestConfig(config: TConfig) {
+  val charset        = config.getString("charset")
+  val maxSizeInMB    = config.getInt("maxSizeInMB")
+  val filteredParams = config.getStringList("filteredParams")
+}
 
-case class ResponseConfig(maxSizeInKBOfCachedStaticFiles: Int, maxNumberOfCachedStaticFiles: Int, clientMustRevalidateStaticFiles: Boolean)
+class ResponseConfig(config: TConfig) {
+  val maxSizeInKBOfCachedStaticFiles  = config.getInt("maxSizeInKBOfCachedStaticFiles")
+  val maxNumberOfCachedStaticFiles    = config.getInt("maxNumberOfCachedStaticFiles")
+  val clientMustRevalidateStaticFiles = config.getBoolean("clientMustRevalidateStaticFiles")
+}
 
-case class Config(
-  basicAuth:     Option[BasicAuthConfig],
-  port:          PortConfig,
-  keystore:      KeyStoreConfig,
-  reverseProxy:  Option[ReverseProxyConfig],
-  scalate:       String,
-  hazelcastMode: String,
-  session:       SessionConfig,
-  request:       RequestConfig,
-  response:      ResponseConfig)
+class Config(config: TConfig) {
+  val basicAuth =
+    if (config.hasPath("basicAuth"))
+      Some(new BasicAuthConfig(config.getConfig("basicAuth")))
+    else
+      None
 
-case class HazelcastJavaClientConfig(groupName: String, groupPassword: String, addresses: List[String])
+  val port = new PortConfig(config.getConfig("port"))
+
+  val keystore = new KeystoreConfig(config.getConfig("keystore"))
+
+  val reverseProxy =
+    if (config.hasPath("reverseProxy"))
+      Some(new ReverseProxyConfig(config.getConfig("reverseProxy")))
+    else
+      None
+
+  val scalate = config.getString("scalate")
+
+  val hazelcastMode = config.getString("hazelcastMode")
+
+  val session = new SessionConfig(config.getConfig("session"))
+
+  val request = new RequestConfig(config.getConfig("request"))
+
+  val response = new ResponseConfig(config.getConfig("response"))
+}
+
+//case class HazelcastJavaClientConfig(groupName: String, groupPassword: String, addresses: List[String])
 
 //----------------------------------------------------------------------------
 
@@ -81,21 +131,21 @@ object Config extends Logger {
   /** See bin/runner.sh */
   val isProductionMode = (System.getProperty("xitrum.mode") == "production")
 
-  /** Loaded from xitrum.json */
+  /** Loaded from config/xitrum.conf */
   val config = {
     var ret: Config = null
     try {
-      ret = Loader.jsonFromClasspath[Config]("xitrum.json")
+      ret = new Config(ConfigFactory.load("xitrum.conf"))
     } catch {
       case e: Exception =>
-        exitOnError("Could not load config/xitrum.json. For an example, see https://github.com/ngocdaothanh/xitrum-new/blob/master/config/xitrum.json", e)
+        exitOnError("Could not load config/xitrum.conf. For an example, see https://github.com/ngocdaothanh/xitrum-new/blob/master/config/xitrum.conf", e)
     }
     ret
   }
 
   def warnOnDefaultSecureKey() {
     if (config.session.secureKey == DEFAULT_SECURE_KEY)
-      logger.warn("For security, change secureKey in config/xitrum.json to your own!")
+      logger.warn("For security, change secureKey in config/xitrum.conf to your own!")
   }
 
   //----------------------------------------------------------------------------

@@ -32,6 +32,7 @@ TODO:
   in your code with
     import xitrum.util.Json
 * Rename config/xitrum.json to config/xitrum.conf
+  https://github.com/typesafehub/config
 * Add methods to render Scalate templates directly from strings (non-file):
     renderScalateString(templateContent, templateType); templateType: "jade", "mustache", "scaml", "ssp"
     renderJadeString(templateContent)

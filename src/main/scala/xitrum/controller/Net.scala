@@ -26,7 +26,7 @@ import xitrum.{Controller, Config}
 object Net {
   // These are not put in trait Net so that they can be reused at AccessLog
 
-  /** See reverseProxy in config/xitrum.json */
+  /** See reverseProxy in config/xitrum.conf */
   def proxyNotAllowed(clientIp: String): Boolean = {
     Config.config.reverseProxy match {
       case None               => false
@@ -66,7 +66,7 @@ trait Net {
   // The "val"s must be "lazy", because when the controller is constructed, the
   // "request" object is null
 
-  /** See reverseProxy in config/xitrum.json */
+  /** See reverseProxy in config/xitrum.conf */
   private lazy val proxyNotAllowed = Net.proxyNotAllowed(clientIp)
 
   /**

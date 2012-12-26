@@ -245,7 +245,7 @@ trait Responder extends JS with Flash with Knockout {
 
   /**
    * Same as respondView(action, customLayout, templateType),
-   * where templateType is as configured in xitrum.json.
+   * where templateType is as configured in xitrum.conf.
    */
   def respondView(action: Action, customLayout: () => Any): ChannelFuture = {
     respondView(action, customLayout, Config.config.scalate)
@@ -270,7 +270,7 @@ trait Responder extends JS with Flash with Knockout {
   /**
    * Same as respondView(action, customLayout, templateType),
    * where customLayout is from the controller's layout method and
-   * templateType is as configured in xitrum.json.
+   * templateType is as configured in xitrum.conf.
    */
   def respondView(action: Action): ChannelFuture = {
     respondView(action, layout _, Config.config.scalate)
@@ -279,7 +279,7 @@ trait Responder extends JS with Flash with Knockout {
   /**
    * Same as respondView(action, customLayout, templateType),
    * where action is currentAction, customLayout is from the controller's layout method and
-   * templateType is as configured in xitrum.json.
+   * templateType is as configured in xitrum.conf.
    */
   def respondView(): ChannelFuture = {
     respondView(currentAction, Config.config.scalate)
