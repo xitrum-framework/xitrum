@@ -2,14 +2,13 @@ TODO:
 * Reload classes and routes in development mode with Javassist or Eclipse JDT
   http://stackoverflow.com/questions/5226746/how-do-grails-or-play-detect-changes-and-hot-reload-classes
 * Add cluster mode to SockJS using cluster feature of Akka and Hazelcast
-* Add automatic HEAD request handling for the whole site
-* Integrate Metrics
+* Integrate Metrics (for SockJS stats etc.)
   http://metrics.codahale.com/
+* Add automatic HEAD request handling for the whole site
 * Flash socket policy server can use the same port with HTTP server
 * Add Ajax style upload based on iframe
 * Support routing by domain name ("Host" header)
 * Make extensive use of Knockout.js and Scala delimited continuation
-* Use wro4j to implement Rails-like asset pipeline (http://guides.rubyonrails.org/asset_pipeline.html)
 * An action can have multiple Scalate view files more easily
 * Support "Range" request to dynamic content, not only to static files
 * Remove HttpChunkAggregator to support big file upload
@@ -23,6 +22,9 @@ TODO:
 1.13 (planned):
 * Update Scala to 2.10.0 and Akka to 2.1.0
   https://groups.google.com/group/akka-user/browse_thread/thread/77e1f134b5134c70
+* Add Rails-like asset pipeline (using wro4j?)
+  http://guides.rubyonrails.org/asset_pipeline.html
+  http://www.playframework.org/documentation/2.0/Assets
 * Add connection abort handling for SockJS
 * Add automatic CORS request handling for the whole site
   http://www.html5rocks.com/en/tutorials/cors/
