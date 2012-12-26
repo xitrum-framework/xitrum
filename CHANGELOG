@@ -36,8 +36,10 @@ TODO:
     import xitrum.util.Json
   Note that there are also other libs like Jacks and jackson-module-scala
     http://wiki.fasterxml.com/JacksonModuleScala
-* Rename config/xitrum.json to config/xitrum.conf
-  https://github.com/typesafehub/config
+* Rename config/xitrum.json to config/xitrum.conf, using
+    https://github.com/typesafehub/config
+  See example:
+    https://github.com/ngocdaothanh/xitrum-new/blob/master/config/xitrum.conf
 * Add methods to render Scalate templates directly from strings (non-file):
     renderScalateString(templateContent, templateType); templateType: "jade", "mustache", "scaml", "ssp"
     renderJadeString(templateContent)
