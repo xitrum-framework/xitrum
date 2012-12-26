@@ -1,7 +1,5 @@
 package xitrum.handler
 
-import java.net.InetSocketAddress
-
 import org.jboss.netty.bootstrap.ServerBootstrap
 import org.jboss.netty.channel.socket.nio.NioServerSocketChannelFactory
 
@@ -36,17 +34,11 @@ object Server extends Logger {
     val channelFactory  = new NioServerSocketChannelFactory
     val bootstrap       = new ServerBootstrap(channelFactory)
     val pipelineFactory = new ChannelPipelineFactory(https)
-    val (kind, port)    = if (https) ("HTTPS", Config.config.port.https.get) else ("HTTP", Config.config.port.http.get)
+    val (service, port) = if (https) ("HTTPS", Config.config.port.https.get) else ("HTTP", Config.config.port.http.get)
 
     bootstrap.setPipelineFactory(pipelineFactory)
-    NetOption.set(bootstrap)
-    try {
-      bootstrap.bind(new InetSocketAddress(port))
-      logger.info("{} server started on port {}", kind, port)
-    } catch {
-      case e: Exception =>
-        val msg = "Could not open port for %s server. Check to see if there's another process running on port %d.".format(kind, port)
-        Config.exitOnError(msg, e)
-    }
+    NetOption.setOptions(bootstrap)
+    NetOption.bind(service, bootstrap, port)
+    logger.info("{} server started on port {}", service, port)
   }
 }

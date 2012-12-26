@@ -65,6 +65,12 @@ class Config(config: TConfig) {
     else
       None
 
+  val interface =
+    if (config.hasPath("interface"))
+      Some(config.getString("interface"))
+    else
+      None
+
   val port = new PortConfig(config.getConfig("port"))
 
   val keystore = new KeystoreConfig(config.getConfig("keystore"))
