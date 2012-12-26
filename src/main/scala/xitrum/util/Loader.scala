@@ -3,7 +3,6 @@ package xitrum.util
 import java.io.{FileInputStream, InputStream}
 import java.util.Properties
 
-import com.codahale.jerkson.Json
 import org.jboss.netty.util.CharsetUtil.UTF_8
 
 object Loader {
@@ -64,7 +63,7 @@ object Loader {
    */
   def propertiesFromClasspath(path: String): Properties = {
     // http://www.javaworld.com/javaworld/javaqa/2003-08/01-qa-0808-property.html?page=2
-    val is = getClass.getClassLoader.getResourceAsStream(path)
+    val is  = getClass.getClassLoader.getResourceAsStream(path)
     val ret = new Properties
     ret.load(is)
     is.close()
@@ -73,12 +72,12 @@ object Loader {
 
   //----------------------------------------------------------------------------
 
-  def jsonFromFile[T](path: String)(implicit m: Manifest[T]) =
+  def jsonFromFile[T](path: String)(implicit m: Manifest[T]): T =
     Json.parse[T](stringFromFile(path))
 
   /**
    * @param path Relative to one of the elements in classpath, without leading "/"
    */
-  def jsonFromClasspath[T](path: String)(implicit m: Manifest[T]) =
+  def jsonFromClasspath[T](path: String)(implicit m: Manifest[T]): T =
     Json.parse[T](stringFromClasspath(path))
 }

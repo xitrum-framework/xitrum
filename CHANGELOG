@@ -1,10 +1,6 @@
 TODO:
-* Update Scala to 2.10 and Akka to 2.1
+* Update Scala to 2.10.0 and Akka to 2.1.0
   https://groups.google.com/group/akka-user/browse_thread/thread/77e1f134b5134c70
-* Replace Jerkson with JSON4S, Jacks, or jackson-module-scala
-  (Jerkson has not been updated for months)
-  https://github.com/json4s/json4s
-  http://wiki.fasterxml.com/JacksonModuleScala
 * Reload classes and routes in development mode with Javassist or Eclipse JDT
   http://stackoverflow.com/questions/5226746/how-do-grails-or-play-detect-changes-and-hot-reload-classes
 * SockJS: Add cluster mode
@@ -27,6 +23,15 @@ TODO:
 * Support SPDY
 
 1.12 (planned):
+* Replace Jerkson with JSON4S (Jerkson has been abandoned)
+    https://github.com/json4s/json4s
+  Note that there are also other libs like Jacks and jackson-module-scala
+    http://wiki.fasterxml.com/JacksonModuleScala
+  Basically, you only have to replace
+    import com.codahale.jerkson.Json
+  in your code with
+    import xitrum.util.Json
+* Rename config/xitrum.json to config/xitrum.conf
 * Add methods to render Scalate templates directly from strings (non-file):
     renderScalateString(templateContent, templateType); templateType: "jade", "mustache", "scaml", "ssp"
     renderJadeString(templateContent)

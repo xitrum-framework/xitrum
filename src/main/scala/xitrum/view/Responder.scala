@@ -11,14 +11,13 @@ import org.jboss.netty.util.CharsetUtil
 import HttpHeaders.Names.{CONTENT_TYPE, CONTENT_LENGTH, TRANSFER_ENCODING}
 import HttpHeaders.Values.{CHUNKED, NO_CACHE}
 
-import com.codahale.jerkson.Json
-
 import xitrum.{Controller, Config}
 import xitrum.controller.Action
 import xitrum.etag.NotModified
 import xitrum.handler.up.NoPipelining
 import xitrum.handler.down.{XSendFile, XSendResource}
 import xitrum.routing.Routes
+import xitrum.util.Json
 
 /**
  * When responding text, charset is automatically set, as advised by Google:
@@ -179,7 +178,7 @@ trait Responder extends JS with Flash with Knockout {
    * "text/json" would make the browser download instead of displaying the content.
    * It makes debugging a pain.
    */
-  def respondJson(obj: Any): ChannelFuture = {
+  def respondJson(obj: AnyRef): ChannelFuture = {
     val json = Json.generate(obj)
     respondText(json, "application/json; charset=" + Config.config.request.charset)
   }
@@ -191,7 +190,7 @@ trait Responder extends JS with Flash with Knockout {
    *
    * Content-Type header is set to "application/javascript".
    */
-  def respondJsonP(obj: Any, function: String): ChannelFuture = {
+  def respondJsonP(obj: AnyRef, function: String): ChannelFuture = {
     val json = Json.generate(obj)
     val text = function + "(" + json + ");\r\n"
     respondJs(text)

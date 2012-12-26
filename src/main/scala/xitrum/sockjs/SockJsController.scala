@@ -6,11 +6,10 @@ import org.jboss.netty.channel.ChannelFutureListener
 import org.jboss.netty.buffer.ChannelBuffers
 import org.jboss.netty.handler.codec.http.{DefaultCookie, HttpHeaders, HttpResponseStatus}
 
-import com.codahale.jerkson.Json
-
 import xitrum.{Config, Controller, SkipCSRFCheck}
 import xitrum.etag.NotModified
 import xitrum.routing.Routes
+import xitrum.util.Json
 import xitrum.view.DocType
 
 // General info:
@@ -295,8 +294,8 @@ class SockJsController extends Controller with SkipCSRFCheck {
             if (messages.isEmpty) {
               respondStreamingWithLimit("h\n")
             } else {
-              val json = "a" + Json.generate(messages) + "\n"
-              respondStreamingWithLimit(json)
+              val json = Json.generate(messages)
+              respondStreamingWithLimit("a" + json + "\n")
             }
           } else {
             false

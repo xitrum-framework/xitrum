@@ -30,8 +30,7 @@ trait JS {
   /**
    * Do not use this to escape JSON, because they are different! For example
    * JSON does not escape ' character, while JavaScript does. To escape JSON,
-   * use Jerkson:
-   * com.codahale.jerkson.Json.generate(List(message))
+   * use JSON4S or xitrum.util.Json, e.g xitrum.util.Json.generate(List(string)).
    *
    * org.apache.commons.lang3.StringEscapeUtils is used internally.
    */

@@ -1,11 +1,12 @@
 package xitrum
 
 import akka.actor.ActorRef
-import com.codahale.jerkson.Json
+
 import org.jboss.netty.channel.ChannelFutureListener
 
 import xitrum.routing.Routes
 import xitrum.sockjs.SockJsNonWebSocketSessions
+import xitrum.util.Json
 
 abstract class SockJsHandler extends Logger {
   /** Set by SockJsController; true if raw WebSocket transport is used */
@@ -40,7 +41,8 @@ abstract class SockJsHandler extends Logger {
       if (rawWebSocket) {
         webSocketController.respondWebSocket(message)
       } else {
-        webSocketController.respondWebSocket("a" + Json.generate(List(message)))
+        val json = Json.generate(List(message))
+        webSocketController.respondWebSocket("a" + json)
       }
     }
   }

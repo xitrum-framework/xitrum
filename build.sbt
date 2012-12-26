@@ -32,15 +32,6 @@ libraryDependencies += "com.hazelcast" % "hazelcast" % "2.4.1"
 // Hazelcast can be configured in Xitrum as super client or native client
 libraryDependencies += "com.hazelcast" % "hazelcast-client" % "2.4.1"
 
-// Jerkson ---------------------------------------------------------------------
-
-// https://github.com/codahale/jerkson
-// lift-json does not generate correctly for:
-//   List(Map("user" -> List("langtu"), "body" -> List("hello world")))
-resolvers += "repo.codahale.com" at "http://repo.codahale.com"
-
-libraryDependencies += "com.codahale" % "jerkson_2.9.1" % "0.5.0"
-
 // Scalate ---------------------------------------------------------------------
 
 libraryDependencies += "org.fusesource.scalate" % "scalate-core_2.9" % "1.6.0"
@@ -66,6 +57,8 @@ libraryDependencies += "org.jboss.marshalling" % "jboss-marshalling-river" % "1.
 
 // For jsEscape
 libraryDependencies += "org.apache.commons" % "commons-lang3" % "3.1"
+
+libraryDependencies += "org.json4s" %% "json4s-native" % "3.0.0"
 
 libraryDependencies += "tv.cntt" %% "scaposer" % "1.2"
 
