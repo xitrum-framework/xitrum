@@ -1,9 +1,3 @@
 // http://www.cakesolutions.net/teamblogs/2012/01/28/publishing-sbt-projects-to-nexus/
 // https://groups.google.com/forum/?fromgroups=#!topic/simple-build-tool/Z54e0wM6SbU
-
-resolvers += Resolver.url(
-  "sbt-plugin-releases",
-  url("http://scalasbt.artifactoryonline.com/scalasbt/sbt-plugin-releases/")
-)(Resolver.ivyStylePatterns)
-
 addSbtPlugin("com.typesafe.sbt" % "sbt-pgp" % "0.7")
