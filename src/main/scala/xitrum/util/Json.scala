@@ -1,7 +1,6 @@
 package xitrum.util
 
 import org.json4s.{DefaultFormats, NoTypeHints}
-import org.json4s.native.JsonMethods
 import org.json4s.native.Serialization
 
 object Json {
@@ -14,7 +13,6 @@ object Json {
   // Parses JSON string to case object.
   def parse[T](jsonString: String)(implicit m: Manifest[T]) = {
     implicit val formats = DefaultFormats
-    val json = JsonMethods.parse(jsonString)
-    json.extract[T]
+    Serialization.read[T](jsonString)
   }
 }
