@@ -20,6 +20,9 @@ TODO:
 * Support SPDY
 
 1.13 (planned):
+* Support listening on a specific network interface, not all intefaces as in
+  previous versions, see:
+  https://github.com/ngocdaothanh/xitrum-new/blob/master/config/xitrum.conf
 * Update Scala to 2.10.0 and Akka to 2.1.0
   https://groups.google.com/group/akka-user/browse_thread/thread/77e1f134b5134c70
 * Add Rails-like asset pipeline (using wro4j?)
