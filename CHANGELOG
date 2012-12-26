@@ -1,9 +1,7 @@
 TODO:
-* Update Scala to 2.10.0 and Akka to 2.1.0
-  https://groups.google.com/group/akka-user/browse_thread/thread/77e1f134b5134c70
 * Reload classes and routes in development mode with Javassist or Eclipse JDT
   http://stackoverflow.com/questions/5226746/how-do-grails-or-play-detect-changes-and-hot-reload-classes
-* SockJS: Add cluster mode
+* Add cluster mode to SockJS using cluster feature of Akka and Hazelcast
 * Add automatic HEAD request handling for the whole site
 * Integrate Metrics
   http://metrics.codahale.com/
@@ -22,15 +20,22 @@ TODO:
 * Middleware architecture based on Netty handlers
 * Support SPDY
 
-1.12 (planned):
+1.13 (planned):
+* Update Scala to 2.10.0 and Akka to 2.1.0
+  https://groups.google.com/group/akka-user/browse_thread/thread/77e1f134b5134c70
+* Add connection abort handling for SockJS
+* Add automatic CORS request handling for the whole site
+  http://www.html5rocks.com/en/tutorials/cors/
+
+1.12:
 * Replace Jerkson with JSON4S (Jerkson has been abandoned)
     https://github.com/json4s/json4s
+  Basically, in your code you only have to replace
+    import com.codahale.jerkson.Json
+  with
+    import xitrum.util.Json
   Note that there are also other libs like Jacks and jackson-module-scala
     http://wiki.fasterxml.com/JacksonModuleScala
-  Basically, you only have to replace
-    import com.codahale.jerkson.Json
-  in your code with
-    import xitrum.util.Json
 * Rename config/xitrum.json to config/xitrum.conf
   https://github.com/typesafehub/config
 * Add methods to render Scalate templates directly from strings (non-file):
@@ -43,11 +48,8 @@ TODO:
   Scalate doc to know how to do it yourself:
     http://scalate.fusesource.org/documentation/scalate-embedding-guide.html
     http://scalate.fusesource.org/developers.html
-* Add automatic CORS request handling for the whole site
-  http://www.html5rocks.com/en/tutorials/cors/
 * Add Unicode quoting for SockJS
   https://groups.google.com/group/sockjs/msg/9da24b0dde8916e4
-* Add connection close handling for SockJS
 * Update Netty from 3.5.11.Final to 3.6.0.Final
   https://netty.io/Blog/Netty+360Final+released+-+Keep+on+moving
 * Update Scalate from 1.5.3 to 1.6.0
