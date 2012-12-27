@@ -116,9 +116,9 @@ object Dispatcher extends Logger {
               controller.jsRespond("alert(\"" + controller.jsEscape(errorMsg) + "\")")
             else
               controller.respondText(errorMsg)
-
-            AccessLog.logDynamicContentAccess(controller, beginTimestamp, 0, false, e)
           }
+
+          AccessLog.logDynamicContentAccess(controller, beginTimestamp, 0, false, e)
         }
     }
   }

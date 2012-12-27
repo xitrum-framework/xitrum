@@ -25,6 +25,7 @@ TODO:
   https://github.com/ngocdaothanh/xitrum-new/blob/master/config/xitrum.conf
 * For debugging, if you want to see request and response, set log level in
   config/logback.xml to TRACE
+* Log details for 500 error in production mode
 * Update Scala to 2.10.0 and Akka to 2.1.0
   https://groups.google.com/group/akka-user/browse_thread/thread/77e1f134b5134c70
 * Add Rails-like asset pipeline (using wro4j?)
