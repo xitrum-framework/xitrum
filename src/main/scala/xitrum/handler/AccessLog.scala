@@ -44,7 +44,7 @@ object AccessLog extends Logger {
     if (e == null) {
       if (logger.isDebugEnabled) logger.debug(msgWithTime(controller, beginTimestamp) + extraInfo(controller, cacheSecs, hit))
     } else {
-      if (logger.isErrorEnabled) logger.error("Dispatch error " + msgWithTime(controller, beginTimestamp) + extraInfo(controller, cacheSecs, hit), e)
+      logger.error("Dispatch error " + msgWithTime(controller, beginTimestamp) + extraInfo(controller, cacheSecs, hit), e)
     }
   }
 

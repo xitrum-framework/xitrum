@@ -4,6 +4,7 @@ import org.jboss.netty.channel.{ChannelEvent, ChannelDownstreamHandler, ChannelH
 import org.jboss.netty.handler.codec.http.{HttpHeaders, HttpMethod, HttpRequest, HttpResponse}
 import ChannelHandler.Sharable
 
+import xitrum.Logger
 import xitrum.etag.NotModified
 
 /**
@@ -13,7 +14,7 @@ import xitrum.etag.NotModified
  * http://stackoverflow.com/questions/12506897/is-safari-on-ios-6-caching-ajax-results
  */
 @Sharable
-class FixiOS6SafariPOST extends ChannelDownstreamHandler {
+class FixiOS6SafariPOST extends ChannelDownstreamHandler with Logger {
   def handleDownstream(ctx: ChannelHandlerContext, e: ChannelEvent) {
     if (!e.isInstanceOf[DownstreamMessageEvent]) {
       ctx.sendDownstream(e)
@@ -27,7 +28,12 @@ class FixiOS6SafariPOST extends ChannelDownstreamHandler {
     }
 
     val response = m.asInstanceOf[HttpResponse]
-    val request  = ctx.getChannel.getAttachment.asInstanceOf[HttpRequest]
+
+    // See ChannelPipelineFactory
+    // This is the last Xitrum handler, log the request
+    if (logger.isTraceEnabled) logger.trace(response.toString)
+
+    val request = ctx.getChannel.getAttachment.asInstanceOf[HttpRequest]
     if (request.getMethod == HttpMethod.POST && !response.containsHeader(HttpHeaders.Names.CACHE_CONTROL))
       NotModified.setNoClientCache(response)
 

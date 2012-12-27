@@ -46,12 +46,12 @@ object Cache extends Logger {
   //---------------------------------------------------------------------------
 
   def put(key: Any, value: Any) {
-    logger.debug("put: " + key)
+    if (logger.isDebugEnabled) logger.debug("put: " + key)
     cache.putAsync(key.toString, value)
   }
 
   def putSecond(key: Any, value: Any, seconds: Int) {
-    logger.debug("put (" + seconds + "s): " + key)
+    if (logger.isDebugEnabled) logger.debug("put (" + seconds + "s): " + key)
     cache.put(key.toString, value, seconds, TimeUnit.SECONDS)
   }
   def putMinute(key: Any, value: Any, minutes: Int) { putSecond(key, value, minutes * 60) }
@@ -59,12 +59,12 @@ object Cache extends Logger {
   def putDay   (key: Any, value: Any, days:    Int) { putHour  (key, value, days    * 24) }
 
   def putIfAbsent(key: Any, value: Any) {
-    logger.debug("putIfAbsent: " + key)
+    if (logger.isDebugEnabled) logger.debug("putIfAbsent: " + key)
     cache.putIfAbsent(key.toString, value)
   }
 
   def putIfAbsentSecond(key: Any, value: Any, seconds: Int) {
-    logger.debug("putIfAbsent (" + seconds + "s): " + key)
+    if (logger.isDebugEnabled) logger.debug("putIfAbsent (" + seconds + "s): " + key)
     cache.putIfAbsent(key.toString, value, seconds, TimeUnit.SECONDS)
   }
   def putIfAbsentMinute(key: Any, value: Any, minutes: Int) { putIfAbsentSecond(key, value, minutes * 60) }
