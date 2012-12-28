@@ -24,11 +24,12 @@ TODO:
   https://groups.google.com/group/akka-user/browse_thread/thread/77e1f134b5134c70
 * Change Scalate template directory from src/main/view/scalate to src/main/scalate
   To update your project to Xitrum 1.13:
-  1. In project/plugins.sbt, change
+  1. Move src/main/view/scalate to src/main/scalate
+  2. In project/plugins.sbt, change
     addSbtPlugin("com.mojolly.scalate" % "xsbt-scalate-generator" % "x.x.x")
   to
     addSbtPlugin("com.mojolly.scalate" % "xsbt-scalate-generator" % "0.4.1")
-  2. In build.sbt, change
+  3. In build.sbt, change
     scalateTemplateDirectory in Compile <<= (baseDirectory) { _ / "src/main/view" }
 
     scalateBindings += Binding("helper", "xitrum.Controller", true)
