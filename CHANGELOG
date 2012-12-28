@@ -20,6 +20,8 @@ TODO:
 * Support SPDY
 
 1.13 (planned):
+* Update Scala to 2.10.0 and Akka to 2.1.0
+  https://groups.google.com/group/akka-user/browse_thread/thread/77e1f134b5134c70
 * Change Scalate template directory from src/main/view/scalate to src/main/scalate
   To update your project to Xitrum 1.13:
   1. In project/plugins.sbt, change
@@ -36,14 +38,10 @@ TODO:
       Seq(),
       Seq(Binding("helper", "xitrum.Controller", true))
     ))
-* Support listening on a specific network interface, not all intefaces as in
-  previous versions, see:
+* Add network interface config to config/xitrum.conf, see:
   https://github.com/ngocdaothanh/xitrum-new/blob/master/config/xitrum.conf
-* For debugging, if you want to see request and response, set log level in
-  config/logback.xml to TRACE
-* Log details for 500 error in production mode
-* Update Scala to 2.10.0 and Akka to 2.1.0
-  https://groups.google.com/group/akka-user/browse_thread/thread/77e1f134b5134c70
+* Add request and response log at TRACE level for easier debugging
+* Add log for 500 error in production mode
 * Add Rails-like asset pipeline (using wro4j?)
   http://guides.rubyonrails.org/asset_pipeline.html
   http://www.playframework.org/documentation/2.0/Assets
