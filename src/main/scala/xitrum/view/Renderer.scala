@@ -14,14 +14,14 @@ trait Renderer {
   //----------------------------------------------------------------------------
 
   /**
-   * Renders Scalate template file relative to src/main/view/scalate directory.
+   * Renders Scalate template file relative to src/main/scalate directory.
    * The current controller instance will be imported in the template as "helper".
    */
   def renderScalateFile(relPath: String) = Scalate.renderFile(this, relPath)
 
   /**
    * Renders Scalate template file with the path:
-   * src/main/view/scalate/<the/given/controller/Class>.<templateType>
+   * src/main/scalate/<the/given/controller/Class>.<templateType>
    *
    * @param controllerClass should be one of the parent classes of the current controller
    *                        because the current controller instance will be imported
@@ -44,7 +44,7 @@ trait Renderer {
 
   /**
    * Renders Scalate template file with the path:
-   * src/main/view/scalate/<the/given/controller/Class>/_<fragment>.<templateType>
+   * src/main/scalate/<the/given/controller/Class>/_<fragment>.<templateType>
    *
    * @param controllerClass should be one of the parent classes of the current controller
    *                        because the current controller instance will be imported

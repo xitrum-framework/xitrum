@@ -10,14 +10,8 @@ import org.jboss.netty.handler.codec.serialization.ClassResolvers
 import xitrum.{Config, Controller, Logger}
 
 object Scalate extends Logger {
-  // build.sbt of Xitrum app should have this line:
-  // scalateTemplateDirectory in Compile <<= (baseDirectory) { _ / "src/main/view" }
-  private[this] val TEMPLATE_DIR          = "src/main/view/scalate"
-
-  // build.sbt of Xitrum app should have this line:
-  // scalateBindings += Binding("helper", "xitrum.Controller", true)
+  private[this] val TEMPLATE_DIR          = "src/main/scalate"
   private[this] val CONTROLLER_BINDING_ID = "helper"
-
   private[this] val CONTEXT_BINDING_ID    = "context"
 
   private[this] val classResolver = ClassResolvers.softCachingConcurrentResolver(getClass.getClassLoader)
@@ -78,7 +72,7 @@ object Scalate extends Logger {
   //----------------------------------------------------------------------------
 
   /**
-   * Renders Scalate template file relative to src/main/view/scalate directory.
+   * Renders Scalate template file relative to src/main/scalate directory.
    * @param controller will be imported in the template as "helper"
    */
   def renderFile(controller: Controller, relPath: String): String = {

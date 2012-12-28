@@ -225,7 +225,7 @@ trait Responder extends JS with Flash with Knockout {
 
   /**
    * Responds Scalate template file with the path:
-   * src/main/view/scalate/</class/name/of/the/controller/of/the/given/action>/<action name>.<templateType>
+   * src/main/scalate/</class/name/of/the/controller/of/the/given/action>/<action name>.<templateType>
    *
    * @param templateType "jade", "mustache", "scaml", or "ssp"
    */

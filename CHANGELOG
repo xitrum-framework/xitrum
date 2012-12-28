@@ -20,6 +20,22 @@ TODO:
 * Support SPDY
 
 1.13 (planned):
+* Change Scalate template directory from src/main/view/scalate to src/main/scalate
+  To update your project to Xitrum 1.13:
+  1. In project/plugins.sbt, change
+    addSbtPlugin("com.mojolly.scalate" % "xsbt-scalate-generator" % "x.x.x")
+  to
+    addSbtPlugin("com.mojolly.scalate" % "xsbt-scalate-generator" % "0.4.1")
+  2. In build.sbt, change
+    scalateTemplateDirectory in Compile <<= (baseDirectory) { _ / "src/main/view" }
+
+    scalateBindings += Binding("helper", "xitrum.Controller", true)
+  to
+    scalateTemplateConfig in Compile := Seq(TemplateConfig(
+      file("src") / "main" / "scalate",
+      Seq(),
+      Seq(Binding("helper", "xitrum.Controller", true))
+    ))
 * Support listening on a specific network interface, not all intefaces as in
   previous versions, see:
   https://github.com/ngocdaothanh/xitrum-new/blob/master/config/xitrum.conf
@@ -44,7 +60,7 @@ TODO:
     import xitrum.util.Json
   Note that there are also other libs like Jacks and jackson-module-scala
     http://wiki.fasterxml.com/JacksonModuleScala
-* Rename config/xitrum.json to config/xitrum.conf, using
+* Change config/xitrum.json to config/xitrum.conf, using
     https://github.com/typesafehub/config
   See example:
     https://github.com/ngocdaothanh/xitrum-new/blob/master/config/xitrum.conf
