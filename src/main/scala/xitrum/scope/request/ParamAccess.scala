@@ -1,5 +1,7 @@
 package xitrum.scope.request
 
+import scala.reflect.runtime.universe._
+
 import org.jboss.netty.handler.codec.http.multipart.FileUpload
 
 import xitrum.Controller
@@ -11,12 +13,12 @@ import xitrum.exception.MissingParam
  * http://groups.google.com/group/akka-user/browse_thread/thread/ee07764dfc1ac794
  */
 object ParamAccess {
-  val manifestFileUpload = manifest[FileUpload]
-  val manifestString     = manifest[String]
-  val manifestInt        = manifest[Int]
-  val manifestLong       = manifest[Long]
-  val manifestFloat      = manifest[Float]
-  val manifestDouble     = manifest[Double]
+  val typeFileUpload = typeOf[FileUpload]
+  val typeString     = typeOf[String]
+  val typeInt        = typeOf[Int]
+  val typeLong       = typeOf[Long]
+  val typeFloat      = typeOf[Float]
+  val typeDouble     = typeOf[Double]
 }
 
 trait ParamAccess {
@@ -40,8 +42,8 @@ trait ParamAccess {
 
   //----------------------------------------------------------------------------
 
-  def param[T](key: String, coll: Params = null)(implicit e: T DefaultsTo String, m: Manifest[T]): T = {
-    if (m <:< manifestFileUpload) {
+  def param[T: TypeTag](key: String, coll: Params = null)(implicit e: T DefaultsTo String): T = {
+    if (typeOf[T] <:< typeFileUpload) {
       fileUploadParams.get(key) match {
         case None         => throw new MissingParam(key)
         case Some(values) => values(0).asInstanceOf[T]
@@ -53,8 +55,8 @@ trait ParamAccess {
     }
   }
 
-  def paramo[T](key: String, coll: Params = null)(implicit e: T DefaultsTo String, m: Manifest[T]): Option[T] = {
-    if (m <:< manifestFileUpload) {
+  def paramo[T: TypeTag](key: String, coll: Params = null)(implicit e: T DefaultsTo String): Option[T] = {
+    if (typeOf[T] <:< typeFileUpload) {
       fileUploadParams.get(key).map { values => values(0).asInstanceOf[T] }
     } else {
       val coll2  = if (coll == null) textParams else coll
@@ -64,8 +66,8 @@ trait ParamAccess {
     }
   }
 
-  def params[T](key: String, coll: Params = null)(implicit e: T DefaultsTo String, m: Manifest[T]): List[T] = {
-    if (m <:< manifestFileUpload) {
+  def params[T: TypeTag](key: String, coll: Params = null)(implicit e: T DefaultsTo String): List[T] = {
+    if (typeOf[T] <:< typeFileUpload) {
       fileUploadParams.get(key) match {
         case None         => throw new MissingParam(key)
         case Some(values) => values.asInstanceOf[List[T]]
@@ -77,8 +79,8 @@ trait ParamAccess {
     }
   }
 
-  def paramso[T](key: String, coll: Params = null)(implicit e: T DefaultsTo String, m: Manifest[T]): Option[List[T]] = {
-    if (m <:< manifestFileUpload) {
+  def paramso[T: TypeTag](key: String, coll: Params = null)(implicit e: T DefaultsTo String): Option[List[T]] = {
+    if (typeOf[T] <:< typeFileUpload) {
       fileUploadParams.get(key).asInstanceOf[Option[List[T]]]
     } else {
       val coll2 = if (coll == null) textParams else coll
@@ -89,14 +91,15 @@ trait ParamAccess {
   //----------------------------------------------------------------------------
 
   /** Applications may override this method to convert to more types. */
-  def convertText[T](value: String)(implicit m: Manifest[T]): T = {
+  def convertText[T: TypeTag](value: String): T = {
+    val t = typeOf[T]
     val any: Any =
-           if (m <:< manifestString) value
-      else if (m <:< manifestInt)    value.toInt
-      else if (m <:< manifestLong)   value.toLong
-      else if (m <:< manifestFloat)  value.toFloat
-      else if (m <:< manifestDouble) value.toDouble
-      else throw new Exception("Cannot covert " + value + " to " + m)
+           if (t <:< typeString) value
+      else if (t <:< typeInt)    value.toInt
+      else if (t <:< typeLong)   value.toLong
+      else if (t <:< typeFloat)  value.toFloat
+      else if (t <:< typeDouble) value.toDouble
+      else throw new Exception("Cannot covert " + value + " to " + t)
 
     any.asInstanceOf[T]
   }

@@ -6,6 +6,7 @@ version := "1.13-SNAPSHOT"
 
 scalacOptions ++= Seq(
   "-deprecation",
+  "-feature",
   "-unchecked"
 )
 
@@ -20,7 +21,7 @@ resolvers += "SonatypeReleases" at "http://oss.sonatype.org/content/repositories
 
 resolvers += "Typesafe" at "http://repo.typesafe.com/typesafe/releases/"
 
-libraryDependencies += "com.typesafe.akka" % "akka-actor" % "2.0.4"
+libraryDependencies += "com.typesafe.akka" %% "akka-actor" % "2.1.0"
 
 // Hazelcast -------------------------------------------------------------------
 
@@ -34,7 +35,7 @@ libraryDependencies += "com.hazelcast" % "hazelcast-client" % "2.4.1"
 
 // Scalate ---------------------------------------------------------------------
 
-libraryDependencies += "org.fusesource.scalate" % "scalate-core_2.9" % "1.6.0"
+libraryDependencies += "org.fusesource.scalate" %% "scalate-core" % "1.6.0"
 
 // For Markdown
 libraryDependencies += "org.fusesource.scalamd" % "scalamd" % "1.5"
@@ -58,7 +59,7 @@ libraryDependencies += "org.jboss.marshalling" % "jboss-marshalling-river" % "1.
 // For jsEscape
 libraryDependencies += "org.apache.commons" % "commons-lang3" % "3.1"
 
-libraryDependencies += "org.json4s" %% "json4s-native" % "3.0.0"
+libraryDependencies += "org.json4s" %% "json4s-native" % "3.1.0"
 
 libraryDependencies += "tv.cntt" %% "scaposer" % "1.2"
 
@@ -68,10 +69,10 @@ libraryDependencies += "tv.cntt" %% "sclasner" % "1.2"
 
 autoCompilerPlugins := true
 
-addCompilerPlugin("org.scala-lang.plugins" % "continuations" % "2.9.2")
+addCompilerPlugin("org.scala-lang.plugins" % "continuations" % "2.10.0")
 
 scalacOptions += "-P:continuations:enable"
 
 // http://www.scala-sbt.org/release/docs/Detailed-Topics/Cross-Build
 //crossScalaVersions := Seq("2.9.2", "2.10.0")
-scalaVersion := "2.9.2"
+scalaVersion := "2.10.0"

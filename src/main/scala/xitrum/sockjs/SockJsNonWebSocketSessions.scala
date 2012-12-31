@@ -2,9 +2,12 @@ package xitrum.sockjs
 
 import java.net.URLEncoder
 
+import scala.concurrent.duration._
+import scala.concurrent.ExecutionContext.Implicits.global
+import scala.util.{Failure, Success}
+
 import akka.actor.{Actor, ActorRef, ActorSystem, Props, ReceiveTimeout}
 import akka.pattern.ask
-import akka.util.duration._
 
 import xitrum.Controller
 import xitrum.routing.Routes
@@ -13,11 +16,11 @@ import xitrum.routing.Routes
 object SockJsNonWebSocketSessions {
   // The session must time out after 5 seconds of not having a receiving connection
   // http://sockjs.github.com/sockjs-protocol/sockjs-protocol-0.3.3.html#section-46
-  val TIMEOUT_CONNECTION = 5
+  val TIMEOUT_CONNECTION = 5.seconds
 
   // The server must send a heartbeat frame every 25 seconds
   // http://sockjs.github.com/sockjs-protocol/sockjs-protocol-0.3.3.html#section-46
-  val TIMEOUT_HEARTBEAT = 25
+  val TIMEOUT_HEARTBEAT = 25.seconds
 
   // Must be bigger than TIMEOUT_HEARTBEAT "ask" timeout does not happen before
   // heartbeat timeout
@@ -35,13 +38,13 @@ object SockJsNonWebSocketSessions {
       callback(SubscribeByClientResultOpen)
       handler.onOpen()  // Call opOpen after "o" frame has been sent
     } else {
-      val future = ref.ask(SubscribeOnceByClient)(TIMEOUT_ASK seconds).mapTo[SockJsSubscribeByClientResult]
+      val future = ref.ask(SubscribeOnceByClient)(TIMEOUT_ASK).mapTo[SockJsSubscribeByClientResult]
       future.onComplete {
-        case Left(e) =>
+        case Failure(e) =>
           // The channel will be closed by SockJsController,
           // handler.onClose is called at SockJsNonWebSocketSession#postStop
           callback(SubscribeByClientResultErrorAfterOpenHasBeenSent)
-        case Right(result) =>
+        case Success(result) =>
           callback(result)
       }
     }
@@ -67,13 +70,13 @@ object SockJsNonWebSocketSessions {
 
   /** Called by subscribeStreaming above, but uses ref to avoid actor lookup cost. */
   private def subscribeStreamingByClient(actorRef: ActorRef, callback: (SockJsSubscribeByClientResult) => Boolean) {
-    val future = actorRef.ask(SubscribeOnceByClient)(TIMEOUT_ASK seconds).mapTo[SockJsSubscribeByClientResult]
+    val future = actorRef.ask(SubscribeOnceByClient)(TIMEOUT_ASK).mapTo[SockJsSubscribeByClientResult]
     future.onComplete {
-      case Left(e) =>
+      case Failure(e) =>
         // The channel will be closed by SockJsController,
         // handler.onClose is called at SockJsNonWebSocketSession#postStop
         callback(SubscribeByClientResultErrorAfterOpenHasBeenSent)
-      case Right(result) =>
+      case Success(result) =>
         if (callback(result) && result != SubscribeByClientResultAnotherConnectionStillOpen)
           subscribeStreamingByClient(actorRef, callback)
     }

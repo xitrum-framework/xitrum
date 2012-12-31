@@ -1,6 +1,7 @@
 package xitrum.sockjs
 
 import java.util.{Arrays, Random}
+import scala.util.control.NonFatal
 
 import org.jboss.netty.channel.ChannelFutureListener
 import org.jboss.netty.buffer.ChannelBuffers
@@ -446,7 +447,7 @@ class SockJsController extends Controller with SkipCSRFCheck {
         request.getContent().toString(Config.requestCharset)
       }
     } catch {
-      case _ =>
+      case NonFatal(e) =>
         ""
     }
 

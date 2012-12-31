@@ -3,7 +3,7 @@ package xitrum.sockjs
 import scala.collection.mutable.ArrayBuffer
 
 import akka.actor.{Actor, ActorRef, ActorSystem, Props, ReceiveTimeout}
-import akka.util.duration._
+import scala.concurrent.duration._
 
 import xitrum.SockJsHandler
 
@@ -32,6 +32,8 @@ case object SubscribeByClientResultErrorAfterOpenHasBeenSent        extends Sock
  * See TIMEOUT_CONNECTION and TIMEOUT_HEARTBEAT in SockJsNonWebSocketSessions.
  */
 class SockJsNonWebSocketSession(sockJsHandler: SockJsHandler) extends Actor {
+  private val TIMEOUT_CONNECTION_MILLIS = SockJsNonWebSocketSessions.TIMEOUT_CONNECTION.toMillis
+
   private val buffer = ArrayBuffer[String]()
   private var clientSender: ActorRef = null
 
@@ -45,7 +47,7 @@ class SockJsNonWebSocketSession(sockJsHandler: SockJsHandler) extends Actor {
   // the close message
   private var closed = false
 
-  context.setReceiveTimeout(SockJsNonWebSocketSessions.TIMEOUT_CONNECTION seconds)
+  context.setReceiveTimeout(SockJsNonWebSocketSessions.TIMEOUT_CONNECTION)
 
   override def preStart() {
     // sockJsHandler.onClose is called at postStop, but sockJsHandler.onOpen
@@ -70,7 +72,7 @@ class SockJsNonWebSocketSession(sockJsHandler: SockJsHandler) extends Actor {
         if (clientSender == null) {
           if (buffer.isEmpty) {
             clientSender = sender
-            context.setReceiveTimeout(SockJsNonWebSocketSessions.TIMEOUT_HEARTBEAT seconds)
+            context.setReceiveTimeout(SockJsNonWebSocketSessions.TIMEOUT_HEARTBEAT)
             //clientSender ! SubscribeByClientResultWaitForMessages
           } else {
             sender ! SubscribeByClientResultMessages(buffer.toList)
@@ -83,7 +85,7 @@ class SockJsNonWebSocketSession(sockJsHandler: SockJsHandler) extends Actor {
 
     case UnsubscribeByClient =>
       clientSender = null
-      context.setReceiveTimeout(SockJsNonWebSocketSessions.TIMEOUT_CONNECTION seconds)
+      context.setReceiveTimeout(SockJsNonWebSocketSessions.TIMEOUT_CONNECTION)
 
     case CloseByHandler =>
       // Until the timeout occurs, the server must serve the close message
@@ -97,7 +99,7 @@ class SockJsNonWebSocketSession(sockJsHandler: SockJsHandler) extends Actor {
         if (clientSender == null) {
           // Manually check if there's no subscriber for a long time
           val now = System.currentTimeMillis()
-          if (now - lastSubscribedAt > SockJsNonWebSocketSessions.TIMEOUT_CONNECTION * 1000) {
+          if (now - lastSubscribedAt > TIMEOUT_CONNECTION_MILLIS) {
             context.stop(self)
           } else {
             buffer += message
@@ -106,7 +108,7 @@ class SockJsNonWebSocketSession(sockJsHandler: SockJsHandler) extends Actor {
           // buffer is empty at this moment
           clientSender ! SubscribeByClientResultMessages(List(message))
           clientSender = null
-          context.setReceiveTimeout(SockJsNonWebSocketSessions.TIMEOUT_CONNECTION seconds)
+          context.setReceiveTimeout(SockJsNonWebSocketSessions.TIMEOUT_CONNECTION)
         }
       }
 
@@ -118,7 +120,7 @@ class SockJsNonWebSocketSession(sockJsHandler: SockJsHandler) extends Actor {
         // No message for subscriber for a long time
         clientSender ! SubscribeByClientResultMessages(Nil)
         clientSender = null
-        context.setReceiveTimeout(SockJsNonWebSocketSessions.TIMEOUT_CONNECTION seconds)
+        context.setReceiveTimeout(SockJsNonWebSocketSessions.TIMEOUT_CONNECTION)
       }
   }
 }
