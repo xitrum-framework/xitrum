@@ -74,5 +74,5 @@ addCompilerPlugin("org.scala-lang.plugins" % "continuations" % "2.10.0")
 scalacOptions += "-P:continuations:enable"
 
 // http://www.scala-sbt.org/release/docs/Detailed-Topics/Cross-Build
-//crossScalaVersions := Seq("2.9.2", "2.10.0")
+//crossScalaVersions := Seq("2.10.0")
 scalaVersion := "2.10.0"
