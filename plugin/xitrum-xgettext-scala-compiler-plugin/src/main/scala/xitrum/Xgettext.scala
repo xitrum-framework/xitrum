@@ -13,13 +13,13 @@ import nsc.plugins.PluginComponent
 class Xgettext(val global: Global) extends Plugin {
   import global._
 
-  val name = "scaposer-xgettext"
+  val name        = "scaposer-xgettext"
   val description = "This Scala compiler plugin extracts and creates gettext.pot file"
-  val components = List[PluginComponent](MapComponent, ReduceComponent)
+  val components  = List[PluginComponent](MapComponent, ReduceComponent)
 
-  val XITRUM_I18N = "xitrum.I18n"
-  val OUTPUT_FILE = "i18n.pot"
-  val HEADER      = """msgid ""
+  val XITRUM_I18N_CLASS_NAME = "xitrum.I18n"
+  val OUTPUT_FILE            = "i18n.pot"
+  val HEADER                 = """msgid ""
 msgstr ""
 "Project-Id-Version: \n"
 "POT-Creation-Date: \n"
@@ -52,8 +52,9 @@ msgstr ""
 
       def apply(unit: CompilationUnit) {
         if (emptyOutputFileExists) {
+          val xitrumI18nType = rootMirror.getClassByName(stringToTypeName(XITRUM_I18N_CLASS_NAME)).tpe
           for (tree @ Apply(Select(x1, x2), list) <- unit.body) {
-            if (x1.tpe <:< definitions.getClass(XITRUM_I18N).tpe) {
+            if (x1.tpe <:< xitrumI18nType) {
               val methodName = x2.toString
               val pos        = tree.pos  // scala.tools.nsc.util.OffsetPosition
               val line       = (relPath(pos.source.path), pos.line)
@@ -89,7 +90,6 @@ msgstr ""
     }
   }
 
-
   private object ReduceComponent extends PluginComponent {
     val global: Xgettext.this.global.type = Xgettext.this.global
 
@@ -120,6 +120,7 @@ msgstr ""
           val out = new BufferedWriter(new FileWriter(outputFile))
           out.write(builder.toString)
           out.close()
+          println("Xitrum created " + OUTPUT_FILE)
 
           reduced = true
         }

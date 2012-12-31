@@ -10,8 +10,6 @@ scalacOptions ++= Seq(
 )
 
 // https://github.com/harrah/xsbt/wiki/Cross-Build
-scalaVersion := "2.9.2"
-//scalaVersion := "2.10.0"
+scalaVersion := "2.10.0"
 
-libraryDependencies += "org.scala-lang" % "scala-compiler" % "2.9.2"
-//libraryDependencies += "org.scala-lang" % "scala-compiler" % "2.10.0"
+libraryDependencies += "org.scala-lang" % "scala-compiler" % "2.10.0"
