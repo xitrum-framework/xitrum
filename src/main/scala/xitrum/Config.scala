@@ -143,7 +143,7 @@ object Config extends Logger {
     try {
       ret = new Config(ConfigFactory.load("xitrum.conf"))
     } catch {
-      case e: Exception =>
+      case scala.util.control.NonFatal(e) =>
         exitOnError("Could not load config/xitrum.conf. For an example, see https://github.com/ngocdaothanh/xitrum-new/blob/master/config/xitrum.conf", e)
     }
     ret

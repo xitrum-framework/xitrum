@@ -26,7 +26,7 @@ object NetOption {
     try {
       bootstrap.bind(addr)
     } catch {
-      case e: Exception =>
+      case scala.util.control.NonFatal(e) =>
         val msg = Config.config.interface match {
           case None =>
             ("Could not open port %d for %s server. " +

@@ -45,7 +45,7 @@ class RouteCollector extends Logger {
         acc
       }
     } catch {
-      case e: Exception =>
+      case scala.util.control.NonFatal(e) =>
         logger.warn("Could not scan route for " + entry.relPath + " in " + entry.container, e)
         acc
     }

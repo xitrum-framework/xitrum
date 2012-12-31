@@ -49,7 +49,7 @@ class HazelcastSessionStore extends SessionStore {
               try {
                 Some(any.asInstanceOf[String])
               } catch {
-                case e: Exception => None
+                case scala.util.control.NonFatal(e) => None
               }
 
             sessionIdo match {

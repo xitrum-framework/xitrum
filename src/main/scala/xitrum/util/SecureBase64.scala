@@ -48,7 +48,7 @@ object SecureBase64 {
         }
       }
     } catch {
-      case e: Exception =>
+      case scala.util.control.NonFatal(e) =>
         None
     }
   }

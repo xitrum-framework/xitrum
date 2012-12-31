@@ -84,7 +84,7 @@ object Cache extends Logger {
     try {
       Option(cache.get(key)).map(_.asInstanceOf[T])
     } catch {
-      case e: Exception =>
+      case scala.util.control.NonFatal(e) =>
         logger.warn("Cache data restoring failed, will now remove it, key: {}", key)
         cache.remove(key)
         None

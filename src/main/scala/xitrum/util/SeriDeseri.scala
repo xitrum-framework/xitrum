@@ -35,7 +35,7 @@ object SeriDeseri {
       bais.close()
       Some(value)
     } catch {
-      case e: Exception => None
+      case scala.util.control.NonFatal(e) => None
     }
   }
 }

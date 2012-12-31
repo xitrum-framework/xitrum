@@ -169,7 +169,7 @@ object Routes extends Logger {
       logger.info("Load " + ROUTES_CACHE + "/collect routes and action/page cache config from controllers...")
       fromCacheFileOrRecollectReal()
     } catch {
-      case e: Exception =>
+      case scala.util.control.NonFatal(e) =>
         // Maybe ROUTES_CACHE file could not be loaded because dependencies have changed.
         // Try deleting and scanning again.
         val f = new File(ROUTES_CACHE)
@@ -262,7 +262,7 @@ object Routes extends Logger {
         klass.getDeclaredField(methodName)
         None
       } catch {
-        case e: Exception =>  // NoSuchFieldException
+        case scala.util.control.NonFatal(e) =>  // NoSuchFieldException
           val actionMethod = klass.getMethod(methodName)
           Some(actionMethod)
       }

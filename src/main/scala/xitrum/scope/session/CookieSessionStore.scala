@@ -26,7 +26,7 @@ class CookieSessionStore extends SessionStore with Logger {
             val immutableMap = try {
               any.asInstanceOf[Map[String, Any]]
             } catch {
-              case e: Exception =>
+              case scala.util.control.NonFatal(e) =>
                 MMap[String, Any]()
             }
 

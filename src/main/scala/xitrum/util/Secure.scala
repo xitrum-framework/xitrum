@@ -36,7 +36,7 @@ object Secure {
       try {
         Some(decryptWithoutSeal(data2, bkey))
       } catch {
-        case e: Exception => None
+        case scala.util.control.NonFatal(e) => None
       }
     }
   }
@@ -127,7 +127,7 @@ object Secure {
       val h2 = hmac(d, key)
       if (Arrays.equals(h2, h)) Some(d) else None
     } catch {
-      case e: Exception => None
+      case scala.util.control.NonFatal(e) => None
     }
   }
 }

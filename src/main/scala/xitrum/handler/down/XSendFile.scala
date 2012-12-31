@@ -204,7 +204,7 @@ object XSendFile extends Logger {
         }
       }
     } catch {
-      case e: Exception =>
+      case scala.util.control.NonFatal(e) =>
         logger.warn("Unsupported Range spec: " + spec)
         None
     }
