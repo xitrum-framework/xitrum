@@ -50,7 +50,8 @@ trait ExtEnv extends RequestEnv with ParamAccess with CSRF {
     Config.sessionStore.restore(this)
   }
 
-  def sessiono[T](key: String): Option[T] = session.get(key).map(_.asInstanceOf[T])
+  def sessiono[T](key: String)(implicit d: T DefaultsTo String): Option[T] =
+    session.get(key).map(_.asInstanceOf[T])
 
   def setCookieAndSessionIfTouchedOnRespond() {
     if (sessionTouched) Config.sessionStore.store(session, this)

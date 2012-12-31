@@ -42,7 +42,7 @@ trait ParamAccess {
 
   //----------------------------------------------------------------------------
 
-  def param[T: TypeTag](key: String, coll: Params = null)(implicit e: T DefaultsTo String): T = {
+  def param[T: TypeTag](key: String, coll: Params = null)(implicit d: T DefaultsTo String): T = {
     if (typeOf[T] <:< typeFileUpload) {
       fileUploadParams.get(key) match {
         case None         => throw new MissingParam(key)
@@ -55,7 +55,7 @@ trait ParamAccess {
     }
   }
 
-  def paramo[T: TypeTag](key: String, coll: Params = null)(implicit e: T DefaultsTo String): Option[T] = {
+  def paramo[T: TypeTag](key: String, coll: Params = null)(implicit d: T DefaultsTo String): Option[T] = {
     if (typeOf[T] <:< typeFileUpload) {
       fileUploadParams.get(key).map { values => values(0).asInstanceOf[T] }
     } else {
@@ -66,7 +66,7 @@ trait ParamAccess {
     }
   }
 
-  def params[T: TypeTag](key: String, coll: Params = null)(implicit e: T DefaultsTo String): List[T] = {
+  def params[T: TypeTag](key: String, coll: Params = null)(implicit d: T DefaultsTo String): List[T] = {
     if (typeOf[T] <:< typeFileUpload) {
       fileUploadParams.get(key) match {
         case None         => throw new MissingParam(key)
@@ -79,7 +79,7 @@ trait ParamAccess {
     }
   }
 
-  def paramso[T: TypeTag](key: String, coll: Params = null)(implicit e: T DefaultsTo String): Option[List[T]] = {
+  def paramso[T: TypeTag](key: String, coll: Params = null)(implicit d: T DefaultsTo String): Option[List[T]] = {
     if (typeOf[T] <:< typeFileUpload) {
       fileUploadParams.get(key).asInstanceOf[Option[List[T]]]
     } else {
