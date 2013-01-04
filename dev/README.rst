@@ -39,5 +39,4 @@ Otherwise there will be error:
 
   java.io.FileNotFoundException: ~/.sbt/gpg/secring.asc (No such file or directory)
 
-There are 2 plugins in "plugins" directory.
-Publish them the same way as with Xitrum above.
+Do the same with things in "plugin" directory.
