@@ -26,6 +26,8 @@ TODO:
 * Add connection abort handling for SockJS
 * Add automatic CORS request handling for the whole site
   http://www.html5rocks.com/en/tutorials/cors/
+* Update Netty from 3.6.0 to 3.6.1
+  https://netty.io/Blog/Netty+361Final+out+-+More+SSL+fixes
 
 1.13:
 * Update Scala from 1.9.2 to 2.10.0
