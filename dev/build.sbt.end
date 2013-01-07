@@ -1,3 +1,7 @@
+// Add diagrams to Scaladoc, graphviz is required
+
+scalacOptions in (Compile, doc) += "-diagrams"
+
 // Publish to Sonatype -------------------------------------------------------
 // https://github.com/sbt/sbt.github.com/blob/gen-master/src/jekyll/using_sonatype.md
 
