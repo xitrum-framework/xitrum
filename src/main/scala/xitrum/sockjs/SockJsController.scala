@@ -73,7 +73,6 @@ object SockJsController {
   // https://groups.google.com/group/sockjs/msg/9da24b0dde8916e4
   // https://groups.google.com/group/sockjs/msg/b63cd4555bd69ae4
   // https://github.com/sockjs/sockjs-node/blob/master/src/utils.coffee#L87-L109
-
   def quoteUnicode(string: String): String = {
     val b = new StringBuilder
     string.foreach { c =>
