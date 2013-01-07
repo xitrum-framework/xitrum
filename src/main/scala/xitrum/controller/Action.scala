@@ -94,4 +94,15 @@ case class Action(route: Route, var method: Method, body: () => Unit, cacheSecon
 
   def webSocketAbsoluteUrl(params: (String, Any)*)(implicit controller: Controller) = controller.webSocketAbsoluteUrlPrefix + url(params:_*)
   def webSocketAbsoluteUrl(implicit controller: Controller): String = webSocketAbsoluteUrl()(controller)
+
+  //----------------------------------------------------------------------------
+
+  /** You can write: if (currentAction == MyController.index) ... */
+  override def equals(action: Any): Boolean = {
+    // Override "equals" instead of "==" because "equals" is only called if "this" is not null
+    // http://stackoverflow.com/questions/7055299/whats-the-difference-between-null-last-and-null-eq-last-in-scala
+
+    if (action == null || !action.isInstanceOf[Action]) return false
+    route == action.asInstanceOf[Action].route
+  }
 }
