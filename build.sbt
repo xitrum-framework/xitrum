@@ -17,12 +17,6 @@ unmanagedBase in Runtime <<= baseDirectory { base => base / "config" }
 // and it takes several hours to sync from Sonatype to Maven Central
 resolvers += "SonatypeReleases" at "http://oss.sonatype.org/content/repositories/releases/"
 
-// Akka ------------------------------------------------------------------------
-
-resolvers += "Typesafe" at "http://repo.typesafe.com/typesafe/releases/"
-
-libraryDependencies += "com.typesafe.akka" %% "akka-actor" % "2.1.0"
-
 // Hazelcast -------------------------------------------------------------------
 
 // For distributed cache and Comet
@@ -58,6 +52,8 @@ libraryDependencies += "org.jboss.marshalling" % "jboss-marshalling-river" % "1.
 
 // For jsEscape
 libraryDependencies += "org.apache.commons" % "commons-lang3" % "3.1"
+
+libraryDependencies += "com.typesafe.akka" %% "akka-actor" % "2.1.0"
 
 libraryDependencies += "org.json4s" %% "json4s-native" % "3.1.0"
 
