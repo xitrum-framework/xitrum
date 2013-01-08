@@ -2,88 +2,16 @@ package xitrum.view
 
 import java.io.File
 
-import xitrum.{Controller, Config}
+import xitrum.{Config, Controller}
+import xitrum.controller.Action
+import xitrum.routing.Routes
 
 trait Renderer {
   this: Controller =>
 
-  var renderedView: Any = null
+  var renderedTemplate: Any = null
 
-  def layout = renderedView
-
-  //----------------------------------------------------------------------------
-
-  /**
-   * Renders Scalate template file relative to src/main/scalate directory.
-   * The current controller instance will be imported in the template as "helper".
-   */
-  def renderScalateFile(relPath: String) = Scalate.renderFile(this, relPath)
-
-  /**
-   * Renders Scalate template file with the path:
-   * src/main/scalate/<the/given/controller/Class>.<templateType>
-   *
-   * @param controllerClass should be one of the parent classes of the current controller
-   *                        because the current controller instance will be imported
-   *                        in the template as "helper"
-   * @param templateType "jade", "mustache", "scaml", or "ssp"
-   */
-  def renderScalate(controllerClass: Class[_], templateType: String): String = {
-    val relPath = controllerClass.getName.replace('.', File.separatorChar) + "." + templateType
-    renderScalateFile(relPath)
-  }
-
-  /**
-   * Same as renderScalate(controllerClass, templateType),
-   * where templateType is as configured in xitrum.conf.
-   */
-  def renderScalate(controllerClass: Class[_]): String =
-    renderScalate(controllerClass, Config.config.scalate)
-
-  //----------------------------------------------------------------------------
-
-  /**
-   * Renders Scalate template file with the path:
-   * src/main/scalate/<the/given/controller/Class>/_<fragment>.<templateType>
-   *
-   * @param controllerClass should be one of the parent classes of the current controller
-   *                        because the current controller instance will be imported
-   *                        in the template as "helper"
-   * @param templateType "jade", "mustache", "scaml", or "ssp"
-   */
-  def renderFragment(controllerClass: Class[_], fragment: String, templateType: String): String = {
-    val relPath = controllerClass.getName.replace('.', File.separatorChar) + File.separatorChar + "_" + fragment + "." + templateType
-    renderScalateFile(relPath)
-  }
-
-  /**
-   * Same as renderFragment(controllerClass, fragment, templateType),
-   * where templateType is as configured in xitrum.conf.
-   */
-  def renderFragment(controllerClass: Class[_], fragment: String): String =
-    renderFragment(controllerClass, fragment, Config.config.scalate)
-
-  /** Renders a fragment of the current controller. */
-  def renderFragment(fragment: String): String =
-    renderFragment(getClass, fragment)
-
-  //----------------------------------------------------------------------------
-
-  /** @param templateType jade, mustache, scaml, ssp */
-  def renderScalateString(templateContent: String, templateType: String): String =
-    Scalate.renderString(this, templateContent, templateType)
-
-  def renderJadeString(templateContent: String): String =
-    Scalate.renderJadeString(this, templateContent)
-
-  def renderMustacheString(templateContent: String): String =
-    Scalate.renderMustacheString(this, templateContent)
-
-  def renderScamlString(templateContent: String): String =
-    Scalate.renderScamlString(this, templateContent)
-
-  def renderSspString(templateContent: String): String =
-    Scalate.renderSspString(this, templateContent)
+  def layout = renderedTemplate
 
   //----------------------------------------------------------------------------
 
@@ -112,4 +40,123 @@ trait Renderer {
     builder.append("\r\n\r\n")
     builder.toString
   }
+
+  //----------------------------------------------------------------------------
+
+  /**
+   * Renders the template associated with the action.
+   *
+   * If you use Scalate and want to use template type other than the default type
+   * configured in xitrum.conf, set options to Map("type" -> "jade", "mustache", "scaml", or "ssp")
+   */
+  def renderTemplate(action: Action, options: Map[String, Any] = Map()): String = {
+    val nonNullActionMethod = if (action.method == null) Routes.lookupMethod(action.route) else action.method
+    val controllerClass     = nonNullActionMethod.getDeclaringClass
+    val controllerName      = controllerClass.getName
+    val actionName          = nonNullActionMethod.getName
+    Config.config.templateEngine.renderTemplate(this, action, controllerName, actionName, options)
+  }
+
+  /**
+   * Same as renderTemplate(action, options),
+   * where action is currentAction.
+   */
+  def renderTemplate(options: Map[String, Any]): String =
+    renderTemplate(currentAction, options)
+
+  def renderTemplate(): String =
+    renderTemplate(currentAction, Map[String, Any]())
+
+  //----------------------------------------------------------------------------
+
+  /**
+   * Renders the template associated with an action to "renderedTemplate",
+   * then calls the layout function.
+   *
+   * If you use Scalate and want to use template type other than the default type
+   * configured in xitrum.conf, set options to Map("type" -> "jade", "mustache", "scaml", or "ssp")
+   */
+  def renderTemplateWithLayout(action: Action, customLayout: () => Any, options: Map[String, Any] = Map()): String = {
+    renderedTemplate = renderTemplate(action, options)
+    customLayout.apply().toString
+  }
+
+  /**
+   * Same as renderTemplateWithLayout(action, customLayout, options),
+   * where action is currentAction.
+   */
+  def renderTemplateWithLayout(customLayout: () => Any, options: Map[String, Any]): String =
+    renderTemplateWithLayout(currentAction, customLayout, options)
+
+  def renderTemplateWithLayout(customLayout: () => Any): String =
+    renderTemplateWithLayout(currentAction, customLayout, Map[String, Any]())
+
+  /**
+   * Same as renderTemplateWithLayout(action, customLayout, options),
+   * where customLayout is the current controller's layout method.
+   */
+  def renderTemplateWithLayout(action: Action, options: Map[String, Any]): String =
+    renderTemplateWithLayout(action, layout _, options)
+
+  def renderTemplateWithLayout(action: Action): String =
+    renderTemplateWithLayout(action, layout _, Map[String, Any]())
+
+  /**
+   * Same as renderTemplateWithLayout(action, customLayout, options),
+   * where action is currentAction and customLayout is the current controller's layout method.
+   */
+  def renderTemplateWithLayout(options: Map[String, Any]): String =
+    renderTemplateWithLayout(currentAction, layout _, options)
+
+  def renderTemplateWithLayout(): String =
+    renderTemplateWithLayout(currentAction, layout _, Map[String, Any]())
+
+  //----------------------------------------------------------------------------
+
+  def renderWithLayout(inlineTemplate: Any): String = {
+    renderedTemplate = inlineTemplate
+    layout.toString()
+  }
+
+  /**
+   * Renders the template (typically the layout) associated with the controller class.
+   *
+   * If you use Scalate and want to use template type other than the default type
+   * configured in xitrum.conf, set options to Map("type" -> "jade", "mustache", "scaml", or "ssp")
+   *
+   * @param controllerClass should be one of the parent classes of the current
+   * controller because the current controller instance will be imported in the
+   * template as "helper"
+   */
+  def renderTemplate(controllerClass: Class[_], options: Map[String, Any]): String =
+    Config.config.templateEngine.renderTemplate(this, controllerClass, options)
+
+  def renderTemplate(controllerClass: Class[_]): String =
+    Config.config.templateEngine.renderTemplate(this, controllerClass, Map())
+
+  //----------------------------------------------------------------------------
+
+  /**
+   * Renders the template fragment inside the directory associated with the
+   * controller class.
+   *
+   * If you use Scalate and want to use template type other than the default type
+   * configured in xitrum.conf, set options to Map("type" -> "jade", "mustache", "scaml", or "ssp")
+   *
+   * @param controllerClass should be one of the parent classes of the current
+   * controller because the current controller instance will be imported in the
+   * template as "helper"
+   */
+  def renderFragment(controllerClass: Class[_], fragment: String, options: Map[String, Any]): String =
+    Config.config.templateEngine.renderFragment(this, controllerClass, fragment, options)
+
+  def renderFragment(controllerClass: Class[_], fragment: String): String =
+    Config.config.templateEngine.renderFragment(this, controllerClass, fragment, Map())
+
+  /** Renders the fragment associated with the current controller class. */
+  def renderFragment(fragment: String, options: Map[String, Any]): String =
+    Config.config.templateEngine.renderFragment(this, getClass, fragment, options)
+
+  def renderFragment(fragment: String): String =
+    Config.config.templateEngine.renderFragment(this, getClass, fragment, Map())
 }

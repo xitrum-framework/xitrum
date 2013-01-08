@@ -46,7 +46,7 @@ trait JS {
 
   def jsRespond(fragments: Any*): ChannelFuture = {
     val js = fragments.mkString(";\n") + ";\n"
-    respondText(js, "text/javascript; charset=" + Config.config.request.charset)
+    respondText(js, "text/javascript")
   }
 
   /** See http://stackoverflow.com/questions/503093/how-can-i-make-a-redirect-page-in-jquery */

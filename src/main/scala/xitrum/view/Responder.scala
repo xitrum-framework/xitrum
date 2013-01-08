@@ -58,27 +58,27 @@ trait Responder extends JS with Flash with Knockout {
   //----------------------------------------------------------------------------
 
   /** If Content-Type header is not set, it is set to "application/octet-stream" */
-  private def writeHeaderIfFirstChunk() {
-    if (!responded) {
-      if (!response.containsHeader(CONTENT_TYPE))
-        response.setHeader(CONTENT_TYPE, "application/octet-stream")
+  private def respondHeadersForFirstChunk() {
+    if (responded) return
 
-      // There should be no CONTENT_LENGTH header
-      response.removeHeader(CONTENT_LENGTH)
+    if (!response.containsHeader(CONTENT_TYPE))
+      response.setHeader(CONTENT_TYPE, "application/octet-stream")
 
-      setNoClientCache()
+    // There should be no CONTENT_LENGTH header
+    response.removeHeader(CONTENT_LENGTH)
 
-      // TRANSFER_ENCODING header is automatically set by Netty when it send the
-      // real response. We don't need to manually set it here.
-      // However, this header is not allowed in HTTP/1.0:
-      // http://sockjs.github.com/sockjs-protocol/sockjs-protocol-0.3.3.html#section-165
-      if (request.getProtocolVersion.compareTo(HttpVersion.HTTP_1_0) == 0) {
-        response.setChunked(false)
-        respond()
-        response.setChunked(true)
-      } else {
-        respond()
-      }
+    setNoClientCache()
+
+    // TRANSFER_ENCODING header is automatically set by Netty when it send the
+    // real response. We don't need to manually set it here.
+    // However, this header is not allowed in HTTP/1.0:
+    // http://sockjs.github.com/sockjs-protocol/sockjs-protocol-0.3.3.html#section-165
+    if (request.getProtocolVersion.compareTo(HttpVersion.HTTP_1_0) == 0) {
+      response.setChunked(false)
+      respond()
+      response.setChunked(true)
+    } else {
+      respond()
     }
   }
 
@@ -108,18 +108,21 @@ trait Responder extends JS with Flash with Knockout {
   //----------------------------------------------------------------------------
 
   /**
-   * If contentType param is not given and Content-Type header is not set, it is
-   * set to "application/xml" if text param is Node or NodeSeq, otherwise it is
+   * @param fallbackContentType Only used if Content-Type header has not been set.
+   * If not given and Content-Type header is not set, it is set to
+   * "application/xml" if text param is Node or NodeSeq, otherwise it is
    * set to "text/plain".
+   *
+   * @param convertXmlToXhtml <br />.toString by default returns <br></br> which
+   * is rendered as 2 <br /> tags on some browsers! Set to false if you really
+   * want XML, not XHTML. See http://www.scala-lang.org/node/492 and
+   * http://www.ne.jp/asahi/hishidama/home/tech/scala/xml.html
    */
-  def respondText(text: Any, contentType: String = null): ChannelFuture = {
+  def respondText(text: Any, fallbackContentType: String = null, convertXmlToXhtml: Boolean = true): ChannelFuture = {
     val textIsXml = text.isInstanceOf[Node] || text.isInstanceOf[NodeSeq]
 
-    // <br />.toString will create <br></br> which responds as 2 <br /> on some browsers!
-    // http://www.scala-lang.org/node/492
-    // http://www.ne.jp/asahi/hishidama/home/tech/scala/xml.html
     val respondedText =
-      if (textIsXml) {
+      if (textIsXml && convertXmlToXhtml) {
         if (text.isInstanceOf[Node])
           Xhtml.toXhtml(text.asInstanceOf[Node])
         else
@@ -128,11 +131,18 @@ trait Responder extends JS with Flash with Knockout {
         text.toString
       }
 
-    if (!responded) {
-      // Set content type automatically
-      if (contentType != null)
-        response.setHeader(CONTENT_TYPE, contentType)
-      else if (!response.containsHeader(CONTENT_TYPE)) {
+    if (!responded && !response.containsHeader(CONTENT_TYPE)) {
+      // Set content type
+      if (fallbackContentType != null) {
+        // https://developers.google.com/speed/docs/best-practices/rendering#SpecifyCharsetEarly
+        val withCharset =
+          if (fallbackContentType.toLowerCase.contains("charset"))
+            fallbackContentType
+          else
+            fallbackContentType + "; charset=" + Config.config.request.charset
+
+        response.setHeader(CONTENT_TYPE, withCharset)
+      } else {
         if (textIsXml)
           response.setHeader(CONTENT_TYPE, "application/xml; charset=" + Config.config.request.charset)
         else
@@ -142,7 +152,7 @@ trait Responder extends JS with Flash with Knockout {
 
     val cb = ChannelBuffers.copiedBuffer(respondedText, Config.requestCharset)
     if (response.isChunked) {
-      writeHeaderIfFirstChunk()
+      respondHeadersForFirstChunk()
       channel.write(new DefaultHttpChunk(cb))
     } else {
       // Content length is number of bytes, not characters!
@@ -154,19 +164,24 @@ trait Responder extends JS with Flash with Knockout {
 
   //----------------------------------------------------------------------------
 
+  /** Content-Type header is set to "application/xml". */
+  def respondXml(any: Any): ChannelFuture = {
+    respondText(any, "application/xml", false)
+  }
+
   /** Content-Type header is set to "text/html". */
   def respondHtml(any: Any): ChannelFuture = {
-    respondText(any, "text/html; charset=" + Config.config.request.charset)
+    respondText(any, "text/html")
   }
 
   /** Content-Type header is set to "application/javascript". */
   def respondJs(any: Any): ChannelFuture = {
-    respondText(any, "application/javascript; charset=" + Config.config.request.charset)
+    respondText(any, "application/javascript")
   }
 
   /** Content-Type header is set to "application/json". */
   def respondJsonText(any: Any): ChannelFuture = {
-    respondText(any, "application/json; charset=" + Config.config.request.charset)
+    respondText(any, "application/json")
   }
 
   /**
@@ -180,7 +195,7 @@ trait Responder extends JS with Flash with Knockout {
    */
   def respondJson(obj: AnyRef): ChannelFuture = {
     val json = Json.generate(obj)
-    respondText(json, "application/json; charset=" + Config.config.request.charset)
+    respondText(json, "application/json")
   }
 
   /**
@@ -207,82 +222,79 @@ trait Responder extends JS with Flash with Knockout {
 
   //----------------------------------------------------------------------------
 
-  def respondInlineView(view: Any): ChannelFuture = {
-    respondInlineView(view, layout _)
+  /**
+   * If you use Scalate and want to use template type other than the default type
+   * configured in xitrum.conf, set options to Map("type" -> "jade", "mustache", "scaml", or "ssp")
+   */
+  def respondTemplate(action: Action, options: Map[String, Any] = Map()): ChannelFuture = {
+    val string = renderTemplate(action, options)
+    respondText(string, "text/html")
   }
 
-  /** Content-Type header is set to "text/html" */
-  def respondInlineView(view: Any, customLayout: () => Any): ChannelFuture = {
-    renderedView = view
-    val respondedLayout = customLayout.apply()
-    if (respondedLayout == null)
-      respondText(renderedView, "text/html; charset=" + Config.config.request.charset)
-    else
-      respondText(respondedLayout, "text/html; charset=" + Config.config.request.charset)
-  }
+  def respondTemplate(options: Map[String, Any]): ChannelFuture =
+    respondTemplate(currentAction, options)
+
+  def respondTemplate(): ChannelFuture =
+    respondTemplate(currentAction, Map[String, Any]())
 
   //----------------------------------------------------------------------------
 
   /**
-   * Responds Scalate template file with the path:
-   * src/main/scalate/</class/name/of/the/controller/of/the/given/action>/<action name>.<templateType>
-   *
-   * @param templateType "jade", "mustache", "scaml", or "ssp"
+   * If you use Scalate and want to use template type other than the default type
+   * configured in xitrum.conf, set options to Map("type" -> "jade", "mustache", "scaml", or "ssp")
    */
-  def respondView(action: Action, customLayout: () => Any, templateType: String): ChannelFuture = {
-    val nonNullActionMethod = if (action.method == null) Routes.lookupMethod(action.route) else action.method
-    val controllerClass     = nonNullActionMethod.getDeclaringClass
-    val actionName          = nonNullActionMethod.getName
-    val relPath             = controllerClass.getName.replace('.', File.separatorChar) + File.separator + actionName + "." + templateType
-
-    renderedView = renderScalateFile(relPath)
-    val respondedLayout = customLayout.apply()
-    if (respondedLayout == null)
-      respondText(renderedView, "text/html; charset=" + Config.config.request.charset)
-    else
-      respondText(respondedLayout, "text/html; charset=" + Config.config.request.charset)
+  def respondTemplateWithLayout(action: Action, customLayout: () => Any, options: Map[String, Any] = Map()): ChannelFuture = {
+    val string = renderTemplateWithLayout(action, customLayout, options)
+    respondText(string, "text/html")
   }
 
   /**
-   * Same as respondView(action, customLayout, templateType),
-   * where templateType is as configured in xitrum.conf.
+   * Same as respondView(action, customLayout, options),
+   * where action is currentAction.
    */
-  def respondView(action: Action, customLayout: () => Any): ChannelFuture = {
-    respondView(action, customLayout, Config.config.scalate)
-  }
+  def respondTemplateWithLayout(customLayout: () => Any, options: Map[String, Any]): ChannelFuture =
+    respondTemplateWithLayout(currentAction, customLayout, options)
+
+  def respondTemplateWithLayout(customLayout: () => Any): ChannelFuture =
+    respondTemplateWithLayout(currentAction, customLayout, Map[String, Any]())
 
   /**
-   * Same as respondView(action, customLayout, templateType),
-   * where customLayout is from the controller's layout method.
+   * Same as respondView(action, customLayout, options),
+   * where customLayout is the controller's layout method.
    */
-  def respondView(action: Action, templateType: String): ChannelFuture = {
-    respondView(action, layout _, templateType)
-  }
+  def respondTemplateWithLayout(action: Action, options: Map[String, Any]): ChannelFuture =
+    respondTemplateWithLayout(action, layout _, options)
+
+  def respondTemplateWithLayout(action: Action): ChannelFuture =
+    respondTemplateWithLayout(action, layout _, Map[String, Any]())
 
   /**
-   * Same as respondView(action, customLayout, templateType),
-   * where action is currentAction and customLayout is from the controller's layout method.
+   * Same as respondView(action, customLayout, options),
+   * where action is currentAction and customLayout is the controller's layout method.
    */
-  def respondView(templateType: String): ChannelFuture = {
-    respondView(currentAction, templateType)
+  def respondTemplateWithLayout(options: Map[String, Any]): ChannelFuture =
+    respondTemplateWithLayout(currentAction, layout _, options)
+
+  def respondTemplateWithLayout(): ChannelFuture =
+    respondTemplateWithLayout(currentAction, layout _, Map[String, Any]())
+
+  //----------------------------------------------------------------------------
+
+  /** Content-Type header is set to "text/html" */
+  def respondWithLayout(inlineTemplate: Any): ChannelFuture = {
+    val string = renderWithLayout(inlineTemplate)
+    respondText(string, "text/html")
   }
 
-  /**
-   * Same as respondView(action, customLayout, templateType),
-   * where customLayout is from the controller's layout method and
-   * templateType is as configured in xitrum.conf.
-   */
-  def respondView(action: Action): ChannelFuture = {
-    respondView(action, layout _, Config.config.scalate)
+  /** Content-Type header is set to "text/html" */
+  def respondTemplate(controllerClass: Class[_], options: Map[String, Any]): ChannelFuture = {
+    val string = renderTemplate(controllerClass, options)
+    respondText(string, "text/html")
   }
 
-  /**
-   * Same as respondView(action, customLayout, templateType),
-   * where action is currentAction, customLayout is from the controller's layout method and
-   * templateType is as configured in xitrum.conf.
-   */
-  def respondView(): ChannelFuture = {
-    respondView(currentAction, Config.config.scalate)
+  def respondTemplate(controllerClass: Class[_]): ChannelFuture = {
+    val string = renderTemplate(controllerClass, Map[String, Any]())
+    respondText(string, "text/html")
   }
 
   //----------------------------------------------------------------------------
@@ -295,7 +307,7 @@ trait Responder extends JS with Flash with Knockout {
   /** If Content-Type header is not set, it is set to "application/octet-stream" */
   def respondBinary(channelBuffer: ChannelBuffer): ChannelFuture = {
     if (response.isChunked) {
-      writeHeaderIfFirstChunk()
+      respondHeadersForFirstChunk()
       channel.write(new DefaultHttpChunk(channelBuffer))
     } else {
       if (!response.containsHeader(CONTENT_TYPE))

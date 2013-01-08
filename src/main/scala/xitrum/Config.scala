@@ -9,6 +9,7 @@ import com.hazelcast.core.{Hazelcast, HazelcastInstance}
 import com.typesafe.config.{Config => TConfig, ConfigFactory}
 
 import xitrum.scope.session.SessionStore
+import xitrum.view.TemplateEngine
 import xitrum.util.Loader
 
 //----------------------------------------------------------------------------
@@ -58,7 +59,7 @@ class ResponseConfig(config: TConfig) {
   val clientMustRevalidateStaticFiles = config.getBoolean("clientMustRevalidateStaticFiles")
 }
 
-class Config(config: TConfig) {
+class Config(val config: TConfig) {
   val basicAuth =
     if (config.hasPath("basicAuth"))
       Some(new BasicAuthConfig(config.getConfig("basicAuth")))
@@ -81,7 +82,11 @@ class Config(config: TConfig) {
     else
       None
 
-  val scalate = config.getString("scalate")
+  val templateEngine = {
+    val className = config.getString("templateEngine")
+    val klass     = Class.forName(className)
+    klass.newInstance().asInstanceOf[TemplateEngine]
+  }
 
   val hazelcastMode = config.getString("hazelcastMode")
 

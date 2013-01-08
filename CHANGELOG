@@ -19,17 +19,21 @@ TODO:
 * Middleware architecture based on Netty handlers
 * Support SPDY
 
-1.14 (planned):
-* Add comparison of controllers and actions
-  if (currentController == MyController) ...
-  if (currentAction == MyController.index) ...
-  https://groups.google.com/group/xitrum-framework/browse_thread/thread/a3469fea17f84ce4
+1.15 (planned):
 * Add Rails-like asset pipeline (not using wro4j because it's heavy)
   http://guides.rubyonrails.org/asset_pipeline.html
   http://www.playframework.org/documentation/2.0/Assets
 * Add connection abort handling for SockJS
 * Add automatic CORS request handling for the whole site
   http://www.html5rocks.com/en/tutorials/cors/
+
+1.14 (planned):
+* Add comparison of controllers and actions
+  if (currentController == MyController) ...
+  if (currentAction == MyController.index) ...
+  https://groups.google.com/group/xitrum-framework/browse_thread/thread/a3469fea17f84ce4
+* Add config for template engine
+* Add config for Scalate template path
 * Update Netty from 3.6.0 to 3.6.1
   https://netty.io/Blog/Netty+361Final+out+-+More+SSL+fixes
 
