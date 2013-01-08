@@ -5,20 +5,35 @@ import xitrum.controller.Action
 
 /** Template engines should extend this trait and implement its methods. */
 trait TemplateEngine {
-  /** Renders the template associated with the action of the controller. */
+  /**
+   * Renders the template associated with the action of the controller.
+   *
+   * Ex: controller: myapp.Site, action: index
+   * => Renders src/main/scalate/myapp/Site/index.jade
+   */
   def renderTemplate(
     controller: Controller, action: Action,
     controllerName: String, actionName: String,
     options: Map[String, Any]
   ): String
 
-  /** Renders the template associated with the controller. */
+  /**
+   * Renders the template associated with the controller.
+   *
+   * Ex: controller: myapp.Site
+   * => Renders src/main/scalate/myapp/Site.jade
+   */
   def renderTemplate(
     controller: Controller, controllerClass: Class[_],
     options: Map[String, Any]
   ): String
 
-  /** Renders the template fragment associated with the controller. */
+  /**
+   * Renders the template fragment associated with the controller.
+   *
+   * Ex: controller: myapp.Site, fragment: "footer"
+   * => Renders src/main/scalate/myapp/Site/_footer.jade
+   */
   def renderFragment(
     controller: Controller, controllerClass: Class[_], fragment: String,
     options: Map[String, Any]
