@@ -36,6 +36,9 @@ TODO:
 * Add config for Scalate template path
 * Update Netty from 3.6.0 to 3.6.1
   https://netty.io/Blog/Netty+361Final+out+-+More+SSL+fixes
+* Update Scalate from 1.6.0 to 1.6.1
+  http://scalate.fusesource.org/blog/releases/release-1.6.1.html
+* Update jboss-marshalling from 1.3.15.GA to 1.3.16.GA
 
 1.13:
 * Update Scala from 1.9.2 to 2.10.0

@@ -2,7 +2,7 @@ organization := "tv.cntt"
 
 name := "xitrum"
 
-version := "1.14-SNAPSHOT"
+version := "1.15-SNAPSHOT"
 
 scalacOptions ++= Seq(
   "-deprecation",
@@ -29,10 +29,10 @@ libraryDependencies += "com.hazelcast" % "hazelcast-client" % "2.4.1"
 
 // Scalate ---------------------------------------------------------------------
 
-libraryDependencies += "org.fusesource.scalate" %% "scalate-core" % "1.6.0"
+libraryDependencies += "org.fusesource.scalate" %% "scalate-core" % "1.6.1"
 
 // For Markdown
-libraryDependencies += "org.fusesource.scalamd" % "scalamd" % "1.5"
+libraryDependencies += "org.fusesource.scalamd" %% "scalamd" % "1.6"
 
 // For Scalate to compile CoffeeScript to JavaScript
 libraryDependencies += "org.mozilla" % "rhino" % "1.7R4"
@@ -46,9 +46,9 @@ libraryDependencies += "org.javassist" % "javassist" % "3.17.1-GA"
 // Projects using Xitrum must provide a concrete implentation of SLF4J (Logback etc.)
 libraryDependencies += "org.slf4j" % "slf4j-api" % "1.7.2" % "provided"
 
-libraryDependencies += "org.jboss.marshalling" % "jboss-marshalling" % "1.3.15.GA"
+libraryDependencies += "org.jboss.marshalling" % "jboss-marshalling" % "1.3.16.GA"
 
-libraryDependencies += "org.jboss.marshalling" % "jboss-marshalling-river" % "1.3.15.GA"
+libraryDependencies += "org.jboss.marshalling" % "jboss-marshalling-river" % "1.3.16.GA"
 
 // For jsEscape
 libraryDependencies += "org.apache.commons" % "commons-lang3" % "3.1"
