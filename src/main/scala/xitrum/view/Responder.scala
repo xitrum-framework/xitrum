@@ -226,25 +226,8 @@ trait Responder extends JS with Flash with Knockout {
    * If you use Scalate and want to use template type other than the default type
    * configured in xitrum.conf, set options to Map("type" -> "jade", "mustache", "scaml", or "ssp")
    */
-  def respondTemplate(action: Action, options: Map[String, Any] = Map()): ChannelFuture = {
-    val string = renderTemplate(action, options)
-    respondText(string, "text/html")
-  }
-
-  def respondTemplate(options: Map[String, Any]): ChannelFuture =
-    respondTemplate(currentAction, options)
-
-  def respondTemplate(): ChannelFuture =
-    respondTemplate(currentAction, Map[String, Any]())
-
-  //----------------------------------------------------------------------------
-
-  /**
-   * If you use Scalate and want to use template type other than the default type
-   * configured in xitrum.conf, set options to Map("type" -> "jade", "mustache", "scaml", or "ssp")
-   */
-  def respondTemplateWithLayout(action: Action, customLayout: () => Any, options: Map[String, Any] = Map()): ChannelFuture = {
-    val string = renderTemplateWithLayout(action, customLayout, options)
+  def respondView(action: Action, customLayout: () => Any, options: Map[String, Any] = Map()): ChannelFuture = {
+    val string = renderView(action, customLayout, options)
     respondText(string, "text/html")
   }
 
@@ -252,50 +235,48 @@ trait Responder extends JS with Flash with Knockout {
    * Same as respondView(action, customLayout, options),
    * where action is currentAction.
    */
-  def respondTemplateWithLayout(customLayout: () => Any, options: Map[String, Any]): ChannelFuture =
-    respondTemplateWithLayout(currentAction, customLayout, options)
+  def respondView(customLayout: () => Any, options: Map[String, Any]): ChannelFuture =
+    respondView(currentAction, customLayout, options)
 
-  def respondTemplateWithLayout(customLayout: () => Any): ChannelFuture =
-    respondTemplateWithLayout(currentAction, customLayout, Map[String, Any]())
+  def respondView(customLayout: () => Any): ChannelFuture =
+    respondView(currentAction, customLayout, Map[String, Any]())
 
   /**
    * Same as respondView(action, customLayout, options),
    * where customLayout is the controller's layout method.
    */
-  def respondTemplateWithLayout(action: Action, options: Map[String, Any]): ChannelFuture =
-    respondTemplateWithLayout(action, layout _, options)
+  def respondView(action: Action, options: Map[String, Any]): ChannelFuture =
+    respondView(action, layout _, options)
 
-  def respondTemplateWithLayout(action: Action): ChannelFuture =
-    respondTemplateWithLayout(action, layout _, Map[String, Any]())
+  def respondView(action: Action): ChannelFuture =
+    respondView(action, layout _, Map[String, Any]())
 
   /**
    * Same as respondView(action, customLayout, options),
    * where action is currentAction and customLayout is the controller's layout method.
    */
-  def respondTemplateWithLayout(options: Map[String, Any]): ChannelFuture =
-    respondTemplateWithLayout(currentAction, layout _, options)
+  def respondView(options: Map[String, Any]): ChannelFuture =
+    respondView(currentAction, layout _, options)
 
-  def respondTemplateWithLayout(): ChannelFuture =
-    respondTemplateWithLayout(currentAction, layout _, Map[String, Any]())
+  def respondView(): ChannelFuture =
+    respondView(currentAction, layout _, Map[String, Any]())
 
   //----------------------------------------------------------------------------
 
   /** Content-Type header is set to "text/html" */
-  def respondWithLayout(inlineTemplate: Any): ChannelFuture = {
-    val string = renderWithLayout(inlineTemplate)
+  def respondInlineView(inlineView: Any): ChannelFuture = {
+    val string = renderInlineView(inlineView)
     respondText(string, "text/html")
   }
 
   /** Content-Type header is set to "text/html" */
-  def respondTemplate(controllerClass: Class[_], options: Map[String, Any]): ChannelFuture = {
-    val string = renderTemplate(controllerClass, options)
+  def respondViewNoLayout(controllerClass: Class[_], options: Map[String, Any]): ChannelFuture = {
+    val string = renderViewNoLayout(controllerClass, options)
     respondText(string, "text/html")
   }
 
-  def respondTemplate(controllerClass: Class[_]): ChannelFuture = {
-    val string = renderTemplate(controllerClass, Map[String, Any]())
-    respondText(string, "text/html")
-  }
+  def respondViewNoLayout(controllerClass: Class[_]): ChannelFuture =
+    respondViewNoLayout(controllerClass, Map[String, Any]())
 
   //----------------------------------------------------------------------------
 

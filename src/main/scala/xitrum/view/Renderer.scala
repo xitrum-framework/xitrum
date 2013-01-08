@@ -9,9 +9,9 @@ import xitrum.routing.Routes
 trait Renderer {
   this: Controller =>
 
-  var renderedTemplate: Any = null
+  var renderedView: Any = null
 
-  def layout = renderedTemplate
+  def layout = renderedView
 
   //----------------------------------------------------------------------------
 
@@ -44,78 +44,58 @@ trait Renderer {
   //----------------------------------------------------------------------------
 
   /**
-   * Renders the template associated with the action.
-   *
-   * If you use Scalate and want to use template type other than the default type
-   * configured in xitrum.conf, set options to Map("type" -> "jade", "mustache", "scaml", or "ssp")
-   */
-  def renderTemplate(action: Action, options: Map[String, Any] = Map()): String = {
-    val nonNullActionMethod = if (action.method == null) Routes.lookupMethod(action.route) else action.method
-    val controllerClass     = nonNullActionMethod.getDeclaringClass
-    val controllerName      = controllerClass.getName
-    val actionName          = nonNullActionMethod.getName
-    Config.config.templateEngine.renderTemplate(this, action, controllerName, actionName, options)
-  }
-
-  /**
-   * Same as renderTemplate(action, options),
-   * where action is currentAction.
-   */
-  def renderTemplate(options: Map[String, Any]): String =
-    renderTemplate(currentAction, options)
-
-  def renderTemplate(): String =
-    renderTemplate(currentAction, Map[String, Any]())
-
-  //----------------------------------------------------------------------------
-
-  /**
    * Renders the template associated with an action to "renderedTemplate",
    * then calls the layout function.
    *
    * If you use Scalate and want to use template type other than the default type
    * configured in xitrum.conf, set options to Map("type" -> "jade", "mustache", "scaml", or "ssp")
    */
-  def renderTemplateWithLayout(action: Action, customLayout: () => Any, options: Map[String, Any] = Map()): String = {
-    renderedTemplate = renderTemplate(action, options)
+  def renderView(action: Action, customLayout: () => Any, options: Map[String, Any] = Map()): String = {
+    val nonNullActionMethod = if (action.method == null) Routes.lookupMethod(action.route) else action.method
+    val controllerClass     = nonNullActionMethod.getDeclaringClass
+    val controllerName      = controllerClass.getName
+    val actionName          = nonNullActionMethod.getName
+
+    renderedView = Config.config.templateEngine.renderTemplate(this, action, controllerName, actionName, options)
     customLayout.apply().toString
   }
 
   /**
-   * Same as renderTemplateWithLayout(action, customLayout, options),
+   * Same as renderView(action, customLayout, options),
    * where action is currentAction.
    */
-  def renderTemplateWithLayout(customLayout: () => Any, options: Map[String, Any]): String =
-    renderTemplateWithLayout(currentAction, customLayout, options)
+  def renderView(customLayout: () => Any, options: Map[String, Any]): String =
+    renderView(currentAction, customLayout, options)
 
-  def renderTemplateWithLayout(customLayout: () => Any): String =
-    renderTemplateWithLayout(currentAction, customLayout, Map[String, Any]())
+  def renderView(customLayout: () => Any): String =
+    renderView(currentAction, customLayout, Map[String, Any]())
 
   /**
-   * Same as renderTemplateWithLayout(action, customLayout, options),
+   * Same as renderView(action, customLayout, options),
    * where customLayout is the current controller's layout method.
    */
-  def renderTemplateWithLayout(action: Action, options: Map[String, Any]): String =
-    renderTemplateWithLayout(action, layout _, options)
+  def renderView(action: Action, options: Map[String, Any]): String =
+    renderView(action, layout _, options)
 
-  def renderTemplateWithLayout(action: Action): String =
-    renderTemplateWithLayout(action, layout _, Map[String, Any]())
+  def renderView(action: Action): String =
+    renderView(action, layout _, Map[String, Any]())
 
   /**
-   * Same as renderTemplateWithLayout(action, customLayout, options),
+   * Same as renderView(action, customLayout, options),
    * where action is currentAction and customLayout is the current controller's layout method.
    */
-  def renderTemplateWithLayout(options: Map[String, Any]): String =
-    renderTemplateWithLayout(currentAction, layout _, options)
+  def renderView(options: Map[String, Any]): String =
+    renderView(currentAction, layout _, options)
 
-  def renderTemplateWithLayout(): String =
-    renderTemplateWithLayout(currentAction, layout _, Map[String, Any]())
+  def renderView(): String =
+    renderView(currentAction, layout _, Map[String, Any]())
 
   //----------------------------------------------------------------------------
 
-  def renderWithLayout(inlineTemplate: Any): String = {
-    renderedTemplate = inlineTemplate
-    layout.toString()
+  def renderInlineView(inlineView: Any): String = {
+    renderedView = inlineView
+    val any = layout  // Call layout
+    any.toString()
   }
 
   /**
@@ -128,10 +108,10 @@ trait Renderer {
    * controller because the current controller instance will be imported in the
    * template as "helper"
    */
-  def renderTemplate(controllerClass: Class[_], options: Map[String, Any]): String =
+  def renderViewNoLayout(controllerClass: Class[_], options: Map[String, Any]): String =
     Config.config.templateEngine.renderTemplate(this, controllerClass, options)
 
-  def renderTemplate(controllerClass: Class[_]): String =
+  def renderViewNoLayout(controllerClass: Class[_]): String =
     Config.config.templateEngine.renderTemplate(this, controllerClass, Map())
 
   //----------------------------------------------------------------------------

@@ -1,8 +1,8 @@
-package xitrum.view.scalate
+package xitrum.view
 
 import java.io.{File, PrintWriter, StringWriter}
 
-import org.fusesource.scalate.{Binding, DefaultRenderContext, RenderContext, Template, TemplateEngine}
+import org.fusesource.scalate.{Binding, DefaultRenderContext, RenderContext, Template, TemplateEngine => STE}
 import org.fusesource.scalate.scaml.ScamlOptions
 import org.fusesource.scalate.support.StringTemplateSource
 
@@ -21,14 +21,14 @@ object Scalate extends Logger {
   private[this] val classResolver = ClassResolvers.softCachingConcurrentResolver(getClass.getClassLoader)
 
   private[this] val fileEngine = {
-    val ret = new TemplateEngine
+    val ret = new STE
     ret.allowCaching = true
     ret.allowReload  = !Config.isProductionMode
     ret
   }
 
   private[this] val stringEngine = {
-    val ret = new TemplateEngine
+    val ret = new STE
     ret.allowCaching = false
     ret.allowReload  = false
     ret
@@ -131,7 +131,7 @@ object Scalate extends Logger {
    *
    * @param controller will be imported in the template as "helper"
    */
-  def render(
+  def renderTemplate(
     controller: Controller, action: Action,
     controllerName: String, actionName: String,
     options: Map[String, Any]
@@ -147,7 +147,7 @@ object Scalate extends Logger {
    *
    * @param controller will be imported in the template as "helper"
    */
-  def render(
+  def renderTemplate(
     controller: Controller, controllerClass: Class[_],
     options: Map[String, Any]
   ): String = {
@@ -155,31 +155,6 @@ object Scalate extends Logger {
     val relPath = controllerClass.getName.replace('.', File.separatorChar) + "." + tpe
     Scalate.renderMaybePrecompiledFile(controller, relPath)
   }
-
-  //----------------------------------------------------------------------------
-
-  /** @param templateType jade, mustache, scaml, or ssp */
-  def renderString(controller: Controller, templateContent: String, templateType: String): String = {
-    val (context, buffer, out) = createContext(false, controller, "scalate." + templateType)
-    val template               = new StringTemplateSource("scalate.jade", templateContent)
-    stringEngine.layout(template, context)
-    out.close()
-    buffer.toString
-  }
-
-  def renderJadeString(controller: Controller, templateContent: String) =
-    renderString(controller, templateContent, "jade")
-
-  def renderMustacheString(controller: Controller, templateContent: String) =
-    renderString(controller, templateContent, "mustache")
-
-  def renderScamlString(controller: Controller, templateContent: String) =
-    renderString(controller, templateContent, "scaml")
-
-  def renderSspString(controller: Controller, templateContent: String) =
-    renderString(controller, templateContent, "ssp")
-
-  //----------------------------------------------------------------------------
 
   /**
    * Renders Scalate template file with the path:
@@ -193,10 +168,33 @@ object Scalate extends Logger {
 
   //----------------------------------------------------------------------------
 
+  /** @param templateType jade, mustache, scaml, or ssp */
+  def renderString(templateContent: String, templateType: String)(implicit controller: Controller): String = {
+    val (context, buffer, out) = createContext(false, controller, "scalate." + templateType)
+    val template               = new StringTemplateSource("scalate.jade", templateContent)
+    stringEngine.layout(template, context)
+    out.close()
+    buffer.toString
+  }
+
+  def renderJadeString(templateContent: String)(implicit controller: Controller) =
+    renderString(templateContent, "jade")(controller)
+
+  def renderMustacheString(templateContent: String)(implicit controller: Controller) =
+    renderString(templateContent, "mustache")(controller)
+
+  def renderScamlString(templateContent: String)(implicit controller: Controller) =
+    renderString(templateContent, "scaml")(controller)
+
+  def renderSspString(templateContent: String)(implicit controller: Controller) =
+    renderString(templateContent, "ssp")(controller)
+
+  //----------------------------------------------------------------------------
+
   /**
    * Takes out "type" from options. It shoud be one of:
    * "jade", "mustache", "scaml", or "ssp"
    */
-  def templateType(options: Map[String, Any]) =
+  private def templateType(options: Map[String, Any]) =
     options.getOrElse("type", defaultType)
 }
