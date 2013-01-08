@@ -27,18 +27,33 @@ TODO:
 * Add automatic CORS request handling for the whole site
   http://www.html5rocks.com/en/tutorials/cors/
 
-1.14 (planned):
+1.14:
+* Add config for template engine and Scalate template path.
 * Add comparison of controllers and actions
   if (currentController == MyController) ...
   if (currentAction == MyController.index) ...
   https://groups.google.com/group/xitrum-framework/browse_thread/thread/a3469fea17f84ce4
-* Add config for template engine
-* Add config for Scalate template path
 * Update Netty from 3.6.0 to 3.6.1
   https://netty.io/Blog/Netty+361Final+out+-+More+SSL+fixes
 * Update Scalate from 1.6.0 to 1.6.1
   http://scalate.fusesource.org/blog/releases/release-1.6.1.html
 * Update jboss-marshalling from 1.3.15.GA to 1.3.16.GA
+
+Updating your project from Xitrum 1.13 to 1.14 is simple, see:
+https://github.com/ngocdaothanh/xitrum-new/commit/fea3334ae3c7bedca1a6051d6abc851fb617d4ba
+
+If you want to create your own template engine:
+1. Create a class that implements xitrum.view.TemplateEngine
+   https://github.com/ngocdaothanh/xitrum/blob/master/src/main/scala/xitrum/view/TemplateEngine.scala
+2. Set that class in xitrum.conf
+   https://github.com/ngocdaothanh/xitrum-new/blob/master/config/xitrum.conf#L47
+3. If you template engine need config items, add them to xitrum.conf,
+   then load them like this:
+   val defaultType = xitrum.Config.config.config.getString("scalateDefaultType")
+
+See:
+https://github.com/typesafehub/config
+http://typesafehub.github.com/config/latest/api/com/typesafe/config/Config.html
 
 1.13:
 * Update Scala from 1.9.2 to 2.10.0
