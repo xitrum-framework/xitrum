@@ -19,13 +19,18 @@ TODO:
 * Middleware architecture based on Netty handlers
 * Support SPDY
 
-1.15 (planned):
+1.16 (planned):
 * Add Rails-like asset pipeline (not using wro4j because it's heavy)
   http://guides.rubyonrails.org/asset_pipeline.html
   http://www.playframework.org/documentation/2.0/Assets
-* Add connection abort handling for SockJS
 * Add automatic CORS request handling for the whole site
   http://www.html5rocks.com/en/tutorials/cors/
+
+1.15 (planned):
+* Improve SockJS handler interface
+  def onOpen()  -> def onOpen(session: immutable Map[String, Any])
+  https://groups.google.com/group/xitrum-framework/browse_thread/thread/d60dbfb72556aa8c
+* Add connection abort handling for SockJS
 
 1.14:
 * Add config for template engine and Scalate template path
