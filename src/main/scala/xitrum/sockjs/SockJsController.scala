@@ -563,14 +563,14 @@ class SockJsController extends Controller with SkipCSRFCheck {
     // Ignored
     //val sessionId = param("sessionId")
 
+    val immutableSession = session.toMap
+    val sockJsHandler    = Routes.createSockJsHandler(pathPrefix)
+    sockJsHandler.webSocketController = this
+    sockJsHandler.rawWebSocket        = false
     acceptWebSocket(new WebSocketHandler {
-      val sockJsHandler = Routes.createSockJsHandler(pathPrefix)
-      sockJsHandler.webSocketController = SockJsController.this
-      sockJsHandler.rawWebSocket        = false
-
       def onOpen() {
         respondWebSocket("o")
-        sockJsHandler.onOpen()
+        sockJsHandler.onOpen(immutableSession)
       }
 
       def onMessage(body: String) {
@@ -603,13 +603,13 @@ class SockJsController extends Controller with SkipCSRFCheck {
   }
 
   def rawWebsocket = WEBSOCKET("websocket") {
+    val immutableSession = session.toMap
+    val sockJsHandler    = Routes.createSockJsHandler(pathPrefix)
+    sockJsHandler.webSocketController = this
+    sockJsHandler.rawWebSocket        = true
     acceptWebSocket(new WebSocketHandler {
-      val sockJsHandler = Routes.createSockJsHandler(pathPrefix)
-      sockJsHandler.webSocketController = SockJsController.this
-      sockJsHandler.rawWebSocket        = true
-
       def onOpen() {
-        sockJsHandler.onOpen()
+        sockJsHandler.onOpen(immutableSession)
       }
 
       def onMessage(message: String) {
