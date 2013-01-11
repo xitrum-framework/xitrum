@@ -7,6 +7,7 @@ import com.hazelcast.client.{ClientConfig, ClientConfigBuilder, HazelcastClient}
 import com.hazelcast.core.{Hazelcast, HazelcastInstance}
 
 import com.typesafe.config.{Config => TConfig, ConfigFactory}
+import akka.actor.ActorSystem
 
 import xitrum.scope.session.SessionStore
 import xitrum.view.TemplateEngine
@@ -126,6 +127,7 @@ object Config extends Logger {
 
   //----------------------------------------------------------------------------
 
+  /** config/application.conf */
   val application: TConfig = {
     try {
       ConfigFactory.load()
@@ -136,6 +138,7 @@ object Config extends Logger {
     }
   }
 
+  /** config/xitrum.conf */
   val xitrum: Config = {
     try {
       new Config(application.getConfig("xitrum"))
@@ -203,6 +206,8 @@ object Config extends Logger {
       HazelcastClient.newHazelcastClient(clientConfig)
     }
   }
+
+  lazy val actorSystem = ActorSystem("xitrum")
 
   //----------------------------------------------------------------------------
 

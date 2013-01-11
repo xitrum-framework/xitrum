@@ -6,10 +6,10 @@ import scala.concurrent.duration._
 import scala.concurrent.ExecutionContext.Implicits.global
 import scala.util.{Failure, Success}
 
-import akka.actor.{Actor, ActorRef, ActorSystem, Props, ReceiveTimeout}
+import akka.actor.{Actor, ActorRef, Props, ReceiveTimeout}
 import akka.pattern.ask
 
-import xitrum.Controller
+import xitrum.{Config, Controller}
 import xitrum.routing.Routes
 
 /** This acts the middleman between client and server SockJS handler. */
@@ -26,18 +26,16 @@ object SockJsNonWebSocketSessions {
   // before heartbeat timeout
   val TIMEOUT_ASK = TIMEOUT_HEARTBEAT * 2
 
-  private val system = ActorSystem("SockJsNonWebSocketSessions")
-
   def subscribeOnceByClient(
       pathPrefix:      String,
       session:         Map[String, Any],
       sockJsSessionId: String,
       callback:        (SockJsSubscribeByClientResult) => Unit) {
     val actorPath = actorPathForSessionId(sockJsSessionId)
-    val ref       = system.actorFor(actorPath)
+    val ref       = Config.actorSystem.actorFor(actorPath)
     if (ref.isTerminated) {
       val handler = Routes.createSockJsHandler(pathPrefix)
-      val ref     = system.actorOf(Props(new SockJsNonWebSocketSession(handler)), actorPath)
+      val ref     = Config.actorSystem.actorOf(Props(new SockJsNonWebSocketSession(handler)), actorPath)
       handler.sockJsNonWebSocketSessionActorRef = ref
       callback(SubscribeByClientResultOpen)  // "o" frame sent here
       handler.onOpen(session)                // Call opOpen after "o" frame has been sent
@@ -63,10 +61,10 @@ object SockJsNonWebSocketSessions {
       sockJsSessionId: String,
       callback:        (SockJsSubscribeByClientResult) => Boolean) {
     val actorPath = actorPathForSessionId(sockJsSessionId)
-    val ref       = system.actorFor(actorPath)
+    val ref       = Config.actorSystem.actorFor(actorPath)
     if (ref.isTerminated) {
       val handler = Routes.createSockJsHandler(pathPrefix)
-      val ref     = system.actorOf(Props(new SockJsNonWebSocketSession(handler)), actorPath)
+      val ref     = Config.actorSystem.actorOf(Props(new SockJsNonWebSocketSession(handler)), actorPath)
       handler.sockJsNonWebSocketSessionActorRef = ref
       val loop = callback(SubscribeByClientResultOpen)  // "o" frame sent here
       handler.onOpen(session)                           // Call opOpen after "o" frame has been sent
@@ -93,7 +91,7 @@ object SockJsNonWebSocketSessions {
   /** @return false means session not found */
   def sendMessagesByClient(sockJsSessionId: String, messages: List[String]): Boolean = {
     val path = actorPathForSessionId(sockJsSessionId)
-    val ref  = system.actorFor(path)
+    val ref  = Config.actorSystem.actorFor(path)
     if (ref.isTerminated) {
       false
     } else {
@@ -104,7 +102,7 @@ object SockJsNonWebSocketSessions {
 
   def unsubscribeByClient(sockJsSessionId: String) {
     val path = actorPathForSessionId(sockJsSessionId)
-    val ref  = system.actorFor(path)
+    val ref  = Config.actorSystem.actorFor(path)
     ref ! UnsubscribeByClient
   }
 
@@ -116,8 +114,8 @@ object SockJsNonWebSocketSessions {
    */
   def abortByClient(sockJsSessionId: String) {
     val path = actorPathForSessionId(sockJsSessionId)
-    val ref  = system.actorFor(path)
-    system.stop(ref)
+    val ref  = Config.actorSystem.actorFor(path)
+    Config.actorSystem.stop(ref)
   }
 
   //----------------------------------------------------------------------------
