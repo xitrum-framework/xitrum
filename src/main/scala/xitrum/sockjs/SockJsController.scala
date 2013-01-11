@@ -182,7 +182,7 @@ class SockJsController extends Controller with SkipCSRFCheck {
     val sessionId = param("sessionId")
 
     handleCookie()
-    SockJsNonWebSocketSessions.subscribeOnceByClient(pathPrefix, sessionId, { result =>
+    SockJsNonWebSocketSessions.subscribeOnceByClient(pathPrefix, session.toMap, sessionId, { result =>
       setCORS()
       setNoClientCache()
 
@@ -261,7 +261,7 @@ class SockJsController extends Controller with SkipCSRFCheck {
     // Below can be initiated by different channels, thus isResponded should
     // be called to check if SockJsController.h2KB should be sent
     handleCookie()
-    SockJsNonWebSocketSessions.subscribeStreamingByClient(pathPrefix, sessionId, { result =>
+    SockJsNonWebSocketSessions.subscribeStreamingByClient(pathPrefix, session.toMap, sessionId, { result =>
       if (!isResponded) {
         setCORS()
         setNoClientCache()
@@ -318,7 +318,7 @@ class SockJsController extends Controller with SkipCSRFCheck {
       val sessionId = param("sessionId")
 
       handleCookie()
-      SockJsNonWebSocketSessions.subscribeStreamingByClient(pathPrefix, sessionId, { result =>
+      SockJsNonWebSocketSessions.subscribeStreamingByClient(pathPrefix, session.toMap, sessionId, { result =>
         result match {
           case SubscribeByClientResultOpen =>
             setCORS()
@@ -401,7 +401,7 @@ class SockJsController extends Controller with SkipCSRFCheck {
       val sessionId = param("sessionId")
 
       handleCookie()
-      SockJsNonWebSocketSessions.subscribeOnceByClient(pathPrefix, sessionId, { result =>
+      SockJsNonWebSocketSessions.subscribeOnceByClient(pathPrefix, session.toMap, sessionId, { result =>
         setCORS()
         setNoClientCache()
 
@@ -486,7 +486,7 @@ class SockJsController extends Controller with SkipCSRFCheck {
     val sessionId = param("sessionId")
 
     handleCookie()
-    SockJsNonWebSocketSessions.subscribeStreamingByClient(pathPrefix, sessionId, { result =>
+    SockJsNonWebSocketSessions.subscribeStreamingByClient(pathPrefix, session.toMap, sessionId, { result =>
       result match {
         case SubscribeByClientResultOpen =>
           setCORS()

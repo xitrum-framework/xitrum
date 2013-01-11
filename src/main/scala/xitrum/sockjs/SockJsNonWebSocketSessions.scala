@@ -22,21 +22,25 @@ object SockJsNonWebSocketSessions {
   // http://sockjs.github.com/sockjs-protocol/sockjs-protocol-0.3.3.html#section-46
   val TIMEOUT_HEARTBEAT = 25.seconds
 
-  // Must be bigger than TIMEOUT_HEARTBEAT "ask" timeout does not happen before
-  // heartbeat timeout
+  // Must be bigger than TIMEOUT_HEARTBEAT so that "ask" timeout does not happen
+  // before heartbeat timeout
   val TIMEOUT_ASK = TIMEOUT_HEARTBEAT * 2
 
   private val system = ActorSystem("SockJsNonWebSocketSessions")
 
-  def subscribeOnceByClient(pathPrefix: String, sockJsSessionId: String, callback: (SockJsSubscribeByClientResult) => Unit) {
-    val escaped = escapeActorPath(sockJsSessionId)
-    val ref     = system.actorFor("/user/" + escaped)
+  def subscribeOnceByClient(
+      pathPrefix:      String,
+      session:         Map[String, Any],
+      sockJsSessionId: String,
+      callback:        (SockJsSubscribeByClientResult) => Unit) {
+    val actorPath = actorPathForSessionId(sockJsSessionId)
+    val ref       = system.actorFor(actorPath)
     if (ref.isTerminated) {
       val handler = Routes.createSockJsHandler(pathPrefix)
-      val ref     = system.actorOf(Props(new SockJsNonWebSocketSession(handler)), escaped)
+      val ref     = system.actorOf(Props(new SockJsNonWebSocketSession(handler)), actorPath)
       handler.sockJsNonWebSocketSessionActorRef = ref
-      callback(SubscribeByClientResultOpen)
-      handler.onOpen()  // Call opOpen after "o" frame has been sent
+      callback(SubscribeByClientResultOpen)  // "o" frame sent here
+      handler.onOpen(session)                // Call opOpen after "o" frame has been sent
     } else {
       val future = ref.ask(SubscribeOnceByClient)(TIMEOUT_ASK).mapTo[SockJsSubscribeByClientResult]
       future.onComplete {
@@ -53,15 +57,19 @@ object SockJsNonWebSocketSessions {
   /**
    * callback result: true means subscribeStreaming should be called again to get more messages
    */
-  def subscribeStreamingByClient(pathPrefix: String, sockJsSessionId: String, callback: (SockJsSubscribeByClientResult) => Boolean) {
-    val escaped = escapeActorPath(sockJsSessionId)
-    val ref     = system.actorFor("/user/" + escaped)
+  def subscribeStreamingByClient(
+      pathPrefix:      String,
+      session:         Map[String, Any],
+      sockJsSessionId: String,
+      callback:        (SockJsSubscribeByClientResult) => Boolean) {
+    val actorPath = actorPathForSessionId(sockJsSessionId)
+    val ref       = system.actorFor(actorPath)
     if (ref.isTerminated) {
       val handler = Routes.createSockJsHandler(pathPrefix)
-      val ref     = system.actorOf(Props(new SockJsNonWebSocketSession(handler)), escaped)
+      val ref     = system.actorOf(Props(new SockJsNonWebSocketSession(handler)), actorPath)
       handler.sockJsNonWebSocketSessionActorRef = ref
       val loop = callback(SubscribeByClientResultOpen)  // "o" frame sent here
-      handler.onOpen()                                  // Call opOpen after "o" frame has been sent
+      handler.onOpen(session)                           // Call opOpen after "o" frame has been sent
       if (loop) subscribeStreamingByClient(ref, callback)
     } else {
       subscribeStreamingByClient(ref, callback)
@@ -84,8 +92,8 @@ object SockJsNonWebSocketSessions {
 
   /** @return false means session not found */
   def sendMessagesByClient(sockJsSessionId: String, messages: List[String]): Boolean = {
-    val escaped = escapeActorPath(sockJsSessionId)
-    val ref     = system.actorFor("/user/" + escaped)
+    val path = actorPathForSessionId(sockJsSessionId)
+    val ref  = system.actorFor(path)
     if (ref.isTerminated) {
       false
     } else {
@@ -95,8 +103,8 @@ object SockJsNonWebSocketSessions {
   }
 
   def unsubscribeByClient(sockJsSessionId: String) {
-    val escaped = escapeActorPath(sockJsSessionId)
-    val ref     = system.actorFor("/user/" + escaped)
+    val path = actorPathForSessionId(sockJsSessionId)
+    val ref  = system.actorFor(path)
     ref ! UnsubscribeByClient
   }
 
@@ -107,8 +115,8 @@ object SockJsNonWebSocketSessions {
    * See http://groups.google.com/group/sockjs/browse_thread/thread/392cd07c4a75400b/9a4593a71e90173b#9a4593a71e90173b
    */
   def abortByClient(sockJsSessionId: String) {
-    val escaped = escapeActorPath(sockJsSessionId)
-    val ref     = system.actorFor("/user/" + escaped)
+    val path = actorPathForSessionId(sockJsSessionId)
+    val ref  = system.actorFor(path)
     system.stop(ref)
   }
 
@@ -134,7 +142,6 @@ object SockJsNonWebSocketSessions {
    * Need this because java.net.URISyntaxException will be thrown if
    * sockJsSessionId contains strange charater.
    */
-  private def escapeActorPath(sockJsSessionId: String) = {
-    URLEncoder.encode(sockJsSessionId, "UTF-8")
-  }
+  private def actorPathForSessionId(sockJsSessionId: String) =
+    "/user/" + URLEncoder.encode(sockJsSessionId, "UTF-8")
 }
