@@ -8,8 +8,9 @@ trait TemplateEngine {
   /**
    * Renders the template associated with the action of the controller.
    *
-   * Ex: controller: myapp.Site, action: index
-   * => Renders src/main/scalate/myapp/Site/index.jade
+   * Ex: When controller = myapp.Site, action = index,
+   * by default the Scalate template path will be:
+   * src/main/scalate/myapp/Site/index.jade
    */
   def renderTemplate(
     controller: Controller, action: Action,
@@ -20,8 +21,9 @@ trait TemplateEngine {
   /**
    * Renders the template associated with the controller.
    *
-   * Ex: controller: myapp.Site
-   * => Renders src/main/scalate/myapp/Site.jade
+   * Ex: When controller = myapp.Site,
+   * by default the Scalate template path will be:
+   * src/main/scalate/myapp/Site.jade
    */
   def renderTemplate(
     controller: Controller, controllerClass: Class[_],
@@ -31,8 +33,9 @@ trait TemplateEngine {
   /**
    * Renders the template fragment associated with the controller.
    *
-   * Ex: controller: myapp.Site, fragment: "footer"
-   * => Renders src/main/scalate/myapp/Site/_footer.jade
+   * Ex: When controller = myapp.Site, fragment = "footer",
+   * by default the Scalate template path will be:
+   * src/main/scalate/myapp/Site/_footer.jade
    */
   def renderFragment(
     controller: Controller, controllerClass: Class[_], fragment: String,
