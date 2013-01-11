@@ -1,4 +1,4 @@
-package xitrum.sockjs
+package xitrum.mq
 
 import java.util.concurrent.TimeUnit
 
@@ -12,6 +12,8 @@ import xitrum.Config
 import xitrum.scope.request.Params
 
 // TODO: presense
+
+/** Simple message queue. Messages older than 60 seconds will automatically be removed. */
 object MessageQueue {
   private[this] val TTL_SECONDS = 60
 

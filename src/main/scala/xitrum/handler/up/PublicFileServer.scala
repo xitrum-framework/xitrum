@@ -46,7 +46,7 @@ class PublicFileServer extends SimpleChannelUpstreamHandler with BadClientSilenc
         if (file.isFile && file.exists) {
           val response = new DefaultHttpResponse(HTTP_1_1, OK)
 
-          if (!Config.config.response.clientMustRevalidateStaticFiles)
+          if (!Config.xitrum.response.clientMustRevalidateStaticFiles)
             NotModified.setClientCacheAggressively(response)
 
           XSendFile.setHeader(response, abs, false)

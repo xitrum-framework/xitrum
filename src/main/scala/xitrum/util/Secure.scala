@@ -19,10 +19,10 @@ import xitrum.Config
 object Secure {
   /** Always returns same output for same input. */
   def encrypt(data: Array[Byte]): Array[Byte] =
-    encrypt(data, Config.config.session.secureKey)
+    encrypt(data, Config.xitrum.session.secureKey)
 
   def decrypt(data: Array[Byte]): Option[Array[Byte]] =
-    decrypt(data, Config.config.session.secureKey)
+    decrypt(data, Config.xitrum.session.secureKey)
 
   def encrypt(data: Array[Byte], key: String): Array[Byte] = {
     val bkey  = makeKey(key)
@@ -53,13 +53,13 @@ object Secure {
   private[this] val CRYPT_ALGORITHM = "AES/CBC/PKCS5Padding"
 
   // Cache for speed because this key is used most of the time
-  private[this] val defaultKey = makeKey(Config.config.session.secureKey)
+  private[this] val defaultKey = makeKey(Config.xitrum.session.secureKey)
 
   // We need 16 bytes array for AES
   // MD5 => 16 bytes, SHA-256 => 32 bytes
   // Idea: http://stackoverflow.com/questions/992019/java-256bit-aes-encryption/992413
   private def makeKey(key: String): Array[Byte] = {
-    if (key == Config.config.session.secureKey && defaultKey != null) {
+    if (key == Config.xitrum.session.secureKey && defaultKey != null) {
       defaultKey
     } else {
       val messageDigest = MessageDigest.getInstance("MD5")

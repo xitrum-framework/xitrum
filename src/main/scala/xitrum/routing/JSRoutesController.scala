@@ -27,7 +27,7 @@ object JSRoutesController extends JSRoutesController {
 
   def gzippedJsRoutes(controller: Controller): Array[Byte] = synchronized {
     if (gzippedJs == null) {
-      gzippedJs = Gzip.compress(jsRoutes(controller).getBytes(Config.config.request.charset))
+      gzippedJs = Gzip.compress(jsRoutes(controller).getBytes(Config.xitrum.request.charset))
     }
     gzippedJs
   }

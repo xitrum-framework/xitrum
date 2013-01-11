@@ -48,7 +48,7 @@ object BasicAuth {
     response.setStatus(HttpResponseStatus.UNAUTHORIZED)
 
     val cb = ChannelBuffers.copiedBuffer("Wrong username or password", Config.requestCharset)
-    response.setHeader(HttpHeaders.Names.CONTENT_TYPE, "text/plain; charset=" + Config.config.request.charset)
+    response.setHeader(HttpHeaders.Names.CONTENT_TYPE, "text/plain; charset=" + Config.xitrum.request.charset)
     HttpHeaders.setContentLength(response, cb.readableBytes)
     response.setContent(cb)
 
@@ -67,7 +67,7 @@ class BasicAuth extends SimpleChannelUpstreamHandler with BadClientSilencer {
       return
     }
 
-    val go = Config.config.basicAuth
+    val go = Config.xitrum.basicAuth
     if (go.isEmpty) {
       ctx.sendUpstream(e)
       return

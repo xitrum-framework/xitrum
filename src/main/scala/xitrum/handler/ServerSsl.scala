@@ -29,13 +29,13 @@ object ServerSsl {
   // Context can be created only once
   private lazy val context: SSLContext = {
     val ks = KeyStore.getInstance("JKS")
-    val is = new FileInputStream(Config.config.keystore.path)
-    ks.load(is, Config.config.keystore.password.toCharArray)
+    val is = new FileInputStream(Config.xitrum.keystore.path)
+    ks.load(is, Config.xitrum.keystore.password.toCharArray)
     is.close()
 
     // Set up key manager factory to use our key store
     val kmf = KeyManagerFactory.getInstance(ALGORITHM)
-    kmf.init(ks, Config.config.keystore.certificatePassword.toCharArray)
+    kmf.init(ks, Config.xitrum.keystore.certificatePassword.toCharArray)
 
     // Initialize the SSLContext to work with our key managers.
     val ret = SSLContext.getInstance(PROTOCOL)

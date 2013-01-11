@@ -139,14 +139,14 @@ trait Responder extends JS with Flash with Knockout {
           if (fallbackContentType.toLowerCase.contains("charset"))
             fallbackContentType
           else
-            fallbackContentType + "; charset=" + Config.config.request.charset
+            fallbackContentType + "; charset=" + Config.xitrum.request.charset
 
         response.setHeader(CONTENT_TYPE, withCharset)
       } else {
         if (textIsXml)
-          response.setHeader(CONTENT_TYPE, "application/xml; charset=" + Config.config.request.charset)
+          response.setHeader(CONTENT_TYPE, "application/xml; charset=" + Config.xitrum.request.charset)
         else
-          response.setHeader(CONTENT_TYPE, "text/plain; charset=" + Config.config.request.charset)
+          response.setHeader(CONTENT_TYPE, "text/plain; charset=" + Config.xitrum.request.charset)
       }
     }
 

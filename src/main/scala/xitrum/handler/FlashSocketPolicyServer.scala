@@ -10,7 +10,7 @@ object FlashSocketPolicyServer extends Logger {
     val channelFactory  = new NioServerSocketChannelFactory
     val bootstrap       = new ServerBootstrap(channelFactory)
     val pipelineFactory = new FlashSocketChannelPipelineFactory
-    val port            = Config.config.port.flashSocketPolicy.get
+    val port            = Config.xitrum.port.flashSocketPolicy.get
 
     bootstrap.setPipelineFactory(pipelineFactory)
     NetOption.setOptions(bootstrap)

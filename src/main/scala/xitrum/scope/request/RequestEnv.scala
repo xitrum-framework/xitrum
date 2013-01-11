@@ -18,7 +18,7 @@ object RequestEnv {
       sb.append(key)
       sb.append(": ")
 
-      if (Config.config.request.filteredParams.contains(key)) {
+      if (Config.xitrum.request.filteredParams.contains(key)) {
         sb.append("[FILTERED]")
       } else {
         val values = params(key)

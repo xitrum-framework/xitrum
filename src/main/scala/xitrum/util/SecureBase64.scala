@@ -5,7 +5,7 @@ import xitrum.Config
 object SecureBase64 {
   /** @param forCookie If true, tries to GZIP compress if > 4KB; the result may > 4KB */
   def encrypt(value: Any, forCookie: Boolean = false): String =
-    encrypt(value, Config.config.session.secureKey, forCookie)
+    encrypt(value, Config.xitrum.session.secureKey, forCookie)
 
   /** @param forCookie If true, tries to GZIP compress if > 4KB; the result may > 4KB */
   def encrypt(value: Any, key: String, forCookie: Boolean): String = {
@@ -37,7 +37,7 @@ object SecureBase64 {
 
   /** @param forCookie If true, tries to GZIP uncompress if the input is compressed */
   def decrypt(base64String: String, forCookie: Boolean = false): Option[Any] =
-    decrypt(base64String, Config.config.session.secureKey, forCookie)
+    decrypt(base64String, Config.xitrum.session.secureKey, forCookie)
 
   def decrypt(base64String: String, key: String, forCookie: Boolean): Option[Any] = {
     try {

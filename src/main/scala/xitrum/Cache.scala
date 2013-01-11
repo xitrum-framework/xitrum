@@ -79,7 +79,7 @@ object Cache extends Logger {
    * In this case, we remove the cache.
    */
   def getAs[T](key: Any): Option[T] = {
-    if (!Config.isProductionMode) return None
+    if (!Config.productionMode) return None
 
     try {
       Option(cache.get(key)).map(_.asInstanceOf[T])

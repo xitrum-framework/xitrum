@@ -18,7 +18,9 @@ object NetOption {
 
   /** Stops the JVM process if cannot bind to the port. */
   def bind(service: String, bootstrap: ServerBootstrap, port: Int) {
-    val addr = Config.config.interface match {
+    val ic = Config.xitrum.interface
+
+    val addr = ic match {
       case None               => new InetSocketAddress(port)
       case Some(hostnameOrIp) => new InetSocketAddress(hostnameOrIp, port)
     }
@@ -27,7 +29,7 @@ object NetOption {
       bootstrap.bind(addr)
     } catch {
       case scala.util.control.NonFatal(e) =>
-        val msg = Config.config.interface match {
+        val msg = ic match {
           case None =>
             ("Could not open port %d for %s server. " +
             "Check to see if there's another process already running on that port.")

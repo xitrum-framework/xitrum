@@ -62,7 +62,7 @@ trait JS {
     val validatei18n = if (getLanguage == "en") "" else <script type="text/javascript" src={urlForResource("xitrum/jquery.validate-1.10.0/localization/messages_"+ getLanguage +".js")}></script>
     val jsRoutesAction = <script type="text/javascript" src={JSRoutesController.serve.url + "?" + Etag.forString(Routes.jsRoutes)}></script>
 
-    if (Config.isProductionMode)
+    if (Config.productionMode)
       <xml:group>
         <script type="text/javascript" src={urlForResource("xitrum/jquery-1.8.3.min.js")}></script>
         <script type="text/javascript" src={urlForResource("xitrum/jquery.validate-1.10.0/jquery.validate.min.js")}></script>

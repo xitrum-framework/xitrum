@@ -19,8 +19,8 @@ object Etag extends Logger {
   case class  Small(val bytes: Array[Byte], val etag: String, val mimeo: Option[String], val gzipped: Boolean) extends Result
 
   //                                                           path    mtime
-  private[this] val smallFileCache        = new LocalLRUCache[(String, Long), Small](Config.config.response.maxNumberOfCachedStaticFiles)
-  private[this] val gzippedSmallFileCache = new LocalLRUCache[(String, Long), Small](Config.config.response.maxNumberOfCachedStaticFiles)
+  private[this] val smallFileCache        = new LocalLRUCache[(String, Long), Small](Config.xitrum.response.maxNumberOfCachedStaticFiles)
+  private[this] val gzippedSmallFileCache = new LocalLRUCache[(String, Long), Small](Config.xitrum.response.maxNumberOfCachedStaticFiles)
 
   /** Etag without quotes is technically illegal. */
   def quote(etag: String) = "\"" + etag + "\""
@@ -36,13 +36,13 @@ object Etag extends Logger {
     Base64.encode(md5.digest)
   }
 
-  def forString(string: String) = forBytes(string.getBytes(Config.config.request.charset))
+  def forString(string: String) = forBytes(string.getBytes(Config.xitrum.request.charset))
 
   def forFile(path: String, gzipped: Boolean): Result = {
     val file = new File(path)
     if (!file.exists) return NotFound
 
-    if (file.length > Config.config.response.maxSizeInKBOfCachedStaticFiles * 1024) return TooBig(file)
+    if (file.length > Config.xitrum.response.maxSizeInKBOfCachedStaticFiles * 1024) return TooBig(file)
 
     val mtime = file.lastModified
     val key   = (path, mtime)

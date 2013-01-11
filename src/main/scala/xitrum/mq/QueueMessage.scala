@@ -1,4 +1,4 @@
-package xitrum.sockjs
+package xitrum.mq
 
 import xitrum.scope.request.Params
 

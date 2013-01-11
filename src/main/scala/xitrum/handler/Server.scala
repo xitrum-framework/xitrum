@@ -19,11 +19,12 @@ object Server extends Logger {
     Routes.printActionPageCaches()
     Routes.printSockJsRoutes()
 
-    if (Config.config.port.http.isDefined)  start(false)
-    if (Config.config.port.https.isDefined) start(true)
-    if (Config.config.port.flashSocketPolicy.isDefined) FlashSocketPolicyServer.start()
+    val pc = Config.xitrum.port
+    if (pc.http.isDefined)  start(false)
+    if (pc.https.isDefined) start(true)
+    if (pc.flashSocketPolicy.isDefined) FlashSocketPolicyServer.start()
 
-    val mode = if (Config.isProductionMode) "production" else "development"
+    val mode = if (Config.productionMode) "production" else "development"
     logger.info("Xitrum started in {} mode", mode)
 
     // This is a good timing to warn
@@ -34,7 +35,8 @@ object Server extends Logger {
     val channelFactory  = new NioServerSocketChannelFactory
     val bootstrap       = new ServerBootstrap(channelFactory)
     val pipelineFactory = new ChannelPipelineFactory(https)
-    val (service, port) = if (https) ("HTTPS", Config.config.port.https.get) else ("HTTP", Config.config.port.http.get)
+    val pc              = Config.xitrum.port
+    val (service, port) = if (https) ("HTTPS", pc.https.get) else ("HTTP", pc.http.get)
 
     bootstrap.setPipelineFactory(pipelineFactory)
     NetOption.setOptions(bootstrap)

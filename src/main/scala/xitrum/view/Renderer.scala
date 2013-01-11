@@ -56,7 +56,7 @@ trait Renderer {
     val controllerName      = controllerClass.getName
     val actionName          = nonNullActionMethod.getName
 
-    renderedView = Config.config.templateEngine.renderTemplate(this, action, controllerName, actionName, options)
+    renderedView = Config.xitrum.templateEngine.renderTemplate(this, action, controllerName, actionName, options)
     customLayout.apply().toString
   }
 
@@ -109,10 +109,10 @@ trait Renderer {
    * template as "helper"
    */
   def renderViewNoLayout(controllerClass: Class[_], options: Map[String, Any]): String =
-    Config.config.templateEngine.renderTemplate(this, controllerClass, options)
+    Config.xitrum.templateEngine.renderTemplate(this, controllerClass, options)
 
   def renderViewNoLayout(controllerClass: Class[_]): String =
-    Config.config.templateEngine.renderTemplate(this, controllerClass, Map())
+    Config.xitrum.templateEngine.renderTemplate(this, controllerClass, Map())
 
   //----------------------------------------------------------------------------
 
@@ -128,15 +128,15 @@ trait Renderer {
    * template as "helper"
    */
   def renderFragment(controllerClass: Class[_], fragment: String, options: Map[String, Any]): String =
-    Config.config.templateEngine.renderFragment(this, controllerClass, fragment, options)
+    Config.xitrum.templateEngine.renderFragment(this, controllerClass, fragment, options)
 
   def renderFragment(controllerClass: Class[_], fragment: String): String =
-    Config.config.templateEngine.renderFragment(this, controllerClass, fragment, Map())
+    Config.xitrum.templateEngine.renderFragment(this, controllerClass, fragment, Map())
 
   /** Renders the fragment associated with the current controller class. */
   def renderFragment(fragment: String, options: Map[String, Any]): String =
-    Config.config.templateEngine.renderFragment(this, getClass, fragment, options)
+    Config.xitrum.templateEngine.renderFragment(this, getClass, fragment, options)
 
   def renderFragment(fragment: String): String =
-    Config.config.templateEngine.renderFragment(this, getClass, fragment, Map())
+    Config.xitrum.templateEngine.renderFragment(this, getClass, fragment, Map())
 }

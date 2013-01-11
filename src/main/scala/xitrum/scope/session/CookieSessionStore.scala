@@ -12,7 +12,7 @@ import xitrum.util.SecureBase64
 class CookieSessionStore extends SessionStore with Logger {
   def restore(extEnv: ExtEnv): Session = {
     // Cannot always get cookie, decrypt, deserialize, and type casting due to program changes etc.
-    extEnv.requestCookies.get(Config.config.session.cookieName) match {
+    extEnv.requestCookies.get(Config.xitrum.session.cookieName) match {
       case None =>
         MMap[String, Any]()
 
@@ -39,7 +39,7 @@ class CookieSessionStore extends SessionStore with Logger {
   }
 
   def store(session: Session, extEnv: ExtEnv) {
-    val sessionCookieName = Config.config.session.cookieName
+    val sessionCookieName = Config.xitrum.session.cookieName
     if (session.isEmpty) {
       // If session cookie has been sent by browser, send back session cookie
       // with max age = 0 so that browser will delete it immediately

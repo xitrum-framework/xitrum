@@ -124,6 +124,36 @@ object Config extends Logger {
 
   private val DEFAULT_SECURE_KEY = "ajconghoaofuxahoi92chunghiaujivietnamlasdoclapjfltudoil98hanhphucup8"
 
+  //----------------------------------------------------------------------------
+
+  val application: TConfig = {
+    try {
+      ConfigFactory.load()
+    } catch {
+      case scala.util.control.NonFatal(e) =>
+        exitOnError("Could not load config/application.conf. For an example, see https://github.com/ngocdaothanh/xitrum-new/blob/master/config/application.conf", e)
+        null
+    }
+  }
+
+  val xitrum: Config = {
+    try {
+      new Config(application.getConfig("xitrum"))
+    } catch {
+      case scala.util.control.NonFatal(e) =>
+        exitOnError("Could not load config/xitrum.conf. For an example, see https://github.com/ngocdaothanh/xitrum-new/blob/master/config/xitrum.conf", e)
+        null
+    }
+  }
+
+  /**
+   * true if "xitrum.mode" system property is set to "production"
+   * See bin/runner.sh.
+   */
+  val productionMode = System.getProperty("xitrum.mode") == "production"
+
+  //----------------------------------------------------------------------------
+
   /**
    * Path to the root directory of the current project.
    * If you're familiar with Rails, this is the same as Rails.root.
@@ -137,31 +167,44 @@ object Config extends Logger {
       System.getProperty("user.dir")  // Fallback to current working directory
   }
 
-  //----------------------------------------------------------------------------
+  val baseUrl = xitrum.reverseProxy.map(_.baseUrl).getOrElse("")
 
-  /** See bin/runner.sh */
-  val isProductionMode = (System.getProperty("xitrum.mode") == "production")
+  val requestCharset = Charset.forName(xitrum.request.charset)
 
-  /** Loaded from config/xitrum.conf */
-  val config = {
-    var ret: Config = null
-    try {
-      ret = new Config(ConfigFactory.load("xitrum.conf"))
-    } catch {
-      case scala.util.control.NonFatal(e) =>
-        exitOnError("Could not load config/xitrum.conf. For an example, see https://github.com/ngocdaothanh/xitrum-new/blob/master/config/xitrum.conf", e)
+  val sessionStore  = {
+    val className = xitrum.session.store
+    Class.forName(className).newInstance().asInstanceOf[SessionStore]
+  }
+
+  /**
+   * Use lazy to avoid starting Hazelcast if it is not used
+   * (starting Hazelcast takes several seconds, sometimes we want to work in
+   * sbt console mode and don't like this overhead)
+   */
+  lazy val hazelcastInstance: HazelcastInstance = {
+    // http://www.hazelcast.com/docs/2.4/manual/multi_html/ch12s07.html
+    System.setProperty("hazelcast.logging.type", "slf4j")
+
+    // http://www.hazelcast.com/docs/2.4/manual/multi_html/ch15.html
+    // http://www.hazelcast.com/docs/2.4/manual/multi_html/ch07s03.html
+    if (xitrum.hazelcastMode == HAZELCAST_MODE_LITE_MEMBER)
+      System.setProperty("hazelcast.lite.member", "true")
+
+    if (xitrum.hazelcastMode == HAZELCAST_MODE_LITE_MEMBER || xitrum.hazelcastMode == HAZELCAST_MODE_CLUSTER_MEMBER) {
+      val path = Config.root + File.separator + "config" + File.separator + "hazelcast_cluster_or_lite_member.xml"
+      System.setProperty("hazelcast.config", path)
+
+      // null: load from "hazelcast.config" system property above
+      // http://www.hazelcast.com/docs/2.4/manual/multi_html/ch12.html
+      Hazelcast.newHazelcastInstance(null)
+    } else {
+      // https://github.com/hazelcast/hazelcast/issues/93
+      val clientConfig = new ClientConfigBuilder("hazelcast_java_client.properties").build()
+      HazelcastClient.newHazelcastClient(clientConfig)
     }
-    ret
-  }
-
-  def warnOnDefaultSecureKey() {
-    if (config.session.secureKey == DEFAULT_SECURE_KEY)
-      logger.warn("For security, change secureKey in config/xitrum.conf to your own!")
   }
 
   //----------------------------------------------------------------------------
-
-  val baseUrl = config.reverseProxy.map(_.baseUrl).getOrElse("")
 
   /**
    * @param path with leading "/"
@@ -178,41 +221,9 @@ object Config extends Logger {
     }
   }
 
-  val requestCharset = Charset.forName(config.request.charset)
-
-  val sessionStore  = {
-    val className = config.session.store
-    Class.forName(className).newInstance().asInstanceOf[SessionStore]
-  }
-
-  //----------------------------------------------------------------------------
-
-  /**
-   * Use lazy to avoid starting Hazelcast if it is not used
-   * (starting Hazelcast takes several seconds, sometimes we want to work in
-   * sbt console mode and don't like this overhead)
-   */
-  lazy val hazelcastInstance: HazelcastInstance = {
-    // http://www.hazelcast.com/docs/2.4/manual/multi_html/ch12s07.html
-    System.setProperty("hazelcast.logging.type", "slf4j")
-
-    // http://www.hazelcast.com/docs/2.4/manual/multi_html/ch15.html
-    // http://www.hazelcast.com/docs/2.4/manual/multi_html/ch07s03.html
-    if (config.hazelcastMode == HAZELCAST_MODE_LITE_MEMBER)
-      System.setProperty("hazelcast.lite.member", "true")
-
-    if (config.hazelcastMode == HAZELCAST_MODE_LITE_MEMBER || config.hazelcastMode == HAZELCAST_MODE_CLUSTER_MEMBER) {
-      val path = Config.root + File.separator + "config" + File.separator + "hazelcast_cluster_or_lite_member.xml"
-      System.setProperty("hazelcast.config", path)
-
-      // null: load from "hazelcast.config" system property above
-      // http://www.hazelcast.com/docs/2.4/manual/multi_html/ch12.html
-      Hazelcast.newHazelcastInstance(null)
-    } else {
-      // https://github.com/hazelcast/hazelcast/issues/93
-      val clientConfig = new ClientConfigBuilder("hazelcast_java_client.properties").build()
-      HazelcastClient.newHazelcastClient(clientConfig)
-    }
+  def warnOnDefaultSecureKey() {
+    if (xitrum.session.secureKey == DEFAULT_SECURE_KEY)
+      logger.warn("For security, change secureKey in config/xitrum.conf to your own!")
   }
 
   /**

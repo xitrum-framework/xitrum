@@ -88,7 +88,7 @@ object Dispatcher extends Logger {
           AccessLog.logDynamicContentAccess(controller, beginTimestamp, 0, false)
         } else {
           controller.response.setStatus(INTERNAL_SERVER_ERROR)
-          if (Config.isProductionMode) {
+          if (Config.productionMode) {
             Routes.action500Method match {
               case None => respondDefault500AlertOrPage(controller)
 

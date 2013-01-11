@@ -31,7 +31,7 @@ object HazelcastSessionStore {
 
 class HazelcastSessionStore extends SessionStore {
   def restore(extEnv: ExtEnv): Session = {
-    val sessionCookieName = Config.config.session.cookieName
+    val sessionCookieName = Config.xitrum.session.cookieName
     extEnv.requestCookies.get(sessionCookieName) match {
       case None =>
         val sessionId = UUID.randomUUID().toString
@@ -75,7 +75,7 @@ class HazelcastSessionStore extends SessionStore {
 
   /** @param session has been restored by "restore" method */
   def store(session: Session, extEnv: ExtEnv) {
-    val sessionCookieName = Config.config.session.cookieName
+    val sessionCookieName = Config.xitrum.session.cookieName
     if (session.isEmpty) {
       // If session cookie has been sent by browser, send back session cookie
       // with max age = 0 so that browser will delete it immediately
@@ -99,7 +99,6 @@ class HazelcastSessionStore extends SessionStore {
         val cookie = new DefaultCookie(sessionCookieName, SecureBase64.encrypt(hSession.sessionId))
         cookie.setHttpOnly(true)
         extEnv.responseCookies.append(cookie)
-
       }
 
       // See "restore" method

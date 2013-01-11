@@ -20,7 +20,7 @@ import xitrum.view.DocType
 // Reference implementation (need to read when in doubt):
 // https://github.com/sockjs/sockjs-node/tree/master/src
 object SockJsController {
-  val LIMIT = if (Config.isProductionMode) 128 * 1024 else 4 * 1024
+  val LIMIT = if (Config.productionMode) 128 * 1024 else 4 * 1024
 
   //----------------------------------------------------------------------------
 
@@ -119,7 +119,7 @@ class SockJsController extends Controller with SkipCSRFCheck {
     val iframe = param("iframe")
     if (iframe.startsWith("iframe") && iframe.endsWith(".html")) {
       val src =
-        if (Config.isProductionMode)
+        if (Config.productionMode)
           "xitrum/sockjs-0.3.4.min.js"
         else
           "xitrum/sockjs-0.3.4.js"
@@ -266,7 +266,7 @@ class SockJsController extends Controller with SkipCSRFCheck {
         setCORS()
         setNoClientCache()
         response.setChunked(true)
-        response.setHeader(HttpHeaders.Names.CONTENT_TYPE, "application/javascript; charset=" + Config.config.request.charset)
+        response.setHeader(HttpHeaders.Names.CONTENT_TYPE, "application/javascript; charset=" + Config.xitrum.request.charset)
         respondBinary(SockJsController.h2KB)
       }
 

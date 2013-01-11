@@ -72,7 +72,7 @@ class ChannelPipelineFactory(https: Boolean) extends CPF {
   def httpHandlers = List(
     // Up
     new HttpRequestDecoder,
-    new HttpChunkAggregator(Config.config.request.maxSizeInMB * 1024 * 1024),
+    new HttpChunkAggregator(Config.xitrum.request.maxSizeInMB * 1024 * 1024),
     noPipelining,
     basicAuth,
     baseUrlRemover,  // HttpRequest is attached to the channel here

@@ -15,15 +15,15 @@ object Scalate extends Logger {
   private[this] val CONTROLLER_BINDING_ID = "helper"
   private[this] val CONTEXT_BINDING_ID    = "context"
 
-  private[this] val defaultType = Config.config.config.getString("scalateDefaultType")
-  private[this] val dir         = Config.config.config.getString("scalateDir")
+  private[this] val defaultType = Config.xitrum.config.getString("scalateDefaultType")
+  private[this] val dir         = Config.xitrum.config.getString("scalateDir")
 
   private[this] val classResolver = ClassResolvers.softCachingConcurrentResolver(getClass.getClassLoader)
 
   private[this] val fileEngine = {
     val ret = new STE
     ret.allowCaching = true
-    ret.allowReload  = !Config.isProductionMode
+    ret.allowReload  = !Config.productionMode
     ret
   }
 
@@ -35,7 +35,7 @@ object Scalate extends Logger {
   }
 
   {
-    ScamlOptions.ugly = Config.isProductionMode
+    ScamlOptions.ugly = Config.productionMode
 
     List(fileEngine, stringEngine).foreach { engine =>
       engine.bindings = List(
@@ -82,7 +82,7 @@ object Scalate extends Logger {
    * @param controller will be imported in the template as "helper"
    */
   private def renderMaybePrecompiledFile(controller: Controller, relPath: String): String = {
-    if (Config.isProductionMode)
+    if (Config.productionMode)
       renderPrecompiledFile(controller, relPath)
     else
       renderNotPrecompiledFile(controller, relPath)
