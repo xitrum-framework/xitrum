@@ -104,6 +104,8 @@ class Config(val config: TConfig) {
 
 /** See config/xitrum.properties */
 object Config extends Logger {
+  val ACTOR_SYSTEM_NAME = "xitrum"
+
   private val HAZELCAST_MODE_CLUSTER_MEMBER = "clusterMember"
   private val HAZELCAST_MODE_LITE_MEMBER    = "liteMember"
   private val HAZELCAST_MODE_JAVA_CLIENT    = "javaClient"
@@ -179,6 +181,9 @@ object Config extends Logger {
     Class.forName(className).newInstance().asInstanceOf[SessionStore]
   }
 
+  /** akka.actor.ActorSystem("xitrum") */
+  val actorSystem = ActorSystem(ACTOR_SYSTEM_NAME)
+
   /**
    * Use lazy to avoid starting Hazelcast if it is not used
    * (starting Hazelcast takes several seconds, sometimes we want to work in
@@ -206,9 +211,6 @@ object Config extends Logger {
       HazelcastClient.newHazelcastClient(clientConfig)
     }
   }
-
-  /** akka.actor.ActorSystem("xitrum") */
-  lazy val actorSystem = ActorSystem("xitrum")
 
   //----------------------------------------------------------------------------
 

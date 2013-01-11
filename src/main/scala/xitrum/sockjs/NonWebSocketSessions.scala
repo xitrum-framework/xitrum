@@ -9,8 +9,9 @@ import scala.util.{Failure, Success}
 import akka.actor.{Actor, ActorRef, Props, ReceiveTimeout}
 import akka.pattern.ask
 
-import xitrum.{Config, Controller}
+import xitrum.{Config, Controller, SockJsHandler}
 import xitrum.routing.Routes
+import xitrum.util.SingleActorInstance
 
 /** This acts the middleman between client and server SockJS handler. */
 object NonWebSocketSessions {
@@ -31,11 +32,16 @@ object NonWebSocketSessions {
       session:         Map[String, Any],
       sockJsSessionId: String,
       callback:        (SockJsSubscribeByClientResult) => Unit) {
-    val actorPath = actorPathForSessionId(sockJsSessionId)
-    val ref       = Config.actorSystem.actorFor(actorPath)
-    if (ref.isTerminated) {
-      val handler = Routes.createSockJsHandler(pathPrefix)
-      val ref     = Config.actorSystem.actorOf(Props(new NonWebSocketSession(handler)), actorPath)
+    var handler: SockJsHandler = null
+    val (newlyCreated, ref) = SingleActorInstance.lookupOrCreate(
+      escapeActorName(sockJsSessionId),
+      () => {
+        handler = Routes.createSockJsHandler(pathPrefix)
+        Props(new NonWebSocketSession(handler))
+      }
+    )
+
+    if (newlyCreated) {
       handler.nonWebSocketSessionActorRef = ref
       callback(SubscribeByClientResultOpen)  // "o" frame sent here
       handler.onOpen(session)                // Call opOpen after "o" frame has been sent
@@ -60,11 +66,16 @@ object NonWebSocketSessions {
       session:         Map[String, Any],
       sockJsSessionId: String,
       callback:        (SockJsSubscribeByClientResult) => Boolean) {
-    val actorPath = actorPathForSessionId(sockJsSessionId)
-    val ref       = Config.actorSystem.actorFor(actorPath)
-    if (ref.isTerminated) {
-      val handler = Routes.createSockJsHandler(pathPrefix)
-      val ref     = Config.actorSystem.actorOf(Props(new NonWebSocketSession(handler)), actorPath)
+    var handler: SockJsHandler = null
+    val (newlyCreated, ref) = SingleActorInstance.lookupOrCreate(
+      escapeActorName(sockJsSessionId),
+      () => {
+        handler = Routes.createSockJsHandler(pathPrefix)
+        Props(new NonWebSocketSession(handler))
+      }
+    )
+
+    if (newlyCreated) {
       handler.nonWebSocketSessionActorRef = ref
       val loop = callback(SubscribeByClientResultOpen)  // "o" frame sent here
       handler.onOpen(session)                           // Call opOpen after "o" frame has been sent
@@ -90,20 +101,19 @@ object NonWebSocketSessions {
 
   /** @return false means session not found */
   def sendMessagesByClient(sockJsSessionId: String, messages: List[String]): Boolean = {
-    val path = actorPathForSessionId(sockJsSessionId)
-    val ref  = Config.actorSystem.actorFor(path)
-    if (ref.isTerminated) {
-      false
-    } else {
-      ref ! SendMessagesByClient(messages)
-      true
+    SingleActorInstance.lookup(escapeActorName(sockJsSessionId)) match {
+      case None =>
+        false
+      case Some(ref) =>
+        ref ! SendMessagesByClient(messages)
+        true
     }
   }
 
   def unsubscribeByClient(sockJsSessionId: String) {
-    val path = actorPathForSessionId(sockJsSessionId)
-    val ref  = Config.actorSystem.actorFor(path)
-    ref ! UnsubscribeByClient
+    SingleActorInstance.lookup(escapeActorName(sockJsSessionId)).foreach { ref =>
+      ref ! UnsubscribeByClient
+    }
   }
 
   /**
@@ -113,9 +123,9 @@ object NonWebSocketSessions {
    * See http://groups.google.com/group/sockjs/browse_thread/thread/392cd07c4a75400b/9a4593a71e90173b#9a4593a71e90173b
    */
   def abortByClient(sockJsSessionId: String) {
-    val path = actorPathForSessionId(sockJsSessionId)
-    val ref  = Config.actorSystem.actorFor(path)
-    Config.actorSystem.stop(ref)
+    SingleActorInstance.lookup(escapeActorName(sockJsSessionId)).foreach { ref =>
+      Config.actorSystem.stop(ref)
+    }
   }
 
   //----------------------------------------------------------------------------
@@ -140,6 +150,6 @@ object NonWebSocketSessions {
    * Need this because java.net.URISyntaxException will be thrown if
    * sockJsSessionId contains strange charater.
    */
-  private def actorPathForSessionId(sockJsSessionId: String) =
-    "/user/" + URLEncoder.encode(sockJsSessionId, "UTF-8")
+  private def escapeActorName(sockJsSessionId: String) =
+    URLEncoder.encode(sockJsSessionId, "UTF-8")
 }

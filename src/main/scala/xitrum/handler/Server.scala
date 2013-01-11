@@ -8,6 +8,8 @@ import xitrum.routing.Routes
 
 object Server extends Logger {
   def start() {
+    xitrum.util.SingleActorInstance.lookup("x")
+
     // Because Hazelcast takes serveral seconds to start, we force it to
     // start before the web server begins receiving requests, instead of
     // letting it start lazily

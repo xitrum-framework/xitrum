@@ -1,7 +1,6 @@
 TODO:
 * Reload classes and routes in development mode with Javassist or Eclipse JDT
   http://stackoverflow.com/questions/5226746/how-do-grails-or-play-detect-changes-and-hot-reload-classes
-* Add cluster mode to SockJS using cluster feature of Akka and Hazelcast
 * Integrate Metrics (for SockJS stats etc.)
   http://metrics.codahale.com/
 * Add automatic HEAD request handling for the whole site
@@ -25,12 +24,19 @@ TODO:
   http://www.playframework.org/documentation/2.0/Assets
 * Add automatic CORS request handling for the whole site
   http://www.html5rocks.com/en/tutorials/cors/
+* Add connection abort handling for SockJS
 
 1.15 (planned):
 * Improve SockJS handler interface
-  def onOpen()  -> def onOpen(session: immutable Map[String, Any])
+  def onOpen() -> def onOpen(session: immutable Map[String, Any])
   https://groups.google.com/group/xitrum-framework/browse_thread/thread/d60dbfb72556aa8c
-* Add connection abort handling for SockJS
+* Make SockJS clusterwise, using Akka Remoting and Hazelcast
+  - Add config/application.conf and conf/akka.conf
+  - Add Config.application and rename Config.config to Config.xitrum
+  - Add Config.actorSystem named "xitrum"
+  - Add xitrum.util.ActorCluster (Akka Clustering is still lacks
+    "single actor instance" feature:
+    http://groups.google.com/group/akka-user/browse_thread/thread/23d6b2851648c1b0
 
 1.14:
 * Add config for template engine and Scalate template path
