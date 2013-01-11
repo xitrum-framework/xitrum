@@ -182,7 +182,7 @@ class SockJsController extends Controller with SkipCSRFCheck {
     val sessionId = param("sessionId")
 
     handleCookie()
-    SockJsNonWebSocketSessions.subscribeOnceByClient(pathPrefix, session.toMap, sessionId, { result =>
+    NonWebSocketSessions.subscribeOnceByClient(pathPrefix, session.toMap, sessionId, { result =>
       setCORS()
       setNoClientCache()
 
@@ -200,7 +200,7 @@ class SockJsController extends Controller with SkipCSRFCheck {
 /*
         case SubscribeByClientResultWaitForMessages =>
           addConnectionClosedListener {
-            SockJsNonWebSocketSessions.abortByClient(sessionId)
+            NonWebSocketSessions.abortByClient(sessionId)
           }
 */
         case SubscribeByClientResultMessages(messages) =>
@@ -237,7 +237,7 @@ class SockJsController extends Controller with SkipCSRFCheck {
 
       if (messages != null) {
         val sessionId = param("sessionId")
-        if (SockJsNonWebSocketSessions.sendMessagesByClient(sessionId, messages)) {
+        if (NonWebSocketSessions.sendMessagesByClient(sessionId, messages)) {
           response.setStatus(HttpResponseStatus.NO_CONTENT)
           response.setHeader(HttpHeaders.Names.CONTENT_TYPE, "text/plain; charset=UTF-8")
           setCORS()
@@ -261,7 +261,7 @@ class SockJsController extends Controller with SkipCSRFCheck {
     // Below can be initiated by different channels, thus isResponded should
     // be called to check if SockJsController.h2KB should be sent
     handleCookie()
-    SockJsNonWebSocketSessions.subscribeStreamingByClient(pathPrefix, session.toMap, sessionId, { result =>
+    NonWebSocketSessions.subscribeStreamingByClient(pathPrefix, session.toMap, sessionId, { result =>
       if (!isResponded) {
         setCORS()
         setNoClientCache()
@@ -273,7 +273,7 @@ class SockJsController extends Controller with SkipCSRFCheck {
       result match {
         case SubscribeByClientResultOpen =>
           respondStreamingWithLimit("o\n")
-          addConnectionClosedListener { SockJsNonWebSocketSessions.unsubscribeByClient(sessionId) }
+          addConnectionClosedListener { NonWebSocketSessions.unsubscribeByClient(sessionId) }
           true
 
         case SubscribeByClientResultAnotherConnectionStillOpen =>
@@ -318,7 +318,7 @@ class SockJsController extends Controller with SkipCSRFCheck {
       val sessionId = param("sessionId")
 
       handleCookie()
-      SockJsNonWebSocketSessions.subscribeStreamingByClient(pathPrefix, session.toMap, sessionId, { result =>
+      NonWebSocketSessions.subscribeStreamingByClient(pathPrefix, session.toMap, sessionId, { result =>
         result match {
           case SubscribeByClientResultOpen =>
             setCORS()
@@ -326,7 +326,7 @@ class SockJsController extends Controller with SkipCSRFCheck {
             response.setChunked(true)
             respondHtml(SockJsController.htmlfile(callback, true))
             respondText("<script>\np(\"o\");\n</script>\r\n")
-            addConnectionClosedListener { SockJsNonWebSocketSessions.unsubscribeByClient(sessionId) }
+            addConnectionClosedListener { NonWebSocketSessions.unsubscribeByClient(sessionId) }
             true
 
           case SubscribeByClientResultAnotherConnectionStillOpen =>
@@ -356,7 +356,7 @@ class SockJsController extends Controller with SkipCSRFCheck {
                 setNoClientCache()
                 response.setChunked(true)
                 respondHtml(SockJsController.htmlfile(callback, true))
-                addConnectionClosedListener{ SockJsNonWebSocketSessions.unsubscribeByClient(sessionId) }
+                addConnectionClosedListener{ NonWebSocketSessions.unsubscribeByClient(sessionId) }
               }
 
               if (messages.isEmpty) {
@@ -401,7 +401,7 @@ class SockJsController extends Controller with SkipCSRFCheck {
       val sessionId = param("sessionId")
 
       handleCookie()
-      SockJsNonWebSocketSessions.subscribeOnceByClient(pathPrefix, session.toMap, sessionId, { result =>
+      NonWebSocketSessions.subscribeOnceByClient(pathPrefix, session.toMap, sessionId, { result =>
         setCORS()
         setNoClientCache()
 
@@ -467,7 +467,7 @@ class SockJsController extends Controller with SkipCSRFCheck {
       }
 
       if (messages != null) {
-        if (SockJsNonWebSocketSessions.sendMessagesByClient(sessionId, messages)) {
+        if (NonWebSocketSessions.sendMessagesByClient(sessionId, messages)) {
           // Konqueror does weird things on 204.
           // As a workaround we need to respond with something - let it be the string "ok".
           setCORS()
@@ -486,13 +486,13 @@ class SockJsController extends Controller with SkipCSRFCheck {
     val sessionId = param("sessionId")
 
     handleCookie()
-    SockJsNonWebSocketSessions.subscribeStreamingByClient(pathPrefix, session.toMap, sessionId, { result =>
+    NonWebSocketSessions.subscribeStreamingByClient(pathPrefix, session.toMap, sessionId, { result =>
       result match {
         case SubscribeByClientResultOpen =>
           setCORS()
           setNoClientCache()
           respondEventSource("o")
-          addConnectionClosedListener { SockJsNonWebSocketSessions.unsubscribeByClient(sessionId) }
+          addConnectionClosedListener { NonWebSocketSessions.unsubscribeByClient(sessionId) }
           true
 
         case SubscribeByClientResultAnotherConnectionStillOpen =>
@@ -514,7 +514,7 @@ class SockJsController extends Controller with SkipCSRFCheck {
             if (!isResponded) {
               setCORS()
               setNoClientCache()
-              addConnectionClosedListener { SockJsNonWebSocketSessions.unsubscribeByClient(sessionId) }
+              addConnectionClosedListener { NonWebSocketSessions.unsubscribeByClient(sessionId) }
             }
 
             if (messages.isEmpty) {

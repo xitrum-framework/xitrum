@@ -13,7 +13,7 @@ import xitrum.{Config, Controller}
 import xitrum.routing.Routes
 
 /** This acts the middleman between client and server SockJS handler. */
-object SockJsNonWebSocketSessions {
+object NonWebSocketSessions {
   // The session must time out after 5 seconds of not having a receiving connection
   // http://sockjs.github.com/sockjs-protocol/sockjs-protocol-0.3.3.html#section-46
   val TIMEOUT_CONNECTION = 5.seconds
@@ -35,8 +35,8 @@ object SockJsNonWebSocketSessions {
     val ref       = Config.actorSystem.actorFor(actorPath)
     if (ref.isTerminated) {
       val handler = Routes.createSockJsHandler(pathPrefix)
-      val ref     = Config.actorSystem.actorOf(Props(new SockJsNonWebSocketSession(handler)), actorPath)
-      handler.sockJsNonWebSocketSessionActorRef = ref
+      val ref     = Config.actorSystem.actorOf(Props(new NonWebSocketSession(handler)), actorPath)
+      handler.nonWebSocketSessionActorRef = ref
       callback(SubscribeByClientResultOpen)  // "o" frame sent here
       handler.onOpen(session)                // Call opOpen after "o" frame has been sent
     } else {
@@ -64,8 +64,8 @@ object SockJsNonWebSocketSessions {
     val ref       = Config.actorSystem.actorFor(actorPath)
     if (ref.isTerminated) {
       val handler = Routes.createSockJsHandler(pathPrefix)
-      val ref     = Config.actorSystem.actorOf(Props(new SockJsNonWebSocketSession(handler)), actorPath)
-      handler.sockJsNonWebSocketSessionActorRef = ref
+      val ref     = Config.actorSystem.actorOf(Props(new NonWebSocketSession(handler)), actorPath)
+      handler.nonWebSocketSessionActorRef = ref
       val loop = callback(SubscribeByClientResultOpen)  // "o" frame sent here
       handler.onOpen(session)                           // Call opOpen after "o" frame has been sent
       if (loop) subscribeStreamingByClient(ref, callback)

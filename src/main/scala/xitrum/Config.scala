@@ -207,6 +207,7 @@ object Config extends Logger {
     }
   }
 
+  /** akka.actor.ActorSystem("xitrum") */
   lazy val actorSystem = ActorSystem("xitrum")
 
   //----------------------------------------------------------------------------

@@ -5,7 +5,7 @@ import akka.actor.ActorRef
 import org.jboss.netty.channel.ChannelFutureListener
 
 import xitrum.routing.Routes
-import xitrum.sockjs.SockJsNonWebSocketSessions
+import xitrum.sockjs.NonWebSocketSessions
 import xitrum.util.Json
 
 abstract class SockJsHandler extends Logger {
@@ -13,7 +13,7 @@ abstract class SockJsHandler extends Logger {
   var rawWebSocket = false
 
   /** Set by SockJsController; null if WebSocket (raw or not) is used (polling is not used) */
-  var sockJsNonWebSocketSessionActorRef: ActorRef = null
+  var nonWebSocketSessionActorRef: ActorRef = null
 
   /** Set by SockJsController; null if WebSocket (raw or not) is not used (polling is used) */
   var webSocketController: Controller = null
@@ -31,9 +31,9 @@ abstract class SockJsHandler extends Logger {
   def send(message: Any) {
     if (webSocketController == null) {
       // FIXME: Ugly code
-      // sockJsNonWebSocketSessionActorRef is set to null by SockJsNonWebSocketSession on postStop
-      if (sockJsNonWebSocketSessionActorRef != null) {
-        if (!SockJsNonWebSocketSessions.sendMessageByHandler(sockJsNonWebSocketSessionActorRef, message.toString))
+      // nonWebSocketSessionActorRef is set to null by SockJsNonWebSocketSession on postStop
+      if (nonWebSocketSessionActorRef != null) {
+        if (!NonWebSocketSessions.sendMessageByHandler(nonWebSocketSessionActorRef, message.toString))
           onClose()
       }
     } else {
@@ -50,7 +50,7 @@ abstract class SockJsHandler extends Logger {
   def close() {
     if (webSocketController == null) {
       // Until the timeout occurs, the server must serve the close message
-      SockJsNonWebSocketSessions.closeByHandler(sockJsNonWebSocketSessionActorRef)
+      NonWebSocketSessions.closeByHandler(nonWebSocketSessionActorRef)
     } else {
       // For WebSocket, must explicitly close
       // WebSocket is used, but it may be raw or not raw
