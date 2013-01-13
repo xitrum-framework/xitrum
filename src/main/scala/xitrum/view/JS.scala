@@ -8,7 +8,7 @@ import org.jboss.netty.channel.ChannelFuture
 import xitrum.{Config, Controller}
 import xitrum.controller.Action
 import xitrum.etag.{Etag, NotModified}
-import xitrum.routing.{Routes, JSRoutesController}
+import xitrum.routing.{Routes, JSRoutesCache, JSRoutesController}
 
 // http://stackoverflow.com/questions/2703861/chromes-loading-indicator-keeps-spinning-during-xmlhttprequest
 // http://stackoverflow.com/questions/1735560/stop-the-browser-throbber-of-doom-while-loading-comet-server-push-xmlhttpreques
@@ -60,7 +60,7 @@ trait JS {
 
   lazy val jsDefaults = {
     val validatei18n = if (getLanguage == "en") "" else <script type="text/javascript" src={urlForResource("xitrum/jquery.validate-1.10.0/localization/messages_"+ getLanguage +".js")}></script>
-    val jsRoutesAction = <script type="text/javascript" src={JSRoutesController.serve.url + "?" + Etag.forString(Routes.jsRoutes)}></script>
+    val jsRoutesAction = <script type="text/javascript" src={JSRoutesController.routes.url + "?" + JSRoutesCache.etag}></script>
 
     if (Config.productionMode)
       <xml:group>
