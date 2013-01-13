@@ -45,7 +45,7 @@ object Dispatcher extends Logger {
       val cacheSeconds = withActionMethod.cacheSeconds
 
       if (cacheSeconds > 0) {     // Page cache
-        tryCache(controller) {
+        hit = tryCache(controller) {
           val passed = controller.callBeforeFilters()
           if (passed) runAroundAndAfterFilters(controller, withActionMethod)
         }
@@ -53,7 +53,7 @@ object Dispatcher extends Logger {
         val passed = controller.callBeforeFilters()
         if (passed) {
           if (cacheSeconds < 0)  // Action cache
-            tryCache(controller) { runAroundAndAfterFilters(controller, withActionMethod) }
+            hit = tryCache(controller) { runAroundAndAfterFilters(controller, withActionMethod) }
           else                   // No cache
             runAroundAndAfterFilters(controller, withActionMethod)
         }
@@ -90,11 +90,12 @@ object Dispatcher extends Logger {
           controller.response.setStatus(INTERNAL_SERVER_ERROR)
           if (Config.productionMode) {
             Routes.action500Method match {
-              case None => respondDefault500AlertOrPage(controller)
+              case None =>
+                controller.respondDefault500Page()
 
               case Some(action500Method) =>
                 if (action500Method == actionMethod) {
-                  respondDefault500AlertOrPage(controller)
+                  controller.respondDefault500Page()
                 } else {
                   controller.response.setStatus(INTERNAL_SERVER_ERROR)
                   dispatchWithFailsafe(action500Method, env)
@@ -124,18 +125,6 @@ object Dispatcher extends Logger {
   }
 
   //----------------------------------------------------------------------------
-
-  private def respondDefault500AlertOrPage(controller: Controller) {
-    if (controller.isAjax) {
-      controller.jsRespond("alert(\"" + controller.jsEscape("Internal Server Error") + "\")")
-    } else {
-      val response = new DefaultHttpResponse(HTTP_1_1, INTERNAL_SERVER_ERROR)
-      XSendFile.set500Page(response, true)
-      val env = controller.handlerEnv
-      env.response = response
-      env.channel.write(env)
-    }
-  }
 
   /** @return true if the cache was hit */
   private def tryCache(controller: Controller)(f: => Unit): Boolean = {
