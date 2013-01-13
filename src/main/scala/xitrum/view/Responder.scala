@@ -5,7 +5,7 @@ import scala.xml.{Node, NodeSeq, Xhtml}
 
 import org.jboss.netty.buffer.{ChannelBuffer, ChannelBuffers}
 import org.jboss.netty.channel.ChannelFuture
-import org.jboss.netty.handler.codec.http.{DefaultHttpChunk, HttpChunk, HttpHeaders, HttpVersion}
+import org.jboss.netty.handler.codec.http.{DefaultHttpChunk, HttpChunk, HttpHeaders, HttpResponseStatus, HttpVersion}
 import org.jboss.netty.handler.codec.http.websocketx.TextWebSocketFrame
 import org.jboss.netty.util.CharsetUtil
 import HttpHeaders.Names.{CONTENT_TYPE, CONTENT_LENGTH, TRANSFER_ENCODING}
@@ -361,13 +361,23 @@ trait Responder extends JS with Flash with Knockout {
   //----------------------------------------------------------------------------
 
   def respondDefault404Page(): ChannelFuture = {
-    XSendFile.set404Page(response, true)
-    respond()
+    if (isAjax) {
+      response.setStatus(HttpResponseStatus.NOT_FOUND)
+      jsRespond("alert(\"" + jsEscape("Not Found") + "\")")
+    } else {
+      XSendFile.set404Page(response, true)
+      respond()
+    }
   }
 
   def respondDefault500Page(): ChannelFuture = {
-    XSendFile.set500Page(response, true)
-    respond()
+    if (isAjax) {
+      response.setStatus(HttpResponseStatus.INTERNAL_SERVER_ERROR)
+      jsRespond("alert(\"" + jsEscape("Internal Server Error") + "\")")
+    } else {
+      XSendFile.set500Page(response, true)
+      respond()
+    }
   }
 
   //----------------------------------------------------------------------------
