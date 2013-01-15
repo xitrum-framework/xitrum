@@ -1,11 +1,19 @@
 package xitrum.util
 
 import scala.collection.mutable.{Map => MMap}
+import scala.concurrent.duration._
+import scala.concurrent.Await
 
-import akka.actor.{ActorRef, Props}
+import akka.actor.{Actor, ActorRef, Props}
+import akka.pattern.ask
+
 import com.hazelcast.core.{IMap, MembershipEvent, MembershipListener}
 
 import xitrum.Config
+
+case class Lookup(name: String)
+case class LookupLocal(name: String)
+case class LookupOrCreate(name: String, propsMaker: () => Props)
 
 /**
  * This object provides "single actor instance" feature, implemented using
@@ -18,11 +26,23 @@ import xitrum.Config
  * With future version of Akka, this object may become obsolete.
  */
 object SingleActorInstance {
-  private val LOCK_NAME = getClass.getName
+  private val LOCK_NAME         = getClass.getName
+  private val ACTOR_SYSTEM_NAME = "SingleActorInstance"
 
-  private val addrs: IMap[String, String] = Config.hazelcastInstance.getMap("xitrum/SingleActorInstance")
+  def start() {
+    Config.actorSystem.actorOf(Props[SingleActorInstance], ACTOR_SYSTEM_NAME)
+  }
+}
 
-  {
+class SingleActorInstance extends Actor {
+  import SingleActorInstance._
+
+  private var addrs:     IMap[String, String] = _
+  private var localAddr: String               = _
+
+  override def preStart() {
+    addrs = Config.hazelcastInstance.getMap("xitrum/SingleActorInstance")
+
     val h    = Config.hazelcastInstance
     val lock = h.getLock(LOCK_NAME)
     lock.lock()
@@ -32,13 +52,12 @@ object SingleActorInstance {
       // Register local node
       val id = cluster.getLocalMember.getUuid
 
-      val nc   = Config.application.getConfig("akka.remote.netty")
-      val host = nc.getString("hostname")
-      val port = nc.getInt("port")
-      val addr = host + ":" + port
+      val nc    = Config.application.getConfig("akka.remote.netty")
+      val host  = nc.getString("hostname")
+      val port  = nc.getInt("port")
+      localAddr = host + ":" + port
 
-      println("addrs.put(id, addr)", id, addr)
-      addrs.put(id, addr)
+      addrs.put(id, localAddr)
 
       // Unregister remote node
       cluster.addMembershipListener(new MembershipListener {
@@ -55,9 +74,20 @@ object SingleActorInstance {
     }
   }
 
-  /** If the actor has not been created, it will be created locally. */
-  def lookupOrCreate(name: String, propsMaker: () => Props): (Boolean, ActorRef) = {
-    val a    = Config.actorSystem
+  def receive = {
+    case Lookup(name: String) =>
+      sender ! lookup(name)
+
+    case LookupLocal(name: String) =>
+      sender ! lookupLocal(name)
+
+    case LookupOrCreate(name, propsMaker) =>
+      sender ! lookupOrCreate(name, propsMaker)
+  }
+
+  //----------------------------------------------------------------------------
+
+  private def lookup(name: String): Option[ActorRef] = {
     val h    = Config.hazelcastInstance
     val lock = h.getLock(LOCK_NAME)
     lock.lock()
@@ -65,20 +95,32 @@ object SingleActorInstance {
       val it = addrs.values().iterator
       while (it.hasNext()) {
         val addr = it.next()
-        println("addr", addr, "akka://" + Config.ACTOR_SYSTEM_NAME + "@" + addr + "/user/" + name)
-        val ref  = a.actorFor("akka://" + Config.ACTOR_SYSTEM_NAME + "@" + addr + "/user/" + name)
-        if (!ref.isTerminated) return (false, ref)
+        if (addr == localAddr) {
+          val ref = context.actorFor(name)
+          if (!ref.isTerminated) return Some(ref)
+        } else {
+          val remoteSingleActorInstance = context.actorFor(
+            "akka://" + Config.ACTOR_SYSTEM_NAME + "@" + addr + "/user/" + ACTOR_SYSTEM_NAME)
+          val timeout                   = 5.seconds
+          val future                    = remoteSingleActorInstance.ask(LookupLocal(name))(timeout)
+          val refo                      = Await.result(future, timeout).asInstanceOf[Option[ActorRef]]
+          if (refo.isDefined) return refo
+        }
       }
 
-      // Create local actor
-      (true, a.actorOf(propsMaker(), name))
+      None
     } finally {
       lock.unlock()
     }
   }
 
-  def lookup(name: String): Option[ActorRef] = {
-    val a    = Config.actorSystem
+  private def lookupLocal(name: String): Option[ActorRef] = {
+    val ref = context.actorFor(name)
+    if (ref.isTerminated) None else Some(ref)
+  }
+
+  /** If the actor has not been created, it will be created locally. */
+  private def lookupOrCreate(name: String, propsMaker: () => Props): (Boolean, ActorRef) = {
     val h    = Config.hazelcastInstance
     val lock = h.getLock(LOCK_NAME)
     lock.lock()
@@ -86,11 +128,21 @@ object SingleActorInstance {
       val it = addrs.values().iterator
       while (it.hasNext()) {
         val addr = it.next()
-        val ref  = a.actorFor("akka://" + Config.ACTOR_SYSTEM_NAME + "@" + addr + "/user/" + name)
-        if (!ref.isTerminated) return Some(ref)
+        if (addr == localAddr) {
+          val ref = context.actorFor(name)
+          if (!ref.isTerminated) return (false, ref)
+        } else {
+          val remoteSingleActorInstance = context.actorFor(
+            "akka://" + Config.ACTOR_SYSTEM_NAME + "@" + addr + "/user/" + ACTOR_SYSTEM_NAME)
+          val timeout                   = 5.seconds
+          val future                    = remoteSingleActorInstance.ask(LookupLocal(name))(timeout)
+          val refo                      = Await.result(future, timeout).asInstanceOf[Option[ActorRef]]
+          if (refo.isDefined) return (false, refo.get)
+        }
       }
 
-      None
+      // Create local actor
+      (true, context.actorOf(propsMaker(), name))
     } finally {
       lock.unlock()
     }
