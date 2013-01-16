@@ -38,6 +38,7 @@ TODO:
     Akka Clustering is currently lacks "single actor instance" feature
     http://groups.google.com/group/akka-user/browse_thread/thread/23d6b2851648c1b0
 * Update Hazelcast from 2.4.1 to 2.5
+  http://www.hazelcast.com/docs/2.5/manual/multi_html/ch18s04.html
 
 1.14:
 * Add config for template engine and Scalate template path
