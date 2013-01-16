@@ -19,13 +19,12 @@ resolvers += "SonatypeReleases" at "http://oss.sonatype.org/content/repositories
 
 // Hazelcast -------------------------------------------------------------------
 
-// For distributed cache and Comet
+// For distributed cache and SockJS
 // Infinispan is good but much heavier
-libraryDependencies += "com.hazelcast" % "hazelcast" % "2.4.1"
+libraryDependencies += "com.hazelcast" % "hazelcast" % "2.5"
 
-// http://www.hazelcast.com/documentation.jsp#Clients
-// Hazelcast can be configured in Xitrum as super client or native client
-libraryDependencies += "com.hazelcast" % "hazelcast-client" % "2.4.1"
+// Hazelcast can be configured as cluster member, lite member, or Java client
+libraryDependencies += "com.hazelcast" % "hazelcast-client" % "2.5"
 
 // Scalate ---------------------------------------------------------------------
 

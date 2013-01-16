@@ -31,12 +31,13 @@ TODO:
   def onOpen() -> def onOpen(session: immutable Map[String, Any])
   https://groups.google.com/group/xitrum-framework/browse_thread/thread/d60dbfb72556aa8c
 * Make SockJS clusterwise, using Akka Remoting and Hazelcast
-  - Add config/application.conf and conf/akka.conf
+  - Add config/application.conf which loads conf/akka.conf and conf/xitrum.conf
   - Add Config.application and rename Config.config to Config.xitrum
   - Add Config.actorSystem named "xitrum"
-  - Add xitrum.util.ActorCluster (Akka Clustering is still lacks
-    "single actor instance" feature:
+  - Add xitrum.util.ActorCluster
+    Akka Clustering is currently lacks "single actor instance" feature
     http://groups.google.com/group/akka-user/browse_thread/thread/23d6b2851648c1b0
+* Update Hazelcast from 2.4.1 to 2.5
 
 1.14:
 * Add config for template engine and Scalate template path
