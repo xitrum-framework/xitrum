@@ -1,10 +1,13 @@
 package xitrum.sockjs
 
 import java.util.{Arrays, Random}
+
 import org.jboss.netty.channel.ChannelFutureListener
 import org.jboss.netty.buffer.ChannelBuffers
 import org.jboss.netty.handler.codec.http.{DefaultCookie, HttpHeaders, HttpResponseStatus}
-import akka.actor.{Actor, ActorRef, Props}
+
+import akka.actor.{Actor, ActorRef, Kill, Props}
+
 import xitrum.{Config, Controller, SkipCSRFCheck}
 import xitrum.etag.NotModified
 import xitrum.routing.Routes
@@ -186,6 +189,7 @@ class SockJsController extends Controller with SkipCSRFCheck {
 
     Config.actorSystem.actorOf(Props(new Actor {
       override def preStart() {
+        addConnectionClosedListener { self ! Kill }
         val propsMaker = () => Props(new NonWebSocketSession(self, pathPrefix, session.toMap))
         SingleActorInstance.actor() ! LookupOrCreate(sessionId, propsMaker)
       }
@@ -216,36 +220,27 @@ class SockJsController extends Controller with SkipCSRFCheck {
           val json   = Json.generate(messages)
           val quoted = SockJsController.quoteUnicode(json)
           respondJs("a" + quoted + "\n")
-
-          addConnectionClosedListener {
-            nonWebSocketSession ! UnsubscribeByClient
-          }
-          context.become(receiveNotification(nonWebSocketSession))
+          context.stop(self)
 
         case SubscribeResultToClientWaitForMessage =>
-          addConnectionClosedListener {
-            nonWebSocketSession ! UnsubscribeByClient
-          }
           context.become(receiveNotification(nonWebSocketSession))
       }
 
       private def receiveNotification(nonWebSocketSession: ActorRef): Receive = {
         case NotificationToClientMessage(message) =>
-          ref ! UnsubscribeByClient
-
           val json   = Json.generate(List(message))
           val quoted = SockJsController.quoteUnicode(json)
           respondJs("a" + quoted + "\n")
+          context.stop(self)
 
         case NotificationToClientHeartbeat =>
-          ref ! UnsubscribeByClient
           respondJs("h\n")
+          context.stop(self)
 
         case NotificationToClientClosed =>
-          ref ! UnsubscribeByClient
-          context.stop(self)
           respondJs("c[3000,\"Go away!\"]\n")
           .addListener(ChannelFutureListener.CLOSE)
+          context.stop(self)
       }
     }))
   }
@@ -294,7 +289,7 @@ class SockJsController extends Controller with SkipCSRFCheck {
   def xhrStreamingOPTIONSReceive = OPTIONS(":serverId<[^\\.]+>/:sessionId<[^\\.]+>/xhr_streaming") {
     xhrOPTIONS()
   }
-
+/*
   def xhrStreamingReceive = POST(":serverId<[^\\.]+>/:sessionId<[^\\.]+>/xhr_streaming") {
     val sessionId = param("sessionId")
 
@@ -591,7 +586,7 @@ class SockJsController extends Controller with SkipCSRFCheck {
       }
     })
   }
-
+*/
   //----------------------------------------------------------------------------
 
   // http://sockjs.github.com/sockjs-protocol/sockjs-protocol-0.3.3.html#section-52
