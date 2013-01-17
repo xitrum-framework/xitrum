@@ -2,26 +2,29 @@ package xitrum.sockjs
 
 import scala.collection.mutable.ArrayBuffer
 
-import akka.actor.{Actor, ActorRef, ActorSystem, Props, ReceiveTimeout}
+import akka.actor.{Actor, ActorRef, ActorSystem, Props, ReceiveTimeout, Terminated}
 import scala.concurrent.duration._
 
 import xitrum.SockJsHandler
 import xitrum.routing.Routes
 
-sealed trait SockJsNonWebSocketSessionActorMessage
-case class  SendMessagesByClient (messages: List[String]) extends SockJsNonWebSocketSessionActorMessage
-case class  SendMessageByHandler(message: String)         extends SockJsNonWebSocketSessionActorMessage
-case object SubscribeOnceByClient                         extends SockJsNonWebSocketSessionActorMessage
-case object UnsubscribeByClient                           extends SockJsNonWebSocketSessionActorMessage
-case object CloseByHandler                                extends SockJsNonWebSocketSessionActorMessage
+sealed trait MessageToSession
+case object SubscribeByClient                            extends MessageToSession
+case object UnsubscribeByClient                          extends MessageToSession
+case class  SendMessagesByClient(messages: List[String]) extends MessageToSession
+case class  SendMessageByHandler(message: String)        extends MessageToSession
+case object CloseByHandler                               extends MessageToSession
 
-sealed trait SockJsSubscribeByClientResult
-case object SubscribeByClientResultOpen                             extends SockJsSubscribeByClientResult
-case object SubscribeByClientResultWaitForMessages                  extends SockJsSubscribeByClientResult
-case object SubscribeByClientResultAnotherConnectionStillOpen       extends SockJsSubscribeByClientResult
-case object SubscribeByClientResultClosed                           extends SockJsSubscribeByClientResult
-case class  SubscribeByClientResultMessages(messages: List[String]) extends SockJsSubscribeByClientResult
-case object SubscribeByClientResultErrorAfterOpenHasBeenSent        extends SockJsSubscribeByClientResult
+sealed trait SubscribeResultToClient
+case object SubscribeResultToClientAnotherConnectionStillOpen       extends SubscribeResultToClient
+case object SubscribeResultToClientClosed                           extends SubscribeResultToClient
+case class  SubscribeResultToClientMessages(messages: List[String]) extends SubscribeResultToClient
+case object SubscribeResultToClientWaitForMessage                   extends SubscribeResultToClient
+
+sealed trait NotificationToClient
+case class  NotificationToClientMessage(message: String) extends NotificationToClient
+case object NotificationToClientHeartbeat                extends NotificationToClient
+case object NotificationToClientClosed                   extends NotificationToClient
 
 object NonWebSocketSession {
   // The session must time out after 5 seconds of not having a receiving connection
@@ -44,12 +47,13 @@ object NonWebSocketSession {
  * for subscriber for a long time.
  * See TIMEOUT_CONNECTION and TIMEOUT_HEARTBEAT in NonWebSocketSessions.
  */
-class NonWebSocketSession(var clientSender: ActorRef, pathPrefix: String, session: Map[String, Any]) extends Actor {
+class NonWebSocketSession(var clientSubscriber: ActorRef, pathPrefix: String, session: Map[String, Any]) extends Actor {
   import NonWebSocketSession._
 
   private var sockJsHandler: SockJsHandler = _
 
-  private val buffer = ArrayBuffer[String]()
+  // Messages from handler to client are buffered here
+  private val bufferForClientSubscriber = ArrayBuffer[String]()
 
   // ReceiveTimeout may not occurred if there's frequent Publish, thus we
   // need to manually check if there's no subscriber for a long time.
@@ -61,84 +65,97 @@ class NonWebSocketSession(var clientSender: ActorRef, pathPrefix: String, sessio
   // the close message
   private var closed = false
 
-  context.setReceiveTimeout(TIMEOUT_CONNECTION)
-
   override def preStart() {
-    // sockJsHandler.onClose is called at postStop, but sockJsHandler.onOpen
-    // is not called here, because sockJsHandler.onOpen may send messages, but
-    // "o" frame needs to be sent before all messages. sockJsHandler.onOpen will
-    // be called by NonWebSocketSessions.
-    lastSubscribedAt = System.currentTimeMillis()
-
+    // sockJsHandler.onClose is called at postStop
     sockJsHandler = Routes.createSockJsHandler(pathPrefix)
     sockJsHandler.nonWebSocketSessionActorRef = self
     sockJsHandler.onOpen(session)
+
+    lastSubscribedAt = System.currentTimeMillis()
+
+    context.watch(clientSubscriber)  // Unsubscribed when stopped
+
+    // Once set, the receive timeout stays in effect (i.e. continues firing
+    // repeatedly after inactivity periods). Duration.Undefined must be set
+    // to switch off this feature.
+    context.setReceiveTimeout(TIMEOUT_CONNECTION)
   }
 
   override def postStop() {
     sockJsHandler.onClose()
-    // Remove interdependency
+
+    // Remove interdependency so that JVM can do gabage collection
     sockJsHandler.nonWebSocketSessionActorRef = null
     sockJsHandler = null
   }
 
   def receive = {
-    case SubscribeOnceByClient =>
+    case Terminated(monitored) =>
+      if (monitored == clientSubscriber) clientSubscriber = null
+
+    case SubscribeByClient =>
       if (closed) {
-        sender ! SubscribeByClientResultClosed
+        sender ! SubscribeResultToClientClosed
       } else {
         lastSubscribedAt = System.currentTimeMillis()
-        if (clientSender == null) {
-          if (buffer.isEmpty) {
-            clientSender = sender
+        if (clientSubscriber == null) {
+          clientSubscriber = sender
+          context.watch(clientSubscriber)  // Unsubscribed when stopped
+          if (bufferForClientSubscriber.isEmpty) {
+            clientSubscriber ! SubscribeResultToClientWaitForMessage
             context.setReceiveTimeout(TIMEOUT_HEARTBEAT)
-            //clientSender ! SubscribeByClientResultWaitForMessages
           } else {
-            sender ! SubscribeByClientResultMessages(buffer.toList)
-            buffer.clear()
+            clientSubscriber ! SubscribeResultToClientMessages(bufferForClientSubscriber.toList)
+            bufferForClientSubscriber.clear()
           }
         } else {
-          sender ! SubscribeByClientResultAnotherConnectionStillOpen
+          sender ! SubscribeResultToClientAnotherConnectionStillOpen
         }
       }
 
     case UnsubscribeByClient =>
-      clientSender = null
-      context.setReceiveTimeout(TIMEOUT_CONNECTION)
+      if (sender == clientSubscriber) {
+        clientSubscriber = null
+        context.unwatch(clientSubscriber)
+        context.setReceiveTimeout(TIMEOUT_CONNECTION)
+      }
 
     case CloseByHandler =>
       // Until the timeout occurs, the server must serve the close message
       closed = true
+      if (clientSubscriber != null) {
+        clientSubscriber = null
+        context.unwatch(clientSubscriber)
+        clientSubscriber ! NotificationToClientClosed
+      }
 
     case SendMessagesByClient(messages) =>
       if (!closed) messages.foreach(sockJsHandler.onMessage(_))
 
     case SendMessageByHandler(message) =>
       if (!closed) {
-        if (clientSender == null) {
-          // Manually check if there's no subscriber for a long time
+        if (clientSubscriber == null) {
+          // Stop to avoid out of memory if there's no subscriber for a long time
           val now = System.currentTimeMillis()
           if (now - lastSubscribedAt > TIMEOUT_CONNECTION_MILLIS) {
             context.stop(self)
           } else {
-            buffer += message
+            bufferForClientSubscriber += message
           }
         } else {
           // buffer is empty at this moment
-          clientSender ! SubscribeByClientResultMessages(List(message))
-          clientSender = null
+          clientSubscriber ! NotificationToClientMessage(message)
           context.setReceiveTimeout(TIMEOUT_CONNECTION)
         }
       }
 
     case ReceiveTimeout =>
-      if (closed || clientSender == null) {
+      if (closed || clientSubscriber == null) {
         // Closed or no subscriber for a long time
         context.stop(self)
       } else {
         // No message for subscriber for a long time
-        clientSender ! SubscribeByClientResultMessages(Nil)
-        clientSender = null
+        clientSubscriber ! NotificationToClientHeartbeat
         context.setReceiveTimeout(TIMEOUT_CONNECTION)
       }
   }

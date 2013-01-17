@@ -1,18 +1,16 @@
 package xitrum.sockjs
 
 import java.util.{Arrays, Random}
-
 import org.jboss.netty.channel.ChannelFutureListener
 import org.jboss.netty.buffer.ChannelBuffers
 import org.jboss.netty.handler.codec.http.{DefaultCookie, HttpHeaders, HttpResponseStatus}
-
 import akka.actor.{Actor, ActorRef, Props}
-
 import xitrum.{Config, Controller, SkipCSRFCheck}
 import xitrum.etag.NotModified
 import xitrum.routing.Routes
 import xitrum.util.{Json, LookupOrCreate, SingleActorInstance}
 import xitrum.view.DocType
+import xitrum.util.Lookup
 
 // General info:
 // http://sockjs.github.com/sockjs-protocol/sockjs-protocol-0.3.html
@@ -193,36 +191,61 @@ class SockJsController extends Controller with SkipCSRFCheck {
       }
 
       def receive = {
-        case (newlyCreated: Boolean, ref: ActorRef) =>
+        case (newlyCreated: Boolean, nonWebSocketSession: ActorRef) =>
          if (newlyCreated) {
            respondJs("o\n")
-           ref ! UnsubscribeByClient
+           context.stop(self)
          } else {
-           ref ! SubscribeOnceByClient
-           context.become {
-             case SubscribeByClientResultAnotherConnectionStillOpen =>
-               respondJs("c[2010,\"Another connection still open\"]\n")
-               .addListener(ChannelFutureListener.CLOSE)
-
-             case SubscribeByClientResultClosed =>
-               respondJs("c[3000,\"Go away!\"]\n")
-               .addListener(ChannelFutureListener.CLOSE)
-
-            case SubscribeByClientResultWaitForMessages =>
-              addConnectionClosedListener {
-                ref ! UnsubscribeByClient
-              }
-
-            case SubscribeByClientResultMessages(messages) =>
-              if (messages.isEmpty) {
-                respondJs("h\n")
-              } else {
-                val json   = Json.generate(messages)
-                val quoted = SockJsController.quoteUnicode(json)
-                respondJs("a" + quoted + "\n")
-              }
-           }
+           nonWebSocketSession ! SubscribeByClient
+           context.become(receiveSubscribeResult(nonWebSocketSession))
          }
+      }
+
+      private def receiveSubscribeResult(nonWebSocketSession: ActorRef): Receive = {
+        case SubscribeResultToClientAnotherConnectionStillOpen =>
+          respondJs("c[2010,\"Another connection still open\"]\n")
+          .addListener(ChannelFutureListener.CLOSE)
+          context.stop(self)
+
+        case SubscribeResultToClientClosed =>
+          respondJs("c[3000,\"Go away!\"]\n")
+          .addListener(ChannelFutureListener.CLOSE)
+          context.stop(self)
+
+        case SubscribeResultToClientMessages(messages) =>
+          val json   = Json.generate(messages)
+          val quoted = SockJsController.quoteUnicode(json)
+          respondJs("a" + quoted + "\n")
+
+          addConnectionClosedListener {
+            nonWebSocketSession ! UnsubscribeByClient
+          }
+          context.become(receiveNotification(nonWebSocketSession))
+
+        case SubscribeResultToClientWaitForMessage =>
+          addConnectionClosedListener {
+            nonWebSocketSession ! UnsubscribeByClient
+          }
+          context.become(receiveNotification(nonWebSocketSession))
+      }
+
+      private def receiveNotification(nonWebSocketSession: ActorRef): Receive = {
+        case NotificationToClientMessage(message) =>
+          ref ! UnsubscribeByClient
+
+          val json   = Json.generate(List(message))
+          val quoted = SockJsController.quoteUnicode(json)
+          respondJs("a" + quoted + "\n")
+
+        case NotificationToClientHeartbeat =>
+          ref ! UnsubscribeByClient
+          respondJs("h\n")
+
+        case NotificationToClientClosed =>
+          ref ! UnsubscribeByClient
+          context.stop(self)
+          respondJs("c[3000,\"Go away!\"]\n")
+          .addListener(ChannelFutureListener.CLOSE)
       }
     }))
   }
@@ -245,14 +268,23 @@ class SockJsController extends Controller with SkipCSRFCheck {
 
       if (messages != null) {
         val sessionId = param("sessionId")
-        if (NonWebSocketSessions.sendMessagesByClient(sessionId, messages)) {
-          response.setStatus(HttpResponseStatus.NO_CONTENT)
-          response.setHeader(HttpHeaders.Names.CONTENT_TYPE, "text/plain; charset=UTF-8")
-          setCORS()
-          respond()
-        } else {
-          respondDefault404Page()
-        }
+        Config.actorSystem.actorOf(Props(new Actor {
+          override def preStart() {
+            SingleActorInstance.actor() ! Lookup(sessionId)
+          }
+
+          def receive = {
+            case None =>
+              respondDefault404Page()
+
+            case Some(ref: ActorRef) =>
+              ref ! SendMessagesByClient(messages)
+              response.setStatus(HttpResponseStatus.NO_CONTENT)
+              response.setHeader(HttpHeaders.Names.CONTENT_TYPE, "text/plain; charset=UTF-8")
+              setCORS()
+              respond()
+          }
+        }))
       }
     }
   }
@@ -475,15 +507,24 @@ class SockJsController extends Controller with SkipCSRFCheck {
       }
 
       if (messages != null) {
-        if (NonWebSocketSessions.sendMessagesByClient(sessionId, messages)) {
-          // Konqueror does weird things on 204.
-          // As a workaround we need to respond with something - let it be the string "ok".
-          setCORS()
-          setNoClientCache()
-          respondText("ok")
-        } else {
-          respondDefault404Page()
-        }
+        Config.actorSystem.actorOf(Props(new Actor {
+          override def preStart() {
+            SingleActorInstance.actor() ! Lookup(sessionId)
+          }
+
+          def receive = {
+            case None =>
+              respondDefault404Page()
+
+            case Some(ref: ActorRef) =>
+              ref ! SendMessagesByClient(messages)
+              // Konqueror does weird things on 204.
+              // As a workaround we need to respond with something - let it be the string "ok".
+              setCORS()
+              setNoClientCache()
+              respondText("ok")
+          }
+        }))
       }
     }
   }
