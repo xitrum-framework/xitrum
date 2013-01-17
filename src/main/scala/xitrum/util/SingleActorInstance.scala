@@ -32,6 +32,8 @@ object SingleActorInstance {
   def start() {
     Config.actorSystem.actorOf(Props[SingleActorInstance], ACTOR_SYSTEM_NAME)
   }
+
+  def actor() = Config.actorSystem.actorFor(ACTOR_SYSTEM_NAME)
 }
 
 class SingleActorInstance extends Actor {

@@ -5,7 +5,7 @@ import akka.actor.ActorRef
 import org.jboss.netty.channel.ChannelFutureListener
 
 import xitrum.routing.Routes
-import xitrum.sockjs.NonWebSocketSessions
+import xitrum.sockjs.{CloseByHandler, SendMessageByHandler}
 import xitrum.util.Json
 
 abstract class SockJsHandler extends Logger {
@@ -33,8 +33,11 @@ abstract class SockJsHandler extends Logger {
       // FIXME: Ugly code
       // nonWebSocketSessionActorRef is set to null by SockJsNonWebSocketSession on postStop
       if (nonWebSocketSessionActorRef != null) {
-        if (!NonWebSocketSessions.sendMessageByHandler(nonWebSocketSessionActorRef, message.toString))
+        if (nonWebSocketSessionActorRef.isTerminated) {
           onClose()
+        } else {
+          nonWebSocketSessionActorRef ! SendMessageByHandler(message.toString)
+        }
       }
     } else {
       // WebSocket is used, but it may be raw or not raw
@@ -50,7 +53,7 @@ abstract class SockJsHandler extends Logger {
   def close() {
     if (webSocketController == null) {
       // Until the timeout occurs, the server must serve the close message
-      NonWebSocketSessions.closeByHandler(nonWebSocketSessionActorRef)
+      nonWebSocketSessionActorRef ! CloseByHandler
     } else {
       // For WebSocket, must explicitly close
       // WebSocket is used, but it may be raw or not raw
@@ -63,7 +66,5 @@ abstract class SockJsHandler extends Logger {
     }
   }
 
-  def url: String = {
-    Config.withBaseUrl(Routes.sockJsPathPrefix(this.getClass))
-  }
+  def url = Config.withBaseUrl(Routes.sockJsPathPrefix(this.getClass))
 }

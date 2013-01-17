@@ -6,10 +6,12 @@ import org.jboss.netty.channel.ChannelFutureListener
 import org.jboss.netty.buffer.ChannelBuffers
 import org.jboss.netty.handler.codec.http.{DefaultCookie, HttpHeaders, HttpResponseStatus}
 
+import akka.actor.{Actor, ActorRef, Props}
+
 import xitrum.{Config, Controller, SkipCSRFCheck}
 import xitrum.etag.NotModified
 import xitrum.routing.Routes
-import xitrum.util.Json
+import xitrum.util.{Json, LookupOrCreate, SingleActorInstance}
 import xitrum.view.DocType
 
 // General info:
@@ -150,8 +152,7 @@ class SockJsController extends Controller with SkipCSRFCheck {
   def infoGET = GET("info") {
     setCORS()
     setNoClientCache()
-    // FIXME: IE doesn't work with SockJS implementation of Xitrum when
-    // cookie_needed is set to true
+    // FIXME: Retest if IE works when cookie_needed is set to true
     val sockJsClassAndOptions = Routes.sockJsClassAndOptions(pathPrefix)
     respondJsonText(
       """{"websocket": """      + sockJsClassAndOptions.websocket +
@@ -182,41 +183,48 @@ class SockJsController extends Controller with SkipCSRFCheck {
     val sessionId = param("sessionId")
 
     handleCookie()
-    NonWebSocketSessions.subscribeOnceByClient(pathPrefix, session.toMap, sessionId, { result =>
-      setCORS()
-      setNoClientCache()
+    setCORS()
+    setNoClientCache()
 
-      result match {
-        case SubscribeByClientResultOpen =>
-          respondJs("o\n")
-
-        case SubscribeByClientResultAnotherConnectionStillOpen =>
-          respondJs("c[2010,\"Another connection still open\"]\n")
-          .addListener(ChannelFutureListener.CLOSE)
-
-        case SubscribeByClientResultClosed =>
-          respondJs("c[3000,\"Go away!\"]\n")
-          .addListener(ChannelFutureListener.CLOSE)
-/*
-        case SubscribeByClientResultWaitForMessages =>
-          addConnectionClosedListener {
-            NonWebSocketSessions.abortByClient(sessionId)
-          }
-*/
-        case SubscribeByClientResultMessages(messages) =>
-          if (messages.isEmpty) {
-            respondJs("h\n")
-          } else {
-            val json   = Json.generate(messages)
-            val quoted = SockJsController.quoteUnicode(json)
-            respondJs("a" + quoted + "\n")
-          }
-
-        case SubscribeByClientResultErrorAfterOpenHasBeenSent =>
-          respondJs("c[2011,\"Server error\"]\n")
-          .addListener(ChannelFutureListener.CLOSE)
+    Config.actorSystem.actorOf(Props(new Actor {
+      override def preStart() {
+        val propsMaker = () => Props(new NonWebSocketSession(self, pathPrefix, session.toMap))
+        SingleActorInstance.actor() ! LookupOrCreate(sessionId, propsMaker)
       }
-    })
+
+      def receive = {
+        case (newlyCreated: Boolean, ref: ActorRef) =>
+         if (newlyCreated) {
+           respondJs("o\n")
+           ref ! UnsubscribeByClient
+         } else {
+           ref ! SubscribeOnceByClient
+           context.become {
+             case SubscribeByClientResultAnotherConnectionStillOpen =>
+               respondJs("c[2010,\"Another connection still open\"]\n")
+               .addListener(ChannelFutureListener.CLOSE)
+
+             case SubscribeByClientResultClosed =>
+               respondJs("c[3000,\"Go away!\"]\n")
+               .addListener(ChannelFutureListener.CLOSE)
+
+            case SubscribeByClientResultWaitForMessages =>
+              addConnectionClosedListener {
+                ref ! UnsubscribeByClient
+              }
+
+            case SubscribeByClientResultMessages(messages) =>
+              if (messages.isEmpty) {
+                respondJs("h\n")
+              } else {
+                val json   = Json.generate(messages)
+                val quoted = SockJsController.quoteUnicode(json)
+                respondJs("a" + quoted + "\n")
+              }
+           }
+         }
+      }
+    }))
   }
 
   def xhrSend = POST(":serverId<[^\\.]+>/:sessionId<[^\\.]+>/xhr_send") {
