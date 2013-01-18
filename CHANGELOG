@@ -50,6 +50,7 @@ TODO:
 See these examples to know how to update your project from 1.14 to 1.15:
 * xitrum-new: https://github.com/ngocdaothanh/xitrum-new/commit/98b1af9a006491935f217d46fedda79bd522a3c9
 * xitrum-demos: https://github.com/ngocdaothanh/xitrum-demos/commit/e57872a1e7d6d74854b012e45879bf1500029217
+* And xsbt-scalate-generate: https://github.com/ngocdaothanh/xitrum-new/commit/ce9d3c777fec2f0e4cacdb5171476791a572f7bc
 
 1.14:
 * Add config for template engine and Scalate template path
