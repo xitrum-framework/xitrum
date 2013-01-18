@@ -26,14 +26,13 @@ case class LookupOrCreate(name: String, propsMaker: () => Props)
  * With future version of Akka, this object may become obsolete.
  */
 object SingleActorInstance {
-  private val LOCK_NAME         = getClass.getName
-  private val ACTOR_SYSTEM_NAME = "SingleActorInstance"
+  private val ACTOR_SYSTEM_NAME = getClass.getName
 
   def start() {
     Config.actorSystem.actorOf(Props[SingleActorInstance], ACTOR_SYSTEM_NAME)
   }
 
-  def actor() = Config.actorSystem.actorFor(ACTOR_SYSTEM_NAME)
+  def actor() = Config.actorSystem.actorFor("user/" + ACTOR_SYSTEM_NAME)
 }
 
 class SingleActorInstance extends Actor {
@@ -46,7 +45,7 @@ class SingleActorInstance extends Actor {
     addrs = Config.hazelcastInstance.getMap("xitrum/SingleActorInstance")
 
     val h    = Config.hazelcastInstance
-    val lock = h.getLock(LOCK_NAME)
+    val lock = h.getLock(ACTOR_SYSTEM_NAME)
     lock.lock()
     try {
       val cluster = h.getCluster
@@ -67,7 +66,6 @@ class SingleActorInstance extends Actor {
 
         def memberRemoved(membershipEvent: MembershipEvent) {
           val id = membershipEvent.getMember.getUuid
-          println("addrs.remove(id)", id)
           addrs.remove(id)
         }
       })
@@ -91,7 +89,7 @@ class SingleActorInstance extends Actor {
 
   private def lookup(name: String): Option[ActorRef] = {
     val h    = Config.hazelcastInstance
-    val lock = h.getLock(LOCK_NAME)
+    val lock = h.getLock(ACTOR_SYSTEM_NAME)
     lock.lock()
     try {
       val it = addrs.values().iterator
@@ -124,7 +122,7 @@ class SingleActorInstance extends Actor {
   /** If the actor has not been created, it will be created locally. */
   private def lookupOrCreate(name: String, propsMaker: () => Props): (Boolean, ActorRef) = {
     val h    = Config.hazelcastInstance
-    val lock = h.getLock(LOCK_NAME)
+    val lock = h.getLock(ACTOR_SYSTEM_NAME)
     lock.lock()
     try {
       val it = addrs.values().iterator
