@@ -6,7 +6,7 @@ import org.jboss.netty.channel.ChannelFutureListener
 import org.jboss.netty.buffer.ChannelBuffers
 import org.jboss.netty.handler.codec.http.{DefaultCookie, HttpHeaders, HttpResponseStatus}
 
-import akka.actor.{Actor, ActorRef, Props, Terminated}
+import akka.actor.{Actor, ActorRef, PoisonPill, Props, Terminated}
 
 import xitrum.{Config, Controller, SkipCSRFCheck}
 import xitrum.etag.NotModified
@@ -105,8 +105,6 @@ object SockJsController {
   }
 }
 
-case object Abort
-
 class SockJsController extends Controller with SkipCSRFCheck {
   // pathPrefix will be set at Routes.sockJs
   // => filters can't be used because, for example beforeFilter is set before
@@ -204,9 +202,6 @@ class SockJsController extends Controller with SkipCSRFCheck {
             nonWebSocketSession ! SubscribeByClient
             context.become(receiveSubscribeResult(nonWebSocketSession))
           }
-
-        case Abort =>
-          context.stop(self)
       }
 
       private def receiveSubscribeResult(nonWebSocketSession: ActorRef): Receive = {
@@ -233,9 +228,6 @@ class SockJsController extends Controller with SkipCSRFCheck {
           respondJs("c[2011,\"Server error\"]\n")
           .addListener(ChannelFutureListener.CLOSE)
           context.stop(self)
-
-        case Abort =>
-          context.stop(self)
       }
 
       private def receiveNotification(nonWebSocketSession: ActorRef): Receive = {
@@ -258,12 +250,9 @@ class SockJsController extends Controller with SkipCSRFCheck {
           respondJs("c[2011,\"Server error\"]\n")
           .addListener(ChannelFutureListener.CLOSE)
           context.stop(self)
-
-        case Abort =>
-          context.stop(self)
       }
     }))
-    addConnectionClosedListener { ref ! Abort }
+    addConnectionClosedListener { ref ! PoisonPill }
   }
 
   def xhrSend = POST(":serverId<[^\\.]+>/:sessionId<[^\\.]+>/xhr_send") {
@@ -301,12 +290,9 @@ class SockJsController extends Controller with SkipCSRFCheck {
               setCORS()
               respond()
               context.stop(self)
-
-            case Abort =>
-              context.stop(self)
           }
         }))
-        addConnectionClosedListener { ref ! Abort }
+        addConnectionClosedListener { ref ! PoisonPill }
       }
     }
   }
@@ -344,9 +330,6 @@ class SockJsController extends Controller with SkipCSRFCheck {
             nonWebSocketSession ! SubscribeByClient
             context.become(receiveSubscribeResult(nonWebSocketSession))
           }
-
-        case Abort =>
-          context.stop(self)
       }
 
       private def receiveSubscribeResult(nonWebSocketSession: ActorRef): Receive = {
@@ -378,9 +361,6 @@ class SockJsController extends Controller with SkipCSRFCheck {
           respondLastChunk()
           .addListener(ChannelFutureListener.CLOSE)
           context.stop(self)
-
-        case Abort =>
-          context.stop(self)
       }
 
       private def receiveNotification(nonWebSocketSession: ActorRef): Receive = {
@@ -403,12 +383,9 @@ class SockJsController extends Controller with SkipCSRFCheck {
           respondLastChunk()
           .addListener(ChannelFutureListener.CLOSE)
           context.stop(self)
-
-        case Abort =>
-          context.stop(self)
       }
     }))
-    addConnectionClosedListener { ref ! Abort }
+    addConnectionClosedListener { ref ! PoisonPill }
   }
 
   //----------------------------------------------------------------------------
@@ -440,9 +417,6 @@ class SockJsController extends Controller with SkipCSRFCheck {
               nonWebSocketSession ! SubscribeByClient
               context.become(receiveSubscribeResult(nonWebSocketSession))
             }
-
-          case Abort =>
-            context.stop(self)
         }
 
         private def receiveSubscribeResult(nonWebSocketSession: ActorRef): Receive = {
@@ -488,9 +462,6 @@ class SockJsController extends Controller with SkipCSRFCheck {
             )
             .addListener(ChannelFutureListener.CLOSE)
             context.stop(self)
-
-          case Abort =>
-            context.stop(self)
         }
 
         private def receiveNotification(nonWebSocketSession: ActorRef): Receive = {
@@ -523,12 +494,9 @@ class SockJsController extends Controller with SkipCSRFCheck {
             respondLastChunk()
             .addListener(ChannelFutureListener.CLOSE)
             context.stop(self)
-
-          case Abort =>
-            context.stop(self)
         }
       }))
-      addConnectionClosedListener { ref ! Abort }
+      addConnectionClosedListener { ref ! PoisonPill }
     }
   }
 
@@ -559,9 +527,6 @@ class SockJsController extends Controller with SkipCSRFCheck {
               nonWebSocketSession ! SubscribeByClient
               context.become(receiveSubscribeResult(nonWebSocketSession))
             }
-
-          case Abort =>
-            context.stop(self)
         }
 
         private def receiveSubscribeResult(nonWebSocketSession: ActorRef): Receive = {
@@ -592,9 +557,6 @@ class SockJsController extends Controller with SkipCSRFCheck {
             respondJs(callback + "(\"c[2011,\\\"Server error\\\"]\");\r\n")
             .addListener(ChannelFutureListener.CLOSE)
             context.stop(self)
-
-          case Abort =>
-            context.stop(self)
         }
 
         private def receiveNotification(nonWebSocketSession: ActorRef): Receive = {
@@ -621,12 +583,9 @@ class SockJsController extends Controller with SkipCSRFCheck {
             respondJs(callback + "(\"c[2011,\\\"Server error\\\"]\");\r\n")
             .addListener(ChannelFutureListener.CLOSE)
             context.stop(self)
-
-          case Abort =>
-            context.stop(self)
         }
       }))
-      addConnectionClosedListener { ref ! Abort }
+      addConnectionClosedListener { ref ! PoisonPill }
     }
   }
 
@@ -679,12 +638,9 @@ class SockJsController extends Controller with SkipCSRFCheck {
               setNoClientCache()
               respondText("ok")
               context.stop(self)
-
-          case Abort =>
-            context.stop(self)
           }
         }))
-        addConnectionClosedListener { ref ! Abort }
+        addConnectionClosedListener { ref ! PoisonPill }
       }
     }
   }
@@ -713,9 +669,6 @@ class SockJsController extends Controller with SkipCSRFCheck {
             nonWebSocketSession ! SubscribeByClient
             context.become(receiveSubscribeResult(nonWebSocketSession))
           }
-
-        case Abort =>
-          context.stop(self)
       }
 
       private def receiveSubscribeResult(nonWebSocketSession: ActorRef): Receive = {
@@ -744,9 +697,6 @@ class SockJsController extends Controller with SkipCSRFCheck {
           respondJs("c[2011,\"Server error\"]\n")
           .addListener(ChannelFutureListener.CLOSE)
           context.stop(self)
-
-        case Abort =>
-          context.stop(self)
       }
 
       private def receiveNotification(nonWebSocketSession: ActorRef): Receive = {
@@ -769,12 +719,9 @@ class SockJsController extends Controller with SkipCSRFCheck {
           respondLastChunk()
           .addListener(ChannelFutureListener.CLOSE)
           context.stop(self)
-
-        case Abort =>
-          context.stop(self)
       }
     }))
-    addConnectionClosedListener { ref ! Abort }
+    addConnectionClosedListener { ref ! PoisonPill }
   }
 
   //----------------------------------------------------------------------------
