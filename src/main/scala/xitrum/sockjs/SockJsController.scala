@@ -310,6 +310,11 @@ class SockJsController extends Controller with SkipCSRFCheck {
     setCORS()
     setNoClientCache()
 
+    // There's always 2KB prelude, even for immediate close frame
+    response.setChunked(true)
+    response.setHeader(HttpHeaders.Names.CONTENT_TYPE, "application/javascript; charset=" + Config.xitrum.request.charset)
+    respondBinary(SockJsController.h2KB)
+
     val ref = Config.actorSystem.actorOf(Props(new Actor {
       override def preStart() {
         val propsMaker = () => Props(new NonWebSocketSession(self, pathPrefix, session.toMap))
@@ -319,7 +324,6 @@ class SockJsController extends Controller with SkipCSRFCheck {
       def receive = {
         case (newlyCreated: Boolean, nonWebSocketSession: ActorRef) =>
           if (newlyCreated) {
-            respond2KB()
             respondStreamingWithLimit("o\n")
             context.become(receiveNotification(nonWebSocketSession))
           } else {
@@ -342,7 +346,6 @@ class SockJsController extends Controller with SkipCSRFCheck {
           context.stop(self)
 
         case SubscribeResultToClientMessages(messages) =>
-          respond2KB()
           val json = Json.generate(messages)
           if (respondStreamingWithLimit("a" + json + "\n"))
             context.become(receiveNotification(nonWebSocketSession))
@@ -350,11 +353,11 @@ class SockJsController extends Controller with SkipCSRFCheck {
             context.stop(self)
 
         case SubscribeResultToClientWaitForMessage =>
-          respond2KB()
           context.become(receiveNotification(nonWebSocketSession))
 
         case Terminated(`nonWebSocketSession`) =>
           respondJs("c[2011,\"Server error\"]\n")
+          respondLastChunk()
           .addListener(ChannelFutureListener.CLOSE)
           context.stop(self)
       }
@@ -378,12 +381,6 @@ class SockJsController extends Controller with SkipCSRFCheck {
           respondLastChunk()
           .addListener(ChannelFutureListener.CLOSE)
           context.stop(self)
-      }
-
-      private def respond2KB() {
-        response.setChunked(true)
-        response.setHeader(HttpHeaders.Names.CONTENT_TYPE, "application/javascript; charset=" + Config.xitrum.request.charset)
-        respondBinary(SockJsController.h2KB)
       }
     }))
     addConnectionClosedListener { ref ! Kill }
