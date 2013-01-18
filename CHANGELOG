@@ -45,6 +45,10 @@ TODO:
   http://www.hazelcast.com/docs/2.5/manual/multi_html/ch18s04.html
 * Update jboss-marshalling from 1.3.16.GA to 1.3.17.GA
 
+See these examples to know how to update your project from 1.14 to 1.15:
+* xitrum-new: https://github.com/ngocdaothanh/xitrum-new/commit/98b1af9a006491935f217d46fedda79bd522a3c9
+* xitrum-demos: https://github.com/ngocdaothanh/xitrum-demos/commit/e57872a1e7d6d74854b012e45879bf1500029217
+
 1.14:
 * Add config for template engine and Scalate template path
   http://ngocdaothanh.github.com/xitrum/guide/howto.html#create-your-own-template-engine
