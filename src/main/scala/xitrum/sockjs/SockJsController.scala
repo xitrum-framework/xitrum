@@ -390,7 +390,7 @@ class SockJsController extends Controller with SkipCSRFCheck {
   }
 
   //----------------------------------------------------------------------------
-/*
+
   def htmlfileReceive = GET(":serverId<[^\\.]+>/:sessionId<[^\\.]+>/htmlfile") {
     val callbacko = callbackParam()
     if (callbacko.isDefined) {
@@ -398,80 +398,104 @@ class SockJsController extends Controller with SkipCSRFCheck {
       val sessionId = param("sessionId")
 
       handleCookie()
-      NonWebSocketSessions.subscribeStreamingByClient(pathPrefix, session.toMap, sessionId, { result =>
-        result match {
-          case SubscribeByClientResultOpen =>
-            setCORS()
-            setNoClientCache()
-            response.setChunked(true)
-            respondHtml(SockJsController.htmlfile(callback, true))
-            respondText("<script>\np(\"o\");\n</script>\r\n")
-            addConnectionClosedListener { NonWebSocketSessions.unsubscribeByClient(sessionId) }
-            true
+      setCORS()
+      setNoClientCache()
 
-          case SubscribeByClientResultAnotherConnectionStillOpen =>
-            setCORS()
-            setNoClientCache()
+      val ref = Config.actorSystem.actorOf(Props(new Actor {
+        override def preStart() {
+          val propsMaker = () => Props(new NonWebSocketSession(self, pathPrefix, session.toMap))
+          SingleActorInstance.actor() ! LookupOrCreate(sessionId, propsMaker)
+        }
+
+        def receive = {
+          case (newlyCreated: Boolean, nonWebSocketSession: ActorRef) =>
+            if (newlyCreated) {
+              response.setChunked(true)
+              respondHtml(SockJsController.htmlfile(callback, true))
+              respondText("<script>\np(\"o\");\n</script>\r\n")
+              context.become(receiveNotification(nonWebSocketSession))
+            } else {
+              nonWebSocketSession ! SubscribeByClient
+              context.become(receiveSubscribeResult(nonWebSocketSession))
+            }
+        }
+
+        private def receiveSubscribeResult(nonWebSocketSession: ActorRef): Receive = {
+          case SubscribeResultToClientAnotherConnectionStillOpen =>
             respondHtml(
               SockJsController.htmlfile(callback, false) +
               "<script>\np(\"c[2010,\\\"Another connection still open\\\"]\");\n</script>\r\n"
             )
             .addListener(ChannelFutureListener.CLOSE)
-            false
+            context.stop(self)
 
-          case SubscribeByClientResultClosed =>
-            setCORS()
-            setNoClientCache()
+          case SubscribeResultToClientClosed =>
             respondHtml(
               SockJsController.htmlfile(callback, false) +
               "<script>\np(\"c[3000,\\\"Go away!\\\"]\");\n</script>\r\n"
             )
             .addListener(ChannelFutureListener.CLOSE)
-            false
+            context.stop(self)
 
-          case SubscribeByClientResultMessages(messages) =>
-            if (channel.isOpen()) {
-              if (!isResponded) {
-                setCORS()
-                setNoClientCache()
-                response.setChunked(true)
-                respondHtml(SockJsController.htmlfile(callback, true))
-                addConnectionClosedListener{ NonWebSocketSessions.unsubscribeByClient(sessionId) }
-              }
+          case SubscribeResultToClientMessages(messages) =>val buffer = new StringBuilder
+            buffer.append("<script>\np(\"a")
+            buffer.append(jsEscape(Json.generate(messages)))
+            buffer.append("\");\n</script>\r\n")
+            response.setChunked(true)
+            respondHtml(SockJsController.htmlfile(callback, true))
+            if (respondStreamingWithLimit(buffer.toString))
+              context.become(receiveSubscribeResult(nonWebSocketSession))
+            else
+              context.stop(self)
 
-              if (messages.isEmpty) {
-                respondStreamingWithLimit("<script>\np(\"h\");\n</script>\r\n")
-              } else {
-                val buffer = new StringBuilder
-                buffer.append("<script>\np(\"a")
-                buffer.append(jsEscape(Json.generate(messages)))
-                buffer.append("\");\n</script>\r\n")
-                respondStreamingWithLimit(buffer.toString)
-              }
-            } else {
-              false
-            }
+          case SubscribeResultToClientWaitForMessage =>
+            response.setChunked(true)
+            respondHtml(SockJsController.htmlfile(callback, true))
+            context.become(receiveSubscribeResult(nonWebSocketSession))
 
-          case SubscribeByClientResultErrorAfterOpenHasBeenSent =>
-            if (!isResponded) {
-              setCORS()
-              setNoClientCache()
-              respondHtml(
-                SockJsController.htmlfile(callback, false) +
-                "<script>\np(\"c[2011,\\\"Server error\\\"]\");\n</script>\r\n"
-              )
-              .addListener(ChannelFutureListener.CLOSE)
-            } else {
-              respondText("<script>\np(\"c[2011,\\\"Server error\\\"]\");\n</script>\r\n")
-              respondLastChunk()
-              .addListener(ChannelFutureListener.CLOSE)
-            }
-            false
+          case Terminated(`nonWebSocketSession`) =>
+            respondHtml(
+              SockJsController.htmlfile(callback, false) +
+              "<script>\np(\"c[2011,\\\"Server error\\\"]\");\n</script>\r\n"
+            )
+            .addListener(ChannelFutureListener.CLOSE)
+            context.stop(self)
         }
-      })
+
+        private def receiveNotification(nonWebSocketSession: ActorRef): Receive = {
+          case NotificationToClientMessage(message) =>
+            val buffer = new StringBuilder
+            buffer.append("<script>\np(\"a")
+            buffer.append(jsEscape(Json.generate(List(message))))
+            buffer.append("\");\n</script>\r\n")
+            if (!respondStreamingWithLimit(buffer.toString)) context.stop(self)
+
+          case NotificationToClientHeartbeat =>
+            if (!respondStreamingWithLimit("<script>\np(\"h\");\n</script>\r\n")) context.stop(self)
+
+          case NotificationToClientClosed =>
+            respondHtml(
+              SockJsController.htmlfile(callback, false) +
+              "<script>\np(\"c[3000,\\\"Go away!\\\"]\");\n</script>\r\n"
+            )
+            respondLastChunk()
+            .addListener(ChannelFutureListener.CLOSE)
+            context.stop(self)
+
+          case Terminated(`nonWebSocketSession`) =>
+            respondHtml(
+              SockJsController.htmlfile(callback, false) +
+              "<script>\np(\"c[2011,\\\"Server error\\\"]\");\n</script>\r\n"
+            )
+            respondLastChunk()
+            .addListener(ChannelFutureListener.CLOSE)
+            context.stop(self)
+        }
+      }))
+      addConnectionClosedListener { ref ! Kill }
     }
   }
-*/
+
   //----------------------------------------------------------------------------
 
   def jsonPPollingReceive = GET(":serverId<[^\\.]+>/:sessionId<[^\\.]+>/jsonp") {
