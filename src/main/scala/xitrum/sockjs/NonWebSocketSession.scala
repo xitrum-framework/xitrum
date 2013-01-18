@@ -119,9 +119,9 @@ class NonWebSocketSession(var clientSubscriber: ActorRef, pathPrefix: String, se
       // Until the timeout occurs, the server must serve the close message
       closed = true
       if (clientSubscriber != null) {
-        clientSubscriber = null
         context.unwatch(clientSubscriber)
         clientSubscriber ! NotificationToClientClosed
+        clientSubscriber = null
       }
 
     case SendMessagesByClient(messages) =>
