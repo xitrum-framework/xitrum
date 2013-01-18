@@ -6,7 +6,7 @@ import org.jboss.netty.channel.ChannelFutureListener
 import org.jboss.netty.buffer.ChannelBuffers
 import org.jboss.netty.handler.codec.http.{DefaultCookie, HttpHeaders, HttpResponseStatus}
 
-import akka.actor.{Actor, ActorRef, Kill, Props}
+import akka.actor.{Actor, ActorRef, Kill, Props, Terminated}
 
 import xitrum.{Config, Controller, SkipCSRFCheck}
 import xitrum.etag.NotModified
@@ -187,22 +187,21 @@ class SockJsController extends Controller with SkipCSRFCheck {
     setCORS()
     setNoClientCache()
 
-    Config.actorSystem.actorOf(Props(new Actor {
+    val ref = Config.actorSystem.actorOf(Props(new Actor {
       override def preStart() {
-        addConnectionClosedListener { self ! Kill }
         val propsMaker = () => Props(new NonWebSocketSession(self, pathPrefix, session.toMap))
         SingleActorInstance.actor() ! LookupOrCreate(sessionId, propsMaker)
       }
 
       def receive = {
         case (newlyCreated: Boolean, nonWebSocketSession: ActorRef) =>
-         if (newlyCreated) {
-           respondJs("o\n")
-           context.stop(self)
-         } else {
-           nonWebSocketSession ! SubscribeByClient
-           context.become(receiveSubscribeResult(nonWebSocketSession))
-         }
+          if (newlyCreated) {
+            respondJs("o\n")
+            context.stop(self)
+          } else {
+            nonWebSocketSession ! SubscribeByClient
+            context.become(receiveSubscribeResult(nonWebSocketSession))
+          }
       }
 
       private def receiveSubscribeResult(nonWebSocketSession: ActorRef): Receive = {
@@ -224,6 +223,11 @@ class SockJsController extends Controller with SkipCSRFCheck {
 
         case SubscribeResultToClientWaitForMessage =>
           context.become(receiveNotification(nonWebSocketSession))
+
+        case Terminated(`nonWebSocketSession`) =>
+          respondJs("c[2011,\"Server error\"]\n")
+          .addListener(ChannelFutureListener.CLOSE)
+          context.stop(self)
       }
 
       private def receiveNotification(nonWebSocketSession: ActorRef): Receive = {
@@ -241,8 +245,14 @@ class SockJsController extends Controller with SkipCSRFCheck {
           respondJs("c[3000,\"Go away!\"]\n")
           .addListener(ChannelFutureListener.CLOSE)
           context.stop(self)
+
+        case Terminated(`nonWebSocketSession`) =>
+          respondJs("c[2011,\"Server error\"]\n")
+          .addListener(ChannelFutureListener.CLOSE)
+          context.stop(self)
       }
     }))
+    addConnectionClosedListener { ref ! Kill }
   }
 
   def xhrSend = POST(":serverId<[^\\.]+>/:sessionId<[^\\.]+>/xhr_send") {
@@ -263,7 +273,7 @@ class SockJsController extends Controller with SkipCSRFCheck {
 
       if (messages != null) {
         val sessionId = param("sessionId")
-        Config.actorSystem.actorOf(Props(new Actor {
+        val ref = Config.actorSystem.actorOf(Props(new Actor {
           override def preStart() {
             SingleActorInstance.actor() ! Lookup(sessionId)
           }
@@ -271,15 +281,18 @@ class SockJsController extends Controller with SkipCSRFCheck {
           def receive = {
             case None =>
               respondDefault404Page()
+              context.stop(self)
 
-            case Some(ref: ActorRef) =>
-              ref ! SendMessagesByClient(messages)
+            case Some(nonWebSocketSession: ActorRef) =>
+              nonWebSocketSession ! SendMessagesByClient(messages)
               response.setStatus(HttpResponseStatus.NO_CONTENT)
               response.setHeader(HttpHeaders.Names.CONTENT_TYPE, "text/plain; charset=UTF-8")
               setCORS()
               respond()
+              context.stop(self)
           }
         }))
+        addConnectionClosedListener { ref ! Kill }
       }
     }
   }
@@ -289,7 +302,7 @@ class SockJsController extends Controller with SkipCSRFCheck {
   def xhrStreamingOPTIONSReceive = OPTIONS(":serverId<[^\\.]+>/:sessionId<[^\\.]+>/xhr_streaming") {
     xhrOPTIONS()
   }
-/*
+
   def xhrStreamingReceive = POST(":serverId<[^\\.]+>/:sessionId<[^\\.]+>/xhr_streaming") {
     val sessionId = param("sessionId")
 
@@ -345,7 +358,7 @@ class SockJsController extends Controller with SkipCSRFCheck {
   }
 
   //----------------------------------------------------------------------------
-
+/*
   def htmlfileReceive = GET(":serverId<[^\\.]+>/:sessionId<[^\\.]+>/htmlfile") {
     val callbacko = callbackParam()
     if (callbacko.isDefined) {
