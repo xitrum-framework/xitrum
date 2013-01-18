@@ -306,55 +306,84 @@ class SockJsController extends Controller with SkipCSRFCheck {
   def xhrStreamingReceive = POST(":serverId<[^\\.]+>/:sessionId<[^\\.]+>/xhr_streaming") {
     val sessionId = param("sessionId")
 
-    // Below can be initiated by different channels, thus isResponded should
-    // be called to check if SockJsController.h2KB should be sent
     handleCookie()
-    NonWebSocketSessions.subscribeStreamingByClient(pathPrefix, session.toMap, sessionId, { result =>
-      if (!isResponded) {
-        setCORS()
-        setNoClientCache()
+    setCORS()
+    setNoClientCache()
+
+    val ref = Config.actorSystem.actorOf(Props(new Actor {
+      override def preStart() {
+        val propsMaker = () => Props(new NonWebSocketSession(self, pathPrefix, session.toMap))
+        SingleActorInstance.actor() ! LookupOrCreate(sessionId, propsMaker)
+      }
+
+      def receive = {
+        case (newlyCreated: Boolean, nonWebSocketSession: ActorRef) =>
+          if (newlyCreated) {
+            respond2KB()
+            respondStreamingWithLimit("o\n")
+            context.become(receiveNotification(nonWebSocketSession))
+          } else {
+            nonWebSocketSession ! SubscribeByClient
+            context.become(receiveSubscribeResult(nonWebSocketSession))
+          }
+      }
+
+      private def receiveSubscribeResult(nonWebSocketSession: ActorRef): Receive = {
+        case SubscribeResultToClientAnotherConnectionStillOpen =>
+          respondJs("c[2010,\"Another connection still open\"]\n")
+          respondLastChunk()
+          .addListener(ChannelFutureListener.CLOSE)
+          context.stop(self)
+
+        case SubscribeResultToClientClosed =>
+          respondJs("c[3000,\"Go away!\"]\n")
+          respondLastChunk()
+          .addListener(ChannelFutureListener.CLOSE)
+          context.stop(self)
+
+        case SubscribeResultToClientMessages(messages) =>
+          respond2KB()
+          val json = Json.generate(messages)
+          if (!respondStreamingWithLimit("a" + json + "\n")) context.stop(self)
+
+        case SubscribeResultToClientWaitForMessage =>
+          respond2KB()
+          context.become(receiveNotification(nonWebSocketSession))
+
+        case Terminated(`nonWebSocketSession`) =>
+          respondJs("c[2011,\"Server error\"]\n")
+          .addListener(ChannelFutureListener.CLOSE)
+          context.stop(self)
+      }
+
+      private def receiveNotification(nonWebSocketSession: ActorRef): Receive = {
+        case NotificationToClientMessage(message) =>
+          val json = Json.generate(List(message))
+          if (!respondStreamingWithLimit("a" + json + "\n")) context.stop(self)
+
+        case NotificationToClientHeartbeat =>
+          if (!respondStreamingWithLimit("h\n")) context.stop(self)
+
+        case NotificationToClientClosed =>
+          respondJs("c[3000,\"Go away!\"]\n")
+          respondLastChunk()
+          .addListener(ChannelFutureListener.CLOSE)
+          context.stop(self)
+
+        case Terminated(`nonWebSocketSession`) =>
+          respondJs("c[2011,\"Server error\"]\n")
+          respondLastChunk()
+          .addListener(ChannelFutureListener.CLOSE)
+          context.stop(self)
+      }
+
+      private def respond2KB() {
         response.setChunked(true)
         response.setHeader(HttpHeaders.Names.CONTENT_TYPE, "application/javascript; charset=" + Config.xitrum.request.charset)
         respondBinary(SockJsController.h2KB)
       }
-
-      result match {
-        case SubscribeByClientResultOpen =>
-          respondStreamingWithLimit("o\n")
-          addConnectionClosedListener { NonWebSocketSessions.unsubscribeByClient(sessionId) }
-          true
-
-        case SubscribeByClientResultAnotherConnectionStillOpen =>
-          respondJs("c[2010,\"Another connection still open\"]\n")
-          respondLastChunk()
-          .addListener(ChannelFutureListener.CLOSE)
-          false
-
-        case SubscribeByClientResultClosed =>
-          respondJs("c[3000,\"Go away!\"]\n")
-          respondLastChunk()
-          .addListener(ChannelFutureListener.CLOSE)
-          false
-
-        case SubscribeByClientResultMessages(messages) =>
-          if (channel.isOpen()) {
-            if (messages.isEmpty) {
-              respondStreamingWithLimit("h\n")
-            } else {
-              val json = Json.generate(messages)
-              respondStreamingWithLimit("a" + json + "\n")
-            }
-          } else {
-            false
-          }
-
-        case SubscribeByClientResultErrorAfterOpenHasBeenSent =>
-          respondJs("c[2011,\"Server error\"]\n")
-          respondLastChunk()
-          .addListener(ChannelFutureListener.CLOSE)
-          false
-      }
-    })
+    }))
+    addConnectionClosedListener { ref ! Kill }
   }
 
   //----------------------------------------------------------------------------

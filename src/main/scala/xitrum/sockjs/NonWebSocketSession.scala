@@ -10,7 +10,6 @@ import xitrum.routing.Routes
 
 sealed trait MessageToSession
 case object SubscribeByClient                            extends MessageToSession
-case object UnsubscribeByClient                          extends MessageToSession
 case class  SendMessagesByClient(messages: List[String]) extends MessageToSession
 case class  SendMessageByHandler(message: String)        extends MessageToSession
 case object CloseByHandler                               extends MessageToSession
@@ -91,7 +90,10 @@ class NonWebSocketSession(var clientSubscriber: ActorRef, pathPrefix: String, se
 
   def receive = {
     case Terminated(monitored) =>
-      if (monitored == clientSubscriber) clientSubscriber = null
+      if (monitored == clientSubscriber) {
+        clientSubscriber = null
+        context.setReceiveTimeout(TIMEOUT_CONNECTION)
+      }
 
     case SubscribeByClient =>
       if (closed) {
@@ -111,13 +113,6 @@ class NonWebSocketSession(var clientSubscriber: ActorRef, pathPrefix: String, se
         } else {
           sender ! SubscribeResultToClientAnotherConnectionStillOpen
         }
-      }
-
-    case UnsubscribeByClient =>
-      if (sender == clientSubscriber) {
-        clientSubscriber = null
-        context.unwatch(clientSubscriber)
-        context.setReceiveTimeout(TIMEOUT_CONNECTION)
       }
 
     case CloseByHandler =>
