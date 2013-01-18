@@ -1,5 +1,7 @@
 package xitrum.util
 
+import java.net.URLEncoder
+
 import scala.collection.mutable.{Map => MMap}
 import scala.concurrent.duration._
 import scala.concurrent.Await
@@ -88,15 +90,16 @@ class SingleActorInstance extends Actor {
   //----------------------------------------------------------------------------
 
   private def lookup(name: String): Option[ActorRef] = {
-    val h    = Config.hazelcastInstance
-    val lock = h.getLock(ACTOR_SYSTEM_NAME)
+    val escapedName = escape(name)
+    val h           = Config.hazelcastInstance
+    val lock        = h.getLock(ACTOR_SYSTEM_NAME)
     lock.lock()
     try {
       val it = addrs.values().iterator
       while (it.hasNext()) {
         val addr = it.next()
         if (addr == localAddr) {
-          val ref = context.actorFor(name)
+          val ref = context.actorFor(escapedName)
           if (!ref.isTerminated) return Some(ref)
         } else {
           val remoteSingleActorInstance = context.actorFor(
@@ -115,21 +118,23 @@ class SingleActorInstance extends Actor {
   }
 
   private def lookupLocal(name: String): Option[ActorRef] = {
-    val ref = context.actorFor(name)
+    val escapedName = escape(name)
+    val ref         = context.actorFor(escapedName)
     if (ref.isTerminated) None else Some(ref)
   }
 
   /** If the actor has not been created, it will be created locally. */
   private def lookupOrCreate(name: String, propsMaker: () => Props): (Boolean, ActorRef) = {
-    val h    = Config.hazelcastInstance
-    val lock = h.getLock(ACTOR_SYSTEM_NAME)
+    val escapedName = escape(name)
+    val h           = Config.hazelcastInstance
+    val lock        = h.getLock(ACTOR_SYSTEM_NAME)
     lock.lock()
     try {
       val it = addrs.values().iterator
       while (it.hasNext()) {
         val addr = it.next()
         if (addr == localAddr) {
-          val ref = context.actorFor(name)
+          val ref = context.actorFor(escapedName)
           if (!ref.isTerminated) return (false, ref)
         } else {
           val remoteSingleActorInstance = context.actorFor(
@@ -142,9 +147,11 @@ class SingleActorInstance extends Actor {
       }
 
       // Create local actor
-      (true, context.actorOf(propsMaker(), name))
+      (true, context.actorOf(propsMaker(), escapedName))
     } finally {
       lock.unlock()
     }
   }
+
+  private def escape(name: String) = URLEncoder.encode(name, "UTF-8")
 }
