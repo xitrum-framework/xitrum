@@ -471,7 +471,7 @@ class SockJsController extends Controller with SkipCSRFCheck {
       })
     }
   }
-
+*/
   //----------------------------------------------------------------------------
 
   def jsonPPollingReceive = GET(":serverId<[^\\.]+>/:sessionId<[^\\.]+>/jsonp") {
@@ -481,38 +481,79 @@ class SockJsController extends Controller with SkipCSRFCheck {
       val sessionId = param("sessionId")
 
       handleCookie()
-      NonWebSocketSessions.subscribeOnceByClient(pathPrefix, session.toMap, sessionId, { result =>
-        setCORS()
-        setNoClientCache()
+      setCORS()
+      setNoClientCache()
 
-        result match {
-          case SubscribeByClientResultOpen =>
-            respondJs(callback + "(\"o\");\r\n")
+      val ref = Config.actorSystem.actorOf(Props(new Actor {
+        override def preStart() {
+          val propsMaker = () => Props(new NonWebSocketSession(self, pathPrefix, session.toMap))
+          SingleActorInstance.actor() ! LookupOrCreate(sessionId, propsMaker)
+        }
 
-          case SubscribeByClientResultAnotherConnectionStillOpen =>
+        def receive = {
+          case (newlyCreated: Boolean, nonWebSocketSession: ActorRef) =>
+            if (newlyCreated) {
+              respondJs(callback + "(\"o\");\r\n")
+              context.stop(self)
+            } else {
+              nonWebSocketSession ! SubscribeByClient
+              context.become(receiveSubscribeResult(nonWebSocketSession))
+            }
+        }
+
+        private def receiveSubscribeResult(nonWebSocketSession: ActorRef): Receive = {
+          case SubscribeResultToClientAnotherConnectionStillOpen =>
             respondJs(callback + "(\"c[2010,\\\"Another connection still open\\\"]\");\r\n")
             .addListener(ChannelFutureListener.CLOSE)
+            context.stop(self)
 
-          case SubscribeByClientResultClosed =>
+          case SubscribeResultToClientClosed =>
             respondJs(callback + "(\"c[3000,\\\"Go away!\\\"]\");\r\n")
             .addListener(ChannelFutureListener.CLOSE)
+            context.stop(self)
 
-          case SubscribeByClientResultMessages(messages) =>
-            if (messages.isEmpty) {
-              respondJs(callback + "(\"h\");\r\n")
-            } else {
-              val buffer = new StringBuilder
-              buffer.append(callback + "(\"a")
-              buffer.append(jsEscape(Json.generate(messages)))
-              buffer.append("\");\r\n")
-              respondJs(buffer.toString)
-            }
+          case SubscribeResultToClientMessages(messages) =>
+            val buffer = new StringBuilder
+            buffer.append(callback + "(\"a")
+            buffer.append(jsEscape(Json.generate(messages)))
+            buffer.append("\");\r\n")
+            respondJs(buffer.toString)
+            context.stop(self)
 
-          case SubscribeByClientResultErrorAfterOpenHasBeenSent =>
+          case SubscribeResultToClientWaitForMessage =>
+            context.become(receiveSubscribeResult(nonWebSocketSession))
+
+          case Terminated(`nonWebSocketSession`) =>
             respondJs(callback + "(\"c[2011,\\\"Server error\\\"]\");\r\n")
             .addListener(ChannelFutureListener.CLOSE)
+            context.stop(self)
         }
-      })
+
+        private def receiveNotification(nonWebSocketSession: ActorRef): Receive = {
+          case NotificationToClientMessage(message) =>
+            val buffer = new StringBuilder
+            buffer.append(callback + "(\"a")
+            buffer.append(jsEscape(Json.generate(List(message))))
+            buffer.append("\");\r\n")
+            respondJs(buffer.toString)
+            context.stop(self)
+
+          case NotificationToClientHeartbeat =>
+            respondJs(callback + "(\"h\");\r\n")
+            context.stop(self)
+
+          case NotificationToClientClosed =>
+            respondJs(callback + "(\"c[3000,\\\"Go away!\\\"]\");\r\n")
+            .addListener(ChannelFutureListener.CLOSE)
+            context.stop(self)
+
+          case Terminated(`nonWebSocketSession`) =>
+            respondJs(callback + "(\"c[2011,\\\"Server error\\\"]\");\r\n")
+            .addListener(ChannelFutureListener.CLOSE)
+            context.stop(self)
+        }
+      }))
+      addConnectionClosedListener { ref ! Kill }
     }
   }
 
@@ -547,7 +588,7 @@ class SockJsController extends Controller with SkipCSRFCheck {
       }
 
       if (messages != null) {
-        Config.actorSystem.actorOf(Props(new Actor {
+        val ref = Config.actorSystem.actorOf(Props(new Actor {
           override def preStart() {
             SingleActorInstance.actor() ! Lookup(sessionId)
           }
@@ -555,20 +596,23 @@ class SockJsController extends Controller with SkipCSRFCheck {
           def receive = {
             case None =>
               respondDefault404Page()
+              context.stop(self)
 
-            case Some(ref: ActorRef) =>
-              ref ! SendMessagesByClient(messages)
+            case Some(nonWebSocketSession: ActorRef) =>
+              nonWebSocketSession ! SendMessagesByClient(messages)
               // Konqueror does weird things on 204.
               // As a workaround we need to respond with something - let it be the string "ok".
               setCORS()
               setNoClientCache()
               respondText("ok")
+              context.stop(self)
           }
         }))
+        addConnectionClosedListener { ref ! Kill }
       }
     }
   }
-*/
+
   //----------------------------------------------------------------------------
 
   def eventSourceReceive = GET(":serverId<[^\\.]+>/:sessionId<[^\\.]+>/eventsource") {
