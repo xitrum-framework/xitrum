@@ -363,8 +363,9 @@ class SockJsController extends Controller with SkipCSRFCheck {
           context.stop(self)
 
         case SubscribeResultToClientMessages(messages) =>
-          val json = Json.generate(messages)
-          if (respondStreamingWithLimit("a" + json + "\n"))
+          val json   = Json.generate(messages)
+          val quoted = SockJsController.quoteUnicode(json)
+          if (respondStreamingWithLimit("a" + quoted + "\n"))
             context.become(receiveNotification(nonWebSocketSession))
           else
             context.stop(self)
@@ -384,8 +385,9 @@ class SockJsController extends Controller with SkipCSRFCheck {
 
       private def receiveNotification(nonWebSocketSession: ActorRef): Receive = {
         case NotificationToClientMessage(message) =>
-          val json = Json.generate(List(message))
-          if (!respondStreamingWithLimit("a" + json + "\n")) context.stop(self)
+          val json   = Json.generate(List(message))
+          val quoted = SockJsController.quoteUnicode(json)
+          if (!respondStreamingWithLimit("a" + quoted + "\n")) context.stop(self)
 
         case NotificationToClientHeartbeat =>
           if (!respondStreamingWithLimit("h\n")) context.stop(self)
@@ -460,9 +462,12 @@ class SockJsController extends Controller with SkipCSRFCheck {
             .addListener(ChannelFutureListener.CLOSE)
             context.stop(self)
 
-          case SubscribeResultToClientMessages(messages) =>val buffer = new StringBuilder
+          case SubscribeResultToClientMessages(messages) =>
+            val buffer = new StringBuilder
+            val json   = Json.generate(messages)
+            val quoted = SockJsController.quoteUnicode(json)
             buffer.append("<script>\np(\"a")
-            buffer.append(jsEscape(Json.generate(messages)))
+            buffer.append(jsEscape(quoted))
             buffer.append("\");\n</script>\r\n")
             response.setChunked(true)
             respondHtml(SockJsController.htmlfile(callback, true))
@@ -491,8 +496,10 @@ class SockJsController extends Controller with SkipCSRFCheck {
         private def receiveNotification(nonWebSocketSession: ActorRef): Receive = {
           case NotificationToClientMessage(message) =>
             val buffer = new StringBuilder
+            val json   = Json.generate(List(message))
+            val quoted = SockJsController.quoteUnicode(json)
             buffer.append("<script>\np(\"a")
-            buffer.append(jsEscape(Json.generate(List(message))))
+            buffer.append(jsEscape(quoted))
             buffer.append("\");\n</script>\r\n")
             if (!respondStreamingWithLimit(buffer.toString)) context.stop(self)
 
@@ -570,8 +577,10 @@ class SockJsController extends Controller with SkipCSRFCheck {
 
           case SubscribeResultToClientMessages(messages) =>
             val buffer = new StringBuilder
+            val json   = Json.generate(messages)
+            val quoted = SockJsController.quoteUnicode(json)
             buffer.append(callback + "(\"a")
-            buffer.append(jsEscape(Json.generate(messages)))
+            buffer.append(jsEscape(quoted))
             buffer.append("\");\r\n")
             respondJs(buffer.toString)
             context.stop(self)
@@ -591,8 +600,10 @@ class SockJsController extends Controller with SkipCSRFCheck {
         private def receiveNotification(nonWebSocketSession: ActorRef): Receive = {
           case NotificationToClientMessage(message) =>
             val buffer = new StringBuilder
+            val json   = Json.generate(List(message))
+            val quoted = SockJsController.quoteUnicode(json)
             buffer.append(callback + "(\"a")
-            buffer.append(jsEscape(Json.generate(List(message))))
+            buffer.append(jsEscape(quoted))
             buffer.append("\");\r\n")
             respondJs(buffer.toString)
             context.stop(self)
@@ -719,8 +730,9 @@ class SockJsController extends Controller with SkipCSRFCheck {
           context.stop(self)
 
         case SubscribeResultToClientMessages(messages) =>
-          val json = "a" + Json.generate(messages)
-          if (respondStreamingWithLimit(json, true))
+          val json   = "a" + Json.generate(messages)
+          val quoted = SockJsController.quoteUnicode(json)
+          if (respondStreamingWithLimit(quoted, true))
             context.become(receiveNotification(nonWebSocketSession))
           else
             context.stop(self)
@@ -739,8 +751,9 @@ class SockJsController extends Controller with SkipCSRFCheck {
 
       private def receiveNotification(nonWebSocketSession: ActorRef): Receive = {
         case NotificationToClientMessage(message) =>
-          val json = "a" + Json.generate(List(message))
-          if (!respondStreamingWithLimit(json, true)) context.stop(self)
+          val json   = "a" + Json.generate(List(message))
+          val quoted = SockJsController.quoteUnicode(json)
+          if (!respondStreamingWithLimit(quoted, true)) context.stop(self)
 
         case NotificationToClientHeartbeat =>
           if (!respondStreamingWithLimit("h", true)) context.stop(self)
