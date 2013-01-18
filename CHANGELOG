@@ -25,6 +25,8 @@ TODO:
 * Add automatic CORS request handling for the whole site
   http://www.html5rocks.com/en/tutorials/cors/
 * Add connection abort handling for SockJS
+* Update jQuery from 1.8.3 to 1.9.0
+* Update Knockout.js from 2.2.0 to 2.2.1
 
 1.15:
 * Improve SockJS handler interface
