@@ -2,7 +2,7 @@ organization := "tv.cntt"
 
 name := "xitrum"
 
-version := "1.15-SNAPSHOT"
+version := "1.15"
 
 scalacOptions ++= Seq(
   "-deprecation",
@@ -38,16 +38,16 @@ libraryDependencies += "org.mozilla" % "rhino" % "1.7R4"
 
 // Other dependencies ----------------------------------------------------------
 
-libraryDependencies += "io.netty" % "netty" % "3.6.1.Final"
+libraryDependencies += "io.netty" % "netty" % "3.6.2.Final"
 
 libraryDependencies += "org.javassist" % "javassist" % "3.17.1-GA"
 
 // Projects using Xitrum must provide a concrete implentation of SLF4J (Logback etc.)
 libraryDependencies += "org.slf4j" % "slf4j-api" % "1.7.2" % "provided"
 
-libraryDependencies += "org.jboss.marshalling" % "jboss-marshalling" % "1.3.16.GA"
+libraryDependencies += "org.jboss.marshalling" % "jboss-marshalling" % "1.3.17.GA"
 
-libraryDependencies += "org.jboss.marshalling" % "jboss-marshalling-river" % "1.3.16.GA"
+libraryDependencies += "org.jboss.marshalling" % "jboss-marshalling-river" % "1.3.17.GA"
 
 // For jsEscape
 libraryDependencies += "org.apache.commons" % "commons-lang3" % "3.1"
