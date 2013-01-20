@@ -200,6 +200,7 @@ class SockJsController extends Controller with SkipCSRFCheck {
             context.stop(self)
           } else {
             nonWebSocketSession ! SubscribeByClient
+            context.watch(nonWebSocketSession)
             context.become(receiveSubscribeResult(nonWebSocketSession))
           }
       }
@@ -323,6 +324,7 @@ class SockJsController extends Controller with SkipCSRFCheck {
 
       def receive = {
         case (newlyCreated: Boolean, nonWebSocketSession: ActorRef) =>
+          context.watch(nonWebSocketSession)
           if (newlyCreated) {
             respondStreamingWithLimit("o\n")
             context.become(receiveNotification(nonWebSocketSession))
@@ -408,6 +410,7 @@ class SockJsController extends Controller with SkipCSRFCheck {
 
         def receive = {
           case (newlyCreated: Boolean, nonWebSocketSession: ActorRef) =>
+            context.watch(nonWebSocketSession)
             if (newlyCreated) {
               response.setChunked(true)
               respondHtml(SockJsController.htmlfile(callback, true))
@@ -525,6 +528,7 @@ class SockJsController extends Controller with SkipCSRFCheck {
               context.stop(self)
             } else {
               nonWebSocketSession ! SubscribeByClient
+              context.watch(nonWebSocketSession)
               context.become(receiveSubscribeResult(nonWebSocketSession))
             }
         }
@@ -662,6 +666,7 @@ class SockJsController extends Controller with SkipCSRFCheck {
 
       def receive = {
         case (newlyCreated: Boolean, nonWebSocketSession: ActorRef) =>
+          context.watch(nonWebSocketSession)
           if (newlyCreated) {
             respondEventSource("o")
             context.become(receiveNotification(nonWebSocketSession))
