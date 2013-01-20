@@ -1,3 +1,6 @@
+Async and clustered Scala web framework and HTTP(S) server for Rails developers
+===============================================================================
+
 ::
 
   +--------------------+
