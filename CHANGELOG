@@ -22,6 +22,8 @@ TODO:
 * Add Rails-like asset pipeline (not using wro4j because it's heavy)
   http://guides.rubyonrails.org/asset_pipeline.html
   http://www.playframework.org/documentation/2.0/Assets
+  http://twitter.github.com/bower/
+  http://yeoman.io/
 * Add automatic CORS request handling for the whole site
   http://www.html5rocks.com/en/tutorials/cors/
 * Add connection abort handling for SockJS
@@ -43,7 +45,7 @@ TODO:
   - Add xitrum.util.ActorCluster
     Akka Clustering is currently lacks "single actor instance" feature
     http://groups.google.com/group/akka-user/browse_thread/thread/23d6b2851648c1b0
-* Update Netty from 3.6.2 to 3.6.2
+* Update Netty from 3.6.1 to 3.6.2
   https://netty.io/Blog/Netty+362Final+released
 * Update Hazelcast from 2.4.1 to 2.5
   http://www.hazelcast.com/docs/2.5/manual/multi_html/ch18s04.html
