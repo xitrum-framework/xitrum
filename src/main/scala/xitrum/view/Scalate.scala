@@ -170,8 +170,9 @@ object Scalate extends Logger {
 
   /** @param templateType jade, mustache, scaml, or ssp */
   def renderString(templateContent: String, templateType: String)(implicit controller: Controller): String = {
-    val (context, buffer, out) = createContext(false, controller, "scalate." + templateType)
-    val template               = new StringTemplateSource("scalate.jade", templateContent)
+    val templateUri = "scalate." + templateType
+    val (context, buffer, out) = createContext(false, controller, templateUri)
+    val template               = new StringTemplateSource(templateUri, templateContent)
     stringEngine.layout(template, context)
     out.close()
     buffer.toString
