@@ -112,10 +112,7 @@ object Scalate extends Logger {
     val path = dir + File.separator + relPath
     val file = new File(path)
     if (file.exists()) {
-      val (context, buffer, out) = createContext(true, controller, relPath)
-      fileEngine.layout(path, context)
-      out.close()
-      buffer.toString
+      renderTemplateFile(path)(controller)
     } else {
       // If called from a JAR library, the template may have been precompiled
       renderPrecompiledFile(controller, relPath)
@@ -124,6 +121,19 @@ object Scalate extends Logger {
 
   //----------------------------------------------------------------------------
   // For ScalateTemplateEngine
+
+  /**
+   * Renders Scalate template file
+   * 
+   * @param templateFile absolute file path of template
+   * @param controller will be imported in the template as "helper"
+   */
+  def renderTemplateFile(templateFile: String)(implicit controller: Controller): String = {
+    val (context, buffer, out) = createContext(true, controller, templateFile)
+    fileEngine.layout(templateFile, context)
+    out.close()
+    buffer.toString
+  }
 
   /**
    * Renders Scalate template file at the path:
