@@ -18,12 +18,7 @@ TODO:
 * Middleware architecture based on Netty handlers
 * Support SPDY
 
-1.16 (planned):
-* Improve Scalate usage. Instead of:
-    currentController.asInstanceOf[MyController].productInfo(id)
-  Write:
-    productInfo(id)
-  http://groups.google.com/group/xitrum-framework/browse_thread/thread/912f4f81f88ba858
+1.17 (planned):
 * Add Rails-like asset pipeline (not using wro4j because it's heavy)
   http://guides.rubyonrails.org/asset_pipeline.html
   http://www.playframework.org/documentation/2.0/Assets
@@ -32,8 +27,17 @@ TODO:
 * Add automatic CORS request handling for the whole site
   http://www.html5rocks.com/en/tutorials/cors/
 * Add connection abort handling for SockJS
-* Update jQuery from 1.8.3 to 1.9.0
-* Update Knockout.js from 2.2.0 to 2.2.1
+
+1.16 (planned):
+* Improve Scalate usage. Instead of:
+    currentController.asInstanceOf[MyController].productInfo(id)
+  Write:
+    productInfo(id)
+  http://groups.google.com/group/xitrum-framework/browse_thread/thread/912f4f81f88ba858
+* Improve SockJS handler interface
+  def onOpen(session: immutable Map[String, Any]) -> def onOpen(controller: Controller)
+* Update jQuery from 1.8.3 to 1.9.1
+* Update Knockout.js from 2.2.0 to 2.2.1, its mapping plugin from 2.3.5 to 2.4.1
 * Update SBT from 0.12.1 to 0.12.2
   http://www.scala-sbt.org/0.12.2/docs/Community/Changes.html
 

@@ -21,7 +21,7 @@ abstract class SockJsHandler extends Logger {
   //----------------------------------------------------------------------------
   // Abstract methods that must be implemented by apps
 
-  def onOpen(session: Map[String, Any])
+  def onOpen(controller: Controller)
   def onMessage(message: String)
   def onClose()
 

@@ -1,5 +1,5 @@
-/// Knockout Mapping plugin v2.3.5
-/// (c) 2012 Steven Sanderson, Roy Jacobs - http://knockoutjs.com/
+/// Knockout Mapping plugin v2.4.1
+/// (c) 2013 Steven Sanderson, Roy Jacobs - http://knockoutjs.com/
 /// License: MIT (http://www.opensource.org/licenses/mit-license.php)
 (function (factory) {
 	// Module systems magic dance.
@@ -82,57 +82,59 @@
 	exports.fromJS = function (jsObject /*, inputOptions, target*/ ) {
 		if (arguments.length == 0) throw new Error("When calling ko.fromJS, pass the object you want to convert.");
 
-		// When mapping is completed, even with an exception, reset the nesting level
-		window.setTimeout(function () {
-			mappingNesting = 0;
-		}, 0);
-
-		if (!mappingNesting++) {
-			dependentObservables = [];
-			visitedObjects = new objectLookup();
-		}
-
-		var options;
-		var target;
-
-		if (arguments.length == 2) {
-			if (arguments[1][mappingProperty]) {
-				target = arguments[1];
-			} else {
-				options = arguments[1];
+		try {
+			if (!mappingNesting++) {
+				dependentObservables = [];
+				visitedObjects = new objectLookup();
 			}
-		}
-		if (arguments.length == 3) {
-			options = arguments[1];
-			target = arguments[2];
-		}
 
-		if (target) {
-			options = merge(options, target[mappingProperty]);
-		}
-		options = fillOptions(options);
+			var options;
+			var target;
 
-		var result = updateViewModel(target, jsObject, options);
-		if (target) {
-			result = target;
-		}
+			if (arguments.length == 2) {
+				if (arguments[1][mappingProperty]) {
+					target = arguments[1];
+				} else {
+					options = arguments[1];
+				}
+			}
+			if (arguments.length == 3) {
+				options = arguments[1];
+				target = arguments[2];
+			}
 
-		// Evaluate any dependent observables that were proxied.
-		// Do this in a timeout to defer execution. Basically, any user code that explicitly looks up the DO will perform the first evaluation. Otherwise,
-		// it will be done by this code.
-		if (!--mappingNesting) {
-			window.setTimeout(function () {
+			if (target) {
+				options = merge(options, target[mappingProperty]);
+			}
+			options = fillOptions(options);
+
+			var result = updateViewModel(target, jsObject, options);
+			if (target) {
+				result = target;
+			}
+
+			// Evaluate any dependent observables that were proxied.
+			// Do this after the model's observables have been created
+			if (!--mappingNesting) {
 				while (dependentObservables.length) {
 					var DO = dependentObservables.pop();
-					if (DO) DO();
+					if (DO) {
+						DO();
+						
+						// Move this magic property to the underlying dependent observable
+						DO.__DO["throttleEvaluation"] = DO["throttleEvaluation"];
+					}
 				}
-			}, 0);
+			}
+
+			// Save any new mapping options in the view model, so that updateFromJS can use them later.
+			result[mappingProperty] = merge(result[mappingProperty], options);
+
+			return result;
+		} catch(e) {
+			mappingNesting = 0;
+			throw e;
 		}
-
-		// Save any new mapping options in the view model, so that updateFromJS can use them later.
-		result[mappingProperty] = merge(result[mappingProperty], options);
-
-		return result;
 	};
 
 	exports.fromJSON = function (jsonString /*, options, target*/ ) {
@@ -189,8 +191,8 @@
 
 	exports.getType = function(x) {
 		if ((x) && (typeof (x) === "object")) {
-			if (x.constructor == (new Date).constructor) return "date";
-			if (Object.prototype.toString.call(x) === "[object Array]") return "array";
+			if (x.constructor === Date) return "date";
+			if (x.constructor === Array) return "array";
 		}
 		return typeof x;
 	}
@@ -278,6 +280,7 @@
 					deferEvaluation: true
 				});
 				if (DEBUG) wrapped._wrapper = true;
+				wrapped.__DO = DO;
 				return wrapped;
 			};
 			
@@ -467,7 +470,10 @@
 					}
 					
 					if (ko.isWriteableObservable(mappedRootObject[indexer])) {
-						mappedRootObject[indexer](ko.utils.unwrapObservable(value));
+						value = ko.utils.unwrapObservable(value);
+						if (mappedRootObject[indexer]() !== value) {
+							mappedRootObject[indexer](value);
+						}
 					} else {
 						value = mappedRootObject[indexer] === undefined ? value : ko.utils.unwrapObservable(value);
 						mappedRootObject[indexer] = value;
@@ -528,6 +534,10 @@
 					var keys = filterArrayByKey(mappedRootObject(), keyCallback);
 					var key = keyCallback(item);
 					return ko.utils.arrayIndexOf(keys, key);
+				}
+
+				mappedRootObject.mappedGet = function (item) {
+					return mappedRootObject()[mappedRootObject.mappedIndexOf(item)];
 				}
 
 				mappedRootObject.mappedCreate = function (value) {
