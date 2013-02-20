@@ -36,6 +36,7 @@ TODO:
   http://groups.google.com/group/xitrum-framework/browse_thread/thread/912f4f81f88ba858
 * SockJS handler can now access session, request headers etc.
   def onOpen(session: immutable Map[String, Any]) -> def onOpen(controller: Controller)
+* Update mime.types from https://github.com/klacke/yaws/blob/master/priv/mime.types
 * Update jQuery from 1.8.3 to 1.9.1
 * Update Knockout.js from 2.2.0 to 2.2.1, its mapping plugin from 2.3.5 to 2.4.1
 * Update SBT from 0.12.1 to 0.12.2
