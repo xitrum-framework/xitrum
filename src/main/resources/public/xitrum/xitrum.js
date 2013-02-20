@@ -137,7 +137,7 @@ $(function() {
     }
   });
 
-  $(".flash_close").live("click", function(event) {
+  $(document).on("click", ".flash_close", function(event) {
     var parent = $(event.target).parent();
     parent.fadeOut(1000, function() { parent.remove() });
   });
