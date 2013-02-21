@@ -1,7 +1,10 @@
-1.17 (planned):
+1.18 (planned):
 * #70 Add Rails-like asset pipeline
 * #71 Add automatic CORS request handling for the whole site
 * #76 Improve currentController in Scalate templates
+
+1.17:
+* Avoid error of instantiating abstract controller while collecting routes
 
 1.16:
 * #86 Add forwardTo

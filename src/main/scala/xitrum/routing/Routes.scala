@@ -1,7 +1,7 @@
 package xitrum.routing
 
 import java.io.File
-import java.lang.reflect.Method
+import java.lang.reflect.{Method, Modifier}
 
 import scala.collection.mutable.{ArrayBuffer, Map => MMap, StringBuilder}
 import scala.util.matching.Regex
@@ -174,7 +174,9 @@ object Routes extends Logger {
         // Try deleting and scanning again.
         val f = new File(ROUTES_CACHE)
         if (f.exists) {
-          logger.warn("Error loading " + ROUTES_CACHE + ". Delete the file and recollect...")
+          logger.warn("Error loading " + ROUTES_CACHE, e)
+
+          logger.info("Delete the file and recollect...")
           f.delete()
           try {
             actions.clear()  // Reset partly-collected routes
@@ -200,12 +202,10 @@ object Routes extends Logger {
   private def fromControllerClassName_ActionMethodNames(controllerClassName_actionMethodNames: Map[String, Seq[String]], forSockJsController: Boolean) {
     for ((controllerClassName, actionMethodNames) <- controllerClassName_actionMethodNames) {
       for (actionMethodName <- actionMethodNames) {
-        getActionMethod(controllerClassName, actionMethodName) match {
-          case None =>
-
-          case Some(actionMethod) =>
-            val controllerClass = actionMethod.getDeclaringClass
-            val controller      = controllerClass.newInstance().asInstanceOf[Controller]
+        getActionMethod(controllerClassName, actionMethodName).foreach { actionMethod =>
+          val controllerClass = actionMethod.getDeclaringClass
+          if (!Modifier.isAbstract(controllerClass.getModifiers)) {
+            val controller = controllerClass.newInstance().asInstanceOf[Controller]
 
             if (forSockJsController) {
               for (pathPrefix <- sockJsClassAndOptionsTable.keys) {
@@ -217,6 +217,7 @@ object Routes extends Logger {
             } else {
               populateActions(controller, actionMethod, forSockJsController)
             }
+          }
         }
       }
     }
