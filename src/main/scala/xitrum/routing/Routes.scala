@@ -166,7 +166,7 @@ object Routes extends Logger {
 
   private def fromCacheFileOrRecollectWithRetry() {
     try {
-      logger.info("Load " + ROUTES_CACHE + "/collect routes and action/page cache config from controllers...")
+      logger.info("Load file " + ROUTES_CACHE + "/collect routes and action/page cache config from controllers...")
       fromCacheFileOrRecollectReal()
     } catch {
       case scala.util.control.NonFatal(e) =>
@@ -174,9 +174,9 @@ object Routes extends Logger {
         // Try deleting and scanning again.
         val f = new File(ROUTES_CACHE)
         if (f.exists) {
-          logger.warn("Error loading " + ROUTES_CACHE, e)
+          logger.warn("Error loading file " + ROUTES_CACHE, e)
 
-          logger.info("Delete the file and recollect...")
+          logger.info("Delete file " + ROUTES_CACHE + " and recollect...")
           f.delete()
           try {
             actions.clear()  // Reset partly-collected routes
