@@ -23,6 +23,9 @@ trait Controller extends ExtEnv
 
   implicit val currentController: Controller = this
 
+  // Use "lazy val" instead of "def" to prevent this action from being picked by RouteCollector
+  lazy val currentAction = handlerEnv.action
+
   def addConnectionClosedListener(listener: => Unit) {
     channel.getCloseFuture.addListener(new ChannelFutureListener {
       def operationComplete(future: ChannelFuture) { listener }
