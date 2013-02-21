@@ -15,6 +15,11 @@ import xitrum.routing.{HttpMethodWebSocket, Route, RouteCompiler, RouteOrder, Ro
  * See ActionFactory, methods here relates to those there.
  */
 case class Action(route: Route, var method: Method, body: () => Unit, cacheSeconds: Int) {
+  def nonNullMethod = {
+    if (method == null) method = Routes.lookupMethod(route)
+    method
+  }
+
   def first = Action(Route(route.httpMethod, RouteOrder.FIRST, route.compiledPattern), method, body, cacheSeconds)
   def last  = Action(Route(route.httpMethod, RouteOrder.LAST,  route.compiledPattern), method, body, cacheSeconds)
 

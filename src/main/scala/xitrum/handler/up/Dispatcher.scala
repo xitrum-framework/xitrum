@@ -59,9 +59,11 @@ object Dispatcher extends Logger {
         }
       }
 
-      AccessLog.logDynamicContentAccess(controller, beginTimestamp, cacheSeconds, hit)
+      if (!controller.forwarding) AccessLog.logDynamicContentAccess(controller, beginTimestamp, cacheSeconds, hit)
     } catch {
       case scala.util.control.NonFatal(e) =>
+        if (controller.forwarding) return
+
         // End timestamp
         val t2 = System.currentTimeMillis()
 

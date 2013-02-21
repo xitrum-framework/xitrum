@@ -51,7 +51,7 @@ trait Renderer {
    * configured in xitrum.conf, set options to Map("type" -> "jade", "mustache", "scaml", or "ssp")
    */
   def renderView(action: Action, customLayout: () => Any, options: Map[String, Any] = Map()): String = {
-    val nonNullActionMethod = if (action.method == null) Routes.lookupMethod(action.route) else action.method
+    val nonNullActionMethod = action.nonNullMethod
     val controllerClass     = nonNullActionMethod.getDeclaringClass
     val controllerName      = controllerClass.getName
     val actionName          = nonNullActionMethod.getName
