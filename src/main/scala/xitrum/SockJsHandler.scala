@@ -21,8 +21,14 @@ abstract class SockJsHandler extends Logger {
   //----------------------------------------------------------------------------
   // Abstract methods that must be implemented by apps
 
+  /**
+   * @param controller the controller just before switching to this SockJS handler,
+   * you can use extract session data, request headers etc. from it
+   */
   def onOpen(controller: Controller)
+
   def onMessage(message: String)
+
   def onClose()
 
   //----------------------------------------------------------------------------
