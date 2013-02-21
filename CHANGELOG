@@ -3,7 +3,7 @@
 * #71 Add automatic CORS request handling for the whole site
 * #76 Improve currentController in Scalate templates
 
-1.16 (planned):
+1.16:
 * #86 Add forwardTo
 * SockJS handler can now access session, request headers etc.
   def onOpen(session: immutable Map[String, Any]) -> def onOpen(controller: Controller)
