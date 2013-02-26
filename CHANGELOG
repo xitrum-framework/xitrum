@@ -1,7 +1,12 @@
-1.18 (planned):
+1.19 (planned):
+* #88 Replace JBoss Marshalling with Twitter's Chill
 * #70 Add Rails-like asset pipeline
 * #71 Add automatic CORS request handling for the whole site
 * #76 Improve currentController in Scalate templates
+
+1.18:
+* #87 Update Netty from 3.6.2 to 3.6.3
+* #90 Update jQuery Validate from 1.10.0 to 1.11.0
 
 1.17:
 * Avoid error of instantiating abstract controller while collecting routes

@@ -2,7 +2,7 @@ organization := "tv.cntt"
 
 name := "xitrum"
 
-version := "1.18-SNAPSHOT"
+version := "1.19-SNAPSHOT"
 
 scalacOptions ++= Seq(
   "-deprecation",
@@ -38,7 +38,7 @@ libraryDependencies += "org.mozilla" % "rhino" % "1.7R4"
 
 // Other dependencies ----------------------------------------------------------
 
-libraryDependencies += "io.netty" % "netty" % "3.6.2.Final"
+libraryDependencies += "io.netty" % "netty" % "3.6.3.Final"
 
 libraryDependencies += "org.javassist" % "javassist" % "3.17.1-GA"
 
