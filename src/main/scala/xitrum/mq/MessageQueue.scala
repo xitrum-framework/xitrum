@@ -11,9 +11,13 @@ import com.hazelcast.query.PredicateBuilder
 import xitrum.Config
 import xitrum.scope.request.Params
 
-// TODO: presense
-
-/** Simple message queue. Messages older than 60 seconds will automatically be removed. */
+/**
+ * Very simple message queue. Messages older than 60 seconds will automatically
+ * be removed.
+ *
+ * For more advanced features (presense, save to disk etc.), you should implement
+ * your own message queue, based on Hazelcast.
+ */
 object MessageQueue {
   private[this] val TTL_SECONDS = 60
 
@@ -26,8 +30,10 @@ object MessageQueue {
 
   //----------------------------------------------------------------------------
 
-  map.addIndex("topic",     false)  // Comparison: =
-  map.addIndex("timestamp", true)   // Comparison: >
+  // Commented out for now, because of this issue:
+  // https://github.com/hazelcast/hazelcast/issues/310
+  //map.addIndex("topic",     false)  // Comparison: =
+  //map.addIndex("timestamp", true)   // Comparison: >
 
   map.addEntryListener(new EntryListener[Long, QueueMessage] {
     def entryAdded(event: EntryEvent[Long, QueueMessage]) {
