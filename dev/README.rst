@@ -33,3 +33,16 @@ https://github.com/sbt/sbt.github.com/blob/gen-master/src/jekyll/using_sonatype.
    newly published item, click "Close" then "Release".
 
 Do the same with things in "plugin" directory.
+
+Update related projects
+-----------------------
+
+After each new version release, please update these projects to use that new Xitrum version:
+
+* `xitrum-new <https://github.com/ngocdaothanh/xitrum-new>`_
+* `xitrum-demos <https://github.com/ngocdaothanh/xitrum-demos>`_
+* `xitrum-modularized-demo <https://github.com/ngocdaothanh/xitrum-modularized-demo>`_
+* `comy <https://github.com/ngocdaothanh/comy>`_
+
+Also update `gh-pages branch of Xitrum <https://github.com/ngocdaothanh/xitrum/tree/gh-pages>`_
+and `Xitrum guide <https://github.com/ngocdaothanh/xitrum-doc>`_.
