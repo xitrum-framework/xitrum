@@ -1,10 +1,12 @@
-1.19 (planned):
-* #91 Update Akka from 2.1.0 to 2.1.1
-* #94 Improve Secure#unseal
+1.20 (planned):
 * #88 Replace JBoss Marshalling with Twitter's Chill
 * #70 Add Rails-like asset pipeline
 * #71 Add automatic CORS request handling for the whole site
 * #76 Improve currentController in Scalate templates
+
+1.19:
+* #91 Update Akka from 2.1.0 to 2.1.1
+* #94 Improve Secure#unseal
 
 1.18:
 * #87 Update Netty from 3.6.2 to 3.6.3
