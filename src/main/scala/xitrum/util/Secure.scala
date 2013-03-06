@@ -117,8 +117,12 @@ object Secure {
   // The reverse of seal method above
   private def unseal(data: Array[Byte], key: Array[Byte]): Option[Array[Byte]] = {
     try {
+      if (data.length <= 4) return None
+
       val b = ByteBuffer.wrap(data)
-      val l = b.getInt
+      val l = b.getInt()
+      if (l <= 0 || l >= data.length - 4) return None
+
       val d = new Array[Byte](l)
       b.get(d)
       val h = new Array[Byte](data.length - 4 - l)
