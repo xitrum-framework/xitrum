@@ -4,6 +4,8 @@ name := "xitrum"
 
 version := "1.20-SNAPSHOT"
 
+scalaVersion := "2.10.1"
+
 scalacOptions ++= Seq(
   "-deprecation",
   "-feature",
@@ -66,10 +68,6 @@ libraryDependencies += "tv.cntt" %% "sclasner" % "1.2"
 
 autoCompilerPlugins := true
 
-addCompilerPlugin("org.scala-lang.plugins" % "continuations" % "2.10.0")
+addCompilerPlugin("org.scala-lang.plugins" % "continuations" % "2.10.1")
 
 scalacOptions += "-P:continuations:enable"
-
-// http://www.scala-sbt.org/release/docs/Detailed-Topics/Cross-Build
-//crossScalaVersions := Seq("2.10.0")
-scalaVersion := "2.10.0"
