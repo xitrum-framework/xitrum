@@ -2,12 +2,19 @@ package xitrum.util
 
 import xitrum.Config
 
-object SecureBase64 {
-  /** @param forCookie If true, tries to GZIP compress if > 4KB; the result may > 4KB */
+/** Combination of Secure and UrlSafeBase64. */
+object SecureUrlSafeBase64 {
   def encrypt(value: Any, forCookie: Boolean = false): String =
     encrypt(value, Config.xitrum.session.secureKey, forCookie)
 
-  /** @param forCookie If true, tries to GZIP compress if > 4KB; the result may > 4KB */
+  /**
+   * The result contains no padding ("=" characters) so that it can be used as
+   * request parameter name. (Netty POST body decoder prohibits "=" in parameter name.)
+   *
+   * See http://en.wikipedia.org/wiki/Base_64#Padding
+   *
+   * @param forCookie If true, tries to GZIP compress if > 4KB; the result may > 4KB
+   */
   def encrypt(value: Any, key: String, forCookie: Boolean): String = {
     val bytes           = SeriDeseri.serialize(value)
     val bytesCompressed = (forCookie && bytes.length > 4 * 1024)
@@ -35,10 +42,13 @@ object SecureBase64 {
     }
   }
 
-  /** @param forCookie If true, tries to GZIP uncompress if the input is compressed */
   def decrypt(base64String: String, forCookie: Boolean = false): Option[Any] =
     decrypt(base64String, Config.xitrum.session.secureKey, forCookie)
 
+  /**
+   * @param base64String may contain optional padding ("=" characters)
+   * @param forCookie If true, tries to GZIP uncompress if the input is compressed
+   */
   def decrypt(base64String: String, key: String, forCookie: Boolean): Option[Any] = {
     try {
       UrlSafeBase64.autoPaddingDecode(base64String).flatMap { encrypted =>

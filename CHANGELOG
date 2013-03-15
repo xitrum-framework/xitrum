@@ -1,4 +1,7 @@
 1.20 (planned):
+* Rename xitrum.util.Base64 to UrlSafeBase64, SecureBase64 to SecureUrlSafeBase64
+  to better reflect that URL-safe dialect of base64 encoding is used
+  http://en.wikipedia.org/wiki/Base_64#Padding
 * #88 Replace JBoss Marshalling with Twitter's Chill
 * #70 Add Rails-like asset pipeline
 * #71 Add automatic CORS request handling for the whole site

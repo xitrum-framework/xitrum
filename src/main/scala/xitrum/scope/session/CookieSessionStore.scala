@@ -6,7 +6,7 @@ import org.jboss.netty.handler.codec.http.DefaultCookie
 
 import xitrum.{Config, Logger}
 import xitrum.scope.request.ExtEnv
-import xitrum.util.SecureBase64
+import xitrum.util.SecureUrlSafeBase64
 
 /** Compress big session cookie to try to avoid the 4KB limit. */
 class CookieSessionStore extends SessionStore with Logger {
@@ -18,7 +18,7 @@ class CookieSessionStore extends SessionStore with Logger {
 
       // See "store" method to know why this map needs to be immutable
       case Some(encryptedImmutableMap) =>
-        SecureBase64.decrypt(encryptedImmutableMap, true) match {
+        SecureUrlSafeBase64.decrypt(encryptedImmutableMap, true) match {
           case None =>
             MMap[String, Any]()
 
@@ -55,7 +55,7 @@ class CookieSessionStore extends SessionStore with Logger {
       val immutableMap = session.toMap
 
       // Most browsers do not support cookie > 4KB
-      val serialized = SecureBase64.encrypt(immutableMap, true)
+      val serialized = SecureUrlSafeBase64.encrypt(immutableMap, true)
       val cookieSize = serialized.length
       if (cookieSize > 4 * 1024) {
         logger.error("Cookie size = " + cookieSize + " > 4KB limit: " + immutableMap)

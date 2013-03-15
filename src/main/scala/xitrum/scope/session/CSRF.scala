@@ -4,7 +4,7 @@ import java.util.UUID
 
 import xitrum.Controller
 import xitrum.exception.InvalidAntiCSRFToken
-import xitrum.util.SecureBase64
+import xitrum.util.SecureUrlSafeBase64
 
 /**
  * SecureBase64 is for preventing a user to mess with his own data to cheat the server.
@@ -27,14 +27,14 @@ object CSRF {
    * (For example when using with GET requests, which does not include the token.)
    * Otherwise you should use SecureBase64.encrypt for shorter result.
    */
-  def encrypt(controller: Controller, value: Any): String = controller.antiCSRFToken + SecureBase64.encrypt(value)
+  def encrypt(controller: Controller, value: Any): String = controller.antiCSRFToken + SecureUrlSafeBase64.encrypt(value)
 
   def decrypt(controller: Controller, string: String): Any = {
     val prefix = controller.antiCSRFToken
     if (!string.startsWith(prefix)) throw new InvalidAntiCSRFToken
 
     val base64String = string.substring(prefix.length)
-    SecureBase64.decrypt(base64String) match {
+    SecureUrlSafeBase64.decrypt(base64String) match {
       case None       => throw new InvalidAntiCSRFToken
       case Some(data) => data
     }

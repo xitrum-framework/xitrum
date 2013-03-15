@@ -8,6 +8,8 @@ import org.jboss.netty.util.CharsetUtil.UTF_8
 /**
  * URL-safe dialect is used:
  * http://netty.io/3.6/api/org/jboss/netty/handler/codec/base64/Base64Dialect.html
+ *
+ * If you want to use standard dialect, use the feature in Netty directly.
  */
 object UrlSafeBase64 {
   /**
@@ -23,7 +25,7 @@ object UrlSafeBase64 {
     removePadding(base64String)
   }
 
-  /** @param base64String may contain padding ("=" characters) */
+  /** @param base64String may contain optional padding ("=" characters) */
   def autoPaddingDecode(base64String: String): Option[Array[Byte]] = {
     try {
       val withPadding = addPadding(base64String)

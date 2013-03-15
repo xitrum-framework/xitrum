@@ -8,7 +8,7 @@ import com.hazelcast.core.IMap
 
 import xitrum.Config
 import xitrum.scope.request.ExtEnv
-import xitrum.util.SecureBase64
+import xitrum.util.SecureUrlSafeBase64
 
 /**
  * @param sessionId needed to save the session to Hazelcast
@@ -38,7 +38,7 @@ class HazelcastSessionStore extends SessionStore {
         new HazelcastSession(sessionId, true)
 
       case Some(encryptedSessionId) =>
-        SecureBase64.decrypt(encryptedSessionId) match {
+        SecureUrlSafeBase64.decrypt(encryptedSessionId) match {
           case None =>
             // sessionId sent by browser is invalid, recreate
             val sessionId = UUID.randomUUID().toString
@@ -96,7 +96,7 @@ class HazelcastSessionStore extends SessionStore {
       if (hSession.newlyCreated) {
         // DefaultCookie has max age of Integer.MIN_VALUE by default,
         // which means the cookie will be removed when user terminates browser
-        val cookie = new DefaultCookie(sessionCookieName, SecureBase64.encrypt(hSession.sessionId))
+        val cookie = new DefaultCookie(sessionCookieName, SecureUrlSafeBase64.encrypt(hSession.sessionId))
         cookie.setHttpOnly(true)
         extEnv.responseCookies.append(cookie)
       }
