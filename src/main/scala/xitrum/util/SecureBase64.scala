@@ -14,7 +14,7 @@ object SecureBase64 {
 
     val maybeCompressed = if (bytesCompressed) Gzip.compress(bytes) else bytes
     val encrypted       = Secure.encrypt(maybeCompressed, key)
-    val ret1            = Base64.encode(encrypted)
+    val ret1            = UrlSafeBase64.noPaddingEncode(encrypted)
 
     if (!forCookie) {
       // Not cookie, nothing to do
@@ -30,7 +30,7 @@ object SecureBase64 {
         // bytes has not been compressed, let's try
         val reallyCompressed = Gzip.compress(bytes)
         val encrypted        = Secure.encrypt(reallyCompressed, key)
-        Base64.encode(encrypted)
+        UrlSafeBase64.noPaddingEncode(encrypted)
       }
     }
   }
@@ -41,7 +41,7 @@ object SecureBase64 {
 
   def decrypt(base64String: String, key: String, forCookie: Boolean): Option[Any] = {
     try {
-      Base64.decode(base64String).flatMap { encrypted =>
+      UrlSafeBase64.autoPaddingDecode(base64String).flatMap { encrypted =>
         Secure.decrypt(encrypted, key).flatMap { maybeCompressed =>
           val bytes = if (forCookie) Gzip.mayUncompress(maybeCompressed) else maybeCompressed
           SeriDeseri.deserialize(bytes)

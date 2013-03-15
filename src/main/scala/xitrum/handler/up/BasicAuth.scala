@@ -6,7 +6,7 @@ import org.jboss.netty.handler.codec.http.{DefaultHttpResponse, HttpHeaders, Htt
 import ChannelHandler.Sharable
 
 import xitrum.Config
-import xitrum.util.Base64
+import xitrum.util.UrlSafeBase64
 
 object BasicAuth {
   /** f takes username and password, and returns true if it want to let the user in. */
@@ -32,7 +32,7 @@ object BasicAuth {
       None
     } else {
       val username_password = authorization.substring(6)  // Skip "Basic "
-      Base64.decode(username_password).flatMap { bytes =>
+      UrlSafeBase64.autoPaddingDecode(username_password).flatMap { bytes =>
         val username_password2 = new String(bytes)
         val username_password3 = username_password2.split(':')
         if (username_password3.length != 2)

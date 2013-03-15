@@ -3,7 +3,6 @@ package xitrum.controller
 import org.jboss.netty.handler.codec.http.{HttpHeaders, HttpResponseStatus}
 
 import xitrum.Controller
-import xitrum.util.Base64
 
 trait BasicAuth {
   this: Controller =>

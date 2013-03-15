@@ -10,7 +10,7 @@ import HttpHeaders.Values._
 import HttpResponseStatus._
 
 import xitrum.{Controller, Config, Logger}
-import xitrum.util.{Base64, Gzip, Loader, LocalLRUCache, Mime}
+import xitrum.util.{UrlSafeBase64, Gzip, Loader, LocalLRUCache, Mime}
 
 object Etag extends Logger {
   class Result
@@ -33,7 +33,7 @@ object Etag extends Logger {
     val md5 = MessageDigest.getInstance("MD5")  // MD5 is fastest
     md5.reset()
     md5.update(bytes)
-    Base64.encode(md5.digest)
+    UrlSafeBase64.noPaddingEncode(md5.digest)
   }
 
   def forString(string: String) = forBytes(string.getBytes(Config.xitrum.request.charset))
