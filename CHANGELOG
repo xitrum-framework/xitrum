@@ -5,11 +5,12 @@
 * #76 Improve currentController in Scalate templates
 
 1.20 (planned):
+* #88 Replace JBoss Marshalling with Twitter's Chill
+* #99 Use ReflectASM, which is included by Twitter Chill, to initiate controllers
 * #96 Rename xitrum.util.Base64 to UrlSafeBase64, SecureBase64 to SecureUrlSafeBase64
 * #97 Update SLF4J from 1.7.2 to 1.7.3, Logback from 1.0.9 to 1.0.10
   You should update Logback in your project from 1.0.9 to 1.0.10
 * #98 Update Akka from 2.1.1 to 2.1.2
-* #88 Replace JBoss Marshalling with Twitter's Chill
 
 1.19:
 * #91 Update Akka from 2.1.0 to 2.1.1

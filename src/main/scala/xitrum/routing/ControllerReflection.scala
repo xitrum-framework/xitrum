@@ -1,7 +1,7 @@
 package xitrum.routing
 
 import java.lang.reflect.Method
-import scala.collection.mutable.{Map => MMap}
+import com.esotericsoftware.reflectasm.ConstructorAccess
 
 import xitrum.Controller
 import xitrum.controller.Action
@@ -25,8 +25,16 @@ object ControllerReflection {
   }
 
   def newControllerAndAction(actionMethod: Method): (Controller, Action) = {
-    val controllerClass  = actionMethod.getDeclaringClass
-    val controller       = controllerClass.newInstance().asInstanceOf[Controller]
+    val controllerClass = actionMethod.getDeclaringClass
+
+    // Use normal Java reflection
+    //val controller = controllerClass.newInstance().asInstanceOf[Controller]
+
+    // Use ReflectASM, which is included by Twitter Chill
+    // https://code.google.com/p/reflectasm/
+    val access     = ConstructorAccess.get(controllerClass)
+    val controller = access.newInstance().asInstanceOf[Controller]
+
     val newAction        = actionMethod.invoke(controller).asInstanceOf[Action]
     val withActionMethod = Action(newAction.route, actionMethod, newAction.body, newAction.cacheSeconds)
     (controller, withActionMethod)
