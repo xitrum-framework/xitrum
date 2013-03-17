@@ -51,9 +51,7 @@ libraryDependencies += "org.javassist" % "javassist" % "3.17.1-GA"
 // Projects using Xitrum must provide a concrete implentation of SLF4J (Logback etc.)
 libraryDependencies += "org.slf4j" % "slf4j-api" % "1.7.3" % "provided"
 
-libraryDependencies += "org.jboss.marshalling" % "jboss-marshalling" % "1.3.17.GA"
-
-libraryDependencies += "org.jboss.marshalling" % "jboss-marshalling-river" % "1.3.17.GA"
+libraryDependencies += "com.twitter" %% "chill" % "0.2.0"
 
 // For jsEscape
 libraryDependencies += "org.apache.commons" % "commons-lang3" % "3.1"

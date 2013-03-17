@@ -4,8 +4,8 @@ import xitrum.Config
 
 /** Combination of Secure and UrlSafeBase64. */
 object SecureUrlSafeBase64 {
-  def encrypt(value: Any, forCookie: Boolean = false): String =
-    encrypt(value, Config.xitrum.session.secureKey, forCookie)
+  def encrypt(ref: AnyRef, forCookie: Boolean = false): String =
+    encrypt(ref, Config.xitrum.session.secureKey, forCookie)
 
   /**
    * The result contains no padding ("=" characters) so that it can be used as
@@ -15,8 +15,8 @@ object SecureUrlSafeBase64 {
    *
    * @param forCookie If true, tries to GZIP compress if > 4KB; the result may > 4KB
    */
-  def encrypt(value: Any, key: String, forCookie: Boolean): String = {
-    val bytes           = SeriDeseri.serialize(value)
+  def encrypt(ref: AnyRef, key: String, forCookie: Boolean): String = {
+    val bytes           = SeriDeseri.serialize(ref)
     val bytesCompressed = (forCookie && bytes.length > 4 * 1024)
 
     val maybeCompressed = if (bytesCompressed) Gzip.compress(bytes) else bytes

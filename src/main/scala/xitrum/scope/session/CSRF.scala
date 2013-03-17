@@ -27,7 +27,7 @@ object CSRF {
    * (For example when using with GET requests, which does not include the token.)
    * Otherwise you should use SecureBase64.encrypt for shorter result.
    */
-  def encrypt(controller: Controller, value: Any): String = controller.antiCSRFToken + SecureUrlSafeBase64.encrypt(value)
+  def encrypt(controller: Controller, ref: AnyRef): String = controller.antiCSRFToken + SecureUrlSafeBase64.encrypt(ref)
 
   def decrypt(controller: Controller, string: String): Any = {
     val prefix = controller.antiCSRFToken
