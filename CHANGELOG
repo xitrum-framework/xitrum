@@ -4,9 +4,9 @@
 * #71 Add automatic CORS request handling for the whole site
 * #76 Improve currentController in Scalate templates
 
-1.20 (planned):
+1.20:
 * #88 Replace JBoss Marshalling with Twitter's Chill
-* #99 Use ReflectASM, which is included by Twitter Chill, to initiate controllers
+* #99 Use ReflectASM (included by Twitter Chill) to initiate controllers faster
 * #96 Rename xitrum.util.Base64 to UrlSafeBase64, SecureBase64 to SecureUrlSafeBase64
 * #97 Update SLF4J from 1.7.2 to 1.7.3, Logback from 1.0.9 to 1.0.10
   You should update Logback in your project from 1.0.9 to 1.0.10
