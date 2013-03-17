@@ -11,7 +11,7 @@ import akka.actor.{Actor, ActorRef, PoisonPill, Props, Terminated}
 import xitrum.{Config, Controller, SkipCSRFCheck}
 import xitrum.etag.NotModified
 import xitrum.routing.Routes
-import xitrum.util.{Json, LookupOrCreate, SingleActorInstance}
+import xitrum.util.{Json, LookupOrCreate, ClusterSingletonActor}
 import xitrum.view.DocType
 import xitrum.util.Lookup
 
@@ -190,7 +190,7 @@ class SockJsController extends Controller with SkipCSRFCheck {
     val ref = Config.actorSystem.actorOf(Props(new Actor {
       override def preStart() {
         val propsMaker = () => Props(new NonWebSocketSession(self, pathPrefix, SockJsController.this))
-        SingleActorInstance.actor() ! LookupOrCreate(sessionId, propsMaker)
+        ClusterSingletonActor.actor() ! LookupOrCreate(sessionId, propsMaker)
       }
 
       def receive = {
@@ -276,7 +276,7 @@ class SockJsController extends Controller with SkipCSRFCheck {
         val sessionId = param("sessionId")
         val ref = Config.actorSystem.actorOf(Props(new Actor {
           override def preStart() {
-            SingleActorInstance.actor() ! Lookup(sessionId)
+            ClusterSingletonActor.actor() ! Lookup(sessionId)
           }
 
           def receive = {
@@ -319,7 +319,7 @@ class SockJsController extends Controller with SkipCSRFCheck {
     val ref = Config.actorSystem.actorOf(Props(new Actor {
       override def preStart() {
         val propsMaker = () => Props(new NonWebSocketSession(self, pathPrefix, SockJsController.this))
-        SingleActorInstance.actor() ! LookupOrCreate(sessionId, propsMaker)
+        ClusterSingletonActor.actor() ! LookupOrCreate(sessionId, propsMaker)
       }
 
       def receive = {
@@ -405,7 +405,7 @@ class SockJsController extends Controller with SkipCSRFCheck {
       val ref = Config.actorSystem.actorOf(Props(new Actor {
         override def preStart() {
           val propsMaker = () => Props(new NonWebSocketSession(self, pathPrefix, SockJsController.this))
-          SingleActorInstance.actor() ! LookupOrCreate(sessionId, propsMaker)
+          ClusterSingletonActor.actor() ! LookupOrCreate(sessionId, propsMaker)
         }
 
         def receive = {
@@ -518,7 +518,7 @@ class SockJsController extends Controller with SkipCSRFCheck {
       val ref = Config.actorSystem.actorOf(Props(new Actor {
         override def preStart() {
           val propsMaker = () => Props(new NonWebSocketSession(self, pathPrefix, SockJsController.this))
-          SingleActorInstance.actor() ! LookupOrCreate(sessionId, propsMaker)
+          ClusterSingletonActor.actor() ! LookupOrCreate(sessionId, propsMaker)
         }
 
         def receive = {
@@ -626,7 +626,7 @@ class SockJsController extends Controller with SkipCSRFCheck {
       if (messages != null) {
         val ref = Config.actorSystem.actorOf(Props(new Actor {
           override def preStart() {
-            SingleActorInstance.actor() ! Lookup(sessionId)
+            ClusterSingletonActor.actor() ! Lookup(sessionId)
           }
 
           def receive = {
@@ -661,7 +661,7 @@ class SockJsController extends Controller with SkipCSRFCheck {
     val ref = Config.actorSystem.actorOf(Props(new Actor {
       override def preStart() {
         val propsMaker = () => Props(new NonWebSocketSession(self, pathPrefix, SockJsController.this))
-        SingleActorInstance.actor() ! LookupOrCreate(sessionId, propsMaker)
+        ClusterSingletonActor.actor() ! LookupOrCreate(sessionId, propsMaker)
       }
 
       def receive = {

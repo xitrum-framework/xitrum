@@ -5,11 +5,11 @@ import org.jboss.netty.channel.socket.nio.NioServerSocketChannelFactory
 
 import xitrum.{Cache, Config, Logger}
 import xitrum.routing.Routes
-import xitrum.util.SingleActorInstance
+import xitrum.util.ClusterSingletonActor
 
 object Server extends Logger {
   def start() {
-    SingleActorInstance.start()
+    ClusterSingletonActor.start()
 
     // Because Hazelcast takes serveral seconds to start, we force it to
     // start before the web server begins receiving requests, instead of
