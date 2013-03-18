@@ -1,5 +1,6 @@
 package xitrum.util
 
+import com.twitter.chill.KryoInjection
 import xitrum.Config
 
 /** Combination of Secure and UrlSafeBase64. */
@@ -16,7 +17,7 @@ object SecureUrlSafeBase64 {
    * @param forCookie If true, tries to GZIP compress if > 4KB; the result may > 4KB
    */
   def encrypt(ref: AnyRef, key: String, forCookie: Boolean): String = {
-    val bytes           = SeriDeseri.serialize(ref)
+    val bytes           = KryoInjection(ref)
     val bytesCompressed = (forCookie && bytes.length > 4 * 1024)
 
     val maybeCompressed = if (bytesCompressed) Gzip.compress(bytes) else bytes
@@ -54,7 +55,7 @@ object SecureUrlSafeBase64 {
       UrlSafeBase64.autoPaddingDecode(base64String).flatMap { encrypted =>
         Secure.decrypt(encrypted, key).flatMap { maybeCompressed =>
           val bytes = if (forCookie) Gzip.mayUncompress(maybeCompressed) else maybeCompressed
-          SeriDeseri.deserialize(bytes)
+          KryoInjection.invert(bytes)
         }
       }
     } catch {
