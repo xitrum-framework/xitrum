@@ -1,6 +1,5 @@
 package xitrum.util
 
-import com.twitter.chill.KryoInjection
 import xitrum.Config
 
 /** Combination of Secure and UrlSafeBase64. */
@@ -17,7 +16,7 @@ object SecureUrlSafeBase64 {
    * @param forCookie If true, tries to GZIP compress if > 4KB; the result may > 4KB
    */
   def encrypt(ref: AnyRef, key: String, forCookie: Boolean): String = {
-    val bytes           = KryoInjection(ref)
+    val bytes           = SeriDeseri.serialize(ref)
     val bytesCompressed = (forCookie && bytes.length > 4 * 1024)
 
     val maybeCompressed = if (bytesCompressed) Gzip.compress(bytes) else bytes
@@ -43,24 +42,19 @@ object SecureUrlSafeBase64 {
     }
   }
 
-  def decrypt(base64String: String, forCookie: Boolean = false): Option[Any] =
+  def decrypt(base64String: String, forCookie: Boolean = false): Option[AnyRef] =
     decrypt(base64String, Config.xitrum.session.secureKey, forCookie)
 
   /**
    * @param base64String may contain optional padding ("=" characters)
    * @param forCookie If true, tries to GZIP uncompress if the input is compressed
    */
-  def decrypt(base64String: String, key: String, forCookie: Boolean): Option[Any] = {
-    try {
-      UrlSafeBase64.autoPaddingDecode(base64String).flatMap { encrypted =>
-        Secure.decrypt(encrypted, key).flatMap { maybeCompressed =>
-          val bytes = if (forCookie) Gzip.mayUncompress(maybeCompressed) else maybeCompressed
-          KryoInjection.invert(bytes)
-        }
+  def decrypt(base64String: String, key: String, forCookie: Boolean): Option[AnyRef] = {
+    UrlSafeBase64.autoPaddingDecode(base64String).flatMap { encrypted =>
+      Secure.decrypt(encrypted, key).flatMap { maybeCompressed =>
+        val bytes = if (forCookie) Gzip.mayUncompress(maybeCompressed) else maybeCompressed
+        SeriDeseri.deserialize(bytes)
       }
-    } catch {
-      case scala.util.control.NonFatal(e) =>
-        None
     }
   }
 }

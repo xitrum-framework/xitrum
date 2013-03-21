@@ -44,7 +44,7 @@ object ResponseCacher extends Logger {
    *   status:  Int
    *   headers: Array[(String, String)]
    *   content: Array[Byte]
-   *   gzipped: Boolean  // Big textual content is gzipped to save memory
+   *   gzipped: Boolean, big textual content is gzipped to save memory
    */
   private def serializeResponse(request: HttpRequest, response: HttpResponse): CachedResponse = {
     val status = response.getStatus.getCode

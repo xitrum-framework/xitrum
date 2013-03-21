@@ -4,6 +4,7 @@ import java.nio.charset.Charset
 import org.jboss.netty.buffer.ChannelBuffers
 import org.jboss.netty.handler.codec.base64.{Base64 => B64, Base64Dialect}
 import org.jboss.netty.util.CharsetUtil.UTF_8
+import xitrum.Logger
 
 /**
  * URL-safe dialect is used:
@@ -11,7 +12,7 @@ import org.jboss.netty.util.CharsetUtil.UTF_8
  *
  * If you want to use standard dialect, use the feature in Netty directly.
  */
-object UrlSafeBase64 {
+object UrlSafeBase64 extends Logger {
   /**
    * The result contains no padding ("=" characters) so that it can be used as
    * request parameter name. (Netty POST body decoder prohibits "=" in parameter name.)
@@ -32,7 +33,9 @@ object UrlSafeBase64 {
       val buffer      = B64.decode(ChannelBuffers.copiedBuffer(withPadding, UTF_8), Base64Dialect.URL_SAFE)
       Some(ChannelBufferToBytes(buffer))
     } catch {
-      case scala.util.control.NonFatal(e) => None
+      case scala.util.control.NonFatal(e) =>
+        logger.debug("Could not decode base64 in URL-safe dialect: " + base64String)
+        None
     }
   }
 
