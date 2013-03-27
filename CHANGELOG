@@ -1,4 +1,5 @@
 1.21 (planned):
+* #100 Update JSON4S to 3.2.2
 * #81 Reload classes and routes in development mode
 * #70 Add Rails-like asset pipeline
 * #71 Add automatic CORS request handling for the whole site
