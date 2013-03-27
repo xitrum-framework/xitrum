@@ -44,6 +44,11 @@ object Dispatcher extends Logger {
 
       val cacheSeconds = withActionMethod.cacheSeconds
 
+      // Before filters:
+      // When not passed, the before filters must explicitly respond to client,
+      // with appropriate response status code, error description etc.
+      // This logic is app-specific, Xitrum cannot does it for the app.
+
       if (cacheSeconds > 0) {     // Page cache
         hit = tryCache(controller) {
           val passed = controller.callBeforeFilters()
