@@ -1,1 +1,1 @@
-java -Xmx512M -XX:MaxPermSize=256M -jar `dirname $0`/sbt-launch-0.12.2.jar "$@"
+java -Xmx512M -XX:MaxPermSize=256M -jar `dirname $0`/sbt-launch-0.12.3.jar "$@"
