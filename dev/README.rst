@@ -32,8 +32,6 @@ https://github.com/sbt/sbt.github.com/blob/gen-master/src/jekyll/using_sonatype.
 3. Login at https://oss.sonatype.org/ and from "Staging Repositories" select the
    newly published item, click "Close" then "Release".
 
-Do the same with things in "plugin" directory.
-
 Update related projects
 -----------------------
 
