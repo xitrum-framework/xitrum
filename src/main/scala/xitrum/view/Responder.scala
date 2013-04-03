@@ -223,8 +223,7 @@ trait Responder extends JS with Flash with Knockout {
   //----------------------------------------------------------------------------
 
   /**
-   * If you use Scalate and want to use template type other than the default type
-   * configured in xitrum.conf, set options to Map("type" -> "jade", "mustache", "scaml", or "ssp")
+   * @param options specific to the configured template engine
    */
   def respondView(action: Action, customLayout: () => Any, options: Map[String, Any] = Map()): ChannelFuture = {
     val string = renderView(action, customLayout, options)

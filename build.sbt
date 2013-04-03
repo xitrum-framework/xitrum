@@ -19,32 +19,18 @@ unmanagedBase in Runtime <<= baseDirectory { base => base / "config" }
 // and it takes several hours to sync from Sonatype to Maven Central
 resolvers += "SonatypeReleases" at "http://oss.sonatype.org/content/repositories/releases/"
 
-// Hazelcast -------------------------------------------------------------------
-
-// For distributed cache and SockJS
-// Infinispan is good but much heavier
-libraryDependencies += "com.hazelcast" % "hazelcast" % "2.5"
-
-// Hazelcast can be configured as cluster member, lite member, or Java client
-libraryDependencies += "com.hazelcast" % "hazelcast-client" % "2.5"
-
-// Scalate ---------------------------------------------------------------------
-
-libraryDependencies += "org.fusesource.scalate" %% "scalate-core" % "1.6.1"
-
-// For Markdown
-libraryDependencies += "org.fusesource.scalamd" %% "scalamd" % "1.6"
-
-// For Scalate to compile CoffeeScript to JavaScript
-libraryDependencies += "org.mozilla" % "rhino" % "1.7R4"
-
-// Other dependencies ----------------------------------------------------------
-
 libraryDependencies += "io.netty" % "netty" % "3.6.3.Final"
 
 libraryDependencies += "com.typesafe.akka" %% "akka-actor" % "2.1.2"
 
 libraryDependencies += "com.typesafe.akka" %% "akka-remote" % "2.1.2"
+
+// Hazelcast is used for distributed cache and SockJS
+// Infinispan is good but much heavier
+libraryDependencies += "com.hazelcast" % "hazelcast" % "2.5"
+
+// Hazelcast can be configured as cluster member, lite member, or Java client
+libraryDependencies += "com.hazelcast" % "hazelcast-client" % "2.5"
 
 libraryDependencies += "org.javassist" % "javassist" % "3.17.1-GA"
 

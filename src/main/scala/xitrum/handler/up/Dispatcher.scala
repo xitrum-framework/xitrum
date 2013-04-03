@@ -109,17 +109,7 @@ object Dispatcher extends Logger {
                 }
             }
           } else {
-            val normalErrorMsg = e.toString + "\n\n" + e.getStackTraceString
-            val errorMsg = if (e.isInstanceOf[org.fusesource.scalate.InvalidSyntaxException]) {
-              val ise = e.asInstanceOf[org.fusesource.scalate.InvalidSyntaxException]
-              val pos = ise.pos
-              "Scalate syntax error: " + ise.source.uri + ", line " + pos.line + "\n" +
-              pos.longString + "\n\n" +
-              normalErrorMsg
-            } else {
-              normalErrorMsg
-            }
-
+            val errorMsg = e.toString + "\n\n" + e.getStackTraceString
             if (controller.isAjax)
               controller.jsRespond("alert(\"" + controller.jsEscape(errorMsg) + "\")")
             else

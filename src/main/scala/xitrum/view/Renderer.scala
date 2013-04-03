@@ -47,8 +47,7 @@ trait Renderer {
    * Renders the template associated with an action to "renderedTemplate",
    * then calls the layout function.
    *
-   * If you use Scalate and want to use template type other than the default type
-   * configured in xitrum.conf, set options to Map("type" -> "jade", "mustache", "scaml", or "ssp")
+   * @param options specific to the configured template engine
    */
   def renderView(action: Action, customLayout: () => Any, options: Map[String, Any] = Map()): String = {
     val nonNullActionMethod = action.nonNullMethod
@@ -101,12 +100,11 @@ trait Renderer {
   /**
    * Renders the template (typically the layout) associated with the controller class.
    *
-   * If you use Scalate and want to use template type other than the default type
-   * configured in xitrum.conf, set options to Map("type" -> "jade", "mustache", "scaml", or "ssp")
-   *
    * @param controllerClass should be one of the parent classes of the current
    * controller because the current controller instance will be imported in the
    * template as "helper"
+   *
+   * @param options specific to the configured template engine
    */
   def renderViewNoLayout(controllerClass: Class[_], options: Map[String, Any]): String =
     Config.xitrum.templateEngine.renderTemplate(this, controllerClass, options)
@@ -120,12 +118,11 @@ trait Renderer {
    * Renders the template fragment inside the directory associated with the
    * controller class.
    *
-   * If you use Scalate and want to use template type other than the default type
-   * configured in xitrum.conf, set options to Map("type" -> "jade", "mustache", "scaml", or "ssp")
-   *
    * @param controllerClass should be one of the parent classes of the current
    * controller because the current controller instance will be imported in the
    * template as "helper"
+   *
+   * @param options specific to the configured template engine
    */
   def renderFragment(controllerClass: Class[_], fragment: String, options: Map[String, Any]): String =
     Config.xitrum.templateEngine.renderFragment(this, controllerClass, fragment, options)
