@@ -35,7 +35,7 @@ libraryDependencies += "com.hazelcast" % "hazelcast-client" % "2.5"
 libraryDependencies += "org.javassist" % "javassist" % "3.17.1-GA"
 
 // Projects using Xitrum must provide a concrete implentation of SLF4J (Logback etc.)
-libraryDependencies += "org.slf4j" % "slf4j-api" % "1.7.3" % "provided"
+libraryDependencies += "org.slf4j" % "slf4j-api" % "1.7.5" % "provided"
 
 libraryDependencies += "com.twitter" %% "chill" % "0.2.0"
 
