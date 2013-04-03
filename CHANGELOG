@@ -9,6 +9,7 @@
 
 1.21:
 * #103 Move Scalate template engine out to a separate project
+* #105 Move xitrum-sbt-plugin out to a separate project
 * #100 Update JSON4S to 3.2.3
 * #102 Update slf4j-api to 1.7.5
 
