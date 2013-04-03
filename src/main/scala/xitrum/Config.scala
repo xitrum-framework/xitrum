@@ -98,17 +98,11 @@ class Config(val config: TConfig) {
   val response = new ResponseConfig(config.getConfig("response"))
 }
 
-//case class HazelcastJavaClientConfig(groupName: String, groupPassword: String, addresses: List[String])
-
 //----------------------------------------------------------------------------
 
 /** See config/xitrum.properties */
 object Config extends Logger {
   val ACTOR_SYSTEM_NAME = "xitrum"
-
-  private val HAZELCAST_MODE_CLUSTER_MEMBER = "clusterMember"
-  private val HAZELCAST_MODE_LITE_MEMBER    = "liteMember"
-  private val HAZELCAST_MODE_JAVA_CLIENT    = "javaClient"
 
   /**
    * Static textual files are always compressed
@@ -125,9 +119,19 @@ object Config extends Logger {
    */
   val EXECUTIORS_PER_CORE = 64
 
+  private val HAZELCAST_MODE_CLUSTER_MEMBER = "clusterMember"
+  private val HAZELCAST_MODE_LITE_MEMBER    = "liteMember"
+  private val HAZELCAST_MODE_JAVA_CLIENT    = "javaClient"
+
   private val DEFAULT_SECURE_KEY = "ajconghoaofuxahoi92chunghiaujivietnamlasdoclapjfltudoil98hanhphucup8"
 
   //----------------------------------------------------------------------------
+
+  /**
+   * true if "xitrum.mode" system property is set to "production"
+   * See bin/runner.sh.
+   */
+  val productionMode = System.getProperty("xitrum.mode") == "production"
 
   /** config/application.conf */
   val application: TConfig = {
@@ -151,12 +155,6 @@ object Config extends Logger {
     }
   }
 
-  /**
-   * true if "xitrum.mode" system property is set to "production"
-   * See bin/runner.sh.
-   */
-  val productionMode = System.getProperty("xitrum.mode") == "production"
-
   //----------------------------------------------------------------------------
 
   /**
@@ -165,9 +163,9 @@ object Config extends Logger {
    * See https://github.com/ngocdaothanh/xitrum/issues/47
    */
   val root = {
-    val res = getClass.getClassLoader.getResource("xitrum.properties")
+    val res = getClass.getClassLoader.getResource("xitrum.conf")
     if (res != null)
-      res.getFile.replace(File.separator + "config" + File.separator + "xitrum.properties", "")
+      res.getFile.replace(File.separator + "config" + File.separator + "xitrum.conf", "")
     else
       System.getProperty("user.dir")  // Fallback to current working directory
   }
