@@ -66,11 +66,11 @@ trait ParamAccess {
     }
   }
 
-  def params[T: TypeTag](key: String, coll: Params = null)(implicit d: T DefaultsTo String): List[T] = {
+  def params[T: TypeTag](key: String, coll: Params = null)(implicit d: T DefaultsTo String): Seq[T] = {
     if (typeOf[T] <:< typeFileUpload) {
       fileUploadParams.get(key) match {
         case None         => throw new MissingParam(key)
-        case Some(values) => values.asInstanceOf[List[T]]
+        case Some(values) => values.asInstanceOf[Seq[T]]
       }
     } else {
       val coll2  = if (coll == null) textParams else coll
@@ -79,9 +79,9 @@ trait ParamAccess {
     }
   }
 
-  def paramso[T: TypeTag](key: String, coll: Params = null)(implicit d: T DefaultsTo String): Option[List[T]] = {
+  def paramso[T: TypeTag](key: String, coll: Params = null)(implicit d: T DefaultsTo String): Option[Seq[T]] = {
     if (typeOf[T] <:< typeFileUpload) {
-      fileUploadParams.get(key).asInstanceOf[Option[List[T]]]
+      fileUploadParams.get(key).asInstanceOf[Option[Seq[T]]]
     } else {
       val coll2 = if (coll == null) textParams else coll
       coll2.get(key).map { values => values.map(convertText[T](_)) }

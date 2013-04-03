@@ -45,7 +45,7 @@ class UriParser extends SimpleChannelUpstreamHandler with BadClientSilencer {
     val keySet = params.keySet
 
     val it  = keySet.iterator
-    val ret = MMap[String, List[String]]()
+    val ret = MMap[String, Seq[String]]()
     while (it.hasNext()) {
       val key    = it.next()
       val values = params.get(key)

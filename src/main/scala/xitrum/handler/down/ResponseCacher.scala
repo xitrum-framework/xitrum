@@ -78,7 +78,7 @@ object ResponseCacher extends Logger {
   // uploadParams is not included in the key, only textParams is
   private def makeCacheKey(controller: Controller): String = {
     // See xitrum.scope.request.Params in xitrum/scope/request/package.scala
-    val sortedMap = (new TreeMap[String, List[String]]) ++ controller.textParams
+    val sortedMap = (new TreeMap[String, Seq[String]]) ++ controller.textParams
 
     val request = controller.request
     val key =
@@ -89,7 +89,7 @@ object ResponseCacher extends Logger {
   }
 
   // See RequestEnv.inspectParamsWithFilter
-  private def inspectSortedParams(params: SortedMap[String, List[String]]) = {
+  private def inspectSortedParams(params: SortedMap[String, Seq[String]]) = {
     val sb = new StringBuilder
     sb.append("{")
 

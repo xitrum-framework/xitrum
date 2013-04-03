@@ -332,7 +332,7 @@ object Routes extends Logger {
       // 0 = max2 <= max1
       if (max2 == 0) {
         if (max1 == 0) {
-          pathParams = MMap[String, List[String]]()
+          pathParams = MMap[String, Seq[String]]()
           return true
         }
         return false
@@ -340,20 +340,20 @@ object Routes extends Logger {
 
       // 0 < max2 <= max1
 
-      pathParams = MMap[String, List[String]]()
+      pathParams = MMap[String, Seq[String]]()
       var i = 0 // i will go from 0 until max1
 
       def matchRegex(rt: RouteToken, value: String): Boolean = {
         rt.regex match {
           case None =>
-            pathParams(rt.value) = List(value)
+            pathParams(rt.value) = Seq(value)
             true
           case Some(r) =>
             r.findFirstIn(value) match {
               case None =>
                 false
               case _ =>
-                pathParams(rt.value) = List(value)
+                pathParams(rt.value) = Seq(value)
                 true
             }
         }

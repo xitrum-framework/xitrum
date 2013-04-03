@@ -50,7 +50,7 @@ abstract class SockJsHandler extends Logger {
       if (rawWebSocket) {
         webSocketController.respondWebSocket(message)
       } else {
-        val json = Json.generate(List(message))
+        val json = Json.generate(Seq(message))
         webSocketController.respondWebSocket("a" + json)
       }
     }

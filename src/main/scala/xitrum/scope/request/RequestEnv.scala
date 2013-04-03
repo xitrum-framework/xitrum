@@ -6,7 +6,7 @@ import xitrum.Config
 import xitrum.handler.HandlerEnv
 
 object RequestEnv {
-  def inspectParamsWithFilter(params: MMap[String, List[Any]]): String = {
+  def inspectParamsWithFilter(params: MMap[String, _ <: Seq[AnyRef]]): String = {
     val sb = new StringBuilder
     sb.append("{")
 
@@ -76,7 +76,7 @@ class RequestEnv {
    * textParams.
    */
   lazy val textParams: Params = {
-    val ret = MMap[String, List[String]]()
+    val ret = MMap[String, Seq[String]]()
 
     // The order is important because we want the later to overwrite the former
     ret ++= handlerEnv.uriParams

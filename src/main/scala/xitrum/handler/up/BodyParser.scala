@@ -60,25 +60,25 @@ class BodyParser extends SimpleChannelUpstreamHandler with BadClientSilencer {
   //----------------------------------------------------------------------------
 
   // May throw exception on decode error
-  private def decodeRequestBody(request: HttpRequest): (MMap[String, List[String]], MMap[String, List[FileUpload]]) = {
+  private def decodeRequestBody(request: HttpRequest): (MMap[String, Seq[String]], MMap[String, Seq[FileUpload]]) = {
     val method = request.getMethod
     if (!method.equals(HttpMethod.POST) && !method.equals(HttpMethod.PUT) && !method.equals(HttpMethod.PATCH))
-      return (MMap[String, List[String]](), MMap[String, List[FileUpload]]())
+      return (MMap[String, Seq[String]](), MMap[String, Seq[FileUpload]]())
 
     val requestContentType = request.getHeader(HttpHeaders.Names.CONTENT_TYPE)
     if (requestContentType == null)
-      return (MMap[String, List[String]](), MMap[String, List[FileUpload]]())
+      return (MMap[String, Seq[String]](), MMap[String, Seq[FileUpload]]())
 
     val requestContentTypeLowerCase = requestContentType.toLowerCase
     if (!requestContentTypeLowerCase.startsWith(HttpHeaders.Values.APPLICATION_X_WWW_FORM_URLENCODED) &&
         !requestContentTypeLowerCase.startsWith(HttpHeaders.Values.MULTIPART_FORM_DATA))
-      return (MMap[String, List[String]](), MMap[String, List[FileUpload]]())
+      return (MMap.empty[String, Seq[String]], MMap.empty[String, Seq[FileUpload]])
 
     val decoder = new HttpPostRequestDecoder(factory, request)
     val datas   = decoder.getBodyHttpDatas
 
-    val bodyParams = MMap[String, List[String]]()
-    val fileParams = MMap[String, List[FileUpload]]()
+    val bodyParams = MMap[String, Seq[String]]()
+    val fileParams = MMap[String, Seq[FileUpload]]()
 
     val it = datas.iterator
     while (it.hasNext()) {
@@ -110,7 +110,7 @@ class BodyParser extends SimpleChannelUpstreamHandler with BadClientSilencer {
 
   private def putOrAppendString(map: Params, key: String, value: String) {
     if (!map.contains(key)) {
-      map(key) = List(value)
+      map(key) = Seq(value)
     } else {
       val values = map(key)
       map(key) = values :+ value
@@ -119,7 +119,7 @@ class BodyParser extends SimpleChannelUpstreamHandler with BadClientSilencer {
 
   private def putOrAppendFileUpload(map: FileUploadParams, key: String, value: FileUpload) {
     if (!map.contains(key)) {
-      map(key) = List(value)
+      map(key) = Seq(value)
     } else {
       val values = map(key)
       map(key) = values :+ value

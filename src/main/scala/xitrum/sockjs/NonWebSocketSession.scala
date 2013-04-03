@@ -9,16 +9,16 @@ import xitrum.{Controller, SockJsHandler}
 import xitrum.routing.Routes
 
 sealed trait MessageToSession
-case object SubscribeByClient                            extends MessageToSession
-case class  SendMessagesByClient(messages: List[String]) extends MessageToSession
-case class  SendMessageByHandler(message: String)        extends MessageToSession
-case object CloseByHandler                               extends MessageToSession
+case object SubscribeByClient                           extends MessageToSession
+case class  SendMessagesByClient(messages: Seq[String]) extends MessageToSession
+case class  SendMessageByHandler(message: String)       extends MessageToSession
+case object CloseByHandler                              extends MessageToSession
 
 sealed trait SubscribeResultToClient
-case object SubscribeResultToClientAnotherConnectionStillOpen       extends SubscribeResultToClient
-case object SubscribeResultToClientClosed                           extends SubscribeResultToClient
-case class  SubscribeResultToClientMessages(messages: List[String]) extends SubscribeResultToClient
-case object SubscribeResultToClientWaitForMessage                   extends SubscribeResultToClient
+case object SubscribeResultToClientAnotherConnectionStillOpen      extends SubscribeResultToClient
+case object SubscribeResultToClientClosed                          extends SubscribeResultToClient
+case class  SubscribeResultToClientMessages(messages: Seq[String]) extends SubscribeResultToClient
+case object SubscribeResultToClientWaitForMessage                  extends SubscribeResultToClient
 
 sealed trait NotificationToClient
 case class  NotificationToClientMessage(message: String) extends NotificationToClient

@@ -233,7 +233,7 @@ class SockJsController extends Controller with SkipCSRFCheck {
 
       private def receiveNotification(nonWebSocketSession: ActorRef): Receive = {
         case NotificationToClientMessage(message) =>
-          val json   = Json.generate(List(message))
+          val json   = Json.generate(Seq(message))
           val quoted = SockJsController.quoteUnicode(json)
           respondJs("a" + quoted + "\n")
           context.stop(self)
@@ -262,9 +262,9 @@ class SockJsController extends Controller with SkipCSRFCheck {
       response.setStatus(HttpResponseStatus.INTERNAL_SERVER_ERROR)
       respondText("Payload expected.")
     } else {
-      val messages: List[String] = try {
+      val messages: Seq[String] = try {
         // body: ["m1", "m2"]
-        Json.parse[List[String]](body)
+        Json.parse[Seq[String]](body)
       } catch {
         case scala.util.control.NonFatal(e) =>
           response.setStatus(HttpResponseStatus.INTERNAL_SERVER_ERROR)
@@ -367,7 +367,7 @@ class SockJsController extends Controller with SkipCSRFCheck {
 
       private def receiveNotification(nonWebSocketSession: ActorRef): Receive = {
         case NotificationToClientMessage(message) =>
-          val json   = Json.generate(List(message))
+          val json   = Json.generate(Seq(message))
           val quoted = SockJsController.quoteUnicode(json)
           if (!respondStreamingWithLimit("a" + quoted + "\n")) context.stop(self)
 
@@ -470,7 +470,7 @@ class SockJsController extends Controller with SkipCSRFCheck {
         private def receiveNotification(nonWebSocketSession: ActorRef): Receive = {
           case NotificationToClientMessage(message) =>
             val buffer = new StringBuilder
-            val json   = Json.generate(List(message))
+            val json   = Json.generate(Seq(message))
             val quoted = SockJsController.quoteUnicode(json)
             buffer.append("<script>\np(\"a")
             buffer.append(jsEscape(quoted))
@@ -566,7 +566,7 @@ class SockJsController extends Controller with SkipCSRFCheck {
         private def receiveNotification(nonWebSocketSession: ActorRef): Receive = {
           case NotificationToClientMessage(message) =>
             val buffer = new StringBuilder
-            val json   = Json.generate(List(message))
+            val json   = Json.generate(Seq(message))
             val quoted = SockJsController.quoteUnicode(json)
             buffer.append(callback + "(\"a")
             buffer.append(jsEscape(quoted))
@@ -613,9 +613,9 @@ class SockJsController extends Controller with SkipCSRFCheck {
     } else {
       val sessionId = param("sessionId")
 
-      val messages: List[String] = try {
+      val messages: Seq[String] = try {
         // body: ["m1", "m2"]
-        Json.parse[List[String]](body)
+        Json.parse[Seq[String]](body)
       } catch {
         case scala.util.control.NonFatal(e) =>
           response.setStatus(HttpResponseStatus.INTERNAL_SERVER_ERROR)
@@ -706,7 +706,7 @@ class SockJsController extends Controller with SkipCSRFCheck {
 
       private def receiveNotification(nonWebSocketSession: ActorRef): Receive = {
         case NotificationToClientMessage(message) =>
-          val json   = "a" + Json.generate(List(message))
+          val json   = "a" + Json.generate(Seq(message))
           val quoted = SockJsController.quoteUnicode(json)
           if (!respondStreamingWithLimit(quoted, true)) context.stop(self)
 
@@ -763,11 +763,11 @@ class SockJsController extends Controller with SkipCSRFCheck {
         // http://sockjs.github.com/sockjs-protocol/sockjs-protocol-0.3.3.html#section-69
         if (body.isEmpty) return
 
-        val messages: List[String] = try {
+        val messages: Seq[String] = try {
           // body: can be ["m1", "m2"] or "m1"
           // http://sockjs.github.com/sockjs-protocol/sockjs-protocol-0.3.3.html#section-61
           val normalizedBody = if (body.startsWith("[")) body else "[" + body + "]"
-          Json.parse[List[String]](normalizedBody)
+          Json.parse[Seq[String]](normalizedBody)
         } catch {
           case scala.util.control.NonFatal(e) =>
             // No c frame is sent!

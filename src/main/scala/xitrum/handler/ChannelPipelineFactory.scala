@@ -69,7 +69,7 @@ class ChannelPipelineFactory(https: Boolean) extends CPF {
    * Upstream direction: first handler -> last handler
    * Downstream direction: last handler -> first handler
    */
-  def httpHandlers = List(
+  def httpHandlers = Seq(
     // Up
     new HttpRequestDecoder,
     new HttpChunkAggregator(Config.xitrum.request.maxSizeInMB * 1024 * 1024),
