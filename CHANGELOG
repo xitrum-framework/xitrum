@@ -1,9 +1,16 @@
-1.21 (planned):
-* #100 Update JSON4S to 3.2.2
+2.1 (planned):
 * #81 Reload classes and routes in development mode
 * #70 Add Rails-like asset pipeline
 * #71 Add automatic CORS request handling for the whole site
 * #76 Improve currentController in Scalate templates
+
+2.0 (planned):
+* Integrate more closely with Akka
+
+1.21 (planned):
+* #103 Move Scalate template engine out to a separate project
+* #100 Update JSON4S to 3.2.3
+* #102 Update slf4j-api to 1.7.5
 
 1.20:
 * #88 Replace JBoss Marshalling with Twitter's Chill
