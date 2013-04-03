@@ -3,7 +3,11 @@ package xitrum.view
 import xitrum.Controller
 import xitrum.controller.Action
 
-/** Template engines should extend this trait and implement its methods. */
+/**
+ * Template engines should extend this trait and implement its methods.
+ * On startup, an instance of the configured template engine is created and used
+ * for every rendering request. Thus it should be thread-safe.
+ */
 trait TemplateEngine {
   /**
    * Renders the template associated with the action of the controller.
