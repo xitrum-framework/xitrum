@@ -7,6 +7,10 @@
 2.0 (planned):
 * #104 Integrate more closely with Akka
 
+1.22:
+* #106 Update JSON4S to 3.2.4
+* #107 Update Netty to 3.6.4
+
 1.21:
 * #103 Move Scalate template engine out to a separate project
 * #105 Move xitrum-sbt-plugin out to a separate project
