@@ -37,9 +37,9 @@ object Routes extends Logger {
     var others = ArrayBuffer[(String, String, String)]()
     val lasts  = ArrayBuffer[(String, String, String)]()
     for ((httpMethod, (fs, os, ls)) <- routes) {
-      for (r <- fs) firsts.append((httpMethod.toString, RouteCompiler.decompile(r.compiledPattern), ControllerReflection.controllerActionName(r)))
-      for (r <- os) others.append((httpMethod.toString, RouteCompiler.decompile(r.compiledPattern), ControllerReflection.controllerActionName(r)))
-      for (r <- ls) lasts.append ((httpMethod.toString, RouteCompiler.decompile(r.compiledPattern), ControllerReflection.controllerActionName(r)))
+      for (r <- fs) firsts.append((httpMethod.toString, RouteCompiler.decompile(r.compiledPattern), r.actionClass.toString))
+      for (r <- os) others.append((httpMethod.toString, RouteCompiler.decompile(r.compiledPattern), r.actionClass.toString))
+      for (r <- ls) lasts.append ((httpMethod.toString, RouteCompiler.decompile(r.compiledPattern), r.actionClass.toString))
     }
 
     var all = firsts ++ others ++ lasts
@@ -100,13 +100,13 @@ object Routes extends Logger {
       val all = fs ++ os ++ ls
       for (r <- all) {
         if (r.cacheSeconds < 0) {
-          val n = ControllerReflection.controllerActionName(r)
+          val n = r.actionClass.toString
           actionCaches.append((n, -r.cacheSeconds))
 
           val nLength = n.length
           if (nLength > actionMaxControllerActionNameLength) actionMaxControllerActionNameLength = nLength
         } else if (r.cacheSeconds > 0) {
-          val n = ControllerReflection.controllerActionName(r)
+          val n = r.actionClass.toString
           pageCaches.append((n, r.cacheSeconds))
 
           val nLength = n.length

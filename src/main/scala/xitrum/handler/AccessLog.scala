@@ -6,7 +6,7 @@ import org.jboss.netty.handler.codec.http.{HttpRequest, HttpResponse}
 
 import xitrum.{ActionEnv, Logger}
 import xitrum.scope.request.RequestEnv
-import xitrum.controller.Net
+import xitrum.action.Net
 
 object AccessLog extends Logger {
   def logFlashSocketPolicyFileAccess(remoteAddress: SocketAddress) {
@@ -57,7 +57,7 @@ object AccessLog extends Logger {
     action.remoteIp + " " +
     action.request.getMethod + " " +
     action.request.getUri + " -> " +
-    ControllerReflection.controllerActionName(action.handlerEnv.action) +
+    action.getClass +
     (if (env.uriParams.nonEmpty)        ", uriParams: "        + RequestEnv.inspectParamsWithFilter(env.uriParams)        else "") +
     (if (env.bodyParams.nonEmpty)       ", bodyParams: "       + RequestEnv.inspectParamsWithFilter(env.bodyParams)       else "") +
     (if (env.pathParams.nonEmpty)       ", pathParams: "       + RequestEnv.inspectParamsWithFilter(env.pathParams)       else "") +

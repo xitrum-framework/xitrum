@@ -5,7 +5,7 @@ import org.jboss.netty.handler.codec.http.websocketx.{
   CloseWebSocketFrame, PingWebSocketFrame, PongWebSocketFrame, TextWebSocketFrame, WebSocketFrame, WebSocketServerHandshaker
 }
 
-import xitrum.controller.WebSocket
+import xitrum.action.WebSocket
 
 /**
  * See https://github.com/netty/netty/blob/master/example/src/main/java/io/netty/example/http/websocketx/server/WebSocketServerHandler.java

@@ -2,7 +2,7 @@ package xitrum.scope.request
 
 import scala.collection.mutable.{Map => MMap}
 
-import xitrum.Config
+import xitrum.{Config, ActionEnv}
 import xitrum.handler.HandlerEnv
 
 object RequestEnv {
@@ -46,7 +46,15 @@ object RequestEnv {
  * All core state variables for a request are here. All other variables in Helper
  * and Controller can be inferred from these variables.
  */
-class RequestEnv {
+trait RequestEnv extends ParamAccess {
+  this: ActionEnv =>
+
+  // Below are lazy because they are not always accessed by framwork/application
+  // (to save calculation time) or the things they depend on are null when this
+  // instance is created
+
+  lazy val at = new At
+
   var handlerEnv: HandlerEnv = _
 
   def apply(handlerEnv: HandlerEnv) {

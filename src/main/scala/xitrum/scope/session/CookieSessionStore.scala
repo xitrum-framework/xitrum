@@ -5,14 +5,13 @@ import scala.collection.mutable.{Map => MMap}
 import org.jboss.netty.handler.codec.http.DefaultCookie
 
 import xitrum.{Config, Logger}
-import xitrum.scope.request.ExtEnv
 import xitrum.util.SecureUrlSafeBase64
 
 /** Compress big session cookie to try to avoid the 4KB limit. */
 class CookieSessionStore extends SessionStore with Logger {
-  def restore(extEnv: ExtEnv): Session = {
+  def restore(env: SessionEnv): Session = {
     // Cannot always get cookie, decrypt, deserialize, and type casting due to program changes etc.
-    extEnv.requestCookies.get(Config.xitrum.session.cookieName) match {
+    env.requestCookies.get(Config.xitrum.session.cookieName) match {
       case None =>
         MMap[String, Any]()
 
@@ -38,16 +37,16 @@ class CookieSessionStore extends SessionStore with Logger {
     }
   }
 
-  def store(session: Session, extEnv: ExtEnv) {
+  def store(session: Session, env: SessionEnv) {
     val sessionCookieName = Config.xitrum.session.cookieName
     if (session.isEmpty) {
       // If session cookie has been sent by browser, send back session cookie
       // with max age = 0 so that browser will delete it immediately
-      if (extEnv.requestCookies.isDefinedAt(sessionCookieName)) {
+      if (env.requestCookies.isDefinedAt(sessionCookieName)) {
         val cookie = new DefaultCookie(sessionCookieName, "0")
         cookie.setHttpOnly(true)
         cookie.setMaxAge(0)
-        extEnv.responseCookies.append(cookie)
+        env.responseCookies.append(cookie)
       }
     } else {
       // See "restore" method
@@ -62,13 +61,13 @@ class CookieSessionStore extends SessionStore with Logger {
         return
       }
 
-      val previousSessionCookieValueo = extEnv.requestCookies.get(sessionCookieName)
+      val previousSessionCookieValueo = env.requestCookies.get(sessionCookieName)
       if (previousSessionCookieValueo.isEmpty || previousSessionCookieValueo.get != serialized) {
         // DefaultCookie has max age of Integer.MIN_VALUE by default,
         // which means the cookie will be removed when user terminates browser
         val cookie = new DefaultCookie(sessionCookieName, serialized)
         cookie.setHttpOnly(true)
-        extEnv.responseCookies.append(cookie)
+        env.responseCookies.append(cookie)
       }
     }
   }

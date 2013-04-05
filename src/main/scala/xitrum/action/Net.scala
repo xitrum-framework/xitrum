@@ -1,4 +1,4 @@
-package xitrum.controller
+package xitrum.action
 
 import java.net.{InetSocketAddress, SocketAddress}
 

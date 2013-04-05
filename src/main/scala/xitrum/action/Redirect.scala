@@ -24,7 +24,7 @@ trait Redirect {
   }
 
   /** See also forwardTo. */
-  def redirectTo(action: Action, params: (String, Any)*): ChannelFuture = { redirectTo(action.url(params: _*)) }
+  def redirectTo(action: ActionEnv, params: (String, Any)*): ChannelFuture = { redirectTo(action.url(params: _*)) }
 
   //----------------------------------------------------------------------------
 
@@ -35,9 +35,8 @@ trait Redirect {
    * Tells another action to process the current request for the current action.
    * See also redirectTo.
    */
-  def forwardTo(action: Action) {
+  def forwardTo(action: Class[_ <: ActionEnv]) {
     forwarding = true
-    val nonNullActionMethod = action.nonNullMethod
-    Dispatcher.dispatchWithFailsafe(nonNullActionMethod, handlerEnv)
+    Dispatcher.dispatchWithFailsafe(action, handlerEnv)
   }
 }

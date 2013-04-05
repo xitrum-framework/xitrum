@@ -224,7 +224,7 @@ trait Responder extends JS with Flash with Knockout {
   /**
    * @param options specific to the configured template engine
    */
-  def respondView(action: Action, customLayout: () => Any, options: Map[String, Any] = Map()): ChannelFuture = {
+  def respondView(action: Class[_ <: ActionEnv], customLayout: () => Any, options: Map[String, Any] = Map()): ChannelFuture = {
     val string = renderView(action, customLayout, options)
     respondText(string, "text/html")
   }
@@ -234,19 +234,19 @@ trait Responder extends JS with Flash with Knockout {
    * where action is currentAction.
    */
   def respondView(customLayout: () => Any, options: Map[String, Any]): ChannelFuture =
-    respondView(currentAction, customLayout, options)
+    respondView(currentAction.getClass, customLayout, options)
 
   def respondView(customLayout: () => Any): ChannelFuture =
-    respondView(currentAction, customLayout, Map[String, Any]())
+    respondView(currentAction.getClass, customLayout, Map[String, Any]())
 
   /**
    * Same as respondView(action, customLayout, options),
    * where customLayout is the controller's layout method.
    */
-  def respondView(action: Action, options: Map[String, Any]): ChannelFuture =
+  def respondView(action: Class[_ <: ActionEnv], options: Map[String, Any]): ChannelFuture =
     respondView(action, layout _, options)
 
-  def respondView(action: Action): ChannelFuture =
+  def respondView(action: Class[_ <: ActionEnv]): ChannelFuture =
     respondView(action, layout _, Map[String, Any]())
 
   /**
@@ -254,10 +254,10 @@ trait Responder extends JS with Flash with Knockout {
    * where action is currentAction and customLayout is the controller's layout method.
    */
   def respondView(options: Map[String, Any]): ChannelFuture =
-    respondView(currentAction, layout _, options)
+    respondView(currentAction.getClass, layout _, options)
 
   def respondView(): ChannelFuture =
-    respondView(currentAction, layout _, Map[String, Any]())
+    respondView(currentAction.getClass, layout _, Map[String, Any]())
 
   //----------------------------------------------------------------------------
 

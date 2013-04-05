@@ -10,6 +10,10 @@ import xitrum.{Config, ActionEnv}
 trait SessionEnv extends CSRF {
   this: ActionEnv =>
 
+  // Below are lazy because they are not always accessed by framwork/application
+  // (to save calculation time) or the things they depend on are null when this
+  // instance is created
+
   /**
    * Browsers will not send cookie attributes back to the server. They will only
    * send the cookieâ name-value pairs.

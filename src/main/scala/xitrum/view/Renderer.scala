@@ -48,8 +48,8 @@ trait Renderer {
    *
    * @param options specific to the configured template engine
    */
-  def renderView(action: Action, customLayout: () => Any, options: Map[String, Any] = Map()): String = {
-    renderedView = "Config.xitrum.templateEngine.renderTemplate(this, action, actionName, options)"
+  def renderView(action: Class[_ <: ActionEnv], customLayout: () => Any, options: Map[String, Any] = Map()): String = {
+    renderedView = Config.xitrum.templateEngine.renderTemplate(action, options)
     customLayout.apply().toString
   }
 
@@ -58,19 +58,19 @@ trait Renderer {
    * where action is currentAction.
    */
   def renderView(customLayout: () => Any, options: Map[String, Any]): String =
-    renderView(currentAction, customLayout, options)
+    renderView(currentAction.getClass, customLayout, options)
 
   def renderView(customLayout: () => Any): String =
-    renderView(currentAction, customLayout, Map[String, Any]())
+    renderView(currentAction.getClass, customLayout, Map[String, Any]())
 
   /**
    * Same as renderView(action, customLayout, options),
    * where customLayout is the current controller's layout method.
    */
-  def renderView(action: Action, options: Map[String, Any]): String =
+  def renderView(action: Class[_ <: ActionEnv], options: Map[String, Any]): String =
     renderView(action, layout _, options)
 
-  def renderView(action: Action): String =
+  def renderView(action: Class[_ <: ActionEnv]): String =
     renderView(action, layout _, Map[String, Any]())
 
   /**
@@ -78,10 +78,10 @@ trait Renderer {
    * where action is currentAction and customLayout is the current controller's layout method.
    */
   def renderView(options: Map[String, Any]): String =
-    renderView(currentAction, layout _, options)
+    renderView(currentAction.getClass, layout _, options)
 
   def renderView(): String =
-    renderView(currentAction, layout _, Map[String, Any]())
+    renderView(currentAction.getClass, layout _, Map[String, Any]())
 
   //----------------------------------------------------------------------------
 
