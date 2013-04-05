@@ -2,11 +2,11 @@ package xitrum.controller
 
 import scala.util.Random
 
-import xitrum.{Config, Controller}
+import xitrum.{Config, Action}
 import xitrum.etag.Etag
 
 trait UrlFor {
-  this: Controller =>
+  this: Action =>
 
   /** @param path Relative to the "public" directory, without leading "/" */
   def urlForPublic(path: String) = {
@@ -28,4 +28,17 @@ trait UrlFor {
     }
     Config.withBaseUrl("/resources/public/" + path + "?" + forceReload)
   }
+
+  //----------------------------------------------------------------------------
+
+  def url(params: (String, Any)*) = route.url(params:_*)
+  lazy val url: String = url()
+
+  def absoluteUrl(params: (String, Any)*)(implicit action: Action) = action.absoluteUrlPrefix + url(params:_*)
+  def absoluteUrl(implicit action: Action): String = absoluteUrl()(action)
+
+  def webSocketAbsoluteUrl(params: (String, Any)*)(implicit action: Action) = action.webSocketAbsoluteUrlPrefix + url(params:_*)
+  def webSocketAbsoluteUrl(implicit action: Action): String = webSocketAbsoluteUrl()(action)
+
+  //----------------------------------------------------------------------------
 }

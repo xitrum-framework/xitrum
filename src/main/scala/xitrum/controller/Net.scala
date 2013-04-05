@@ -6,7 +6,7 @@ import org.jboss.netty.handler.codec.http.HttpRequest
 import org.jboss.netty.handler.codec.http.HttpHeaders.Names.HOST
 import org.jboss.netty.handler.ssl.SslHandler
 
-import xitrum.{Controller, Config}
+import xitrum.{Action, Config}
 
 // See:
 //   http://httpd.apache.org/docs/2.2/mod/mod_proxy.html
@@ -61,7 +61,7 @@ object Net {
 }
 
 trait Net {
-  this: Controller =>
+  this: Action =>
 
   // The "val"s must be "lazy", because when the controller is constructed, the
   // "request" object is null

@@ -10,7 +10,7 @@ import HttpResponseStatus.OK
 import HttpHeaders.Names.{CONTENT_ENCODING, CONTENT_TYPE}
 
 import xitrum.{Cache, Config, Logger}
-import xitrum.Controller
+import xitrum.Action
 import xitrum.routing.Routes
 import xitrum.scope.request.RequestEnv
 import xitrum.handler.HandlerEnv
@@ -20,19 +20,19 @@ object ResponseCacher extends Logger {
   //                             statusCode  headers           content
   private type CachedResponse = (Int, Array[(String, String)], Array[Byte])
 
-  def cacheResponse(controller: Controller) {
-    val cacheSeconds = controller.handlerEnv.action.cacheSeconds
-    val key          = makeCacheKey(controller)
+  def cacheResponse(action: Action) {
+    val cacheSeconds = action.cacheSeconds
+    val key          = makeCacheKey(action)
     if (!Cache.cache.containsKey(key)) { // Check to avoid the cost of serializing
-      val response             = controller.response
-      val cachedResponse       = serializeResponse(controller.request, response)
+      val response             = action.response
+      val cachedResponse       = serializeResponse(action.request, response)
       val positiveCacheSeconds = if (cacheSeconds < 0) -cacheSeconds else cacheSeconds
       Cache.putIfAbsentSecond(key, cachedResponse, positiveCacheSeconds)
     }
   }
 
-  def getCachedResponse(controller: Controller): Option[HttpResponse] = {
-    val key = makeCacheKey(controller)
+  def getCachedResponse(action: Action): Option[HttpResponse] = {
+    val key = makeCacheKey(action)
     Cache.getAs[CachedResponse](key).map(deserializeToResponse)
   }
 
@@ -76,13 +76,13 @@ object ResponseCacher extends Logger {
   }
 
   // uploadParams is not included in the key, only textParams is
-  private def makeCacheKey(controller: Controller): String = {
+  private def makeCacheKey(action: Action): String = {
     // See xitrum.scope.request.Params in xitrum/scope/request/package.scala
-    val sortedMap = (new TreeMap[String, Seq[String]]) ++ controller.textParams
+    val sortedMap = (new TreeMap[String, Seq[String]]) ++ action.textParams
 
-    val request = controller.request
+    val request = action.request
     val key =
-      Cache.pageActionPrefix(controller) + "/" +
+      Cache.pageActionPrefix(action) + "/" +
       request.getMethod + "/" +
       inspectSortedParams(sortedMap)
     if (Gzip.isAccepted(request)) key + "_gzipped" else key
@@ -131,18 +131,18 @@ class ResponseCacher extends SimpleChannelDownstreamHandler with Logger {
       return
     }
 
-    val env        = m.asInstanceOf[HandlerEnv]
-    val controller = env.controller
+    val env    = m.asInstanceOf[HandlerEnv]
+    val action = env.action
 
-    // controller may be null when the request could not go to Dispatcher, for
+    // action may be null when the request could not go to Dispatcher, for
     // example when the response is served from PublicResourceServer
-    if (controller == null) {
+    if (action == null) {
       ctx.sendDownstream(e)
       return
     }
 
-    val response = controller.response
-    if (response.getStatus == OK && !response.isChunked && env.action.cacheSeconds != 0) cacheResponse(controller)
+    val response = action.response
+    if (response.getStatus == OK && !response.isChunked && env.action.cacheSeconds != 0) cacheResponse(action)
 
     ctx.sendDownstream(e)
   }

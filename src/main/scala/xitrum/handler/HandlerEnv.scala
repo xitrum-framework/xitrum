@@ -5,8 +5,7 @@ import scala.collection.mutable.{HashMap => MHashMap}
 import org.jboss.netty.channel.Channel
 import org.jboss.netty.handler.codec.http.{HttpRequest, HttpResponse}
 
-import xitrum.Controller
-import xitrum.controller.Action
+import xitrum.Action
 import xitrum.scope.request.{FileUploadParams, Params, PathInfo}
 
 /**
@@ -30,5 +29,4 @@ class HandlerEnv extends MHashMap[String, Any] {
   // Set by Dispatcher
   var action:           Action           = null
   var pathParams:       Params           = null  // The above params are real from the request, this one is logical from the request URL
-  var controller:       Controller       = null
 }

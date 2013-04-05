@@ -3,16 +3,16 @@ package xitrum
 class SessionVar[T] {
   private[this] val key = this.getClass.getName
 
-  def get(implicit controller: Controller) = controller.session(key).asInstanceOf[T]
+  def get(implicit action: Action) = action.session(key).asInstanceOf[T]
 
-  def set(value: T)(implicit controller: Controller) = {
-    controller.session(key) = value
+  def set(value: T)(implicit action: Action) = {
+    action.session(key) = value
     value
   }
 
-  def isDefined(implicit controller: Controller) = controller.session.isDefinedAt(key)
+  def isDefined(implicit action: Action) = action.session.isDefinedAt(key)
 
-  def remove()(implicit controller: Controller) {
-    controller.session.remove(key)
+  def remove()(implicit action: Action) {
+    action.session.remove(key)
   }
 }

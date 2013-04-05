@@ -1,12 +1,11 @@
 package xitrum.view
 
-import xitrum.{Cache, Controller}
-import xitrum.controller.Action
+import xitrum.{Cache, Action}
 import xitrum.util.Json
 
 /** Support for Knockout.js */
 trait Knockout {
-  this: Controller =>
+  this: Action =>
 
   def koApplyBindings(model: AnyRef, syncAction: Action, js: String) {
     koApplyBindings(model, None, syncAction, js)

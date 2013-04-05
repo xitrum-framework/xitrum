@@ -16,7 +16,7 @@ abstract class SockJsHandler extends Logger {
   var nonWebSocketSessionActorRef: ActorRef = null
 
   /** Set by SockJsController; null if WebSocket (raw or not) is not used (polling is used) */
-  var webSocketController: Controller = null
+  var webSocketAction: Action = null
 
   //----------------------------------------------------------------------------
   // Abstract methods that must be implemented by apps
@@ -25,7 +25,7 @@ abstract class SockJsHandler extends Logger {
    * @param controller the controller just before switching to this SockJS handler,
    * you can use extract session data, request headers etc. from it
    */
-  def onOpen(controller: Controller)
+  def onOpen(action: Action)
 
   def onMessage(message: String)
 
@@ -35,7 +35,7 @@ abstract class SockJsHandler extends Logger {
   // Helper methods for apps to use
 
   def send(message: Any) {
-    if (webSocketController == null) {
+    if (webSocketAction == null) {
       // FIXME: Ugly code
       // nonWebSocketSessionActorRef is set to null by SockJsNonWebSocketSession on postStop
       if (nonWebSocketSessionActorRef != null) {
@@ -48,25 +48,25 @@ abstract class SockJsHandler extends Logger {
     } else {
       // WebSocket is used, but it may be raw or not raw
       if (rawWebSocket) {
-        webSocketController.respondWebSocket(message)
+        webSocketAction.respondWebSocket(message)
       } else {
         val json = Json.generate(Seq(message))
-        webSocketController.respondWebSocket("a" + json)
+        webSocketAction.respondWebSocket("a" + json)
       }
     }
   }
 
   def close() {
-    if (webSocketController == null) {
+    if (webSocketAction == null) {
       // Until the timeout occurs, the server must serve the close message
       nonWebSocketSessionActorRef ! CloseByHandler
     } else {
       // For WebSocket, must explicitly close
       // WebSocket is used, but it may be raw or not raw
       if (rawWebSocket) {
-        webSocketController.channel.close()
+        webSocketAction.channel.close()
       } else {
-        webSocketController.respondWebSocket("c[3000,\"Go away!\"]")
+        webSocketAction.respondWebSocket("c[3000,\"Go away!\"]")
         .addListener(ChannelFutureListener.CLOSE)
       }
     }

@@ -5,7 +5,8 @@ import HttpHeaders.Names._
 import HttpHeaders.Values._
 import HttpResponseStatus._
 
-import xitrum.{Controller, Config}
+import xitrum.{Action, Config}
+import xitrum.annotation.GET
 import xitrum.etag.{Etag, NotModified}
 import xitrum.util.Gzip
 
@@ -21,10 +22,9 @@ object JSRoutesCache {
     Gzip.compress(routes.getBytes(Config.xitrum.request.charset))
 }
 
-object JSRoutesController extends JSRoutesController
-
-class JSRoutesController extends Controller {
-  def routes = GET("xitrum/routes.js") {
+@GET("xitrum/routes.js")
+class JSRoutesController extends Action {
+  def execute() {
     if (!Etag.respondIfEtagsIdentical(this, JSRoutesCache.etag)) {
       NotModified.setClientCacheAggressively(response)
       response.setHeader(CONTENT_TYPE, "text/javascript")

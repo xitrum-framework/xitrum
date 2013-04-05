@@ -9,25 +9,24 @@ import scala.util.matching.Regex
 import org.apache.commons.lang3.ClassUtils
 import org.jboss.netty.handler.codec.http.{HttpMethod, QueryStringEncoder}
 
-import xitrum.{Config, Controller, ErrorController, Logger, SockJsHandler}
-import xitrum.controller.Action
+import xitrum.{Config, Action, Logger, SockJsHandler}
 import xitrum.scope.request.{Params, PathInfo}
 import xitrum.sockjs.SockJsController
 
 object Routes extends Logger {
-  type First_Other_Last = (ArrayBuffer[Action], ArrayBuffer[Action], ArrayBuffer[Action])
+  type First_Other_Last = (ArrayBuffer[Route], ArrayBuffer[Route], ArrayBuffer[Route])
 
   private val ROUTES_CACHE = "routes.cache"
 
   /**
    * Route matching: httpMethod -> order -> pattern
-   * When matched, method is used for creating a new controller instance,
-   * then the method is invoked on that instance to get the action.
+   * When matched, actionClass is used for creating a new action instance.
    */
-  private val actions = MMap[HttpMethod, First_Other_Last]()
+  private val routes = MMap[HttpMethod, First_Other_Last]()
 
   /** 404.html and 500.html is used by default */
-  var error: Class[_ <: ErrorController] = _
+  var error404: Option[Class[_ <: Action]] = None
+  var error500: Option[Class[_ <: Action]] = None
 
   //----------------------------------------------------------------------------
 
@@ -37,10 +36,10 @@ object Routes extends Logger {
     val firsts = ArrayBuffer[(String, String, String)]()
     var others = ArrayBuffer[(String, String, String)]()
     val lasts  = ArrayBuffer[(String, String, String)]()
-    for ((httpMethod, (fs, os, ls)) <- actions) {
-      for (a <- fs) firsts.append((httpMethod.toString, RouteCompiler.decompile(a.route.compiledPattern), ControllerReflection.controllerActionName(a)))
-      for (a <- os) others.append((httpMethod.toString, RouteCompiler.decompile(a.route.compiledPattern), ControllerReflection.controllerActionName(a)))
-      for (a <- ls) lasts.append ((httpMethod.toString, RouteCompiler.decompile(a.route.compiledPattern), ControllerReflection.controllerActionName(a)))
+    for ((httpMethod, (fs, os, ls)) <- routes) {
+      for (r <- fs) firsts.append((httpMethod.toString, RouteCompiler.decompile(r.compiledPattern), ControllerReflection.controllerActionName(r)))
+      for (r <- os) others.append((httpMethod.toString, RouteCompiler.decompile(r.compiledPattern), ControllerReflection.controllerActionName(r)))
+      for (r <- ls) lasts.append ((httpMethod.toString, RouteCompiler.decompile(r.compiledPattern), ControllerReflection.controllerActionName(r)))
     }
 
     var all = firsts ++ others ++ lasts
@@ -97,18 +96,18 @@ object Routes extends Logger {
     var pageCaches = ArrayBuffer[(String, Int)]()
     var pageMaxControllerActionNameLength = 0
 
-    for ((httpMethod, (fs, os, ls)) <- actions) {
+    for ((httpMethod, (fs, os, ls)) <- routes) {
       val all = fs ++ os ++ ls
-      for (a <- all) {
-        if (a.cacheSeconds < 0) {
-          val n = ControllerReflection.controllerActionName(a)
-          actionCaches.append((n, -a.cacheSeconds))
+      for (r <- all) {
+        if (r.cacheSeconds < 0) {
+          val n = ControllerReflection.controllerActionName(r)
+          actionCaches.append((n, -r.cacheSeconds))
 
           val nLength = n.length
           if (nLength > actionMaxControllerActionNameLength) actionMaxControllerActionNameLength = nLength
-        } else if (a.cacheSeconds > 0) {
-          val n = ControllerReflection.controllerActionName(a)
-          pageCaches.append((n, a.cacheSeconds))
+        } else if (r.cacheSeconds > 0) {
+          val n = ControllerReflection.controllerActionName(r)
+          pageCaches.append((n, r.cacheSeconds))
 
           val nLength = n.length
           if (nLength > pageMaxControllerActionNameLength) pageMaxControllerActionNameLength = nLength
@@ -153,7 +152,7 @@ object Routes extends Logger {
   def fromCacheFileOrRecollect() {
     // Avoid running twice, older version of Xitrum (v1.8) needs apps to
     // call this method explicitly
-    if (actions.isEmpty) fromCacheFileOrRecollectWithRetry()
+    if (routes.isEmpty) fromCacheFileOrRecollectWithRetry()
   }
 
   def fromSockJsController() {
@@ -179,7 +178,7 @@ object Routes extends Logger {
           logger.info("Delete file " + ROUTES_CACHE + " and recollect...")
           f.delete()
           try {
-            actions.clear()  // Reset partly-collected routes
+            routes.clear()  // Reset partly-collected routes
             fromCacheFileOrRecollectReal()
           } catch {
             case e2: Exception =>
@@ -223,7 +222,7 @@ object Routes extends Logger {
     }
   }
 
-  private def populateActions(controller: Controller, actionMethod: Method, forSockJsController: Boolean) {
+  private def populateRoutes(controller: Controller, actionMethod: Method, forSockJsController: Boolean) {
     val action = actionMethod.invoke(controller).asInstanceOf[Action]
 
     // Skip WEBSOCKET if websocket option is false
@@ -255,64 +254,47 @@ object Routes extends Logger {
     }
   }
 
-  private def getActionMethod(className: String, methodName: String): Option[Method] = {
-    val klass = Class.forName(className)
-    if (classOf[Controller].isAssignableFrom(klass)) {  // Should be a subclass of Controller
-      // Should be "def", not "val"
-      try {
-        klass.getDeclaredField(methodName)
-        None
-      } catch {
-        case scala.util.control.NonFatal(e) =>  // NoSuchFieldException
-          val actionMethod = klass.getMethod(methodName)
-          Some(actionMethod)
-      }
-    } else {
-      None
-    }
-  }
-
   //----------------------------------------------------------------------------
 
-  def lookupMethod(route: Route): Method = {
-    val (firsts, others, lasts) = actions(route.httpMethod)
-    firsts.foreach { a => if (a.route == route) return a.method }
-    others.foreach { a => if (a.route == route) return a.method }
-    lasts .foreach { a => if (a.route == route) return a.method }
+  def lookupActionClass(route: Route): Class[_ <: Action] = {
+    val (firsts, others, lasts) = routes(route.httpMethod)
+    firsts.foreach { r => if (r == route) return r.actionClass }
+    others.foreach { r => if (r == route) return r.actionClass }
+    lasts .foreach { r => if (r == route) return r.actionClass }
     throw new Exception("Route not found: " + route)
   }
 
   /** For use from browser */
   lazy val jsRoutes = {
-    val actionArray = ArrayBuffer[Action]()
-    for ((httpMethod, (firsts, others, lasts)) <- actions) {
+    val routeArray = ArrayBuffer[Route]()
+    for ((httpMethod, (firsts, others, lasts)) <- routes) {
       val all = firsts ++ others ++ lasts
-      actionArray.appendAll(all)
+      routeArray.appendAll(all)
     }
 
-    val xs = actionArray.map { action =>
-      val ys = action.route.compiledPattern.map { rt =>
+    val xs = routeArray.map { route =>
+      val ys = route.compiledPattern.map { rt =>
         "['" + rt.value + "', " + rt.isPlaceHolder + "]"
       }
-      "[[" + ys.mkString(", ") + "], '" + ControllerReflection.controllerActionName(action) + "']"
+      "[[" + ys.mkString(", ") + "], '" + ControllerReflection.controllerActionName(route) + "']"
     }
     "[" + xs.mkString(", ") + "]"
   }
 
   //----------------------------------------------------------------------------
 
-  def matchRoute(httpMethod: HttpMethod, pathInfo: PathInfo): Option[(Method, Params)] = {
+  def matchRoute(httpMethod: HttpMethod, pathInfo: PathInfo): Option[(Class[_ <: Action], Params)] = {
     // This method is only run for every request, speed is a problem
 
-    if (!actions.isDefinedAt(httpMethod)) return None
+    if (!routes.isDefinedAt(httpMethod)) return None
 
     val tokens = pathInfo.tokens
     val max1   = tokens.size
 
     var pathParams: Params = null
 
-    def finder(action: Action): Boolean = {
-      val routeTokens = action.route.compiledPattern
+    def finder(route: Route): Boolean = {
+      val routeTokens = route.compiledPattern
       val max2        = routeTokens.size
 
       // Check the number of tokens
@@ -389,24 +371,20 @@ object Routes extends Logger {
     }
 
     // actions.isDefinedAt(httpMethod) has been checked above
-    val (firsts, others, lasts) = actions(httpMethod)
+    val (firsts, others, lasts) = routes(httpMethod)
     firsts.find(finder) match {
-      case Some(action) => Some((action.method, pathParams))
+      case Some(route) => Some((route.actionClass, pathParams))
       case None =>
         others.find(finder) match {
-          case Some(action) => Some((action.method, pathParams))
+          case Some(route) => Some((route.actionClass, pathParams))
           case None =>
             lasts.find(finder) match {
-              case Some(action) => Some((action.method, pathParams))
+              case Some(route) => Some((route.actionClass, pathParams))
               case None => None
             }
         }
     }
   }
-
-  lazy val action404Method: Option[Method] = Option(error).map(_.getMethod("error404"))
-
-  lazy val action500Method: Option[Method] = Option(error).map(_.getMethod("error500"))
 
   //----------------------------------------------------------------------------
 

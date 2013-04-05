@@ -10,8 +10,7 @@ import javassist.{ClassClassPath, ClassPool}
 import javassist.bytecode.{ClassFile, MethodInfo, AccessFlag}
 import sclasner.{FileEntry, Scanner}
 
-import xitrum.{Config, Logger}
-import xitrum.controller.Action
+import xitrum.{Action, Logger}
 import xitrum.sockjs.SockJsController
 
 /** Scan all classes to collect routes from controllers. */

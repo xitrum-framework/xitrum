@@ -1,9 +1,14 @@
 package xitrum.routing
 
 import org.jboss.netty.handler.codec.http.{HttpMethod, QueryStringEncoder}
-import xitrum.Config
+import xitrum.{Config, Action}
 
-case class Route(httpMethod: HttpMethod, order: RouteOrder.RouteOrder, compiledPattern: Seq[RouteToken]) {
+/** @param cacheSecs 0 = no cache, < 0 = cache action, > 0 = cache page */
+case class Route(
+    httpMethod: HttpMethod, order: RouteOrder.RouteOrder, compiledPattern: Seq[RouteToken],
+    actionClass: Class[_ <: Action], cacheSeconds: Int
+)
+{
   def url(params: (String, Any)*) = {
     var map = params.toMap
     val tokens = compiledPattern.map { rt =>

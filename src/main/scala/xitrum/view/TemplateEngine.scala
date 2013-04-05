@@ -1,7 +1,6 @@
 package xitrum.view
 
-import xitrum.Controller
-import xitrum.controller.Action
+import xitrum.Action
 
 /**
  * Template engines should extend this trait and implement its methods.
@@ -10,45 +9,13 @@ import xitrum.controller.Action
  */
 trait TemplateEngine {
   /**
-   * Renders the template associated with the action of the controller.
+   * Renders the template associated with the action.
    *
-   * Ex: When controller = myapp.Site, action = index, and Scalate template
+   * Ex: When action = myapp.SiteIndex, and Scalate template
    * engine is used, by default the template path will be:
-   * src/main/scalate/myapp/Site/index.jade
+   * src/main/scalate/myapp/SiteIndex.jade
    *
    * @param options specific to the configured template engine
    */
-  def renderTemplate(
-    controller: Controller, action: Action,
-    controllerName: String, actionName: String,
-    options: Map[String, Any]
-  ): String
-
-  /**
-   * Renders the template associated with the controller.
-   *
-   * Ex: When controller = myapp.Site, and Scalate template
-   * engine is used, by default the template path will be:
-   * src/main/scalate/myapp/Site.jade
-   *
-   * @param options specific to the configured template engine
-   */
-  def renderTemplate(
-    controller: Controller, controllerClass: Class[_],
-    options: Map[String, Any]
-  ): String
-
-  /**
-   * Renders the template fragment associated with the controller.
-   *
-   * Ex: When controller = myapp.Site, fragment = "footer", and Scalate template
-   * engine is used, by default the template path will be:
-   * src/main/scalate/myapp/Site/_footer.jade
-   *
-   * @param options specific to the configured template engine
-   */
-  def renderFragment(
-    controller: Controller, controllerClass: Class[_], fragment: String,
-    options: Map[String, Any]
-  ): String
+  def renderTemplate(action: Action, actionName: String, options: Map[String, Any]): String
 }

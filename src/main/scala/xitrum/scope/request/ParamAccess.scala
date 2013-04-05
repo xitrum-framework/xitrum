@@ -4,7 +4,7 @@ import scala.reflect.runtime.universe._
 
 import org.jboss.netty.handler.codec.http.multipart.FileUpload
 
-import xitrum.Controller
+import xitrum.Action
 import xitrum.exception.MissingParam
 
 /**
@@ -22,7 +22,7 @@ object ParamAccess {
 }
 
 trait ParamAccess {
-  this: Controller =>
+  this: Action =>
 
   import ParamAccess._
 

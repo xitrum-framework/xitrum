@@ -1,13 +1,15 @@
 package xitrum
 
+import akka.actor.Actor
 import org.jboss.netty.channel.{ChannelFuture, ChannelFutureListener}
 
 import xitrum.controller._
+import xitrum.handler.HandlerEnv
 import xitrum.scope.request.ExtEnv
 import xitrum.view.{Renderer, Responder}
 
-trait Controller extends ExtEnv
-    with ActionFactory
+trait Action extends Actor
+    with ExtEnv
     with Logger
     with Net
     with Filter
@@ -17,14 +19,14 @@ trait Controller extends ExtEnv
     with UrlFor
     with Renderer
     with Responder
-    with I18n {
+    with I18n
+{
+  lazy val currentAction = this
 
-  var pathPrefix = ""
-
-  implicit val currentController: Controller = this
-
-  // Use "lazy val" instead of "def" to prevent this action from being picked by RouteCollector
-  lazy val currentAction = handlerEnv.action
+  def receive = {
+    case env: HandlerEnv =>
+      apply(env)
+  }
 
   def addConnectionClosedListener(listener: => Unit) {
     channel.getCloseFuture.addListener(new ChannelFutureListener {

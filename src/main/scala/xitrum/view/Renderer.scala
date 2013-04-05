@@ -2,12 +2,11 @@ package xitrum.view
 
 import java.io.File
 
-import xitrum.{Config, Controller}
-import xitrum.controller.Action
+import xitrum.{Config, Action}
 import xitrum.routing.Routes
 
 trait Renderer {
-  this: Controller =>
+  this: Action =>
 
   var renderedView: Any = null
 
@@ -50,12 +49,7 @@ trait Renderer {
    * @param options specific to the configured template engine
    */
   def renderView(action: Action, customLayout: () => Any, options: Map[String, Any] = Map()): String = {
-    val nonNullActionMethod = action.nonNullMethod
-    val controllerClass     = nonNullActionMethod.getDeclaringClass
-    val controllerName      = controllerClass.getName
-    val actionName          = nonNullActionMethod.getName
-
-    renderedView = Config.xitrum.templateEngine.renderTemplate(this, action, controllerName, actionName, options)
+    renderedView = "Config.xitrum.templateEngine.renderTemplate(this, action, actionName, options)"
     customLayout.apply().toString
   }
 
@@ -106,34 +100,9 @@ trait Renderer {
    *
    * @param options specific to the configured template engine
    */
-  def renderViewNoLayout(controllerClass: Class[_], options: Map[String, Any]): String =
-    Config.xitrum.templateEngine.renderTemplate(this, controllerClass, options)
+  def renderViewNoLayout(actionClass: Class[_], options: Map[String, Any]): String =
+    "Config.xitrum.templateEngine.renderTemplate(this, actionClass, options)"
 
-  def renderViewNoLayout(controllerClass: Class[_]): String =
-    Config.xitrum.templateEngine.renderTemplate(this, controllerClass, Map())
-
-  //----------------------------------------------------------------------------
-
-  /**
-   * Renders the template fragment inside the directory associated with the
-   * controller class.
-   *
-   * @param controllerClass should be one of the parent classes of the current
-   * controller because the current controller instance will be imported in the
-   * template as "helper"
-   *
-   * @param options specific to the configured template engine
-   */
-  def renderFragment(controllerClass: Class[_], fragment: String, options: Map[String, Any]): String =
-    Config.xitrum.templateEngine.renderFragment(this, controllerClass, fragment, options)
-
-  def renderFragment(controllerClass: Class[_], fragment: String): String =
-    Config.xitrum.templateEngine.renderFragment(this, controllerClass, fragment, Map())
-
-  /** Renders the fragment associated with the current controller class. */
-  def renderFragment(fragment: String, options: Map[String, Any]): String =
-    Config.xitrum.templateEngine.renderFragment(this, getClass, fragment, options)
-
-  def renderFragment(fragment: String): String =
-    Config.xitrum.templateEngine.renderFragment(this, getClass, fragment, Map())
+  def renderViewNoLayout(actionClass: Class[_]): String =
+    "Config.xitrum.templateEngine.renderTemplate(this, actionClass, Map())"
 }

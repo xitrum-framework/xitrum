@@ -2,7 +2,7 @@ package xitrum.controller
 
 import scala.collection.mutable.ArrayBuffer
 
-import xitrum.Controller
+import xitrum.Action
 import xitrum.routing.Route
 
 case class BeforeFilter(body: ()          => Boolean, only: ArrayBuffer[Route], except: ArrayBuffer[Route])
@@ -10,7 +10,7 @@ case class AfterFilter (body: ()          => Any,     only: ArrayBuffer[Route], 
 case class AroundFilter(body: (() => Any) => Any,     only: ArrayBuffer[Route], except: ArrayBuffer[Route])
 
 trait Filter {
-  this: Controller =>
+  this: Action =>
 
   private val beforeFilters = ArrayBuffer[BeforeFilter]()
 

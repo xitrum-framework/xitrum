@@ -5,11 +5,11 @@ import scala.collection.mutable.{ArrayBuffer, HashMap}
 import org.jboss.netty.handler.codec.http.{HttpRequest, Cookie, CookieDecoder, CookieEncoder, HttpHeaders}
 import HttpHeaders.Names
 
-import xitrum.{Config, Controller}
+import xitrum.{Config, Action}
 import xitrum.scope.session.CSRF
 
 trait ExtEnv extends RequestEnv with ParamAccess with CSRF {
-  this: Controller =>
+  this: Action =>
 
   // Below are lazy because they are not always accessed by framwork/application
   // (to save calculation time) or the things they depend on are null when this
@@ -19,7 +19,7 @@ trait ExtEnv extends RequestEnv with ParamAccess with CSRF {
 
   /**
    * Browsers will not send cookie attributes back to the server. They will only
-   * send the cookieâ€™s name-value pair.
+   * send the cookieâ name-value pairs.
    * http://en.wikipedia.org/wiki/HTTP_cookie#Cookie_attributes
    */
   lazy val requestCookies: Map[String, String] = {

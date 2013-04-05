@@ -8,12 +8,12 @@ import org.jboss.netty.handler.codec.http.{ HttpHeaders, HttpResponseStatus }
 import HttpHeaders.Names.LOCATION
 import HttpResponseStatus.FOUND
 
-import xitrum.Controller
+import xitrum.Action
 import xitrum.handler.up.Dispatcher
 import xitrum.routing.Routes
 
 trait Redirect {
-  this: Controller =>
+  this: Action =>
 
   /** See also forwardTo. */
   def redirectTo(location: String, status: HttpResponseStatus = FOUND): ChannelFuture = {

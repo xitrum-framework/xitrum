@@ -2,7 +2,7 @@ package xitrum.controller
 
 import org.jboss.netty.handler.codec.http.websocketx.WebSocketServerHandshakerFactory
 
-import xitrum.Controller
+import xitrum.Action
 import xitrum.handler.ChannelPipelineFactory
 import xitrum.handler.up.WebSocketDispatcher
 
@@ -10,7 +10,7 @@ import xitrum.handler.up.WebSocketDispatcher
  * See https://github.com/netty/netty/blob/master/example/src/main/java/io/netty/example/http/websocketx/server/WebSocketServerHandler.java
  */
 trait WebSocket {
-  this: Controller =>
+  this: Action =>
 
   trait WebSocketHandler {
     def onOpen()
