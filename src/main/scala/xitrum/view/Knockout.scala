@@ -1,23 +1,23 @@
 package xitrum.view
 
-import xitrum.{Cache, Action}
+import xitrum.{Cache, ActionEnv}
 import xitrum.util.Json
 
 /** Support for Knockout.js */
 trait Knockout {
-  this: Action =>
+  this: ActionEnv =>
 
-  def koApplyBindings(model: AnyRef, syncAction: Action, js: String) {
+  def koApplyBindings(model: AnyRef, syncAction: ActionEnv, js: String) {
     koApplyBindings(model, None, syncAction, js)
   }
 
-  def koApplyBindings(model: AnyRef, scopeSelector: String, syncAction: Action, js: String) {
+  def koApplyBindings(model: AnyRef, scopeSelector: String, syncAction: ActionEnv, js: String) {
     koApplyBindings(model, Some(scopeSelector), syncAction, js)
   }
 
   //----------------------------------------------------------------------------
 
-  private def koApplyBindings(model: AnyRef, scopeSelector: Option[String], syncAction: Action, js: String) {
+  private def koApplyBindings(model: AnyRef, scopeSelector: Option[String], syncAction: ActionEnv, js: String) {
     // jQuery automatically converts Ajax response based on content type header
     val prepareModel =
       "var model = ko.mapping.fromJS(" + Json.generate(model) + ");\n" +

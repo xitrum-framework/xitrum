@@ -1,4 +1,4 @@
-package xitrum.controller
+package xitrum.action
 
 import java.lang.reflect.Method
 
@@ -8,12 +8,12 @@ import org.jboss.netty.handler.codec.http.{ HttpHeaders, HttpResponseStatus }
 import HttpHeaders.Names.LOCATION
 import HttpResponseStatus.FOUND
 
-import xitrum.Action
+import xitrum.ActionEnv
 import xitrum.handler.up.Dispatcher
 import xitrum.routing.Routes
 
 trait Redirect {
-  this: Action =>
+  this: ActionEnv =>
 
   /** See also forwardTo. */
   def redirectTo(location: String, status: HttpResponseStatus = FOUND): ChannelFuture = {

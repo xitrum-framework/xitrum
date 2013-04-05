@@ -1,21 +1,14 @@
-package xitrum.scope.request
+package xitrum.scope.session
 
 import scala.collection.mutable.{ArrayBuffer, HashMap}
 
 import org.jboss.netty.handler.codec.http.{HttpRequest, Cookie, CookieDecoder, CookieEncoder, HttpHeaders}
 import HttpHeaders.Names
 
-import xitrum.{Config, Action}
-import xitrum.scope.session.CSRF
+import xitrum.{Config, ActionEnv}
 
-trait ExtEnv extends RequestEnv with ParamAccess with CSRF {
+trait SessionEnv extends CSRF {
   this: ActionEnv =>
-
-  // Below are lazy because they are not always accessed by framwork/application
-  // (to save calculation time) or the things they depend on are null when this
-  // instance is created
-
-  lazy val at = new At
 
   /**
    * Browsers will not send cookie attributes back to the server. They will only

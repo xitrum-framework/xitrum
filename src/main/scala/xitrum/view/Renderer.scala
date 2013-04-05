@@ -2,11 +2,11 @@ package xitrum.view
 
 import java.io.File
 
-import xitrum.{Config, Action}
+import xitrum.{Config, ActionEnv}
 import xitrum.routing.Routes
 
 trait Renderer {
-  this: Action =>
+  this: ActionEnv =>
 
   var renderedView: Any = null
 

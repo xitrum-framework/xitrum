@@ -1,12 +1,12 @@
-package xitrum.controller
+package xitrum.action
 
 import scala.util.Random
 
-import xitrum.{Config, Action}
+import xitrum.{Config, ActionEnv}
 import xitrum.etag.Etag
 
 trait UrlFor {
-  this: Action =>
+  this: ActionEnv =>
 
   /** @param path Relative to the "public" directory, without leading "/" */
   def urlForPublic(path: String) = {

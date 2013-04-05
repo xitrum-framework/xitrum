@@ -11,7 +11,7 @@ import org.jboss.netty.util.CharsetUtil
 import HttpHeaders.Names.{CONTENT_TYPE, CONTENT_LENGTH, TRANSFER_ENCODING}
 import HttpHeaders.Values.{CHUNKED, NO_CACHE}
 
-import xitrum.{Action, Config}
+import xitrum.{ActionEnv, Config}
 import xitrum.etag.NotModified
 import xitrum.handler.up.NoPipelining
 import xitrum.handler.down.{XSendFile, XSendResource}
@@ -23,7 +23,7 @@ import xitrum.util.Json
  * http://code.google.com/speed/page-speed/docs/rendering.html#SpecifyCharsetEarly
  */
 trait Responder extends JS with Flash with Knockout {
-  this: Action =>
+  this: ActionEnv =>
 
   //----------------------------------------------------------------------------
 

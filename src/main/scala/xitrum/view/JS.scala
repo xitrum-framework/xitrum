@@ -5,14 +5,14 @@ import scala.xml.Unparsed
 import org.apache.commons.lang3.StringEscapeUtils
 import org.jboss.netty.channel.ChannelFuture
 
-import xitrum.{Config, Action}
+import xitrum.{Config, ActionEnv}
 import xitrum.etag.{Etag, NotModified}
 import xitrum.routing.{Routes, JSRoutesCache, JSRoutesController}
 
 // http://stackoverflow.com/questions/2703861/chromes-loading-indicator-keeps-spinning-during-xmlhttprequest
 // http://stackoverflow.com/questions/1735560/stop-the-browser-throbber-of-doom-while-loading-comet-server-push-xmlhttpreques
 trait JS {
-  this: Action =>
+  this: ActionEnv =>
 
   private val buffer = new StringBuilder
 

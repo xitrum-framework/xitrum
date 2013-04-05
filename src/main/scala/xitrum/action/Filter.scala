@@ -1,8 +1,8 @@
-package xitrum.controller
+package xitrum.action
 
 import scala.collection.mutable.ArrayBuffer
 
-import xitrum.Action
+import xitrum.ActionEnv
 import xitrum.routing.Route
 
 case class BeforeFilter(body: ()          => Boolean, only: ArrayBuffer[Route], except: ArrayBuffer[Route])
@@ -10,7 +10,7 @@ case class AfterFilter (body: ()          => Any,     only: ArrayBuffer[Route], 
 case class AroundFilter(body: (() => Any) => Any,     only: ArrayBuffer[Route], except: ArrayBuffer[Route])
 
 trait Filter {
-  this: Action =>
+  this: ActionEnv =>
 
   private val beforeFilters = ArrayBuffer[BeforeFilter]()
 
@@ -20,7 +20,7 @@ trait Filter {
     ret
   }
 
-  def beforeFilter(only: Seq[Action] = Seq.empty, except: Seq[Action] = Seq.empty)(f: => Boolean): () => Boolean = {
+  def beforeFilter(only: Seq[ActionEnv] = Seq.empty, except: Seq[ActionEnv] = Seq.empty)(f: => Boolean): () => Boolean = {
     if (only.nonEmpty && except.nonEmpty) throw new Exception("Can't specify 'both' only and 'except'")
 
     val ret = () => f
@@ -30,7 +30,7 @@ trait Filter {
     ret
   }
 
-  def skipBeforeFilter(body: () => Boolean, only: Seq[Action] = Seq.empty, except: Seq[Action] = Seq.empty) {
+  def skipBeforeFilter(body: () => Boolean, only: Seq[ActionEnv] = Seq.empty, except: Seq[ActionEnv] = Seq.empty) {
     if (only.nonEmpty && except.nonEmpty) throw new Exception("Can't specify both 'only' and 'except'")
 
     if (only.isEmpty && except.isEmpty) {
@@ -85,7 +85,7 @@ trait Filter {
     ret
   }
 
-  def afterFilter(only: Seq[Action] = Seq.empty, except: Seq[Action] = Seq.empty)(f: => Any): () => Any = {
+  def afterFilter(only: Seq[ActionEnv] = Seq.empty, except: Seq[ActionEnv] = Seq.empty)(f: => Any): () => Any = {
     if (only.nonEmpty && except.nonEmpty) throw new Exception("Can't specify both 'only' and 'except'")
 
     val ret = () => f
@@ -95,7 +95,7 @@ trait Filter {
     ret
   }
 
-  def skipAfterFilter(body: () => Any, only: Seq[Action] = Seq.empty, except: Seq[Action] = Seq.empty) {
+  def skipAfterFilter(body: () => Any, only: Seq[ActionEnv] = Seq.empty, except: Seq[ActionEnv] = Seq.empty) {
     if (only.nonEmpty && except.nonEmpty) throw new Exception("Can't specify both 'only' and 'except'")
 
     if (only.isEmpty && except.isEmpty) {
@@ -151,7 +151,7 @@ trait Filter {
     f
   }
 
-  def aroundFilter(only: Seq[Action] = Seq.empty, except: Seq[Action] = Seq.empty)(f: (() => Any) => Any): (() => Any) => Any = {
+  def aroundFilter(only: Seq[ActionEnv] = Seq.empty, except: Seq[ActionEnv] = Seq.empty)(f: (() => Any) => Any): (() => Any) => Any = {
     if (only.nonEmpty && except.nonEmpty) throw new Exception("Can't specify both 'only' and 'except'")
 
     val onlyBuffer   = ArrayBuffer[Route](); onlyBuffer.appendAll(only.map(_.route))
@@ -160,7 +160,7 @@ trait Filter {
     f
   }
 
-  def skipAroundFilter(body: (() => Any) => Any, only: Seq[Action] = Seq.empty, except: Seq[Action] = Seq.empty) {
+  def skipAroundFilter(body: (() => Any) => Any, only: Seq[ActionEnv] = Seq.empty, except: Seq[ActionEnv] = Seq.empty) {
     if (only.nonEmpty && except.nonEmpty) throw new Exception("Can't specify both 'only' and 'except'")
 
     if (only.isEmpty && except.isEmpty) {
@@ -195,7 +195,7 @@ trait Filter {
 
 
   /** Called by Dispatcher */
-  def callAroundFilters(action: Action) {
+  def callAroundFilters(action: ActionEnv) {
     val initialWrapper = () => action.body()
     val bigWrapper = aroundFilters.foldLeft(initialWrapper) { (wrapper, af) =>
       () => af.body(wrapper)

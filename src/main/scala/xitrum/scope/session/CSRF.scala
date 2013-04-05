@@ -2,7 +2,7 @@ package xitrum.scope.session
 
 import java.util.UUID
 
-import xitrum.Action
+import xitrum.ActionEnv
 import xitrum.exception.InvalidAntiCSRFToken
 import xitrum.util.SecureUrlSafeBase64
 
@@ -42,7 +42,7 @@ object CSRF {
 }
 
 trait CSRF {
-  this: Action =>
+  this: ActionEnv =>
 
   import CSRF._
 
