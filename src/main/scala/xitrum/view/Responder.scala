@@ -38,7 +38,6 @@ trait Responder extends JS with Flash with Knockout {
       NoPipelining.setResponseHeaderForKeepAliveRequest(request, response)
       setCookieAndSessionIfTouchedOnRespond()
       val future = channel.write(handlerEnv)
-      responded = true
 
       // Do not handle keep alive:
       // * If XSendFile or XSendResource is used because it is handled by them
@@ -49,6 +48,9 @@ trait Responder extends JS with Flash with Knockout {
           !response.isChunked) {
         NoPipelining.if_keepAliveRequest_then_resumeReading_else_closeOnComplete(request, channel, future)
       }
+
+      responded = true
+      Config.actorSystem.stop(self)
 
       future
     }
