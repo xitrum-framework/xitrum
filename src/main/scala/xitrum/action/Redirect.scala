@@ -35,8 +35,8 @@ trait Redirect {
    * Tells another action to process the current request for the current action.
    * See also redirectTo.
    */
-  def forwardTo(action: Class[_ <: Action]) {
+  def forwardTo(actionClass: Class[_ <: Action]) {
     forwarding = true
-    Dispatcher.dispatchWithFailsafe(action, 0, handlerEnv)
+    Dispatcher.dispatchWithFailsafe(channel, actionClass, 0, handlerEnv)
   }
 }

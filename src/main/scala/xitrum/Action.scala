@@ -32,12 +32,6 @@ trait Action extends Actor
 {
   lazy val currentAction = this
 
-  def addConnectionClosedListener(listener: => Unit) {
-    channel.getCloseFuture.addListener(new ChannelFutureListener {
-      def operationComplete(future: ChannelFuture) { listener }
-    })
-  }
-
   /** Actions have to implement this method. */
   def execute()
 
@@ -123,7 +117,7 @@ trait Action extends Actor
                 respondDefault500Page()
               } else {
                 response.setStatus(HttpResponseStatus.INTERNAL_SERVER_ERROR)
-                Dispatcher.dispatchWithFailsafe(Routes.error500, 0, handlerEnv)
+                Dispatcher.dispatchWithFailsafe(channel, Routes.error500, 0, handlerEnv)
               }
             }
           } else {
