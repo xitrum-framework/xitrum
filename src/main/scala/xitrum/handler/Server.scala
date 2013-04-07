@@ -17,10 +17,9 @@ object Server extends Logger {
     Cache.cache.size()
 
     Routes.fromCacheFileOrRecollect()
-    Routes.fromSockJsController()
-    Routes.printRoutes()
-    Routes.printActionPageCaches()
-    Routes.printSockJsRoutes()
+    val routes = Routes.routes.get
+    routes.printRoutes()
+    routes.printActionPageCaches()
 
     val pc = Config.xitrum.port
     if (pc.http.isDefined)  start(false)

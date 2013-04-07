@@ -11,7 +11,7 @@ import org.jboss.netty.util.CharsetUtil
 import HttpHeaders.Names.{CONTENT_TYPE, CONTENT_LENGTH, TRANSFER_ENCODING}
 import HttpHeaders.Values.{CHUNKED, NO_CACHE}
 
-import xitrum.{ActionEnv, Config}
+import xitrum.{Action, Config}
 import xitrum.etag.NotModified
 import xitrum.handler.up.NoPipelining
 import xitrum.handler.down.{XSendFile, XSendResource}
@@ -23,7 +23,7 @@ import xitrum.util.Json
  * http://code.google.com/speed/page-speed/docs/rendering.html#SpecifyCharsetEarly
  */
 trait Responder extends JS with Flash with Knockout {
-  this: ActionEnv =>
+  this: Action =>
 
   //----------------------------------------------------------------------------
 
@@ -224,7 +224,7 @@ trait Responder extends JS with Flash with Knockout {
   /**
    * @param options specific to the configured template engine
    */
-  def respondView(action: Class[_ <: ActionEnv], customLayout: () => Any, options: Map[String, Any] = Map()): ChannelFuture = {
+  def respondView(action: Class[_ <: Action], customLayout: () => Any, options: Map[String, Any] = Map()): ChannelFuture = {
     val string = renderView(action, customLayout, options)
     respondText(string, "text/html")
   }
@@ -243,10 +243,10 @@ trait Responder extends JS with Flash with Knockout {
    * Same as respondView(action, customLayout, options),
    * where customLayout is the controller's layout method.
    */
-  def respondView(action: Class[_ <: ActionEnv], options: Map[String, Any]): ChannelFuture =
+  def respondView(action: Class[_ <: Action], options: Map[String, Any]): ChannelFuture =
     respondView(action, layout _, options)
 
-  def respondView(action: Class[_ <: ActionEnv]): ChannelFuture =
+  def respondView(action: Class[_ <: Action]): ChannelFuture =
     respondView(action, layout _, Map[String, Any]())
 
   /**

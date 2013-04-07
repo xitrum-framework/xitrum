@@ -2,7 +2,7 @@ package xitrum.scope.session
 
 import java.util.UUID
 
-import xitrum.ActionEnv
+import xitrum.Action
 import xitrum.exception.InvalidAntiCSRFToken
 import xitrum.util.SecureUrlSafeBase64
 
@@ -13,7 +13,7 @@ import xitrum.util.SecureUrlSafeBase64
 object CSRF {
   val TOKEN = "csrf-token"
 
-  def isValidToken(action: ActionEnv): Boolean = {
+  def isValidToken(action: Action): Boolean = {
     // The token must be in the request body for more security
     val tokenInRequest = action.param(TOKEN, action.bodyParams)
     // Cleaner for application developers when seeing access log
@@ -27,9 +27,9 @@ object CSRF {
    * (For example when using with GET requests, which does not include the token.)
    * Otherwise you should use SecureBase64.encrypt for shorter result.
    */
-  def encrypt(action: ActionEnv, ref: AnyRef): String = action.antiCSRFToken + SecureUrlSafeBase64.encrypt(ref)
+  def encrypt(action: Action, ref: AnyRef): String = action.antiCSRFToken + SecureUrlSafeBase64.encrypt(ref)
 
-  def decrypt(action: ActionEnv, string: String): Any = {
+  def decrypt(action: Action, string: String): Any = {
     val prefix = action.antiCSRFToken
     if (!string.startsWith(prefix)) throw new InvalidAntiCSRFToken
 
@@ -42,7 +42,7 @@ object CSRF {
 }
 
 trait CSRF {
-  this: ActionEnv =>
+  this: Action =>
 
   import CSRF._
 

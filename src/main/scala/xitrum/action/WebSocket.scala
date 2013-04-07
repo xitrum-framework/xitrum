@@ -2,7 +2,7 @@ package xitrum.action
 
 import org.jboss.netty.handler.codec.http.websocketx.WebSocketServerHandshakerFactory
 
-import xitrum.ActionEnv
+import xitrum.Action
 import xitrum.handler.ChannelPipelineFactory
 import xitrum.handler.up.WebSocketDispatcher
 
@@ -10,7 +10,7 @@ import xitrum.handler.up.WebSocketDispatcher
  * See https://github.com/netty/netty/blob/master/example/src/main/java/io/netty/example/http/websocketx/server/WebSocketServerHandler.java
  */
 trait WebSocket {
-  this: ActionEnv =>
+  this: Action =>
 
   trait WebSocketHandler {
     def onOpen()

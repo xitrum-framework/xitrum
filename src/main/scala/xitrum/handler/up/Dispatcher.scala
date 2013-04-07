@@ -2,6 +2,7 @@ package xitrum.handler.up
 
 import java.lang.reflect.Method
 import scala.collection.mutable.{ArrayBuffer, Map => MMap}
+import scala.util.control.NonFatal
 
 import org.jboss.netty.channel._
 import org.jboss.netty.handler.codec.http._
@@ -19,17 +20,15 @@ import xitrum.handler.down.{ResponseCacher, XSendFile}
 import xitrum.routing.{Route, Routes}
 import xitrum.scope.request.RequestEnv
 import xitrum.scope.session.CSRF
-import xitrum.sockjs.SockJsController
+import xitrum.sockjs.SockJsAction
 
 object Dispatcher extends Logger {
-  def dispatchWithFailsafe(route: Route, env: HandlerEnv) {
+  def dispatchWithFailsafe(actionClass: Class[_ <: Action], cacheSecs: Int, env: HandlerEnv) {
     val beginTimestamp = System.currentTimeMillis()
     var hit            = false
 
-    val (action, actorRef) = newActionActorRef(route.actionClass)
+    val (action, actorRef) = newActionActorRef(actionClass)
     actorRef ! env
-
-    env.action = action
 
     try {
       // Check for CSRF (CSRF has been checked if "postback" is true)
@@ -39,14 +38,12 @@ object Dispatcher extends Logger {
           !action.isInstanceOf[SkipCSRFCheck] &&
           !CSRF.isValidToken(action)) throw new InvalidAntiCSRFToken
 
-      val cacheSeconds = route.cacheSeconds
-
       // Before filters:
       // When not passed, the before filters must explicitly respond to client,
       // with appropriate response status code, error description etc.
       // This logic is app-specific, Xitrum cannot does it for the app.
 
-      if (cacheSeconds > 0) {     // Page cache
+      if (cacheSecs > 0) {     // Page cache
         hit = tryCache(action) {
           val passed = action.callBeforeFilters()
           if (passed) runAroundAndAfterFilters(action)
@@ -54,17 +51,17 @@ object Dispatcher extends Logger {
       } else {
         val passed = action.callBeforeFilters()
         if (passed) {
-          if (cacheSeconds < 0)  // Action cache
+          if (cacheSecs < 0)  // Action cache
             hit = tryCache(action) { runAroundAndAfterFilters(action) }
           else                   // No cache
             runAroundAndAfterFilters(action)
         }
       }
 
-      if (!action.forwarding) AccessLog.logDynamicContentAccess(action, beginTimestamp, cacheSeconds, hit)
+      if (!action.forwarding) AccessLog.logDynamicContentAccess(action, beginTimestamp, cacheSecs, hit)
     } catch {
-      case scala.util.control.NonFatal(e) =>
-        if (action.forwarding) return
+      case NonFatal(e) =>
+        if (action.forwarding) throw e
 
         // End timestamp
         val t2 = System.currentTimeMillis()
@@ -102,7 +99,7 @@ object Dispatcher extends Logger {
                   action.respondDefault500Page()
                 } else {
                   action.response.setStatus(INTERNAL_SERVER_ERROR)
-                  dispatchWithFailsafe(action500, env)
+                  dispatchWithFailsafe(action500, 0, env)
                 }
             }
           } else {
@@ -169,23 +166,23 @@ class Dispatcher extends SimpleChannelUpstreamHandler with BadClientSilencer {
 
     // Look up GET if method is HEAD
     val requestMethod = if (request.getMethod == HttpMethod.HEAD) HttpMethod.GET else request.getMethod
-    Routes.matchRoute(requestMethod, pathInfo) match {
-      case Some((actionClass, pathParams)) =>
+    Routes.routes.get.route(requestMethod, pathInfo) match {
+      case Some((route, pathParams)) =>
         env.pathParams = pathParams
-        dispatchWithFailsafe(actionClass, env)
+        dispatchWithFailsafe(route.actionClass, route.cacheSecs, env)
 
       case None =>
         Routes.error404 match {
+          case Some(actionClass) =>
+            env.pathParams = MMap.empty
+            env.response.setStatus(NOT_FOUND)
+            dispatchWithFailsafe(actionClass, 0, env)
+
           case None =>
             val response = new DefaultHttpResponse(HTTP_1_1, NOT_FOUND)
             XSendFile.set404Page(response, false)
             env.response = response
             ctx.getChannel.write(env)
-
-          case Some(actionClass) =>
-            env.pathParams = MMap.empty
-            env.response.setStatus(NOT_FOUND)
-            dispatchWithFailsafe(actionClass, env)
         }
     }
   }

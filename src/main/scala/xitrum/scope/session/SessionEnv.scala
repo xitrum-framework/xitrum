@@ -5,10 +5,10 @@ import scala.collection.mutable.{ArrayBuffer, HashMap}
 import org.jboss.netty.handler.codec.http.{HttpRequest, Cookie, CookieDecoder, CookieEncoder, HttpHeaders}
 import HttpHeaders.Names
 
-import xitrum.{Config, ActionEnv}
+import xitrum.{Config, Action}
 
 trait SessionEnv extends CSRF {
-  this: ActionEnv =>
+  this: Action =>
 
   // Below are lazy because they are not always accessed by framwork/application
   // (to save calculation time) or the things they depend on are null when this
@@ -16,7 +16,7 @@ trait SessionEnv extends CSRF {
 
   /**
    * Browsers will not send cookie attributes back to the server. They will only
-   * send the cookieâ name-value pairs.
+   * send the cookie (name-value pairs).
    * http://en.wikipedia.org/wiki/HTTP_cookie#Cookie_attributes
    */
   lazy val requestCookies: Map[String, String] = {

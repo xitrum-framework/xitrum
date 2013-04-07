@@ -27,6 +27,5 @@ class HandlerEnv extends MHashMap[String, Any] {
   var fileUploadParams: FileUploadParams = null  // The filename has been sanitized for insecure character
 
   // Set by Dispatcher
-  var action:           Action           = null
   var pathParams:       Params           = null  // The above params are real from the request, this one is logical from the request URL
 }

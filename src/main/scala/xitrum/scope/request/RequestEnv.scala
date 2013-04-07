@@ -2,8 +2,9 @@ package xitrum.scope.request
 
 import scala.collection.mutable.{Map => MMap}
 
-import xitrum.{Config, ActionEnv}
+import xitrum.{Config, Action}
 import xitrum.handler.HandlerEnv
+import xitrum.routing.Route
 
 object RequestEnv {
   def inspectParamsWithFilter(params: MMap[String, _ <: Seq[AnyRef]]): String = {
@@ -47,7 +48,7 @@ object RequestEnv {
  * and Controller can be inferred from these variables.
  */
 trait RequestEnv extends ParamAccess {
-  this: ActionEnv =>
+  this: Action =>
 
   // Below are lazy because they are not always accessed by framwork/application
   // (to save calculation time) or the things they depend on are null when this

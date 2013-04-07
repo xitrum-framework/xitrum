@@ -5,14 +5,14 @@ import scala.xml.Unparsed
 import org.apache.commons.lang3.StringEscapeUtils
 import org.jboss.netty.channel.ChannelFuture
 
-import xitrum.{Config, ActionEnv}
+import xitrum.{Config, Action}
 import xitrum.etag.{Etag, NotModified}
-import xitrum.routing.{Routes, JSRoutesCache, JSRoutesController}
+import xitrum.routing.{Routes, JSRoutesCache, JSRoutesAction}
 
 // http://stackoverflow.com/questions/2703861/chromes-loading-indicator-keeps-spinning-during-xmlhttprequest
 // http://stackoverflow.com/questions/1735560/stop-the-browser-throbber-of-doom-while-loading-comet-server-push-xmlhttpreques
 trait JS {
-  this: ActionEnv =>
+  this: Action =>
 
   private val buffer = new StringBuilder
 
@@ -59,7 +59,7 @@ trait JS {
 
   lazy val jsDefaults = {
     val validatei18n = if (getLanguage == "en") "" else <script type="text/javascript" src={urlForResource("xitrum/jquery.validate-1.11.0/localization/messages_"+ getLanguage +".js")}></script>
-    val jsRoutesAction = <script type="text/javascript" src={JSRoutesController.routes.url + "?" + JSRoutesCache.etag}></script>
+    val jsRoutesAction = <script type="text/javascript" src={Routes.url[JSRoutesAction] + "?" + JSRoutesCache.etag}></script>
 
     if (Config.productionMode)
       <xml:group>

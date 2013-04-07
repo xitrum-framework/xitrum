@@ -9,6 +9,7 @@ import org.jboss.netty.handler.codec.http.{DefaultCookie, HttpHeaders, HttpRespo
 import akka.actor.{Actor, ActorRef, PoisonPill, Props, Terminated}
 
 import xitrum.{Config, Action, SkipCSRFCheck}
+import xitrum.annotation._
 import xitrum.etag.NotModified
 import xitrum.routing.Routes
 import xitrum.util.{Json, LookupOrCreate, ClusterSingletonActor}
@@ -22,7 +23,7 @@ import xitrum.util.Lookup
 //
 // Reference implementation (need to read when in doubt):
 // https://github.com/sockjs/sockjs-node/tree/master/src
-object SockJsController {
+object SockJsAction {
   val LIMIT = if (Config.productionMode) 128 * 1024 else 4 * 1024
 
   //----------------------------------------------------------------------------
@@ -105,20 +106,96 @@ object SockJsController {
   }
 }
 
-class SockJsAction extends Action with SkipCSRFCheck {
-  // pathPrefix will be set at Routes.sockJs
-  // => filters can't be used because, for example beforeFilter is set before
-  //    pathPrefix is set
+// pathPrefix will be set at Routes.sockJs
+// => filters can't be used because, for example beforeFilter is set before
+//    pathPrefix is set
 
-  def greeting = GET("") {
-    respondText("Welcome to SockJS!\n")
+trait SockJsAction extends Action with SkipCSRFCheck
+
+/*
+{
+  // JSESSIONID cookie must be echoed back if sent by the client, or created
+  // http://groups.google.com/group/sockjs/browse_thread/thread/71dfdff6e8f1e5f7
+  // Can't use beforeFilter, see comment of pathPrefix at the top of this controller.
+  private def handleCookie() {
+    val sockJsClassAndOptions = Routes.sockJsClassAndOptions(pathPrefix)
+    if (sockJsClassAndOptions.cookieNeeded) {
+      val value  = requestCookies.get("JSESSIONID").getOrElse("dummy")
+      val cookie = new DefaultCookie("JSESSIONID", value)
+      responseCookies.append(cookie)
+    }
   }
 
-  def greetingWithSlash = GET("/") {
-    respondText("Welcome to SockJS!\n")
+  private def setCORS() {
+    val requestOrigin  = request.getHeader(HttpHeaders.Names.ORIGIN)
+    val responseOrigin = if (requestOrigin == null || requestOrigin == "null") "*" else requestOrigin
+    response.setHeader(HttpHeaders.Names.ACCESS_CONTROL_ALLOW_ORIGIN,      responseOrigin)
+    response.setHeader(HttpHeaders.Names.ACCESS_CONTROL_ALLOW_CREDENTIALS, "true")
+
+    val accessControlRequestHeaders = request.getHeader(HttpHeaders.Names.ACCESS_CONTROL_REQUEST_HEADERS)
+    if (accessControlRequestHeaders != null)
+      response.setHeader(HttpHeaders.Names.ACCESS_CONTROL_ALLOW_HEADERS, accessControlRequestHeaders)
   }
 
-  def iframe = last.GET(":iframe") {
+  private def xhrOPTIONS() {
+    response.setStatus(HttpResponseStatus.NO_CONTENT)
+    response.setHeader(HttpHeaders.Names.ACCESS_CONTROL_ALLOW_METHODS, "OPTIONS, POST")
+    setCORS()
+    setClientCacheAggressively()
+    respond()
+  }
+
+  private def callbackParam(): Option[String] = {
+    val paramName = if (uriParams.isDefinedAt("c")) "c" else "callback"
+    val ret = paramo(paramName)
+    if (ret == None) {
+      response.setStatus(HttpResponseStatus.INTERNAL_SERVER_ERROR)
+      respondText("\"callback\" parameter required")
+    }
+    ret
+  }
+
+  //----------------------------------------------------------------------------
+
+  /**
+   * We should close a streaming request every 128KB messages was send.
+   * The test server should have this limit decreased to 4KB.
+   */
+  private var streamingBytesSent = 0
+
+  /**
+   * All the chunking transports are closed by the server after 128K was
+   * send, in order to force client to GC and reconnect. The server doesn't have
+   * to send "c" frame.
+   * @return false if the channel will be closed when the channel write completes
+   */
+  private def respondStreamingWithLimit(text: String, isEventSource: Boolean = false): Boolean = {
+    // This is length in characters, not bytes,
+    // but in this case the result doesn't have to be precise
+    val size = text.length
+    streamingBytesSent += size
+    if (streamingBytesSent < SockJsAction.LIMIT) {
+      if (isEventSource) respondEventSource(text) else respondText(text)
+      true
+    } else {
+      if (isEventSource) respondEventSource(text) else respondText(text)
+      respondLastChunk().addListener(ChannelFutureListener.CLOSE)
+      false
+    }
+  }
+}
+
+@GETs(Array("", "/"))
+class SockJsGreeting extends SockJsAction {
+  def execute() {
+    respondText("Welcome to SockJS!\n")
+  }
+}
+
+@Last
+@GET(":iframe")
+class SockJsIframe extends SockJsAction {
+  def execute() {
     val iframe = param("iframe")
     if (iframe.startsWith("iframe") && iframe.endsWith(".html")) {
       val src =
@@ -149,8 +226,11 @@ class SockJsAction extends Action with SkipCSRFCheck {
       respondDefault404Page()
     }
   }
+}
 
-  def infoGET = GET("info") {
+@GET("info")
+class SockJsInfoGET extends SockJsAction {
+  def execute() {
     setCORS()
     setNoClientCache()
     // FIXME: Retest if IE works when cookie_needed is set to true
@@ -161,26 +241,36 @@ class SockJsAction extends Action with SkipCSRFCheck {
       """, "origins": ["*:*"], "entropy": """ + SockJsController.entropy() + "}"
     )
   }
+}
 
-  def infoOPTIONS = OPTIONS("info") {
+@OPTIONS("info")
+class SockJsInfoOPTIONS extends SockJsAction {
+  def execute() {
     response.setStatus(HttpResponseStatus.NO_CONTENT)
     response.setHeader(HttpHeaders.Names.ACCESS_CONTROL_ALLOW_METHODS, "OPTIONS, GET")
     setCORS()
     setClientCacheAggressively()
     respond()
   }
+}
 
-  //----------------------------------------------------------------------------
-
-  def xhrPollingOPTIONSReceive = OPTIONS(":serverId<[^\\.]+>/:sessionId<[^\\.]+>/xhr") {
+@OPTIONS(":serverId<[^\\.]+>/:sessionId<[^\\.]+>/xhr")
+class SockJsXhrPollingOPTIONSReceive extends SockJsAction {
+  def execute() {
     xhrOPTIONS()
   }
+}
 
-  def xhrOPTIONSSend = OPTIONS(":serverId<[^\\.]+>/:sessionId<[^\\.]+>/xhr_send") {
+@OPTIONS(":serverId<[^\\.]+>/:sessionId<[^\\.]+>/xhr_send")
+class SockJsXhrPollingOPTIONSSend extends SockJsAction {
+  def execute() {
     xhrOPTIONS()
   }
+}
 
-  def xhrPollingReceive = POST(":serverId<[^\\.]+>/:sessionId<[^\\.]+>/xhr") {
+@POST(":serverId<[^\\.]+>/:sessionId<[^\\.]+>/xhr")
+class SockJsXhrPollingReceive extends SockJsAction {
+  def execute() {
     val sessionId = param("sessionId")
 
     handleCookie()
@@ -255,8 +345,11 @@ class SockJsAction extends Action with SkipCSRFCheck {
     }))
     addConnectionClosedListener { ref ! PoisonPill }
   }
+}
 
-  def xhrSend = POST(":serverId<[^\\.]+>/:sessionId<[^\\.]+>/xhr_send") {
+@POST(":serverId<[^\\.]+>/:sessionId<[^\\.]+>/xhr_send")
+class SockJsXhrSend extends SockJsAction {
+  def execute() {
     val body = request.getContent().toString(Config.requestCharset)
     if (body.isEmpty) {
       response.setStatus(HttpResponseStatus.INTERNAL_SERVER_ERROR)
@@ -297,14 +390,18 @@ class SockJsAction extends Action with SkipCSRFCheck {
       }
     }
   }
+}
 
-  //----------------------------------------------------------------------------
-
-  def xhrStreamingOPTIONSReceive = OPTIONS(":serverId<[^\\.]+>/:sessionId<[^\\.]+>/xhr_streaming") {
+@OPTIONS(":serverId<[^\\.]+>/:sessionId<[^\\.]+>/xhr_streaming")
+class SockJsXhrStreamingOPTIONSReceive extends SockJsAction {
+  def execute() {
     xhrOPTIONS()
   }
+}
 
-  def xhrStreamingReceive = POST(":serverId<[^\\.]+>/:sessionId<[^\\.]+>/xhr_streaming") {
+@POST(":serverId<[^\\.]+>/:sessionId<[^\\.]+>/xhr_streaming")
+class SockJsXhrStreamingReceive extends SockJsAction {
+  def execute() {
     val sessionId = param("sessionId")
 
     handleCookie()
@@ -314,7 +411,7 @@ class SockJsAction extends Action with SkipCSRFCheck {
     // There's always 2KB prelude, even for immediate close frame
     response.setChunked(true)
     response.setHeader(HttpHeaders.Names.CONTENT_TYPE, "application/javascript; charset=" + Config.xitrum.request.charset)
-    respondBinary(SockJsController.h2KB)
+    respondBinary(SockJsAction.h2KB)
 
     val ref = Config.actorSystem.actorOf(Props(new Actor {
       override def preStart() {
@@ -389,10 +486,11 @@ class SockJsAction extends Action with SkipCSRFCheck {
     }))
     addConnectionClosedListener { ref ! PoisonPill }
   }
+}
 
-  //----------------------------------------------------------------------------
-
-  def htmlfileReceive = GET(":serverId<[^\\.]+>/:sessionId<[^\\.]+>/htmlfile") {
+@GET(":serverId<[^\\.]+>/:sessionId<[^\\.]+>/htmlfile")
+class SockJshtmlfileReceive extends SockJsAction {
+  def execute() {
     val callbacko = callbackParam()
     if (callbacko.isDefined) {
       val callback  = callbacko.get
@@ -502,10 +600,11 @@ class SockJsAction extends Action with SkipCSRFCheck {
       addConnectionClosedListener { ref ! PoisonPill }
     }
   }
+}
 
-  //----------------------------------------------------------------------------
-
-  def jsonPPollingReceive = GET(":serverId<[^\\.]+>/:sessionId<[^\\.]+>/jsonp") {
+@GET(":serverId<[^\\.]+>/:sessionId<[^\\.]+>/jsonp")
+class SockJsJsonPPollingReceive extends SockJsAction {
+  def execute() {
     val callbacko = callbackParam()
     if (callbacko.isDefined) {
       val callback  = callbacko.get
@@ -592,8 +691,11 @@ class SockJsAction extends Action with SkipCSRFCheck {
       addConnectionClosedListener { ref ! PoisonPill }
     }
   }
+}
 
-  def jsonPSend = POST(":serverId<[^\\.]+>/:sessionId<[^\\.]+>/jsonp_send") {
+@POST(":serverId<[^\\.]+>/:sessionId<[^\\.]+>/jsonp_send")
+class SockJsJsonPPollingSend extends SockJsAction {
+  def execute() {
     val body: String = try {
       val contentType = request.getHeader(HttpHeaders.Names.CONTENT_TYPE)
       if (contentType != null && contentType.toLowerCase.startsWith(HttpHeaders.Values.APPLICATION_X_WWW_FORM_URLENCODED)) {
@@ -648,10 +750,11 @@ class SockJsAction extends Action with SkipCSRFCheck {
       }
     }
   }
+}
 
-  //----------------------------------------------------------------------------
-
-  def eventSourceReceive = GET(":serverId<[^\\.]+>/:sessionId<[^\\.]+>/eventsource") {
+@GET(":serverId<[^\\.]+>/:sessionId<[^\\.]+>/eventsource")
+class SockJEventSourceReceive extends SockJsAction {
+  def execute() {
     val sessionId = param("sessionId")
 
     handleCookie()
@@ -728,24 +831,34 @@ class SockJsAction extends Action with SkipCSRFCheck {
     }))
     addConnectionClosedListener { ref ! PoisonPill }
   }
+}
 
-  //----------------------------------------------------------------------------
-
-  // http://sockjs.github.com/sockjs-protocol/sockjs-protocol-0.3.3.html#section-52
-  def websocketGET = last.GET(":serverId<[^\\.]+>/:sessionId<[^\\.]+>/websocket") {
+// http://sockjs.github.com/sockjs-protocol/sockjs-protocol-0.3.3.html#section-52
+@Last
+@GET(":serverId<[^\\.]+>/:sessionId<[^\\.]+>/websocket")
+class SockJSWebsocketGET extends SockJsAction {
+  def execute() {
     response.setStatus(HttpResponseStatus.BAD_REQUEST)
     respondText("""'Can "Upgrade" only to "WebSocket".'""")
   }
+}
 
-  // http://sockjs.github.com/sockjs-protocol/sockjs-protocol-0.3.3.html#section-54
-  // http://sockjs.github.com/sockjs-protocol/sockjs-protocol-0.3.3.html#section-6
-  def websocketPOST = last.POST(":serverId<[^\\.]+>/:sessionId<[^\\.]+>/websocket") {
+
+// http://sockjs.github.com/sockjs-protocol/sockjs-protocol-0.3.3.html#section-54
+// http://sockjs.github.com/sockjs-protocol/sockjs-protocol-0.3.3.html#section-6
+@Last
+@POST(":serverId<[^\\.]+>/:sessionId<[^\\.]+>/websocket")
+class SockJSWebsocketPOST extends SockJsAction {
+  def execute() {
     response.setStatus(HttpResponseStatus.METHOD_NOT_ALLOWED)
     response.setHeader(HttpHeaders.Names.ALLOW, "GET")
     respond()
   }
+}
 
-  def websocket = WEBSOCKET(":serverId<[^\\.]+>/:sessionId<[^\\.]+>/websocket") {
+@WEBSOCKET(":serverId<[^\\.]+>/:sessionId<[^\\.]+>/websocket")
+class SockJSWebsocket extends SockJsAction {
+  def execute() {
     // Ignored
     //val sessionId = param("sessionId")
 
@@ -786,8 +899,11 @@ class SockJsAction extends Action with SkipCSRFCheck {
       }
     })
   }
+}
 
-  def rawWebsocket = WEBSOCKET("websocket") {
+@WEBSOCKET("websocket")
+class SockJSRawWebsocket extends SockJsAction {
+  def execute() {
     val immutableSession = session.toMap
     val sockJsHandler    = Routes.createSockJsHandler(pathPrefix)
     sockJsHandler.webSocketController = this
@@ -806,76 +922,5 @@ class SockJsAction extends Action with SkipCSRFCheck {
       }
     })
   }
-
-  //----------------------------------------------------------------------------
-
-  // JSESSIONID cookie must be echoed back if sent by the client, or created
-  // http://groups.google.com/group/sockjs/browse_thread/thread/71dfdff6e8f1e5f7
-  // Can't use beforeFilter, see comment of pathPrefix at the top of this controller.
-  private def handleCookie() {
-    val sockJsClassAndOptions = Routes.sockJsClassAndOptions(pathPrefix)
-    if (sockJsClassAndOptions.cookieNeeded) {
-      val value  = requestCookies.get("JSESSIONID").getOrElse("dummy")
-      val cookie = new DefaultCookie("JSESSIONID", value)
-      responseCookies.append(cookie)
-    }
-  }
-
-  private def setCORS() {
-    val requestOrigin  = request.getHeader(HttpHeaders.Names.ORIGIN)
-    val responseOrigin = if (requestOrigin == null || requestOrigin == "null") "*" else requestOrigin
-    response.setHeader(HttpHeaders.Names.ACCESS_CONTROL_ALLOW_ORIGIN,      responseOrigin)
-    response.setHeader(HttpHeaders.Names.ACCESS_CONTROL_ALLOW_CREDENTIALS, "true")
-
-    val accessControlRequestHeaders = request.getHeader(HttpHeaders.Names.ACCESS_CONTROL_REQUEST_HEADERS)
-    if (accessControlRequestHeaders != null)
-      response.setHeader(HttpHeaders.Names.ACCESS_CONTROL_ALLOW_HEADERS, accessControlRequestHeaders)
-  }
-
-  private def xhrOPTIONS() {
-    response.setStatus(HttpResponseStatus.NO_CONTENT)
-    response.setHeader(HttpHeaders.Names.ACCESS_CONTROL_ALLOW_METHODS, "OPTIONS, POST")
-    setCORS()
-    setClientCacheAggressively()
-    respond()
-  }
-
-  private def callbackParam(): Option[String] = {
-    val paramName = if (uriParams.isDefinedAt("c")) "c" else "callback"
-    val ret = paramo(paramName)
-    if (ret == None) {
-      response.setStatus(HttpResponseStatus.INTERNAL_SERVER_ERROR)
-      respondText("\"callback\" parameter required")
-    }
-    ret
-  }
-
-  //----------------------------------------------------------------------------
-
-  /**
-   * We should close a streaming request every 128KB messages was send.
-   * The test server should have this limit decreased to 4KB.
-   */
-  private var streamingBytesSent = 0
-
-  /**
-   * All the chunking transports are closed by the server after 128K was
-   * send, in order to force client to GC and reconnect. The server doesn't have
-   * to send "c" frame.
-   * @return false if the channel will be closed when the channel write completes
-   */
-  private def respondStreamingWithLimit(text: String, isEventSource: Boolean = false): Boolean = {
-    // This is length in characters, not bytes,
-    // but in this case the result doesn't have to be precise
-    val size = text.length
-    streamingBytesSent += size
-    if (streamingBytesSent < SockJsController.LIMIT) {
-      if (isEventSource) respondEventSource(text) else respondText(text)
-      true
-    } else {
-      if (isEventSource) respondEventSource(text) else respondText(text)
-      respondLastChunk().addListener(ChannelFutureListener.CLOSE)
-      false
-    }
-  }
 }
+*/

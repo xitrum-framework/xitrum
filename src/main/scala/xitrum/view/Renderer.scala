@@ -2,11 +2,11 @@ package xitrum.view
 
 import java.io.File
 
-import xitrum.{Config, ActionEnv}
+import xitrum.{Config, Action}
 import xitrum.routing.Routes
 
 trait Renderer {
-  this: ActionEnv =>
+  this: Action =>
 
   var renderedView: Any = null
 
@@ -48,7 +48,7 @@ trait Renderer {
    *
    * @param options specific to the configured template engine
    */
-  def renderView(action: Class[_ <: ActionEnv], customLayout: () => Any, options: Map[String, Any] = Map()): String = {
+  def renderView(action: Class[_ <: Action], customLayout: () => Any, options: Map[String, Any] = Map()): String = {
     renderedView = Config.xitrum.templateEngine.renderTemplate(action, options)
     customLayout.apply().toString
   }
@@ -67,10 +67,10 @@ trait Renderer {
    * Same as renderView(action, customLayout, options),
    * where customLayout is the current controller's layout method.
    */
-  def renderView(action: Class[_ <: ActionEnv], options: Map[String, Any]): String =
+  def renderView(action: Class[_ <: Action], options: Map[String, Any]): String =
     renderView(action, layout _, options)
 
-  def renderView(action: Class[_ <: ActionEnv]): String =
+  def renderView(action: Class[_ <: Action]): String =
     renderView(action, layout _, Map[String, Any]())
 
   /**

@@ -8,12 +8,12 @@ import org.jboss.netty.handler.codec.http.{ HttpHeaders, HttpResponseStatus }
 import HttpHeaders.Names.LOCATION
 import HttpResponseStatus.FOUND
 
-import xitrum.ActionEnv
+import xitrum.Action
 import xitrum.handler.up.Dispatcher
 import xitrum.routing.Routes
 
 trait Redirect {
-  this: ActionEnv =>
+  this: Action =>
 
   /** See also forwardTo. */
   def redirectTo(location: String, status: HttpResponseStatus = FOUND): ChannelFuture = {
@@ -24,7 +24,7 @@ trait Redirect {
   }
 
   /** See also forwardTo. */
-  def redirectTo(action: ActionEnv, params: (String, Any)*): ChannelFuture = { redirectTo(action.url(params: _*)) }
+  def redirectTo(action: Action, params: (String, Any)*): ChannelFuture = { redirectTo(action.url(params: _*)) }
 
   //----------------------------------------------------------------------------
 
@@ -35,8 +35,8 @@ trait Redirect {
    * Tells another action to process the current request for the current action.
    * See also redirectTo.
    */
-  def forwardTo(action: Class[_ <: ActionEnv]) {
+  def forwardTo(action: Class[_ <: Action]) {
     forwarding = true
-    Dispatcher.dispatchWithFailsafe(action, handlerEnv)
+    Dispatcher.dispatchWithFailsafe(action, 0, handlerEnv)
   }
 }

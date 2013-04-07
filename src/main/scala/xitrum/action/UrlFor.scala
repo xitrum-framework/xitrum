@@ -2,11 +2,12 @@ package xitrum.action
 
 import scala.util.Random
 
-import xitrum.{Config, ActionEnv}
+import xitrum.{Config, Action}
 import xitrum.etag.Etag
+import xitrum.routing.Routes
 
 trait UrlFor {
-  this: ActionEnv =>
+  this: Action =>
 
   /** @param path Relative to the "public" directory, without leading "/" */
   def urlForPublic(path: String) = {
@@ -31,7 +32,7 @@ trait UrlFor {
 
   //----------------------------------------------------------------------------
 
-  def url(params: (String, Any)*) = route.url(params:_*)
+  def url(params: (String, Any)*) = Routes.routes.get.reverseMappings(getClass).url(params:_*)
   lazy val url: String = url()
 
   def absoluteUrl(params: (String, Any)*)(implicit action: Action) = action.absoluteUrlPrefix + url(params:_*)
