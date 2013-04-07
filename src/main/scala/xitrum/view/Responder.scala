@@ -50,7 +50,7 @@ trait Responder extends JS with Flash with Knockout {
       }
 
       responded = true
-      Config.actorSystem.stop(self)
+      context.stop(self)
 
       future
     }
