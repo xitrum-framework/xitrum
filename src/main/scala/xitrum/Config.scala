@@ -2,6 +2,7 @@ package xitrum
 
 import java.io.File
 import java.nio.charset.Charset
+import scala.util.control.NonFatal
 
 import com.hazelcast.client.{ClientConfig, ClientConfigBuilder, HazelcastClient}
 import com.hazelcast.core.{Hazelcast, HazelcastInstance}
@@ -138,7 +139,7 @@ object Config extends Logger {
     try {
       ConfigFactory.load()
     } catch {
-      case scala.util.control.NonFatal(e) =>
+      case NonFatal(e) =>
         exitOnError("Could not load config/application.conf. For an example, see https://github.com/ngocdaothanh/xitrum-new/blob/master/config/application.conf", e)
         null
     }
@@ -149,7 +150,7 @@ object Config extends Logger {
     try {
       new Config(application.getConfig("xitrum"))
     } catch {
-      case scala.util.control.NonFatal(e) =>
+      case NonFatal(e) =>
         exitOnError("Could not load config/xitrum.conf. For an example, see https://github.com/ngocdaothanh/xitrum-new/blob/master/config/xitrum.conf", e)
         null
     }
