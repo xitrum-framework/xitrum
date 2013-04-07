@@ -9,13 +9,13 @@ import xitrum.Action
  */
 trait TemplateEngine {
   /**
-   * Renders the template associated with the action.
+   * Renders the template associated with the actionClass (not action).
    *
-   * Ex: When action = myapp.SiteIndex, and Scalate template
+   * Ex: When actionClass = myapp.SiteIndex and Scalate template
    * engine is used, by default the template path will be:
    * src/main/scalate/myapp/SiteIndex.jade
    *
    * @param options specific to the configured template engine
    */
-  def renderTemplate(action: Class[_ <: Action], options: Map[String, Any]): String
+  def renderTemplate(actionClass: Class[_ <: Action], action: Action, options: Map[String, Any]): String
 }

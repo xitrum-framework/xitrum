@@ -1,5 +1,6 @@
 package xitrum.routing
 
+import java.io.Serializable
 import org.jboss.netty.handler.codec.http.HttpMethod
 import xitrum.Action
 
@@ -9,7 +10,7 @@ class SerializableRoute(
 
   // Out
   val actionClass: String, val cacheSecs: Int
-)
+) extends Serializable
 {
   def toRoute: Route = {
     new Route(

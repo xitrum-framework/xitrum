@@ -1,8 +1,9 @@
 package xitrum.routing
 
+import java.io.Serializable
 import scala.collection.mutable.ArrayBuffer
 
-class SerializableRouteCollection {
+class SerializableRouteCollection extends Serializable {
   val firstGETs = ArrayBuffer[SerializableRoute]()
   val lastGETs  = ArrayBuffer[SerializableRoute]()
   val otherGETs = ArrayBuffer[SerializableRoute]()

@@ -57,7 +57,7 @@ object AccessLog extends Logger {
     action.remoteIp + " " +
     action.request.getMethod + " " +
     action.request.getUri + " -> " +
-    action.getClass +
+    action.getClass.getName +
     (if (env.uriParams.nonEmpty)        ", uriParams: "        + RequestEnv.inspectParamsWithFilter(env.uriParams)        else "") +
     (if (env.bodyParams.nonEmpty)       ", bodyParams: "       + RequestEnv.inspectParamsWithFilter(env.bodyParams)       else "") +
     (if (env.pathParams.nonEmpty)       ", pathParams: "       + RequestEnv.inspectParamsWithFilter(env.pathParams)       else "") +

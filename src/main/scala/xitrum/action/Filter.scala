@@ -37,8 +37,8 @@ trait Filter {
   }
 
   /** Called by Dispatcher */
-  def callAroundFilters(action: Action) {
-    val initialWrapper = () => action.execute()
+  def callExecuteWrappedInAroundFilters() {
+    val initialWrapper = () => execute()
     val bigWrapper = aroundFilters.foldLeft(initialWrapper) { (wrapper, af) =>
       () => af(wrapper)
     }

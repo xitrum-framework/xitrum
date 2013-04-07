@@ -48,41 +48,29 @@ trait Renderer {
    *
    * @param options specific to the configured template engine
    */
-  def renderView(action: Class[_ <: Action], customLayout: () => Any, options: Map[String, Any] = Map()): String = {
-    renderedView = Config.xitrum.templateEngine.renderTemplate(action, options)
+  def renderView(customLayout: () => Any = layout _, actionClass: Class[_ <: Action] = getClass, options: Map[String, Any] = Map()): String = {
+    renderedView = Config.xitrum.templateEngine.renderTemplate(actionClass, this, options)
     customLayout.apply().toString
   }
-
-  /**
-   * Same as renderView(action, customLayout, options),
-   * where action is currentAction.
-   */
+/*
   def renderView(customLayout: () => Any, options: Map[String, Any]): String =
-    renderView(currentAction.getClass, customLayout, options)
+    renderView(customLayout, getClass, this, options)
 
   def renderView(customLayout: () => Any): String =
-    renderView(currentAction.getClass, customLayout, Map[String, Any]())
+    renderView(customLayout, getClass, this, Map())
 
-  /**
-   * Same as renderView(action, customLayout, options),
-   * where customLayout is the current controller's layout method.
-   */
-  def renderView(action: Class[_ <: Action], options: Map[String, Any]): String =
-    renderView(action, layout _, options)
+  def renderView(actionClass: Class[_ <: Action], options: Map[String, Any]): String =
+    renderView(layout _, actionClass, this, options)
 
-  def renderView(action: Class[_ <: Action]): String =
-    renderView(action, layout _, Map[String, Any]())
+  def renderView(actionClass: Class[_ <: Action]): String =
+    renderView(layout _, actionClass, this, Map())
 
-  /**
-   * Same as renderView(action, customLayout, options),
-   * where action is currentAction and customLayout is the current controller's layout method.
-   */
   def renderView(options: Map[String, Any]): String =
-    renderView(currentAction.getClass, layout _, options)
+    renderView(layout _, getClass, this, options)
 
   def renderView(): String =
-    renderView(currentAction.getClass, layout _, Map[String, Any]())
-
+    renderView(layout _, getClass, this, Map())
+*/
   //----------------------------------------------------------------------------
 
   def renderInlineView(inlineView: Any): String = {
@@ -91,18 +79,12 @@ trait Renderer {
     any.toString()
   }
 
-  /**
-   * Renders the template (typically the layout) associated with the controller class.
-   *
-   * @param controllerClass should be one of the parent classes of the current
-   * controller because the current controller instance will be imported in the
-   * template as "helper"
-   *
-   * @param options specific to the configured template engine
-   */
-  def renderViewNoLayout(actionClass: Class[_], options: Map[String, Any]): String =
-    "Config.xitrum.templateEngine.renderTemplate(this, actionClass, options)"
+  def renderViewNoLayout(actionClass: Class[_ <: Action], options: Map[String, Any]): String =
+    Config.xitrum.templateEngine.renderTemplate(actionClass, this, options)
 
-  def renderViewNoLayout(actionClass: Class[_]): String =
-    "Config.xitrum.templateEngine.renderTemplate(this, actionClass, Map())"
+  def renderViewNoLayout(actionClass: Class[_ <: Action]): String =
+    Config.xitrum.templateEngine.renderTemplate(actionClass, this, Map())
+
+  def renderViewNoLayout(): String =
+    Config.xitrum.templateEngine.renderTemplate(getClass, this, Map())
 }

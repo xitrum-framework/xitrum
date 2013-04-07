@@ -20,8 +20,8 @@ object Routes extends Logger {
   var routes: Option[RouteCollection] = None
 
   /** 404.html and 500.html are used by default */
-  var error404: Option[Class[_ <: Action]] = None
-  var error500: Option[Class[_ <: Action]] = None
+  var error404: Class[_ <: Action] = _
+  var error500: Class[_ <: Action] = _
 
   def fromCacheFileOrRecollect() {
     // Avoid running twice, older version of Xitrum (v1.8) needs apps to
