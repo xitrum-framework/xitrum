@@ -42,4 +42,13 @@ trait UrlFor {
   def webSocketAbsoluteUrl(implicit action: Action): String = webSocketAbsoluteUrl()(action)
 
   //----------------------------------------------------------------------------
+
+  def url[T: Manifest](params: (String, Any)*) = {
+    val actionClass = manifest[T].runtimeClass.asInstanceOf[Class[Action]]
+    Routes.routes.get.reverseMappings(actionClass).url(params:_*)
+  }
+  def absoluteUrl[T: Manifest](params: (String, Any)*) = absoluteUrlPrefix + url[T](params:_*)
+
+  def url[T: Manifest]: String         = url[T]()
+  def absoluteUrl[T: Manifest]: String = absoluteUrl[T]()
 }

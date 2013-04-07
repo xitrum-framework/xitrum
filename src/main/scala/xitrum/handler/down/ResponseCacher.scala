@@ -21,14 +21,15 @@ object ResponseCacher extends Logger {
   private type CachedResponse = (Int, Array[(String, String)], Array[Byte])
 
   def cacheResponse(action: Action) {
-    val cacheSeconds = action.cacheSeconds
-    val key          = makeCacheKey(action)
-    if (!Cache.cache.containsKey(key)) { // Check to avoid the cost of serializing
-      val response             = action.response
-      val cachedResponse       = serializeResponse(action.request, response)
-      val positiveCacheSeconds = if (cacheSeconds < 0) -cacheSeconds else cacheSeconds
-      Cache.putIfAbsentSecond(key, cachedResponse, positiveCacheSeconds)
-    }
+// FIXME
+//    val cacheSeconds = action.cacheSeconds
+//    val key          = makeCacheKey(action)
+//    if (!Cache.cache.containsKey(key)) { // Check to avoid the cost of serializing
+//      val response             = action.response
+//      val cachedResponse       = serializeResponse(action.request, response)
+//      val positiveCacheSeconds = if (cacheSeconds < 0) -cacheSeconds else cacheSeconds
+//      Cache.putIfAbsentSecond(key, cachedResponse, positiveCacheSeconds)
+//    }
   }
 
   def getCachedResponse(action: Action): Option[HttpResponse] = {
@@ -82,7 +83,7 @@ object ResponseCacher extends Logger {
 
     val request = action.request
     val key =
-      Cache.pageActionPrefix(action) + "/" +
+      Cache.pageActionPrefix(action.getClass) + "/" +
       request.getMethod + "/" +
       inspectSortedParams(sortedMap)
     if (Gzip.isAccepted(request)) key + "_gzipped" else key
@@ -125,25 +126,26 @@ class ResponseCacher extends SimpleChannelDownstreamHandler with Logger {
   import ResponseCacher._
 
   override def writeRequested(ctx: ChannelHandlerContext, e: MessageEvent) {
-    val m = e.getMessage
-    if (!m.isInstanceOf[HandlerEnv]) {
-      ctx.sendDownstream(e)
-      return
-    }
-
-    val env    = m.asInstanceOf[HandlerEnv]
-    val action = env.action
-
-    // action may be null when the request could not go to Dispatcher, for
-    // example when the response is served from PublicResourceServer
-    if (action == null) {
-      ctx.sendDownstream(e)
-      return
-    }
-
-    val response = action.response
-    if (response.getStatus == OK && !response.isChunked && env.action.cacheSeconds != 0) cacheResponse(action)
-
-    ctx.sendDownstream(e)
+// FIXME
+//    val m = e.getMessage
+//    if (!m.isInstanceOf[HandlerEnv]) {
+//      ctx.sendDownstream(e)
+//      return
+//    }
+//
+//    val env    = m.asInstanceOf[HandlerEnv]
+//    val action = env.action
+//
+//    // action may be null when the request could not go to Dispatcher, for
+//    // example when the response is served from PublicResourceServer
+//    if (action == null) {
+//      ctx.sendDownstream(e)
+//      return
+//    }
+//
+//    val response = action.response
+//    if (response.getStatus == OK && !response.isChunked && env.action.cacheSeconds != 0) cacheResponse(action)
+//
+//    ctx.sendDownstream(e)
   }
 }

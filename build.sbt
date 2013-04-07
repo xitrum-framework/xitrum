@@ -2,7 +2,7 @@ organization := "tv.cntt"
 
 name := "xitrum"
 
-version := "1.21"
+version := "2.0"
 
 scalaVersion := "2.10.1"
 
@@ -55,3 +55,7 @@ autoCompilerPlugins := true
 addCompilerPlugin("org.scala-lang.plugins" % "continuations" % "2.10.1")
 
 scalacOptions += "-P:continuations:enable"
+
+// To speedup "publish-local" while developing, skip API doc generation.
+// When publishing to Maven, comment out this line.
+publishArtifact in (Compile, packageDoc) := false
