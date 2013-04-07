@@ -42,6 +42,7 @@ class Dispatcher extends SimpleChannelUpstreamHandler with BadClientSilencer {
     val requestMethod = if (request.getMethod == HttpMethod.HEAD) HttpMethod.GET else request.getMethod
     Routes.routes.get.route(requestMethod, pathInfo) match {
       case Some((route, pathParams)) =>
+        env.route      = route
         env.pathParams = pathParams
         Dispatcher.dispatchWithFailsafe(route.actionClass, route.cacheSecs, env)
 

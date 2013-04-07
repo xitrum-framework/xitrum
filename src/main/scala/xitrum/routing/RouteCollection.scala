@@ -84,9 +84,9 @@ class RouteCollection(
     var others = ArrayBuffer[(String, String, String)]()
     val lasts  = ArrayBuffer[(String, String, String)]()
 
-    for (r <- allFirsts) firsts.append((r.httpMethod.toString, RouteCompiler.decompile(r.compiledPattern), r.actionClass.toString))
-    for (r <- allOthers) others.append((r.httpMethod.toString, RouteCompiler.decompile(r.compiledPattern), r.actionClass.toString))
-    for (r <- allLasts)  lasts.append((r.httpMethod.toString, RouteCompiler.decompile(r.compiledPattern), r.actionClass.toString))
+    for (r <- allFirsts) firsts.append((r.httpMethod.toString, RouteCompiler.decompile(r.compiledPattern), r.actionClass.getName))
+    for (r <- allOthers) others.append((r.httpMethod.toString, RouteCompiler.decompile(r.compiledPattern), r.actionClass.getName))
+    for (r <- allLasts ) lasts .append((r.httpMethod.toString, RouteCompiler.decompile(r.compiledPattern), r.actionClass.getName))
 
     // Sort by pattern
     var all = firsts ++ others.sortBy(_._2) ++ lasts

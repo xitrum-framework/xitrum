@@ -19,7 +19,7 @@ object Cache extends Logger {
   }
 
   def pageActionPrefix(actionClass: Class[_ <: Action]): String =
-    "xitrum/page-action/" + actionClass
+    "xitrum/page-action/" + actionClass.getName
 
   private def removePrefix(keyPrefix: Any) {
     val keyPrefixS = keyPrefix.toString

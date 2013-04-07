@@ -84,9 +84,10 @@ trait Action extends Actor
       if (!forwarding) AccessLog.logDynamicContentAccess(this, beginTimestamp, cacheSecs, hit)
     } catch {
       case NonFatal(e) =>
-        println(e)
-        e.printStackTrace()
-        //if (action.forwarding) throw e
+        if (forwarding) {
+          logger.warn("Error", e)
+          return
+        }
 
         // End timestamp
         val t2 = System.currentTimeMillis()
@@ -142,7 +143,7 @@ trait Action extends Actor
 
   /** @return true if the cache was hit */
   private def tryCache(f: => Unit): Boolean = {
-    ResponseCacher.getCachedResponse(this) match {
+    ResponseCacher.getCachedResponse(handlerEnv) match {
       case None =>
         f
         false
