@@ -7,6 +7,8 @@ import java.util.Arrays
 import javax.crypto.{Cipher, Mac}
 import javax.crypto.spec.{SecretKeySpec, IvParameterSpec}
 
+import scala.util.control.NonFatal
+
 import org.jboss.netty.util.CharsetUtil.UTF_8
 import xitrum.Config
 
@@ -36,7 +38,7 @@ object Secure {
       try {
         Some(decryptWithoutSeal(data2, bkey))
       } catch {
-        case scala.util.control.NonFatal(e) => None
+        case NonFatal(e) => None
       }
     }
   }
@@ -131,7 +133,7 @@ object Secure {
       val h2 = hmac(d, key)
       if (Arrays.equals(h2, h)) Some(d) else None
     } catch {
-      case scala.util.control.NonFatal(e) => None
+      case NonFatal(e) => None
     }
   }
 }

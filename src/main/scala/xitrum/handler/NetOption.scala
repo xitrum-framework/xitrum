@@ -1,6 +1,8 @@
 package xitrum.handler
 
 import java.net.InetSocketAddress
+import scala.util.control.NonFatal
+
 import org.jboss.netty.bootstrap.ServerBootstrap
 import xitrum.Config
 
@@ -28,7 +30,7 @@ object NetOption {
     try {
       bootstrap.bind(addr)
     } catch {
-      case scala.util.control.NonFatal(e) =>
+      case NonFatal(e) =>
         val msg = ic match {
           case None =>
             ("Could not open port %d for %s server. " +

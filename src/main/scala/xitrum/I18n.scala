@@ -1,5 +1,6 @@
 package xitrum
 
+import scala.util.control.NonFatal
 import org.jboss.netty.handler.codec.http.HttpHeaders.Names
 import xitrum.i18n.PoLoader
 
@@ -22,7 +23,7 @@ trait I18n {
       val lang_priority = lang.split(";")
       if (lang_priority.size == 2) {
         val lang2    = lang_priority(0).trim
-        val priority = try { lang_priority(1).trim.toFloat } catch { case scala.util.control.NonFatal(e) => 1.0 }
+        val priority = try { lang_priority(1).trim.toFloat } catch { case NonFatal(e) => 1.0 }
         (lang2, priority)
       } else {
         (lang.trim, 1.0)

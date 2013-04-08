@@ -5,6 +5,7 @@ import java.lang.reflect.Method
 import java.util.{List => JList}
 
 import scala.collection.mutable.ArrayBuffer
+import scala.util.control.NonFatal
 
 import javassist.{ClassClassPath, ClassPool}
 import javassist.bytecode.{AnnotationsAttribute, ClassFile, MethodInfo, AccessFlag}
@@ -48,7 +49,7 @@ class RouteCollector extends Logger {
         acc
       }
     } catch {
-      case scala.util.control.NonFatal(e) =>
+      case NonFatal(e) =>
         logger.warn("Could not scan route for " + entry.relPath + " in " + entry.container, e)
         acc
     }

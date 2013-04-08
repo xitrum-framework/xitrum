@@ -1,6 +1,7 @@
 package xitrum.sockjs
 
 import java.util.{Arrays, Random}
+import scala.util.control.NonFatal
 
 import org.jboss.netty.channel.ChannelFutureListener
 import org.jboss.netty.buffer.ChannelBuffers
@@ -359,7 +360,7 @@ class SockJsXhrSend extends SockJsAction {
         // body: ["m1", "m2"]
         Json.parse[Seq[String]](body)
       } catch {
-        case scala.util.control.NonFatal(e) =>
+        case NonFatal(e) =>
           response.setStatus(HttpResponseStatus.INTERNAL_SERVER_ERROR)
           respondText("Broken JSON encoding.")
           null
@@ -704,7 +705,7 @@ class SockJsJsonPPollingSend extends SockJsAction {
         request.getContent().toString(Config.requestCharset)
       }
     } catch {
-      case scala.util.control.NonFatal(e) =>
+      case NonFatal(e) =>
         ""
     }
 
@@ -719,7 +720,7 @@ class SockJsJsonPPollingSend extends SockJsAction {
         // body: ["m1", "m2"]
         Json.parse[Seq[String]](body)
       } catch {
-        case scala.util.control.NonFatal(e) =>
+        case NonFatal(e) =>
           response.setStatus(HttpResponseStatus.INTERNAL_SERVER_ERROR)
           respondText("Broken JSON encoding.")
           null
@@ -882,7 +883,7 @@ class SockJSWebsocket extends SockJsAction {
           val normalizedBody = if (body.startsWith("[")) body else "[" + body + "]"
           Json.parse[Seq[String]](normalizedBody)
         } catch {
-          case scala.util.control.NonFatal(e) =>
+          case NonFatal(e) =>
             // No c frame is sent!
             // http://sockjs.github.com/sockjs-protocol/sockjs-protocol-0.3.3.html#section-72
             //respondWebSocket("c[2011,\"Broken JSON encoding.\"]")

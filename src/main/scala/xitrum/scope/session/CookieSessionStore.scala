@@ -1,6 +1,7 @@
 package xitrum.scope.session
 
 import scala.collection.mutable.{Map => MMap}
+import scala.util.control.NonFatal
 
 import org.jboss.netty.handler.codec.http.DefaultCookie
 
@@ -25,7 +26,7 @@ class CookieSessionStore extends SessionStore with Logger {
             val immutableMap = try {
               any.asInstanceOf[Map[String, Any]]
             } catch {
-              case scala.util.control.NonFatal(e) =>
+              case NonFatal(e) =>
                 MMap[String, Any]()
             }
 

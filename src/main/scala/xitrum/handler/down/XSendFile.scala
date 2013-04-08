@@ -1,6 +1,7 @@
 package xitrum.handler.down
 
 import java.io.{File, RandomAccessFile}
+import scala.util.control.NonFatal
 
 import org.jboss.netty.channel.{ChannelEvent, ChannelDownstreamHandler, Channels, ChannelHandler, ChannelHandlerContext, DownstreamMessageEvent, UpstreamMessageEvent, ChannelFuture, DefaultFileRegion, ChannelFutureListener}
 import org.jboss.netty.handler.codec.http.{HttpHeaders, HttpMethod, HttpRequest, HttpResponse, HttpResponseStatus, HttpVersion}
@@ -204,7 +205,7 @@ object XSendFile extends Logger {
         }
       }
     } catch {
-      case scala.util.control.NonFatal(e) =>
+      case NonFatal(e) =>
         logger.warn("Unsupported Range spec: " + spec)
         None
     }

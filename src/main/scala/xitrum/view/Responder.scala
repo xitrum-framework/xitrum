@@ -2,6 +2,7 @@ package xitrum.view
 
 import java.io.File
 import scala.xml.{Node, NodeSeq, Xhtml}
+import scala.util.control.NonFatal
 
 import org.jboss.netty.buffer.{ChannelBuffer, ChannelBuffers}
 import org.jboss.netty.channel.ChannelFuture
@@ -388,7 +389,7 @@ trait Responder extends JS with Flash with Knockout {
     try {
       throw new IllegalStateException("Double response")
     } catch {
-      case scala.util.control.NonFatal(e) =>
+      case NonFatal(e) =>
         logger.warn("Double response! This double response is ignored.", e)
     }
     null  // This may cause NPE on double response if the ChannelFuture result is used

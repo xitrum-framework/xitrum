@@ -2,6 +2,7 @@ package xitrum
 
 import java.lang.reflect.Method
 import java.util.concurrent.TimeUnit
+import scala.util.control.NonFatal
 
 import com.hazelcast.core.{IMap, MapEntry}
 import com.hazelcast.query.Predicate
@@ -76,7 +77,7 @@ object Cache extends Logger {
     try {
       Option(cache.get(key)).map(_.asInstanceOf[T])
     } catch {
-      case scala.util.control.NonFatal(e) =>
+      case NonFatal(e) =>
         logger.warn("Cache data restoring failed, will now remove it, key: {}", key)
         cache.remove(key)
         None

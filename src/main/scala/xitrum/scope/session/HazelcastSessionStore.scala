@@ -2,6 +2,7 @@ package xitrum.scope.session
 
 import java.util.UUID
 import scala.collection.mutable.HashMap
+import scala.util.control.NonFatal
 
 import org.jboss.netty.handler.codec.http.DefaultCookie
 import com.hazelcast.core.IMap
@@ -48,7 +49,7 @@ class HazelcastSessionStore extends SessionStore {
               try {
                 Some(any.asInstanceOf[String])
               } catch {
-                case scala.util.control.NonFatal(e) => None
+                case NonFatal(e) => None
               }
 
             sessionIdo match {
