@@ -17,24 +17,18 @@ import xitrum.sockjs.SockJsAction
 object Routes extends Logger {
   private val ROUTES_CACHE = "routes.cache"
 
-  var routes: Option[RouteCollection] = None
+  val routes = deserializeCacheFileOrRecollectWithRetry()
 
   /** 404.html and 500.html are used by default */
   var error404: Class[_ <: Action] = _
   var error500: Class[_ <: Action] = _
 
-  def fromCacheFileOrRecollect() {
-    // Avoid running twice, older version of Xitrum (v1.8) needs apps to
-    // call this method explicitly
-    if (routes.isEmpty) fromCacheFileOrRecollectWithRetry()
-  }
-
   //----------------------------------------------------------------------------
 
-  private def fromCacheFileOrRecollectWithRetry() {
+  private def deserializeCacheFileOrRecollectWithRetry(): RouteCollection = {
     try {
       logger.info("Load file " + ROUTES_CACHE + "/collect routes and action/page cache config from controllers...")
-      fromCacheFileOrRecollectReal()
+      deserializeCacheFileOrRecollectWithoutRetry()
     } catch {
       case NonFatal(e) =>
         // Maybe ROUTES_CACHE file could not be loaded because dependencies have changed.
@@ -46,7 +40,7 @@ object Routes extends Logger {
           logger.info("Delete file " + ROUTES_CACHE + " and recollect...")
           f.delete()
           try {
-            fromCacheFileOrRecollectReal()
+            deserializeCacheFileOrRecollectWithoutRetry()
           } catch {
             case e2: Exception =>
               Config.exitOnError("Could not collect routes", e2)
@@ -59,8 +53,8 @@ object Routes extends Logger {
     }
   }
 
-  private def fromCacheFileOrRecollectReal() {
+  private def deserializeCacheFileOrRecollectWithoutRetry(): RouteCollection = {
     val routeCollector = new RouteCollector
-    routes = Some(routeCollector.fromCacheFileOrRecollect(ROUTES_CACHE))
+    routeCollector.deserializeCacheFileOrRecollect(ROUTES_CACHE)
   }
 }

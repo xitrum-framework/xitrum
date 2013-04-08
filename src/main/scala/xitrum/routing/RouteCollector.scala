@@ -17,7 +17,7 @@ import xitrum.sockjs.SockJsAction
 
 /** Scan all classes to collect routes from actions. */
 class RouteCollector extends Logger {
-  def fromCacheFileOrRecollect(cachedFileName: String): RouteCollection = {
+  def deserializeCacheFileOrRecollect(cachedFileName: String): RouteCollection = {
     val acc          = new SerializableRouteCollection
     val serializable = Scanner.foldLeft(cachedFileName, acc, discovered _)
     serializable.toRouteCollection
