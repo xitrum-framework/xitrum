@@ -226,37 +226,29 @@ trait Responder extends JS with Flash with Knockout {
   /**
    * @param options specific to the configured template engine
    */
-  def respondView(customLayout: () => Any = layout _, actionClass: Class[_ <: Action] = getClass, options: Map[String, Any] = Map()): ChannelFuture = {
+  def respondView(customLayout: () => Any, actionClass: Class[_ <: Action], options: Map[String, Any]): ChannelFuture = {
     val string = renderView(customLayout, actionClass, options)
     respondText(string, "text/html")
   }
-/*
+
   def respondView(customLayout: () => Any, options: Map[String, Any]): ChannelFuture =
-    respondView(currentAction.getClass, customLayout, options)
+    respondView(customLayout, getClass, options)
 
   def respondView(customLayout: () => Any): ChannelFuture =
-    respondView(currentAction.getClass, customLayout, Map[String, Any]())
+    respondView(customLayout, getClass, Map())
 
-  /**
-   * Same as respondView(action, customLayout, options),
-   * where customLayout is the controller's layout method.
-   */
-  def respondView(action: Class[_ <: Action], options: Map[String, Any]): ChannelFuture =
-    respondView(action, layout _, options)
+  def respondView(actionClass: Class[_ <: Action], options: Map[String, Any]): ChannelFuture =
+    respondView(layout _, actionClass, options)
 
-  def respondView(action: Class[_ <: Action]): ChannelFuture =
-    respondView(action, layout _, Map[String, Any]())
+  def respondView(actionClass: Class[_ <: Action]): ChannelFuture =
+    respondView(layout _, actionClass, Map())
 
-  /**
-   * Same as respondView(action, customLayout, options),
-   * where action is currentAction and customLayout is the controller's layout method.
-   */
   def respondView(options: Map[String, Any]): ChannelFuture =
-    respondView(currentAction.getClass, layout _, options)
+    respondView(layout _, getClass, options)
 
   def respondView(): ChannelFuture =
-    respondView(currentAction.getClass, layout _, Map[String, Any]())
-*/
+    respondView(layout _, getClass, Map())
+
   //----------------------------------------------------------------------------
 
   /** Content-Type header is set to "text/html" */

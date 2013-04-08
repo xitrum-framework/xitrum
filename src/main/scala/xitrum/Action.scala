@@ -30,7 +30,7 @@ trait Action extends Actor
   with Responder
   with I18n
 {
-  lazy val currentAction = this
+  implicit val currentAction = this
 
   /** Actions have to implement this method. */
   def execute()

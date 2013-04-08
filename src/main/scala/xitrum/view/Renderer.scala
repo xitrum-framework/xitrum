@@ -48,29 +48,29 @@ trait Renderer {
    *
    * @param options specific to the configured template engine
    */
-  def renderView(customLayout: () => Any = layout _, actionClass: Class[_ <: Action] = getClass, options: Map[String, Any] = Map()): String = {
+  def renderView(customLayout: () => Any, actionClass: Class[_ <: Action], options: Map[String, Any]): String = {
     renderedView = Config.xitrum.templateEngine.renderTemplate(actionClass, this, options)
     customLayout.apply().toString
   }
-/*
+
   def renderView(customLayout: () => Any, options: Map[String, Any]): String =
-    renderView(customLayout, getClass, this, options)
+    renderView(customLayout, getClass, options)
 
   def renderView(customLayout: () => Any): String =
-    renderView(customLayout, getClass, this, Map())
+    renderView(customLayout, getClass, Map())
 
   def renderView(actionClass: Class[_ <: Action], options: Map[String, Any]): String =
-    renderView(layout _, actionClass, this, options)
+    renderView(layout _, actionClass, options)
 
   def renderView(actionClass: Class[_ <: Action]): String =
-    renderView(layout _, actionClass, this, Map())
+    renderView(layout _, actionClass, Map())
 
   def renderView(options: Map[String, Any]): String =
-    renderView(layout _, getClass, this, options)
+    renderView(layout _, getClass, options)
 
   def renderView(): String =
-    renderView(layout _, getClass, this, Map())
-*/
+    renderView(layout _, getClass, Map())
+
   //----------------------------------------------------------------------------
 
   def renderInlineView(inlineView: Any): String = {
