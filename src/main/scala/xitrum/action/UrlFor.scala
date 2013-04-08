@@ -32,7 +32,7 @@ trait UrlFor {
 
   //----------------------------------------------------------------------------
 
-  def url(params: (String, Any)*) = Routes.routes.get.reverseMappings(getClass).url(params:_*)
+  def url(params: (String, Any)*) = Routes.routes.reverseMappings(getClass).url(params:_*)
   lazy val url: String = url()
 
   def absoluteUrl(params: (String, Any)*)(implicit action: Action) = action.absoluteUrlPrefix + url(params:_*)
@@ -45,7 +45,7 @@ trait UrlFor {
 
   def url[T: Manifest](params: (String, Any)*) = {
     val actionClass = manifest[T].runtimeClass.asInstanceOf[Class[Action]]
-    Routes.routes.get.reverseMappings(actionClass).url(params:_*)
+    Routes.routes.reverseMappings(actionClass).url(params:_*)
   }
   def absoluteUrl[T: Manifest](params: (String, Any)*) = absoluteUrlPrefix + url[T](params:_*)
 

@@ -16,8 +16,7 @@ object Server extends Logger {
     // letting it start lazily
     Cache.cache.size()
 
-    Routes.fromCacheFileOrRecollect()
-    val routes = Routes.routes.get
+    val routes = Routes.routes
     routes.printRoutes()
     routes.printActionPageCaches()
 

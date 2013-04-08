@@ -12,11 +12,11 @@ import xitrum.util.Gzip
 
 object JSRoutesCache {
   // This value is stable, even across different servers in a cluster
-  lazy val etag = Etag.forString(Routes.routes.get.jsRoutes)
+  lazy val etag = Etag.forString(Routes.routes.jsRoutes)
 
   lazy val routes =
     "var XITRUM_BASE_URL = '" + Config.baseUrl  + "';\n" +
-    "var XITRUM_ROUTES   = "  + Routes.routes.get.jsRoutes + ";\n"
+    "var XITRUM_ROUTES   = "  + Routes.routes.jsRoutes + ";\n"
 
   lazy val gzippedRoutes =
     Gzip.compress(routes.getBytes(Config.xitrum.request.charset))

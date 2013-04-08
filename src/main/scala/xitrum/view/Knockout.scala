@@ -25,7 +25,7 @@ trait Knockout {
       (if (scopeSelector.isEmpty) "ko.applyBindings(model);\n" else "ko.applyBindings(model, " + scopeSelector + "[0]);\n")
     val prepareSync =
       "var sync = function() {\n" +
-        "$.post('" + Routes.routes.get.reverseMappings(syncAction).url() + """', {model: ko.mapping.toJSON(model)}, function(data) {
+        "$.post('" + Routes.routes.reverseMappings(syncAction).url() + """', {model: ko.mapping.toJSON(model)}, function(data) {
           if (typeof(data) === 'object') {
             model = ko.mapping.fromJS(data);
             ko.applyBindings(model);
