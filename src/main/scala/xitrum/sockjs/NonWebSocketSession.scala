@@ -5,7 +5,7 @@ import scala.collection.mutable.ArrayBuffer
 import akka.actor.{Actor, ActorRef, ActorSystem, Props, ReceiveTimeout, Terminated}
 import scala.concurrent.duration._
 
-import xitrum.{Action, SockJsHandler}
+import xitrum.{ActionEnv, SockJsHandler}
 import xitrum.routing.Routes
 
 sealed trait MessageToSession
@@ -46,7 +46,7 @@ object NonWebSocketSession {
  * for subscriber for a long time.
  * See TIMEOUT_CONNECTION and TIMEOUT_HEARTBEAT in NonWebSocketSessions.
  */
-class NonWebSocketSession(var clientSubscriber: ActorRef, pathPrefix: String, action: Action) extends Actor {
+class NonWebSocketSession(var clientSubscriber: ActorRef, pathPrefix: String, action: ActionEnv) extends Actor {
   import NonWebSocketSession._
 
   private var sockJsHandler: SockJsHandler = _

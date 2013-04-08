@@ -2,7 +2,7 @@ package xitrum.scope.request
 
 import scala.collection.mutable.{Map => MMap}
 
-import xitrum.{Config, Action}
+import xitrum.{Config, ActionEnv}
 import xitrum.handler.HandlerEnv
 import xitrum.routing.Route
 
@@ -48,7 +48,7 @@ object RequestEnv {
  * and Controller can be inferred from these variables.
  */
 trait RequestEnv extends ParamAccess {
-  this: Action =>
+  this: ActionEnv =>
 
   var handlerEnv: HandlerEnv = _
 

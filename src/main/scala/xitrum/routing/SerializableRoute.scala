@@ -2,7 +2,7 @@ package xitrum.routing
 
 import java.io.Serializable
 import org.jboss.netty.handler.codec.http.HttpMethod
-import xitrum.Action
+import xitrum.ActionEnv
 
 class SerializableRoute(
   // In
@@ -15,7 +15,7 @@ class SerializableRoute(
   def toRoute: Route = {
     new Route(
       new HttpMethod(httpMethod),
-      compiledPattern, Class.forName(actionClass).asInstanceOf[Class[Action]],
+      compiledPattern, Class.forName(actionClass).asInstanceOf[Class[ActionEnv]],
       cacheSecs
     )
   }

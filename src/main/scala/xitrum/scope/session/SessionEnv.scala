@@ -5,10 +5,10 @@ import scala.collection.mutable.{ArrayBuffer, HashMap}
 import org.jboss.netty.handler.codec.http.{HttpRequest, Cookie, CookieDecoder, CookieEncoder, HttpHeaders}
 import HttpHeaders.Names
 
-import xitrum.{Config, Action}
+import xitrum.{Config, ActionEnv}
 
 trait SessionEnv extends CSRF {
-  this: Action =>
+  this: ActionEnv =>
 
   // Below are lazy because they are not always accessed by framwork/application
   // (to save calculation time) or the things they depend on are null when this

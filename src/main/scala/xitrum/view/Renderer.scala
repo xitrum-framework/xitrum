@@ -2,11 +2,11 @@ package xitrum.view
 
 import java.io.File
 
-import xitrum.{Config, Action}
+import xitrum.{Config, ActionEnv}
 import xitrum.routing.Routes
 
 trait Renderer {
-  this: Action =>
+  this: ActionEnv =>
 
   var renderedView: Any = null
 
@@ -48,7 +48,7 @@ trait Renderer {
    *
    * @param options specific to the configured template engine
    */
-  def renderView(customLayout: () => Any, actionClass: Class[_ <: Action], options: Map[String, Any]): String = {
+  def renderView(customLayout: () => Any, actionClass: Class[_ <: ActionEnv], options: Map[String, Any]): String = {
     renderedView = Config.xitrum.templateEngine.renderTemplate(actionClass, this, options)
     customLayout.apply().toString
   }
@@ -59,10 +59,10 @@ trait Renderer {
   def renderView(customLayout: () => Any): String =
     renderView(customLayout, getClass, Map())
 
-  def renderView(actionClass: Class[_ <: Action], options: Map[String, Any]): String =
+  def renderView(actionClass: Class[_ <: ActionEnv], options: Map[String, Any]): String =
     renderView(layout _, actionClass, options)
 
-  def renderView(actionClass: Class[_ <: Action]): String =
+  def renderView(actionClass: Class[_ <: ActionEnv]): String =
     renderView(layout _, actionClass, Map())
 
   def renderView(options: Map[String, Any]): String =
@@ -79,10 +79,10 @@ trait Renderer {
     any.toString()
   }
 
-  def renderViewNoLayout(actionClass: Class[_ <: Action], options: Map[String, Any]): String =
+  def renderViewNoLayout(actionClass: Class[_ <: ActionEnv], options: Map[String, Any]): String =
     Config.xitrum.templateEngine.renderTemplate(actionClass, this, options)
 
-  def renderViewNoLayout(actionClass: Class[_ <: Action]): String =
+  def renderViewNoLayout(actionClass: Class[_ <: ActionEnv]): String =
     Config.xitrum.templateEngine.renderTemplate(actionClass, this, Map())
 
   def renderViewNoLayout(): String =

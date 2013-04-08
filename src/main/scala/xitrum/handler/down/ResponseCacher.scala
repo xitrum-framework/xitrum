@@ -10,7 +10,7 @@ import HttpResponseStatus.OK
 import HttpHeaders.Names.{CONTENT_ENCODING, CONTENT_TYPE}
 
 import xitrum.{Cache, Config, Logger}
-import xitrum.Action
+import xitrum.ActionEnv
 import xitrum.routing.Routes
 import xitrum.scope.request.RequestEnv
 import xitrum.handler.HandlerEnv

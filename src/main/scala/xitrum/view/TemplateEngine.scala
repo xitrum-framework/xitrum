@@ -1,6 +1,6 @@
 package xitrum.view
 
-import xitrum.Action
+import xitrum.ActionEnv
 
 /**
  * Template engines should extend this trait and implement its methods.
@@ -17,5 +17,5 @@ trait TemplateEngine {
    *
    * @param options specific to the configured template engine
    */
-  def renderTemplate(actionClass: Class[_ <: Action], action: Action, options: Map[String, Any]): String
+  def renderTemplate(actionClass: Class[_ <: ActionEnv], action: ActionEnv, options: Map[String, Any]): String
 }

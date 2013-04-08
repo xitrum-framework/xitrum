@@ -2,12 +2,12 @@ package xitrum.action
 
 import scala.util.Random
 
-import xitrum.{Config, Action}
+import xitrum.{Config, ActionEnv}
 import xitrum.etag.Etag
 import xitrum.routing.Routes
 
 trait UrlFor {
-  this: Action =>
+  this: ActionEnv =>
 
   /** @param path Relative to the "public" directory, without leading "/" */
   def urlForPublic(path: String) = {
@@ -44,7 +44,7 @@ trait UrlFor {
   //----------------------------------------------------------------------------
 
   def url[T: Manifest](params: (String, Any)*) = {
-    val actionClass = manifest[T].runtimeClass.asInstanceOf[Class[Action]]
+    val actionClass = manifest[T].runtimeClass.asInstanceOf[Class[ActionEnv]]
     Routes.routes.reverseMappings(actionClass).url(params:_*)
   }
   def url[T: Manifest]: String = url[T]()
@@ -53,7 +53,7 @@ trait UrlFor {
   def absoluteUrl[T: Manifest]: String = absoluteUrl[T]()
 
   def webSocketAbsoluteUrl[T: Manifest](params: (String, Any)*) = {
-    val actionClass = manifest[T].runtimeClass.asInstanceOf[Class[Action]]
+    val actionClass = manifest[T].runtimeClass.asInstanceOf[Class[ActionEnv]]
     webSocketAbsoluteUrlPrefix + url[T](params:_*)
   }
   def webSocketAbsoluteUrl[T: Manifest]: String = webSocketAbsoluteUrl[T]()

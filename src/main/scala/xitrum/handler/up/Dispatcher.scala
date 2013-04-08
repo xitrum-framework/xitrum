@@ -11,20 +11,16 @@ import HttpVersion._
 import akka.actor.{Actor, ActorRef, Props}
 import com.esotericsoftware.reflectasm.ConstructorAccess
 
-import xitrum.{Action, Config}
+import xitrum.{ActionEnv, Config}
 import xitrum.handler.HandlerEnv
 import xitrum.handler.down.XSendFile
 import xitrum.routing.Routes
 
 object Dispatcher {
-  def dispatchWithFailsafe(channel: Channel, actionClass: Class[_ <: Action], cacheSecs: Int, env: HandlerEnv) {
+  def dispatchWithFailsafe(actionClass: Class[_ <: ActionEnv], cacheSecs: Int, env: HandlerEnv) {
     val system   = Config.actorSystem
-    val actorRef = system.actorOf(Props(ConstructorAccess.get(actionClass).newInstance()))
+    val actorRef = system.actorOf(Props(ConstructorAccess.get(actionClass).newInstance().asInstanceOf[Actor]))
     actorRef ! (env, cacheSecs)
-
-    channel.getCloseFuture.addListener(new ChannelFutureListener {
-      def operationComplete(future: ChannelFuture) { system.stop(actorRef) }
-    })
   }
 }
 
@@ -49,7 +45,7 @@ class Dispatcher extends SimpleChannelUpstreamHandler with BadClientSilencer {
       case Some((route, pathParams)) =>
         env.route      = route
         env.pathParams = pathParams
-        Dispatcher.dispatchWithFailsafe(ctx.getChannel, route.actionClass, route.cacheSecs, env)
+        Dispatcher.dispatchWithFailsafe(route.actionClass, route.cacheSecs, env)
 
       case None =>
         if (Routes.error404 == null) {
@@ -60,7 +56,7 @@ class Dispatcher extends SimpleChannelUpstreamHandler with BadClientSilencer {
         } else {
             env.pathParams = MMap.empty
             env.response.setStatus(NOT_FOUND)
-            Dispatcher.dispatchWithFailsafe(ctx.getChannel, Routes.error404, 0, env)
+            Dispatcher.dispatchWithFailsafe(Routes.error404, 0, env)
         }
     }
   }
