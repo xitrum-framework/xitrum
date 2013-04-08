@@ -17,6 +17,7 @@ object ChannelPipelineFactory {
     // pipeline.replace(classOf[HttpResponseEncoder], "wsencoder", new WebSocket08FrameEncoder(false))
 
     pipeline.remove(classOf[NoPipelining])
+    if (Config.xitrum.basicAuth.isDefined)
     pipeline.remove(classOf[BasicAuth])
     pipeline.remove(classOf[BaseUrlRemover])
     pipeline.remove(classOf[PublicFileServer])
