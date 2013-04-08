@@ -1,18 +1,18 @@
 package xitrum.routing
 
 import java.io.File
-import java.lang.reflect.{Method, Modifier}
 
-import scala.collection.mutable.{ArrayBuffer, Map => MMap, StringBuilder}
+import scala.collection.mutable.{Map => MMap}
 import scala.util.control.NonFatal
-import scala.util.matching.Regex
 
 import org.apache.commons.lang3.ClassUtils
-import org.jboss.netty.handler.codec.http.{HttpMethod, QueryStringEncoder}
 
 import xitrum.{Config, Action, Logger, SockJsHandler}
-import xitrum.scope.request.{Params, PathInfo}
 import xitrum.sockjs.SockJsAction
+
+// "websocket" and "cookieNeeded" members are named after SockJS option:
+// {"websocket": true/false, "cookie_needed": true/false, "origins": ["*:*"], "entropy": integer}
+class SockJsClassAndOptions(val handlerClass: Class[_ <: SockJsHandler], val websocket: Boolean, val cookieNeeded: Boolean)
 
 object Routes extends Logger {
   private val ROUTES_CACHE = "routes.cache"
@@ -27,34 +27,56 @@ object Routes extends Logger {
 
   private def deserializeCacheFileOrRecollectWithRetry(): RouteCollection = {
     try {
-      logger.info("Load file " + ROUTES_CACHE + "/collect routes and action/page cache config from controllers...")
-      deserializeCacheFileOrRecollectWithoutRetry()
+      logger.info("Load file " + ROUTES_CACHE + " or recollect routes...")
+      val routeCollector = new RouteCollector
+      routeCollector.deserializeCacheFileOrRecollect(ROUTES_CACHE)
     } catch {
       case NonFatal(e) =>
-        // Maybe ROUTES_CACHE file could not be loaded because dependencies have changed.
-        // Try deleting and scanning again.
-        val f = new File(ROUTES_CACHE)
-        if (f.exists) {
-          logger.warn("Error loading file " + ROUTES_CACHE, e)
-
-          logger.info("Delete file " + ROUTES_CACHE + " and recollect...")
-          f.delete()
-          try {
-            deserializeCacheFileOrRecollectWithoutRetry()
-          } catch {
-            case e2: Exception =>
-              Config.exitOnError("Could not collect routes", e2)
-              throw e2
-          }
-        } else {
-          Config.exitOnError("Could not collect routes", e)
-          throw e
-        }
+        Config.exitOnError("Could not collect routes", e)
+        throw e
     }
   }
 
-  private def deserializeCacheFileOrRecollectWithoutRetry(): RouteCollection = {
-    val routeCollector = new RouteCollector
-    routeCollector.deserializeCacheFileOrRecollect(ROUTES_CACHE)
+  //----------------------------------------------------------------------------
+
+  private val sockJsClassAndOptionsTable = MMap[String, SockJsClassAndOptions]()
+
+  /**
+   * Mounts SockJS handler at the path prefix.
+   *
+   * @param websocket set to true to enable WebSocket
+   * @param cookieNeeded set to true for load balancers that needs JSESSION cookie
+   */
+  def sockJs(handlerClass: Class[_ <: SockJsHandler], pathPrefix: String, websocket: Boolean = true, cookieNeeded: Boolean = false) {
+    sockJsClassAndOptionsTable(pathPrefix) = new SockJsClassAndOptions(handlerClass, websocket, cookieNeeded)
+  }
+
+  def createSockJsHandler(pathPrefix: String) = {
+    val sockJsClassAndOptions = sockJsClassAndOptionsTable(pathPrefix)
+    sockJsClassAndOptions.handlerClass.newInstance()
+  }
+
+  /** @param sockJsHandlerClass Normal SockJsHandler subclass or object class */
+  def sockJsPathPrefix(sockJsHandlerClass: Class[_ <: SockJsHandler]) = {
+    val className = sockJsHandlerClass.getName
+    if (className.endsWith("$")) {
+      val normalClassName = className.substring(0, className.length - 1)
+      val normalClass     = ClassUtils.getClass(normalClassName)
+      sockJsPathPrefixForNormalSockJsHandlerClass(normalClass.asInstanceOf[Class[_ <: SockJsHandler]])
+    } else {
+      sockJsPathPrefixForNormalSockJsHandlerClass(sockJsHandlerClass)
+    }
+  }
+
+  def sockJsClassAndOptions(pathPrefix: String) = {
+    sockJsClassAndOptionsTable(pathPrefix)
+  }
+
+  private def sockJsPathPrefixForNormalSockJsHandlerClass(handlerClass: Class[_ <: SockJsHandler]): String = {
+    val kv = sockJsClassAndOptionsTable.find { case (k, v) => v.handlerClass == handlerClass }
+    kv match {
+      case Some((k, v)) => "/" + k
+      case None         => throw new Exception("Cannot lookup SockJS URL for class: " + handlerClass)
+    }
   }
 }
