@@ -24,7 +24,9 @@ trait Redirect {
   }
 
   /** See also forwardTo. */
-  def redirectTo(action: Action, params: (String, Any)*): ChannelFuture = { redirectTo(action.url(params: _*)) }
+  def redirectTo(actionClass: Class[_ <: Action], params: (String, Any)*): ChannelFuture = {
+    redirectTo(Routes.routes.reverseMappings(actionClass).url(params: _*))
+  }
 
   //----------------------------------------------------------------------------
 
