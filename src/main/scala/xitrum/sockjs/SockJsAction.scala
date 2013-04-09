@@ -143,7 +143,7 @@ trait SockJsAction extends Action with SkipCSRFCheck {
   }
 
   protected def callbackParam(): Option[String] = {
-    val paramName = if (uriParams.isDefinedAt("c")) "c" else "callback"
+    val paramName = if (handlerEnv.uriParams.isDefinedAt("c")) "c" else "callback"
     val ret = paramo(paramName)
     if (ret == None) {
       response.setStatus(HttpResponseStatus.INTERNAL_SERVER_ERROR)

@@ -15,9 +15,12 @@ object CSRF {
 
   def isValidToken(action: Action): Boolean = {
     // The token must be in the request body for more security
-    val tokenInRequest = action.param(TOKEN, action.bodyParams)
+    val bodyParams     = action.handlerEnv.bodyParams
+    val tokenInRequest = action.param(TOKEN, bodyParams)
+
     // Cleaner for application developers when seeing access log
-    action.bodyParams.remove(TOKEN)
+    bodyParams.remove(TOKEN)
+
     val tokenInSession = action.antiCSRFToken
     tokenInRequest == tokenInSession
   }
