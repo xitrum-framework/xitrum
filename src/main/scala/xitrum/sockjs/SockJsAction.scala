@@ -9,7 +9,7 @@ import org.jboss.netty.handler.codec.http.{DefaultCookie, HttpHeaders, HttpRespo
 
 import akka.actor.{Actor, ActorRef, PoisonPill, Props, Terminated}
 
-import xitrum.{Config, ActionEnv, SkipCSRFCheck}
+import xitrum.{Config, Action, SkipCSRFCheck}
 import xitrum.annotation._
 import xitrum.etag.NotModified
 import xitrum.routing.Routes
@@ -111,7 +111,7 @@ object SockJsAction {
 // => filters can't be used because, for example beforeFilter is set before
 //    pathPrefix is set
 
-trait SockJsAction extends ActionEnv with SkipCSRFCheck
+trait SockJsAction extends Action with SkipCSRFCheck
 
 /*
 {

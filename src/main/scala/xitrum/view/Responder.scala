@@ -12,7 +12,7 @@ import org.jboss.netty.util.CharsetUtil
 import HttpHeaders.Names.{CONTENT_TYPE, CONTENT_LENGTH, TRANSFER_ENCODING}
 import HttpHeaders.Values.{CHUNKED, NO_CACHE}
 
-import xitrum.{ActionEnv, Config}
+import xitrum.{Action, Config}
 import xitrum.etag.NotModified
 import xitrum.handler.up.NoPipelining
 import xitrum.handler.down.{XSendFile, XSendResource}
@@ -24,7 +24,7 @@ import xitrum.util.Json
  * http://code.google.com/speed/page-speed/docs/rendering.html#SpecifyCharsetEarly
  */
 trait Responder extends JS with Flash with Knockout {
-  this: ActionEnv =>
+  this: Action =>
 
   //----------------------------------------------------------------------------
 
@@ -32,8 +32,8 @@ trait Responder extends JS with Flash with Knockout {
 
   def isResponded = responded
 
-  /** Implemented by Action. */
-  def onResponded()
+  /** Called when the response has been sent to the client. */
+  def onResponded() {}
 
   def respond(): ChannelFuture = {
     if (responded) {
@@ -230,7 +230,7 @@ trait Responder extends JS with Flash with Knockout {
   /**
    * @param options specific to the configured template engine
    */
-  def respondView(customLayout: () => Any, actionClass: Class[_ <: ActionEnv], options: Map[String, Any]): ChannelFuture = {
+  def respondView(customLayout: () => Any, actionClass: Class[_ <: Action], options: Map[String, Any]): ChannelFuture = {
     val string = renderView(customLayout, actionClass, options)
     respondText(string, "text/html")
   }
@@ -241,10 +241,10 @@ trait Responder extends JS with Flash with Knockout {
   def respondView(customLayout: () => Any): ChannelFuture =
     respondView(customLayout, getClass, Map())
 
-  def respondView(actionClass: Class[_ <: ActionEnv], options: Map[String, Any]): ChannelFuture =
+  def respondView(actionClass: Class[_ <: Action], options: Map[String, Any]): ChannelFuture =
     respondView(layout _, actionClass, options)
 
-  def respondView(actionClass: Class[_ <: ActionEnv]): ChannelFuture =
+  def respondView(actionClass: Class[_ <: Action]): ChannelFuture =
     respondView(layout _, actionClass, Map())
 
   def respondView(options: Map[String, Any]): ChannelFuture =
@@ -262,7 +262,7 @@ trait Responder extends JS with Flash with Knockout {
   }
 
   /** Content-Type header is set to "text/html" */
-  def respondViewNoLayout(actionClass: Class[_ <: ActionEnv] = getClass, options: Map[String, Any] = Map()): ChannelFuture = {
+  def respondViewNoLayout(actionClass: Class[_ <: Action] = getClass, options: Map[String, Any] = Map()): ChannelFuture = {
     val string = renderViewNoLayout(actionClass, options)
     respondText(string, "text/html")
   }

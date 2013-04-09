@@ -5,7 +5,7 @@ import scala.collection.mutable.{ArrayBuffer, Map => MMap}
 
 import org.jboss.netty.handler.codec.http.HttpMethod
 
-import xitrum.{ActionEnv, Logger}
+import xitrum.{Action, Logger}
 import xitrum.scope.request.Params
 import xitrum.scope.request.PathInfo
 
@@ -36,8 +36,8 @@ class RouteCollection(
   val otherWEBSOCKETs: Seq[Route]
 ) extends Logger
 {
-  lazy val reverseMappings: Map[Class[_ <: ActionEnv], Route] = {
-    val mmap = MMap[Class[_ <: ActionEnv], Route]()
+  lazy val reverseMappings: Map[Class[_ <: Action], Route] = {
+    val mmap = MMap[Class[_ <: Action], Route]()
     allFirsts.foreach { r => mmap(r.actionClass) = r }
     allLasts .foreach { r => mmap(r.actionClass) = r }
     allOthers.foreach { r => mmap(r.actionClass) = r }

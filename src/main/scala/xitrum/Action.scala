@@ -17,11 +17,11 @@ import xitrum.scope.session.{CSRF, SessionEnv}
 import xitrum.view.{Renderer, Responder}
 
 /**
- * ActionEnv is designed to be separated from Action, which is Actor, so that
- * an action can pass the env outside without violating the principle of Actor:
- * Do not pass "this" from an Action outside.
+ * Action is designed to be separated from ActionActor, so that an ActionActor
+ * can pass the Action outside without violating the principle of Actor:
+ * Do not leak "this" of an Actor to outside.
  */
-trait ActionEnv extends RequestEnv
+trait Action extends RequestEnv
   with SessionEnv
   with Logger
   with Net
@@ -34,9 +34,12 @@ trait ActionEnv extends RequestEnv
   with Responder
   with I18n
 {
-  implicit val currentAction = this
+  implicit val currentAction = Action.this
 
-  /** Actions have to implement this method. */
+  /**
+   * Called when the HTTP request comes in.
+   * Actions have to implement this method.
+   */
   def execute()
 
   def addConnectionClosedListener(listener: => Unit) {
@@ -57,7 +60,7 @@ trait ActionEnv extends RequestEnv
            request.getMethod == HttpMethod.PUT ||
            request.getMethod == HttpMethod.DELETE) &&
           !isInstanceOf[SkipCSRFCheck] &&
-          !CSRF.isValidToken(ActionEnv.this)) throw new InvalidAntiCSRFToken
+          !CSRF.isValidToken(Action.this)) throw new InvalidAntiCSRFToken
 
       // Before filters:
       // When not passed, the before filters must explicitly respond to client,
@@ -79,7 +82,7 @@ trait ActionEnv extends RequestEnv
         }
       }
 
-      if (!forwarding) AccessLog.logDynamicContentAccess(ActionEnv.this, beginTimestamp, cacheSecs, hit)
+      if (!forwarding) AccessLog.logDynamicContentAccess(Action.this, beginTimestamp, cacheSecs, hit)
     } catch {
       case NonFatal(e) =>
         if (forwarding) {
@@ -110,7 +113,7 @@ trait ActionEnv extends RequestEnv
           else
             respondText(msg)
 
-          AccessLog.logDynamicContentAccess(ActionEnv.this, beginTimestamp, 0, false)
+          AccessLog.logDynamicContentAccess(Action.this, beginTimestamp, 0, false)
         } else {
           response.setStatus(HttpResponseStatus.INTERNAL_SERVER_ERROR)
           if (Config.productionMode) {
@@ -132,7 +135,7 @@ trait ActionEnv extends RequestEnv
               respondText(errorMsg)
           }
 
-          AccessLog.logDynamicContentAccess(ActionEnv.this, beginTimestamp, 0, false, e)
+          AccessLog.logDynamicContentAccess(Action.this, beginTimestamp, 0, false, e)
         }
     }
   }

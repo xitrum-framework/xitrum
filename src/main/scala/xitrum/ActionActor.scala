@@ -1,10 +1,9 @@
 package xitrum
 
 import akka.actor.Actor
-
 import xitrum.handler.HandlerEnv
 
-trait Action extends Actor with ActionEnv {
+trait ActionActor extends Actor with Action {
   def receive = {
     case (env: HandlerEnv, cacheSecs: Int) =>
       apply(env)
@@ -12,7 +11,7 @@ trait Action extends Actor with ActionEnv {
       dispatchWithFailsafe(cacheSecs)
   }
 
-  def onResponded() {
+  override def onResponded() {
     context.stop(self)
   }
 }

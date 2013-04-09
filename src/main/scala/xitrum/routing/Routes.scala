@@ -7,7 +7,7 @@ import scala.util.control.NonFatal
 
 import org.apache.commons.lang3.ClassUtils
 
-import xitrum.{Config, ActionEnv, Logger, SockJsHandler}
+import xitrum.{Config, Action, Logger, SockJsHandler}
 import xitrum.sockjs.SockJsAction
 
 // "websocket" and "cookieNeeded" members are named after SockJS option:
@@ -20,8 +20,8 @@ object Routes extends Logger {
   val routes = deserializeCacheFileOrRecollectWithRetry()
 
   /** 404.html and 500.html are used by default */
-  var error404: Class[_ <: ActionEnv] = _
-  var error500: Class[_ <: ActionEnv] = _
+  var error404: Class[_ <: Action] = _
+  var error500: Class[_ <: Action] = _
 
   //----------------------------------------------------------------------------
 

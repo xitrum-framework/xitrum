@@ -5,7 +5,7 @@ import scala.collection.mutable.{HashMap => MHashMap, Map => MMap}
 import org.jboss.netty.channel.Channel
 import org.jboss.netty.handler.codec.http.{HttpRequest, HttpResponse}
 
-import xitrum.ActionEnv
+import xitrum.Action
 import xitrum.routing.Route
 import xitrum.scope.request.{FileUploadParams, Params, PathInfo}
 

@@ -3,7 +3,7 @@ package xitrum.routing
 import scala.collection.mutable.{Map => MMap}
 import org.jboss.netty.handler.codec.http.{HttpMethod, QueryStringEncoder}
 
-import xitrum.{Config, ActionEnv}
+import xitrum.{Config, Action}
 import xitrum.scope.request.Params
 
 /** @param cacheSecs < 0: cache action, > 0: cache page, 0: no cache */
@@ -12,7 +12,7 @@ class Route(
   val httpMethod: HttpMethod, val compiledPattern: Seq[RouteToken],
 
   // Out
-  val actionClass: Class[ActionEnv], val cacheSecs: Int
+  val actionClass: Class[Action], val cacheSecs: Int
 )
 {
   def url(params: (String, Any)*) = {

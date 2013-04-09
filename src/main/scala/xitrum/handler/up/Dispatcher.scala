@@ -11,13 +11,13 @@ import HttpVersion._
 import akka.actor.{Actor, ActorRef, Props}
 import com.esotericsoftware.reflectasm.ConstructorAccess
 
-import xitrum.{ActionEnv, Config}
+import xitrum.{Action, Config}
 import xitrum.handler.HandlerEnv
 import xitrum.handler.down.XSendFile
 import xitrum.routing.Routes
 
 object Dispatcher {
-  def dispatchWithFailsafe(actionClass: Class[_ <: ActionEnv], cacheSecs: Int, env: HandlerEnv) {
+  def dispatchWithFailsafe(actionClass: Class[_ <: Action], cacheSecs: Int, env: HandlerEnv) {
     val system   = Config.actorSystem
     val actorRef = system.actorOf(Props(ConstructorAccess.get(actionClass).newInstance().asInstanceOf[Actor]))
     actorRef ! (env, cacheSecs)

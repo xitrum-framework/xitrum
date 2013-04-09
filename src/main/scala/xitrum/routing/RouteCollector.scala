@@ -12,7 +12,7 @@ import javassist.bytecode.{AnnotationsAttribute, ClassFile, MethodInfo, AccessFl
 import javassist.bytecode.annotation.{Annotation, MemberValue, ArrayMemberValue, StringMemberValue, IntegerMemberValue}
 import sclasner.{FileEntry, Scanner}
 
-import xitrum.{ActionEnv, Logger}
+import xitrum.{Action, Logger}
 import xitrum.annotation._
 import xitrum.sockjs.SockJsAction
 

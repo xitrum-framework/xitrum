@@ -5,7 +5,7 @@ import org.jboss.netty.handler.codec.http.HttpHeaders.Names
 import xitrum.i18n.PoLoader
 
 trait I18n {
-  this: ActionEnv =>
+  this: Action =>
 
   private var language = "en"
   private var po       = PoLoader.load("en")

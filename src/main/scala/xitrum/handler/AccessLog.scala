@@ -4,7 +4,7 @@ import java.net.SocketAddress
 import scala.collection.mutable.{Map => MMap}
 import org.jboss.netty.handler.codec.http.{HttpRequest, HttpResponse}
 
-import xitrum.{ActionEnv, Logger}
+import xitrum.{Action, Logger}
 import xitrum.scope.request.RequestEnv
 import xitrum.action.Net
 
@@ -39,7 +39,7 @@ object AccessLog extends Logger {
     }
   }
 
-  def logDynamicContentAccess(action: ActionEnv, beginTimestamp: Long, cacheSecs: Int, hit: Boolean, e: Throwable = null) {
+  def logDynamicContentAccess(action: Action, beginTimestamp: Long, cacheSecs: Int, hit: Boolean, e: Throwable = null) {
     if (e == null) {
       if (logger.isDebugEnabled) logger.debug(msgWithTime(action, beginTimestamp) + extraInfo(action, cacheSecs, hit))
     } else {
@@ -49,7 +49,7 @@ object AccessLog extends Logger {
 
   //----------------------------------------------------------------------------
 
-  private def msgWithTime(action: ActionEnv, beginTimestamp: Long) = {
+  private def msgWithTime(action: Action, beginTimestamp: Long) = {
     val endTimestamp = System.currentTimeMillis()
     val dt           = endTimestamp - beginTimestamp
     val env          = action.handlerEnv
@@ -66,7 +66,7 @@ object AccessLog extends Logger {
     ", " + dt + " [ms]"
   }
 
-  private def extraInfo(action: ActionEnv, cacheSecs: Int, hit: Boolean) = {
+  private def extraInfo(action: Action, cacheSecs: Int, hit: Boolean) = {
     if (cacheSecs == 0) {
       if (action.isResponded) "" else " (async)"
     } else {

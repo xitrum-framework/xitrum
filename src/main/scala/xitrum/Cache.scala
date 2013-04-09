@@ -14,12 +14,12 @@ object Cache extends Logger {
     cache.removeAsync(key.toString)
   }
 
-  def removeAction(actionClass: Class[_ <: ActionEnv]) {
+  def removeAction(actionClass: Class[_ <: Action]) {
     val keyPrefix = pageActionPrefix(actionClass)
     removePrefix(keyPrefix)
   }
 
-  def pageActionPrefix(actionClass: Class[_ <: ActionEnv]): String =
+  def pageActionPrefix(actionClass: Class[_ <: Action]): String =
     "xitrum/page-action/" + actionClass.getName
 
   private def removePrefix(keyPrefix: Any) {
