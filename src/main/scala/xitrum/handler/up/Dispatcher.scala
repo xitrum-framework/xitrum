@@ -15,18 +15,29 @@ import xitrum.{Action, ActionActor, Config}
 import xitrum.handler.HandlerEnv
 import xitrum.handler.down.XSendFile
 import xitrum.routing.Routes
+import xitrum.sockjs.SockJsAction
 
 object Dispatcher {
-  def dispatchWithFailsafe(actionClass: Class[_ <: Action], env: HandlerEnv) {
+  def dispatch(actionClass: Class[_ <: Action], env: HandlerEnv) {
     if (actionClass.isAssignableFrom(classOf[ActionActor])) {
       val system   = Config.actorSystem
-      val actorRef = system.actorOf(Props(ConstructorAccess.get(actionClass).newInstance().asInstanceOf[Actor]))
+      val actorRef = system.actorOf(Props {
+        val action = ConstructorAccess.get(actionClass).newInstance()
+        setPathPrefixForSockJsAction(action)
+        action.asInstanceOf[Actor]
+      })
       actorRef ! env
     } else {
       val action = ConstructorAccess.get(actionClass).newInstance()
+      setPathPrefixForSockJsAction(action)
       action(env)
       action.dispatchWithFailsafe()
     }
+  }
+
+  private def setPathPrefixForSockJsAction(action: Action) {
+    if (action.isInstanceOf[SockJsAction])
+      action.asInstanceOf[SockJsAction].pathPrefix = action.pathInfo.tokens(0)
   }
 }
 
@@ -51,7 +62,7 @@ class Dispatcher extends SimpleChannelUpstreamHandler with BadClientSilencer {
       case Some((route, pathParams)) =>
         env.route      = route
         env.pathParams = pathParams
-        Dispatcher.dispatchWithFailsafe(route.actionClass, env)
+        Dispatcher.dispatch(route.actionClass, env)
 
       case None =>
         if (Routes.error404 == null) {
@@ -62,7 +73,7 @@ class Dispatcher extends SimpleChannelUpstreamHandler with BadClientSilencer {
         } else {
             env.pathParams = MMap.empty
             env.response.setStatus(NOT_FOUND)
-            Dispatcher.dispatchWithFailsafe(Routes.error404, env)
+            Dispatcher.dispatch(Routes.error404, env)
         }
     }
   }

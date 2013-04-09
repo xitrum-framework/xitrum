@@ -107,11 +107,8 @@ object SockJsAction {
   }
 }
 
-// pathPrefix will be set at Routes.sockJs
-// => filters can't be used because, for example beforeFilter is set before
-//    pathPrefix is set
-
 trait SockJsAction extends Action with SkipCSRFCheck {
+  // Set by Dispatcher
   var pathPrefix = ""
 
   // JSESSIONID cookie must be echoed back if sent by the client, or created

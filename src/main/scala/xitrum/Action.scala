@@ -126,7 +126,7 @@ trait Action extends RequestEnv
                 respondDefault500Page()
               } else {
                 response.setStatus(HttpResponseStatus.INTERNAL_SERVER_ERROR)
-                Dispatcher.dispatchWithFailsafe(Routes.error500, handlerEnv)
+                Dispatcher.dispatch(Routes.error500, handlerEnv)
               }
             }
           } else {
