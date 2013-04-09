@@ -2,11 +2,11 @@ package xitrum.action
 
 import scala.collection.mutable.ArrayBuffer
 
-import xitrum.ActionEnv
+import xitrum.Action
 import xitrum.routing.Route
 
 trait Filter {
-  this: ActionEnv =>
+  this: Action =>
 
   private val beforeFilters = ArrayBuffer[() => Boolean]()
 

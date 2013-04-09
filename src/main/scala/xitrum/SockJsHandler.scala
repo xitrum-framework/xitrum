@@ -16,7 +16,7 @@ abstract class SockJsHandler extends Logger {
   var nonWebSocketSessionActorRef: ActorRef = null
 
   /** Set by SockJsController; null if WebSocket (raw or not) is not used (polling is used) */
-  var webSocketAction: ActionEnv = null
+  var webSocketAction: Action = null
 
   //----------------------------------------------------------------------------
   // Abstract methods that must be implemented by apps
@@ -25,7 +25,7 @@ abstract class SockJsHandler extends Logger {
    * @param controller the controller just before switching to this SockJS handler,
    * you can use extract session data, request headers etc. from it
    */
-  def onOpen(action: ActionEnv)
+  def onOpen(action: Action)
 
   def onMessage(message: String)
 

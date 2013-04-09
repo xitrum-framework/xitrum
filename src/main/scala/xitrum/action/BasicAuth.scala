@@ -1,9 +1,9 @@
 package xitrum.action
 
-import xitrum.ActionEnv
+import xitrum.Action
 
 trait BasicAuth {
-  this: ActionEnv =>
+  this: Action =>
 
   /**
    * @param authenticator takes username and password, returns true if it want
