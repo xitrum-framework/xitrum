@@ -19,7 +19,7 @@ import xitrum.sockjs.SockJsAction
 
 object Dispatcher {
   def dispatch(actionClass: Class[_ <: Action], handlerEnv: HandlerEnv) {
-    if (actionClass.isAssignableFrom(classOf[ActionActor])) {
+    if (classOf[ActionActor].isAssignableFrom(actionClass)) {
       val system   = Config.actorSystem
       val actorRef = system.actorOf(Props {
         val action = ConstructorAccess.get(actionClass).newInstance()
