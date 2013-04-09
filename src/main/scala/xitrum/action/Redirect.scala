@@ -39,6 +39,7 @@ trait Redirect {
    */
   def forwardTo(actionClass: Class[_ <: Action]) {
     forwarding = true
-    Dispatcher.dispatchWithFailsafe(actionClass, 0, handlerEnv)
+    handlerEnv.route = Routes.routes.reverseMappings(actionClass)
+    Dispatcher.dispatchWithFailsafe(actionClass, handlerEnv)
   }
 }

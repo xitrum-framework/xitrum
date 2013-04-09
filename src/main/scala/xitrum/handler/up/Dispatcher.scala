@@ -11,16 +11,22 @@ import HttpVersion._
 import akka.actor.{Actor, ActorRef, Props}
 import com.esotericsoftware.reflectasm.ConstructorAccess
 
-import xitrum.{Action, Config}
+import xitrum.{Action, ActionActor, Config}
 import xitrum.handler.HandlerEnv
 import xitrum.handler.down.XSendFile
 import xitrum.routing.Routes
 
 object Dispatcher {
-  def dispatchWithFailsafe(actionClass: Class[_ <: Action], cacheSecs: Int, env: HandlerEnv) {
-    val system   = Config.actorSystem
-    val actorRef = system.actorOf(Props(ConstructorAccess.get(actionClass).newInstance().asInstanceOf[Actor]))
-    actorRef ! (env, cacheSecs)
+  def dispatchWithFailsafe(actionClass: Class[_ <: Action], env: HandlerEnv) {
+    if (actionClass.isAssignableFrom(classOf[ActionActor])) {
+      val system   = Config.actorSystem
+      val actorRef = system.actorOf(Props(ConstructorAccess.get(actionClass).newInstance().asInstanceOf[Actor]))
+      actorRef ! env
+    } else {
+      val action = ConstructorAccess.get(actionClass).newInstance()
+      action(env)
+      action.dispatchWithFailsafe()
+    }
   }
 }
 
@@ -45,7 +51,7 @@ class Dispatcher extends SimpleChannelUpstreamHandler with BadClientSilencer {
       case Some((route, pathParams)) =>
         env.route      = route
         env.pathParams = pathParams
-        Dispatcher.dispatchWithFailsafe(route.actionClass, route.cacheSecs, env)
+        Dispatcher.dispatchWithFailsafe(route.actionClass, env)
 
       case None =>
         if (Routes.error404 == null) {
@@ -56,7 +62,7 @@ class Dispatcher extends SimpleChannelUpstreamHandler with BadClientSilencer {
         } else {
             env.pathParams = MMap.empty
             env.response.setStatus(NOT_FOUND)
-            Dispatcher.dispatchWithFailsafe(Routes.error404, 0, env)
+            Dispatcher.dispatchWithFailsafe(Routes.error404, env)
         }
     }
   }

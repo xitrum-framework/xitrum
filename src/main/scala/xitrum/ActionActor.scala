@@ -5,10 +5,10 @@ import xitrum.handler.HandlerEnv
 
 trait ActionActor extends Actor with Action {
   def receive = {
-    case (env: HandlerEnv, cacheSecs: Int) =>
+    case env: HandlerEnv =>
       apply(env)
       addConnectionClosedListener { context.stop(self) }
-      dispatchWithFailsafe(cacheSecs)
+      dispatchWithFailsafe()
   }
 
   override def onResponded() {

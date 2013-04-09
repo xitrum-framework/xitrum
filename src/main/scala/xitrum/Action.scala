@@ -50,8 +50,10 @@ trait Action extends RequestEnv
 
   //----------------------------------------------------------------------------
 
-  protected def dispatchWithFailsafe(cacheSecs: Int) {
+  def dispatchWithFailsafe() {
     val beginTimestamp = System.currentTimeMillis()
+    val route          = handlerEnv.route
+    val cacheSecs      = if (route == null) 0 else route.cacheSecs
     var hit            = false
 
     try {
@@ -124,7 +126,7 @@ trait Action extends RequestEnv
                 respondDefault500Page()
               } else {
                 response.setStatus(HttpResponseStatus.INTERNAL_SERVER_ERROR)
-                Dispatcher.dispatchWithFailsafe(Routes.error500, 0, handlerEnv)
+                Dispatcher.dispatchWithFailsafe(Routes.error500, handlerEnv)
               }
             }
           } else {
@@ -139,8 +141,6 @@ trait Action extends RequestEnv
         }
     }
   }
-
-  //----------------------------------------------------------------------------
 
   /** @return true if the cache was hit */
   private def tryCache(f: => Unit): Boolean = {
