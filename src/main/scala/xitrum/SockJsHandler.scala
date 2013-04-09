@@ -71,6 +71,4 @@ abstract class SockJsHandler extends Logger {
       }
     }
   }
-
-  //def url = Config.withBaseUrl(Routes.sockJsPathPrefix(this.getClass))
 }

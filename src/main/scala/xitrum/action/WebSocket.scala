@@ -30,7 +30,7 @@ trait WebSocket {
    * the connection.
    */
   def acceptWebSocket(handler: WebSocketHandler) {
-    val factory    = new WebSocketServerHandshakerFactory(webSocketAbsoluteRequestUrl, null, false)
+    val factory    = new WebSocketServerHandshakerFactory(webSocketAbsRequestUrl, null, false)
     val handshaker = factory.newHandshaker(request)
     if (handshaker == null) {
       factory.sendUnsupportedWebSocketVersionResponse(channel)

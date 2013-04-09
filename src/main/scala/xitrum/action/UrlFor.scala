@@ -2,7 +2,7 @@ package xitrum.action
 
 import scala.util.Random
 
-import xitrum.{Config, Action}
+import xitrum.{Config, Action, SockJsHandler}
 import xitrum.etag.Etag
 import xitrum.routing.Routes
 
@@ -35,11 +35,11 @@ trait UrlFor {
   def url(params: (String, Any)*) = Routes.routes.reverseMappings(getClass).url(params:_*)
   lazy val url: String = url()
 
-  def absoluteUrl(params: (String, Any)*) = absoluteUrlPrefix + url(params:_*)
-  def absoluteUrl: String = absoluteUrl()
+  def absUrl(params: (String, Any)*) = absUrlPrefix + url(params:_*)
+  def absUrl: String = absUrl()
 
-  def webSocketAbsoluteUrl(params: (String, Any)*) = webSocketAbsoluteUrlPrefix + url(params:_*)
-  def webSocketAbsoluteUrl: String = webSocketAbsoluteUrl()
+  def webSocketAbsUrl(params: (String, Any)*) = webSocketAbsUrlPrefix + url(params:_*)
+  def webSocketAbsUrl: String = webSocketAbsUrl()
 
   //----------------------------------------------------------------------------
 
@@ -49,12 +49,21 @@ trait UrlFor {
   }
   def url[T: Manifest]: String = url[T]()
 
-  def absoluteUrl[T: Manifest](params: (String, Any)*) = absoluteUrlPrefix + url[T](params:_*)
-  def absoluteUrl[T: Manifest]: String = absoluteUrl[T]()
+  def absUrl[T: Manifest](params: (String, Any)*) = absUrlPrefix + url[T](params:_*)
+  def absUrl[T: Manifest]: String = absUrl[T]()
 
-  def webSocketAbsoluteUrl[T: Manifest](params: (String, Any)*) = {
+  def webSocketAbsUrl[T: Manifest](params: (String, Any)*) = {
     val actionClass = manifest[T].runtimeClass.asInstanceOf[Class[Action]]
-    webSocketAbsoluteUrlPrefix + url[T](params:_*)
+    webSocketAbsUrlPrefix + url[T](params:_*)
   }
-  def webSocketAbsoluteUrl[T: Manifest]: String = webSocketAbsoluteUrl[T]()
+  def webSocketAbsUrl[T: Manifest]: String = webSocketAbsUrl[T]()
+
+  //----------------------------------------------------------------------------
+
+  def sockJsUrl[T: Manifest] = {
+    val handlerClass = manifest[T].runtimeClass.asInstanceOf[Class[SockJsHandler]]
+    Routes.sockJsPathPrefix(handlerClass)
+  }
+
+  def sockJsAbsUrl[T: Manifest] = absUrlPrefix + sockJsUrl[T]
 }

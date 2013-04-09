@@ -111,14 +111,13 @@ object SockJsAction {
 // => filters can't be used because, for example beforeFilter is set before
 //    pathPrefix is set
 
-trait SockJsAction extends Action with SkipCSRFCheck
+trait SockJsAction extends Action with SkipCSRFCheck {
+  var pathPrefix = ""
 
-/*
-{
   // JSESSIONID cookie must be echoed back if sent by the client, or created
   // http://groups.google.com/group/sockjs/browse_thread/thread/71dfdff6e8f1e5f7
   // Can't use beforeFilter, see comment of pathPrefix at the top of this controller.
-  private def handleCookie() {
+  protected def handleCookie() {
     val sockJsClassAndOptions = Routes.sockJsClassAndOptions(pathPrefix)
     if (sockJsClassAndOptions.cookieNeeded) {
       val value  = requestCookies.get("JSESSIONID").getOrElse("dummy")
@@ -127,7 +126,7 @@ trait SockJsAction extends Action with SkipCSRFCheck
     }
   }
 
-  private def setCORS() {
+  protected def setCORS() {
     val requestOrigin  = request.getHeader(HttpHeaders.Names.ORIGIN)
     val responseOrigin = if (requestOrigin == null || requestOrigin == "null") "*" else requestOrigin
     response.setHeader(HttpHeaders.Names.ACCESS_CONTROL_ALLOW_ORIGIN,      responseOrigin)
@@ -138,7 +137,7 @@ trait SockJsAction extends Action with SkipCSRFCheck
       response.setHeader(HttpHeaders.Names.ACCESS_CONTROL_ALLOW_HEADERS, accessControlRequestHeaders)
   }
 
-  private def xhrOPTIONS() {
+  protected def xhrOPTIONS() {
     response.setStatus(HttpResponseStatus.NO_CONTENT)
     response.setHeader(HttpHeaders.Names.ACCESS_CONTROL_ALLOW_METHODS, "OPTIONS, POST")
     setCORS()
@@ -146,7 +145,7 @@ trait SockJsAction extends Action with SkipCSRFCheck
     respond()
   }
 
-  private def callbackParam(): Option[String] = {
+  protected def callbackParam(): Option[String] = {
     val paramName = if (uriParams.isDefinedAt("c")) "c" else "callback"
     val ret = paramo(paramName)
     if (ret == None) {
@@ -162,7 +161,7 @@ trait SockJsAction extends Action with SkipCSRFCheck
    * We should close a streaming request every 128KB messages was send.
    * The test server should have this limit decreased to 4KB.
    */
-  private var streamingBytesSent = 0
+  private[this] var streamingBytesSent = 0
 
   /**
    * All the chunking transports are closed by the server after 128K was
@@ -170,7 +169,7 @@ trait SockJsAction extends Action with SkipCSRFCheck
    * to send "c" frame.
    * @return false if the channel will be closed when the channel write completes
    */
-  private def respondStreamingWithLimit(text: String, isEventSource: Boolean = false): Boolean = {
+  protected def respondStreamingWithLimit(text: String, isEventSource: Boolean = false): Boolean = {
     // This is length in characters, not bytes,
     // but in this case the result doesn't have to be precise
     val size = text.length
@@ -186,7 +185,7 @@ trait SockJsAction extends Action with SkipCSRFCheck
   }
 }
 
-@GETs(Array("", "/"))
+@GET("")
 class SockJsGreeting extends SockJsAction {
   def execute() {
     respondText("Welcome to SockJS!\n")
@@ -239,7 +238,7 @@ class SockJsInfoGET extends SockJsAction {
     respondJsonText(
       """{"websocket": """      + sockJsClassAndOptions.websocket +
       """, "cookie_needed": """ + sockJsClassAndOptions.cookieNeeded +
-      """, "origins": ["*:*"], "entropy": """ + SockJsController.entropy() + "}"
+      """, "origins": ["*:*"], "entropy": """ + SockJsAction.entropy() + "}"
     )
   }
 }
@@ -280,7 +279,7 @@ class SockJsXhrPollingReceive extends SockJsAction {
 
     val ref = Config.actorSystem.actorOf(Props(new Actor {
       override def preStart() {
-        val propsMaker = () => Props(new NonWebSocketSession(self, pathPrefix, SockJsController.this))
+        val propsMaker = () => Props(new NonWebSocketSession(self, pathPrefix, SockJsXhrPollingReceive.this))
         ClusterSingletonActor.actor() ! LookupOrCreate(sessionId, propsMaker)
       }
 
@@ -309,7 +308,7 @@ class SockJsXhrPollingReceive extends SockJsAction {
 
         case SubscribeResultToClientMessages(messages) =>
           val json   = Json.generate(messages)
-          val quoted = SockJsController.quoteUnicode(json)
+          val quoted = SockJsAction.quoteUnicode(json)
           respondJs("a" + quoted + "\n")
           context.stop(self)
 
@@ -325,7 +324,7 @@ class SockJsXhrPollingReceive extends SockJsAction {
       private def receiveNotification(nonWebSocketSession: ActorRef): Receive = {
         case NotificationToClientMessage(message) =>
           val json   = Json.generate(Seq(message))
-          val quoted = SockJsController.quoteUnicode(json)
+          val quoted = SockJsAction.quoteUnicode(json)
           respondJs("a" + quoted + "\n")
           context.stop(self)
 
@@ -416,7 +415,7 @@ class SockJsXhrStreamingReceive extends SockJsAction {
 
     val ref = Config.actorSystem.actorOf(Props(new Actor {
       override def preStart() {
-        val propsMaker = () => Props(new NonWebSocketSession(self, pathPrefix, SockJsController.this))
+        val propsMaker = () => Props(new NonWebSocketSession(self, pathPrefix, SockJsXhrStreamingReceive.this))
         ClusterSingletonActor.actor() ! LookupOrCreate(sessionId, propsMaker)
       }
 
@@ -447,7 +446,7 @@ class SockJsXhrStreamingReceive extends SockJsAction {
 
         case SubscribeResultToClientMessages(messages) =>
           val json   = Json.generate(messages)
-          val quoted = SockJsController.quoteUnicode(json)
+          val quoted = SockJsAction.quoteUnicode(json)
           if (respondStreamingWithLimit("a" + quoted + "\n"))
             context.become(receiveNotification(nonWebSocketSession))
           else
@@ -466,7 +465,7 @@ class SockJsXhrStreamingReceive extends SockJsAction {
       private def receiveNotification(nonWebSocketSession: ActorRef): Receive = {
         case NotificationToClientMessage(message) =>
           val json   = Json.generate(Seq(message))
-          val quoted = SockJsController.quoteUnicode(json)
+          val quoted = SockJsAction.quoteUnicode(json)
           if (!respondStreamingWithLimit("a" + quoted + "\n")) context.stop(self)
 
         case NotificationToClientHeartbeat =>
@@ -503,7 +502,7 @@ class SockJshtmlfileReceive extends SockJsAction {
 
       val ref = Config.actorSystem.actorOf(Props(new Actor {
         override def preStart() {
-          val propsMaker = () => Props(new NonWebSocketSession(self, pathPrefix, SockJsController.this))
+          val propsMaker = () => Props(new NonWebSocketSession(self, pathPrefix, SockJshtmlfileReceive.this))
           ClusterSingletonActor.actor() ! LookupOrCreate(sessionId, propsMaker)
         }
 
@@ -512,7 +511,7 @@ class SockJshtmlfileReceive extends SockJsAction {
             context.watch(nonWebSocketSession)
             if (newlyCreated) {
               response.setChunked(true)
-              respondHtml(SockJsController.htmlfile(callback, true))
+              respondHtml(SockJsAction.htmlfile(callback, true))
               respondText("<script>\np(\"o\");\n</script>\r\n")
               context.become(receiveNotification(nonWebSocketSession))
             } else {
@@ -524,7 +523,7 @@ class SockJshtmlfileReceive extends SockJsAction {
         private def receiveSubscribeResult(nonWebSocketSession: ActorRef): Receive = {
           case SubscribeResultToClientAnotherConnectionStillOpen =>
             respondHtml(
-              SockJsController.htmlfile(callback, false) +
+              SockJsAction.htmlfile(callback, false) +
               "<script>\np(\"c[2010,\\\"Another connection still open\\\"]\");\n</script>\r\n"
             )
             .addListener(ChannelFutureListener.CLOSE)
@@ -532,7 +531,7 @@ class SockJshtmlfileReceive extends SockJsAction {
 
           case SubscribeResultToClientClosed =>
             respondHtml(
-              SockJsController.htmlfile(callback, false) +
+              SockJsAction.htmlfile(callback, false) +
               "<script>\np(\"c[3000,\\\"Go away!\\\"]\");\n</script>\r\n"
             )
             .addListener(ChannelFutureListener.CLOSE)
@@ -541,12 +540,12 @@ class SockJshtmlfileReceive extends SockJsAction {
           case SubscribeResultToClientMessages(messages) =>
             val buffer = new StringBuilder
             val json   = Json.generate(messages)
-            val quoted = SockJsController.quoteUnicode(json)
+            val quoted = SockJsAction.quoteUnicode(json)
             buffer.append("<script>\np(\"a")
             buffer.append(jsEscape(quoted))
             buffer.append("\");\n</script>\r\n")
             response.setChunked(true)
-            respondHtml(SockJsController.htmlfile(callback, true))
+            respondHtml(SockJsAction.htmlfile(callback, true))
             if (respondStreamingWithLimit(buffer.toString))
               context.become(receiveSubscribeResult(nonWebSocketSession))
             else
@@ -554,12 +553,12 @@ class SockJshtmlfileReceive extends SockJsAction {
 
           case SubscribeResultToClientWaitForMessage =>
             response.setChunked(true)
-            respondHtml(SockJsController.htmlfile(callback, true))
+            respondHtml(SockJsAction.htmlfile(callback, true))
             context.become(receiveSubscribeResult(nonWebSocketSession))
 
           case Terminated(`nonWebSocketSession`) =>
             respondHtml(
-              SockJsController.htmlfile(callback, false) +
+              SockJsAction.htmlfile(callback, false) +
               "<script>\np(\"c[2011,\\\"Server error\\\"]\");\n</script>\r\n"
             )
             .addListener(ChannelFutureListener.CLOSE)
@@ -570,7 +569,7 @@ class SockJshtmlfileReceive extends SockJsAction {
           case NotificationToClientMessage(message) =>
             val buffer = new StringBuilder
             val json   = Json.generate(Seq(message))
-            val quoted = SockJsController.quoteUnicode(json)
+            val quoted = SockJsAction.quoteUnicode(json)
             buffer.append("<script>\np(\"a")
             buffer.append(jsEscape(quoted))
             buffer.append("\");\n</script>\r\n")
@@ -581,7 +580,7 @@ class SockJshtmlfileReceive extends SockJsAction {
 
           case NotificationToClientClosed =>
             respondHtml(
-              SockJsController.htmlfile(callback, false) +
+              SockJsAction.htmlfile(callback, false) +
               "<script>\np(\"c[3000,\\\"Go away!\\\"]\");\n</script>\r\n"
             )
             respondLastChunk()
@@ -590,7 +589,7 @@ class SockJshtmlfileReceive extends SockJsAction {
 
           case Terminated(`nonWebSocketSession`) =>
             respondHtml(
-              SockJsController.htmlfile(callback, false) +
+              SockJsAction.htmlfile(callback, false) +
               "<script>\np(\"c[2011,\\\"Server error\\\"]\");\n</script>\r\n"
             )
             respondLastChunk()
@@ -617,7 +616,7 @@ class SockJsJsonPPollingReceive extends SockJsAction {
 
       val ref = Config.actorSystem.actorOf(Props(new Actor {
         override def preStart() {
-          val propsMaker = () => Props(new NonWebSocketSession(self, pathPrefix, SockJsController.this))
+          val propsMaker = () => Props(new NonWebSocketSession(self, pathPrefix, SockJsJsonPPollingReceive.this))
           ClusterSingletonActor.actor() ! LookupOrCreate(sessionId, propsMaker)
         }
 
@@ -647,7 +646,7 @@ class SockJsJsonPPollingReceive extends SockJsAction {
           case SubscribeResultToClientMessages(messages) =>
             val buffer = new StringBuilder
             val json   = Json.generate(messages)
-            val quoted = SockJsController.quoteUnicode(json)
+            val quoted = SockJsAction.quoteUnicode(json)
             buffer.append(callback + "(\"a")
             buffer.append(jsEscape(quoted))
             buffer.append("\");\r\n")
@@ -667,7 +666,7 @@ class SockJsJsonPPollingReceive extends SockJsAction {
           case NotificationToClientMessage(message) =>
             val buffer = new StringBuilder
             val json   = Json.generate(Seq(message))
-            val quoted = SockJsController.quoteUnicode(json)
+            val quoted = SockJsAction.quoteUnicode(json)
             buffer.append(callback + "(\"a")
             buffer.append(jsEscape(quoted))
             buffer.append("\");\r\n")
@@ -764,7 +763,7 @@ class SockJEventSourceReceive extends SockJsAction {
 
     val ref = Config.actorSystem.actorOf(Props(new Actor {
       override def preStart() {
-        val propsMaker = () => Props(new NonWebSocketSession(self, pathPrefix, SockJsController.this))
+        val propsMaker = () => Props(new NonWebSocketSession(self, pathPrefix, SockJEventSourceReceive.this))
         ClusterSingletonActor.actor() ! LookupOrCreate(sessionId, propsMaker)
       }
 
@@ -793,7 +792,7 @@ class SockJEventSourceReceive extends SockJsAction {
 
         case SubscribeResultToClientMessages(messages) =>
           val json   = "a" + Json.generate(messages)
-          val quoted = SockJsController.quoteUnicode(json)
+          val quoted = SockJsAction.quoteUnicode(json)
           if (respondStreamingWithLimit(quoted, true))
             context.become(receiveNotification(nonWebSocketSession))
           else
@@ -811,7 +810,7 @@ class SockJEventSourceReceive extends SockJsAction {
       private def receiveNotification(nonWebSocketSession: ActorRef): Receive = {
         case NotificationToClientMessage(message) =>
           val json   = "a" + Json.generate(Seq(message))
-          val quoted = SockJsController.quoteUnicode(json)
+          val quoted = SockJsAction.quoteUnicode(json)
           if (!respondStreamingWithLimit(quoted, true)) context.stop(self)
 
         case NotificationToClientHeartbeat =>
@@ -864,12 +863,12 @@ class SockJSWebsocket extends SockJsAction {
     //val sessionId = param("sessionId")
 
     val sockJsHandler = Routes.createSockJsHandler(pathPrefix)
-    sockJsHandler.webSocketController = this
-    sockJsHandler.rawWebSocket        = false
+    sockJsHandler.webSocketAction = this
+    sockJsHandler.rawWebSocket    = false
     acceptWebSocket(new WebSocketHandler {
       def onOpen() {
         respondWebSocket("o")
-        sockJsHandler.onOpen(SockJsController.this)
+        sockJsHandler.onOpen(SockJSWebsocket.this)
       }
 
       def onMessage(body: String) {
@@ -907,11 +906,11 @@ class SockJSRawWebsocket extends SockJsAction {
   def execute() {
     val immutableSession = session.toMap
     val sockJsHandler    = Routes.createSockJsHandler(pathPrefix)
-    sockJsHandler.webSocketController = this
-    sockJsHandler.rawWebSocket        = true
+    sockJsHandler.webSocketAction = this
+    sockJsHandler.rawWebSocket    = true
     acceptWebSocket(new WebSocketHandler {
       def onOpen() {
-        sockJsHandler.onOpen(SockJsController.this)
+        sockJsHandler.onOpen(SockJSRawWebsocket.this)
       }
 
       def onMessage(message: String) {
@@ -924,4 +923,3 @@ class SockJSRawWebsocket extends SockJsAction {
     })
   }
 }
-*/

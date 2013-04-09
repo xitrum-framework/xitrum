@@ -12,6 +12,12 @@ class SerializableRoute(
   val actionClass: String, val cacheSecs: Int
 ) extends Serializable
 {
+  /** @return A new route with the prefix */
+  def addPrefix(prefix: String): SerializableRoute = {
+    val routeToken = RouteToken(prefix, false, None)
+    new SerializableRoute(httpMethod, Seq(routeToken) ++ compiledPattern, actionClass, cacheSecs)
+  }
+
   def toRoute: Route = {
     new Route(
       new HttpMethod(httpMethod),

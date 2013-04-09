@@ -18,24 +18,18 @@ import xitrum.sockjs.SockJsAction
 
 /** Scan all classes to collect routes from actions. */
 class RouteCollector extends Logger {
-  def deserializeCacheFileOrRecollect(cachedFileName: String): RouteCollection = {
-    val acc          = new SerializableRouteCollection
-    val serializable = Scanner.foldLeft(cachedFileName, acc, discovered _)
-    serializable.toRouteCollection
+  def deserializeCacheFileOrRecollect(cachedFileName: String): (SerializableRouteCollection, SerializableRouteCollection) = {
+    val normal = new SerializableRouteCollection
+    val sockJs = new SerializableRouteCollection
+    Scanner.foldLeft(cachedFileName, (normal, sockJs), discovered _)
   }
-
-/*
-  def fromSockJsController: RouteCollection = {
-    val pool = ClassPool.getDefault
-    pool.insertClassPath(new ClassClassPath(classOf[SockJsController]))
-    val cc = pool.get(classOf[SockJsController].getName)
-    discover(true, Map[String, Seq[String]](), cc.getClassFile)
-  }
-*/
 
   //----------------------------------------------------------------------------
 
-  private def discovered(acc: SerializableRouteCollection, entry: FileEntry): SerializableRouteCollection = {
+  private def discovered(
+      normal_sockJs: (SerializableRouteCollection, SerializableRouteCollection),
+      entry:         FileEntry): (SerializableRouteCollection, SerializableRouteCollection) =
+  {
     try {
       if (entry.relPath.endsWith(".class")) {
         val bais = new ByteArrayInputStream(entry.bytes)
@@ -43,30 +37,37 @@ class RouteCollector extends Logger {
         val cf   = new ClassFile(dis)
         dis.close()
         bais.close()
-        processDiscovered(false, acc, cf)
-        acc
+        processDiscovered(normal_sockJs, cf)
+        normal_sockJs
       } else {
-        acc
+        normal_sockJs
       }
     } catch {
       case NonFatal(e) =>
         logger.warn("Could not scan route for " + entry.relPath + " in " + entry.container, e)
-        acc
+        normal_sockJs
     }
   }
 
-  private def processDiscovered(fromSockJs: Boolean, acc: SerializableRouteCollection, classFile: ClassFile) {
-    val className = classFile.getName
-    if (!fromSockJs && className.startsWith(classOf[SockJsAction].getName)) return
-
+  private def processDiscovered(
+      normal_sockJs: (SerializableRouteCollection, SerializableRouteCollection),
+      classFile:     ClassFile)
+  {
     val aa = classFile.getAttribute(AnnotationsAttribute.visibleTag).asInstanceOf[AnnotationsAttribute]
     if (aa == null) return
 
-    val as = aa.getAnnotations
-    collectRoutes(acc, className, as)
+    val annotations = aa.getAnnotations
+    val className   = classFile.getName
+    val fromSockJs  = className.startsWith(classOf[SockJsAction].getPackage.getName)
+    val routes      = if (fromSockJs) normal_sockJs._2 else normal_sockJs._1
+    collectRoutes(routes, className, annotations)
   }
 
-  private def collectRoutes(acc: SerializableRouteCollection, className: String, annotations: Array[Annotation]) {
+  private def collectRoutes(
+      routes:      SerializableRouteCollection,
+      className:   String,
+      annotations: Array[Annotation])
+  {
     var routeOrder           = 0  // -1: first, 1: last, 0: other
     var cacheSecs            = 0  // < 0: cache action, > 0: cache page, 0: no cache
     var method_pattern_coll = ArrayBuffer[(String, String)]()
@@ -82,29 +83,29 @@ class RouteCollector extends Logger {
       val compiledPattern   = RouteCompiler.compile(pattern)
       val serializableRoute = new SerializableRoute(method, compiledPattern, className, cacheSecs)
       val coll              = (routeOrder, method) match {
-        case (-1, "GET") => acc.firstGETs
-        case ( 1, "GET") => acc.lastGETs
-        case ( 0, "GET") => acc.otherGETs
+        case (-1, "GET") => routes.firstGETs
+        case ( 1, "GET") => routes.lastGETs
+        case ( 0, "GET") => routes.otherGETs
 
-        case (-1, "POST") => acc.firstPOSTs
-        case ( 1, "POST") => acc.lastPOSTs
-        case ( 0, "POST") => acc.otherPOSTs
+        case (-1, "POST") => routes.firstPOSTs
+        case ( 1, "POST") => routes.lastPOSTs
+        case ( 0, "POST") => routes.otherPOSTs
 
-        case (-1, "PUT") => acc.firstPUTs
-        case ( 1, "PUT") => acc.lastPUTs
-        case ( 0, "PUT") => acc.otherPUTs
+        case (-1, "PUT") => routes.firstPUTs
+        case ( 1, "PUT") => routes.lastPUTs
+        case ( 0, "PUT") => routes.otherPUTs
 
-        case (-1, "DELETE") => acc.firstDELETEs
-        case ( 1, "DELETE") => acc.lastDELETEs
-        case ( 0, "DELETE") => acc.otherDELETEs
+        case (-1, "DELETE") => routes.firstDELETEs
+        case ( 1, "DELETE") => routes.lastDELETEs
+        case ( 0, "DELETE") => routes.otherDELETEs
 
-        case (-1, "OPTIONS") => acc.firstOPTIONSs
-        case ( 1, "OPTIONS") => acc.lastOPTIONSs
-        case ( 0, "OPTIONS") => acc.otherOPTIONSs
+        case (-1, "OPTIONS") => routes.firstOPTIONSs
+        case ( 1, "OPTIONS") => routes.lastOPTIONSs
+        case ( 0, "OPTIONS") => routes.otherOPTIONSs
 
-        case (-1, "WEBSOCKET") => acc.firstWEBSOCKETs
-        case ( 1, "WEBSOCKET") => acc.lastWEBSOCKETs
-        case ( 0, "WEBSOCKET") => acc.otherWEBSOCKETs
+        case (-1, "WEBSOCKET") => routes.firstWEBSOCKETs
+        case ( 1, "WEBSOCKET") => routes.lastWEBSOCKETs
+        case ( 0, "WEBSOCKET") => routes.otherWEBSOCKETs
       }
       coll.append(serializableRoute)
     }

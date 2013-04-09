@@ -17,7 +17,33 @@ class SockJsClassAndOptions(val handlerClass: Class[_ <: SockJsHandler], val web
 object Routes extends Logger {
   private val ROUTES_CACHE = "routes.cache"
 
-  val routes = deserializeCacheFileOrRecollectWithRetry()
+  /** Needs to be lazy so that route collecting is done after SockJS config */
+  lazy val routes: RouteCollection = {
+    val (normal, sockJs) = deserializeCacheFileOrRecollectWithRetry()
+    sockJsClassAndOptionsTable.keys.foreach { prefix =>
+      sockJs.firstGETs      .foreach { r => normal.firstGETs      .append(r.addPrefix(prefix)) }
+      sockJs.firstPOSTs     .foreach { r => normal.firstPOSTs     .append(r.addPrefix(prefix)) }
+      sockJs.firstPUTs      .foreach { r => normal.firstPUTs      .append(r.addPrefix(prefix)) }
+      sockJs.firstDELETEs   .foreach { r => normal.firstDELETEs   .append(r.addPrefix(prefix)) }
+      sockJs.firstOPTIONSs  .foreach { r => normal.firstOPTIONSs  .append(r.addPrefix(prefix)) }
+      sockJs.firstWEBSOCKETs.foreach { r => normal.firstWEBSOCKETs.append(r.addPrefix(prefix)) }
+
+      sockJs.lastGETs      .foreach { r => normal.lastGETs      .append(r.addPrefix(prefix)) }
+      sockJs.lastPOSTs     .foreach { r => normal.lastPOSTs     .append(r.addPrefix(prefix)) }
+      sockJs.lastPUTs      .foreach { r => normal.lastPUTs      .append(r.addPrefix(prefix)) }
+      sockJs.lastDELETEs   .foreach { r => normal.lastDELETEs   .append(r.addPrefix(prefix)) }
+      sockJs.lastOPTIONSs  .foreach { r => normal.lastOPTIONSs  .append(r.addPrefix(prefix)) }
+      sockJs.lastWEBSOCKETs.foreach { r => normal.lastWEBSOCKETs.append(r.addPrefix(prefix)) }
+
+      sockJs.otherGETs      .foreach { r => normal.otherGETs      .append(r.addPrefix(prefix)) }
+      sockJs.otherPOSTs     .foreach { r => normal.otherPOSTs     .append(r.addPrefix(prefix)) }
+      sockJs.otherPUTs      .foreach { r => normal.otherPUTs      .append(r.addPrefix(prefix)) }
+      sockJs.otherDELETEs   .foreach { r => normal.otherDELETEs   .append(r.addPrefix(prefix)) }
+      sockJs.otherOPTIONSs  .foreach { r => normal.otherOPTIONSs  .append(r.addPrefix(prefix)) }
+      sockJs.otherWEBSOCKETs.foreach { r => normal.otherWEBSOCKETs.append(r.addPrefix(prefix)) }
+    }
+    normal.toRouteCollection
+  }
 
   /** 404.html and 500.html are used by default */
   var error404: Class[_ <: Action] = _
@@ -25,7 +51,7 @@ object Routes extends Logger {
 
   //----------------------------------------------------------------------------
 
-  private def deserializeCacheFileOrRecollectWithRetry(): RouteCollection = {
+  private def deserializeCacheFileOrRecollectWithRetry(): (SerializableRouteCollection, SerializableRouteCollection) = {
     try {
       logger.info("Load file " + ROUTES_CACHE + " or recollect routes...")
       val routeCollector = new RouteCollector
