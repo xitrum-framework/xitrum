@@ -230,22 +230,25 @@ trait Responder extends JS with Flash with Knockout {
   /**
    * @param options specific to the configured template engine
    */
-  def respondView(customLayout: () => Any, actionClass: Class[_ <: Action], options: Map[String, Any]): ChannelFuture = {
-    val string = renderView(customLayout, actionClass, options)
+  def respondView(customLayout: () => Any, location: Class[_ <: Action], options: Map[String, Any]): ChannelFuture = {
+    val string = renderView(customLayout, location, options)
     respondText(string, "text/html")
   }
+
+  def respondView(location: Class[_ <: Action], options: Map[String, Any]): ChannelFuture =
+    respondView(layout _, location, options)
 
   def respondView(customLayout: () => Any, options: Map[String, Any]): ChannelFuture =
     respondView(customLayout, getClass, options)
 
+  def respondView(customLayout: () => Any, location: Class[_ <: Action]): ChannelFuture =
+    respondView(customLayout, location, Map())
+
   def respondView(customLayout: () => Any): ChannelFuture =
     respondView(customLayout, getClass, Map())
 
-  def respondView(actionClass: Class[_ <: Action], options: Map[String, Any]): ChannelFuture =
-    respondView(layout _, actionClass, options)
-
-  def respondView(actionClass: Class[_ <: Action]): ChannelFuture =
-    respondView(layout _, actionClass, Map())
+  def respondView(location: Class[_ <: Action]): ChannelFuture =
+    respondView(layout _, location, Map())
 
   def respondView(options: Map[String, Any]): ChannelFuture =
     respondView(layout _, getClass, options)
@@ -256,20 +259,28 @@ trait Responder extends JS with Flash with Knockout {
   //----------------------------------------------------------------------------
 
   /** Content-Type header is set to "text/html" */
+  def respondViewNoLayout(location: Class[_ <: Action], options: Map[String, Any]): ChannelFuture = {
+    val string = renderViewNoLayout(location, options)
+    respondText(string, "text/html")
+  }
+
+  def respondViewNoLayout(location: Class[_ <: Action]): ChannelFuture =
+    respondViewNoLayout(location, Map())
+
+  def respondViewNoLayout(options: Map[String, Any]): ChannelFuture =
+    respondViewNoLayout(getClass, options)
+
+  def respondViewNoLayout(): ChannelFuture =
+    respondViewNoLayout(getClass, Map())
+
+  //----------------------------------------------------------------------------
+
+  /** Content-Type header is set to "text/html" */
   def respondInlineView(inlineView: Any): ChannelFuture = {
     val string = renderInlineView(inlineView)
     respondText(string, "text/html")
   }
 
-  /** Content-Type header is set to "text/html" */
-  def respondViewNoLayout(actionClass: Class[_ <: Action] = getClass, options: Map[String, Any] = Map()): ChannelFuture = {
-    val string = renderViewNoLayout(actionClass, options)
-    respondText(string, "text/html")
-  }
-/*
-  def respondViewNoLayout(controllerClass: Class[_]): ChannelFuture =
-    respondViewNoLayout(controllerClass, Map[String, Any]())
-*/
   //----------------------------------------------------------------------------
 
   /** If Content-Type header is not set, it is set to "application/octet-stream" */

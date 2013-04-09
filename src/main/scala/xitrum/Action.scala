@@ -17,9 +17,9 @@ import xitrum.scope.session.{CSRF, SessionEnv}
 import xitrum.view.{Renderer, Responder}
 
 /**
- * Action is designed to be separated from ActionActor, so that an ActionActor
- * can pass the Action outside without violating the principle of Actor:
- * Do not leak "this" of an Actor to outside.
+ * Action is designed to be separated from ActionActor. ActionActor extends
+ * Action. An ActionActor can pass its Action things outside without violating
+ * the principle of Actor: Do not leak Actor internals to outside.
  */
 trait Action extends RequestEnv
   with SessionEnv

@@ -9,13 +9,29 @@ import xitrum.Action
  */
 trait TemplateEngine {
   /**
-   * Renders the template associated with the actionClass (not action).
+   * Renders the template at the location identified by the given action class.
    *
-   * Ex: When actionClass = myapp.SiteIndex and Scalate template
+   * Ex: When location = myapp.SiteIndex and Scalate template
    * engine is used, by default the template path will be:
    * src/main/scalate/myapp/SiteIndex.jade
    *
+   * @param location the action class used to identify the template location
+   *
    * @param options specific to the configured template engine
    */
-  def renderTemplate(actionClass: Class[_ <: Action], action: Action, options: Map[String, Any]): String
+  def renderView(location: Class[_ <: Action], currentAction: Action, options: Map[String, Any]): String
+
+  /**
+   * Renders the template at the location identified by the package of the given
+   * action class and the given fragment.
+   *
+   * Ex: When location = myapp.ArticleNew, fragment = form and Scalate template
+   * engine is used, by default the template path will be:
+   * src/main/scalate/myapp/_form.jade
+   *
+   * @param location the action class used to identify the template location
+   *
+   * @param options specific to the configured template engine
+   */
+  def renderFragment(location: Class[_ <: Action], fragment: String, currentAction: Action, options: Map[String, Any]): String
 }

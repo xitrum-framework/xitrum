@@ -48,22 +48,25 @@ trait Renderer {
    *
    * @param options specific to the configured template engine
    */
-  def renderView(customLayout: () => Any, actionClass: Class[_ <: Action], options: Map[String, Any]): String = {
-    renderedView = Config.xitrum.templateEngine.renderTemplate(actionClass, this, options)
+  def renderView(customLayout: () => Any, location: Class[_ <: Action], options: Map[String, Any]): String = {
+    renderedView = Config.xitrum.templateEngine.renderView(location, this, options)
     customLayout.apply().toString
   }
+
+  def renderView(location: Class[_ <: Action], options: Map[String, Any]): String =
+    renderView(layout _, location, options)
 
   def renderView(customLayout: () => Any, options: Map[String, Any]): String =
     renderView(customLayout, getClass, options)
 
+  def renderView(customLayout: () => Any, location: Class[_ <: Action]): String =
+    renderView(customLayout, location, Map())
+
   def renderView(customLayout: () => Any): String =
     renderView(customLayout, getClass, Map())
 
-  def renderView(actionClass: Class[_ <: Action], options: Map[String, Any]): String =
-    renderView(layout _, actionClass, options)
-
-  def renderView(actionClass: Class[_ <: Action]): String =
-    renderView(layout _, actionClass, Map())
+  def renderView(location: Class[_ <: Action]): String =
+    renderView(layout _, location, Map())
 
   def renderView(options: Map[String, Any]): String =
     renderView(layout _, getClass, options)
@@ -73,18 +76,37 @@ trait Renderer {
 
   //----------------------------------------------------------------------------
 
+  def renderViewNoLayout(location: Class[_ <: Action], options: Map[String, Any]): String =
+    Config.xitrum.templateEngine.renderView(location, this, options)
+
+  def renderViewNoLayout(location: Class[_ <: Action]): String =
+    Config.xitrum.templateEngine.renderView(location, this, Map())
+
+  def renderViewNoLayout(options: Map[String, Any]): String =
+    Config.xitrum.templateEngine.renderView(getClass, this, options)
+
+  def renderViewNoLayout(): String =
+    Config.xitrum.templateEngine.renderView(getClass, this, Map())
+
+  //----------------------------------------------------------------------------
+
+  def renderFragment(location: Class[_ <: Action], fragment: String, options: Map[String, Any]): String =
+    Config.xitrum.templateEngine.renderFragment(location, fragment, this, options)
+
+  def renderFragment(fragment: String, options: Map[String, Any]): String =
+    Config.xitrum.templateEngine.renderFragment(getClass, fragment, this, options)
+
+  def renderFragment(location: Class[_ <: Action], fragment: String): String =
+    Config.xitrum.templateEngine.renderFragment(location, fragment, this, Map())
+
+  def renderFragment(fragment: String): String =
+    Config.xitrum.templateEngine.renderFragment(getClass, fragment, this, Map())
+
+  //----------------------------------------------------------------------------
+
   def renderInlineView(inlineView: Any): String = {
     renderedView = inlineView
     val any = layout  // Call layout
     any.toString()
   }
-
-  def renderViewNoLayout(actionClass: Class[_ <: Action], options: Map[String, Any]): String =
-    Config.xitrum.templateEngine.renderTemplate(actionClass, this, options)
-
-  def renderViewNoLayout(actionClass: Class[_ <: Action]): String =
-    Config.xitrum.templateEngine.renderTemplate(actionClass, this, Map())
-
-  def renderViewNoLayout(): String =
-    Config.xitrum.templateEngine.renderTemplate(getClass, this, Map())
 }
