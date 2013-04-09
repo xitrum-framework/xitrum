@@ -23,7 +23,7 @@ class SerializableRoute(
       else
         Seq(routeToken) ++ compiledPattern
 
-    new SerializableRoute(httpMethod, Seq(routeToken) ++ compiledPattern, actionClass, cacheSecs)
+    new SerializableRoute(httpMethod, newCompiledPattern, actionClass, cacheSecs)
   }
 
   def toRoute: Route = {

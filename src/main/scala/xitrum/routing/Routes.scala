@@ -51,6 +51,7 @@ object Routes extends Logger {
 
   //----------------------------------------------------------------------------
 
+  /** @return (normal routes, SockJS routes) */
   private def deserializeCacheFileOrRecollectWithRetry(): (SerializableRouteCollection, SerializableRouteCollection) = {
     try {
       logger.info("Load file " + ROUTES_CACHE + " or recollect routes...")

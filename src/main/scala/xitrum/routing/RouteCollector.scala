@@ -18,6 +18,7 @@ import xitrum.sockjs.SockJsAction
 
 /** Scan all classes to collect routes from actions. */
 class RouteCollector extends Logger {
+  /** @return (normal routes, SockJS routes) */
   def deserializeCacheFileOrRecollect(cachedFileName: String): (SerializableRouteCollection, SerializableRouteCollection) = {
     val normal = new SerializableRouteCollection
     val sockJs = new SerializableRouteCollection
