@@ -65,10 +65,8 @@ class NonWebSocketSession(var clientSubscriber: ActorRef, pathPrefix: String, ac
   private var closed = false
 
   override def preStart() {
-    // FIXME
-
     // sockJsHandler.onClose is called at postStop
-    //sockJsHandler = Routes.createSockJsHandler(pathPrefix)
+    sockJsHandler = Routes.createSockJsHandler(pathPrefix)
     sockJsHandler.nonWebSocketSessionActorRef = self
     sockJsHandler.onOpen(action)
 
