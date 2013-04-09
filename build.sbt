@@ -46,7 +46,7 @@ libraryDependencies += "org.json4s" %% "json4s-native" % "3.2.3"
 
 libraryDependencies += "tv.cntt" %% "scaposer" % "1.2"
 
-libraryDependencies += "tv.cntt" %% "sclasner" % "1.4"
+libraryDependencies += "tv.cntt" %% "sclasner" % "1.5"
 
 // xitrum.imperatively uses Scala continuation, a compiler plugin --------------
 
