@@ -18,7 +18,8 @@ object Server extends Logger {
   }
 
   /**
-   * Starts with your custom ChannelPipelineFactory.
+   * Starts with your custom ChannelPipelineFactory. For an example, see
+   * xitrum.handler.DefaultHttpChannelPipelineFactory.
    * SSL codec handler will be automatically prepended for HTTPS server.
    */
   def start(httpChannelPipelineFactory: ChannelPipelineFactory) {
