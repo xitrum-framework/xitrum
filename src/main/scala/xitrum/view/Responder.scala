@@ -7,7 +7,7 @@ import scala.util.control.NonFatal
 import org.jboss.netty.buffer.{ChannelBuffer, ChannelBuffers}
 import org.jboss.netty.channel.ChannelFuture
 import org.jboss.netty.handler.codec.http.{DefaultHttpChunk, HttpChunk, HttpHeaders, HttpResponseStatus, HttpVersion}
-import org.jboss.netty.handler.codec.http.websocketx.TextWebSocketFrame
+import org.jboss.netty.handler.codec.http.websocketx.{BinaryWebSocketFrame, TextWebSocketFrame}
 import org.jboss.netty.util.CharsetUtil
 import HttpHeaders.Names.{CONTENT_TYPE, CONTENT_LENGTH, TRANSFER_ENCODING}
 import HttpHeaders.Values.{CHUNKED, NO_CACHE}
@@ -344,12 +344,16 @@ trait Responder extends JS with Flash with Knockout {
 
   //----------------------------------------------------------------------------
 
-  def respondWebSocket(text: Any): ChannelFuture = {
+  def respondWebSocketText(text: Any): ChannelFuture = {
     channel.write(new TextWebSocketFrame(text.toString))
   }
 
-  def respondWebSocket(channelBuffer: ChannelBuffer): ChannelFuture = {
-    channel.write(new TextWebSocketFrame(channelBuffer))
+  def respondWebSocketBinary(binary: Array[Byte]): ChannelFuture = {
+    channel.write(new BinaryWebSocketFrame(ChannelBuffers.wrappedBuffer(binary)))
+  }
+
+  def respondWebSocketBinary(channelBuffer: ChannelBuffer): ChannelFuture = {
+    channel.write(new BinaryWebSocketFrame(channelBuffer))
   }
 
   //----------------------------------------------------------------------------

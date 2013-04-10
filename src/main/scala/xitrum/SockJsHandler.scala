@@ -48,10 +48,10 @@ abstract class SockJsHandler extends Logger {
     } else {
       // WebSocket is used, but it may be raw or not raw
       if (rawWebSocket) {
-        webSocketAction.respondWebSocket(message)
+        webSocketAction.respondWebSocketText(message)
       } else {
         val json = Json.generate(Seq(message))
-        webSocketAction.respondWebSocket("a" + json)
+        webSocketAction.respondWebSocketText("a" + json)
       }
     }
   }
@@ -66,7 +66,7 @@ abstract class SockJsHandler extends Logger {
       if (rawWebSocket) {
         webSocketAction.channel.close()
       } else {
-        webSocketAction.respondWebSocket("c[3000,\"Go away!\"]")
+        webSocketAction.respondWebSocketText("c[3000,\"Go away!\"]")
         .addListener(ChannelFutureListener.CLOSE)
       }
     }

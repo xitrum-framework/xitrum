@@ -18,11 +18,11 @@ trait WebSocket {
     /** Called when the websocket or the network connection is closed. */
     def onClose()
 
-    /**
-     * Called when the client sends data (only text is supported).
-     * You may call respondWebSocket(string) to send data to the client.
-     */
-    def onMessage(text: String)
+    /** Called when the client sends text data. */
+    def onTextMessage(text: String)
+
+    /** Called when the client sends binary data. */
+    def onBinaryMessage(binary: Array[Byte])
   }
 
   /**
@@ -39,7 +39,7 @@ trait WebSocket {
 
       val pipeline = channel.getPipeline
       DefaultHttpChannelPipelineFactory.removeUnusedForWebSocket(pipeline)
-      pipeline.addLast("webSocketDispatcher", new WebSocketDispatcher(handshaker, handler))
+      pipeline.addLast("webSocketDispatcher", new WebSocketDispatcher(channel, handshaker, handler))
 
       handler.onOpen();
       channel.setReadable(true)  // Resume reading paused at NoPipelining

@@ -788,11 +788,15 @@ class SockJSWebsocket extends SockJsAction {
     sockJsHandler.rawWebSocket    = false
     acceptWebSocket(new WebSocketHandler {
       def onOpen() {
-        respondWebSocket("o")
+        respondWebSocketText("o")
         sockJsHandler.onOpen(SockJSWebsocket.this)
       }
 
-      def onMessage(body: String) {
+      def onClose() {
+        sockJsHandler.onClose()
+      }
+
+      def onTextMessage(body: String) {
         // Server must ignore empty messages
         // http://sockjs.github.com/sockjs-protocol/sockjs-protocol-0.3.3.html#section-69
         if (body.isEmpty) return
@@ -814,8 +818,7 @@ class SockJSWebsocket extends SockJsAction {
         }
       }
 
-      def onClose() {
-        sockJsHandler.onClose()
+      def onBinaryMessage(binary: Array[Byte]) {
       }
     })
   }
@@ -833,12 +836,15 @@ class SockJSRawWebsocket extends SockJsAction {
         sockJsHandler.onOpen(SockJSRawWebsocket.this)
       }
 
-      def onMessage(message: String) {
-        sockJsHandler.onMessage(message)
-      }
-
       def onClose() {
         sockJsHandler.onClose()
+      }
+
+      def onTextMessage(text: String) {
+        sockJsHandler.onMessage(text)
+      }
+
+      def onBinaryMessage(binary: Array[Byte]) {
       }
     })
   }
