@@ -2,13 +2,26 @@ package xitrum.handler
 
 import org.jboss.netty.bootstrap.ServerBootstrap
 import org.jboss.netty.channel.socket.nio.NioServerSocketChannelFactory
+import org.jboss.netty.channel.ChannelPipelineFactory
 
 import xitrum.{Cache, Config, Logger}
 import xitrum.routing.Routes
 import xitrum.util.ClusterSingletonActor
 
 object Server extends Logger {
+  /**
+   * Starts with default ChannelPipelineFactory provided by Xitrum.
+   */
   def start() {
+    val default = new DefaultHttpChannelPipelineFactory
+    start(default)
+  }
+
+  /**
+   * Starts with your custom ChannelPipelineFactory.
+   * SSL codec handler will be automatically prepended for HTTPS server.
+   */
+  def start(httpChannelPipelineFactory: ChannelPipelineFactory) {
     ClusterSingletonActor.start()
 
     // Because Hazelcast takes serveral seconds to start, we force it to
@@ -20,10 +33,10 @@ object Server extends Logger {
     routes.printRoutes()
     routes.printActionPageCaches()
 
-    val pc = Config.xitrum.port
-    if (pc.http.isDefined)  start(false)
-    if (pc.https.isDefined) start(true)
-    if (pc.flashSocketPolicy.isDefined) FlashSocketPolicyServer.start()
+    val portConfig = Config.xitrum.port
+    if (portConfig.http.isDefined)  doStart(false, httpChannelPipelineFactory)
+    if (portConfig.https.isDefined) doStart(true,  httpChannelPipelineFactory)
+    if (portConfig.flashSocketPolicy.isDefined) FlashSocketPolicyServer.start()
 
     val mode = if (Config.productionMode) "production" else "development"
     logger.info("Xitrum started in {} mode", mode)
@@ -32,14 +45,18 @@ object Server extends Logger {
     Config.warnOnDefaultSecureKey()
   }
 
-  private def start(https: Boolean) {
-    val channelFactory  = new NioServerSocketChannelFactory
-    val bootstrap       = new ServerBootstrap(channelFactory)
-    val pipelineFactory = new ChannelPipelineFactory(https)
-    val pc              = Config.xitrum.port
-    val (service, port) = if (https) ("HTTPS", pc.https.get) else ("HTTP", pc.http.get)
+  private def doStart(https: Boolean, httpChannelPipelineFactory: ChannelPipelineFactory) {
+    val channelPipelineFactory =
+      if (https)
+        new SslChannelPipelineFactory(httpChannelPipelineFactory)
+      else
+        httpChannelPipelineFactory
 
-    bootstrap.setPipelineFactory(pipelineFactory)
+    val bootstrap       = new ServerBootstrap(new NioServerSocketChannelFactory)
+    val portConfig      = Config.xitrum.port
+    val (service, port) = if (https) ("HTTPS", portConfig.https.get) else ("HTTP", portConfig.http.get)
+
+    bootstrap.setPipelineFactory(channelPipelineFactory)
     NetOption.setOptions(bootstrap)
     NetOption.bind(service, bootstrap, port)
     logger.info("{} server started on port {}", service, port)

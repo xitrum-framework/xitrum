@@ -230,7 +230,7 @@ object Config extends Logger {
 
   def warnOnDefaultSecureKey() {
     if (xitrum.session.secureKey == DEFAULT_SECURE_KEY)
-      logger.warn("For security, change secureKey in config/xitrum.conf to your own!")
+      logger.warn("*** For security, change secureKey in config/xitrum.conf to your own! ***")
   }
 
   /**

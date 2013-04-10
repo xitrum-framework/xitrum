@@ -3,7 +3,7 @@ package xitrum.action
 import org.jboss.netty.handler.codec.http.websocketx.WebSocketServerHandshakerFactory
 
 import xitrum.Action
-import xitrum.handler.ChannelPipelineFactory
+import xitrum.handler.DefaultHttpChannelPipelineFactory
 import xitrum.handler.up.WebSocketDispatcher
 
 /**
@@ -38,7 +38,7 @@ trait WebSocket {
       handshaker.handshake(channel, request)
 
       val pipeline = channel.getPipeline
-      ChannelPipelineFactory.removeUnusedDefaultHttpHandlersForWebSocket(pipeline)
+      DefaultHttpChannelPipelineFactory.removeUnusedForWebSocket(pipeline)
       pipeline.addLast("webSocketDispatcher", new WebSocketDispatcher(handshaker, handler))
 
       handler.onOpen();
