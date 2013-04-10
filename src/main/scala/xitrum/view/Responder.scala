@@ -348,8 +348,8 @@ trait Responder extends JS with Flash with Knockout {
     channel.write(new TextWebSocketFrame(text.toString))
   }
 
-  def respondWebSocketBinary(binary: Array[Byte]): ChannelFuture = {
-    channel.write(new BinaryWebSocketFrame(ChannelBuffers.wrappedBuffer(binary)))
+  def respondWebSocketBinary(bytes: Array[Byte]): ChannelFuture = {
+    channel.write(new BinaryWebSocketFrame(ChannelBuffers.wrappedBuffer(bytes)))
   }
 
   def respondWebSocketBinary(channelBuffer: ChannelBuffer): ChannelFuture = {

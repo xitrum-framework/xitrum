@@ -22,7 +22,7 @@ trait WebSocket {
     def onTextMessage(text: String)
 
     /** Called when the client sends binary data. */
-    def onBinaryMessage(binary: Array[Byte])
+    def onBinaryMessage(bytes: Array[Byte])
   }
 
   /**
