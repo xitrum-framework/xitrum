@@ -19,7 +19,7 @@ trait ActionActor extends Actor with Action {
       dispatchWithFailsafe()
   }
 
-  override def onResponded() {
+  override def onDoneResponding() {
     context.stop(self)
   }
 }

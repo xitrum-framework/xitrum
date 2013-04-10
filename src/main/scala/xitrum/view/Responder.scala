@@ -32,8 +32,11 @@ trait Responder extends JS with Flash with Knockout {
 
   def isResponded = responded
 
-  /** Called when the response has been sent to the client. */
-  def onResponded() {}
+  /**
+   * Called when the response or the last chunk (in case of chunked response)
+   * has been sent to the client.
+   */
+  def onDoneResponding() {}
 
   def respond(): ChannelFuture = {
     if (responded) {
@@ -54,7 +57,7 @@ trait Responder extends JS with Flash with Knockout {
       }
 
       responded = true
-      onResponded()
+      if (!response.isChunked) onDoneResponding()
 
       future
     }
@@ -106,6 +109,7 @@ trait Responder extends JS with Flash with Knockout {
       // response error will be raised if the app try to respond more.
       response.setChunked(false)
 
+      onDoneResponding()
       future
     }
   }
