@@ -53,7 +53,7 @@ trait JS {
     jsRespond("window.location.href = \"" + jsEscape(location) + "\"")
   }
 
-  def jsRedirectTo(action: Action, params: (String, Any)*): ChannelFuture = { jsRedirectTo(action.url(params:_*)) }
+  def jsRedirectTo[T <: Action : Manifest](params: (String, Any)*): ChannelFuture = { jsRedirectTo(url[T](params:_*)) }
 
   //----------------------------------------------------------------------------
 

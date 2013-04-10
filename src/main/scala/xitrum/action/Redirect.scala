@@ -24,8 +24,8 @@ trait Redirect {
   }
 
   /** See also forwardTo. */
-  def redirectTo(actionClass: Class[_ <: Action], params: (String, Any)*): ChannelFuture = {
-    redirectTo(Routes.routes.reverseMappings(actionClass).url(params: _*))
+  def redirectTo[T <: Action : Manifest](params: (String, Any)*): ChannelFuture = {
+    redirectTo(url[T](params: _*))
   }
 
   //----------------------------------------------------------------------------
@@ -37,8 +37,9 @@ trait Redirect {
    * Tells another action to process the current request for the current action.
    * See also redirectTo.
    */
-  def forwardTo(actionClass: Class[_ <: Action]) {
-    forwarding = true
+  def forwardTo[T <: Action : Manifest]() {
+    val actionClass = manifest[T].runtimeClass.asInstanceOf[Class[Action]]
+    forwarding       = true
     handlerEnv.route = Routes.routes.reverseMappings(actionClass)
     Dispatcher.dispatch(actionClass, handlerEnv)
   }

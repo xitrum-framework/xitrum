@@ -43,27 +43,27 @@ trait UrlFor {
 
   //----------------------------------------------------------------------------
 
-  def url[T: Manifest](params: (String, Any)*) = {
+  def url[T <: Action : Manifest](params: (String, Any)*) = {
     val actionClass = manifest[T].runtimeClass.asInstanceOf[Class[Action]]
     Routes.routes.reverseMappings(actionClass).url(params:_*)
   }
-  def url[T: Manifest]: String = url[T]()
+  def url[T <: Action : Manifest]: String = url[T]()
 
-  def absUrl[T: Manifest](params: (String, Any)*) = absUrlPrefix + url[T](params:_*)
-  def absUrl[T: Manifest]: String = absUrl[T]()
+  def absUrl[T <: Action : Manifest](params: (String, Any)*) = absUrlPrefix + url[T](params:_*)
+  def absUrl[T <: Action : Manifest]: String = absUrl[T]()
 
-  def webSocketAbsUrl[T: Manifest](params: (String, Any)*) = {
+  def webSocketAbsUrl[T <: Action : Manifest](params: (String, Any)*) = {
     val actionClass = manifest[T].runtimeClass.asInstanceOf[Class[Action]]
     webSocketAbsUrlPrefix + url[T](params:_*)
   }
-  def webSocketAbsUrl[T: Manifest]: String = webSocketAbsUrl[T]()
+  def webSocketAbsUrl[T <: Action : Manifest]: String = webSocketAbsUrl[T]()
 
   //----------------------------------------------------------------------------
 
-  def sockJsUrl[T: Manifest] = {
+  def sockJsUrl[T <: Action : Manifest] = {
     val handlerClass = manifest[T].runtimeClass.asInstanceOf[Class[SockJsHandler]]
     Routes.sockJsPathPrefix(handlerClass)
   }
 
-  def sockJsAbsUrl[T: Manifest] = absUrlPrefix + sockJsUrl[T]
+  def sockJsAbsUrl[T <: Action : Manifest] = absUrlPrefix + sockJsUrl[T]
 }
