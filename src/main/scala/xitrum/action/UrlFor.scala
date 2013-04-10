@@ -60,10 +60,10 @@ trait UrlFor {
 
   //----------------------------------------------------------------------------
 
-  def sockJsUrl[T <: Action : Manifest] = {
+  def sockJsUrl[T <: SockJsHandler : Manifest] = {
     val handlerClass = manifest[T].runtimeClass.asInstanceOf[Class[SockJsHandler]]
     Routes.sockJsPathPrefix(handlerClass)
   }
 
-  def sockJsAbsUrl[T <: Action : Manifest] = absUrlPrefix + sockJsUrl[T]
+  def sockJsAbsUrl[T <: SockJsHandler : Manifest] = absUrlPrefix + sockJsUrl[T]
 }
