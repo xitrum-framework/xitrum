@@ -19,7 +19,7 @@ unmanagedBase in Runtime <<= baseDirectory { base => base / "config" }
 // and it takes several hours to sync from Sonatype to Maven Central
 resolvers += "SonatypeReleases" at "http://oss.sonatype.org/content/repositories/releases/"
 
-libraryDependencies += "io.netty" % "netty" % "3.6.3.Final"
+libraryDependencies += "io.netty" % "netty" % "3.6.5.Final"
 
 libraryDependencies += "com.typesafe.akka" %% "akka-actor" % "2.1.2"
 
@@ -42,7 +42,7 @@ libraryDependencies += "com.twitter" %% "chill" % "0.2.0"
 // For jsEscape
 libraryDependencies += "org.apache.commons" % "commons-lang3" % "3.1"
 
-libraryDependencies += "org.json4s" %% "json4s-native" % "3.2.3"
+libraryDependencies += "org.json4s" %% "json4s-native" % "3.2.4"
 
 libraryDependencies += "tv.cntt" %% "scaposer" % "1.2"
 
