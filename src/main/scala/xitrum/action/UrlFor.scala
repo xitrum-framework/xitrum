@@ -36,10 +36,10 @@ trait UrlFor {
   lazy val url: String = url()
 
   def absUrl(params: (String, Any)*) = absUrlPrefix + url(params:_*)
-  def absUrl: String = absUrl()
+  lazy val absUrl: String = absUrl()
 
   def webSocketAbsUrl(params: (String, Any)*) = webSocketAbsUrlPrefix + url(params:_*)
-  def webSocketAbsUrl: String = webSocketAbsUrl()
+  lazy val webSocketAbsUrl: String = webSocketAbsUrl()
 
   //----------------------------------------------------------------------------
 
