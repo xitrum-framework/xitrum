@@ -28,7 +28,11 @@ trait Responder extends JS with Flash with Knockout {
 
   //----------------------------------------------------------------------------
 
+  // Used by respond
   private var responded = false
+
+  // Used by respondHeadersForFirstChunk and respond
+  private var chunkModeTemporarilyTurnedOff = false
 
   def isResponded = responded
 
@@ -57,7 +61,7 @@ trait Responder extends JS with Flash with Knockout {
       }
 
       responded = true
-      if (!response.isChunked) onDoneResponding()
+      if (!response.isChunked && !chunkModeTemporarilyTurnedOff) onDoneResponding()
 
       future
     }
@@ -83,7 +87,9 @@ trait Responder extends JS with Flash with Knockout {
     // http://sockjs.github.com/sockjs-protocol/sockjs-protocol-0.3.3.html#section-165
     if (request.getProtocolVersion.compareTo(HttpVersion.HTTP_1_0) == 0) {
       response.setChunked(false)
+      chunkModeTemporarilyTurnedOff = true
       respond()
+      chunkModeTemporarilyTurnedOff = false
       response.setChunked(true)
     } else {
       respond()
