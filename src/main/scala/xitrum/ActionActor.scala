@@ -21,6 +21,8 @@ trait ActionActor extends Actor with Action {
   }
 
   override def onDoneResponding() {
-    context.stop(self)
+    // Avoid using context.stop(self) to avoid leaking actor internals (context)
+    // outside this actor, just in case onDoneResponding is called from another thread
+    Config.actorSystem.stop(self)
   }
 }

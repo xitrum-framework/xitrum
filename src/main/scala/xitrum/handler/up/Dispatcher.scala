@@ -1,6 +1,6 @@
 package xitrum.handler.up
 
-import scala.collection.mutable.{ArrayBuffer, Map => MMap}
+import scala.collection.mutable.{Map => MMap}
 
 import org.jboss.netty.channel._
 import org.jboss.netty.handler.codec.http._
@@ -8,7 +8,7 @@ import ChannelHandler.Sharable
 import HttpResponseStatus._
 import HttpVersion._
 
-import akka.actor.{Actor, ActorRef, Props}
+import akka.actor.{Actor, Props}
 import com.esotericsoftware.reflectasm.ConstructorAccess
 
 import xitrum.{Action, ActionActor, Config}
@@ -19,7 +19,7 @@ import xitrum.sockjs.SockJsAction
 
 object Dispatcher {
   def dispatch(actionClass: Class[_ <: Action], handlerEnv: HandlerEnv) {
-    if (classOf[ActionActor].isAssignableFrom(actionClass)) {
+    if (classOf[Actor].isAssignableFrom(actionClass)) {
       val system   = Config.actorSystem
       val actorRef = system.actorOf(Props {
         val action = ConstructorAccess.get(actionClass).newInstance()
