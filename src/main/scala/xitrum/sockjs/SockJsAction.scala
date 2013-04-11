@@ -13,7 +13,7 @@ import xitrum.{Action, ActionActor, Config, SkipCSRFCheck}
 import xitrum.annotation._
 import xitrum.etag.NotModified
 import xitrum.routing.Routes
-import xitrum.util.{Json, Lookup, LookupOrCreate, ClusterSingletonActor}
+import xitrum.util.{Json, ClusterSingletonActor}
 import xitrum.view.DocType
 
 // General info:
@@ -185,11 +185,11 @@ trait SockJsAction extends Action with SkipCSRFCheck {
 trait SockJsActionActor extends ActionActor with SockJsAction {
   protected def lookupOrCreateNonWebSocketSessionActor(sessionId: String) {
     val propsMaker = () => Props(new NonWebSocketSession(self, pathPrefix, this))
-    ClusterSingletonActor.actor() ! LookupOrCreate(sessionId, propsMaker)
+    ClusterSingletonActor.actor() ! ClusterSingletonActor.LookupOrCreate(sessionId, propsMaker)
   }
 
   protected def lookupNonWebSocketSessionActor(sessionId: String) {
-    ClusterSingletonActor.actor() ! Lookup(sessionId)
+    ClusterSingletonActor.actor() ! ClusterSingletonActor.Lookup(sessionId)
   }
 }
 
