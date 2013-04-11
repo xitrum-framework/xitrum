@@ -45,10 +45,6 @@ object Routes extends Logger {
     normal.toRouteCollection
   }
 
-  /** 404.html and 500.html are used by default */
-  var error404: Class[_ <: Action] = _
-  var error500: Class[_ <: Action] = _
-
   //----------------------------------------------------------------------------
 
   /** @return (normal routes, SockJS routes) */

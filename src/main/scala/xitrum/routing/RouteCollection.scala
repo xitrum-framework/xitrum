@@ -33,7 +33,11 @@ class RouteCollection(
 
   val firstWEBSOCKETs: Seq[Route],
   val lastWEBSOCKETs:  Seq[Route],
-  val otherWEBSOCKETs: Seq[Route]
+  val otherWEBSOCKETs: Seq[Route],
+
+  // 404.html and 500.html are used by default
+  val error400: Option[Class[Action]],
+  val error500: Option[Class[Action]]
 ) extends Logger
 {
   lazy val reverseMappings: Map[Class[_ <: Action], Route] = {
