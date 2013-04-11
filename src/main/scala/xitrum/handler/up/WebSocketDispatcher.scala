@@ -1,5 +1,7 @@
 package xitrum.handler.up
 
+import akka.actor.ActorRef
+
 import org.jboss.netty.channel.{
   Channel, ChannelHandler, ChannelHandlerContext, ChannelFuture,
   ChannelFutureListener, SimpleChannelUpstreamHandler, MessageEvent
@@ -16,7 +18,7 @@ import xitrum.util.ChannelBufferToBytes
 class WebSocketDispatcher(
     channel:    Channel,
     handshaker: WebSocketServerHandshaker,
-    handler:    WebSocket#WebSocketHandler
+    actorRef:   ActorRef
 ) extends SimpleChannelUpstreamHandler with BadClientSilencer
 {
   // Prevent WebSocketHandler#onClosed to be called twice

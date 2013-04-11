@@ -27,7 +27,6 @@ trait Action extends RequestEnv
   with Net
   with Filter
   with BasicAuth
-  with WebSocket
   with Redirect
   with UrlFor
   with Renderer
