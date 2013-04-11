@@ -68,7 +68,7 @@ object AccessLog extends Logger {
 
   private def extraInfo(action: Action, cacheSecs: Int, hit: Boolean) = {
     if (cacheSecs == 0) {
-      if (action.isResponded) "" else " (async)"
+      if (action.isDoneResponding) "" else " (async)"
     } else {
       if (hit) {
         if (cacheSecs < 0) " (action cache hit)"  else " (page cache hit)"

@@ -28,13 +28,11 @@ trait Responder extends JS with Flash with Knockout {
 
   //----------------------------------------------------------------------------
 
-  // Used by respond
-  private var responded = false
+  private var nonChunkedResponseOrFirstChunkSent = false
+  private var chunkModeTemporarilyTurnedOff      = false
+  private var doneResponding                     = false
 
-  // Used by respondHeadersForFirstChunk and respond
-  private var chunkModeTemporarilyTurnedOff = false
-
-  def isResponded = responded
+  def isDoneResponding = doneResponding
 
   /**
    * Called when the response or the last chunk (in case of chunked response)
@@ -43,7 +41,7 @@ trait Responder extends JS with Flash with Knockout {
   def onDoneResponding() {}
 
   def respond(): ChannelFuture = {
-    if (responded) {
+    if (nonChunkedResponseOrFirstChunkSent) {
       printDoubleResponseErrorStackTrace()
     } else {
       NoPipelining.setResponseHeaderForKeepAliveRequest(request, response)
@@ -60,8 +58,11 @@ trait Responder extends JS with Flash with Knockout {
         NoPipelining.if_keepAliveRequest_then_resumeReading_else_closeOnComplete(request, channel, future)
       }
 
-      responded = true
-      if (!response.isChunked && !chunkModeTemporarilyTurnedOff) onDoneResponding()
+      nonChunkedResponseOrFirstChunkSent = true
+      if (!response.isChunked && !chunkModeTemporarilyTurnedOff) {
+        doneResponding = true
+        onDoneResponding()
+      }
 
       future
     }
@@ -71,7 +72,7 @@ trait Responder extends JS with Flash with Knockout {
 
   /** If Content-Type header is not set, it is set to "application/octet-stream" */
   private def respondHeadersForFirstChunk() {
-    if (responded) return
+    if (nonChunkedResponseOrFirstChunkSent) return
 
     if (!response.containsHeader(CONTENT_TYPE))
       response.setHeader(CONTENT_TYPE, "application/octet-stream")
@@ -115,7 +116,9 @@ trait Responder extends JS with Flash with Knockout {
       // response error will be raised if the app try to respond more.
       response.setChunked(false)
 
+      doneResponding = true
       onDoneResponding()
+
       future
     }
   }
@@ -146,7 +149,7 @@ trait Responder extends JS with Flash with Knockout {
         text.toString
       }
 
-    if (!responded && !response.containsHeader(CONTENT_TYPE)) {
+    if (!nonChunkedResponseOrFirstChunkSent && !response.containsHeader(CONTENT_TYPE)) {
       // Set content type
       if (fallbackContentType != null) {
         // https://developers.google.com/speed/docs/best-practices/rendering#SpecifyCharsetEarly
@@ -367,7 +370,7 @@ trait Responder extends JS with Flash with Knockout {
    * - http://dev.w3.org/html5/eventsource/
    */
   def respondEventSource(data: Any, event: String = "message"): ChannelFuture = {
-    if (!responded) {
+    if (!nonChunkedResponseOrFirstChunkSent) {
       response.setHeader(CONTENT_TYPE, "text/event-stream; charset=UTF-8")
       response.setChunked(true)
       respondText("\r\n")  // Send a new line prelude, due to a bug in Opera

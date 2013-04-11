@@ -208,7 +208,7 @@ trait SockJsNonWebSocketSessionReceiverActionActor extends SockJsNonWebSocketSes
   }
 
   override def postStop() {
-    if (nonWebSocketSession != null && !isResponded)
+    if (nonWebSocketSession != null && !isDoneResponding)
       nonWebSocketSession ! AbortFromReceiverClient
   }
 }
