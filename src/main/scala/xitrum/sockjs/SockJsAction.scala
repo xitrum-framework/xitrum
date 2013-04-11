@@ -13,9 +13,8 @@ import xitrum.{Action, ActionActor, Config, SkipCSRFCheck}
 import xitrum.annotation._
 import xitrum.etag.NotModified
 import xitrum.routing.Routes
-import xitrum.util.{Json, LookupOrCreate, ClusterSingletonActor}
+import xitrum.util.{Json, Lookup, LookupOrCreate, ClusterSingletonActor}
 import xitrum.view.DocType
-import xitrum.util.Lookup
 
 // General info:
 // http://sockjs.github.com/sockjs-protocol/sockjs-protocol-0.3.html
@@ -183,6 +182,17 @@ trait SockJsAction extends Action with SkipCSRFCheck {
   }
 }
 
+trait SockJsActionActor extends ActionActor with SockJsAction {
+  protected def lookupOrCreateNonWebSocketSessionActor(sessionId: String) {
+    val propsMaker = () => Props(new NonWebSocketSession(self, pathPrefix, this))
+    ClusterSingletonActor.actor() ! LookupOrCreate(sessionId, propsMaker)
+  }
+
+  protected def lookupNonWebSocketSessionActor(sessionId: String) {
+    ClusterSingletonActor.actor() ! Lookup(sessionId)
+  }
+}
+
 @GET("")
 class SockJsGreeting extends SockJsAction {
   def execute() {
@@ -267,7 +277,7 @@ class SockJsXhrPollingOPTIONSSend extends SockJsAction {
 }
 
 @POST(":serverId<[^\\.]+>/:sessionId<[^\\.]+>/xhr")
-class SockJsXhrPollingReceive extends ActionActor with SockJsAction {
+class SockJsXhrPollingReceive extends SockJsActionActor {
   def execute() {
     val sessionId = param("sessionId")
 
@@ -275,9 +285,7 @@ class SockJsXhrPollingReceive extends ActionActor with SockJsAction {
     setCORS()
     setNoClientCache()
 
-    val propsMaker = () => Props(new NonWebSocketSession(self, pathPrefix, this))
-    ClusterSingletonActor.actor() ! LookupOrCreate(sessionId, propsMaker)
-
+    lookupOrCreateNonWebSocketSessionActor(sessionId)
     context.become {
       case (newlyCreated: Boolean, nonWebSocketSession: ActorRef) =>
         if (newlyCreated) {
@@ -332,7 +340,7 @@ class SockJsXhrPollingReceive extends ActionActor with SockJsAction {
 }
 
 @POST(":serverId<[^\\.]+>/:sessionId<[^\\.]+>/xhr_send")
-class SockJsXhrSend extends ActionActor with SockJsAction {
+class SockJsXhrSend extends SockJsActionActor {
   def execute() {
     val body = request.getContent.toString(Config.requestCharset)
     if (body.isEmpty) {
@@ -352,8 +360,7 @@ class SockJsXhrSend extends ActionActor with SockJsAction {
     }
 
     val sessionId = param("sessionId")
-    ClusterSingletonActor.actor() ! Lookup(sessionId)
-
+    lookupNonWebSocketSessionActor(sessionId)
     context.become {
       case None =>
         respondDefault404Page()
@@ -376,7 +383,7 @@ class SockJsXhrStreamingOPTIONSReceive extends SockJsAction {
 }
 
 @POST(":serverId<[^\\.]+>/:sessionId<[^\\.]+>/xhr_streaming")
-class SockJsXhrStreamingReceive extends ActionActor with SockJsAction {
+class SockJsXhrStreamingReceive extends SockJsActionActor {
   def execute() {
     val sessionId = param("sessionId")
 
@@ -389,9 +396,7 @@ class SockJsXhrStreamingReceive extends ActionActor with SockJsAction {
     response.setHeader(HttpHeaders.Names.CONTENT_TYPE, "application/javascript; charset=" + Config.xitrum.request.charset)
     respondBinary(SockJsAction.h2KB)
 
-    val propsMaker = () => Props(new NonWebSocketSession(self, pathPrefix, this))
-    ClusterSingletonActor.actor() ! LookupOrCreate(sessionId, propsMaker)
-
+    lookupOrCreateNonWebSocketSessionActor(sessionId)
     context.become {
       case (newlyCreated: Boolean, nonWebSocketSession: ActorRef) =>
         context.watch(nonWebSocketSession)
@@ -453,7 +458,7 @@ class SockJsXhrStreamingReceive extends ActionActor with SockJsAction {
 }
 
 @GET(":serverId<[^\\.]+>/:sessionId<[^\\.]+>/htmlfile")
-class SockJshtmlfileReceive extends ActionActor with SockJsAction {
+class SockJshtmlfileReceive extends SockJsActionActor {
   var callback: String = null
 
   def execute() {
@@ -467,9 +472,7 @@ class SockJshtmlfileReceive extends ActionActor with SockJsAction {
     setCORS()
     setNoClientCache()
 
-    val propsMaker = () => Props(new NonWebSocketSession(self, pathPrefix, this))
-    ClusterSingletonActor.actor() ! LookupOrCreate(sessionId, propsMaker)
-
+    lookupOrCreateNonWebSocketSessionActor(sessionId)
     context.become {
       case (newlyCreated: Boolean, nonWebSocketSession: ActorRef) =>
         context.watch(nonWebSocketSession)
@@ -557,7 +560,7 @@ class SockJshtmlfileReceive extends ActionActor with SockJsAction {
 }
 
 @GET(":serverId<[^\\.]+>/:sessionId<[^\\.]+>/jsonp")
-class SockJsJsonPPollingReceive extends ActionActor with SockJsAction {
+class SockJsJsonPPollingReceive extends SockJsActionActor {
   var callback: String = null
 
   def execute() {
@@ -571,9 +574,7 @@ class SockJsJsonPPollingReceive extends ActionActor with SockJsAction {
     setCORS()
     setNoClientCache()
 
-    val propsMaker = () => Props(new NonWebSocketSession(self, pathPrefix, SockJsJsonPPollingReceive.this))
-    ClusterSingletonActor.actor() ! LookupOrCreate(sessionId, propsMaker)
-
+    lookupOrCreateNonWebSocketSessionActor(sessionId)
     context.become {
       case (newlyCreated: Boolean, nonWebSocketSession: ActorRef) =>
         if (newlyCreated) {
@@ -636,7 +637,7 @@ class SockJsJsonPPollingReceive extends ActionActor with SockJsAction {
 }
 
 @POST(":serverId<[^\\.]+>/:sessionId<[^\\.]+>/jsonp_send")
-class SockJsJsonPPollingSend extends ActionActor with SockJsAction {
+class SockJsJsonPPollingSend extends SockJsActionActor {
   def execute() {
     val body: String = try {
       val contentType = request.getHeader(HttpHeaders.Names.CONTENT_TYPE)
@@ -669,8 +670,7 @@ class SockJsJsonPPollingSend extends ActionActor with SockJsAction {
         return
     }
 
-    ClusterSingletonActor.actor() ! Lookup(sessionId)
-
+    lookupNonWebSocketSessionActor(sessionId)
     context.become {
       case None =>
         respondDefault404Page()
@@ -687,7 +687,7 @@ class SockJsJsonPPollingSend extends ActionActor with SockJsAction {
 }
 
 @GET(":serverId<[^\\.]+>/:sessionId<[^\\.]+>/eventsource")
-class SockJEventSourceReceive extends ActionActor with SockJsAction {
+class SockJEventSourceReceive extends SockJsActionActor {
   def execute() {
     val sessionId = param("sessionId")
 
@@ -695,9 +695,7 @@ class SockJEventSourceReceive extends ActionActor with SockJsAction {
     setCORS()
     setNoClientCache()
 
-    val propsMaker = () => Props(new NonWebSocketSession(self, pathPrefix, SockJEventSourceReceive.this))
-    ClusterSingletonActor.actor() ! LookupOrCreate(sessionId, propsMaker)
-
+    lookupOrCreateNonWebSocketSessionActor(sessionId)
     context.become {
       case (newlyCreated: Boolean, nonWebSocketSession: ActorRef) =>
         context.watch(nonWebSocketSession)
