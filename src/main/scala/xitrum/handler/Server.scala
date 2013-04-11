@@ -25,11 +25,6 @@ object Server extends Logger {
   def start(httpChannelPipelineFactory: ChannelPipelineFactory) {
     ClusterSingletonActor.start()
 
-    // Because Hazelcast takes serveral seconds to start, we force it to
-    // start before the web server begins receiving requests, instead of
-    // letting it start lazily
-    Cache.cache.size()
-
     val routes = Routes.routes
     routes.printRoutes()
     routes.printActionPageCaches()
@@ -39,6 +34,14 @@ object Server extends Logger {
     if (portConfig.http.isDefined)  doStart(false, httpChannelPipelineFactory)
     if (portConfig.https.isDefined) doStart(true,  httpChannelPipelineFactory)
     if (portConfig.flashSocketPolicy.isDefined) FlashSocketPolicyServer.start()
+
+    // Because Hazelcast takes serveral seconds to start, we force it to
+    // start before the web server begins receiving requests, instead of
+    // letting it start lazily
+    Cache.cache.size()
+
+    // templateEngine is lazy, force its initialization here
+    Config.xitrum.templateEngine
 
     val mode = if (Config.productionMode) "production" else "development"
     logger.info("Xitrum started in {} mode", mode)

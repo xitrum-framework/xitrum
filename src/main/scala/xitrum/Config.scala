@@ -84,7 +84,11 @@ class Config(val config: TConfig) {
     else
       None
 
-  val templateEngine = {
+  /**
+   * lazy: templateEngine is initialized after xitrum.Config, so that inside
+   * the template engine class, xitrum.Config can be used
+   */
+  lazy val templateEngine = {
     val className = config.getString("templateEngine")
     val klass     = Class.forName(className)
     klass.newInstance().asInstanceOf[TemplateEngine]
