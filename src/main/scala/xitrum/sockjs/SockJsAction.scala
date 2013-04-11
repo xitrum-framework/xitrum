@@ -176,13 +176,17 @@ trait SockJsAction extends Action with SkipCSRFCheck {
       true
     } else {
       if (isEventSource) respondEventSource(text) else respondText(text)
-      respondLastChunk().addListener(ChannelFutureListener.CLOSE)
+      closeWithLastChunk()
       false
     }
   }
+
+  protected def closeWithLastChunk() {
+    respondLastChunk().addListener(ChannelFutureListener.CLOSE)
+  }
 }
 
-trait SockJsActionActor extends ActionActor with SockJsAction {
+trait SockJsNonWebSocketSessionActionActor extends ActionActor with SockJsAction {
   protected def lookupOrCreateNonWebSocketSessionActor(sessionId: String) {
     val propsMaker = () => Props(new NonWebSocketSession(self, pathPrefix, this))
     ClusterSingletonActor.actor() ! ClusterSingletonActor.LookupOrCreate(sessionId, propsMaker)
@@ -190,6 +194,22 @@ trait SockJsActionActor extends ActionActor with SockJsAction {
 
   protected def lookupNonWebSocketSessionActor(sessionId: String) {
     ClusterSingletonActor.actor() ! ClusterSingletonActor.Lookup(sessionId)
+  }
+}
+
+trait SockJsNonWebSocketSessionReceiverActionActor extends SockJsNonWebSocketSessionActionActor {
+  protected var nonWebSocketSession: ActorRef = null
+
+  protected def receiveNotification(nonWebSocketSession: ActorRef): Receive
+
+  protected def becomeReceiveNotification(nonWebSocketSession: ActorRef) {
+    this.nonWebSocketSession = nonWebSocketSession
+    context.become(receiveNotification(nonWebSocketSession))
+  }
+
+  override def postStop() {
+    if (nonWebSocketSession != null && !isResponded)
+      nonWebSocketSession ! AbortFromReceiverClient
   }
 }
 
@@ -277,7 +297,7 @@ class SockJsXhrPollingOPTIONSSend extends SockJsAction {
 }
 
 @POST(":serverId<[^\\.]+>/:sessionId<[^\\.]+>/xhr")
-class SockJsXhrPollingReceive extends SockJsActionActor {
+class SockJsXhrPollingReceive extends SockJsNonWebSocketSessionReceiverActionActor {
   def execute() {
     val sessionId = param("sessionId")
 
@@ -291,7 +311,7 @@ class SockJsXhrPollingReceive extends SockJsActionActor {
         if (newlyCreated) {
           respondJs("o\n")
         } else {
-          nonWebSocketSession ! SubscribeByClient
+          nonWebSocketSession ! SubscribeFromReceiverClient
           context.watch(nonWebSocketSession)
           context.become(receiveSubscribeResult(nonWebSocketSession))
         }
@@ -299,37 +319,37 @@ class SockJsXhrPollingReceive extends SockJsActionActor {
   }
 
   private def receiveSubscribeResult(nonWebSocketSession: ActorRef): Receive = {
-    case SubscribeResultToClientAnotherConnectionStillOpen =>
+    case SubscribeResultToReceiverClientAnotherConnectionStillOpen =>
       respondJs("c[2010,\"Another connection still open\"]\n")
       .addListener(ChannelFutureListener.CLOSE)
 
-    case SubscribeResultToClientClosed =>
+    case SubscribeResultToReceiverClientClosed =>
       respondJs("c[3000,\"Go away!\"]\n")
       .addListener(ChannelFutureListener.CLOSE)
 
-    case SubscribeResultToClientMessages(messages) =>
+    case SubscribeResultToReceiverClientMessages(messages) =>
       val json   = Json.generate(messages)
       val quoted = SockJsAction.quoteUnicode(json)
       respondJs("a" + quoted + "\n")
 
-    case SubscribeResultToClientWaitForMessage =>
-      context.become(receiveNotification(nonWebSocketSession))
+    case SubscribeResultToReceiverClientWaitForMessage =>
+      becomeReceiveNotification(nonWebSocketSession)
 
     case Terminated(`nonWebSocketSession`) =>
       respondJs("c[2011,\"Server error\"]\n")
       .addListener(ChannelFutureListener.CLOSE)
   }
 
-  private def receiveNotification(nonWebSocketSession: ActorRef): Receive = {
-    case NotificationToClientMessage(message) =>
+  protected override def receiveNotification(nonWebSocketSession: ActorRef): Receive = {
+    case NotificationToReceiverClientMessage(message) =>
       val json   = Json.generate(Seq(message))
       val quoted = SockJsAction.quoteUnicode(json)
       respondJs("a" + quoted + "\n")
 
-    case NotificationToClientHeartbeat =>
+    case NotificationToReceiverClientHeartbeat =>
       respondJs("h\n")
 
-    case NotificationToClientClosed =>
+    case NotificationToReceiverClientClosed =>
       respondJs("c[3000,\"Go away!\"]\n")
       .addListener(ChannelFutureListener.CLOSE)
 
@@ -340,7 +360,7 @@ class SockJsXhrPollingReceive extends SockJsActionActor {
 }
 
 @POST(":serverId<[^\\.]+>/:sessionId<[^\\.]+>/xhr_send")
-class SockJsXhrSend extends SockJsActionActor {
+class SockJsXhrSend extends SockJsNonWebSocketSessionActionActor {
   def execute() {
     val body = request.getContent.toString(Config.requestCharset)
     if (body.isEmpty) {
@@ -366,7 +386,7 @@ class SockJsXhrSend extends SockJsActionActor {
         respondDefault404Page()
 
       case Some(nonWebSocketSession: ActorRef) =>
-        nonWebSocketSession ! SendMessagesByClient(messages)
+        nonWebSocketSession ! MessagesFromSenderClient(messages)
         response.setStatus(HttpResponseStatus.NO_CONTENT)
         response.setHeader(HttpHeaders.Names.CONTENT_TYPE, "text/plain; charset=UTF-8")
         setCORS()
@@ -383,7 +403,7 @@ class SockJsXhrStreamingOPTIONSReceive extends SockJsAction {
 }
 
 @POST(":serverId<[^\\.]+>/:sessionId<[^\\.]+>/xhr_streaming")
-class SockJsXhrStreamingReceive extends SockJsActionActor {
+class SockJsXhrStreamingReceive extends SockJsNonWebSocketSessionReceiverActionActor {
   def execute() {
     val sessionId = param("sessionId")
 
@@ -402,63 +422,58 @@ class SockJsXhrStreamingReceive extends SockJsActionActor {
         context.watch(nonWebSocketSession)
         if (newlyCreated) {
           respondStreamingWithLimit("o\n")
-          context.become(receiveNotification(nonWebSocketSession))
+          becomeReceiveNotification(nonWebSocketSession)
         } else {
-          nonWebSocketSession ! SubscribeByClient
+          nonWebSocketSession ! SubscribeFromReceiverClient
           context.become(receiveSubscribeResult(nonWebSocketSession))
         }
     }
   }
 
   private def receiveSubscribeResult(nonWebSocketSession: ActorRef): Receive = {
-    case SubscribeResultToClientAnotherConnectionStillOpen =>
+    case SubscribeResultToReceiverClientAnotherConnectionStillOpen =>
       respondJs("c[2010,\"Another connection still open\"]\n")
-      respondLastChunk()
-      .addListener(ChannelFutureListener.CLOSE)
+      closeWithLastChunk()
 
-    case SubscribeResultToClientClosed =>
+    case SubscribeResultToReceiverClientClosed =>
       respondJs("c[3000,\"Go away!\"]\n")
-      respondLastChunk()
-      .addListener(ChannelFutureListener.CLOSE)
+      closeWithLastChunk()
 
-    case SubscribeResultToClientMessages(messages) =>
+    case SubscribeResultToReceiverClientMessages(messages) =>
       val json   = Json.generate(messages)
       val quoted = SockJsAction.quoteUnicode(json)
       if (respondStreamingWithLimit("a" + quoted + "\n"))
-        context.become(receiveNotification(nonWebSocketSession))
+        becomeReceiveNotification(nonWebSocketSession)
 
-    case SubscribeResultToClientWaitForMessage =>
-      context.become(receiveNotification(nonWebSocketSession))
+    case SubscribeResultToReceiverClientWaitForMessage =>
+      becomeReceiveNotification(nonWebSocketSession)
 
     case Terminated(`nonWebSocketSession`) =>
       respondJs("c[2011,\"Server error\"]\n")
-      respondLastChunk()
-      .addListener(ChannelFutureListener.CLOSE)
+      closeWithLastChunk()
   }
 
-  private def receiveNotification(nonWebSocketSession: ActorRef): Receive = {
-    case NotificationToClientMessage(message) =>
+  protected override def receiveNotification(nonWebSocketSession: ActorRef): Receive = {
+    case NotificationToReceiverClientMessage(message) =>
       val json   = Json.generate(Seq(message))
       val quoted = SockJsAction.quoteUnicode(json)
       respondStreamingWithLimit("a" + quoted + "\n")
 
-    case NotificationToClientHeartbeat =>
+    case NotificationToReceiverClientHeartbeat =>
       respondStreamingWithLimit("h\n")
 
-    case NotificationToClientClosed =>
+    case NotificationToReceiverClientClosed =>
       respondJs("c[3000,\"Go away!\"]\n")
-      respondLastChunk()
-      .addListener(ChannelFutureListener.CLOSE)
+      closeWithLastChunk()
 
     case Terminated(`nonWebSocketSession`) =>
       respondJs("c[2011,\"Server error\"]\n")
-      respondLastChunk()
-      .addListener(ChannelFutureListener.CLOSE)
+      closeWithLastChunk()
   }
 }
 
 @GET(":serverId<[^\\.]+>/:sessionId<[^\\.]+>/htmlfile")
-class SockJshtmlfileReceive extends SockJsActionActor {
+class SockJshtmlfileReceive extends SockJsNonWebSocketSessionReceiverActionActor {
   var callback: String = null
 
   def execute() {
@@ -480,30 +495,30 @@ class SockJshtmlfileReceive extends SockJsActionActor {
           response.setChunked(true)
           respondHtml(SockJsAction.htmlfile(callback, true))
           respondText("<script>\np(\"o\");\n</script>\r\n")
-          context.become(receiveNotification(nonWebSocketSession))
+          becomeReceiveNotification(nonWebSocketSession)
         } else {
-          nonWebSocketSession ! SubscribeByClient
+          nonWebSocketSession ! SubscribeFromReceiverClient
           context.become(receiveSubscribeResult(nonWebSocketSession))
         }
     }
   }
 
   private def receiveSubscribeResult(nonWebSocketSession: ActorRef): Receive = {
-    case SubscribeResultToClientAnotherConnectionStillOpen =>
+    case SubscribeResultToReceiverClientAnotherConnectionStillOpen =>
       respondHtml(
         SockJsAction.htmlfile(callback, false) +
         "<script>\np(\"c[2010,\\\"Another connection still open\\\"]\");\n</script>\r\n"
       )
       .addListener(ChannelFutureListener.CLOSE)
 
-    case SubscribeResultToClientClosed =>
+    case SubscribeResultToReceiverClientClosed =>
       respondHtml(
         SockJsAction.htmlfile(callback, false) +
         "<script>\np(\"c[3000,\\\"Go away!\\\"]\");\n</script>\r\n"
       )
       .addListener(ChannelFutureListener.CLOSE)
 
-    case SubscribeResultToClientMessages(messages) =>
+    case SubscribeResultToReceiverClientMessages(messages) =>
       val buffer = new StringBuilder
       val json   = Json.generate(messages)
       val quoted = SockJsAction.quoteUnicode(json)
@@ -513,12 +528,12 @@ class SockJshtmlfileReceive extends SockJsActionActor {
       response.setChunked(true)
       respondHtml(SockJsAction.htmlfile(callback, true))
       if (respondStreamingWithLimit(buffer.toString))
-        context.become(receiveSubscribeResult(nonWebSocketSession))
+        becomeReceiveNotification(nonWebSocketSession)
 
-    case SubscribeResultToClientWaitForMessage =>
+    case SubscribeResultToReceiverClientWaitForMessage =>
       response.setChunked(true)
       respondHtml(SockJsAction.htmlfile(callback, true))
-      context.become(receiveSubscribeResult(nonWebSocketSession))
+      becomeReceiveNotification(nonWebSocketSession)
 
     case Terminated(`nonWebSocketSession`) =>
       respondHtml(
@@ -528,8 +543,8 @@ class SockJshtmlfileReceive extends SockJsActionActor {
       .addListener(ChannelFutureListener.CLOSE)
   }
 
-  private def receiveNotification(nonWebSocketSession: ActorRef): Receive = {
-    case NotificationToClientMessage(message) =>
+  protected override def receiveNotification(nonWebSocketSession: ActorRef): Receive = {
+    case NotificationToReceiverClientMessage(message) =>
       val buffer = new StringBuilder
       val json   = Json.generate(Seq(message))
       val quoted = SockJsAction.quoteUnicode(json)
@@ -538,29 +553,27 @@ class SockJshtmlfileReceive extends SockJsActionActor {
       buffer.append("\");\n</script>\r\n")
       respondStreamingWithLimit(buffer.toString)
 
-    case NotificationToClientHeartbeat =>
+    case NotificationToReceiverClientHeartbeat =>
       respondStreamingWithLimit("<script>\np(\"h\");\n</script>\r\n")
 
-    case NotificationToClientClosed =>
+    case NotificationToReceiverClientClosed =>
       respondHtml(
         SockJsAction.htmlfile(callback, false) +
         "<script>\np(\"c[3000,\\\"Go away!\\\"]\");\n</script>\r\n"
       )
-      respondLastChunk()
-      .addListener(ChannelFutureListener.CLOSE)
+      closeWithLastChunk()
 
     case Terminated(`nonWebSocketSession`) =>
       respondHtml(
         SockJsAction.htmlfile(callback, false) +
         "<script>\np(\"c[2011,\\\"Server error\\\"]\");\n</script>\r\n"
       )
-      respondLastChunk()
-      .addListener(ChannelFutureListener.CLOSE)
+      closeWithLastChunk()
   }
 }
 
 @GET(":serverId<[^\\.]+>/:sessionId<[^\\.]+>/jsonp")
-class SockJsJsonPPollingReceive extends SockJsActionActor {
+class SockJsJsonPPollingReceive extends SockJsNonWebSocketSessionReceiverActionActor {
   var callback: String = null
 
   def execute() {
@@ -580,7 +593,7 @@ class SockJsJsonPPollingReceive extends SockJsActionActor {
         if (newlyCreated) {
           respondJs(callback + "(\"o\");\r\n")
         } else {
-          nonWebSocketSession ! SubscribeByClient
+          nonWebSocketSession ! SubscribeFromReceiverClient
           context.watch(nonWebSocketSession)
           context.become(receiveSubscribeResult(nonWebSocketSession))
         }
@@ -588,15 +601,15 @@ class SockJsJsonPPollingReceive extends SockJsActionActor {
   }
 
   private def receiveSubscribeResult(nonWebSocketSession: ActorRef): Receive = {
-    case SubscribeResultToClientAnotherConnectionStillOpen =>
+    case SubscribeResultToReceiverClientAnotherConnectionStillOpen =>
       respondJs(callback + "(\"c[2010,\\\"Another connection still open\\\"]\");\r\n")
       .addListener(ChannelFutureListener.CLOSE)
 
-    case SubscribeResultToClientClosed =>
+    case SubscribeResultToReceiverClientClosed =>
       respondJs(callback + "(\"c[3000,\\\"Go away!\\\"]\");\r\n")
       .addListener(ChannelFutureListener.CLOSE)
 
-    case SubscribeResultToClientMessages(messages) =>
+    case SubscribeResultToReceiverClientMessages(messages) =>
       val buffer = new StringBuilder
       val json   = Json.generate(messages)
       val quoted = SockJsAction.quoteUnicode(json)
@@ -605,16 +618,16 @@ class SockJsJsonPPollingReceive extends SockJsActionActor {
       buffer.append("\");\r\n")
       respondJs(buffer.toString)
 
-    case SubscribeResultToClientWaitForMessage =>
-      context.become(receiveSubscribeResult(nonWebSocketSession))
+    case SubscribeResultToReceiverClientWaitForMessage =>
+      becomeReceiveNotification(nonWebSocketSession)
 
     case Terminated(`nonWebSocketSession`) =>
       respondJs(callback + "(\"c[2011,\\\"Server error\\\"]\");\r\n")
       .addListener(ChannelFutureListener.CLOSE)
   }
 
-  private def receiveNotification(nonWebSocketSession: ActorRef): Receive = {
-    case NotificationToClientMessage(message) =>
+  protected override def receiveNotification(nonWebSocketSession: ActorRef): Receive = {
+    case NotificationToReceiverClientMessage(message) =>
       val buffer = new StringBuilder
       val json   = Json.generate(Seq(message))
       val quoted = SockJsAction.quoteUnicode(json)
@@ -623,10 +636,10 @@ class SockJsJsonPPollingReceive extends SockJsActionActor {
       buffer.append("\");\r\n")
       respondJs(buffer.toString)
 
-    case NotificationToClientHeartbeat =>
+    case NotificationToReceiverClientHeartbeat =>
       respondJs(callback + "(\"h\");\r\n")
 
-    case NotificationToClientClosed =>
+    case NotificationToReceiverClientClosed =>
       respondJs(callback + "(\"c[3000,\\\"Go away!\\\"]\");\r\n")
       .addListener(ChannelFutureListener.CLOSE)
 
@@ -637,7 +650,7 @@ class SockJsJsonPPollingReceive extends SockJsActionActor {
 }
 
 @POST(":serverId<[^\\.]+>/:sessionId<[^\\.]+>/jsonp_send")
-class SockJsJsonPPollingSend extends SockJsActionActor {
+class SockJsJsonPPollingSend extends SockJsNonWebSocketSessionActionActor {
   def execute() {
     val body: String = try {
       val contentType = request.getHeader(HttpHeaders.Names.CONTENT_TYPE)
@@ -676,7 +689,7 @@ class SockJsJsonPPollingSend extends SockJsActionActor {
         respondDefault404Page()
 
       case Some(nonWebSocketSession: ActorRef) =>
-        nonWebSocketSession ! SendMessagesByClient(messages)
+        nonWebSocketSession ! MessagesFromSenderClient(messages)
         // Konqueror does weird things on 204.
         // As a workaround we need to respond with something - let it be the string "ok".
         setCORS()
@@ -687,7 +700,7 @@ class SockJsJsonPPollingSend extends SockJsActionActor {
 }
 
 @GET(":serverId<[^\\.]+>/:sessionId<[^\\.]+>/eventsource")
-class SockJEventSourceReceive extends SockJsActionActor {
+class SockJEventSourceReceive extends SockJsNonWebSocketSessionReceiverActionActor {
   def execute() {
     val sessionId = param("sessionId")
 
@@ -701,55 +714,53 @@ class SockJEventSourceReceive extends SockJsActionActor {
         context.watch(nonWebSocketSession)
         if (newlyCreated) {
           respondEventSource("o")
-          context.become(receiveNotification(nonWebSocketSession))
+          becomeReceiveNotification(nonWebSocketSession)
         } else {
-          nonWebSocketSession ! SubscribeByClient
+          nonWebSocketSession ! SubscribeFromReceiverClient
           context.become(receiveSubscribeResult(nonWebSocketSession))
         }
     }
   }
 
   private def receiveSubscribeResult(nonWebSocketSession: ActorRef): Receive = {
-    case SubscribeResultToClientAnotherConnectionStillOpen =>
+    case SubscribeResultToReceiverClientAnotherConnectionStillOpen =>
       respondJs("c[2010,\"Another connection still open\"]\n")
       .addListener(ChannelFutureListener.CLOSE)
 
-    case SubscribeResultToClientClosed =>
+    case SubscribeResultToReceiverClientClosed =>
       respondJs("c[3000,\"Go away!\"]\n")
       .addListener(ChannelFutureListener.CLOSE)
 
-    case SubscribeResultToClientMessages(messages) =>
+    case SubscribeResultToReceiverClientMessages(messages) =>
       val json   = "a" + Json.generate(messages)
       val quoted = SockJsAction.quoteUnicode(json)
       if (respondStreamingWithLimit(quoted, true))
-        context.become(receiveNotification(nonWebSocketSession))
+        becomeReceiveNotification(nonWebSocketSession)
 
-    case SubscribeResultToClientWaitForMessage =>
-      context.become(receiveNotification(nonWebSocketSession))
+    case SubscribeResultToReceiverClientWaitForMessage =>
+      becomeReceiveNotification(nonWebSocketSession)
 
     case Terminated(`nonWebSocketSession`) =>
       respondJs("c[2011,\"Server error\"]\n")
       .addListener(ChannelFutureListener.CLOSE)
   }
 
-  private def receiveNotification(nonWebSocketSession: ActorRef): Receive = {
-    case NotificationToClientMessage(message) =>
+  protected override def receiveNotification(nonWebSocketSession: ActorRef): Receive = {
+    case NotificationToReceiverClientMessage(message) =>
       val json   = "a" + Json.generate(Seq(message))
       val quoted = SockJsAction.quoteUnicode(json)
       respondStreamingWithLimit(quoted, true)
 
-    case NotificationToClientHeartbeat =>
+    case NotificationToReceiverClientHeartbeat =>
       respondStreamingWithLimit("h", true)
 
-    case NotificationToClientClosed =>
+    case NotificationToReceiverClientClosed =>
       respondJs("c[3000,\"Go away!\"]\n")
-      respondLastChunk()
-      .addListener(ChannelFutureListener.CLOSE)
+      closeWithLastChunk()
 
     case Terminated(`nonWebSocketSession`) =>
       respondEventSource("c[2011,\"Server error\"]")
-      respondLastChunk()
-      .addListener(ChannelFutureListener.CLOSE)
+      closeWithLastChunk()
   }
 }
 

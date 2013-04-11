@@ -5,7 +5,7 @@ import akka.actor.ActorRef
 import org.jboss.netty.channel.ChannelFutureListener
 
 import xitrum.routing.Routes
-import xitrum.sockjs.{CloseByHandler, SendMessageByHandler}
+import xitrum.sockjs.{CloseFromHandler, MessageFromHandler}
 import xitrum.util.Json
 
 abstract class SockJsHandler extends Logger {
@@ -42,7 +42,7 @@ abstract class SockJsHandler extends Logger {
         if (nonWebSocketSessionActorRef.isTerminated) {
           onClose()
         } else {
-          nonWebSocketSessionActorRef ! SendMessageByHandler(message.toString)
+          nonWebSocketSessionActorRef ! MessageFromHandler(message.toString)
         }
       }
     } else {
@@ -59,7 +59,7 @@ abstract class SockJsHandler extends Logger {
   def close() {
     if (webSocketAction == null) {
       // Until the timeout occurs, the server must serve the close message
-      nonWebSocketSessionActorRef ! CloseByHandler
+      nonWebSocketSessionActorRef ! CloseFromHandler
     } else {
       // For WebSocket, must explicitly close
       // WebSocket is used, but it may be raw or not raw
