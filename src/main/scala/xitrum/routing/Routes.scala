@@ -68,6 +68,34 @@ object Routes extends Logger {
 
   private val sockJsClassAndOptionsTable = MMap[String, SockJsClassAndOptions]()
 
+  def printSockJsRoutes() {
+    // This method is only run once on start, speed is not a problem
+
+    if (!sockJsClassAndOptionsTable.isEmpty) {
+      val (pathPrefixMaxLength, handlerClassNameMaxLength, websocketOptionMaxLength) =
+        sockJsClassAndOptionsTable.toList.foldLeft((0, 0, "websocket: true,".length)) {
+            case ((pmax, hmax, wmax), (pathPrefix, sockJsClassAndOptions)) =>
+          val plen  = pathPrefix.length
+          val hlen  = sockJsClassAndOptions.handlerClass.getName.length
+          val pmax2 = if (pmax < plen) plen else pmax
+          val hmax2 = if (hmax < hlen) hlen else hmax
+          val wmax2 = if (sockJsClassAndOptions.websocket) wmax else "websocket: false,".length
+          (pmax2, hmax2, wmax2)
+        }
+      val logFormat = "%-" + pathPrefixMaxLength + "s  %-" + handlerClassNameMaxLength + "s  %-" + websocketOptionMaxLength + "s %s"
+
+      val strings = sockJsClassAndOptionsTable.map { case (pathPrefix, sockJsClassAndOptions) =>
+        logFormat.format(
+          pathPrefix,
+          sockJsClassAndOptions.handlerClass.getName,
+          "websocket: " + sockJsClassAndOptions.websocket + ",",
+          "cookie_needed: " + sockJsClassAndOptions.cookieNeeded
+        )
+      }
+      logger.info("SockJS routes:\n" + strings.mkString("\n"))
+    }
+  }
+
   /**
    * Mounts SockJS handler at the path prefix.
    *

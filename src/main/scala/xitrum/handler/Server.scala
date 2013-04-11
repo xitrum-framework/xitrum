@@ -33,6 +33,7 @@ object Server extends Logger {
     val routes = Routes.routes
     routes.printRoutes()
     routes.printActionPageCaches()
+    Routes.printSockJsRoutes()
 
     val portConfig = Config.xitrum.port
     if (portConfig.http.isDefined)  doStart(false, httpChannelPipelineFactory)
