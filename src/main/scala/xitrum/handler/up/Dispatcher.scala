@@ -65,15 +65,17 @@ class Dispatcher extends SimpleChannelUpstreamHandler with BadClientSilencer {
         Dispatcher.dispatch(route.actionClass, env)
 
       case None =>
-        if (Routes.error404 == null) {
+        Routes.routes.error404 match {
+          case None =>
             val response = new DefaultHttpResponse(HTTP_1_1, NOT_FOUND)
             XSendFile.set404Page(response, false)
             env.response = response
             ctx.getChannel.write(env)
-        } else {
+
+          case Some(error404) =>
             env.pathParams = MMap.empty
             env.response.setStatus(NOT_FOUND)
-            Dispatcher.dispatch(Routes.error404, env)
+            Dispatcher.dispatch(error404, env)
         }
     }
   }

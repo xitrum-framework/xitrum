@@ -36,7 +36,7 @@ class RouteCollection(
   val otherWEBSOCKETs: Seq[Route],
 
   // 404.html and 500.html are used by default
-  val error400: Option[Class[Action]],
+  val error404: Option[Class[Action]],
   val error500: Option[Class[Action]]
 ) extends Logger
 {

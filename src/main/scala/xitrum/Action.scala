@@ -119,15 +119,17 @@ trait Action extends RequestEnv
         } else {
           response.setStatus(HttpResponseStatus.INTERNAL_SERVER_ERROR)
           if (Config.productionMode) {
-            if (Routes.error500 == null) {
-              respondDefault500Page()
-            } else {
-              if (Routes.error500 == getClass) {
+            Routes.routes.error500 match {
+              case None =>
                 respondDefault500Page()
-              } else {
-                response.setStatus(HttpResponseStatus.INTERNAL_SERVER_ERROR)
-                Dispatcher.dispatch(Routes.error500, handlerEnv)
-              }
+
+              case Some(error500) =>
+                if (error500 == getClass) {
+                  respondDefault500Page()
+                } else {
+                  response.setStatus(HttpResponseStatus.INTERNAL_SERVER_ERROR)
+                  Dispatcher.dispatch(error500, handlerEnv)
+                }
             }
           } else {
             val errorMsg = e.toString + "\n\n" + e.getStackTraceString

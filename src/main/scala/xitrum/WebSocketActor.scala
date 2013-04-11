@@ -1,13 +1,5 @@
 package xitrum
 
-import akka.actor.Actor
-
-import org.jboss.netty.buffer.{ChannelBuffer, ChannelBuffers}
-import org.jboss.netty.channel.ChannelFuture
-import org.jboss.netty.handler.codec.http.websocketx.{BinaryWebSocketFrame, TextWebSocketFrame}
-
-import xitrum.handler.HandlerEnv
-
 /**
  * An actor will be created when there's request. It will be stopped when:
  * - The connection is closed
