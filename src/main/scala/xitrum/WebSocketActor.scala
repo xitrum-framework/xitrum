@@ -1,7 +1,17 @@
 package xitrum
 
 import akka.actor.Actor
-import org.jboss.netty.handler.codec.http.websocketx.WebSocketServerHandshakerFactory
+
+import org.jboss.netty.buffer.{ChannelBuffer, ChannelBuffers}
+import org.jboss.netty.channel.{ChannelFuture, ChannelFutureListener}
+import org.jboss.netty.handler.codec.http.websocketx.{
+  BinaryWebSocketFrame,
+  CloseWebSocketFrame,
+  PingWebSocketFrame,
+  PongWebSocketFrame,
+  TextWebSocketFrame,
+  WebSocketServerHandshakerFactory
+}
 
 import xitrum.handler.{DefaultHttpChannelPipelineFactory, HandlerEnv}
 import xitrum.handler.up.WebSocketEventDispatcher
@@ -47,6 +57,34 @@ trait WebSocketActor extends Actor with Action {
         context.stop(self)
       }
   }
+
+  //----------------------------------------------------------------------------
+
+  def respondWebSocketText(text: Any): ChannelFuture = {
+    channel.write(new TextWebSocketFrame(text.toString))
+  }
+
+  def respondWebSocketBinary(bytes: Array[Byte]): ChannelFuture = {
+    channel.write(new BinaryWebSocketFrame(ChannelBuffers.wrappedBuffer(bytes)))
+  }
+
+  def respondWebSocketBinary(channelBuffer: ChannelBuffer): ChannelFuture = {
+    channel.write(new BinaryWebSocketFrame(channelBuffer))
+  }
+
+  /** There's no respondWebSocketPong, because pong is automatically sent by Xitrum for you. */
+  def respondWebSocketPing(): ChannelFuture = {
+    channel.write(new PingWebSocketFrame())
+  }
+
+  /** Connection is automatically closed. */
+  def respondWebSocketClose(): ChannelFuture = {
+    val future = channel.write(new CloseWebSocketFrame())
+    future.addListener(ChannelFutureListener.CLOSE)
+    future
+  }
+
+  //----------------------------------------------------------------------------
 
   private def acceptWebSocket(): Boolean = {
     val factory    = new WebSocketServerHandshakerFactory(webSocketAbsRequestUrl, null, false)

@@ -3,20 +3,20 @@ package xitrum.view
 import java.io.File
 import scala.xml.{Node, NodeSeq, Xhtml}
 import scala.util.control.NonFatal
+
 import org.jboss.netty.buffer.{ChannelBuffer, ChannelBuffers}
-import org.jboss.netty.channel.ChannelFuture
+import org.jboss.netty.channel.{ChannelFuture, ChannelFutureListener}
 import org.jboss.netty.handler.codec.http.{DefaultHttpChunk, HttpChunk, HttpHeaders, HttpResponseStatus, HttpVersion}
-import org.jboss.netty.handler.codec.http.websocketx.{BinaryWebSocketFrame, CloseWebSocketFrame, PingWebSocketFrame, PongWebSocketFrame, TextWebSocketFrame}
 import org.jboss.netty.util.CharsetUtil
 import HttpHeaders.Names.{CONTENT_TYPE, CONTENT_LENGTH, TRANSFER_ENCODING}
 import HttpHeaders.Values.{CHUNKED, NO_CACHE}
+
 import xitrum.{Action, Config}
 import xitrum.etag.NotModified
 import xitrum.handler.up.NoPipelining
 import xitrum.handler.down.{XSendFile, XSendResource}
 import xitrum.routing.Routes
 import xitrum.util.Json
-import org.jboss.netty.channel.ChannelFutureListener
 
 /**
  * When responding text, charset is automatically set, as advised by Google:
@@ -342,32 +342,6 @@ trait Responder extends JS with Flash with Knockout {
   def respondResource(path: String): ChannelFuture = {
     XSendResource.setHeader(response, path, true)
     respond()
-  }
-
-  //----------------------------------------------------------------------------
-
-  def respondWebSocketText(text: Any): ChannelFuture = {
-    channel.write(new TextWebSocketFrame(text.toString))
-  }
-
-  def respondWebSocketBinary(bytes: Array[Byte]): ChannelFuture = {
-    channel.write(new BinaryWebSocketFrame(ChannelBuffers.wrappedBuffer(bytes)))
-  }
-
-  def respondWebSocketBinary(channelBuffer: ChannelBuffer): ChannelFuture = {
-    channel.write(new BinaryWebSocketFrame(channelBuffer))
-  }
-
-  /** There's no respondWebSocketPong, because pong is automatically sent by Xitrum for you. */
-  def respondWebSocketPing(): ChannelFuture = {
-    channel.write(new PingWebSocketFrame())
-  }
-
-  /** Connection is automatically closed. */
-  def respondWebSocketClose(): ChannelFuture = {
-    val future = channel.write(new CloseWebSocketFrame())
-    future.addListener(ChannelFutureListener.CLOSE)
-    future
   }
 
   //----------------------------------------------------------------------------
