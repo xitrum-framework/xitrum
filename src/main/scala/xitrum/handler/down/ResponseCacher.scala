@@ -82,7 +82,7 @@ object ResponseCacher extends Logger {
 
     val request = env.request
     val key =
-      Cache.pageActionPrefix(env.route.actionClass) + "/" +
+      Cache.pageActionPrefix(env.route.klass.asInstanceOf[Class[Action]]) + "/" +
       request.getMethod + "/" +
       inspectSortedParams(sortedMap)
     if (Gzip.isAccepted(request)) key + "_gzipped" else key

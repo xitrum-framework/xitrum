@@ -15,28 +15,28 @@ import xitrum.{Action, ActionActor, Config}
 import xitrum.handler.HandlerEnv
 import xitrum.handler.down.XSendFile
 import xitrum.routing.Routes
-import xitrum.sockjs.SockJsAction
+import xitrum.sockjs.SockJsPrefix
 
 object Dispatcher {
-  def dispatch(actionClass: Class[_ <: Action], handlerEnv: HandlerEnv) {
-    if (classOf[Actor].isAssignableFrom(actionClass)) {
+  def dispatch(klass: Class[_], handlerEnv: HandlerEnv) {
+    if (classOf[Actor].isAssignableFrom(klass)) {
       val actorRef = Config.actorSystem.actorOf(Props {
-        val action = ConstructorAccess.get(actionClass).newInstance()
-        setPathPrefixForSockJsAction(action, handlerEnv)
-        action.asInstanceOf[Actor]
+        val actor = ConstructorAccess.get(klass).newInstance()
+        setPathPrefixForSockJs(actor, handlerEnv)
+        actor.asInstanceOf[Actor]
       })
       actorRef ! handlerEnv
     } else {
-      val action = ConstructorAccess.get(actionClass).newInstance()
-      setPathPrefixForSockJsAction(action, handlerEnv)
+      val action = ConstructorAccess.get(klass).newInstance().asInstanceOf[Action]
+      setPathPrefixForSockJs(action, handlerEnv)
       action.apply(handlerEnv)
       action.dispatchWithFailsafe()
     }
   }
 
-  private def setPathPrefixForSockJsAction(action: Action, handlerEnv: HandlerEnv) {
-    if (action.isInstanceOf[SockJsAction])
-      action.asInstanceOf[SockJsAction].pathPrefix = handlerEnv.pathInfo.tokens(0)
+  private def setPathPrefixForSockJs(instance: Any, handlerEnv: HandlerEnv) {
+    if (instance.isInstanceOf[SockJsPrefix])
+      instance.asInstanceOf[SockJsPrefix].pathPrefix = handlerEnv.pathInfo.tokens(0)
   }
 }
 
@@ -61,7 +61,7 @@ class Dispatcher extends SimpleChannelUpstreamHandler with BadClientSilencer {
       case Some((route, pathParams)) =>
         env.route      = route
         env.pathParams = pathParams
-        Dispatcher.dispatch(route.actionClass, env)
+        Dispatcher.dispatch(route.klass, env)
 
       case None =>
         Routes.routes.error404 match {

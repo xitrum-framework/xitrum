@@ -40,11 +40,11 @@ class RouteCollection(
   val error500: Option[Class[Action]]
 ) extends Logger
 {
-  lazy val reverseMappings: Map[Class[_ <: Action], Route] = {
-    val mmap = MMap[Class[_ <: Action], Route]()
-    allFirsts.foreach { r => mmap(r.actionClass) = r }
-    allLasts .foreach { r => mmap(r.actionClass) = r }
-    allOthers.foreach { r => mmap(r.actionClass) = r }
+  lazy val reverseMappings: Map[Class[_], Route] = {
+    val mmap = MMap[Class[_], Route]()
+    allFirsts.foreach { r => mmap(r.klass) = r }
+    allLasts .foreach { r => mmap(r.klass) = r }
+    allOthers.foreach { r => mmap(r.klass) = r }
     mmap.toMap
   }
 
@@ -74,7 +74,7 @@ class RouteCollection(
       val ys = route.compiledPattern.map { rt =>
         "['" + rt.value + "', " + rt.isPlaceHolder + "]"
       }
-      "[[" + ys.mkString(", ") + "], '" + route.actionClass.getName + "']"
+      "[[" + ys.mkString(", ") + "], '" + route.klass.getName + "']"
     }
     "[" + xs.mkString(", ") + "]"
   }
@@ -88,9 +88,9 @@ class RouteCollection(
     var others = ArrayBuffer[(String, String, String)]()
     val lasts  = ArrayBuffer[(String, String, String)]()
 
-    for (r <- allFirsts) firsts.append((r.httpMethod.toString, RouteCompiler.decompile(r.compiledPattern), r.actionClass.getName))
-    for (r <- allOthers) others.append((r.httpMethod.toString, RouteCompiler.decompile(r.compiledPattern), r.actionClass.getName))
-    for (r <- allLasts ) lasts .append((r.httpMethod.toString, RouteCompiler.decompile(r.compiledPattern), r.actionClass.getName))
+    for (r <- allFirsts) firsts.append((r.httpMethod.toString, RouteCompiler.decompile(r.compiledPattern), r.klass.getName))
+    for (r <- allOthers) others.append((r.httpMethod.toString, RouteCompiler.decompile(r.compiledPattern), r.klass.getName))
+    for (r <- allLasts ) lasts .append((r.httpMethod.toString, RouteCompiler.decompile(r.compiledPattern), r.klass.getName))
 
     // Sort by pattern
     var all = firsts ++ others.sortBy(_._2) ++ lasts
@@ -120,13 +120,13 @@ class RouteCollection(
     val all = allFirsts ++ allOthers ++ allLasts
     for (r <- all) {
       if (r.cacheSecs < 0) {
-        val n = r.actionClass.toString
+        val n = r.klass.toString
         actionCaches.append((n, -r.cacheSecs))
 
         val nLength = n.length
         if (nLength > actionMaxControllerActionNameLength) actionMaxControllerActionNameLength = nLength
       } else if (r.cacheSecs > 0) {
-        val n = r.actionClass.toString
+        val n = r.klass.toString
         pageCaches.append((n, r.cacheSecs))
 
         val nLength = n.length

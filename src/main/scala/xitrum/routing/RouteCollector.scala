@@ -12,9 +12,9 @@ import javassist.bytecode.{AnnotationsAttribute, ClassFile, MethodInfo, AccessFl
 import javassist.bytecode.annotation.{Annotation, MemberValue, ArrayMemberValue, StringMemberValue, IntegerMemberValue}
 import sclasner.{FileEntry, Scanner}
 
-import xitrum.{Action, Logger}
+import xitrum.Logger
 import xitrum.annotation._
-import xitrum.sockjs.SockJsAction
+import xitrum.sockjs.SockJsPrefix
 
 /** Scan all classes to collect routes from actions. */
 class RouteCollector extends Logger {
@@ -59,7 +59,7 @@ class RouteCollector extends Logger {
 
     val annotations = aa.getAnnotations
     val className   = classFile.getName
-    val fromSockJs  = className.startsWith(classOf[SockJsAction].getPackage.getName)
+    val fromSockJs  = className.startsWith(classOf[SockJsPrefix].getPackage.getName)
     val routes      = if (fromSockJs) normal_sockJs._2 else normal_sockJs._1
     collectRoutes(routes, className, annotations)
   }

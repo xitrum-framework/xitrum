@@ -2,7 +2,7 @@ package xitrum.action
 
 import scala.util.Random
 
-import xitrum.{Config, Action, SockJsActor}
+import xitrum.{Config, Action, SockJsActor, WebSocketActor}
 import xitrum.etag.Etag
 import xitrum.routing.Routes
 
@@ -44,25 +44,27 @@ trait UrlFor {
   //----------------------------------------------------------------------------
 
   def url[T <: Action : Manifest](params: (String, Any)*) = {
-    val actionClass = manifest[T].runtimeClass.asInstanceOf[Class[Action]]
-    Routes.routes.reverseMappings(actionClass).url(params:_*)
+    val klass = manifest[T].runtimeClass.asInstanceOf[Class[Action]]
+    Routes.routes.reverseMappings(klass).url(params:_*)
   }
   def url[T <: Action : Manifest]: String = url[T]()
 
   def absUrl[T <: Action : Manifest](params: (String, Any)*) = absUrlPrefix + url[T](params:_*)
   def absUrl[T <: Action : Manifest]: String = absUrl[T]()
 
-  def webSocketAbsUrl[T <: Action : Manifest](params: (String, Any)*) = {
-    val actionClass = manifest[T].runtimeClass.asInstanceOf[Class[Action]]
-    webSocketAbsUrlPrefix + url[T](params:_*)
+  //----------------------------------------------------------------------------
+
+  def webSocketAbsUrl[T <: WebSocketActor : Manifest](params: (String, Any)*) = {
+    val klass = manifest[T].runtimeClass.asInstanceOf[Class[Action]]
+    webSocketAbsUrlPrefix + Routes.routes.reverseMappings(klass).url(params:_*)
   }
-  def webSocketAbsUrl[T <: Action : Manifest]: String = webSocketAbsUrl[T]()
+  def webSocketAbsUrl[T <: WebSocketActor : Manifest]: String = webSocketAbsUrl[T]()
 
   //----------------------------------------------------------------------------
 
   def sockJsUrl[T <: SockJsActor : Manifest] = {
-    val handlerClass = manifest[T].runtimeClass.asInstanceOf[Class[SockJsActor]]
-    Routes.sockJsPathPrefix(handlerClass)
+    val klass = manifest[T].runtimeClass.asInstanceOf[Class[SockJsActor]]
+    Routes.sockJsPathPrefix(klass)
   }
 
   def sockJsAbsUrl[T <: SockJsActor : Manifest] = absUrlPrefix + sockJsUrl[T]
