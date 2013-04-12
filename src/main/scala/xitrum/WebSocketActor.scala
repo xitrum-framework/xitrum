@@ -13,7 +13,7 @@ import org.jboss.netty.handler.codec.http.websocketx.{
   WebSocketServerHandshakerFactory
 }
 
-import xitrum.handler.{DefaultHttpChannelPipelineFactory, HandlerEnv}
+import xitrum.handler.{AccessLog, DefaultHttpChannelPipelineFactory, HandlerEnv}
 import xitrum.handler.up.WebSocketEventDispatcher
 
 //------------------------------------------------------------------------------
@@ -37,6 +37,8 @@ trait WebSocketActor extends Actor {
 
   def receive = {
     case env: HandlerEnv =>
+      val beginTimestamp = System.currentTimeMillis()
+
       val action = new Action { def execute() {} }
       action.apply(env)
 
@@ -46,9 +48,8 @@ trait WebSocketActor extends Actor {
         // Can't use context.stop(self), that means context is leaked outside this actor
         action.addConnectionClosedListener { Config.actorSystem.stop(self) }
 
-        // FIXME: log access
-
         execute(action)
+        AccessLog.logWebSocketAccess(getClass.getName, action, beginTimestamp)
 
         // Resume reading paused at NoPipelining
         channel.setReadable(true)

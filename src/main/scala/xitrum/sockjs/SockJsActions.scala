@@ -791,7 +791,7 @@ class SockJSWebsocketPOST extends SockJsAction with SkipCSRFCheck {
 
 @WEBSOCKET(":serverId<[^\\.]+>/:sessionId<[^\\.]+>/websocket")
 class SockJSWebsocket extends WebSocketActor with SockJsPrefix {
-  private var sockJsActorRef: ActorRef = _
+  private[this] var sockJsActorRef: ActorRef = _
 
   def execute(action: Action) {
     // Ignored
@@ -837,13 +837,13 @@ class SockJSWebsocket extends WebSocketActor with SockJsPrefix {
   }
 
   override def postStop() {
-    Config.actorSystem.stop(sockJsActorRef)
+    if (sockJsActorRef != null) Config.actorSystem.stop(sockJsActorRef)
   }
 }
 
 @WEBSOCKET("websocket")
 class SockJSRawWebsocket extends WebSocketActor with SockJsPrefix {
-  private var sockJsActorRef: ActorRef = _
+  private[this] var sockJsActorRef: ActorRef = _
 
   def execute(action: Action) {
     sockJsActorRef = Routes.createSockJsActor(pathPrefix)
@@ -865,6 +865,6 @@ class SockJSRawWebsocket extends WebSocketActor with SockJsPrefix {
   }
 
   override def postStop() {
-    Config.actorSystem.stop(sockJsActorRef)
+    if (sockJsActorRef != null) Config.actorSystem.stop(sockJsActorRef)
   }
 }

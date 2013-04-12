@@ -83,7 +83,7 @@ trait Action extends RequestEnv
         }
       }
 
-      if (!forwarding) AccessLog.logDynamicContentAccess(Action.this, beginTimestamp, cacheSecs, hit)
+      if (!forwarding) AccessLog.logActionAccess(this, beginTimestamp, cacheSecs, hit)
     } catch {
       case NonFatal(e) =>
         if (forwarding) {
@@ -114,7 +114,7 @@ trait Action extends RequestEnv
           else
             respondText(msg)
 
-          AccessLog.logDynamicContentAccess(Action.this, beginTimestamp, 0, false)
+          AccessLog.logActionAccess(Action.this, beginTimestamp, 0, false)
         } else {
           response.setStatus(HttpResponseStatus.INTERNAL_SERVER_ERROR)
           if (Config.productionMode) {
@@ -138,7 +138,7 @@ trait Action extends RequestEnv
               respondText(errorMsg)
           }
 
-          AccessLog.logDynamicContentAccess(Action.this, beginTimestamp, 0, false, e)
+          AccessLog.logActionAccess(Action.this, beginTimestamp, 0, false, e)
         }
     }
   }

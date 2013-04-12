@@ -56,20 +56,20 @@ object NonWebSocketSession {
 class NonWebSocketSession(var receiverClient: ActorRef, pathPrefix: String, action: Action) extends Actor {
   import NonWebSocketSession._
 
-  private var sockJsActorRef: ActorRef = _
+  private[this] var sockJsActorRef: ActorRef = _
 
   // Messages from handler to client are buffered here
-  private val bufferForClientSubscriber = ArrayBuffer[String]()
+  private[this] val bufferForClientSubscriber = ArrayBuffer[String]()
 
   // ReceiveTimeout may not occurred if there's frequent Publish, thus we
   // need to manually check if there's no subscriber for a long time.
   // lastSubscribedAt must be Long to avoid Integer overflow, beacuse
   // System.currentTimeMillis() is used.
-  private var lastSubscribedAt = 0L
+  private[this] var lastSubscribedAt = 0L
 
   // Until the timeout occurs, the server must constantly serve
   // the close message
-  private var closed = false
+  private[this] var closed = false
 
   override def preStart() {
     // sockJsHandler.onClose is called at postStop

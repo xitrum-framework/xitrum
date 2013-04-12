@@ -15,7 +15,7 @@ case class SockJsText(text: String)
  */
 trait SockJsActor extends Actor {
   // Ref of NonWebSocketSessionActor, SockJSWebsocket, or SockJSRawWebsocket
-  private var sessionActorRef: ActorRef = _
+  private[this] var sessionActorRef: ActorRef = _
 
   def receive = {
     case (sessionActorRef: ActorRef, action: Action) =>

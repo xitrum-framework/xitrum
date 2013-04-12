@@ -39,17 +39,21 @@ object AccessLog extends Logger {
     }
   }
 
-  def logDynamicContentAccess(action: Action, beginTimestamp: Long, cacheSecs: Int, hit: Boolean, e: Throwable = null) {
+  def logActionAccess(action: Action, beginTimestamp: Long, cacheSecs: Int, hit: Boolean, e: Throwable = null) {
     if (e == null) {
-      if (logger.isDebugEnabled) logger.debug(msgWithTime(action, beginTimestamp) + extraInfo(action, cacheSecs, hit))
+      if (logger.isDebugEnabled) logger.debug(msgWithTime(action.getClass.getName, action, beginTimestamp) + extraInfo(action, cacheSecs, hit))
     } else {
-      logger.error("Dispatch error " + msgWithTime(action, beginTimestamp) + extraInfo(action, cacheSecs, hit), e)
+      logger.error("Dispatch error " + msgWithTime(action.getClass.getName, action, beginTimestamp) + extraInfo(action, cacheSecs, hit), e)
     }
+  }
+
+  def logWebSocketAccess(className: String, action: Action, beginTimestamp: Long) {
+    if (logger.isDebugEnabled) logger.debug(msgWithTime(className, action, beginTimestamp) + extraInfo(action, 0, false))
   }
 
   //----------------------------------------------------------------------------
 
-  private def msgWithTime(action: Action, beginTimestamp: Long) = {
+  private def msgWithTime(className: String, action: Action, beginTimestamp: Long) = {
     val endTimestamp = System.currentTimeMillis()
     val dt           = endTimestamp - beginTimestamp
     val env          = action.handlerEnv
@@ -57,7 +61,7 @@ object AccessLog extends Logger {
     action.remoteIp + " " +
     action.request.getMethod + " " +
     action.request.getUri + " -> " +
-    action.getClass.getName +
+    className +
     (if (env.uriParams.nonEmpty)        ", uriParams: "        + RequestEnv.inspectParamsWithFilter(env.uriParams)        else "") +
     (if (env.bodyParams.nonEmpty)       ", bodyParams: "       + RequestEnv.inspectParamsWithFilter(env.bodyParams)       else "") +
     (if (env.pathParams.nonEmpty)       ", pathParams: "       + RequestEnv.inspectParamsWithFilter(env.pathParams)       else "") +

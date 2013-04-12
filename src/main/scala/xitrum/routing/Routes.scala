@@ -8,8 +8,7 @@ import scala.util.control.NonFatal
 import akka.actor.{Actor, ActorRef, Props}
 import com.esotericsoftware.reflectasm.ConstructorAccess
 
-import xitrum.{Config, Action, Logger, SockJsActor}
-import xitrum.sockjs.SockJsAction
+import xitrum.{Config, Logger, SockJsActor}
 
 // "websocket" and "cookieNeeded" members are named after SockJS option:
 // {"websocket": true/false, "cookie_needed": true/false, "origins": ["*:*"], "entropy": integer}
@@ -106,7 +105,9 @@ object Routes extends Logger {
   def createSockJsActor(pathPrefix: String): ActorRef = {
     val sockJsClassAndOptions = sockJsClassAndOptionsTable(pathPrefix)
     val actorClass            = sockJsClassAndOptions.handlerClass
-    Config.actorSystem.actorOf(Props { ConstructorAccess.get(actorClass).asInstanceOf[Class[Actor]] })
+    Config.actorSystem.actorOf(Props {
+      ConstructorAccess.get(actorClass).newInstance().asInstanceOf[Actor]
+    })
   }
 
   /** @param sockJsHandlerClass Normal SockJsHandler subclass or object class */
