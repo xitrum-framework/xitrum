@@ -4,7 +4,16 @@ import akka.actor.Actor
 import org.jboss.netty.handler.codec.http.websocketx.WebSocketServerHandshakerFactory
 
 import xitrum.handler.{DefaultHttpChannelPipelineFactory, HandlerEnv}
-import xitrum.handler.up.WebSocketDispatcher
+import xitrum.handler.up.WebSocketEventDispatcher
+
+case class WebSocketText(text: String)
+
+case class WebSocketBinary(bytes: Array[Byte])
+
+/** Pong is automatically sent by Xitrum, don't send it yourself. */
+case object WebSocketPing
+
+case object WebSocketPong
 
 /**
  * An actor will be created when there's request. It will be stopped when:
@@ -22,17 +31,6 @@ import xitrum.handler.up.WebSocketDispatcher
  * There's no respondWebSocketPong, because pong is automatically sent by Xitrum for you.
  */
 trait WebSocketActor extends Actor with Action {
-  case class WebSocketText(text: String)
-
-  case class WebSocketBinary(bytes: Array[Byte])
-
-  /** Pong is automatically sent by Xitrum, don't send it yourself. */
-  case object WebSocketPing
-
-  case object WebSocketPong
-
-  //----------------------------------------------------------------------------
-
   def receive = {
     case env: HandlerEnv =>
       apply(env)
@@ -61,7 +59,7 @@ trait WebSocketActor extends Actor with Action {
 
       val pipeline = channel.getPipeline
       DefaultHttpChannelPipelineFactory.removeUnusedForWebSocket(pipeline)
-      pipeline.addLast("webSocketDispatcher", new WebSocketDispatcher(channel, handshaker, self))
+      pipeline.addLast("webSocketEventDispatcher", new WebSocketEventDispatcher(handshaker, self))
       true
     }
   }

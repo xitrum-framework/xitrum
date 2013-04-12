@@ -11,30 +11,15 @@ import org.jboss.netty.handler.codec.http.websocketx.{
   TextWebSocketFrame, WebSocketFrame, WebSocketServerHandshaker
 }
 
-import xitrum.action.WebSocket
+import xitrum.{WebSocketBinary, WebSocketPing, WebSocketPong, WebSocketText}
 import xitrum.util.ChannelBufferToBytes
 
 /** See https://github.com/netty/netty/blob/master/example/src/main/java/io/netty/example/http/websocketx/server/WebSocketServerHandler.java */
-class WebSocketDispatcher(
-    channel:    Channel,
+class WebSocketEventDispatcher(
     handshaker: WebSocketServerHandshaker,
     actorRef:   ActorRef
 ) extends SimpleChannelUpstreamHandler with BadClientSilencer
 {
-  // Prevent WebSocketHandler#onClosed to be called twice
-  private var onClosedCalled: Boolean = false
-
-  private def callOnClose(): Unit = synchronized {
-    if (!onClosedCalled) {
-      onClosedCalled = true
-      handler.onClose()
-    }
-  }
-
-  channel.getCloseFuture.addListener(new ChannelFutureListener {
-    def operationComplete(future: ChannelFuture) { callOnClose() }
-  })
-
   override def messageReceived(ctx: ChannelHandlerContext, e: MessageEvent) {
     val m = e.getMessage
     if (!m.isInstanceOf[WebSocketFrame]) {
@@ -44,26 +29,31 @@ class WebSocketDispatcher(
 
     val frame = m.asInstanceOf[WebSocketFrame]
 
-    if (frame.isInstanceOf[CloseWebSocketFrame]) {
-      handshaker.close(ctx.getChannel, frame.asInstanceOf[CloseWebSocketFrame]).addListener(ChannelFutureListener.CLOSE)
-      callOnClose()
+    if (frame.isInstanceOf[TextWebSocketFrame]) {
+      val text = frame.asInstanceOf[TextWebSocketFrame].getText
+      actorRef ! WebSocketText(text)
+      return
+    }
+
+    if (frame.isInstanceOf[BinaryWebSocketFrame]) {
+      val bytes = ChannelBufferToBytes(frame.asInstanceOf[BinaryWebSocketFrame].getBinaryData)
+      actorRef ! WebSocketBinary(bytes)
       return
     }
 
     if (frame.isInstanceOf[PingWebSocketFrame]) {
       ctx.getChannel.write(new PongWebSocketFrame(frame.getBinaryData))
+      actorRef ! WebSocketPing
       return
     }
 
-    if (frame.isInstanceOf[TextWebSocketFrame]) {
-      val text = frame.asInstanceOf[TextWebSocketFrame].getText
-      handler.onTextMessage(text)
+    if (frame.isInstanceOf[PongWebSocketFrame]) {
+      actorRef ! WebSocketPong
       return
     }
 
-    if (frame.isInstanceOf[BinaryWebSocketFrame]) {
-      val binary = ChannelBufferToBytes(frame.asInstanceOf[BinaryWebSocketFrame].getBinaryData)
-      handler.onBinaryMessage(binary)
+    if (frame.isInstanceOf[CloseWebSocketFrame]) {
+      handshaker.close(ctx.getChannel, frame.asInstanceOf[CloseWebSocketFrame]).addListener(ChannelFutureListener.CLOSE)
       return
     }
   }

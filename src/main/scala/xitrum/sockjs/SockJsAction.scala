@@ -10,6 +10,7 @@ import org.jboss.netty.handler.codec.http.{DefaultCookie, HttpHeaders, HttpRespo
 import akka.actor.{Actor, ActorRef, PoisonPill, Props, Terminated}
 
 import xitrum.{Action, ActionActor, Config, SkipCSRFCheck}
+import xitrum.{WebSocketActor, WebSocketBinary, WebSocketPing, WebSocketPong, WebSocketText}
 import xitrum.annotation._
 import xitrum.etag.NotModified
 import xitrum.routing.Routes
@@ -834,16 +835,16 @@ class SockJSWebsocket extends SockJsAction {
 }
 
 @WEBSOCKET("websocket")
-class SockJSRawWebsocket extends SockJsAction {
+class SockJSRawWebsocket extends WebSocketActor {
   def execute() {
     val immutableSession = session.toMap
     val sockJsHandler    = Routes.createSockJsHandler(pathPrefix)
     sockJsHandler.webSocketAction = this
     sockJsHandler.rawWebSocket    = true
-    acceptWebSocket(new WebSocketHandler {
-      def onOpen() {
-        sockJsHandler.onOpen(SockJSRawWebsocket.this)
-      }
+
+    context.become {
+      case WebSocketText(text) =>
+        sockJsHandler.onOpen(this)
 
       def onClose() {
         sockJsHandler.onClose()
