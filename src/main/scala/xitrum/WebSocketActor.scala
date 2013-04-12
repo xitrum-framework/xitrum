@@ -32,7 +32,7 @@ case object WebSocketPong
  * - The connection is closed
  * - WebSocket close frame is received or sent
  */
-trait WebSocketActor extends Actor {
+trait WebSocketActor extends Actor with Logger {
   private var channel: Channel = _
 
   def receive = {
