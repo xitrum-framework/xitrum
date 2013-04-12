@@ -149,6 +149,13 @@ class RouteCollection(
     }
   }
 
+  def printErrorRoutes() {
+    val strings = ArrayBuffer[String]()
+    error404.foreach { klass => strings.append("404  " + klass.getName) }
+    error500.foreach { klass => strings.append("500  " + klass.getName) }
+    if (!strings.isEmpty) logger.info("Error routes:\n" + strings.mkString("\n"))
+  }
+
   private def allFirsts(): Seq[Route] = {
     val ret = ArrayBuffer[Route]()
     ret.appendAll(firstGETs)

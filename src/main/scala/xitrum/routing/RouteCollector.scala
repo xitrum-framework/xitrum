@@ -12,7 +12,7 @@ import javassist.bytecode.{AnnotationsAttribute, ClassFile, MethodInfo, AccessFl
 import javassist.bytecode.annotation.{Annotation, MemberValue, ArrayMemberValue, StringMemberValue, IntegerMemberValue}
 import sclasner.{FileEntry, Scanner}
 
-import xitrum.Logger
+import xitrum.{Action, Logger, SockJsActor}
 import xitrum.annotation._
 import xitrum.sockjs.SockJsPrefix
 
@@ -61,10 +61,12 @@ class RouteCollector extends Logger {
     val className   = classFile.getName
     val fromSockJs  = className.startsWith(classOf[SockJsPrefix].getPackage.getName)
     val routes      = if (fromSockJs) normal_sockJs._2 else normal_sockJs._1
-    collectRoutes(routes, className, annotations)
+    collectNormalRoutes(routes, className, annotations)
+    collectSockJsRoutes(routes, className, annotations)
+    collectErrorRoutes (routes, className, annotations)
   }
 
-  private def collectRoutes(
+  private def collectNormalRoutes(
       routes:      SerializableRouteCollection,
       className:   String,
       annotations: Array[Annotation])
@@ -112,6 +114,42 @@ class RouteCollector extends Logger {
     }
   }
 
+  private def collectSockJsRoutes(
+      routes:      SerializableRouteCollection,
+      className:   String,
+      annotations: Array[Annotation])
+  {
+    var pathPrefix: String = null
+    var noWebSocket  = false
+    var cookieNeeded = false
+
+    annotations.foreach { a =>
+      val tn = a.getTypeName
+      if (tn == classOf[SOCKJS].getName)             pathPrefix   = getString(a)
+      if (tn == classOf[SockJsNoWebSocket].getName)  noWebSocket  = true
+      if (tn == classOf[SockJsCookieNeeded].getName) cookieNeeded = true
+    }
+
+    if (pathPrefix != null) {
+      val klass = Class.forName(className).asInstanceOf[Class[SockJsActor]]
+      Routes.sockJs(klass, pathPrefix, !noWebSocket, cookieNeeded)
+    }
+  }
+
+  private def collectErrorRoutes(
+      routes:      SerializableRouteCollection,
+      className:   String,
+      annotations: Array[Annotation])
+  {
+    annotations.foreach { a =>
+      val tn = a.getTypeName
+      if (tn == classOf[Error404].getName) routes.error404 = Some(Class.forName(className).asInstanceOf[Class[Action]])
+      if (tn == classOf[Error500].getName) routes.error500 = Some(Class.forName(className).asInstanceOf[Class[Action]])
+    }
+  }
+
+  //----------------------------------------------------------------------------
+
   private def optRouteOrder(annotationTypeName: String): Option[Int] = {
     if (annotationTypeName == classOf[First].getName) return Some(-1)
     if (annotationTypeName == classOf[Last].getName)  return Some(1)
@@ -120,28 +158,28 @@ class RouteCollector extends Logger {
 
   private def optCacheSecs(annotation: Annotation, annotationTypeName: String): Option[Int] = {
     if (annotationTypeName == classOf[CacheActionDay].getName)
-      return Some(-getCacheSecsValue(annotation) * 24 * 60 * 60)
+      return Some(-getInt(annotation) * 24 * 60 * 60)
 
     if (annotationTypeName == classOf[CacheActionHour].getName)
-      return Some(-getCacheSecsValue(annotation)      * 60 * 60)
+      return Some(-getInt(annotation)      * 60 * 60)
 
     if (annotationTypeName == classOf[CacheActionMinute].getName)
-      return Some(-getCacheSecsValue(annotation)           * 60)
+      return Some(-getInt(annotation)           * 60)
 
     if (annotationTypeName == classOf[CacheActionSecond].getName)
-      return Some(-getCacheSecsValue(annotation))
+      return Some(-getInt(annotation))
 
     if (annotationTypeName == classOf[CachePageDay].getName)
-      return Some(getCacheSecsValue(annotation) * 24 * 60 * 60)
+      return Some(getInt(annotation) * 24 * 60 * 60)
 
     if (annotationTypeName == classOf[CachePageHour].getName)
-      return Some(getCacheSecsValue(annotation)      * 60 * 60)
+      return Some(getInt(annotation)      * 60 * 60)
 
     if (annotationTypeName == classOf[CachePageMinute].getName)
-      return Some(getCacheSecsValue(annotation)           * 60)
+      return Some(getInt(annotation)           * 60)
 
     if (annotationTypeName == classOf[CachePageSecond].getName)
-      return Some(getCacheSecsValue(annotation))
+      return Some(getInt(annotation))
 
     None
   }
@@ -149,29 +187,29 @@ class RouteCollector extends Logger {
   /** @return Option[(method, pattern)] */
   private def optMethodAndPattern(annotation: Annotation, annotationTypeName: String): Option[(String, String)] = {
     if (annotationTypeName == classOf[GET].getName)
-      return Some("GET", getMethodPattern(annotation))
+      return Some("GET", getString(annotation))
 
     if (annotationTypeName == classOf[POST].getName)
-      return Some("POST", getMethodPattern(annotation))
+      return Some("POST", getString(annotation))
 
     if (annotationTypeName == classOf[PUT].getName)
-      return Some("PUT", getMethodPattern(annotation))
+      return Some("PUT", getString(annotation))
 
     if (annotationTypeName == classOf[DELETE].getName)
-      return Some("DELETE", getMethodPattern(annotation))
+      return Some("DELETE", getString(annotation))
 
     if (annotationTypeName == classOf[OPTIONS].getName)
-      return Some("OPTIONS", getMethodPattern(annotation))
+      return Some("OPTIONS", getString(annotation))
 
     if (annotationTypeName == classOf[WEBSOCKET].getName)
-      return Some("WEBSOCKET", getMethodPattern(annotation))
+      return Some("WEBSOCKET", getString(annotation))
 
     None
   }
 
-  private def getCacheSecsValue(annotation: Annotation): Int =
+  private def getInt(annotation: Annotation): Int =
     annotation.getMemberValue("value").asInstanceOf[IntegerMemberValue].getValue
 
-  private def getMethodPattern(annotation: Annotation): String =
+  private def getString(annotation: Annotation): String =
     annotation.getMemberValue("value").asInstanceOf[StringMemberValue].getValue
 }
