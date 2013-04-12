@@ -8,8 +8,9 @@ xitrum.util package, not here.
 
 Annotations and validators are put to
 xitrum.annation and
-xitrum.validation because there are many of them. It's better for application
+xitrum.validator
+because there are many of them. It's better for application
 developers to write:
 
 import xitrum.annotation._
-import xitrum.validation._
+import xitrum.validator._
