@@ -14,7 +14,6 @@ import com.esotericsoftware.reflectasm.ConstructorAccess
 import xitrum.{Action, ActionActor, Config}
 import xitrum.handler.HandlerEnv
 import xitrum.handler.down.XSendFile
-import xitrum.routing.Routes
 import xitrum.sockjs.SockJsPrefix
 
 object Dispatcher {
@@ -57,14 +56,14 @@ class Dispatcher extends SimpleChannelUpstreamHandler with BadClientSilencer {
 
     // Look up GET if method is HEAD
     val requestMethod = if (request.getMethod == HttpMethod.HEAD) HttpMethod.GET else request.getMethod
-    Routes.routes.route(requestMethod, pathInfo) match {
+    Config.routes.route(requestMethod, pathInfo) match {
       case Some((route, pathParams)) =>
         env.route      = route
         env.pathParams = pathParams
         Dispatcher.dispatch(route.klass, env)
 
       case None =>
-        Routes.routes.error404 match {
+        Config.routes.error404 match {
           case None =>
             val response = new DefaultHttpResponse(HTTP_1_1, NOT_FOUND)
             XSendFile.set404Page(response, false)

@@ -5,7 +5,6 @@ import org.jboss.netty.channel.socket.nio.NioServerSocketChannelFactory
 import org.jboss.netty.channel.ChannelPipelineFactory
 
 import xitrum.{Cache, Config, Logger}
-import xitrum.routing.Routes
 import xitrum.util.ClusterSingletonActor
 
 object Server extends Logger {
@@ -25,10 +24,10 @@ object Server extends Logger {
   def start(httpChannelPipelineFactory: ChannelPipelineFactory) {
     ClusterSingletonActor.start()
 
-    val routes = Routes.routes
+    val routes = Config.routes
     routes.printRoutes()
     routes.printActionPageCaches()
-    Routes.printSockJsRoutes()
+    routes.sockJsRouteMap.print()
     routes.printErrorRoutes()
 
     val portConfig = Config.xitrum.port

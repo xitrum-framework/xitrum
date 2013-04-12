@@ -7,7 +7,7 @@ import org.jboss.netty.channel.ChannelFuture
 
 import xitrum.{Config, Action}
 import xitrum.etag.{Etag, NotModified}
-import xitrum.routing.{Routes, JSRoutesCache, JSRoutesAction}
+import xitrum.routing.{JSRoutesCache, JSRoutesAction}
 
 // http://stackoverflow.com/questions/2703861/chromes-loading-indicator-keeps-spinning-during-xmlhttprequest
 // http://stackoverflow.com/questions/1735560/stop-the-browser-throbber-of-doom-while-loading-comet-server-push-xmlhttpreques

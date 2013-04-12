@@ -8,9 +8,8 @@ import org.jboss.netty.handler.codec.http.{ HttpHeaders, HttpResponseStatus }
 import HttpHeaders.Names.LOCATION
 import HttpResponseStatus.FOUND
 
-import xitrum.Action
+import xitrum.{Action, Config}
 import xitrum.handler.up.Dispatcher
-import xitrum.routing.Routes
 
 trait Redirect {
   this: Action =>
@@ -40,7 +39,7 @@ trait Redirect {
   def forwardTo[T <: Action : Manifest]() {
     val actionClass = manifest[T].runtimeClass.asInstanceOf[Class[Action]]
     forwarding       = true
-    handlerEnv.route = Routes.routes.reverseMappings(actionClass)
+    handlerEnv.route = Config.routes.reverseMappings(actionClass)
     Dispatcher.dispatch(actionClass, handlerEnv)
   }
 }

@@ -2,8 +2,7 @@ package xitrum.view
 
 import java.io.File
 
-import xitrum.{Config, Action}
-import xitrum.routing.Routes
+import xitrum.{Action, Config}
 
 trait Renderer {
   this: Action =>

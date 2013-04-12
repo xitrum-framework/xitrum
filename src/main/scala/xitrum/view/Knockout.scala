@@ -1,7 +1,6 @@
 package xitrum.view
 
-import xitrum.{Cache, Action}
-import xitrum.routing.Routes
+import xitrum.{Action, Cache, Config}
 import xitrum.util.Json
 
 /** Support for Knockout.js */
@@ -25,7 +24,7 @@ trait Knockout {
       (if (scopeSelector.isEmpty) "ko.applyBindings(model);\n" else "ko.applyBindings(model, " + scopeSelector + "[0]);\n")
     val prepareSync =
       "var sync = function() {\n" +
-        "$.post('" + Routes.routes.reverseMappings(syncActionClass).url() + """', {model: ko.mapping.toJSON(model)}, function(data) {
+        "$.post('" + Config.routes.reverseMappings(syncActionClass).url() + """', {model: ko.mapping.toJSON(model)}, function(data) {
           if (typeof(data) === 'object') {
             model = ko.mapping.fromJS(data);
             ko.applyBindings(model);

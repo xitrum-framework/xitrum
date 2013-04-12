@@ -9,6 +9,49 @@ import xitrum.{Action, Logger}
 import xitrum.scope.request.Params
 import xitrum.scope.request.PathInfo
 
+object RouteCollection {
+  def fromSerializable(
+      normal:              SerializableRouteCollection,
+      sockJsWithoutPrefix: SerializableRouteCollection,
+      sockJsMap:           Map[String, SockJsClassAndOptions]
+  ): RouteCollection = {
+    sockJsMap.keys.foreach { prefix =>
+      sockJsWithoutPrefix.firstGETs      .foreach { r => normal.firstGETs      .append(r.addPrefix(prefix)) }
+      sockJsWithoutPrefix.firstPOSTs     .foreach { r => normal.firstPOSTs     .append(r.addPrefix(prefix)) }
+      sockJsWithoutPrefix.firstPUTs      .foreach { r => normal.firstPUTs      .append(r.addPrefix(prefix)) }
+      sockJsWithoutPrefix.firstDELETEs   .foreach { r => normal.firstDELETEs   .append(r.addPrefix(prefix)) }
+      sockJsWithoutPrefix.firstOPTIONSs  .foreach { r => normal.firstOPTIONSs  .append(r.addPrefix(prefix)) }
+      sockJsWithoutPrefix.firstWEBSOCKETs.foreach { r => normal.firstWEBSOCKETs.append(r.addPrefix(prefix)) }
+
+      sockJsWithoutPrefix.lastGETs      .foreach { r => normal.lastGETs      .append(r.addPrefix(prefix)) }
+      sockJsWithoutPrefix.lastPOSTs     .foreach { r => normal.lastPOSTs     .append(r.addPrefix(prefix)) }
+      sockJsWithoutPrefix.lastPUTs      .foreach { r => normal.lastPUTs      .append(r.addPrefix(prefix)) }
+      sockJsWithoutPrefix.lastDELETEs   .foreach { r => normal.lastDELETEs   .append(r.addPrefix(prefix)) }
+      sockJsWithoutPrefix.lastOPTIONSs  .foreach { r => normal.lastOPTIONSs  .append(r.addPrefix(prefix)) }
+      sockJsWithoutPrefix.lastWEBSOCKETs.foreach { r => normal.lastWEBSOCKETs.append(r.addPrefix(prefix)) }
+
+      sockJsWithoutPrefix.otherGETs      .foreach { r => normal.otherGETs      .append(r.addPrefix(prefix)) }
+      sockJsWithoutPrefix.otherPOSTs     .foreach { r => normal.otherPOSTs     .append(r.addPrefix(prefix)) }
+      sockJsWithoutPrefix.otherPUTs      .foreach { r => normal.otherPUTs      .append(r.addPrefix(prefix)) }
+      sockJsWithoutPrefix.otherDELETEs   .foreach { r => normal.otherDELETEs   .append(r.addPrefix(prefix)) }
+      sockJsWithoutPrefix.otherOPTIONSs  .foreach { r => normal.otherOPTIONSs  .append(r.addPrefix(prefix)) }
+      sockJsWithoutPrefix.otherWEBSOCKETs.foreach { r => normal.otherWEBSOCKETs.append(r.addPrefix(prefix)) }
+    }
+
+    new RouteCollection(
+      normal.firstGETs.map(_.toRoute),       normal.lastGETs.map(_.toRoute),       normal.otherGETs.map(_.toRoute),
+      normal.firstPOSTs.map(_.toRoute),      normal.lastPOSTs.map(_.toRoute),      normal.otherPOSTs.map(_.toRoute),
+      normal.firstPUTs.map(_.toRoute),       normal.lastPUTs.map(_.toRoute),       normal.otherPUTs.map(_.toRoute),
+      normal.firstDELETEs.map(_.toRoute),    normal.lastDELETEs.map(_.toRoute),    normal.otherDELETEs.map(_.toRoute),
+      normal.firstOPTIONSs.map(_.toRoute),   normal.lastOPTIONSs.map(_.toRoute),   normal.otherOPTIONSs.map(_.toRoute),
+      normal.firstWEBSOCKETs.map(_.toRoute), normal.lastWEBSOCKETs.map(_.toRoute), normal.otherWEBSOCKETs.map(_.toRoute),
+      new SockJsRouteMap(sockJsMap),
+      normal.error404.map(Class.forName(_).asInstanceOf[Class[Action]]),
+      normal.error500.map(Class.forName(_).asInstanceOf[Class[Action]])
+    )
+  }
+}
+
 /** Direct listing is used, map is not used, so that route matching is faster. */
 class RouteCollection(
   val firstGETs: Seq[Route],
@@ -34,6 +77,8 @@ class RouteCollection(
   val firstWEBSOCKETs: Seq[Route],
   val lastWEBSOCKETs:  Seq[Route],
   val otherWEBSOCKETs: Seq[Route],
+
+  val sockJsRouteMap: SockJsRouteMap,
 
   // 404.html and 500.html are used by default
   val error404: Option[Class[Action]],

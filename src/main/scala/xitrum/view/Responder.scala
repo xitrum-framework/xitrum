@@ -15,7 +15,6 @@ import xitrum.{Action, Config}
 import xitrum.etag.NotModified
 import xitrum.handler.up.NoPipelining
 import xitrum.handler.down.{XSendFile, XSendResource}
-import xitrum.routing.Routes
 import xitrum.util.Json
 
 /**

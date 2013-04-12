@@ -29,18 +29,10 @@ class SerializableRouteCollection extends Serializable {
   val lastWEBSOCKETs  = ArrayBuffer[SerializableRoute]()
   val otherWEBSOCKETs = ArrayBuffer[SerializableRoute]()
 
+  // Mutable map is not serializable
+  var sockJsRoutes = Map[String, SockJsClassAndOptions]()
+
   // 404.html and 500.html are used by default
   var error404: Option[String] = None
   var error500: Option[String] = None
-
-  def toRouteCollection = new RouteCollection(
-    firstGETs.map(_.toRoute),       lastGETs.map(_.toRoute),       otherGETs.map(_.toRoute),
-    firstPOSTs.map(_.toRoute),      lastPOSTs.map(_.toRoute),      otherPOSTs.map(_.toRoute),
-    firstPUTs.map(_.toRoute),       lastPUTs.map(_.toRoute),       otherPUTs.map(_.toRoute),
-    firstDELETEs.map(_.toRoute),    lastDELETEs.map(_.toRoute),    otherDELETEs.map(_.toRoute),
-    firstOPTIONSs.map(_.toRoute),   lastOPTIONSs.map(_.toRoute),   otherOPTIONSs.map(_.toRoute),
-    firstWEBSOCKETs.map(_.toRoute), lastWEBSOCKETs.map(_.toRoute), otherWEBSOCKETs.map(_.toRoute),
-    error404.map(Class.forName(_).asInstanceOf[Class[Action]]),
-    error500.map(Class.forName(_).asInstanceOf[Class[Action]])
-  )
 }

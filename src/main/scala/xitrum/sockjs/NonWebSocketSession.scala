@@ -6,7 +6,6 @@ import akka.actor.{Actor, ActorRef, ActorSystem, Props, ReceiveTimeout, Terminat
 import scala.concurrent.duration._
 
 import xitrum.{Action, Config, SockJsText}
-import xitrum.routing.Routes
 
 // There are 2 kinds of non-WebSocket client: receiver and sender
 // receiver/sender client <-> NonWebSocketSessionActor <-> SockJsActor
@@ -73,7 +72,7 @@ class NonWebSocketSession(var receiverClient: ActorRef, pathPrefix: String, acti
 
   override def preStart() {
     // sockJsHandler.onClose is called at postStop
-    sockJsActorRef = Routes.createSockJsActor(pathPrefix)
+    sockJsActorRef = Config.routes.sockJsRouteMap.createSockJsActor(pathPrefix)
     sockJsActorRef ! (self, action)
 
     lastSubscribedAt = System.currentTimeMillis()

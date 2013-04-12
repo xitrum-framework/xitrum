@@ -11,6 +11,7 @@ import com.typesafe.config.{Config => TConfig, ConfigFactory}
 import akka.actor.ActorSystem
 
 import xitrum.scope.session.SessionStore
+import xitrum.routing.{RouteCollection, RouteCollector, SerializableRouteCollection, SockJsClassAndOptions}
 import xitrum.view.TemplateEngine
 import xitrum.util.Loader
 
@@ -246,5 +247,36 @@ object Config extends Logger {
     logger.error(msg, e)
     Hazelcast.shutdownAll()
     System.exit(-1)
+  }
+
+  //----------------------------------------------------------------------------
+
+  private[this] val ROUTES_CACHE = "routes.cache"
+
+  val routes: RouteCollection = {
+    val (normal, sockJsWithoutPrefix, sockJsMap) = deserializeCacheFileOrRecollectWithRetry()
+    RouteCollection.fromSerializable(normal, sockJsWithoutPrefix, sockJsMap)
+  }
+
+  /** @return (normal routes, SockJS routes) */
+  private def deserializeCacheFileOrRecollectWithRetry(retried: Boolean = false):
+    (SerializableRouteCollection, SerializableRouteCollection, Map[String, SockJsClassAndOptions]) =
+  {
+    try {
+      logger.info("Load file " + ROUTES_CACHE + " or recollect routes...")
+      val routeCollector = new RouteCollector
+      routeCollector.deserializeCacheFileOrRecollect(ROUTES_CACHE)
+    } catch {
+      case NonFatal(e) =>
+        if (retried) {
+          Config.exitOnError("Could not collect routes", e)
+          throw e
+        } else {
+          logger.info("Delete " + ROUTES_CACHE + " and retry")
+          val file = new File(ROUTES_CACHE)
+          file.delete()
+          deserializeCacheFileOrRecollectWithRetry(true)
+        }
+    }
   }
 }

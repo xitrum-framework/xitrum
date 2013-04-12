@@ -11,7 +11,6 @@ import xitrum.exception.{InvalidAntiCSRFToken, InvalidInput, MissingParam, Sessi
 import xitrum.handler.{AccessLog, HandlerEnv}
 import xitrum.handler.down.ResponseCacher
 import xitrum.handler.up.Dispatcher
-import xitrum.routing.Routes
 import xitrum.scope.request.RequestEnv
 import xitrum.scope.session.{CSRF, SessionEnv}
 import xitrum.view.{Renderer, Responder}
@@ -118,7 +117,7 @@ trait Action extends RequestEnv
         } else {
           response.setStatus(HttpResponseStatus.INTERNAL_SERVER_ERROR)
           if (Config.productionMode) {
-            Routes.routes.error500 match {
+            Config.routes.error500 match {
               case None =>
                 respondDefault500Page()
 

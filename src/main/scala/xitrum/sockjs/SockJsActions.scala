@@ -13,7 +13,6 @@ import xitrum.{Action, ActionActor, Config, SkipCSRFCheck, SockJsText}
 import xitrum.{WebSocketActor, WebSocketBinary, WebSocketPing, WebSocketPong, WebSocketText}
 import xitrum.annotation._
 import xitrum.etag.NotModified
-import xitrum.routing.Routes
 import xitrum.util.{Json, ClusterSingletonActor}
 import xitrum.view.DocType
 
@@ -117,7 +116,7 @@ trait SockJsAction extends Action with SockJsPrefix {
   // http://groups.google.com/group/sockjs/browse_thread/thread/71dfdff6e8f1e5f7
   // Can't use beforeFilter, see comment of pathPrefix at the top of this controller.
   protected def handleCookie() {
-    val sockJsClassAndOptions = Routes.sockJsClassAndOptions(pathPrefix)
+    val sockJsClassAndOptions = Config.routes.sockJsRouteMap.lookup(pathPrefix)
     if (sockJsClassAndOptions.cookieNeeded) {
       val value  = requestCookies.get("JSESSIONID").getOrElse("dummy")
       val cookie = new DefaultCookie("JSESSIONID", value)
@@ -265,7 +264,7 @@ class SockJsInfoGET extends SockJsAction {
     setCORS()
     setNoClientCache()
     // FIXME: Retest if IE works when cookie_needed is set to true
-    val sockJsClassAndOptions = Routes.sockJsClassAndOptions(pathPrefix)
+    val sockJsClassAndOptions = Config.routes.sockJsRouteMap.lookup(pathPrefix)
     respondJsonText(
       """{"websocket": """      + sockJsClassAndOptions.websocket +
       """, "cookie_needed": """ + sockJsClassAndOptions.cookieNeeded +
@@ -797,7 +796,7 @@ class SockJSWebsocket extends WebSocketActor with SockJsPrefix {
     // Ignored
     //val sessionId = param("sessionId")
 
-    sockJsActorRef = Routes.createSockJsActor(pathPrefix)
+    sockJsActorRef = Config.routes.sockJsRouteMap.createSockJsActor(pathPrefix)
     respondWebSocketText("o")
     sockJsActorRef ! (self, action)
 
@@ -854,7 +853,7 @@ class SockJSRawWebsocket extends WebSocketActor with SockJsPrefix {
   private[this] var sockJsActorRef: ActorRef = _
 
   def execute(action: Action) {
-    sockJsActorRef = Routes.createSockJsActor(pathPrefix)
+    sockJsActorRef = Config.routes.sockJsRouteMap.createSockJsActor(pathPrefix)
     sockJsActorRef ! (self, action)
 
     context.become {

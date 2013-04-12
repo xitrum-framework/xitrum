@@ -18,18 +18,22 @@ import xitrum.sockjs.SockJsPrefix
 
 /** Scan all classes to collect routes from actions. */
 class RouteCollector extends Logger {
-  /** @return (normal routes, SockJS routes) */
-  def deserializeCacheFileOrRecollect(cachedFileName: String): (SerializableRouteCollection, SerializableRouteCollection) = {
-    val normal = new SerializableRouteCollection
-    val sockJs = new SerializableRouteCollection
-    Scanner.foldLeft(cachedFileName, (normal, sockJs), discovered _)
+  /** @return (normal routes, SockJS routes without prefix, SockJS route map) */
+  def deserializeCacheFileOrRecollect(cachedFileName: String):
+    (SerializableRouteCollection, SerializableRouteCollection, Map[String, SockJsClassAndOptions]) =
+  {
+    val normal              = new SerializableRouteCollection
+    val sockJsWithoutPrefix = new SerializableRouteCollection
+    val sockJsMap           = Map[String, SockJsClassAndOptions]()
+    Scanner.foldLeft(cachedFileName, (normal, sockJsWithoutPrefix, sockJsMap), discovered _)
   }
 
   //----------------------------------------------------------------------------
 
   private def discovered(
-      normal_sockJs: (SerializableRouteCollection, SerializableRouteCollection),
-      entry:         FileEntry): (SerializableRouteCollection, SerializableRouteCollection) =
+      normal_sockJsWithoutPrefix_sockJsMap: (SerializableRouteCollection, SerializableRouteCollection, Map[String, SockJsClassAndOptions]),
+      entry:                                FileEntry
+  ): (SerializableRouteCollection, SerializableRouteCollection, Map[String, SockJsClassAndOptions]) =
   {
     try {
       if (entry.relPath.endsWith(".class")) {
@@ -38,32 +42,37 @@ class RouteCollector extends Logger {
         val cf   = new ClassFile(dis)
         dis.close()
         bais.close()
-        processDiscovered(normal_sockJs, cf)
-        normal_sockJs
+        val newSockJsMap = processDiscovered(normal_sockJsWithoutPrefix_sockJsMap, cf)
+
+        val (normal, sockJsWithoutPrefix, _) = normal_sockJsWithoutPrefix_sockJsMap
+        (normal, sockJsWithoutPrefix, newSockJsMap)
       } else {
-        normal_sockJs
+        normal_sockJsWithoutPrefix_sockJsMap
       }
     } catch {
       case NonFatal(e) =>
         logger.warn("Could not scan route for " + entry.relPath + " in " + entry.container, e)
-        normal_sockJs
+        normal_sockJsWithoutPrefix_sockJsMap
     }
   }
 
   private def processDiscovered(
-      normal_sockJs: (SerializableRouteCollection, SerializableRouteCollection),
-      classFile:     ClassFile)
+      normal_sockJsWithoutPrefix_sockJsMap: (SerializableRouteCollection, SerializableRouteCollection, Map[String, SockJsClassAndOptions]),
+      classFile:                            ClassFile
+  ): Map[String, SockJsClassAndOptions] =
   {
+    val (normal, sockJsWithoutPrefix, sockJsMap) = normal_sockJsWithoutPrefix_sockJsMap
     val aa = classFile.getAttribute(AnnotationsAttribute.visibleTag).asInstanceOf[AnnotationsAttribute]
-    if (aa == null) return
+    if (aa == null) return sockJsMap
 
     val annotations = aa.getAnnotations
     val className   = classFile.getName
     val fromSockJs  = className.startsWith(classOf[SockJsPrefix].getPackage.getName)
-    val routes      = if (fromSockJs) normal_sockJs._2 else normal_sockJs._1
+    val routes      = if (fromSockJs) sockJsWithoutPrefix else normal
     collectNormalRoutes(routes, className, annotations)
-    collectSockJsRoutes(routes, className, annotations)
     collectErrorRoutes (routes, className, annotations)
+
+    collectSockJsMap(sockJsMap, className, annotations)
   }
 
   private def collectNormalRoutes(
@@ -114,10 +123,23 @@ class RouteCollector extends Logger {
     }
   }
 
-  private def collectSockJsRoutes(
+  private def collectErrorRoutes(
       routes:      SerializableRouteCollection,
       className:   String,
       annotations: Array[Annotation])
+  {
+    annotations.foreach { a =>
+      val tn = a.getTypeName
+      if (tn == classOf[Error404].getName) routes.error404 = Some(className)
+      if (tn == classOf[Error500].getName) routes.error500 = Some(className)
+    }
+  }
+
+  private def collectSockJsMap(
+      sockJsMap:   Map[String, SockJsClassAndOptions],
+      className:   String,
+      annotations: Array[Annotation]
+  ): Map[String, SockJsClassAndOptions] =
   {
     var pathPrefix: String = null
     var noWebSocket  = false
@@ -130,21 +152,11 @@ class RouteCollector extends Logger {
       if (tn == classOf[SockJsCookieNeeded].getName) cookieNeeded = true
     }
 
-    if (pathPrefix != null) {
+    if (pathPrefix == null) {
+      sockJsMap
+    } else {
       val klass = Class.forName(className).asInstanceOf[Class[SockJsActor]]
-      Routes.sockJs(klass, pathPrefix, !noWebSocket, cookieNeeded)
-    }
-  }
-
-  private def collectErrorRoutes(
-      routes:      SerializableRouteCollection,
-      className:   String,
-      annotations: Array[Annotation])
-  {
-    annotations.foreach { a =>
-      val tn = a.getTypeName
-      if (tn == classOf[Error404].getName) routes.error404 = Some(className)
-      if (tn == classOf[Error500].getName) routes.error500 = Some(className)
+      sockJsMap + (pathPrefix -> new SockJsClassAndOptions(klass, !noWebSocket, cookieNeeded))
     }
   }
 
