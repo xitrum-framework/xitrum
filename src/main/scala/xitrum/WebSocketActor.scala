@@ -3,7 +3,7 @@ package xitrum
 import akka.actor.Actor
 
 import org.jboss.netty.buffer.{ChannelBuffer, ChannelBuffers}
-import org.jboss.netty.channel.{ChannelFuture, ChannelFutureListener}
+import org.jboss.netty.channel.{Channel, ChannelFuture, ChannelFutureListener}
 import org.jboss.netty.handler.codec.http.websocketx.{
   BinaryWebSocketFrame,
   CloseWebSocketFrame,
@@ -15,6 +15,8 @@ import org.jboss.netty.handler.codec.http.websocketx.{
 
 import xitrum.handler.{DefaultHttpChannelPipelineFactory, HandlerEnv}
 import xitrum.handler.up.WebSocketEventDispatcher
+
+//------------------------------------------------------------------------------
 
 case class WebSocketText(text: String)
 
@@ -29,27 +31,24 @@ case object WebSocketPong
  * An actor will be created when there's request. It will be stopped when:
  * - The connection is closed
  * - WebSocket close frame is received or sent
- *
- * You can access request headers, session etc.
- * but do not use respondText, respondView etc.
- * Use these to send WebSocket frames:
- * - respondWebSocketText
- * - respondWebSocketBinary
- * - respondWebSocketPing
- * - respondWebSocketClose
- *
- * There's no respondWebSocketPong, because pong is automatically sent by Xitrum for you.
  */
-trait WebSocketActor extends Actor with Action {
+trait WebSocketActor extends Actor {
+  private var channel: Channel = _
+
   def receive = {
     case env: HandlerEnv =>
-      apply(env)
+      val action = new Action { def execute() {} }
+      action.apply(env)
 
-      if (acceptWebSocket()) {
+      if (acceptWebSocket(action)) {
+        channel = env.channel
+
         // Can't use context.stop(self), that means context is leaked outside this actor
-        addConnectionClosedListener { Config.actorSystem.stop(self) }
+        action.addConnectionClosedListener { Config.actorSystem.stop(self) }
 
-        dispatchWithFailsafe()
+        // FIXME: log access
+
+        execute(action)
 
         // Resume reading paused at NoPipelining
         channel.setReadable(true)
@@ -57,6 +56,19 @@ trait WebSocketActor extends Actor with Action {
         context.stop(self)
       }
   }
+
+  /**
+   * @param action The action just before switching to this WebSocket actor.
+   * You can extract session data, request headers etc. from it, but do not use
+   * respondText, respondView etc. Use these to send WebSocket frames:
+   * - respondWebSocketText
+   * - respondWebSocketBinary
+   * - respondWebSocketPing
+   * - respondWebSocketClose
+   *
+   * There's no respondWebSocketPong, because pong is automatically sent by Xitrum for you.
+   */
+  def execute(action: Action)
 
   //----------------------------------------------------------------------------
 
@@ -86,16 +98,16 @@ trait WebSocketActor extends Actor with Action {
 
   //----------------------------------------------------------------------------
 
-  private def acceptWebSocket(): Boolean = {
-    val factory    = new WebSocketServerHandshakerFactory(webSocketAbsRequestUrl, null, false)
-    val handshaker = factory.newHandshaker(request)
+  private def acceptWebSocket(action: Action): Boolean = {
+    val factory    = new WebSocketServerHandshakerFactory(action.webSocketAbsRequestUrl, null, false)
+    val handshaker = factory.newHandshaker(action.request)
     if (handshaker == null) {
-      factory.sendUnsupportedWebSocketVersionResponse(channel)
+      factory.sendUnsupportedWebSocketVersionResponse(action.channel)
       false
     } else {
-      handshaker.handshake(channel, request)
+      handshaker.handshake(action.channel, action.request)
 
-      val pipeline = channel.getPipeline
+      val pipeline = action.channel.getPipeline
       DefaultHttpChannelPipelineFactory.removeUnusedForWebSocket(pipeline)
       pipeline.addLast("webSocketEventDispatcher", new WebSocketEventDispatcher(handshaker, self))
       true

@@ -2,7 +2,7 @@ package xitrum.action
 
 import scala.util.Random
 
-import xitrum.{Config, Action, SockJsHandler}
+import xitrum.{Config, Action, SockJsActor}
 import xitrum.etag.Etag
 import xitrum.routing.Routes
 
@@ -60,10 +60,10 @@ trait UrlFor {
 
   //----------------------------------------------------------------------------
 
-  def sockJsUrl[T <: SockJsHandler : Manifest] = {
-    val handlerClass = manifest[T].runtimeClass.asInstanceOf[Class[SockJsHandler]]
+  def sockJsUrl[T <: SockJsActor : Manifest] = {
+    val handlerClass = manifest[T].runtimeClass.asInstanceOf[Class[SockJsActor]]
     Routes.sockJsPathPrefix(handlerClass)
   }
 
-  def sockJsAbsUrl[T <: SockJsHandler : Manifest] = absUrlPrefix + sockJsUrl[T]
+  def sockJsAbsUrl[T <: SockJsActor : Manifest] = absUrlPrefix + sockJsUrl[T]
 }

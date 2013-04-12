@@ -5,14 +5,15 @@ import java.io.File
 import scala.collection.mutable.{Map => MMap}
 import scala.util.control.NonFatal
 
-import org.apache.commons.lang3.ClassUtils
+import akka.actor.{Actor, ActorRef, Props}
+import com.esotericsoftware.reflectasm.ConstructorAccess
 
-import xitrum.{Config, Action, Logger, SockJsHandler}
+import xitrum.{Config, Action, Logger, SockJsActor}
 import xitrum.sockjs.SockJsAction
 
 // "websocket" and "cookieNeeded" members are named after SockJS option:
 // {"websocket": true/false, "cookie_needed": true/false, "origins": ["*:*"], "entropy": integer}
-class SockJsClassAndOptions(val handlerClass: Class[_ <: SockJsHandler], val websocket: Boolean, val cookieNeeded: Boolean)
+class SockJsClassAndOptions(val handlerClass: Class[_ <: SockJsActor], val websocket: Boolean, val cookieNeeded: Boolean)
 
 object Routes extends Logger {
   private val ROUTES_CACHE = "routes.cache"
@@ -98,36 +99,26 @@ object Routes extends Logger {
    * @param websocket set to true to enable WebSocket
    * @param cookieNeeded set to true for load balancers that needs JSESSION cookie
    */
-  def sockJs(handlerClass: Class[_ <: SockJsHandler], pathPrefix: String, websocket: Boolean = true, cookieNeeded: Boolean = false) {
+  def sockJs(handlerClass: Class[_ <: SockJsActor], pathPrefix: String, websocket: Boolean, cookieNeeded: Boolean) {
     sockJsClassAndOptionsTable(pathPrefix) = new SockJsClassAndOptions(handlerClass, websocket, cookieNeeded)
   }
 
-  def createSockJsHandler(pathPrefix: String) = {
+  def createSockJsActor(pathPrefix: String): ActorRef = {
     val sockJsClassAndOptions = sockJsClassAndOptionsTable(pathPrefix)
-    sockJsClassAndOptions.handlerClass.newInstance()
+    val actorClass            = sockJsClassAndOptions.handlerClass
+    Config.actorSystem.actorOf(Props { ConstructorAccess.get(actorClass).asInstanceOf[Class[Actor]] })
   }
 
   /** @param sockJsHandlerClass Normal SockJsHandler subclass or object class */
-  def sockJsPathPrefix(sockJsHandlerClass: Class[_ <: SockJsHandler]) = {
-    val className = sockJsHandlerClass.getName
-    if (className.endsWith("$")) {
-      val normalClassName = className.substring(0, className.length - 1)
-      val normalClass     = ClassUtils.getClass(normalClassName)
-      sockJsPathPrefixForNormalSockJsHandlerClass(normalClass.asInstanceOf[Class[_ <: SockJsHandler]])
-    } else {
-      sockJsPathPrefixForNormalSockJsHandlerClass(sockJsHandlerClass)
+  def sockJsPathPrefix(sockJsHandlerClass: Class[_ <: SockJsActor]): String = {
+    val kv = sockJsClassAndOptionsTable.find { case (k, v) => v.handlerClass == sockJsHandlerClass }
+    kv match {
+      case Some((k, v)) => "/" + k
+      case None         => throw new Exception("Cannot lookup SockJS URL for class: " + sockJsHandlerClass)
     }
   }
 
   def sockJsClassAndOptions(pathPrefix: String) = {
     sockJsClassAndOptionsTable(pathPrefix)
-  }
-
-  private def sockJsPathPrefixForNormalSockJsHandlerClass(handlerClass: Class[_ <: SockJsHandler]): String = {
-    val kv = sockJsClassAndOptionsTable.find { case (k, v) => v.handlerClass == handlerClass }
-    kv match {
-      case Some((k, v)) => "/" + k
-      case None         => throw new Exception("Cannot lookup SockJS URL for class: " + handlerClass)
-    }
   }
 }

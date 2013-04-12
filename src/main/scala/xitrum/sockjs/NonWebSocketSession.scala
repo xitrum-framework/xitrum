@@ -5,14 +5,15 @@ import scala.collection.mutable.ArrayBuffer
 import akka.actor.{Actor, ActorRef, ActorSystem, Props, ReceiveTimeout, Terminated}
 import scala.concurrent.duration._
 
-import xitrum.{Action, SockJsHandler}
+import xitrum.{Action, Config, SockJsText}
 import xitrum.routing.Routes
 
-// There are 2 kinds of client: receiver and sender.
-// WebSocket is both receiver and sender.
+// There are 2 kinds of non-WebSocket client: receiver and sender
+// receiver/sender client <-> NonWebSocketSessionActor <-> SockJsActor
+// (See SockJsActions.scala)
 //
-// receiver/sender client <-> NonWebSocketSession <-> handler
-// (See SockJsAction.scala)                           (See SockJsHandler.scala)
+// For WebSocket:
+// receiver/sender client <-> SockJsActor
 
 case object SubscribeFromReceiverClient
 case object AbortFromReceiverClient
@@ -55,7 +56,7 @@ object NonWebSocketSession {
 class NonWebSocketSession(var receiverClient: ActorRef, pathPrefix: String, action: Action) extends Actor {
   import NonWebSocketSession._
 
-  private var sockJsHandler: SockJsHandler = _
+  private var sockJsActorRef: ActorRef = _
 
   // Messages from handler to client are buffered here
   private val bufferForClientSubscriber = ArrayBuffer[String]()
@@ -72,9 +73,8 @@ class NonWebSocketSession(var receiverClient: ActorRef, pathPrefix: String, acti
 
   override def preStart() {
     // sockJsHandler.onClose is called at postStop
-    sockJsHandler = Routes.createSockJsHandler(pathPrefix)
-    sockJsHandler.nonWebSocketSessionActorRef = self
-    sockJsHandler.onOpen(action)
+    sockJsActorRef = Routes.createSockJsActor(pathPrefix)
+    sockJsActorRef ! (self, action)
 
     lastSubscribedAt = System.currentTimeMillis()
 
@@ -87,11 +87,7 @@ class NonWebSocketSession(var receiverClient: ActorRef, pathPrefix: String, acti
   }
 
   override def postStop() {
-    sockJsHandler.onClose()
-
-    // Remove interdependency so that JVM can do gabage collection
-    sockJsHandler.nonWebSocketSessionActorRef = null
-    sockJsHandler = null
+    Config.actorSystem.stop(sockJsActorRef)
   }
 
   def receive = {
@@ -142,7 +138,7 @@ class NonWebSocketSession(var receiverClient: ActorRef, pathPrefix: String, acti
       }
 
     case MessagesFromSenderClient(messages) =>
-      if (!closed) messages.foreach(sockJsHandler.onMessage(_))
+      if (!closed) messages.foreach { msg => sockJsActorRef ! SockJsText(msg) }
 
     case MessageFromHandler(message) =>
       if (!closed) {

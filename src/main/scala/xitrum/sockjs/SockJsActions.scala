@@ -3,13 +3,13 @@ package xitrum.sockjs
 import java.util.{Arrays, Random}
 import scala.util.control.NonFatal
 
-import org.jboss.netty.channel.ChannelFutureListener
+import org.jboss.netty.channel.{ChannelFuture, ChannelFutureListener}
 import org.jboss.netty.buffer.ChannelBuffers
 import org.jboss.netty.handler.codec.http.{DefaultCookie, HttpHeaders, HttpResponseStatus}
 
 import akka.actor.{Actor, ActorRef, PoisonPill, Props, Terminated}
 
-import xitrum.{Action, ActionActor, Config, SkipCSRFCheck}
+import xitrum.{Action, ActionActor, Config, SkipCSRFCheck, SockJsText}
 import xitrum.{WebSocketActor, WebSocketBinary, WebSocketPing, WebSocketPong, WebSocketText}
 import xitrum.annotation._
 import xitrum.etag.NotModified
@@ -107,10 +107,12 @@ object SockJsAction {
   }
 }
 
-trait SockJsAction extends Action with SkipCSRFCheck {
+trait SockJsPrefix {
   // Set by Dispatcher
   var pathPrefix = ""
+}
 
+trait SockJsAction extends Action with SockJsPrefix {
   // JSESSIONID cookie must be echoed back if sent by the client, or created
   // http://groups.google.com/group/sockjs/browse_thread/thread/71dfdff6e8f1e5f7
   // Can't use beforeFilter, see comment of pathPrefix at the top of this controller.
@@ -298,7 +300,7 @@ class SockJsXhrPollingOPTIONSSend extends SockJsAction {
 }
 
 @POST(":serverId<[^\\.]+>/:sessionId<[^\\.]+>/xhr")
-class SockJsXhrPollingReceive extends SockJsNonWebSocketSessionReceiverActionActor {
+class SockJsXhrPollingReceive extends SockJsNonWebSocketSessionReceiverActionActor with SkipCSRFCheck {
   def execute() {
     val sessionId = param("sessionId")
 
@@ -361,7 +363,7 @@ class SockJsXhrPollingReceive extends SockJsNonWebSocketSessionReceiverActionAct
 }
 
 @POST(":serverId<[^\\.]+>/:sessionId<[^\\.]+>/xhr_send")
-class SockJsXhrSend extends SockJsNonWebSocketSessionActionActor {
+class SockJsXhrSend extends SockJsNonWebSocketSessionActionActor with SkipCSRFCheck {
   def execute() {
     val body = request.getContent.toString(Config.requestCharset)
     if (body.isEmpty) {
@@ -404,7 +406,7 @@ class SockJsXhrStreamingOPTIONSReceive extends SockJsAction {
 }
 
 @POST(":serverId<[^\\.]+>/:sessionId<[^\\.]+>/xhr_streaming")
-class SockJsXhrStreamingReceive extends SockJsNonWebSocketSessionReceiverActionActor {
+class SockJsXhrStreamingReceive extends SockJsNonWebSocketSessionReceiverActionActor with SkipCSRFCheck {
   def execute() {
     val sessionId = param("sessionId")
 
@@ -651,7 +653,7 @@ class SockJsJsonPPollingReceive extends SockJsNonWebSocketSessionReceiverActionA
 }
 
 @POST(":serverId<[^\\.]+>/:sessionId<[^\\.]+>/jsonp_send")
-class SockJsJsonPPollingSend extends SockJsNonWebSocketSessionActionActor {
+class SockJsJsonPPollingSend extends SockJsNonWebSocketSessionActionActor with SkipCSRFCheck {
   def execute() {
     val body: String = try {
       val contentType = request.getHeader(HttpHeaders.Names.CONTENT_TYPE)
@@ -779,7 +781,7 @@ class SockJSWebsocketGET extends SockJsAction {
 // http://sockjs.github.com/sockjs-protocol/sockjs-protocol-0.3.3.html#section-6
 @Last
 @POST(":serverId<[^\\.]+>/:sessionId<[^\\.]+>/websocket")
-class SockJSWebsocketPOST extends SockJsAction {
+class SockJSWebsocketPOST extends SockJsAction with SkipCSRFCheck {
   def execute() {
     response.setStatus(HttpResponseStatus.METHOD_NOT_ALLOWED)
     response.setHeader(HttpHeaders.Names.ALLOW, "GET")
@@ -788,25 +790,19 @@ class SockJSWebsocketPOST extends SockJsAction {
 }
 
 @WEBSOCKET(":serverId<[^\\.]+>/:sessionId<[^\\.]+>/websocket")
-class SockJSWebsocket extends SockJsAction {
-  def execute() {
+class SockJSWebsocket extends WebSocketActor with SockJsPrefix {
+  private var sockJsActorRef: ActorRef = _
+
+  def execute(action: Action) {
     // Ignored
     //val sessionId = param("sessionId")
 
-    val sockJsHandler = Routes.createSockJsHandler(pathPrefix)
-    sockJsHandler.webSocketAction = this
-    sockJsHandler.rawWebSocket    = false
-    acceptWebSocket(new WebSocketHandler {
-      def onOpen() {
-        respondWebSocketText("o")
-        sockJsHandler.onOpen(SockJSWebsocket.this)
-      }
+    sockJsActorRef = Routes.createSockJsActor(pathPrefix)
+    respondWebSocketText("o")
+    sockJsActorRef ! (self, action)
 
-      def onClose() {
-        sockJsHandler.onClose()
-      }
-
-      def onTextMessage(body: String) {
+    context.become {
+      case WebSocketText(body) =>
         // Server must ignore empty messages
         // http://sockjs.github.com/sockjs-protocol/sockjs-protocol-0.3.3.html#section-69
         if (body.isEmpty) return
@@ -816,46 +812,59 @@ class SockJSWebsocket extends SockJsAction {
           // http://sockjs.github.com/sockjs-protocol/sockjs-protocol-0.3.3.html#section-61
           val normalizedBody = if (body.startsWith("[")) body else "[" + body + "]"
           val messages       = Json.parse[Seq[String]](normalizedBody)
-          messages.foreach(sockJsHandler.onMessage(_))
+          messages.foreach { msg => sockJsActorRef ! SockJsText(msg) }
         } catch {
           case NonFatal(e) =>
             // No c frame is sent!
             // http://sockjs.github.com/sockjs-protocol/sockjs-protocol-0.3.3.html#section-72
             //respondWebSocket("c[2011,\"Broken JSON encoding.\"]")
             //.addListener(ChannelFutureListener.CLOSE)
-            channel.close()
-            sockJsHandler.onClose()
+            respondWebSocketClose()
         }
-      }
 
-      def onBinaryMessage(binary: Array[Byte]) {
-      }
-    })
+      case MessageFromHandler(text) =>
+        val json = Json.generate(Seq(text))
+        respondWebSocketText("a" + json)
+
+      case CloseFromHandler =>
+        respondWebSocketText("c[3000,\"Go away!\"]").addListener(new ChannelFutureListener {
+          def operationComplete(f: ChannelFuture) { respondWebSocketClose() }
+        })
+
+      case _ =>
+        // Ignore all others
+    }
+  }
+
+  override def postStop() {
+    Config.actorSystem.stop(sockJsActorRef)
   }
 }
 
 @WEBSOCKET("websocket")
-class SockJSRawWebsocket extends WebSocketActor {
-  def execute() {
-    val immutableSession = session.toMap
-    val sockJsHandler    = Routes.createSockJsHandler(pathPrefix)
-    sockJsHandler.webSocketAction = this
-    sockJsHandler.rawWebSocket    = true
+class SockJSRawWebsocket extends WebSocketActor with SockJsPrefix {
+  private var sockJsActorRef: ActorRef = _
+
+  def execute(action: Action) {
+    sockJsActorRef = Routes.createSockJsActor(pathPrefix)
+    sockJsActorRef ! (self, action)
 
     context.become {
       case WebSocketText(text) =>
-        sockJsHandler.onOpen(this)
+        sockJsActorRef ! SockJsText(text)
 
-      def onClose() {
-        sockJsHandler.onClose()
-      }
+      case MessageFromHandler(text) =>
+        respondWebSocketText(text)
 
-      def onTextMessage(text: String) {
-        sockJsHandler.onMessage(text)
-      }
+      case CloseFromHandler =>
+        respondWebSocketClose()
 
-      def onBinaryMessage(binary: Array[Byte]) {
-      }
-    })
+      case _ =>
+        // Ignore all others
+    }
+  }
+
+  override def postStop() {
+    Config.actorSystem.stop(sockJsActorRef)
   }
 }

@@ -20,8 +20,7 @@ import xitrum.sockjs.SockJsAction
 object Dispatcher {
   def dispatch(actionClass: Class[_ <: Action], handlerEnv: HandlerEnv) {
     if (classOf[Actor].isAssignableFrom(actionClass)) {
-      val system   = Config.actorSystem
-      val actorRef = system.actorOf(Props {
+      val actorRef = Config.actorSystem.actorOf(Props {
         val action = ConstructorAccess.get(actionClass).newInstance()
         setPathPrefixForSockJsAction(action, handlerEnv)
         action.asInstanceOf[Actor]
@@ -30,7 +29,7 @@ object Dispatcher {
     } else {
       val action = ConstructorAccess.get(actionClass).newInstance()
       setPathPrefixForSockJsAction(action, handlerEnv)
-      action(handlerEnv)
+      action.apply(handlerEnv)
       action.dispatchWithFailsafe()
     }
   }
