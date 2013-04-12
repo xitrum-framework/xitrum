@@ -805,21 +805,24 @@ class SockJSWebsocket extends WebSocketActor with SockJsPrefix {
       case WebSocketText(body) =>
         // Server must ignore empty messages
         // http://sockjs.github.com/sockjs-protocol/sockjs-protocol-0.3.3.html#section-69
-        if (body.isEmpty) return
+        if (!body.isEmpty) {
+          try {
+            // body: can be ["m1", "m2"] or "m1"
+            // http://sockjs.github.com/sockjs-protocol/sockjs-protocol-0.3.3.html#section-61
+            val normalizedBody = if (body.startsWith("[")) body else "[" + body + "]"
+            val messages       = Json.parse[Seq[String]](normalizedBody)
+            messages.foreach { msg => sockJsActorRef ! SockJsText(msg) }
+          } catch {
+            case NonFatal(e) =>
+              // No c frame is sent!
+              // http://sockjs.github.com/sockjs-protocol/sockjs-protocol-0.3.3.html#section-72
+              //respondWebSocketText("c[2011,\"Broken JSON encoding.\"]")
+              //.addListener(ChannelFutureListener.CLOSE)
 
-        try {
-          // body: can be ["m1", "m2"] or "m1"
-          // http://sockjs.github.com/sockjs-protocol/sockjs-protocol-0.3.3.html#section-61
-          val normalizedBody = if (body.startsWith("[")) body else "[" + body + "]"
-          val messages       = Json.parse[Seq[String]](normalizedBody)
-          messages.foreach { msg => sockJsActorRef ! SockJsText(msg) }
-        } catch {
-          case NonFatal(e) =>
-            // No c frame is sent!
-            // http://sockjs.github.com/sockjs-protocol/sockjs-protocol-0.3.3.html#section-72
-            //respondWebSocket("c[2011,\"Broken JSON encoding.\"]")
-            //.addListener(ChannelFutureListener.CLOSE)
-            respondWebSocketClose()
+              respondWebSocketClose()
+
+  //            action.channel.close()
+          }
         }
 
       case MessageFromHandler(text) =>
@@ -831,12 +834,17 @@ class SockJSWebsocket extends WebSocketActor with SockJsPrefix {
           def operationComplete(f: ChannelFuture) { respondWebSocketClose() }
         })
 
+//        respondWebSocketClose()
+
+//        respondWebSocketText("c[3000,\"Go away!\"]")
+//        .addListener(ChannelFutureListener.CLOSE)
+
       case _ =>
         // Ignore all others
     }
   }
 
-  override def postStop() {
+  override def postStop() {println("postStop sockJsActorRef: " + sockJsActorRef)
     if (sockJsActorRef != null) Config.actorSystem.stop(sockJsActorRef)
   }
 }

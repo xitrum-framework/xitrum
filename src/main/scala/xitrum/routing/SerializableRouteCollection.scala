@@ -30,8 +30,8 @@ class SerializableRouteCollection extends Serializable {
   val otherWEBSOCKETs = ArrayBuffer[SerializableRoute]()
 
   // 404.html and 500.html are used by default
-  var error404: Option[Class[Action]] = None
-  var error500: Option[Class[Action]] = None
+  var error404: Option[String] = None
+  var error500: Option[String] = None
 
   def toRouteCollection = new RouteCollection(
     firstGETs.map(_.toRoute),       lastGETs.map(_.toRoute),       otherGETs.map(_.toRoute),
@@ -40,6 +40,7 @@ class SerializableRouteCollection extends Serializable {
     firstDELETEs.map(_.toRoute),    lastDELETEs.map(_.toRoute),    otherDELETEs.map(_.toRoute),
     firstOPTIONSs.map(_.toRoute),   lastOPTIONSs.map(_.toRoute),   otherOPTIONSs.map(_.toRoute),
     firstWEBSOCKETs.map(_.toRoute), lastWEBSOCKETs.map(_.toRoute), otherWEBSOCKETs.map(_.toRoute),
-    error404, error500
+    error404.map(Class.forName(_).asInstanceOf[Class[Action]]),
+    error500.map(Class.forName(_).asInstanceOf[Class[Action]])
   )
 }

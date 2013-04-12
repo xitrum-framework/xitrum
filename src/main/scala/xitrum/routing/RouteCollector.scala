@@ -143,8 +143,8 @@ class RouteCollector extends Logger {
   {
     annotations.foreach { a =>
       val tn = a.getTypeName
-      if (tn == classOf[Error404].getName) routes.error404 = Some(Class.forName(className).asInstanceOf[Class[Action]])
-      if (tn == classOf[Error500].getName) routes.error500 = Some(Class.forName(className).asInstanceOf[Class[Action]])
+      if (tn == classOf[Error404].getName) routes.error404 = Some(className)
+      if (tn == classOf[Error500].getName) routes.error500 = Some(className)
     }
   }
 
