@@ -22,7 +22,15 @@ object Server extends Logger {
    * SSL codec handler will be automatically prepended for HTTPS server.
    */
   def start(httpChannelPipelineFactory: ChannelPipelineFactory) {
+    // Because Hazelcast takes serveral seconds to start, we force it to
+    // start before the web server begins receiving requests, instead of
+    // letting it start lazily
+    Cache.cache.size()
+
     ClusterSingletonActor.start()
+
+    // templateEngine is lazy, force its initialization here
+    Config.xitrum.templateEngine
 
     val routes = Config.routes
     routes.printRoutes()
@@ -30,18 +38,11 @@ object Server extends Logger {
     routes.sockJsRouteMap.print()
     routes.printErrorRoutes()
 
+    // Lastly, start the server(s) after necessary things have been prepared
     val portConfig = Config.xitrum.port
     if (portConfig.http.isDefined)  doStart(false, httpChannelPipelineFactory)
     if (portConfig.https.isDefined) doStart(true,  httpChannelPipelineFactory)
     if (portConfig.flashSocketPolicy.isDefined) FlashSocketPolicyServer.start()
-
-    // Because Hazelcast takes serveral seconds to start, we force it to
-    // start before the web server begins receiving requests, instead of
-    // letting it start lazily
-    Cache.cache.size()
-
-    // templateEngine is lazy, force its initialization here
-    Config.xitrum.templateEngine
 
     val mode = if (Config.productionMode) "production" else "development"
     logger.info("Xitrum started in {} mode", mode)
