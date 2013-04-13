@@ -119,17 +119,11 @@ object Config extends Logger {
    */
   val BIG_TEXTUAL_RESPONSE_SIZE_IN_KB = 1
 
-  /**
-   * In case of CPU bound, the pool size should be equal the number of cores
-   * http://grizzly.java.net/nonav/docs/docbkx2.0/html/bestpractices.html
-   */
-  val EXECUTIORS_PER_CORE = 64
+  private[this] val HAZELCAST_MODE_CLUSTER_MEMBER = "clusterMember"
+  private[this] val HAZELCAST_MODE_LITE_MEMBER    = "liteMember"
+  private[this] val HAZELCAST_MODE_JAVA_CLIENT    = "javaClient"
 
-  private val HAZELCAST_MODE_CLUSTER_MEMBER = "clusterMember"
-  private val HAZELCAST_MODE_LITE_MEMBER    = "liteMember"
-  private val HAZELCAST_MODE_JAVA_CLIENT    = "javaClient"
-
-  private val DEFAULT_SECURE_KEY = "ajconghoaofuxahoi92chunghiaujivietnamlasdoclapjfltudoil98hanhphucup8"
+  private[this] val DEFAULT_SECURE_KEY = "ajconghoaofuxahoi92chunghiaujivietnamlasdoclapjfltudoil98hanhphucup8"
 
   //----------------------------------------------------------------------------
 
@@ -189,9 +183,9 @@ object Config extends Logger {
   val actorSystem = ActorSystem(ACTOR_SYSTEM_NAME)
 
   /**
-   * Use lazy to avoid starting Hazelcast if it is not used
-   * (starting Hazelcast takes several seconds, sometimes we want to work in
-   * sbt console mode and don't like this overhead)
+   * Use lazy to avoid starting Hazelcast if it is not used.
+   * Starting Hazelcast takes several seconds, sometimes we want to work in
+   * sbt console mode and don't like this overhead.
    */
   lazy val hazelcastInstance: HazelcastInstance = {
     // http://www.hazelcast.com/docs/2.4/manual/multi_html/ch12s07.html
@@ -253,7 +247,11 @@ object Config extends Logger {
 
   private[this] val ROUTES_CACHE = "routes.cache"
 
-  val routes: RouteCollection = {
+  /**
+   * Use lazy to avoid collecting routes if they are not used.
+   * Sometimes we want to work in sbt console mode and don't like this overhead.
+   */
+  lazy val routes: RouteCollection = {
     val (normal, sockJsWithoutPrefix, sockJsMap) = deserializeCacheFileOrRecollectWithRetry()
     RouteCollection.fromSerializable(normal, sockJsWithoutPrefix, sockJsMap)
   }
