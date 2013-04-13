@@ -843,7 +843,7 @@ class SockJSWebsocket extends WebSocketActor with SockJsPrefix {
     }
   }
 
-  override def postStop() {println("postStop sockJsActorRef: " + sockJsActorRef)
+  override def postStop() {
     if (sockJsActorRef != null) Config.actorSystem.stop(sockJsActorRef)
   }
 }
