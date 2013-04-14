@@ -13,6 +13,7 @@ import xitrum.{Action, ActionActor, Config, SkipCSRFCheck, SockJsText}
 import xitrum.{WebSocketActor, WebSocketBinary, WebSocketPing, WebSocketPong, WebSocketText}
 import xitrum.annotation._
 import xitrum.etag.NotModified
+import xitrum.scope.request.PathInfo
 import xitrum.util.{Json, ClusterSingletonActor}
 import xitrum.view.DocType
 
@@ -107,8 +108,24 @@ object SockJsAction {
 }
 
 trait SockJsPrefix {
-  // Set by Dispatcher
-  var pathPrefix = ""
+  protected var pathPrefix = ""
+
+  /** Called by Dispatcher. */
+  def setPathPrefix(pathInfo: PathInfo) {
+    val n       = nLastTokensToRemoveFromPathInfo
+    val encoded = pathInfo.encoded
+    pathPrefix =
+      if (n == 0)
+        encoded.substring(1)
+      else if (n == 1)
+        encoded.substring(1, encoded.lastIndexOf("/"))
+      else {
+        val tokens = pathInfo.tokens
+        tokens.take(tokens.size - n).mkString("/")
+      }
+  }
+
+  protected def nLastTokensToRemoveFromPathInfo: Int
 }
 
 trait SockJsAction extends Action with SockJsPrefix {
@@ -217,6 +234,8 @@ trait SockJsNonWebSocketSessionReceiverActionActor extends SockJsNonWebSocketSes
 
 @GET("")
 class SockJsGreeting extends SockJsAction {
+  def nLastTokensToRemoveFromPathInfo = 0
+
   def execute() {
     respondText("Welcome to SockJS!\n")
   }
@@ -225,6 +244,8 @@ class SockJsGreeting extends SockJsAction {
 @Last
 @GET(":iframe")
 class SockJsIframe extends SockJsAction {
+  def nLastTokensToRemoveFromPathInfo = 1
+
   def execute() {
     val iframe = param("iframe")
     if (iframe.startsWith("iframe") && iframe.endsWith(".html")) {
@@ -260,6 +281,8 @@ class SockJsIframe extends SockJsAction {
 
 @GET("info")
 class SockJsInfoGET extends SockJsAction {
+  def nLastTokensToRemoveFromPathInfo = 1
+
   def execute() {
     setCORS()
     setNoClientCache()
@@ -275,6 +298,8 @@ class SockJsInfoGET extends SockJsAction {
 
 @OPTIONS("info")
 class SockJsInfoOPTIONS extends SockJsAction {
+  def nLastTokensToRemoveFromPathInfo = 1
+
   def execute() {
     response.setStatus(HttpResponseStatus.NO_CONTENT)
     response.setHeader(HttpHeaders.Names.ACCESS_CONTROL_ALLOW_METHODS, "OPTIONS, GET")
@@ -286,6 +311,8 @@ class SockJsInfoOPTIONS extends SockJsAction {
 
 @OPTIONS(":serverId<[^\\.]+>/:sessionId<[^\\.]+>/xhr")
 class SockJsXhrPollingOPTIONSReceive extends SockJsAction {
+  def nLastTokensToRemoveFromPathInfo = 3
+
   def execute() {
     xhrOPTIONS()
   }
@@ -293,6 +320,8 @@ class SockJsXhrPollingOPTIONSReceive extends SockJsAction {
 
 @OPTIONS(":serverId<[^\\.]+>/:sessionId<[^\\.]+>/xhr_send")
 class SockJsXhrPollingOPTIONSSend extends SockJsAction {
+  def nLastTokensToRemoveFromPathInfo = 3
+
   def execute() {
     xhrOPTIONS()
   }
@@ -300,6 +329,8 @@ class SockJsXhrPollingOPTIONSSend extends SockJsAction {
 
 @POST(":serverId<[^\\.]+>/:sessionId<[^\\.]+>/xhr")
 class SockJsXhrPollingReceive extends SockJsNonWebSocketSessionReceiverActionActor with SkipCSRFCheck {
+  def nLastTokensToRemoveFromPathInfo = 3
+
   def execute() {
     val sessionId = param("sessionId")
 
@@ -363,6 +394,8 @@ class SockJsXhrPollingReceive extends SockJsNonWebSocketSessionReceiverActionAct
 
 @POST(":serverId<[^\\.]+>/:sessionId<[^\\.]+>/xhr_send")
 class SockJsXhrSend extends SockJsNonWebSocketSessionActionActor with SkipCSRFCheck {
+  def nLastTokensToRemoveFromPathInfo = 3
+
   def execute() {
     val body = request.getContent.toString(Config.requestCharset)
     if (body.isEmpty) {
@@ -399,6 +432,8 @@ class SockJsXhrSend extends SockJsNonWebSocketSessionActionActor with SkipCSRFCh
 
 @OPTIONS(":serverId<[^\\.]+>/:sessionId<[^\\.]+>/xhr_streaming")
 class SockJsXhrStreamingOPTIONSReceive extends SockJsAction {
+  def nLastTokensToRemoveFromPathInfo = 3
+
   def execute() {
     xhrOPTIONS()
   }
@@ -406,6 +441,8 @@ class SockJsXhrStreamingOPTIONSReceive extends SockJsAction {
 
 @POST(":serverId<[^\\.]+>/:sessionId<[^\\.]+>/xhr_streaming")
 class SockJsXhrStreamingReceive extends SockJsNonWebSocketSessionReceiverActionActor with SkipCSRFCheck {
+  def nLastTokensToRemoveFromPathInfo = 3
+
   def execute() {
     val sessionId = param("sessionId")
 
@@ -476,6 +513,8 @@ class SockJsXhrStreamingReceive extends SockJsNonWebSocketSessionReceiverActionA
 
 @GET(":serverId<[^\\.]+>/:sessionId<[^\\.]+>/htmlfile")
 class SockJshtmlfileReceive extends SockJsNonWebSocketSessionReceiverActionActor {
+  def nLastTokensToRemoveFromPathInfo = 3
+
   var callback: String = null
 
   def execute() {
@@ -576,6 +615,8 @@ class SockJshtmlfileReceive extends SockJsNonWebSocketSessionReceiverActionActor
 
 @GET(":serverId<[^\\.]+>/:sessionId<[^\\.]+>/jsonp")
 class SockJsJsonPPollingReceive extends SockJsNonWebSocketSessionReceiverActionActor {
+  def nLastTokensToRemoveFromPathInfo = 3
+
   var callback: String = null
 
   def execute() {
@@ -653,6 +694,8 @@ class SockJsJsonPPollingReceive extends SockJsNonWebSocketSessionReceiverActionA
 
 @POST(":serverId<[^\\.]+>/:sessionId<[^\\.]+>/jsonp_send")
 class SockJsJsonPPollingSend extends SockJsNonWebSocketSessionActionActor with SkipCSRFCheck {
+  def nLastTokensToRemoveFromPathInfo = 3
+
   def execute() {
     val body: String = try {
       val contentType = request.getHeader(HttpHeaders.Names.CONTENT_TYPE)
@@ -703,6 +746,8 @@ class SockJsJsonPPollingSend extends SockJsNonWebSocketSessionActionActor with S
 
 @GET(":serverId<[^\\.]+>/:sessionId<[^\\.]+>/eventsource")
 class SockJEventSourceReceive extends SockJsNonWebSocketSessionReceiverActionActor {
+  def nLastTokensToRemoveFromPathInfo = 3
+
   def execute() {
     val sessionId = param("sessionId")
 
@@ -770,6 +815,8 @@ class SockJEventSourceReceive extends SockJsNonWebSocketSessionReceiverActionAct
 @Last
 @GET(":serverId<[^\\.]+>/:sessionId<[^\\.]+>/websocket")
 class SockJSWebsocketGET extends SockJsAction {
+  def nLastTokensToRemoveFromPathInfo = 3
+
   def execute() {
     response.setStatus(HttpResponseStatus.BAD_REQUEST)
     respondText("""'Can "Upgrade" only to "WebSocket".'""")
@@ -781,6 +828,8 @@ class SockJSWebsocketGET extends SockJsAction {
 @Last
 @POST(":serverId<[^\\.]+>/:sessionId<[^\\.]+>/websocket")
 class SockJSWebsocketPOST extends SockJsAction with SkipCSRFCheck {
+  def nLastTokensToRemoveFromPathInfo = 3
+
   def execute() {
     response.setStatus(HttpResponseStatus.METHOD_NOT_ALLOWED)
     response.setHeader(HttpHeaders.Names.ALLOW, "GET")
@@ -790,6 +839,8 @@ class SockJSWebsocketPOST extends SockJsAction with SkipCSRFCheck {
 
 @WEBSOCKET(":serverId<[^\\.]+>/:sessionId<[^\\.]+>/websocket")
 class SockJSWebsocket extends WebSocketActor with SockJsPrefix {
+  def nLastTokensToRemoveFromPathInfo = 3
+
   private[this] var sockJsActorRef: ActorRef = _
 
   def execute(action: Action) {
@@ -850,6 +901,8 @@ class SockJSWebsocket extends WebSocketActor with SockJsPrefix {
 
 @WEBSOCKET("websocket")
 class SockJSRawWebsocket extends WebSocketActor with SockJsPrefix {
+  def nLastTokensToRemoveFromPathInfo = 1
+
   private[this] var sockJsActorRef: ActorRef = _
 
   def execute(action: Action) {

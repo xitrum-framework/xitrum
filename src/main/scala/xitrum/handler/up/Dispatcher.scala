@@ -35,7 +35,7 @@ object Dispatcher {
 
   private def setPathPrefixForSockJs(instance: Any, handlerEnv: HandlerEnv) {
     if (instance.isInstanceOf[SockJsPrefix])
-      instance.asInstanceOf[SockJsPrefix].pathPrefix = handlerEnv.pathInfo.tokens(0)
+      instance.asInstanceOf[SockJsPrefix].setPathPrefix(handlerEnv.pathInfo)
   }
 }
 

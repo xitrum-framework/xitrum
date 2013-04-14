@@ -5,7 +5,7 @@ import scala.collection.mutable.ArrayBuffer
 
 import xitrum.Config
 
-/** URL: http://example.com/articles?page=2 => pathInfo: /articles */
+/** URL: http://example.com/articles?page=2 => encoded: /articles */
 class PathInfo(val encoded: String) {
   val tokens = {
     // http://stackoverflow.com/questions/785586/how-can-split-a-string-which-contains-only-delimiter
