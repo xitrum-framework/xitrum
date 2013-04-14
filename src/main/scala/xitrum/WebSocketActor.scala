@@ -32,44 +32,37 @@ case object WebSocketPong
  * - The connection is closed
  * - WebSocket close frame is received or sent
  */
-trait WebSocketActor extends Actor with Logger {
-  private var channel: Channel = _
-
+trait WebSocketActor extends Actor with Action {
   def receive = {
     case env: HandlerEnv =>
       val beginTimestamp = System.currentTimeMillis()
+      apply(env)
 
-      val action = new Action { def execute() {} }
-      action.apply(env)
-
-      if (acceptWebSocket(action)) {
-        channel = env.channel
-
+      if (acceptWebSocket()) {
         // Can't use context.stop(self), that means context is leaked outside this actor
-        action.addConnectionClosedListener { Config.actorSystem.stop(self) }
+        addConnectionClosedListener { Config.actorSystem.stop(self) }
 
-        execute(action)
-        AccessLog.logWebSocketAccess(getClass.getName, action, beginTimestamp)
-
-        // Resume reading paused at NoPipelining
-        channel.setReadable(true)
+        // Can't use dispatchWithFailsafe because it may respond normal HTTP
+        // response; we have just upgraded the connection to WebSocket protocol
+        // at acceptWebSocket
+        execute()
+        AccessLog.logWebSocketAccess(getClass.getName, this, beginTimestamp)
       } else {
         context.stop(self)
       }
   }
 
   /**
-   * @param action The action just before switching to this WebSocket actor.
-   * You can extract session data, request headers etc. from it, but do not use
-   * respondText, respondView etc. Use these to send WebSocket frames:
+   * You can extract session data, request headers etc. from the current action,
+   * but do not use respondText, respondView etc. Use these to send WebSocket frames:
    * - respondWebSocketText
    * - respondWebSocketBinary
    * - respondWebSocketPing
    * - respondWebSocketClose
    *
-   * There's no respondWebSocketPong, because pong is automatically sent by Xitrum for you.
+   * There's no respondWebSocketPong, because Xitrum automatically sends pong for you.
    */
-  def execute(action: Action)
+  def execute()
 
   //----------------------------------------------------------------------------
 
@@ -99,18 +92,22 @@ trait WebSocketActor extends Actor with Logger {
 
   //----------------------------------------------------------------------------
 
-  private def acceptWebSocket(action: Action): Boolean = {
-    val factory    = new WebSocketServerHandshakerFactory(action.webSocketAbsRequestUrl, null, false)
-    val handshaker = factory.newHandshaker(action.request)
+  private def acceptWebSocket(): Boolean = {
+    val factory    = new WebSocketServerHandshakerFactory(webSocketAbsRequestUrl, null, false)
+    val handshaker = factory.newHandshaker(request)
     if (handshaker == null) {
-      factory.sendUnsupportedWebSocketVersionResponse(action.channel)
+      factory.sendUnsupportedWebSocketVersionResponse(channel)
       false
     } else {
-      handshaker.handshake(action.channel, action.request)
+      handshaker.handshake(channel, request)
 
-      val pipeline = action.channel.getPipeline
+      val pipeline = channel.getPipeline
       DefaultHttpChannelPipelineFactory.removeUnusedForWebSocket(pipeline)
       pipeline.addLast("webSocketEventDispatcher", new WebSocketEventDispatcher(handshaker, self))
+
+      // Resume reading paused at NoPipelining
+      channel.setReadable(true)
+
       true
     }
   }

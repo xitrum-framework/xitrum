@@ -843,13 +843,13 @@ class SockJSWebsocket extends WebSocketActor with SockJsPrefix {
 
   private[this] var sockJsActorRef: ActorRef = _
 
-  def execute(action: Action) {
+  def execute() {
     // Ignored
     //val sessionId = param("sessionId")
 
     sockJsActorRef = Config.routes.sockJsRouteMap.createSockJsActor(pathPrefix)
     respondWebSocketText("o")
-    sockJsActorRef ! (self, action)
+    sockJsActorRef ! (self, currentAction)
 
     context.become {
       case WebSocketText(body) =>
@@ -905,9 +905,9 @@ class SockJSRawWebsocket extends WebSocketActor with SockJsPrefix {
 
   private[this] var sockJsActorRef: ActorRef = _
 
-  def execute(action: Action) {
+  def execute() {
     sockJsActorRef = Config.routes.sockJsRouteMap.createSockJsActor(pathPrefix)
-    sockJsActorRef ! (self, action)
+    sockJsActorRef ! (self, currentAction)
 
     context.become {
       case WebSocketText(text) =>
