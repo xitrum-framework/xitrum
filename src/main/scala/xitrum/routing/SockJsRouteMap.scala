@@ -12,7 +12,7 @@ import xitrum.{Config, Logger, SockJsActor}
 //
 // websocket: true means WebSocket is enabled
 // cookieNeeded: true means load balancers needs JSESSION cookie
-class SockJsClassAndOptions(val actorClass: Class[_ <: SockJsActor], val websocket: Boolean, val cookieNeeded: Boolean)
+class SockJsClassAndOptions(val actorClass: Class[_ <: SockJsActor], val websocket: Boolean, val cookieNeeded: Boolean) extends Serializable
 
 class SockJsRouteMap(map: Map[String, SockJsClassAndOptions]) extends Logger {
   def print() {
