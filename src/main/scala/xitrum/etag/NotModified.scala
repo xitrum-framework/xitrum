@@ -8,8 +8,6 @@ import HttpHeaders.Names._
 import HttpHeaders.Values._
 import HttpResponseStatus._
 
-import xitrum.Controller
-
 object NotModified {
   private[this] val SECS_IN_A_YEAR = 365 * 24 * 60 * 60
 

@@ -2,12 +2,10 @@ package xitrum.view
 
 import java.io.File
 
-import xitrum.{Config, Controller}
-import xitrum.controller.Action
-import xitrum.routing.Routes
+import xitrum.{Action, Config}
 
 trait Renderer {
-  this: Controller =>
+  this: Action =>
 
   var renderedView: Any = null
 
@@ -49,45 +47,59 @@ trait Renderer {
    *
    * @param options specific to the configured template engine
    */
-  def renderView(action: Action, customLayout: () => Any, options: Map[String, Any] = Map()): String = {
-    val nonNullActionMethod = action.nonNullMethod
-    val controllerClass     = nonNullActionMethod.getDeclaringClass
-    val controllerName      = controllerClass.getName
-    val actionName          = nonNullActionMethod.getName
-
-    renderedView = Config.xitrum.templateEngine.renderTemplate(this, action, controllerName, actionName, options)
+  def renderView(customLayout: () => Any, location: Class[_ <: Action], options: Map[String, Any]): String = {
+    renderedView = Config.xitrum.templateEngine.renderView(location, this, options)
     customLayout.apply().toString
   }
 
-  /**
-   * Same as renderView(action, customLayout, options),
-   * where action is currentAction.
-   */
+  def renderView(location: Class[_ <: Action], options: Map[String, Any]): String =
+    renderView(layout _, location, options)
+
   def renderView(customLayout: () => Any, options: Map[String, Any]): String =
-    renderView(currentAction, customLayout, options)
+    renderView(customLayout, getClass, options)
+
+  def renderView(customLayout: () => Any, location: Class[_ <: Action]): String =
+    renderView(customLayout, location, Map())
 
   def renderView(customLayout: () => Any): String =
-    renderView(currentAction, customLayout, Map[String, Any]())
+    renderView(customLayout, getClass, Map())
 
-  /**
-   * Same as renderView(action, customLayout, options),
-   * where customLayout is the current controller's layout method.
-   */
-  def renderView(action: Action, options: Map[String, Any]): String =
-    renderView(action, layout _, options)
+  def renderView(location: Class[_ <: Action]): String =
+    renderView(layout _, location, Map())
 
-  def renderView(action: Action): String =
-    renderView(action, layout _, Map[String, Any]())
-
-  /**
-   * Same as renderView(action, customLayout, options),
-   * where action is currentAction and customLayout is the current controller's layout method.
-   */
   def renderView(options: Map[String, Any]): String =
-    renderView(currentAction, layout _, options)
+    renderView(layout _, getClass, options)
 
   def renderView(): String =
-    renderView(currentAction, layout _, Map[String, Any]())
+    renderView(layout _, getClass, Map())
+
+  //----------------------------------------------------------------------------
+
+  def renderViewNoLayout(location: Class[_ <: Action], options: Map[String, Any]): String =
+    Config.xitrum.templateEngine.renderView(location, this, options)
+
+  def renderViewNoLayout(location: Class[_ <: Action]): String =
+    Config.xitrum.templateEngine.renderView(location, this, Map())
+
+  def renderViewNoLayout(options: Map[String, Any]): String =
+    Config.xitrum.templateEngine.renderView(getClass, this, options)
+
+  def renderViewNoLayout(): String =
+    Config.xitrum.templateEngine.renderView(getClass, this, Map())
+
+  //----------------------------------------------------------------------------
+
+  def renderFragment(location: Class[_ <: Action], fragment: String, options: Map[String, Any]): String =
+    Config.xitrum.templateEngine.renderFragment(location, fragment, this, options)
+
+  def renderFragment(fragment: String, options: Map[String, Any]): String =
+    Config.xitrum.templateEngine.renderFragment(getClass, fragment, this, options)
+
+  def renderFragment(location: Class[_ <: Action], fragment: String): String =
+    Config.xitrum.templateEngine.renderFragment(location, fragment, this, Map())
+
+  def renderFragment(fragment: String): String =
+    Config.xitrum.templateEngine.renderFragment(getClass, fragment, this, Map())
 
   //----------------------------------------------------------------------------
 
@@ -96,44 +108,4 @@ trait Renderer {
     val any = layout  // Call layout
     any.toString()
   }
-
-  /**
-   * Renders the template (typically the layout) associated with the controller class.
-   *
-   * @param controllerClass should be one of the parent classes of the current
-   * controller because the current controller instance will be imported in the
-   * template as "helper"
-   *
-   * @param options specific to the configured template engine
-   */
-  def renderViewNoLayout(controllerClass: Class[_], options: Map[String, Any]): String =
-    Config.xitrum.templateEngine.renderTemplate(this, controllerClass, options)
-
-  def renderViewNoLayout(controllerClass: Class[_]): String =
-    Config.xitrum.templateEngine.renderTemplate(this, controllerClass, Map())
-
-  //----------------------------------------------------------------------------
-
-  /**
-   * Renders the template fragment inside the directory associated with the
-   * controller class.
-   *
-   * @param controllerClass should be one of the parent classes of the current
-   * controller because the current controller instance will be imported in the
-   * template as "helper"
-   *
-   * @param options specific to the configured template engine
-   */
-  def renderFragment(controllerClass: Class[_], fragment: String, options: Map[String, Any]): String =
-    Config.xitrum.templateEngine.renderFragment(this, controllerClass, fragment, options)
-
-  def renderFragment(controllerClass: Class[_], fragment: String): String =
-    Config.xitrum.templateEngine.renderFragment(this, controllerClass, fragment, Map())
-
-  /** Renders the fragment associated with the current controller class. */
-  def renderFragment(fragment: String, options: Map[String, Any]): String =
-    Config.xitrum.templateEngine.renderFragment(this, getClass, fragment, options)
-
-  def renderFragment(fragment: String): String =
-    Config.xitrum.templateEngine.renderFragment(this, getClass, fragment, Map())
 }

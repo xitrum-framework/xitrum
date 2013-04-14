@@ -1,6 +1,7 @@
 package xitrum.util
 
 import scala.runtime.ScalaRunTime
+import scala.util.control.NonFatal
 import com.twitter.chill.KryoBijection
 import xitrum.Logger
 
@@ -12,7 +13,7 @@ object SeriDeseri extends Logger {
     try {
       Some(KryoBijection.invert(bytes))
     } catch {
-      case scala.util.control.NonFatal(e) =>
+      case NonFatal(e) =>
         if (logger.isDebugEnabled) logger.debug("Could not deserialize: " + ScalaRunTime.stringOf(bytes), e)
         None
     }

@@ -2,6 +2,7 @@ package xitrum.handler.up
 
 import java.util.{Map => JMap, List => JList, LinkedHashMap => JLinkedHashMap}
 import scala.collection.mutable.{ArrayBuffer, Map => MMap}
+import scala.util.control.NonFatal
 
 import org.jboss.netty.channel.{ChannelHandler, SimpleChannelUpstreamHandler, ChannelHandlerContext, MessageEvent, Channels}
 import ChannelHandler.Sharable
@@ -24,11 +25,20 @@ class UriParser extends SimpleChannelUpstreamHandler with BadClientSilencer {
     val request = env.request
 
     try {
-      val decoder   = new QueryStringDecoder(request.getUri, Config.requestCharset)
-      env.pathInfo  = new PathInfo(decoder.getPath)
+      val decoder = new QueryStringDecoder(request.getUri, Config.requestCharset)
+      val path    = decoder.getPath
+
+      // Treat "articles" and "articles/" the same
+      val pathWithoutTrailingSlash =
+        if (path.endsWith("/"))
+          path.substring(0, path.length - 1)
+        else
+          path
+
+      env.pathInfo  = new PathInfo(pathWithoutTrailingSlash)
       env.uriParams = jParamsToParams(decoder.getParameters)
     } catch {
-      case scala.util.control.NonFatal(e) =>
+      case NonFatal(e) =>
         val msg = "Could not parse URI: " + request.getUri
         logger.warn(msg, e)
 

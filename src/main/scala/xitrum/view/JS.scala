@@ -5,15 +5,14 @@ import scala.xml.Unparsed
 import org.apache.commons.lang3.StringEscapeUtils
 import org.jboss.netty.channel.ChannelFuture
 
-import xitrum.{Config, Controller}
-import xitrum.controller.Action
+import xitrum.{Config, Action}
 import xitrum.etag.{Etag, NotModified}
-import xitrum.routing.{Routes, JSRoutesCache, JSRoutesController}
+import xitrum.routing.{JSRoutesCache, JSRoutesAction}
 
 // http://stackoverflow.com/questions/2703861/chromes-loading-indicator-keeps-spinning-during-xmlhttprequest
 // http://stackoverflow.com/questions/1735560/stop-the-browser-throbber-of-doom-while-loading-comet-server-push-xmlhttpreques
 trait JS {
-  this: Controller =>
+  this: Action =>
 
   private val buffer = new StringBuilder
 
@@ -54,19 +53,19 @@ trait JS {
     jsRespond("window.location.href = \"" + jsEscape(location) + "\"")
   }
 
-  def jsRedirectTo(action: Action, params: (String, Any)*): ChannelFuture = { jsRedirectTo(action.url(params:_*)) }
+  def jsRedirectTo[T <: Action : Manifest](params: (String, Any)*): ChannelFuture = { jsRedirectTo(url[T](params:_*)) }
 
   //----------------------------------------------------------------------------
 
   lazy val jsDefaults = {
-    val validatei18n = if (getLanguage == "en") "" else <script type="text/javascript" src={urlForResource("xitrum/jquery.validate-1.11.0/localization/messages_"+ getLanguage +".js")}></script>
-    val jsRoutesAction = <script type="text/javascript" src={JSRoutesController.routes.url + "?" + JSRoutesCache.etag}></script>
+    val validatei18n = if (getLanguage == "en") "" else <script type="text/javascript" src={urlForResource("xitrum/jquery.validate-1.11.1/localization/messages_"+ getLanguage +".js")}></script>
+    val jsRoutesAction = <script type="text/javascript" src={url[JSRoutesAction] + "?" + JSRoutesCache.etag}></script>
 
     if (Config.productionMode)
       <xml:group>
         <script type="text/javascript" src={urlForResource("xitrum/jquery-1.9.1.min.js")}></script>
-        <script type="text/javascript" src={urlForResource("xitrum/jquery.validate-1.11.0/jquery.validate.min.js")}></script>
-        <script type="text/javascript" src={urlForResource("xitrum/jquery.validate-1.11.0/additional-methods.min.js")}></script>
+        <script type="text/javascript" src={urlForResource("xitrum/jquery.validate-1.11.1/jquery.validate.min.js")}></script>
+        <script type="text/javascript" src={urlForResource("xitrum/jquery.validate-1.11.1/additional-methods.min.js")}></script>
         {validatei18n}
         <script type="text/javascript" src={urlForResource("xitrum/knockout/knockout-2.2.1.min.js")}></script>
         <script type="text/javascript" src={urlForResource("xitrum/knockout/knockout.mapping-2.4.1.min.js")}></script>
@@ -77,8 +76,8 @@ trait JS {
     else
       <xml:group>
         <script type="text/javascript" src={urlForResource("xitrum/jquery-1.9.1.js")}></script>
-        <script type="text/javascript" src={urlForResource("xitrum/jquery.validate-1.11.0/jquery.validate.js")}></script>
-        <script type="text/javascript" src={urlForResource("xitrum/jquery.validate-1.11.0/additional-methods.js")}></script>
+        <script type="text/javascript" src={urlForResource("xitrum/jquery.validate-1.11.1/jquery.validate.js")}></script>
+        <script type="text/javascript" src={urlForResource("xitrum/jquery.validate-1.11.1/additional-methods.js")}></script>
         {validatei18n}
         <script type="text/javascript" src={urlForResource("xitrum/knockout/knockout-2.2.1.js")}></script>
         <script type="text/javascript" src={urlForResource("xitrum/knockout/knockout.mapping-2.4.1.js")}></script>

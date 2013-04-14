@@ -1,13 +1,13 @@
 package xitrum.view
 
-import xitrum.Controller
+import xitrum.Action
 
 object Flash {
   val FLASH_KEY = "_flash"
 }
 
 trait Flash {
-  this: Controller =>
+  this: Action =>
 
   import Flash._
 

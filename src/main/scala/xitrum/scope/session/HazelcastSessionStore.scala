@@ -2,12 +2,12 @@ package xitrum.scope.session
 
 import java.util.UUID
 import scala.collection.mutable.HashMap
+import scala.util.control.NonFatal
 
 import org.jboss.netty.handler.codec.http.DefaultCookie
 import com.hazelcast.core.IMap
 
 import xitrum.Config
-import xitrum.scope.request.ExtEnv
 import xitrum.util.SecureUrlSafeBase64
 
 /**
@@ -30,9 +30,9 @@ object HazelcastSessionStore {
 }
 
 class HazelcastSessionStore extends SessionStore {
-  def restore(extEnv: ExtEnv): Session = {
+  def restore(env: SessionEnv): Session = {
     val sessionCookieName = Config.xitrum.session.cookieName
-    extEnv.requestCookies.get(sessionCookieName) match {
+    env.requestCookies.get(sessionCookieName) match {
       case None =>
         val sessionId = UUID.randomUUID().toString
         new HazelcastSession(sessionId, true)
@@ -49,7 +49,7 @@ class HazelcastSessionStore extends SessionStore {
               try {
                 Some(any.asInstanceOf[String])
               } catch {
-                case scala.util.control.NonFatal(e) => None
+                case NonFatal(e) => None
               }
 
             sessionIdo match {
@@ -74,16 +74,16 @@ class HazelcastSessionStore extends SessionStore {
   }
 
   /** @param session has been restored by "restore" method */
-  def store(session: Session, extEnv: ExtEnv) {
+  def store(session: Session, env: SessionEnv) {
     val sessionCookieName = Config.xitrum.session.cookieName
     if (session.isEmpty) {
       // If session cookie has been sent by browser, send back session cookie
       // with max age = 0 so that browser will delete it immediately
-      if (extEnv.requestCookies.isDefinedAt(sessionCookieName)) {
+      if (env.requestCookies.isDefinedAt(sessionCookieName)) {
         val cookie = new DefaultCookie(sessionCookieName, "0")
         cookie.setHttpOnly(true)
         cookie.setMaxAge(0)
-        extEnv.responseCookies.append(cookie)
+        env.responseCookies.append(cookie)
 
         // Remove session in Hazelcast if any
         val hSession = session.asInstanceOf[HazelcastSession]
@@ -98,7 +98,7 @@ class HazelcastSessionStore extends SessionStore {
         // which means the cookie will be removed when user terminates browser
         val cookie = new DefaultCookie(sessionCookieName, SecureUrlSafeBase64.encrypt(hSession.sessionId))
         cookie.setHttpOnly(true)
-        extEnv.responseCookies.append(cookie)
+        env.responseCookies.append(cookie)
       }
 
       // See "restore" method

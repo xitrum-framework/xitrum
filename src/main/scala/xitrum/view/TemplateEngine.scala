@@ -1,7 +1,6 @@
 package xitrum.view
 
-import xitrum.Controller
-import xitrum.controller.Action
+import xitrum.Action
 
 /**
  * Template engines should extend this trait and implement its methods.
@@ -10,45 +9,29 @@ import xitrum.controller.Action
  */
 trait TemplateEngine {
   /**
-   * Renders the template associated with the action of the controller.
+   * Renders the template at the location identified by the given action class.
    *
-   * Ex: When controller = myapp.Site, action = index, and Scalate template
+   * Ex: When location = myapp.SiteIndex and Scalate template
    * engine is used, by default the template path will be:
-   * src/main/scalate/myapp/Site/index.jade
+   * src/main/scalate/myapp/SiteIndex.jade
+   *
+   * @param location the action class used to identify the template location
    *
    * @param options specific to the configured template engine
    */
-  def renderTemplate(
-    controller: Controller, action: Action,
-    controllerName: String, actionName: String,
-    options: Map[String, Any]
-  ): String
+  def renderView(location: Class[_ <: Action], currentAction: Action, options: Map[String, Any]): String
 
   /**
-   * Renders the template associated with the controller.
+   * Renders the template at the location identified by the package of the given
+   * action class and the given fragment.
    *
-   * Ex: When controller = myapp.Site, and Scalate template
+   * Ex: When location = myapp.ArticleNew, fragment = form and Scalate template
    * engine is used, by default the template path will be:
-   * src/main/scalate/myapp/Site.jade
+   * src/main/scalate/myapp/_form.jade
+   *
+   * @param location the action class used to identify the template location
    *
    * @param options specific to the configured template engine
    */
-  def renderTemplate(
-    controller: Controller, controllerClass: Class[_],
-    options: Map[String, Any]
-  ): String
-
-  /**
-   * Renders the template fragment associated with the controller.
-   *
-   * Ex: When controller = myapp.Site, fragment = "footer", and Scalate template
-   * engine is used, by default the template path will be:
-   * src/main/scalate/myapp/Site/_footer.jade
-   *
-   * @param options specific to the configured template engine
-   */
-  def renderFragment(
-    controller: Controller, controllerClass: Class[_], fragment: String,
-    options: Map[String, Any]
-  ): String
+  def renderFragment(location: Class[_ <: Action], fragment: String, currentAction: Action, options: Map[String, Any]): String
 }

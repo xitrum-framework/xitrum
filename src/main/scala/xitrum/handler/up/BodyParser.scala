@@ -2,6 +2,7 @@ package xitrum.handler.up
 
 import java.nio.charset.Charset
 import scala.collection.mutable.{Map => MMap}
+import scala.util.control.NonFatal
 
 import org.jboss.netty.channel.{ChannelHandler, SimpleChannelUpstreamHandler, ChannelHandlerContext, MessageEvent, ExceptionEvent, Channels}
 import org.jboss.netty.handler.codec.http.{HttpHeaders, HttpMethod, HttpRequest}
@@ -50,7 +51,7 @@ class BodyParser extends SimpleChannelUpstreamHandler with BadClientSilencer {
       handlerEnv.fileUploadParams = fileUploadParams
       Channels.fireMessageReceived(ctx, handlerEnv)
     } catch {
-      case scala.util.control.NonFatal(e) =>
+      case NonFatal(e) =>
         val msg = "Could not parse body of request: " + request
         logger.warn(msg, e)
         ctx.getChannel.close()

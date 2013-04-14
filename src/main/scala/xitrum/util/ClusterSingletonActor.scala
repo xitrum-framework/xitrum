@@ -13,10 +13,6 @@ import com.hazelcast.core.{IMap, MembershipEvent, MembershipListener}
 
 import xitrum.Config
 
-case class Lookup(name: String)
-case class LookupLocal(name: String)
-case class LookupOrCreate(name: String, propsMaker: () => Props)
-
 /**
  * This feature is implemented using Akka Remoting and Hazelcast distributed lock:
  * https://groups.google.com/group/akka-user/browse_thread/thread/23d6b2851648c1b0
@@ -30,6 +26,10 @@ case class LookupOrCreate(name: String, propsMaker: () => Props)
  * Caveat: Akka Remoting does not trigger Death Watch for lost connections.
  */
 object ClusterSingletonActor {
+  case class Lookup(name: String)
+  case class LookupLocal(name: String)
+  case class LookupOrCreate(name: String, propsMaker: () => Props)
+
   private val ACTOR_SYSTEM_NAME     = getClass.getName
   private val REMOTE_LOOKUP_TIMEOUT = 5.seconds
 

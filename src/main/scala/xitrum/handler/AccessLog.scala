@@ -4,10 +4,9 @@ import java.net.SocketAddress
 import scala.collection.mutable.{Map => MMap}
 import org.jboss.netty.handler.codec.http.{HttpRequest, HttpResponse}
 
-import xitrum.{Controller, Logger}
-import xitrum.routing.ControllerReflection
+import xitrum.{Action, Logger}
 import xitrum.scope.request.RequestEnv
-import xitrum.controller.Net
+import xitrum.action.Net
 
 object AccessLog extends Logger {
   def logFlashSocketPolicyFileAccess(remoteAddress: SocketAddress) {
@@ -40,36 +39,40 @@ object AccessLog extends Logger {
     }
   }
 
-  def logDynamicContentAccess(controller: Controller, beginTimestamp: Long, cacheSecs: Int, hit: Boolean, e: Throwable = null) {
+  def logActionAccess(action: Action, beginTimestamp: Long, cacheSecs: Int, hit: Boolean, e: Throwable = null) {
     if (e == null) {
-      if (logger.isDebugEnabled) logger.debug(msgWithTime(controller, beginTimestamp) + extraInfo(controller, cacheSecs, hit))
+      if (logger.isDebugEnabled) logger.debug(msgWithTime(action.getClass.getName, action, beginTimestamp) + extraInfo(action, cacheSecs, hit))
     } else {
-      logger.error("Dispatch error " + msgWithTime(controller, beginTimestamp) + extraInfo(controller, cacheSecs, hit), e)
+      logger.error("Dispatch error " + msgWithTime(action.getClass.getName, action, beginTimestamp) + extraInfo(action, cacheSecs, hit), e)
     }
+  }
+
+  def logWebSocketAccess(className: String, action: Action, beginTimestamp: Long) {
+    if (logger.isDebugEnabled) logger.debug(msgWithTime(className, action, beginTimestamp) + extraInfo(action, 0, false))
   }
 
   //----------------------------------------------------------------------------
 
-  private def msgWithTime(controller: Controller, beginTimestamp: Long) = {
+  private def msgWithTime(className: String, action: Action, beginTimestamp: Long) = {
     val endTimestamp = System.currentTimeMillis()
     val dt           = endTimestamp - beginTimestamp
-    val env          = controller.handlerEnv
+    val env          = action.handlerEnv
 
-    controller.remoteIp + " " +
-    controller.request.getMethod + " " +
-    controller.request.getUri + " -> " +
-    ControllerReflection.controllerActionName(controller.handlerEnv.action) +
+    action.remoteIp + " " +
+    action.request.getMethod + " " +
+    action.request.getUri + " -> " +
+    className +
     (if (env.uriParams.nonEmpty)        ", uriParams: "        + RequestEnv.inspectParamsWithFilter(env.uriParams)        else "") +
     (if (env.bodyParams.nonEmpty)       ", bodyParams: "       + RequestEnv.inspectParamsWithFilter(env.bodyParams)       else "") +
     (if (env.pathParams.nonEmpty)       ", pathParams: "       + RequestEnv.inspectParamsWithFilter(env.pathParams)       else "") +
     (if (env.fileUploadParams.nonEmpty) ", fileUploadParams: " + RequestEnv.inspectParamsWithFilter(env.fileUploadParams) else "") +
-    " -> " + controller.response.getStatus.getCode +
+    " -> " + action.response.getStatus.getCode +
     ", " + dt + " [ms]"
   }
 
-  private def extraInfo(controller: Controller, cacheSecs: Int, hit: Boolean) = {
+  private def extraInfo(action: Action, cacheSecs: Int, hit: Boolean) = {
     if (cacheSecs == 0) {
-      if (controller.isResponded) "" else " (async)"
+      if (action.isDoneResponding) "" else " (async)"
     } else {
       if (hit) {
         if (cacheSecs < 0) " (action cache hit)"  else " (page cache hit)"

@@ -1,7 +1,6 @@
 package xitrum.handler.up
 
-import java.lang.reflect.Method
-import scala.collection.mutable.{ArrayBuffer, Map => MMap}
+import scala.collection.mutable.{Map => MMap}
 
 import org.jboss.netty.channel._
 import org.jboss.netty.handler.codec.http._
@@ -9,143 +8,39 @@ import ChannelHandler.Sharable
 import HttpResponseStatus._
 import HttpVersion._
 
-import xitrum.{Config, Controller, SkipCSRFCheck, Cache, Logger}
-import xitrum.controller.Action
-import xitrum.exception.{InvalidAntiCSRFToken, InvalidInput, MissingParam, SessionExpired}
-import xitrum.handler.{AccessLog, HandlerEnv}
-import xitrum.handler.down.{ResponseCacher, XSendFile}
-import xitrum.routing.{ControllerReflection, Routes}
-import xitrum.scope.request.RequestEnv
-import xitrum.scope.session.CSRF
-import xitrum.sockjs.SockJsController
+import akka.actor.{Actor, Props}
+import com.esotericsoftware.reflectasm.ConstructorAccess
 
-object Dispatcher extends Logger {
-  def dispatchWithFailsafe(actionMethod: Method, env: HandlerEnv) {
-    val beginTimestamp = System.currentTimeMillis()
-    var hit            = false
+import xitrum.{Action, ActionActor, Config}
+import xitrum.handler.HandlerEnv
+import xitrum.handler.down.XSendFile
+import xitrum.sockjs.SockJsPrefix
 
-    val (controller, withActionMethod) = ControllerReflection.newControllerAndAction(actionMethod)
-    controller(env)
-
-    // Set pathPrefix for SockJsController
-    if (controller.isInstanceOf[SockJsController])
-      controller.pathPrefix = controller.pathInfo.tokens(0)
-
-    env.action     = withActionMethod
-    env.controller = controller
-
-    try {
-      // Check for CSRF (CSRF has been checked if "postback" is true)
-      if ((controller.request.getMethod == HttpMethod.POST ||
-           controller.request.getMethod == HttpMethod.PUT ||
-           controller.request.getMethod == HttpMethod.DELETE) &&
-          !controller.isInstanceOf[SkipCSRFCheck] &&
-          !CSRF.isValidToken(controller)) throw new InvalidAntiCSRFToken
-
-      val cacheSeconds = withActionMethod.cacheSeconds
-
-      // Before filters:
-      // When not passed, the before filters must explicitly respond to client,
-      // with appropriate response status code, error description etc.
-      // This logic is app-specific, Xitrum cannot does it for the app.
-
-      if (cacheSeconds > 0) {     // Page cache
-        hit = tryCache(controller) {
-          val passed = controller.callBeforeFilters()
-          if (passed) runAroundAndAfterFilters(controller, withActionMethod)
-        }
-      } else {
-        val passed = controller.callBeforeFilters()
-        if (passed) {
-          if (cacheSeconds < 0)  // Action cache
-            hit = tryCache(controller) { runAroundAndAfterFilters(controller, withActionMethod) }
-          else                   // No cache
-            runAroundAndAfterFilters(controller, withActionMethod)
-        }
-      }
-
-      if (!controller.forwarding) AccessLog.logDynamicContentAccess(controller, beginTimestamp, cacheSeconds, hit)
-    } catch {
-      case scala.util.control.NonFatal(e) =>
-        if (controller.forwarding) return
-
-        // End timestamp
-        val t2 = System.currentTimeMillis()
-
-        // These exceptions are special cases:
-        // We know that the exception is caused by the client (bad request)
-        if (e.isInstanceOf[SessionExpired] || e.isInstanceOf[InvalidAntiCSRFToken] || e.isInstanceOf[MissingParam] || e.isInstanceOf[InvalidInput]) {
-          controller.response.setStatus(BAD_REQUEST)
-          val msg = if (e.isInstanceOf[SessionExpired] || e.isInstanceOf[InvalidAntiCSRFToken]) {
-            controller.session.clear()
-            "Session expired. Please refresh your browser."
-          } else if (e.isInstanceOf[MissingParam]) {
-            val mp  = e.asInstanceOf[MissingParam]
-            "Missing param: " + mp.key
-          } else {
-            val ve = e.asInstanceOf[InvalidInput]
-            "Validation error: " + ve.message
-          }
-
-          if (controller.isAjax)
-            controller.jsRespond("alert(\"" + controller.jsEscape(msg) + "\")")
-          else
-            controller.respondText(msg)
-
-          AccessLog.logDynamicContentAccess(controller, beginTimestamp, 0, false)
-        } else {
-          controller.response.setStatus(INTERNAL_SERVER_ERROR)
-          if (Config.productionMode) {
-            Routes.action500Method match {
-              case None =>
-                controller.respondDefault500Page()
-
-              case Some(action500Method) =>
-                if (action500Method == actionMethod) {
-                  controller.respondDefault500Page()
-                } else {
-                  controller.response.setStatus(INTERNAL_SERVER_ERROR)
-                  dispatchWithFailsafe(action500Method, env)
-                }
-            }
-          } else {
-            val errorMsg = e.toString + "\n\n" + e.getStackTraceString
-            if (controller.isAjax)
-              controller.jsRespond("alert(\"" + controller.jsEscape(errorMsg) + "\")")
-            else
-              controller.respondText(errorMsg)
-          }
-
-          AccessLog.logDynamicContentAccess(controller, beginTimestamp, 0, false, e)
-        }
+object Dispatcher {
+  def dispatch(klass: Class[_], handlerEnv: HandlerEnv) {
+    if (classOf[Actor].isAssignableFrom(klass)) {
+      val actorRef = Config.actorSystem.actorOf(Props {
+        val actor = ConstructorAccess.get(klass).newInstance()
+        setPathPrefixForSockJs(actor, handlerEnv)
+        actor.asInstanceOf[Actor]
+      })
+      actorRef ! handlerEnv
+    } else {
+      val action = ConstructorAccess.get(klass).newInstance().asInstanceOf[Action]
+      setPathPrefixForSockJs(action, handlerEnv)
+      action.apply(handlerEnv)
+      action.dispatchWithFailsafe()
     }
   }
 
-  //----------------------------------------------------------------------------
-
-  /** @return true if the cache was hit */
-  private def tryCache(controller: Controller)(f: => Unit): Boolean = {
-    ResponseCacher.getCachedResponse(controller) match {
-      case None =>
-        f
-        false
-
-      case Some(response) =>
-        controller.channel.write(response)
-        true
-    }
-  }
-
-  private def runAroundAndAfterFilters(controller: Controller, action: Action) {
-    controller.callAroundFilters(action)
-    controller.callAfterFilters()
+  private def setPathPrefixForSockJs(instance: Any, handlerEnv: HandlerEnv) {
+    if (instance.isInstanceOf[SockJsPrefix])
+      instance.asInstanceOf[SockJsPrefix].setPathPrefix(handlerEnv.pathInfo)
   }
 }
 
 @Sharable
 class Dispatcher extends SimpleChannelUpstreamHandler with BadClientSilencer {
-  import Dispatcher._
-
   override def messageReceived(ctx: ChannelHandlerContext, e: MessageEvent) {
     val m = e.getMessage
     if (!m.isInstanceOf[HandlerEnv]) {
@@ -161,23 +56,24 @@ class Dispatcher extends SimpleChannelUpstreamHandler with BadClientSilencer {
 
     // Look up GET if method is HEAD
     val requestMethod = if (request.getMethod == HttpMethod.HEAD) HttpMethod.GET else request.getMethod
-    Routes.matchRoute(requestMethod, pathInfo) match {
-      case Some((actionMethod, pathParams)) =>
+    Config.routes.route(requestMethod, pathInfo) match {
+      case Some((route, pathParams)) =>
+        env.route      = route
         env.pathParams = pathParams
-        dispatchWithFailsafe(actionMethod, env)
+        Dispatcher.dispatch(route.klass, env)
 
       case None =>
-        Routes.action404Method match {
+        Config.routes.error404 match {
           case None =>
             val response = new DefaultHttpResponse(HTTP_1_1, NOT_FOUND)
             XSendFile.set404Page(response, false)
             env.response = response
             ctx.getChannel.write(env)
 
-          case Some(actionMethod) =>
+          case Some(error404) =>
             env.pathParams = MMap.empty
             env.response.setStatus(NOT_FOUND)
-            dispatchWithFailsafe(actionMethod, env)
+            Dispatcher.dispatch(error404, env)
         }
     }
   }

@@ -2,6 +2,7 @@ package xitrum
 
 import java.io.File
 import java.nio.charset.Charset
+import scala.util.control.NonFatal
 
 import com.hazelcast.client.{ClientConfig, ClientConfigBuilder, HazelcastClient}
 import com.hazelcast.core.{Hazelcast, HazelcastInstance}
@@ -10,6 +11,7 @@ import com.typesafe.config.{Config => TConfig, ConfigFactory}
 import akka.actor.ActorSystem
 
 import xitrum.scope.session.SessionStore
+import xitrum.routing.{RouteCollection, RouteCollector, SerializableRouteCollection, SockJsClassAndOptions}
 import xitrum.view.TemplateEngine
 import xitrum.util.Loader
 
@@ -83,7 +85,11 @@ class Config(val config: TConfig) {
     else
       None
 
-  val templateEngine = {
+  /**
+   * lazy: templateEngine is initialized after xitrum.Config, so that inside
+   * the template engine class, xitrum.Config can be used
+   */
+  lazy val templateEngine = {
     val className = config.getString("templateEngine")
     val klass     = Class.forName(className)
     klass.newInstance().asInstanceOf[TemplateEngine]
@@ -113,17 +119,11 @@ object Config extends Logger {
    */
   val BIG_TEXTUAL_RESPONSE_SIZE_IN_KB = 1
 
-  /**
-   * In case of CPU bound, the pool size should be equal the number of cores
-   * http://grizzly.java.net/nonav/docs/docbkx2.0/html/bestpractices.html
-   */
-  val EXECUTIORS_PER_CORE = 64
+  private[this] val HAZELCAST_MODE_CLUSTER_MEMBER = "clusterMember"
+  private[this] val HAZELCAST_MODE_LITE_MEMBER    = "liteMember"
+  private[this] val HAZELCAST_MODE_JAVA_CLIENT    = "javaClient"
 
-  private val HAZELCAST_MODE_CLUSTER_MEMBER = "clusterMember"
-  private val HAZELCAST_MODE_LITE_MEMBER    = "liteMember"
-  private val HAZELCAST_MODE_JAVA_CLIENT    = "javaClient"
-
-  private val DEFAULT_SECURE_KEY = "ajconghoaofuxahoi92chunghiaujivietnamlasdoclapjfltudoil98hanhphucup8"
+  private[this] val DEFAULT_SECURE_KEY = "ajconghoaofuxahoi92chunghiaujivietnamlasdoclapjfltudoil98hanhphucup8"
 
   //----------------------------------------------------------------------------
 
@@ -138,7 +138,7 @@ object Config extends Logger {
     try {
       ConfigFactory.load()
     } catch {
-      case scala.util.control.NonFatal(e) =>
+      case NonFatal(e) =>
         exitOnError("Could not load config/application.conf. For an example, see https://github.com/ngocdaothanh/xitrum-new/blob/master/config/application.conf", e)
         null
     }
@@ -149,7 +149,7 @@ object Config extends Logger {
     try {
       new Config(application.getConfig("xitrum"))
     } catch {
-      case scala.util.control.NonFatal(e) =>
+      case NonFatal(e) =>
         exitOnError("Could not load config/xitrum.conf. For an example, see https://github.com/ngocdaothanh/xitrum-new/blob/master/config/xitrum.conf", e)
         null
     }
@@ -183,9 +183,9 @@ object Config extends Logger {
   val actorSystem = ActorSystem(ACTOR_SYSTEM_NAME)
 
   /**
-   * Use lazy to avoid starting Hazelcast if it is not used
-   * (starting Hazelcast takes several seconds, sometimes we want to work in
-   * sbt console mode and don't like this overhead)
+   * Use lazy to avoid starting Hazelcast if it is not used.
+   * Starting Hazelcast takes several seconds, sometimes we want to work in
+   * sbt console mode and don't like this overhead.
    */
   lazy val hazelcastInstance: HazelcastInstance = {
     // http://www.hazelcast.com/docs/2.4/manual/multi_html/ch12s07.html
@@ -229,7 +229,7 @@ object Config extends Logger {
 
   def warnOnDefaultSecureKey() {
     if (xitrum.session.secureKey == DEFAULT_SECURE_KEY)
-      logger.warn("For security, change secureKey in config/xitrum.conf to your own!")
+      logger.warn("*** For security, change secureKey in config/xitrum.conf to your own! ***")
   }
 
   /**
@@ -241,5 +241,40 @@ object Config extends Logger {
     logger.error(msg, e)
     Hazelcast.shutdownAll()
     System.exit(-1)
+  }
+
+  //----------------------------------------------------------------------------
+
+  private[this] val ROUTES_CACHE = "routes.cache"
+
+  /**
+   * Use lazy to avoid collecting routes if they are not used.
+   * Sometimes we want to work in sbt console mode and don't like this overhead.
+   */
+  lazy val routes: RouteCollection = {
+    val (normal, sockJsWithoutPrefix, sockJsMap) = deserializeCacheFileOrRecollectWithRetry()
+    RouteCollection.fromSerializable(normal, sockJsWithoutPrefix, sockJsMap)
+  }
+
+  /** @return (normal routes, SockJS routes) */
+  private def deserializeCacheFileOrRecollectWithRetry(retried: Boolean = false):
+    (SerializableRouteCollection, SerializableRouteCollection, Map[String, SockJsClassAndOptions]) =
+  {
+    try {
+      logger.info("Load file " + ROUTES_CACHE + " or recollect routes...")
+      val routeCollector = new RouteCollector
+      routeCollector.deserializeCacheFileOrRecollect(ROUTES_CACHE)
+    } catch {
+      case NonFatal(e) =>
+        if (retried) {
+          Config.exitOnError("Could not collect routes", e)
+          throw e
+        } else {
+          logger.info("Delete " + ROUTES_CACHE + " and retry")
+          val file = new File(ROUTES_CACHE)
+          file.delete()
+          deserializeCacheFileOrRecollectWithRetry(true)
+        }
+    }
   }
 }
