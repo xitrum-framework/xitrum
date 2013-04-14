@@ -17,4 +17,4 @@ on top of `Netty <http://netty.io/>`_, `Akka <http://akka.io/>`_, and
   |       Netty        |
   +--------------------+
 
-Please see `Xitrum home page <http://ngocdaothanh.github.com/xitrum>`_.
+Please see `Xitrum home page <http://ngocdaothanh.github.io/xitrum>`_.
