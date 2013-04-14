@@ -4,8 +4,22 @@
 * #71 Add automatic CORS request handling for the whole site
 * #76 Improve currentController in Scalate templates
 
-2.0 (planned):
-* #104 Integrate more closely with Akka
+2.0: #104 Annotate your Akka actor to make it accessible from web
+* Break actions in controller out to separate classes, each is an Action or
+  an ActionActor; your action can be an actor
+* Rewrite part of SockJS using ActionActor
+* Support "/" in SockJS path prefix
+* Support WebSocket binary frame
+* Allow starting server with custom Netty ChannelPipelineFactory;
+  for an example, see xitrum.handler.DefaultHttpChannelPipelineFactory
+* Speed up CoffeeScript compiling by using
+  https://github.com/ngocdaothanh/RhinoCoffeeScript
+* Use Akka log instead of using SLF4J directly
+* Ignore trailing slash in URL: treat "articles" and "articles/" the same;
+  note that trailing slash is not recommended since browsers do not cache page with such URL
+* Update Netty to 3.6.5 (http://netty.io/news/2013/04/09/3-6-5-Final.html),
+  jQuery Validate to 1.11.1 (http://bassistance.de/2013/03/22/release-validation-plugin-1-11-1/),
+  Sclasner to 1.6, and xitrum-scalate to 1.1
 
 1.22:
 * #106 Update JSON4S to 3.2.4
