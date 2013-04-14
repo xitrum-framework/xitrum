@@ -13,22 +13,23 @@ case class SockJsText(text: String)
  * An actor will be created when there's new SockJS session. It will be stopped when
  * the session is closed.
  */
-trait SockJsActor extends Actor with Logger {
+trait SockJsActor extends Actor with Action {
   // Ref of NonWebSocketSessionActor, SockJSWebsocket, or SockJSRawWebsocket
   private[this] var sessionActorRef: ActorRef = _
 
   def receive = {
     case (sessionActorRef: ActorRef, action: Action) =>
       this.sessionActorRef = sessionActorRef
-      execute(action)
+      apply(action.handlerEnv)
+      execute()
   }
 
   /**
-   * @param action The action just before switching to this SockJS actor.
+   * The current action is the one just before switching to this SockJS actor.
    * You can extract session data, request headers etc. from it, but do not use
-   * respondText, respondView etc. Use respondSockJsText or respondSockJsClose.
+   * respondText, respondView etc. Use respondSockJsText and respondSockJsClose.
    */
-  def execute(action: Action)
+  def execute()
 
   //----------------------------------------------------------------------------
 
