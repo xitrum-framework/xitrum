@@ -58,14 +58,14 @@ trait JS {
   //----------------------------------------------------------------------------
 
   lazy val jsDefaults = {
-    val validatei18n = if (getLanguage == "en") "" else <script type="text/javascript" src={urlForResource("xitrum/jquery.validate-1.11.0/localization/messages_"+ getLanguage +".js")}></script>
+    val validatei18n = if (getLanguage == "en") "" else <script type="text/javascript" src={urlForResource("xitrum/jquery.validate-1.11.1/localization/messages_"+ getLanguage +".js")}></script>
     val jsRoutesAction = <script type="text/javascript" src={url[JSRoutesAction] + "?" + JSRoutesCache.etag}></script>
 
     if (Config.productionMode)
       <xml:group>
         <script type="text/javascript" src={urlForResource("xitrum/jquery-1.9.1.min.js")}></script>
-        <script type="text/javascript" src={urlForResource("xitrum/jquery.validate-1.11.0/jquery.validate.min.js")}></script>
-        <script type="text/javascript" src={urlForResource("xitrum/jquery.validate-1.11.0/additional-methods.min.js")}></script>
+        <script type="text/javascript" src={urlForResource("xitrum/jquery.validate-1.11.1/jquery.validate.min.js")}></script>
+        <script type="text/javascript" src={urlForResource("xitrum/jquery.validate-1.11.1/additional-methods.min.js")}></script>
         {validatei18n}
         <script type="text/javascript" src={urlForResource("xitrum/knockout/knockout-2.2.1.min.js")}></script>
         <script type="text/javascript" src={urlForResource("xitrum/knockout/knockout.mapping-2.4.1.min.js")}></script>
@@ -76,8 +76,8 @@ trait JS {
     else
       <xml:group>
         <script type="text/javascript" src={urlForResource("xitrum/jquery-1.9.1.js")}></script>
-        <script type="text/javascript" src={urlForResource("xitrum/jquery.validate-1.11.0/jquery.validate.js")}></script>
-        <script type="text/javascript" src={urlForResource("xitrum/jquery.validate-1.11.0/additional-methods.js")}></script>
+        <script type="text/javascript" src={urlForResource("xitrum/jquery.validate-1.11.1/jquery.validate.js")}></script>
+        <script type="text/javascript" src={urlForResource("xitrum/jquery.validate-1.11.1/additional-methods.js")}></script>
         {validatei18n}
         <script type="text/javascript" src={urlForResource("xitrum/knockout/knockout-2.2.1.js")}></script>
         <script type="text/javascript" src={urlForResource("xitrum/knockout/knockout.mapping-2.4.1.js")}></script>
