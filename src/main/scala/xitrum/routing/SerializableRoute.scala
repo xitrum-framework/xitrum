@@ -14,14 +14,14 @@ class SerializableRoute(
 {
   /** @return A new route with the prefix */
   def addPrefix(prefix: String): SerializableRoute = {
-    val routeToken = RouteToken(prefix, false, None)
-    val firstToken = compiledPattern.head
+    val prefixTokens = RouteCompiler.compile(prefix)
+    val firstToken   = compiledPattern.head
 
     val newCompiledPattern =
       if (firstToken.value.isEmpty)
-        Seq(routeToken)
+        prefixTokens
       else
-        Seq(routeToken) ++ compiledPattern
+        prefixTokens ++ compiledPattern
 
     new SerializableRoute(httpMethod, newCompiledPattern, actionClass, cacheSecs)
   }
