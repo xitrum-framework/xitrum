@@ -1,8 +1,16 @@
-2.1 (planned):
+2.2 (planned):
 * #81 Reload classes and routes in development mode
+* #76 Improve currentAction in Scalate templates
+* #95 Add another template engine faster than Scalate
 * #70 Add Rails-like asset pipeline
 * #71 Add automatic CORS request handling for the whole site
-* #76 Improve currentController in Scalate templates
+* #109 Use Akka log instead of using SLF4J directly
+
+2.1:
+* #110 Can't run in production mode because SockJsClassAndOptions
+  in routes can't be serialized
+* #111 Unify the "execute" method for Action, ActionActor,
+  WebSocketActor, and SockJSActor
 
 2.0: #104 Annotate your Akka actor to make it accessible from web
 * Break actions in controller out to separate classes, each is an Action or
