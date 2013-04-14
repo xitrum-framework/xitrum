@@ -40,7 +40,7 @@ libraryDependencies += "org.json4s" %% "json4s-native" % "3.2.4"
 libraryDependencies += "tv.cntt" %% "scaposer" % "1.2"
 
 // For compiling CoffeeScript to JavaScript
-libraryDependencies += "tv.cntt" % "rhinocoffeescript" % "1.6.2-SNAPSHOT"
+libraryDependencies += "tv.cntt" % "rhinocoffeescript" % "1.6.2"
 
 // Hazelcast is used for distributed cache and SockJS --------------------------
 
@@ -67,5 +67,5 @@ scalacOptions += "-P:continuations:enable"
 //------------------------------------------------------------------------------
 
 // Skip API doc generation to speedup "publish-local" while developing.
-// Comment out this line when publishing to Maven.
+// Comment out this line when publishing to Sonatype.
 publishArtifact in (Compile, packageDoc) := false
