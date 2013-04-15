@@ -1,4 +1,5 @@
 2.2 (planned):
+* #112 Add redirectToThis to redirect to the current action
 * #81 Reload classes and routes in development mode
 * #76 Improve currentAction in Scalate templates
 * #95 Add another template engine faster than Scalate

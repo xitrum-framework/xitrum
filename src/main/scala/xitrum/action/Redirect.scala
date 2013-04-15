@@ -27,6 +27,10 @@ trait Redirect {
     redirectTo(url[T](params: _*))
   }
 
+  def redirectToThis(params: (String, Any)*): ChannelFuture = {
+    redirectTo(url(params: _*))
+  }
+
   //----------------------------------------------------------------------------
 
   /** Set to true by forwardTo. */
