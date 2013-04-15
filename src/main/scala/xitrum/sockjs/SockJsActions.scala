@@ -265,7 +265,7 @@ class SockJsIframe extends SockJsAction {
     document.domain = document.domain;
     _sockjs_onload = function(){SockJS.bootstrap_iframe();};
   </xml:unparsed></script>
-  <script src={urlForResource(src)}></script>
+  <script src={resourceUrl(src)}></script>
 </head>
 <body>
   <h2>Don't panic!</h2>

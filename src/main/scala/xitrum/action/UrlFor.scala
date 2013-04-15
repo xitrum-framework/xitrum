@@ -9,7 +9,7 @@ trait UrlFor {
   this: Action =>
 
   /** @param path Relative to the "public" directory, without leading "/" */
-  def urlForPublic(path: String) = {
+  def publicUrl(path: String) = {
     val absPath     = Config.root + "/public/" + path
     val forceReload = Etag.forFile(absPath, true) match {
       case Etag.NotFound                           => Random.nextLong.toString
@@ -20,7 +20,7 @@ trait UrlFor {
   }
 
   /** @param path Relative to an entry in classpath, without leading "/" */
-  def urlForResource(path: String) = {
+  def resourceUrl(path: String) = {
     val classPathPath = "public/" + path
     val forceReload = Etag.forResource(classPathPath, true) match {
       case Etag.NotFound                           => Random.nextLong.toString
