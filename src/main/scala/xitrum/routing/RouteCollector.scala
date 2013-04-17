@@ -80,15 +80,15 @@ class RouteCollector extends Logger {
       className:   String,
       annotations: Array[Annotation])
   {
-    var routeOrder           = 0  // -1: first, 1: last, 0: other
-    var cacheSecs            = 0  // < 0: cache action, > 0: cache page, 0: no cache
+    var routeOrder          = 0  // -1: first, 1: last, 0: other
+    var cacheSecs           = 0  // < 0: cache action, > 0: cache page, 0: no cache
     var method_pattern_coll = ArrayBuffer[(String, String)]()
 
     annotations.foreach { a =>
       val tn = a.getTypeName
       optRouteOrder(tn)         .foreach { order => routeOrder = order }
       optCacheSecs(a, tn)       .foreach { secs  => cacheSecs  = secs  }
-      optMethodAndPattern(a, tn).foreach { m_ps  => method_pattern_coll.append(m_ps) }
+      optMethodAndPattern(a, tn).foreach { m_p   => method_pattern_coll.append(m_p) }
     }
 
     method_pattern_coll.foreach { case (method, pattern) =>

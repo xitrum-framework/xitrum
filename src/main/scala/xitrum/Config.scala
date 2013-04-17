@@ -62,7 +62,7 @@ class ResponseConfig(config: TConfig) {
   val clientMustRevalidateStaticFiles = config.getBoolean("clientMustRevalidateStaticFiles")
 }
 
-class Config(val config: TConfig) {
+class Config(val config: TConfig) extends Logger {
   val basicAuth =
     if (config.hasPath("basicAuth"))
       Some(new BasicAuthConfig(config.getConfig("basicAuth")))
@@ -89,10 +89,15 @@ class Config(val config: TConfig) {
    * lazy: templateEngine is initialized after xitrum.Config, so that inside
    * the template engine class, xitrum.Config can be used
    */
-  lazy val templateEngine = {
-    val className = config.getString("templateEngine")
-    val klass     = Class.forName(className)
-    klass.newInstance().asInstanceOf[TemplateEngine]
+  lazy val templateEngine: TemplateEngine = {
+    if (config.hasPath("templateEngine")) {
+      val className = config.getString("templateEngine")
+      val klass     = Class.forName(className)
+      klass.newInstance().asInstanceOf[TemplateEngine]
+    } else {
+      logger.info("No template engine is configured")
+      null
+    }
   }
 
   val hazelcastMode = config.getString("hazelcastMode")
