@@ -79,13 +79,13 @@ trait Renderer {
     Config.xitrum.templateEngine.renderView(location, this, options)
 
   def renderViewNoLayout(location: Class[_ <: Action]): String =
-    Config.xitrum.templateEngine.renderView(location, this, Map())
+    renderViewNoLayout(location, Map())
 
   def renderViewNoLayout(options: Map[String, Any]): String =
-    Config.xitrum.templateEngine.renderView(getClass, this, options)
+    renderViewNoLayout(getClass, options)
 
   def renderViewNoLayout(): String =
-    Config.xitrum.templateEngine.renderView(getClass, this, Map())
+    renderViewNoLayout(getClass, Map())
 
   //----------------------------------------------------------------------------
 
@@ -93,13 +93,13 @@ trait Renderer {
     Config.xitrum.templateEngine.renderFragment(location, fragment, this, options)
 
   def renderFragment(fragment: String, options: Map[String, Any]): String =
-    Config.xitrum.templateEngine.renderFragment(getClass, fragment, this, options)
+    renderFragment(getClass, fragment, options)
 
   def renderFragment(location: Class[_ <: Action], fragment: String): String =
-    Config.xitrum.templateEngine.renderFragment(location, fragment, this, Map())
+    renderFragment(location, fragment, Map())
 
   def renderFragment(fragment: String): String =
-    Config.xitrum.templateEngine.renderFragment(getClass, fragment, this, Map())
+    renderFragment(getClass, fragment, Map())
 
   //----------------------------------------------------------------------------
 
