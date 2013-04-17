@@ -29,7 +29,7 @@ object SockJsAction {
 
   //----------------------------------------------------------------------------
 
-  private val random = new Random(System.currentTimeMillis())
+  private[this] val random = new Random(System.currentTimeMillis())
 
   /** 0 to 2^32 - 1 */
   def entropy() = random.nextInt().abs
@@ -44,33 +44,38 @@ object SockJsAction {
     ret
   }
 
-  /** Template for htmlfile transport */
-  def htmlfile(callback: String, with1024: Boolean): String = {
-    val template = """<!doctype html>
+  private[this] val htmlTemplateBefore = """<!doctype html>
 <html><head>
   <meta http-equiv="X-UA-Compatible" content="IE=edge" />
   <meta http-equiv="Content-Type" content="text/html; charset=UTF-8" />
 </head><body><h2>Don't panic!</h2>
   <script>
     document.domain = document.domain;
-    var c = parent.""" + callback + """;
+    var c = parent."""
+
+  private[this] val htmlTemplateAfter = """;
     c.start();
     function p(d) {c.message(d);};
     window.onload = function() {c.stop();};
   </script>"""
 
-    // Safari needs at least 1024 bytes to parse the website:
-    // http://code.google.com/p/browsersec/wiki/Part2#Survey_of_content_sniffing_behaviors
+  // Nearly 1KB of spaces
+  //
+  // Safari needs at least 1024 bytes to parse the website:
+  // http://code.google.com/p/browsersec/wiki/Part2#Survey_of_content_sniffing_behaviors
+  //
+  // https://github.com/sockjs/sockjs-node/blob/master/src/trans-htmlfile.coffee#L29
+  // http://stackoverflow.com/questions/2804827/create-a-string-with-n-characters
+  private[this] val s1KB = {
+    val spaces = new Array[Char](1024 - htmlTemplateBefore.length + htmlTemplateAfter.length)
+    Arrays.fill(spaces, ' ')
+    new String(spaces) + "\r\n\r\n"
+  }
 
-    // https://github.com/sockjs/sockjs-node/blob/master/src/trans-htmlfile.coffee#L29
-    // http://stackoverflow.com/questions/2804827/create-a-string-with-n-characters
-    if (with1024) {
-      val spaces = new Array[Char](1024 - template.length + 14)
-      Arrays.fill(spaces, ' ')
-      template + new String(spaces) + "\r\n\r\n"
-    } else {
-      template
-    }
+  /** Template for htmlfile transport */
+  def htmlfile(callback: String, with1024Spaces: Boolean): String = {
+    val template = htmlTemplateBefore + callback + htmlTemplateAfter
+    if (with1024Spaces) template + s1KB else template
   }
 
   //----------------------------------------------------------------------------
