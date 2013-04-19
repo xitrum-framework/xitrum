@@ -1,13 +1,16 @@
-2.2 (planned):
-* #112 Add redirectToThis to redirect to the current action
-* #113 Rename urlForPublic to publicUrl, urlForResource to resourceUrl
-* #117 Apps can be configured to use no template engine
+2.3 (planned):
 * #81 Reload classes and routes in development mode
 * #76 Improve currentAction in Scalate templates
 * #95 Add another template engine faster than Scalate
 * #70 Add Rails-like asset pipeline
 * #71 Add automatic CORS request handling for the whole site
 * #109 Use Akka log instead of using SLF4J directly
+
+2.2 (planned):
+* #112 Add redirectToThis to redirect to the current action
+* #113 Rename urlForPublic to publicUrl, urlForResource to resourceUrl
+* #117 Apps can be configured to use no template engine
+* #118 Route collecting: support getting cache annotation from superclasses
 
 2.1:
 * #110 Can't run in production mode because SockJsClassAndOptions

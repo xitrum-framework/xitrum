@@ -39,7 +39,6 @@ object Server extends Logger {
 
     val routes = Config.routes
     routes.printRoutes()
-    routes.printActionPageCaches()
     routes.sockJsRouteMap.print()
     routes.printErrorRoutes()
 

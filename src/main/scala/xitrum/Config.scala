@@ -11,7 +11,7 @@ import com.typesafe.config.{Config => TConfig, ConfigFactory}
 import akka.actor.ActorSystem
 
 import xitrum.scope.session.SessionStore
-import xitrum.routing.{RouteCollection, RouteCollector, SerializableRouteCollection, SockJsClassAndOptions}
+import xitrum.routing.{DiscoveredAcc, RouteCollection, RouteCollector, SerializableRouteCollection, SockJsClassAndOptions}
 import xitrum.view.TemplateEngine
 import xitrum.util.Loader
 
@@ -257,14 +257,12 @@ object Config extends Logger {
    * Sometimes we want to work in sbt console mode and don't like this overhead.
    */
   lazy val routes: RouteCollection = {
-    val (normal, sockJsWithoutPrefix, sockJsMap) = deserializeCacheFileOrRecollectWithRetry()
-    RouteCollection.fromSerializable(normal, sockJsWithoutPrefix, sockJsMap)
+    val discoveredAcc = deserializeCacheFileOrRecollectWithRetry()
+    RouteCollection.fromSerializable(discoveredAcc)
   }
 
   /** @return (normal routes, SockJS routes) */
-  private def deserializeCacheFileOrRecollectWithRetry(retried: Boolean = false):
-    (SerializableRouteCollection, SerializableRouteCollection, Map[String, SockJsClassAndOptions]) =
-  {
+  private def deserializeCacheFileOrRecollectWithRetry(retried: Boolean = false): DiscoveredAcc = {
     try {
       logger.info("Load file " + ROUTES_CACHE + " or recollect routes...")
       val routeCollector = new RouteCollector

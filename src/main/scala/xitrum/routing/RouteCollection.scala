@@ -10,11 +10,13 @@ import xitrum.scope.request.Params
 import xitrum.scope.request.PathInfo
 
 object RouteCollection {
-  def fromSerializable(
-      normal:              SerializableRouteCollection,
-      sockJsWithoutPrefix: SerializableRouteCollection,
-      sockJsMap:           Map[String, SockJsClassAndOptions]
-  ): RouteCollection = {
+  def fromSerializable(acc: DiscoveredAcc): RouteCollection = {
+    val normal              = acc.normalRoutes
+    val sockJsWithoutPrefix = acc.sockJsWithoutPrefixRoutes
+    val sockJsMap           = acc.sockJsMap
+    val parentClassCacheMap = acc.parentClassCacheMap
+
+    // Add prefixes to SockJS routes
     sockJsMap.keys.foreach { prefix =>
       sockJsWithoutPrefix.firstGETs      .foreach { r => normal.firstGETs      .append(r.addPrefix(prefix)) }
       sockJsWithoutPrefix.firstPOSTs     .foreach { r => normal.firstPOSTs     .append(r.addPrefix(prefix)) }
@@ -38,6 +40,17 @@ object RouteCollection {
       sockJsWithoutPrefix.otherWEBSOCKETs.foreach { r => normal.otherWEBSOCKETs.append(r.addPrefix(prefix)) }
     }
 
+    // Update normal routes with cacheSecs from parentClassCacheMap
+    Seq(
+      normal.firstGETs, normal.firstPOSTs, normal.firstPUTs, normal.firstDELETEs, normal.firstOPTIONSs,
+      normal.lastGETs,  normal.lastPOSTs,  normal.lastPUTs,  normal.lastDELETEs,  normal.lastOPTIONSs,
+      normal.otherGETs, normal.otherPOSTs, normal.otherPUTs, normal.otherDELETEs, normal.otherOPTIONSs
+    ).foreach { rs =>
+      rs.foreach { r =>
+        if (r.cacheSecs == 0) r.cacheSecs = getCacheSecsFromParent(r.actionClass, parentClassCacheMap)
+      }
+    }
+
     new RouteCollection(
       normal.firstGETs.map(_.toRoute),       normal.lastGETs.map(_.toRoute),       normal.otherGETs.map(_.toRoute),
       normal.firstPOSTs.map(_.toRoute),      normal.lastPOSTs.map(_.toRoute),      normal.otherPOSTs.map(_.toRoute),
@@ -49,6 +62,18 @@ object RouteCollection {
       normal.error404.map(Class.forName(_).asInstanceOf[Class[Action]]),
       normal.error500.map(Class.forName(_).asInstanceOf[Class[Action]])
     )
+  }
+
+  private def getCacheSecsFromParent(className: String, parentClassCacheMap: Map[String, Int]): Int = {
+    val klass      = Class.forName(className)
+    val superClass = klass.getSuperclass.getName
+    if (parentClassCacheMap.contains(superClass)) return parentClassCacheMap(superClass)
+
+    val found = klass.getInterfaces.map(_.getName).find { i => parentClassCacheMap.contains(i) }
+    found match {
+      case None    => 0
+      case Some(i) => parentClassCacheMap(i)
+    }
   }
 }
 
@@ -129,13 +154,14 @@ class RouteCollection(
   def printRoutes() {
     // This method is only run once on start, speed is not a problem
 
+    //                        method  pattern target
     val firsts = ArrayBuffer[(String, String, String)]()
     var others = ArrayBuffer[(String, String, String)]()
     val lasts  = ArrayBuffer[(String, String, String)]()
 
-    for (r <- allFirsts) firsts.append((r.httpMethod.toString, RouteCompiler.decompile(r.compiledPattern), r.klass.getName))
-    for (r <- allOthers) others.append((r.httpMethod.toString, RouteCompiler.decompile(r.compiledPattern), r.klass.getName))
-    for (r <- allLasts ) lasts .append((r.httpMethod.toString, RouteCompiler.decompile(r.compiledPattern), r.klass.getName))
+    for (r <- allFirsts) firsts.append((r.httpMethod.toString, RouteCompiler.decompile(r.compiledPattern), targetWithCache(r)))
+    for (r <- allOthers) others.append((r.httpMethod.toString, RouteCompiler.decompile(r.compiledPattern), targetWithCache(r)))
+    for (r <- allLasts ) lasts .append((r.httpMethod.toString, RouteCompiler.decompile(r.compiledPattern), targetWithCache(r)))
 
     // Sort by pattern
     var all = firsts ++ others.sortBy(_._2) ++ lasts
@@ -153,45 +179,15 @@ class RouteCollection(
     logger.info("Routes:\n" + strings.mkString("\n"))
   }
 
-  def printActionPageCaches() {
-    // This method is only run once on start, speed is not a problem
-
-    var actionCaches = ArrayBuffer[(String, Int)]()
-    var actionMaxControllerActionNameLength = 0
-
-    var pageCaches = ArrayBuffer[(String, Int)]()
-    var pageMaxControllerActionNameLength = 0
-
-    val all = allFirsts ++ allOthers ++ allLasts
-    for (r <- all) {
-      if (r.cacheSecs < 0) {
-        val n = r.klass.toString
-        actionCaches.append((n, -r.cacheSecs))
-
-        val nLength = n.length
-        if (nLength > actionMaxControllerActionNameLength) actionMaxControllerActionNameLength = nLength
-      } else if (r.cacheSecs > 0) {
-        val n = r.klass.toString
-        pageCaches.append((n, r.cacheSecs))
-
-        val nLength = n.length
-        if (nLength > pageMaxControllerActionNameLength) pageMaxControllerActionNameLength = nLength
-      }
-    }
-
-    if (actionCaches.nonEmpty) {
-      actionCaches = actionCaches.sortBy(_._1)
-      val logFormat = "%-" + actionMaxControllerActionNameLength + "s    %s"
-      val strings = actionCaches.map { case (n, s) => logFormat.format(n, formatTime(s)) }
-      logger.info("Action cache:\n" + strings.mkString("\n"))
-    }
-
-    if (pageCaches.nonEmpty) {
-      pageCaches = pageCaches.sortBy(_._1)
-      val logFormat = "%-" + pageMaxControllerActionNameLength + "s    %s"
-      val strings = pageCaches.map { case (n, s) => logFormat.format(n, formatTime(s)) }
-      logger.info("Page cache:\n" + strings.mkString("\n"))
-    }
+  private def targetWithCache(route: Route): String = {
+    val target = route.klass.getName
+    val secs   = route.cacheSecs
+    if (secs == 0)
+      target
+    else if (secs < 0)
+      s"$target (action cache: ${formatTime(-secs)})"
+    else
+      s"$target (page cache: ${formatTime(secs)})"
   }
 
   def printErrorRoutes() {

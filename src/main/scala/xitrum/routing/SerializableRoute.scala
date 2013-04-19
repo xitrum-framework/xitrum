@@ -9,7 +9,7 @@ class SerializableRoute(
   val httpMethod: String, val compiledPattern: Seq[RouteToken],
 
   // Out
-  val actionClass: String, val cacheSecs: Int
+  val actionClass: String, var cacheSecs: Int
 ) extends Serializable
 {
   /** @return A new route with the prefix */
