@@ -38,7 +38,7 @@ libraryDependencies += "com.typesafe.akka" %% "akka-remote" % "2.1.2"
 libraryDependencies += "org.slf4j" % "slf4j-api" % "1.7.5" % "provided"
 
 // For (de)serializing
-libraryDependencies += "com.twitter" %% "chill" % "0.2.1"
+libraryDependencies += "com.twitter" %% "chill" % "0.2.0"
 
 // For jsEscape
 libraryDependencies += "org.apache.commons" % "commons-lang3" % "3.1"

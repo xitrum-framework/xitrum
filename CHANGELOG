@@ -1,4 +1,6 @@
 2.4 (planned):
+* #115 Replace Javassist with ASM to reduce the number of dependencies
+* #121 Update Twitter Chill to 0.2.1
 * #81 Reload classes and routes in development mode
 * #76 Improve currentAction in Scalate templates
 * #95 Add another template engine faster than Scalate
@@ -9,7 +11,6 @@
 2.3:
 * #120 Add javacOptions -source 1.6 to avoid problem when Xitrum is built with
   Java 7 but the projects that use Xitrum are run with Java 6
-* #121 Update Twitter Chill to 0.2.1
 
 2.2:
 * #112 Add redirectToThis to redirect to the current action
