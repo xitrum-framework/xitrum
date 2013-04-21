@@ -32,7 +32,7 @@ class Route(
     }
     val url = Config.withBaseUrl("/" + tokens.mkString("/"))
 
-    val qse = new QueryStringEncoder(url, Config.requestCharset)
+    val qse = new QueryStringEncoder(url, Config.xitrum.request.charset)
     for ((k, v) <- map) qse.addParam(k, v.toString)
     qse.toString
   }

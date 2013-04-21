@@ -402,7 +402,7 @@ class SockJsXhrSend extends SockJsNonWebSocketSessionActionActor with SkipCSRFCh
   def nLastTokensToRemoveFromPathInfo = 3
 
   def execute() {
-    val body = request.getContent.toString(Config.requestCharset)
+    val body = request.getContent.toString(Config.xitrum.request.charset)
     if (body.isEmpty) {
       response.setStatus(HttpResponseStatus.INTERNAL_SERVER_ERROR)
       respondText("Payload expected.")
@@ -707,7 +707,7 @@ class SockJsJsonPPollingSend extends SockJsNonWebSocketSessionActionActor with S
       if (contentType != null && contentType.toLowerCase.startsWith(HttpHeaders.Values.APPLICATION_X_WWW_FORM_URLENCODED)) {
         param("d")
       } else {
-        request.getContent.toString(Config.requestCharset)
+        request.getContent.toString(Config.xitrum.request.charset)
       }
     } catch {
       case NonFatal(e) =>

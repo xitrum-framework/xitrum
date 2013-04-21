@@ -25,7 +25,7 @@ class UriParser extends SimpleChannelUpstreamHandler with BadClientSilencer {
     val request = env.request
 
     try {
-      val decoder = new QueryStringDecoder(request.getUri, Config.requestCharset)
+      val decoder = new QueryStringDecoder(request.getUri, Config.xitrum.request.charset)
       val path    = decoder.getPath
 
       // Treat "articles" and "articles/" the same

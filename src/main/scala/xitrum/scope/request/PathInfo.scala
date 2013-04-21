@@ -15,7 +15,7 @@ class PathInfo(val encoded: String) {
     val noSlashPrefix = if (encoded.startsWith("/")) encoded.substring(1) else encoded
     val encodeds      = noSlashPrefix.split("/", -1)
 
-    encodeds.map(URLDecoder.decode(_, Config.xitrum.request.charset))
+    encodeds.map(URLDecoder.decode(_, Config.xitrum.request.charsetName))
   }
 
   val decoded = "/" + tokens.mkString("/")

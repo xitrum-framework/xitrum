@@ -47,7 +47,7 @@ object BasicAuth {
     response.setHeader(HttpHeaders.Names.WWW_AUTHENTICATE, "Basic realm=\"" + realm + "\"")
     response.setStatus(HttpResponseStatus.UNAUTHORIZED)
 
-    val cb = ChannelBuffers.copiedBuffer("Wrong username or password", Config.requestCharset)
+    val cb = ChannelBuffers.copiedBuffer("Wrong username or password", Config.xitrum.request.charset)
     response.setHeader(HttpHeaders.Names.CONTENT_TYPE, "text/plain; charset=" + Config.xitrum.request.charset)
     HttpHeaders.setContentLength(response, cb.readableBytes)
     response.setContent(cb)

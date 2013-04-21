@@ -51,9 +51,11 @@ class SessionConfig(config: TConfig) {
 }
 
 class RequestConfig(config: TConfig) {
-  val charset        = config.getString("charset")
+  val charsetName    = config.getString("charset")
   val maxSizeInMB    = config.getInt("maxSizeInMB")
   val filteredParams = config.getStringList("filteredParams")
+
+  val charset = Charset.forName(charsetName)
 }
 
 class ResponseConfig(config: TConfig) {
@@ -177,7 +179,22 @@ object Config extends Logger {
 
   val baseUrl = xitrum.reverseProxy.map(_.baseUrl).getOrElse("")
 
-  val requestCharset = Charset.forName(xitrum.request.charset)
+  /**
+   * @param path with leading "/"
+   *
+   * Avoids returning path with double "//" prefix. Something like
+   * //xitrum/postback/zOIc0v...
+   * will cause the browser to send request to http://xitrum/postback/zOIc0v...
+   */
+  def withBaseUrl(path: String) = {
+    if (Config.baseUrl.isEmpty) {
+      path
+    } else {
+      if (path.isEmpty) Config.baseUrl else Config.baseUrl + "/" + path
+    }
+  }
+
+  //----------------------------------------------------------------------------
 
   val sessionStore  = {
     val className = xitrum.session.store
@@ -216,21 +233,6 @@ object Config extends Logger {
   }
 
   //----------------------------------------------------------------------------
-
-  /**
-   * @param path with leading "/"
-   *
-   * Avoids returning path with double "//" prefix. Something like
-   * //xitrum/postback/zOIc0v...
-   * will cause the browser to send request to http://xitrum/postback/zOIc0v...
-   */
-  def withBaseUrl(path: String) = {
-    if (Config.baseUrl.isEmpty) {
-      path
-    } else {
-      if (path.isEmpty) Config.baseUrl else Config.baseUrl + "/" + path
-    }
-  }
 
   def warnOnDefaultSecureKey() {
     if (xitrum.session.secureKey == DEFAULT_SECURE_KEY)

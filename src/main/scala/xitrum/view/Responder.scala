@@ -166,7 +166,7 @@ trait Responder extends JS with Flash with Knockout {
       }
     }
 
-    val cb = ChannelBuffers.copiedBuffer(respondedText, Config.requestCharset)
+    val cb = ChannelBuffers.copiedBuffer(respondedText, Config.xitrum.request.charset)
     if (response.isChunked) {
       respondHeadersForFirstChunk()
       channel.write(new DefaultHttpChunk(cb))
