@@ -80,12 +80,12 @@ trait WebSocketActor extends Actor with Action {
 
   /** There's no respondWebSocketPong, because pong is automatically sent by Xitrum for you. */
   def respondWebSocketPing(): ChannelFuture = {
-    channel.write(new PingWebSocketFrame())
+    channel.write(new PingWebSocketFrame)
   }
 
   /** Connection is automatically closed. */
   def respondWebSocketClose(): ChannelFuture = {
-    val future = channel.write(new CloseWebSocketFrame())
+    val future = channel.write(new CloseWebSocketFrame)
     future.addListener(ChannelFutureListener.CLOSE)
     future
   }
