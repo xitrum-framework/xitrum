@@ -68,7 +68,7 @@ class RouteCollector extends Logger {
           null
         }
       }
-    }, 0)
+    }, ClassReader.SKIP_CODE | ClassReader.SKIP_DEBUG | ClassReader.SKIP_FRAMES)
 
     if (annotations.isEmpty) {
       acc
