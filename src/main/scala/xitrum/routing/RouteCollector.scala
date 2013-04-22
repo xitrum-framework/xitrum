@@ -1,18 +1,12 @@
 package xitrum.routing
 
-import java.io.{ByteArrayInputStream, DataInputStream}
-import java.lang.reflect.Method
-import java.util.{List => JList}
-
-import scala.collection.mutable.ArrayBuffer
+import scala.collection.mutable.{ArrayBuffer, Map => MMap}
 import scala.util.control.NonFatal
 
-import javassist.{ClassClassPath, ClassPool}
-import javassist.bytecode.{AnnotationsAttribute, ClassFile, MethodInfo, AccessFlag}
-import javassist.bytecode.annotation.{Annotation, MemberValue, ArrayMemberValue, StringMemberValue, IntegerMemberValue}
+import org.objectweb.asm.{AnnotationVisitor, ClassReader, ClassVisitor, Opcodes, Type}
 import sclasner.{FileEntry, Scanner}
 
-import xitrum.{Action, Logger, SockJsActor}
+import xitrum.{Logger, SockJsActor}
 import xitrum.annotation._
 import xitrum.sockjs.SockJsPrefix
 
@@ -40,12 +34,8 @@ class RouteCollector extends Logger {
   private def discovered(acc: DiscoveredAcc, entry: FileEntry): DiscoveredAcc = {
     try {
       if (entry.relPath.endsWith(".class")) {
-        val bais = new ByteArrayInputStream(entry.bytes)
-        val dis  = new DataInputStream(bais)
-        val cf   = new ClassFile(dis)
-        dis.close()
-        bais.close()
-        processDiscovered(acc, cf)
+        val reader = new ClassReader(entry.bytes)
+        processDiscovered(acc, reader)
       } else {
         acc
       }
@@ -56,40 +46,56 @@ class RouteCollector extends Logger {
     }
   }
 
-  private def processDiscovered(acc: DiscoveredAcc, classFile: ClassFile): DiscoveredAcc = {
-    val aa = classFile.getAttribute(AnnotationsAttribute.visibleTag).asInstanceOf[AnnotationsAttribute]
-    if (aa == null) return acc
+  private def processDiscovered(acc: DiscoveredAcc, reader: ClassReader): DiscoveredAcc = {
+    val className  = reader.getClassName.replace('/', '.')
+    val fromSockJs = className.startsWith(classOf[SockJsPrefix].getPackage.getName)
+    val routes     = if (fromSockJs) acc.sockJsWithoutPrefixRoutes else acc.normalRoutes
 
-    val annotations            = aa.getAnnotations
-    val className              = classFile.getName
-    val fromSockJs             = className.startsWith(classOf[SockJsPrefix].getPackage.getName)
-    val routes                 = if (fromSockJs) acc.sockJsWithoutPrefixRoutes else acc.normalRoutes
-    val newParentClassCacheMap = collectNormalRoutes(routes, acc.parentClassCacheMap, classFile, annotations)
-    val newSockJsMap           = collectSockJsMap(acc.sockJsMap, className, annotations)
-    collectErrorRoutes (routes, className, annotations)
+    // http://asm.ow2.org/asm40/javadoc/user/org/objectweb/asm/AnnotationVisitor.html
+    //                     internalName  ->  annotation value (single value, not array)
+    val annotations = MMap[String,           Object]()
 
+    reader.accept(new ClassVisitor(Opcodes.ASM4) {
+      override def visitAnnotation(desc: String, visible: Boolean): AnnotationVisitor = {
+        if (desc.indexOf("xitrum/annotation") > -1) {
+          annotations(desc) = null
+          new AnnotationVisitor(Opcodes.ASM4) {
+            override def visit(name: String, value: Object) {
+              annotations(desc) = value
+            }
+          }
+        } else {
+          null
+        }
+      }
+    }, 0)
 
-    DiscoveredAcc(acc.normalRoutes, acc.sockJsWithoutPrefixRoutes, newSockJsMap, newParentClassCacheMap)
+    if (annotations.isEmpty) {
+      acc
+    } else {
+      val newParentClassCacheMap = collectNormalRoutes(routes, acc.parentClassCacheMap, className, annotations)
+      val newSockJsMap           = collectSockJsMap(acc.sockJsMap, className, annotations)
+      collectErrorRoutes (routes, className, annotations)
+
+      DiscoveredAcc(acc.normalRoutes, acc.sockJsWithoutPrefixRoutes, newSockJsMap, newParentClassCacheMap)
+    }
   }
 
   private def collectNormalRoutes(
       routes:              SerializableRouteCollection,
       parentClassCacheMap: Map[String, Int],
-      classFile:           ClassFile,
-      annotations:         Array[Annotation]
+      className:           String,
+      annotations:         MMap[String, Object]
   ): Map[String, Int] =
   {
-    val className = classFile.getName
-
     var routeOrder          = 0  // -1: first, 1: last, 0: other
     var cacheSecs           = 0  // < 0: cache action, > 0: cache page, 0: no cache
     var method_pattern_coll = ArrayBuffer[(String, String)]()
 
-    annotations.foreach { a =>
-      val tn = a.getTypeName
-      optRouteOrder(tn)         .foreach { order => routeOrder = order }
-      optCacheSecs(a, tn)       .foreach { secs  => cacheSecs  = secs  }
-      optMethodAndPattern(a, tn).foreach { m_p   => method_pattern_coll.append(m_p) }
+    annotations.foreach { case (desc, value) =>
+      optRouteOrder(desc)             .foreach { order => routeOrder = order }
+      optCacheSecs(desc, value)       .foreach { secs  => cacheSecs  = secs  }
+      optMethodAndPattern(desc, value).foreach { m_p   => method_pattern_coll.append(m_p) }
     }
 
     // Save cacheSecs, it may be used in direct subclass
@@ -136,30 +142,28 @@ class RouteCollector extends Logger {
   private def collectErrorRoutes(
       routes:      SerializableRouteCollection,
       className:   String,
-      annotations: Array[Annotation])
+      annotations: MMap[String, Object])
   {
-    annotations.foreach { a =>
-      val tn = a.getTypeName
-      if (tn == classOf[Error404].getName) routes.error404 = Some(className)
-      if (tn == classOf[Error500].getName) routes.error500 = Some(className)
+    annotations.foreach { case (desc, _) =>
+      if (desc == Type.getDescriptor(classOf[Error404])) routes.error404 = Some(className)
+      if (desc == Type.getDescriptor(classOf[Error500])) routes.error500 = Some(className)
     }
   }
 
   private def collectSockJsMap(
       sockJsMap:   Map[String, SockJsClassAndOptions],
       className:   String,
-      annotations: Array[Annotation]
+      annotations: MMap[String, Object]
   ): Map[String, SockJsClassAndOptions] =
   {
     var pathPrefix: String = null
     var noWebSocket  = false
     var cookieNeeded = false
 
-    annotations.foreach { a =>
-      val tn = a.getTypeName
-      if (tn == classOf[SOCKJS].getName)             pathPrefix   = getString(a)
-      if (tn == classOf[SockJsNoWebSocket].getName)  noWebSocket  = true
-      if (tn == classOf[SockJsCookieNeeded].getName) cookieNeeded = true
+    annotations.foreach { case (desc, value) =>
+      if (desc == Type.getDescriptor(classOf[SOCKJS]))             pathPrefix   = getString(value)
+      if (desc == Type.getDescriptor(classOf[SockJsNoWebSocket]))  noWebSocket  = true
+      if (desc == Type.getDescriptor(classOf[SockJsCookieNeeded])) cookieNeeded = true
     }
 
     if (pathPrefix == null) {
@@ -172,66 +176,66 @@ class RouteCollector extends Logger {
 
   //----------------------------------------------------------------------------
 
-  private def optRouteOrder(annotationTypeName: String): Option[Int] = {
-    if (annotationTypeName == classOf[First].getName) return Some(-1)
-    if (annotationTypeName == classOf[Last].getName)  return Some(1)
+  private def optRouteOrder(annotationDesc: String): Option[Int] = {
+    if (annotationDesc == Type.getDescriptor(classOf[First])) return Some(-1)
+    if (annotationDesc == Type.getDescriptor(classOf[Last]))  return Some(1)
     None
   }
 
-  private def optCacheSecs(annotation: Annotation, annotationTypeName: String): Option[Int] = {
-    if (annotationTypeName == classOf[CacheActionDay].getName)
-      return Some(-getInt(annotation) * 24 * 60 * 60)
+  private def optCacheSecs(annotationDesc: String, annotationValue: Object): Option[Int] = {
+    if (annotationDesc == Type.getDescriptor(classOf[CacheActionDay]))
+      return Some(-getInt(annotationValue) * 24 * 60 * 60)
 
-    if (annotationTypeName == classOf[CacheActionHour].getName)
-      return Some(-getInt(annotation)      * 60 * 60)
+    if (annotationDesc == Type.getDescriptor(classOf[CacheActionHour]))
+      return Some(-getInt(annotationValue)      * 60 * 60)
 
-    if (annotationTypeName == classOf[CacheActionMinute].getName)
-      return Some(-getInt(annotation)           * 60)
+    if (annotationDesc == Type.getDescriptor(classOf[CacheActionMinute]))
+      return Some(-getInt(annotationValue)           * 60)
 
-    if (annotationTypeName == classOf[CacheActionSecond].getName)
-      return Some(-getInt(annotation))
+    if (annotationDesc == Type.getDescriptor(classOf[CacheActionSecond]))
+      return Some(-getInt(annotationValue))
 
-    if (annotationTypeName == classOf[CachePageDay].getName)
-      return Some(getInt(annotation) * 24 * 60 * 60)
+    if (annotationDesc == Type.getDescriptor(classOf[CachePageDay]))
+      return Some(getInt(annotationValue) * 24 * 60 * 60)
 
-    if (annotationTypeName == classOf[CachePageHour].getName)
-      return Some(getInt(annotation)      * 60 * 60)
+    if (annotationDesc == Type.getDescriptor(classOf[CachePageHour]))
+      return Some(getInt(annotationValue)      * 60 * 60)
 
-    if (annotationTypeName == classOf[CachePageMinute].getName)
-      return Some(getInt(annotation)           * 60)
+    if (annotationDesc == Type.getDescriptor(classOf[CachePageMinute]))
+      return Some(getInt(annotationValue)           * 60)
 
-    if (annotationTypeName == classOf[CachePageSecond].getName)
-      return Some(getInt(annotation))
+    if (annotationDesc == Type.getDescriptor(classOf[CachePageSecond]))
+      return Some(getInt(annotationValue))
 
     None
   }
 
   /** @return Option[(method, pattern)] */
-  private def optMethodAndPattern(annotation: Annotation, annotationTypeName: String): Option[(String, String)] = {
-    if (annotationTypeName == classOf[GET].getName)
-      return Some("GET", getString(annotation))
+  private def optMethodAndPattern(annotationDesc: String, annotationValue: Object): Option[(String, String)] = {
+    if (annotationDesc == Type.getDescriptor(classOf[GET]))
+      return Some("GET", getString(annotationValue))
 
-    if (annotationTypeName == classOf[POST].getName)
-      return Some("POST", getString(annotation))
+    if (annotationDesc == Type.getDescriptor(classOf[POST]))
+      return Some("POST", getString(annotationValue))
 
-    if (annotationTypeName == classOf[PUT].getName)
-      return Some("PUT", getString(annotation))
+    if (annotationDesc == Type.getDescriptor(classOf[PUT]))
+      return Some("PUT", getString(annotationValue))
 
-    if (annotationTypeName == classOf[DELETE].getName)
-      return Some("DELETE", getString(annotation))
+    if (annotationDesc == Type.getDescriptor(classOf[DELETE]))
+      return Some("DELETE", getString(annotationValue))
 
-    if (annotationTypeName == classOf[OPTIONS].getName)
-      return Some("OPTIONS", getString(annotation))
+    if (annotationDesc == Type.getDescriptor(classOf[OPTIONS]))
+      return Some("OPTIONS", getString(annotationValue))
 
-    if (annotationTypeName == classOf[WEBSOCKET].getName)
-      return Some("WEBSOCKET", getString(annotation))
+    if (annotationDesc == Type.getDescriptor(classOf[WEBSOCKET]))
+      return Some("WEBSOCKET", getString(annotationValue))
 
     None
   }
 
-  private def getInt(annotation: Annotation): Int =
-    annotation.getMemberValue("value").asInstanceOf[IntegerMemberValue].getValue
+  private def getInt(annotationValue: Object): Int =
+    annotationValue.toString.toInt
 
-  private def getString(annotation: Annotation): String =
-    annotation.getMemberValue("value").asInstanceOf[StringMemberValue].getValue
+  private def getString(annotationValue: Object): String =
+    annotationValue.toString
 }

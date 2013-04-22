@@ -37,6 +37,9 @@ libraryDependencies += "com.typesafe.akka" %% "akka-remote" % "2.1.2"
 // Projects using Xitrum must provide a concrete implentation of SLF4J (Logback etc.)
 libraryDependencies += "org.slf4j" % "slf4j-api" % "1.7.5" % "provided"
 
+// For scanning routes
+libraryDependencies += "tv.cntt" %% "sclasner" % "1.6"
+
 // For (de)serializing
 libraryDependencies += "com.twitter" %% "chill" % "0.2.0"
 
@@ -58,12 +61,6 @@ libraryDependencies += "com.hazelcast" % "hazelcast" % "2.5"
 
 // Hazelcast can be configured as cluster member, lite member, or Java client
 libraryDependencies += "com.hazelcast" % "hazelcast-client" % "2.5"
-
-// For scanning routes ---------------------------------------------------------
-
-libraryDependencies += "tv.cntt" %% "sclasner" % "1.6"
-
-libraryDependencies += "org.javassist" % "javassist" % "3.17.1-GA"
 
 // xitrum.imperatively uses Scala continuation, a compiler plugin --------------
 
