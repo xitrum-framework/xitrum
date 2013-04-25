@@ -66,7 +66,7 @@ object AccessLog extends Logger {
     (if (env.bodyParams.nonEmpty)       ", bodyParams: "       + RequestEnv.inspectParamsWithFilter(env.bodyParams)       else "") +
     (if (env.pathParams.nonEmpty)       ", pathParams: "       + RequestEnv.inspectParamsWithFilter(env.pathParams)       else "") +
     (if (env.fileUploadParams.nonEmpty) ", fileUploadParams: " + RequestEnv.inspectParamsWithFilter(env.fileUploadParams) else "") +
-    " -> " + action.response.getStatus.getCode +
+    (if (action.isDoneResponding)       " -> "                 + action.response.getStatus.getCode                        else "") +
     ", " + dt + " [ms]"
   }
 
