@@ -41,7 +41,7 @@ libraryDependencies += "org.slf4j" % "slf4j-api" % "1.7.5" % "provided"
 libraryDependencies += "tv.cntt" %% "sclasner" % "1.6"
 
 // For (de)serializing
-libraryDependencies += "com.twitter" %% "chill" % "0.2.0"
+libraryDependencies += "com.twitter" %% "chill" % "0.2.1"
 
 // For jsEscape
 libraryDependencies += "org.apache.commons" % "commons-lang3" % "3.1"
