@@ -1,7 +1,3 @@
-plugin/compiler/project/project
-plubin/compiler/project/target
-plugin/sbt/project/project
-plugin/sbt/project/target
 project/project
 project/target
 target
