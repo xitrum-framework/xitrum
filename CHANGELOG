@@ -1,12 +1,15 @@
-2.4 (planned):
-* #115 Replace Javassist with ASM to reduce the number of dependencies
-* #121 Update Twitter Chill to 0.2.1
+2.5 (planned):
 * #81 Reload classes and routes in development mode
 * #76 Improve currentAction in Scalate templates
 * #95 Add another template engine faster than Scalate
 * #70 Add Rails-like asset pipeline
 * #71 Add automatic CORS request handling for the whole site
 * #109 Use Akka log instead of using SLF4J directly
+
+2.4:
+* #115 Replace Javassist with ASM to reduce the number of dependencies
+* #121 Update Twitter Chill to 0.2.1
+* #123 Update Hazelcast to 2.5.1
 
 2.3:
 * #120 Add javacOptions -source 1.6 to avoid problem when Xitrum is built with
