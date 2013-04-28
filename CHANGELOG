@@ -31,6 +31,7 @@
 * Break actions in controller out to separate classes, each is an Action or
   an ActionActor; your action can be an actor
 * Rewrite part of SockJS using ActionActor
+* Add connection abort handling for SockJS
 * Support "/" in SockJS path prefix
 * Support WebSocket binary frame
 * Allow starting server with custom Netty ChannelPipelineFactory;
