@@ -72,6 +72,9 @@ scalacOptions += "-P:continuations:enable"
 
 //------------------------------------------------------------------------------
 
+// https://github.com/jrudolph/sbt-dependency-graph
+net.virtualvoid.sbt.graph.Plugin.graphSettings
+
 // Skip API doc generation to speedup "publish-local" while developing.
 // Comment out this line when publishing to Sonatype.
 publishArtifact in (Compile, packageDoc) := false
