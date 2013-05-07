@@ -2,7 +2,7 @@ organization := "tv.cntt"
 
 name := "xitrum"
 
-version := "2.5-SNAPSHOT"
+version := "2.6-SNAPSHOT"
 
 scalaVersion := "2.10.1"
 
@@ -41,7 +41,7 @@ libraryDependencies += "org.slf4j" % "slf4j-api" % "1.7.5" % "provided"
 libraryDependencies += "tv.cntt" %% "sclasner" % "1.6"
 
 // For (de)serializing
-libraryDependencies += "com.twitter" %% "chill" % "0.2.1"
+libraryDependencies += "com.twitter" %% "chill" % "0.2.2"
 
 // For jsEscape
 libraryDependencies += "org.apache.commons" % "commons-lang3" % "3.1"
