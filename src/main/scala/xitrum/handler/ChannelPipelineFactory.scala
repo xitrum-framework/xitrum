@@ -17,9 +17,9 @@ object DefaultHttpChannelPipelineFactory {
     // pipeline.replace(classOf[HttpResponseEncoder], "wsencoder", new WebSocket08FrameEncoder(false))
 
     pipeline.remove(classOf[NoPipelining])
+    pipeline.remove(classOf[BaseUrlRemover])
     if (Config.xitrum.basicAuth.isDefined)
     pipeline.remove(classOf[BasicAuth])
-    pipeline.remove(classOf[BaseUrlRemover])
     pipeline.remove(classOf[PublicFileServer])
     pipeline.remove(classOf[PublicResourceServer])
     pipeline.remove(classOf[Request2Env])
@@ -43,8 +43,8 @@ class DefaultHttpChannelPipelineFactory extends CPF {
 
   // Upstream
   private[this] val noPipelining         = new NoPipelining
-  private[this] val basicAuth            = new BasicAuth
   private[this] val baseUrlRemover       = new BaseUrlRemover
+  private[this] val basicAuth            = new BasicAuth
   private[this] val publicFileServer     = new PublicFileServer
   private[this] val publicResourceServer = new PublicResourceServer
   private[this] val request2Env          = new Request2Env
@@ -72,12 +72,12 @@ class DefaultHttpChannelPipelineFactory extends CPF {
     val ret = Channels.pipeline()
 
     // Upstream
-    ret.addLast("noPipelining",         noPipelining)
     ret.addLast("HttpRequestDecoder",   new HttpRequestDecoder)
     ret.addLast("HttpChunkAggregator",  new HttpChunkAggregator(Config.xitrum.request.maxSizeInMB * 1024 * 1024))
+    ret.addLast("noPipelining",         noPipelining)
+    ret.addLast("baseUrlRemover",       baseUrlRemover)  // HttpRequest is attached to the channel here
     if (Config.xitrum.basicAuth.isDefined)
     ret.addLast("basicAuth",            basicAuth)
-    ret.addLast("baseUrlRemover",       baseUrlRemover)  // HttpRequest is attached to the channel here
     ret.addLast("publicFileServer",     publicFileServer)
     ret.addLast("publicResourceServer", publicResourceServer)
     ret.addLast("request2Env",          request2Env)
