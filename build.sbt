@@ -2,7 +2,7 @@ organization := "tv.cntt"
 
 name := "xitrum"
 
-version := "2.6-SNAPSHOT"
+version := "2.7-SNAPSHOT"
 
 scalaVersion := "2.10.1"
 
@@ -28,11 +28,11 @@ unmanagedBase in Runtime <<= baseDirectory { base => base / "config" }
 // and it takes several hours to sync from Sonatype to Maven Central
 resolvers += "SonatypeReleases" at "http://oss.sonatype.org/content/repositories/releases/"
 
-libraryDependencies += "io.netty" % "netty" % "3.6.5.Final"
+libraryDependencies += "io.netty" % "netty" % "3.6.6.Final"
 
-libraryDependencies += "com.typesafe.akka" %% "akka-actor" % "2.1.2"
+libraryDependencies += "com.typesafe.akka" %% "akka-actor" % "2.1.4"
 
-libraryDependencies += "com.typesafe.akka" %% "akka-remote" % "2.1.2"
+libraryDependencies += "com.typesafe.akka" %% "akka-remote" % "2.1.4"
 
 // Projects using Xitrum must provide a concrete implentation of SLF4J (Logback etc.)
 libraryDependencies += "org.slf4j" % "slf4j-api" % "1.7.5" % "provided"
@@ -41,7 +41,7 @@ libraryDependencies += "org.slf4j" % "slf4j-api" % "1.7.5" % "provided"
 libraryDependencies += "tv.cntt" %% "sclasner" % "1.6"
 
 // For (de)serializing
-libraryDependencies += "com.twitter" %% "chill" % "0.2.2"
+libraryDependencies += "com.twitter" %% "chill" % "0.2.3"
 
 // For jsEscape
 libraryDependencies += "org.apache.commons" % "commons-lang3" % "3.1"

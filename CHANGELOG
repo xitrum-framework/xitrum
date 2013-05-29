@@ -1,10 +1,17 @@
-2.6 (planned):
+2.7 (planned):
 * #81 Reload classes and routes in development mode
 * #76 Improve currentAction in Scalate templates
 * #95 Add another template engine faster than Scalate
 * #70 Add Rails-like asset pipeline
 * #71 Add automatic CORS request handling for the whole site
 * #109 Use Akka log instead of using SLF4J directly
+
+2.6:
+* #135 Bug: Hangs up on cached action
+* #136 Update Netty to 3.6.6.Final
+* #133 Update Akka to 2.1.4
+* #137 Update Twitter Chill to 0.2.3
+* #138 Update jQuery to 1.10.0
 
 2.5:
 * #126 Basic authentication causes NullPointerException
