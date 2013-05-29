@@ -8,6 +8,7 @@
 
 2.6:
 * #135 Bug: Hangs up on cached action
+* #119 Close connection after sendUnsupportedWebSocketVersionResponse
 * #136 Update Netty to 3.6.6.Final
 * #133 Update Akka to 2.1.4
 * #137 Update Twitter Chill to 0.2.3

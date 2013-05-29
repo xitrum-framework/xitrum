@@ -96,7 +96,8 @@ trait WebSocketActor extends Actor with Action {
     val factory    = new WebSocketServerHandshakerFactory(webSocketAbsRequestUrl, null, false)
     val handshaker = factory.newHandshaker(request)
     if (handshaker == null) {
-      factory.sendUnsupportedWebSocketVersionResponse(channel)
+      val future = factory.sendUnsupportedWebSocketVersionResponse(channel)
+      future.addListener(ChannelFutureListener.CLOSE)
       false
     } else {
       handshaker.handshake(channel, request)

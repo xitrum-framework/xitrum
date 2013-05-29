@@ -70,15 +70,15 @@ trait Action extends RequestEnv
       if (cacheSecs > 0) {     // Page cache
         hit = tryCache {
           val passed = callBeforeFilters()
-          if (passed) runAroundAndAfterFilters()
+          if (passed) callExecuteWrappedInAroundFiltersThenAfterFilters()
         }
       } else {
         val passed = callBeforeFilters()
         if (passed) {
           if (cacheSecs < 0)  // Action cache
-            hit = tryCache { runAroundAndAfterFilters() }
+            hit = tryCache { callExecuteWrappedInAroundFiltersThenAfterFilters() }
           else                // No cache
-            runAroundAndAfterFilters()
+            callExecuteWrappedInAroundFiltersThenAfterFilters()
         }
       }
 
@@ -155,7 +155,7 @@ trait Action extends RequestEnv
     }
   }
 
-  private def runAroundAndAfterFilters() {
+  private def callExecuteWrappedInAroundFiltersThenAfterFilters() {
     callExecuteWrappedInAroundFilters()
     callAfterFilters()
   }

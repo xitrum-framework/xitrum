@@ -1,6 +1,5 @@
 package xitrum
 
-import java.lang.reflect.Method
 import java.util.concurrent.TimeUnit
 import scala.util.control.NonFatal
 
