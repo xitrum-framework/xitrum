@@ -10,7 +10,7 @@ import xitrum.action._
 import xitrum.exception.{InvalidAntiCSRFToken, InvalidInput, MissingParam, SessionExpired}
 import xitrum.handler.{AccessLog, HandlerEnv}
 import xitrum.handler.down.ResponseCacher
-import xitrum.handler.up.Dispatcher
+import xitrum.handler.up.{Dispatcher, NoPipelining}
 import xitrum.scope.request.RequestEnv
 import xitrum.scope.session.{CSRF, SessionEnv}
 import xitrum.view.{Renderer, Responder}
@@ -150,7 +150,8 @@ trait Action extends RequestEnv
         false
 
       case Some(response) =>
-        channel.write(response)
+        val future = channel.write(response)
+        NoPipelining.if_keepAliveRequest_then_resumeReading_else_closeOnComplete(request, channel, future)
         true
     }
   }
