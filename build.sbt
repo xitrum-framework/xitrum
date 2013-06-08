@@ -4,7 +4,7 @@ name := "xitrum"
 
 version := "2.7-SNAPSHOT"
 
-scalaVersion := "2.10.1"
+scalaVersion := "2.10.2"
 
 scalacOptions ++= Seq(
   "-deprecation",
@@ -66,7 +66,7 @@ libraryDependencies += "com.hazelcast" % "hazelcast-client" % "2.5.1"
 
 autoCompilerPlugins := true
 
-addCompilerPlugin("org.scala-lang.plugins" % "continuations" % "2.10.1")
+addCompilerPlugin("org.scala-lang.plugins" % "continuations" % "2.10.2")
 
 scalacOptions += "-P:continuations:enable"
 

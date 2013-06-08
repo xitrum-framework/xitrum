@@ -1,4 +1,5 @@
 2.7 (planned):
+* #140 Update Scala from 2.10.1 to 2.10.2
 * #81 Reload classes and routes in development mode
 * #76 Improve currentAction in Scalate templates
 * #95 Add another template engine faster than Scalate
