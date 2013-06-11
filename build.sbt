@@ -57,10 +57,10 @@ libraryDependencies += "tv.cntt" % "rhinocoffeescript" % "1.6.2"
 // Hazelcast is used for distributed cache and SockJS --------------------------
 
 // Infinispan is good but much heavier
-libraryDependencies += "com.hazelcast" % "hazelcast" % "2.5.1"
+libraryDependencies += "com.hazelcast" % "hazelcast" % "2.6"
 
 // Hazelcast can be configured as cluster member, lite member, or Java client
-libraryDependencies += "com.hazelcast" % "hazelcast-client" % "2.5.1"
+libraryDependencies += "com.hazelcast" % "hazelcast-client" % "2.6"
 
 // xitrum.imperatively uses Scala continuation, a compiler plugin --------------
 

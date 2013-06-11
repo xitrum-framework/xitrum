@@ -8,6 +8,7 @@
 
 2.7 (planned):
 * #140 Update Scala from 2.10.1 to 2.10.2
+* #142 Update Hazelcast from 2.5.1 to 2.6
 * #77 Support big file upload, remove maxSizeInMB in xitrum.conf
 
 2.6:
