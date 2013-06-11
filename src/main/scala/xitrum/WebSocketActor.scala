@@ -103,7 +103,7 @@ trait WebSocketActor extends Actor with Action {
       handshaker.handshake(channel, request)
 
       val pipeline = channel.getPipeline
-      DefaultHttpChannelPipelineFactory.removeUnusedForWebSocket(pipeline)
+      DefaultHttpChannelPipelineFactory.removeUnusedHandlersForWebSocket(pipeline)
       pipeline.addLast("webSocketEventDispatcher", new WebSocketEventDispatcher(handshaker, self))
 
       // Resume reading paused at NoPipelining

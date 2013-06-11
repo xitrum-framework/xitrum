@@ -10,12 +10,13 @@ import xitrum.handler.up._
 import xitrum.handler.down._
 
 object DefaultHttpChannelPipelineFactory {
-  def removeUnusedForWebSocket(pipeline: ChannelPipeline) {
+  def removeUnusedHandlersForWebSocket(pipeline: ChannelPipeline) {
     // WebSocket handshaker in Netty dynamically changes the pipeline like this:
     // pipeline.remove(classOf[HttpChunkAggregator])
     // pipeline.replace(classOf[HttpRequestDecoder],  "wsdecoder", new WebSocket08FrameDecoder(true, this.allowExtensions))
     // pipeline.replace(classOf[HttpResponseEncoder], "wsencoder", new WebSocket08FrameEncoder(false))
 
+    // Upstream
     pipeline.remove(classOf[NoPipelining])
     pipeline.remove(classOf[BaseUrlRemover])
     if (Config.xitrum.basicAuth.isDefined)
@@ -28,6 +29,7 @@ object DefaultHttpChannelPipelineFactory {
     pipeline.remove(classOf[MethodOverrider])
     pipeline.remove(classOf[Dispatcher])
 
+    // Downstream
     pipeline.remove(classOf[ChunkedWriteHandler])
     pipeline.remove(classOf[FixiOS6SafariPOST])
     pipeline.remove(classOf[XSendFile])
@@ -37,7 +39,6 @@ object DefaultHttpChannelPipelineFactory {
   }
 }
 
-// See doc/sphinx/handler.rst
 class DefaultHttpChannelPipelineFactory extends CPF {
   // Sharable handlers
 
