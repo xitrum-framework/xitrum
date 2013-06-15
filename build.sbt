@@ -66,7 +66,10 @@ libraryDependencies += "com.hazelcast" % "hazelcast-client" % "2.6"
 
 autoCompilerPlugins := true
 
-addCompilerPlugin("org.scala-lang.plugins" % "continuations" % "2.10.2")
+// https://groups.google.com/forum/?fromgroups#!topic/simple-build-tool/ReZvT14noxU
+libraryDependencies <+= scalaVersion { sv =>
+  compilerPlugin("org.scala-lang.plugins" % "continuations" % sv)
+}
 
 scalacOptions += "-P:continuations:enable"
 
