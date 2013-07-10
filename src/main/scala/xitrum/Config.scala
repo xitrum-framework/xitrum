@@ -59,8 +59,11 @@ class RequestConfig(config: TConfig) {
 }
 
 class ResponseConfig(config: TConfig) {
-  val maxSizeInKBOfCachedStaticFiles  = config.getInt("maxSizeInKBOfCachedStaticFiles")
-  val maxNumberOfCachedStaticFiles    = config.getInt("maxNumberOfCachedStaticFiles")
+  val autoGzip = config.getBoolean("autoGzip")
+
+  val maxSizeInKBOfCachedStaticFiles = config.getInt("maxSizeInKBOfCachedStaticFiles")
+  val maxNumberOfCachedStaticFiles   = config.getInt("maxNumberOfCachedStaticFiles")
+
   val clientMustRevalidateStaticFiles = config.getBoolean("clientMustRevalidateStaticFiles")
 }
 
