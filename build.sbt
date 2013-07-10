@@ -30,9 +30,9 @@ resolvers += "SonatypeReleases" at "http://oss.sonatype.org/content/repositories
 
 libraryDependencies += "io.netty" % "netty" % "3.6.6.Final"
 
-libraryDependencies += "com.typesafe.akka" %% "akka-actor" % "2.1.4"
+libraryDependencies += "com.typesafe.akka" %% "akka-actor" % "2.2.0"
 
-libraryDependencies += "com.typesafe.akka" %% "akka-remote" % "2.1.4"
+libraryDependencies += "com.typesafe.akka" %% "akka-remote" % "2.2.0"
 
 // Projects using Xitrum must provide a concrete implentation of SLF4J (Logback etc.)
 libraryDependencies += "org.slf4j" % "slf4j-api" % "1.7.5" % "provided"
