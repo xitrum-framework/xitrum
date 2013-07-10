@@ -52,7 +52,7 @@ libraryDependencies += "org.json4s" %% "json4s-native" % "3.2.4"
 libraryDependencies += "tv.cntt" %% "scaposer" % "1.2"
 
 // For compiling CoffeeScript to JavaScript
-libraryDependencies += "tv.cntt" % "rhinocoffeescript" % "1.6.2"
+libraryDependencies += "tv.cntt" % "rhinocoffeescript" % "1.6.3"
 
 // Hazelcast is used for distributed cache and SockJS --------------------------
 

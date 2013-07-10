@@ -1,4 +1,5 @@
 2.8 (planned):
+* #77 Support big file upload, remove maxSizeInMB in xitrum.conf
 * #81 Reload classes and routes in development mode
 * #76 Improve currentAction in Scalate templates
 * #95 Add another template engine faster than Scalate
@@ -8,8 +9,9 @@
 
 2.7 (planned):
 * #140 Update Scala from 2.10.1 to 2.10.2
+* #148 Update Akka to 2.2.0
 * #142 Update Hazelcast from 2.5.1 to 2.6
-* #77 Support big file upload, remove maxSizeInMB in xitrum.conf
+* #147 Update RhinoCoffeeScript to 1.6.3
 
 2.6:
 * #135 Bug: Hangs up on cached action
