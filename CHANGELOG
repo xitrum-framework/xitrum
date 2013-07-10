@@ -8,10 +8,12 @@
 * #109 Use Akka log instead of using SLF4J directly
 
 2.7 (planned):
+* #146 Add config option to disable auto gzip
 * #140 Update Scala from 2.10.1 to 2.10.2
 * #148 Update Akka to 2.2.0
 * #142 Update Hazelcast from 2.5.1 to 2.6
 * #147 Update RhinoCoffeeScript to 1.6.3
+* #149 Update jQuery from 1.10.0 to 1.10.2
 
 2.6:
 * #135 Bug: Hangs up on cached action
