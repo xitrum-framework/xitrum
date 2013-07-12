@@ -56,8 +56,12 @@ object Gzip {
     if (isCompressed(maybeCompressed)) uncompress(maybeCompressed) else maybeCompressed
 
   def isAccepted(request: HttpRequest) = {
-    val acceptEncoding = request.getHeader(ACCEPT_ENCODING)
-    (acceptEncoding != null && acceptEncoding.contains("gzip"))
+    if (Config.xitrum.response.autoGzip) {
+      val acceptEncoding = request.getHeader(ACCEPT_ENCODING)
+      (acceptEncoding != null && acceptEncoding.contains("gzip"))
+    } else {
+      false
+    }
   }
 
   /**
