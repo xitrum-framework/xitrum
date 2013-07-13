@@ -16,15 +16,15 @@ trait ActionActor extends Actor with Action {
     case env: HandlerEnv =>
       apply(env)
 
-      // Can't use context.stop(self), that means context is leaked outside this actor
+      // Don't use context.stop(self) to avoid leaking context outside this actor
       addConnectionClosedListener { Config.actorSystem.stop(self) }
 
       dispatchWithFailsafe()
   }
 
   override def onDoneResponding() {
-    // Avoid using context.stop(self) to avoid leaking actor internals (context)
-    // outside this actor, just in case onDoneResponding is called from another thread
+    // Don't use context.stop(self) to avoid leaking context outside this actor,
+    // just in case onDoneResponding is called from another thread
     Config.actorSystem.stop(self)
   }
 }

@@ -39,7 +39,7 @@ trait WebSocketActor extends Actor with Action {
       apply(env)
 
       if (acceptWebSocket()) {
-        // Can't use context.stop(self), that means context is leaked outside this actor
+        // Don't use context.stop(self) to avoid leaking context outside this actor
         addConnectionClosedListener { Config.actorSystem.stop(self) }
 
         // Can't use dispatchWithFailsafe because it may respond normal HTTP

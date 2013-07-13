@@ -10,7 +10,7 @@ import xitrum.handler.{
   NetOption,
   SslChannelPipelineFactory
 }
-import xitrum.util.ClusterSingletonActor
+import xitrum.util.RemoteActorRegistry
 
 object Server extends Logger {
   /**
@@ -32,7 +32,7 @@ object Server extends Logger {
     // letting it start lazily
     Cache.cache.size()
 
-    ClusterSingletonActor.start()
+    RemoteActorRegistry.start()
 
     // templateEngine is lazy, force its initialization here
     Config.xitrum.templateEngine

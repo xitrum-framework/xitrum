@@ -5,49 +5,52 @@ import java.net.URLEncoder
 import scala.collection.mutable.{Map => MMap}
 import scala.concurrent.duration._
 import scala.concurrent.Await
+import scala.util.control.NonFatal
 
 import akka.actor.{Actor, ActorRef, Props}
 import akka.pattern.ask
 
 import com.hazelcast.core.{IMap, MembershipEvent, MembershipListener}
 
-import xitrum.Config
+import xitrum.{Config, Logger}
 
 /**
- * This feature is implemented using Akka Remoting and Hazelcast distributed lock:
- * https://groups.google.com/group/akka-user/browse_thread/thread/23d6b2851648c1b0
+ * This feature is implemented using Akka Remoting and Hazelcast distributed lock
+ * (blocking).
  *
  * You must config config/akka.conf to use Akka Remoting:
- * http://doc.akka.io/docs/akka/2.1.2/scala/remoting.html
+ * http://doc.akka.io/docs/akka/2.2.0/scala/remoting.html
  *
- * With future version of Akka Cluster, this object may be removed:
- * http://doc.akka.io/docs/akka/2.1.2/cluster/index.html
- *
- * Caveat: Akka Remoting does not trigger Death Watch for lost connections.
+ * With Akka Cluster Singleton Pattern, this feature may be removed in the future:
+ * http://doc.akka.io/docs/akka/2.2.0/contrib/cluster-singleton.html
+ * https://groups.google.com/group/akka-user/browse_thread/thread/23d6b2851648c1b0
  */
-object ClusterSingletonActor {
+object RemoteActorRegistry {
   case class Lookup(name: String)
   case class LookupLocal(name: String)
   case class LookupOrCreate(name: String, propsMaker: () => Props)
 
-  private val ACTOR_SYSTEM_NAME     = getClass.getName
-  private val REMOTE_LOOKUP_TIMEOUT = 5.seconds
+  //----------------------------------------------------------------------------
 
+  private val ACTOR_SYSTEM_NAME = getClass.getName
+  private val LOOKUP_TIMEOUT    = 5.seconds
+
+  val actorRef = Config.actorSystem.actorOf(Props[RemoteActorRegistry], ACTOR_SYSTEM_NAME)
+
+  /** Should be called at application start. */
   def start() {
-    Config.actorSystem.actorOf(Props[ClusterSingletonActor], ACTOR_SYSTEM_NAME)
+    // actorRef above will be started
   }
-
-  def actor() = Config.actorSystem.actorFor("user/" + ACTOR_SYSTEM_NAME)
 }
 
-class ClusterSingletonActor extends Actor {
-  import ClusterSingletonActor._
+class RemoteActorRegistry extends Actor with Logger {
+  import RemoteActorRegistry._
 
   private var addrs:     IMap[String, String] = _
   private var localAddr: String               = _
 
   override def preStart() {
-    addrs = Config.hazelcastInstance.getMap("xitrum/ClusterSingletonActor")
+    addrs = Config.hazelcastInstance.getMap("xitrum/RemoteActorRegistry")
 
     val h    = Config.hazelcastInstance
     val lock = h.getLock(ACTOR_SYSTEM_NAME)
@@ -93,23 +96,27 @@ class ClusterSingletonActor extends Actor {
   //----------------------------------------------------------------------------
 
   private def lookup(name: String): Option[ActorRef] = {
-    val escapedName = escape(name)
-    val h           = Config.hazelcastInstance
-    val lock        = h.getLock(ACTOR_SYSTEM_NAME)
+    val lock = Config.hazelcastInstance.getLock(ACTOR_SYSTEM_NAME)
     lock.lock()
     try {
       val it = addrs.values().iterator
       while (it.hasNext()) {
         val addr = it.next()
-        if (addr == localAddr) {
-          val ref = context.actorFor(escapedName)
-          if (!ref.isTerminated) return Some(ref)
-        } else {
-          val remoteSingleActor = context.actorFor(
-            "akka://" + Config.ACTOR_SYSTEM_NAME + "@" + addr + "/user/" + ACTOR_SYSTEM_NAME)
-          val future            = remoteSingleActor.ask(LookupLocal(name))(REMOTE_LOOKUP_TIMEOUT)
-          val refo              = Await.result(future, REMOTE_LOOKUP_TIMEOUT).asInstanceOf[Option[ActorRef]]
+        val url  =
+          if (addr == localAddr)
+            escape(name)
+          else
+            "akka://" + Config.ACTOR_SYSTEM_NAME + "@" + addr + "/user/" + ACTOR_SYSTEM_NAME
+
+        val sel    = context.actorSelection(url)
+        val future = sel.ask(LookupLocal(name))(LOOKUP_TIMEOUT).mapTo[Option[ActorRef]]
+
+        try {
+          val refo = Await.result(future, LOOKUP_TIMEOUT)
           if (refo.isDefined) return refo
+        } catch {
+          case NonFatal(e) =>
+            logger.warn("lookup Await error", e)
         }
       }
 
@@ -120,30 +127,41 @@ class ClusterSingletonActor extends Actor {
   }
 
   private def lookupLocal(name: String): Option[ActorRef] = {
-    val escapedName = escape(name)
-    val ref         = context.actorFor(escapedName)
-    if (ref.isTerminated) None else Some(ref)
+    val sel    = context.actorSelection(escape(name))
+    val future = sel.ask(LookupLocal(name))(LOOKUP_TIMEOUT).mapTo[Option[ActorRef]]
+    try {
+      Await.result(future, LOOKUP_TIMEOUT)
+    } catch {
+      case NonFatal(e) =>
+        logger.warn("lookupLocal Await error", e)
+        None
+    }
   }
 
   /** If the actor has not been created, it will be created locally. */
   private def lookupOrCreate(name: String, propsMaker: () => Props): (Boolean, ActorRef) = {
     val escapedName = escape(name)
-    val h           = Config.hazelcastInstance
-    val lock        = h.getLock(ACTOR_SYSTEM_NAME)
+    val lock        = Config.hazelcastInstance.getLock(ACTOR_SYSTEM_NAME)
     lock.lock()
     try {
       val it = addrs.values().iterator
       while (it.hasNext()) {
         val addr = it.next()
-        if (addr == localAddr) {
-          val ref = context.actorFor(escapedName)
-          if (!ref.isTerminated) return (false, ref)
-        } else {
-          val remoteSingleActor = context.actorFor(
-            "akka://" + Config.ACTOR_SYSTEM_NAME + "@" + addr + "/user/" + ACTOR_SYSTEM_NAME)
-          val future            = remoteSingleActor.ask(LookupLocal(name))(REMOTE_LOOKUP_TIMEOUT)
-          val refo              = Await.result(future, REMOTE_LOOKUP_TIMEOUT).asInstanceOf[Option[ActorRef]]
+        val url  =
+          if (addr == localAddr)
+            escape(name)
+          else
+            "akka://" + Config.ACTOR_SYSTEM_NAME + "@" + addr + "/user/" + ACTOR_SYSTEM_NAME
+
+        val sel    = context.actorSelection(url)
+        val future = sel.ask(LookupLocal(name))(LOOKUP_TIMEOUT).mapTo[Option[ActorRef]]
+
+        try {
+          val refo = Await.result(future, LOOKUP_TIMEOUT)
           if (refo.isDefined) return (false, refo.get)
+        } catch {
+          case NonFatal(e) =>
+            logger.warn("lookupOrCreate Await error", e)
         }
       }
 
