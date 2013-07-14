@@ -41,13 +41,11 @@ object ActorRegistry extends Logger {
 
   //----------------------------------------------------------------------------
 
-  val ACTOR_SYSTEM_NAME = escape(getClass.getName)
-
   val actorRef =
     if (Config.application.hasPath("akka.remote.netty"))
-      Config.actorSystem.actorOf(Props[RemoteActorRegistry], ACTOR_SYSTEM_NAME)
+      Config.actorSystem.actorOf(Props[RemoteActorRegistry], RemoteActorRegistry.ACTOR_NAME)
     else
-      Config.actorSystem.actorOf(Props[LocalActorRegistry], ACTOR_SYSTEM_NAME)
+      Config.actorSystem.actorOf(Props[LocalActorRegistry], LocalActorRegistry.ACTOR_NAME)
 
   /** Should be called at application start. */
   def start() {
@@ -58,11 +56,15 @@ object ActorRegistry extends Logger {
 }
 
 object RemoteActorRegistry {
+  val ACTOR_NAME = ActorRegistry.escape(getClass.getName)
+
   private case class LookupLocal(name: String)
   private val LOOKUP_TIMEOUT = 5.seconds
 }
 
 object LocalActorRegistry {
+  val ACTOR_NAME = ActorRegistry.escape(getClass.getName)
+
   private case class IdentifyForLookup(sed: ActorRef)
   private case class IdentifyForLookupOrCreate(sed: ActorRef, propsMaker: () => Props, escapedName: String)
 }
