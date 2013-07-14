@@ -5,9 +5,10 @@ import java.net.URLEncoder
 import scala.collection.mutable.{Map => MMap}
 import scala.concurrent.duration._
 import scala.concurrent.Await
+import scala.concurrent.ExecutionContext.Implicits.global
 import scala.util.control.NonFatal
 
-import akka.actor.{Actor, ActorRef, Props}
+import akka.actor.{Actor, ActorRef, Props, Identify, ActorIdentity}
 import akka.pattern.ask
 
 import com.hazelcast.core.{IMap, MembershipEvent, MembershipListener}
@@ -24,26 +25,78 @@ import xitrum.{Config, Logger}
  * With Akka Cluster Singleton Pattern, this feature may be removed in the future:
  * http://doc.akka.io/docs/akka/2.2.0/contrib/cluster-singleton.html
  * https://groups.google.com/group/akka-user/browse_thread/thread/23d6b2851648c1b0
+ *
+ * To lookup, from your actor call
+ * ActorRegistry.actorRef ! Lookup(name)
+ * then receive Option[ActorRef].
+ *
+ * To lookup and create if there's no actor, from your actor call
+ * ActorRegistry.actorRef ! LookupOrCreate(name, propsMaker)
+ * then receive tuple (newlyCreated, actorRef). propsMaker is used to create the
+ * actor if it does not exist.
  */
-object RemoteActorRegistry {
+object ActorRegistry extends Logger {
   case class Lookup(name: String)
-  case class LookupLocal(name: String)
   case class LookupOrCreate(name: String, propsMaker: () => Props)
 
   //----------------------------------------------------------------------------
 
-  private val ACTOR_SYSTEM_NAME = getClass.getName
-  private val LOOKUP_TIMEOUT    = 5.seconds
+  val ACTOR_SYSTEM_NAME = escape(getClass.getName)
 
-  val actorRef = Config.actorSystem.actorOf(Props[RemoteActorRegistry], ACTOR_SYSTEM_NAME)
+  val actorRef =
+    if (Config.application.hasPath("akka.remote.netty"))
+      Config.actorSystem.actorOf(Props[RemoteActorRegistry], ACTOR_SYSTEM_NAME)
+    else
+      Config.actorSystem.actorOf(Props[LocalActorRegistry], ACTOR_SYSTEM_NAME)
 
   /** Should be called at application start. */
   def start() {
-    // actorRef above will be started
+    logger.info("RemoteActorRegistry started: " + actorRef)
+  }
+
+  def escape(name: String) = URLEncoder.encode(name, "UTF-8")
+}
+
+object RemoteActorRegistry {
+  private case class LookupLocal(name: String)
+  private val LOOKUP_TIMEOUT = 5.seconds
+}
+
+object LocalActorRegistry {
+  private case class IdentifyForLookup(sed: ActorRef)
+  private case class IdentifyForLookupOrCreate(sed: ActorRef, propsMaker: () => Props, escapedName: String)
+}
+
+class LocalActorRegistry extends Actor {
+  import ActorRegistry._
+  import LocalActorRegistry._
+
+  def receive = {
+    case Lookup(name) =>
+      val sel = context.actorSelection(escape(name))
+      val sed = sender
+      sel ! Identify(IdentifyForLookup(sed))
+
+    case LookupOrCreate(name, propsMaker) =>
+      val escapedName = escape(name)
+      val sel = context.actorSelection(escapedName)
+      val sed = sender
+      sel ! Identify(IdentifyForLookupOrCreate(sed, propsMaker, escapedName))
+
+    case ActorIdentity(IdentifyForLookup(sed), opt) =>
+      sed ! opt
+
+    case ActorIdentity(IdentifyForLookupOrCreate(sed, _, _), Some(actorRef)) =>
+      sed ! actorRef
+
+    case ActorIdentity(IdentifyForLookupOrCreate(sed, propsMaker, escapedName), None) =>
+      val actorRef = context.actorOf(propsMaker(), escapedName)
+      sed ! actorRef
   }
 }
 
 class RemoteActorRegistry extends Actor with Logger {
+  import ActorRegistry._
   import RemoteActorRegistry._
 
   private var addrs:     IMap[String, String] = _
@@ -83,7 +136,7 @@ class RemoteActorRegistry extends Actor with Logger {
   }
 
   def receive = {
-    case Lookup(name: String) =>
+    case Lookup(name) =>
       sender ! lookup(name)
 
     case LookupLocal(name: String) =>
@@ -95,6 +148,49 @@ class RemoteActorRegistry extends Actor with Logger {
 
   //----------------------------------------------------------------------------
 
+  private def lookupLocal(name: String): Option[ActorRef] = {
+    val sel    = context.actorSelection(escape(name))
+    val future = ask(sel, Identify(None))(LOOKUP_TIMEOUT).mapTo[ActorIdentity].map(_.ref)
+
+    try {
+      Await.result(future, LOOKUP_TIMEOUT)
+    } catch {
+      case NonFatal(e) =>
+        logger.warn("lookupLocal Await error, name: " + name, e)
+        None
+    }
+  }
+  /*
+
+  private def lookupLocal(name: String): Option[ActorRef] = {
+    val sel    = context.actorSelection(escape(name))
+    sel ! Identify(None)
+    context.become(receivex)
+    None
+  }
+
+  def receivex: PartialFunction[Any, Unit] = {
+    case ActorIdentity(_, Some(ref)) ⇒
+      println("---------- " + ref)
+    case ActorIdentity(_, None) =>
+
+      println("---------- " + None)
+
+  }
+*/
+  private def lookupRemote(addr: String, name: String): Option[ActorRef] = {
+    val url    = "akka://" + Config.ACTOR_SYSTEM_NAME + "@" + addr + "/user/" + ACTOR_SYSTEM_NAME
+    val sel    = context.actorSelection(url)
+    val future = sel.ask(LookupLocal(name))(LOOKUP_TIMEOUT).mapTo[Option[ActorRef]]
+    try {
+      Await.result(future, LOOKUP_TIMEOUT)
+    } catch {
+      case NonFatal(e) =>
+        logger.warn("lookupRemote Await error, addr: " + addr + ", name: " + name, e)
+        None
+    }
+  }
+
   private def lookup(name: String): Option[ActorRef] = {
     val lock = Config.hazelcastInstance.getLock(ACTOR_SYSTEM_NAME)
     lock.lock()
@@ -102,22 +198,8 @@ class RemoteActorRegistry extends Actor with Logger {
       val it = addrs.values().iterator
       while (it.hasNext()) {
         val addr = it.next()
-        val url  =
-          if (addr == localAddr)
-            escape(name)
-          else
-            "akka://" + Config.ACTOR_SYSTEM_NAME + "@" + addr + "/user/" + ACTOR_SYSTEM_NAME
-
-        val sel    = context.actorSelection(url)
-        val future = sel.ask(LookupLocal(name))(LOOKUP_TIMEOUT).mapTo[Option[ActorRef]]
-
-        try {
-          val refo = Await.result(future, LOOKUP_TIMEOUT)
-          if (refo.isDefined) return refo
-        } catch {
-          case NonFatal(e) =>
-            logger.warn("lookup Await error", e)
-        }
+        val refo = if (addr == localAddr) lookupLocal(name) else lookupRemote(addr, name)
+        if (refo.isDefined) return refo
       }
 
       None
@@ -126,51 +208,24 @@ class RemoteActorRegistry extends Actor with Logger {
     }
   }
 
-  private def lookupLocal(name: String): Option[ActorRef] = {
-    val sel    = context.actorSelection(escape(name))
-    val future = sel.ask(LookupLocal(name))(LOOKUP_TIMEOUT).mapTo[Option[ActorRef]]
-    try {
-      Await.result(future, LOOKUP_TIMEOUT)
-    } catch {
-      case NonFatal(e) =>
-        logger.warn("lookupLocal Await error", e)
-        None
-    }
-  }
-
   /** If the actor has not been created, it will be created locally. */
   private def lookupOrCreate(name: String, propsMaker: () => Props): (Boolean, ActorRef) = {
-    val escapedName = escape(name)
-    val lock        = Config.hazelcastInstance.getLock(ACTOR_SYSTEM_NAME)
+    val lock = Config.hazelcastInstance.getLock(ACTOR_SYSTEM_NAME)
     lock.lock()
     try {
       val it = addrs.values().iterator
       while (it.hasNext()) {
         val addr = it.next()
-        val url  =
-          if (addr == localAddr)
-            escape(name)
-          else
-            "akka://" + Config.ACTOR_SYSTEM_NAME + "@" + addr + "/user/" + ACTOR_SYSTEM_NAME
-
-        val sel    = context.actorSelection(url)
-        val future = sel.ask(LookupLocal(name))(LOOKUP_TIMEOUT).mapTo[Option[ActorRef]]
-
-        try {
-          val refo = Await.result(future, LOOKUP_TIMEOUT)
-          if (refo.isDefined) return (false, refo.get)
-        } catch {
-          case NonFatal(e) =>
-            logger.warn("lookupOrCreate Await error", e)
-        }
+        val refo = if (addr == localAddr) lookupLocal(name) else lookupRemote(addr, name)
+        if (refo.isDefined) return (false, refo.get)
       }
 
       // Create local actor
-      (true, context.actorOf(propsMaker(), escapedName))
+
+      println("-----------Create local actor")
+      (true, context.actorOf(propsMaker(), escape(name)))
     } finally {
       lock.unlock()
     }
   }
-
-  private def escape(name: String) = URLEncoder.encode(name, "UTF-8")
 }

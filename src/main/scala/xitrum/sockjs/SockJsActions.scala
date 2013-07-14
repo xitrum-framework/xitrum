@@ -14,7 +14,7 @@ import xitrum.{WebSocketActor, WebSocketBinary, WebSocketPing, WebSocketPong, We
 import xitrum.annotation._
 import xitrum.etag.NotModified
 import xitrum.scope.request.PathInfo
-import xitrum.util.{Json, RemoteActorRegistry}
+import xitrum.util.{Json, ActorRegistry}
 import xitrum.view.DocType
 
 // General info:
@@ -213,11 +213,11 @@ trait SockJsAction extends Action with SockJsPrefix {
 trait SockJsNonWebSocketSessionActionActor extends ActionActor with SockJsAction {
   protected def lookupOrCreateNonWebSocketSessionActor(sessionId: String) {
     val propsMaker = () => Props(new NonWebSocketSession(self, pathPrefix, this))
-    RemoteActorRegistry.actorRef ! RemoteActorRegistry.LookupOrCreate(sessionId, propsMaker)
+    ActorRegistry.actorRef ! ActorRegistry.LookupOrCreate(sessionId, propsMaker)
   }
 
   protected def lookupNonWebSocketSessionActor(sessionId: String) {
-    RemoteActorRegistry.actorRef ! RemoteActorRegistry.Lookup(sessionId)
+    ActorRegistry.actorRef ! ActorRegistry.Lookup(sessionId)
   }
 }
 
