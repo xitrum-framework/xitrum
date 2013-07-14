@@ -41,15 +41,16 @@ object ActorRegistry extends Logger {
 
   //----------------------------------------------------------------------------
 
-  val actorRef =
-    if (Config.application.hasPath("akka.remote.netty"))
+  val actorRef = {
+    if (Config.application.getString("akka.actor.provider") == "akka.remote.RemoteActorRefProvider")
       Config.actorSystem.actorOf(Props[RemoteActorRegistry], RemoteActorRegistry.ACTOR_NAME)
     else
       Config.actorSystem.actorOf(Props[LocalActorRegistry], LocalActorRegistry.ACTOR_NAME)
+  }
 
   /** Should be called at application start. */
   def start() {
-    logger.info("RemoteActorRegistry started: " + actorRef)
+    logger.info("ActorRegistry started: " + actorRef)
   }
 
   def escape(name: String) = URLEncoder.encode(name, "UTF-8")
@@ -80,20 +81,20 @@ class LocalActorRegistry extends Actor {
       sel ! Identify(IdentifyForLookup(sed))
 
     case LookupOrCreate(name, propsMaker) =>
-      val escapedName = escape(name)
-      val sel = context.actorSelection(escapedName)
+      val esc = escape(name)
+      val sel = context.actorSelection(esc)
       val sed = sender
-      sel ! Identify(IdentifyForLookupOrCreate(sed, propsMaker, escapedName))
+      sel ! Identify(IdentifyForLookupOrCreate(sed, propsMaker, esc))
 
     case ActorIdentity(IdentifyForLookup(sed), opt) =>
       sed ! opt
 
     case ActorIdentity(IdentifyForLookupOrCreate(sed, _, _), Some(actorRef)) =>
-      sed ! actorRef
+      sed ! (false, actorRef)
 
     case ActorIdentity(IdentifyForLookupOrCreate(sed, propsMaker, escapedName), None) =>
       val actorRef = context.actorOf(propsMaker(), escapedName)
-      sed ! actorRef
+      sed ! (true, actorRef)
   }
 }
 
@@ -108,7 +109,7 @@ class RemoteActorRegistry extends Actor with Logger {
     addrs = Config.hazelcastInstance.getMap("xitrum/RemoteActorRegistry")
 
     val h    = Config.hazelcastInstance
-    val lock = h.getLock(ACTOR_SYSTEM_NAME)
+    val lock = h.getLock(ACTOR_NAME)
     lock.lock()
     try {
       val cluster = h.getCluster
@@ -116,7 +117,7 @@ class RemoteActorRegistry extends Actor with Logger {
       // Register local node
       val id = cluster.getLocalMember.getUuid
 
-      val nc    = Config.application.getConfig("akka.remote.netty")
+      val nc    = Config.application.getConfig("akka.remote.netty.tcp")
       val host  = nc.getString("hostname")
       val port  = nc.getInt("port")
       localAddr = host + ":" + port
@@ -181,7 +182,7 @@ class RemoteActorRegistry extends Actor with Logger {
   }
 */
   private def lookupRemote(addr: String, name: String): Option[ActorRef] = {
-    val url    = "akka://" + Config.ACTOR_SYSTEM_NAME + "@" + addr + "/user/" + ACTOR_SYSTEM_NAME
+    val url    = "akka.tcp://" + Config.ACTOR_SYSTEM_NAME + "@" + addr + "/user/" + ACTOR_NAME
     val sel    = context.actorSelection(url)
     val future = sel.ask(LookupLocal(name))(LOOKUP_TIMEOUT).mapTo[Option[ActorRef]]
     try {
@@ -194,7 +195,7 @@ class RemoteActorRegistry extends Actor with Logger {
   }
 
   private def lookup(name: String): Option[ActorRef] = {
-    val lock = Config.hazelcastInstance.getLock(ACTOR_SYSTEM_NAME)
+    val lock = Config.hazelcastInstance.getLock(ACTOR_NAME + name)
     lock.lock()
     try {
       val it = addrs.values().iterator
@@ -212,7 +213,7 @@ class RemoteActorRegistry extends Actor with Logger {
 
   /** If the actor has not been created, it will be created locally. */
   private def lookupOrCreate(name: String, propsMaker: () => Props): (Boolean, ActorRef) = {
-    val lock = Config.hazelcastInstance.getLock(ACTOR_SYSTEM_NAME)
+    val lock = Config.hazelcastInstance.getLock(ACTOR_NAME + name)
     lock.lock()
     try {
       val it = addrs.values().iterator
