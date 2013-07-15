@@ -28,14 +28,14 @@ unmanagedBase in Runtime <<= baseDirectory { base => base / "config" }
 // and it takes several hours to sync from Sonatype to Maven Central
 resolvers += "SonatypeReleases" at "http://oss.sonatype.org/content/repositories/releases/"
 
-libraryDependencies += "io.netty" % "netty" % "3.6.6.Final"
-
-libraryDependencies += "com.typesafe.akka" %% "akka-actor" % "2.2.0"
-
-libraryDependencies += "com.typesafe.akka" %% "akka-remote" % "2.2.0"
-
 // Projects using Xitrum must provide a concrete implentation of SLF4J (Logback etc.)
 libraryDependencies += "org.slf4j" % "slf4j-api" % "1.7.5" % "provided"
+
+// Netty is the core of Xitrum's HTTP(S) feature
+libraryDependencies += "io.netty" % "netty" % "3.6.6.Final"
+
+// For clustering SockJS; Akka is included here
+libraryDependencies += "tv.cntt" %% "glokka" % "1.0"
 
 // For scanning routes
 libraryDependencies += "tv.cntt" %% "sclasner" % "1.6"

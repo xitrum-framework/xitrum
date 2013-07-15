@@ -9,12 +9,14 @@ import org.jboss.netty.handler.codec.http.{DefaultCookie, HttpHeaders, HttpRespo
 
 import akka.actor.{Actor, ActorRef, PoisonPill, Props, Terminated}
 
+import glokka.ActorRegistry
+
 import xitrum.{Action, ActionActor, Config, SkipCSRFCheck, SockJsText}
 import xitrum.{WebSocketActor, WebSocketBinary, WebSocketPing, WebSocketPong, WebSocketText}
 import xitrum.annotation._
 import xitrum.etag.NotModified
 import xitrum.scope.request.PathInfo
-import xitrum.util.{Json, ActorRegistry}
+import xitrum.util.Json
 import xitrum.view.DocType
 
 // General info:
@@ -213,11 +215,11 @@ trait SockJsAction extends Action with SockJsPrefix {
 trait SockJsNonWebSocketSessionActionActor extends ActionActor with SockJsAction {
   protected def lookupOrCreateNonWebSocketSessionActor(sessionId: String) {
     val propsMaker = () => Props(new NonWebSocketSession(self, pathPrefix, this))
-    ActorRegistry.actorRef ! ActorRegistry.LookupOrCreate(sessionId, propsMaker)
+    ActorRegistry.lookupOrCreate(sessionId, propsMaker)
   }
 
   protected def lookupNonWebSocketSessionActor(sessionId: String) {
-    ActorRegistry.actorRef ! ActorRegistry.Lookup(sessionId)
+    ActorRegistry.lookup(sessionId)
   }
 }
 
