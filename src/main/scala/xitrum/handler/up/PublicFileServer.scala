@@ -16,7 +16,7 @@ import xitrum.etag.NotModified
 import xitrum.util.PathSanitizer
 
 /**
- * Serves files in "static/public" directory.
+ * Serves static files in "public" directory.
  * See ChannelPipelineFactory, this handler is put after XSendFile.
  */
 @Sharable
