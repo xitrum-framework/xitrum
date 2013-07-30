@@ -174,10 +174,14 @@ object Config extends Logger {
    */
   val root = {
     val res = getClass.getClassLoader.getResource("xitrum.conf")
-    if (res != null)
-      res.getFile.replace(File.separator + "config" + File.separator + "xitrum.conf", "")
-    else
-      System.getProperty("user.dir")  // Fallback to current working directory
+    if (res != null) {
+      val fileName = res.getFile
+      // This doesn't work on Windows, because "/" is always used in fileName
+      // fileName.replace(File.separator + "config" + File.separator + "xitrum.conf", "")
+      fileName.replace("/config/xitrum.conf", "")
+    } else {
+      // Fallback to current working directory
+      System.getProperty("user.dir")
   }
 
   val baseUrl = xitrum.reverseProxy.map(_.baseUrl).getOrElse("")
