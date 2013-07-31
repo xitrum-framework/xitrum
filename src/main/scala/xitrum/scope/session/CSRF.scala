@@ -30,7 +30,7 @@ object CSRF {
    * (For example when using with GET requests, which does not include the token.)
    * Otherwise you should use SecureBase64.encrypt for shorter result.
    */
-  def encrypt(action: Action, ref: AnyRef): String = action.antiCSRFToken + SecureUrlSafeBase64.encrypt(ref)
+  def encrypt(action: Action, any: Any): String = action.antiCSRFToken + SecureUrlSafeBase64.encrypt(any)
 
   def decrypt(action: Action, string: String): Any = {
     val prefix = action.antiCSRFToken

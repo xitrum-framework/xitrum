@@ -1,19 +1,20 @@
 package xitrum.util
 
 import scala.runtime.ScalaRunTime
-import scala.util.control.NonFatal
-import com.twitter.chill.KryoBijection
+import scala.util.{Try, Success, Failure}
+
+import com.twitter.chill.KryoInjection
 import xitrum.Logger
 
 object SeriDeseri extends Logger {
-  def serialize(ref: AnyRef): Array[Byte] = KryoBijection(ref)
+  def serialize(any: Any): Array[Byte] = KryoInjection(any)
 
-  def deserialize(bytes: Array[Byte]): Option[AnyRef] = {
-    // KryoInjection is not used because it swallows the debug info
-    try {
-      Some(KryoBijection.invert(bytes))
-    } catch {
-      case NonFatal(e) =>
+  def deserialize(bytes: Array[Byte]): Option[Any] = {
+    KryoInjection.invert(bytes) match {
+      case Success(any) =>
+        Some(any)
+
+      case Failure(e) =>
         if (logger.isDebugEnabled) logger.debug("Could not deserialize: " + ScalaRunTime.stringOf(bytes), e)
         None
     }

@@ -41,7 +41,7 @@ libraryDependencies += "tv.cntt" %% "glokka" % "1.0"
 libraryDependencies += "tv.cntt" %% "sclasner" % "1.6"
 
 // For (de)serializing
-libraryDependencies += "com.twitter" %% "chill" % "0.2.3"
+libraryDependencies += "com.twitter" %% "chill-bijection" % "0.3.0"
 
 // For jsEscape
 libraryDependencies += "org.apache.commons" % "commons-lang3" % "3.1"

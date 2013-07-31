@@ -209,8 +209,8 @@ trait Responder extends JS with Flash with Knockout {
    * "text/json" would make the browser download instead of displaying the content.
    * It makes debugging a pain.
    */
-  def respondJson(obj: AnyRef): ChannelFuture = {
-    val json = Json.generate(obj)
+  def respondJson(ref: AnyRef): ChannelFuture = {
+    val json = Json.generate(ref)
     respondText(json, "application/json")
   }
 
@@ -221,8 +221,8 @@ trait Responder extends JS with Flash with Knockout {
    *
    * Content-Type header is set to "application/javascript".
    */
-  def respondJsonP(obj: AnyRef, function: String): ChannelFuture = {
-    val json = Json.generate(obj)
+  def respondJsonP(ref: AnyRef, function: String): ChannelFuture = {
+    val json = Json.generate(ref)
     val text = function + "(" + json + ");\r\n"
     respondJs(text)
   }

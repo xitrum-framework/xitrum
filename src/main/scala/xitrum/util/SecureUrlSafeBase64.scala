@@ -4,8 +4,8 @@ import xitrum.Config
 
 /** Combination of Secure and UrlSafeBase64. */
 object SecureUrlSafeBase64 {
-  def encrypt(ref: AnyRef, forCookie: Boolean = false): String =
-    encrypt(ref, Config.xitrum.session.secureKey, forCookie)
+  def encrypt(any: Any, forCookie: Boolean = false): String =
+    encrypt(any, Config.xitrum.session.secureKey, forCookie)
 
   /**
    * The result contains no padding ("=" characters) so that it can be used as
@@ -15,8 +15,8 @@ object SecureUrlSafeBase64 {
    *
    * @param forCookie If true, tries to GZIP compress if > 4KB; the result may > 4KB
    */
-  def encrypt(ref: AnyRef, key: String, forCookie: Boolean): String = {
-    val bytes           = SeriDeseri.serialize(ref)
+  def encrypt(any: Any, key: String, forCookie: Boolean): String = {
+    val bytes           = SeriDeseri.serialize(any)
     val bytesCompressed = (forCookie && bytes.length > 4 * 1024)
 
     val maybeCompressed = if (bytesCompressed) Gzip.compress(bytes) else bytes
@@ -42,14 +42,14 @@ object SecureUrlSafeBase64 {
     }
   }
 
-  def decrypt(base64String: String, forCookie: Boolean = false): Option[AnyRef] =
+  def decrypt(base64String: String, forCookie: Boolean = false): Option[Any] =
     decrypt(base64String, Config.xitrum.session.secureKey, forCookie)
 
   /**
    * @param base64String may contain optional padding ("=" characters)
    * @param forCookie If true, tries to GZIP uncompress if the input is compressed
    */
-  def decrypt(base64String: String, key: String, forCookie: Boolean): Option[AnyRef] = {
+  def decrypt(base64String: String, key: String, forCookie: Boolean): Option[Any] = {
     UrlSafeBase64.autoPaddingDecode(base64String).flatMap { encrypted =>
       Secure.decrypt(encrypted, key).flatMap { maybeCompressed =>
         val bytes = if (forCookie) Gzip.mayUncompress(maybeCompressed) else maybeCompressed
