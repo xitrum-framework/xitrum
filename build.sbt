@@ -46,7 +46,7 @@ libraryDependencies += "com.twitter" %% "chill-bijection" % "0.3.0"
 // For jsEscape
 libraryDependencies += "org.apache.commons" % "commons-lang3" % "3.1"
 
-libraryDependencies += "org.json4s" %% "json4s-native" % "3.2.4"
+libraryDependencies += "org.json4s" %% "json4s-native" % "3.2.5"
 
 // For i18n
 libraryDependencies += "tv.cntt" %% "scaposer" % "1.2"
