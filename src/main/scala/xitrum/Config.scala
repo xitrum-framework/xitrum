@@ -182,6 +182,7 @@ object Config extends Logger {
     } else {
       // Fallback to current working directory
       System.getProperty("user.dir")
+    }
   }
 
   val baseUrl = xitrum.reverseProxy.map(_.baseUrl).getOrElse("")

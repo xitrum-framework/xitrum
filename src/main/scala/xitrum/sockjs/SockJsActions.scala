@@ -215,11 +215,11 @@ trait SockJsAction extends Action with SockJsPrefix {
 trait SockJsNonWebSocketSessionActionActor extends ActionActor with SockJsAction {
   protected def lookupOrCreateNonWebSocketSessionActor(sessionId: String) {
     val propsMaker = () => Props(new NonWebSocketSession(self, pathPrefix, this))
-    ActorRegistry.lookupOrCreate(sessionId, propsMaker)
+    ActorRegistry.actorRef ! ActorRegistry.LookupOrCreate(sessionId, propsMaker)
   }
 
   protected def lookupNonWebSocketSessionActor(sessionId: String) {
-    ActorRegistry.lookup(sessionId)
+    ActorRegistry.actorRef ! ActorRegistry.Lookup(sessionId)
   }
 }
 
