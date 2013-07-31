@@ -9,6 +9,7 @@
 
 2.7 (planned):
 * #152 Fix: Static files in public directory are not served on Windows
+* #155 Fix: Workaround for thread safety problem of Scala reflection API
 * #146 Add config option to disable auto gzip
 * #140 Update Scala from 2.10.1 to 2.10.2
 * #148 Update Akka to 2.2.0

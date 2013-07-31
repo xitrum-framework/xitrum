@@ -13,7 +13,10 @@ object Json {
     Serialization.write(caseObject)
   }
 
-  /** Parses JSON string to case object. */
+  /**
+   * Parses JSON string to case object.
+   * See https://github.com/json4s/json4s#serialization
+   */
   def parse[T](jsonString: String)(implicit m: Manifest[T]) = {
     implicit val formats = DefaultFormats
     Serialization.read[T](jsonString)

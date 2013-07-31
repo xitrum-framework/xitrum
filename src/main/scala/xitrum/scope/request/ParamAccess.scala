@@ -1,11 +1,11 @@
 package xitrum.scope.request
 
-import scala.reflect.runtime.universe._
-
 import org.jboss.netty.handler.codec.http.multipart.FileUpload
 
 import xitrum.Action
 import xitrum.exception.MissingParam
+
+// See https://github.com/ngocdaothanh/xitrum/issues/155
 
 /**
  * Cache manifests because manifest[T] is a rather expensive operation
@@ -13,12 +13,12 @@ import xitrum.exception.MissingParam
  * http://groups.google.com/group/akka-user/browse_thread/thread/ee07764dfc1ac794
  */
 object ParamAccess {
-  val typeFileUpload = typeOf[FileUpload]
-  val typeString     = typeOf[String]
-  val typeInt        = typeOf[Int]
-  val typeLong       = typeOf[Long]
-  val typeFloat      = typeOf[Float]
-  val typeDouble     = typeOf[Double]
+  val manifestFileUpload = manifest[FileUpload]
+  val manifestString     = manifest[String]
+  val manifestInt        = manifest[Int]
+  val manifestLong       = manifest[Long]
+  val manifestFloat      = manifest[Float]
+  val manifestDouble     = manifest[Double]
 }
 
 trait ParamAccess {
@@ -42,8 +42,8 @@ trait ParamAccess {
 
   //----------------------------------------------------------------------------
 
-  def param[T: TypeTag](key: String, coll: Params = null)(implicit d: T DefaultsTo String): T = {
-    if (typeOf[T] <:< typeFileUpload) {
+  def param[T](key: String, coll: Params = null)(implicit e: T DefaultsTo String, m: Manifest[T]): T = {
+    if (m <:< manifestFileUpload) {
       fileUploadParams.get(key) match {
         case None         => throw new MissingParam(key)
         case Some(values) => values(0).asInstanceOf[T]
@@ -55,8 +55,8 @@ trait ParamAccess {
     }
   }
 
-  def paramo[T: TypeTag](key: String, coll: Params = null)(implicit d: T DefaultsTo String): Option[T] = {
-    if (typeOf[T] <:< typeFileUpload) {
+  def paramo[T](key: String, coll: Params = null)(implicit e: T DefaultsTo String, m: Manifest[T]): Option[T] = {
+    if (m <:< manifestFileUpload) {
       fileUploadParams.get(key).map { values => values(0).asInstanceOf[T] }
     } else {
       val coll2  = if (coll == null) textParams else coll
@@ -66,8 +66,8 @@ trait ParamAccess {
     }
   }
 
-  def params[T: TypeTag](key: String, coll: Params = null)(implicit d: T DefaultsTo String): Seq[T] = {
-    if (typeOf[T] <:< typeFileUpload) {
+  def params[T](key: String, coll: Params = null)(implicit e: T DefaultsTo String, m: Manifest[T]): Seq[T] = {
+    if (m <:< manifestFileUpload) {
       fileUploadParams.get(key) match {
         case None         => throw new MissingParam(key)
         case Some(values) => values.asInstanceOf[Seq[T]]
@@ -79,8 +79,8 @@ trait ParamAccess {
     }
   }
 
-  def paramso[T: TypeTag](key: String, coll: Params = null)(implicit d: T DefaultsTo String): Option[Seq[T]] = {
-    if (typeOf[T] <:< typeFileUpload) {
+  def paramso[T](key: String, coll: Params = null)(implicit e: T DefaultsTo String, m: Manifest[T]): Option[Seq[T]] = {
+    if (m <:< manifestFileUpload) {
       fileUploadParams.get(key).asInstanceOf[Option[Seq[T]]]
     } else {
       val coll2 = if (coll == null) textParams else coll
@@ -91,15 +91,14 @@ trait ParamAccess {
   //----------------------------------------------------------------------------
 
   /** Applications may override this method to convert to more types. */
-  def convertText[T: TypeTag](value: String): T = {
-    val t = typeOf[T]
+  def convertText[T](value: String)(implicit m: Manifest[T]): T = {
     val any: Any =
-           if (t <:< typeString) value
-      else if (t <:< typeInt)    value.toInt
-      else if (t <:< typeLong)   value.toLong
-      else if (t <:< typeFloat)  value.toFloat
-      else if (t <:< typeDouble) value.toDouble
-      else throw new Exception("Cannot covert " + value + " to " + t)
+           if (m <:< manifestString) value
+      else if (m <:< manifestInt)    value.toInt
+      else if (m <:< manifestLong)   value.toLong
+      else if (m <:< manifestFloat)  value.toFloat
+      else if (m <:< manifestDouble) value.toDouble
+      else throw new Exception("Cannot covert " + value + " to " + m)
 
     any.asInstanceOf[T]
   }
