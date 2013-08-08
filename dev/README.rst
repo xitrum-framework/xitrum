@@ -4,6 +4,22 @@ Debug client-server data receiving and sending
 I recommend Tcpdump / Wireshark, or even better Tcpflow:
 http://groups.google.com/group/sockjs/msg/12f28eccf1851d54
 
+Generate API doc with graphical type hierarchy
+----------------------------------------------
+
+Demo:
+http://ngocdaothanh.github.io/xitrum/api/index.html#xitrum.Action
+
+Graphviz is required, see build.sbt.end.
+
+Create dependency graph
+-----------------------
+
+Demo:
+http://ngocdaothanh.github.io/xitrum/guide/deps.html
+
+See https://github.com/jrudolph/sbt-dependency-graph.
+
 Publish to local
 ----------------
 

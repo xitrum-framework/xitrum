@@ -40,3 +40,6 @@ pomExtra := (
     </developer>
   </developers>
 )
+
+// https://github.com/jrudolph/sbt-dependency-graph
+net.virtualvoid.sbt.graph.Plugin.graphSettings
