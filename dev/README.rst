@@ -20,6 +20,12 @@ http://ngocdaothanh.github.io/xitrum/guide/deps.html
 
 See https://github.com/jrudolph/sbt-dependency-graph.
 
+Convert dependencies-compile.dot to deps.png:
+
+::
+
+  dot -Tpng dependencies-compile.dot > deps.png
+
 Publish to local
 ----------------
 
