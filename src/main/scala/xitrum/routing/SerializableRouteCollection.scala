@@ -17,6 +17,10 @@ class SerializableRouteCollection extends Serializable {
   val lastPUTs  = ArrayBuffer[SerializableRoute]()
   val otherPUTs = ArrayBuffer[SerializableRoute]()
 
+  val firstPATCHs = ArrayBuffer[SerializableRoute]()
+  val lastPATCHs  = ArrayBuffer[SerializableRoute]()
+  val otherPATCHs = ArrayBuffer[SerializableRoute]()
+
   val firstDELETEs = ArrayBuffer[SerializableRoute]()
   val lastDELETEs  = ArrayBuffer[SerializableRoute]()
   val otherDELETEs = ArrayBuffer[SerializableRoute]()

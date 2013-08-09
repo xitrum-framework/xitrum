@@ -1,4 +1,5 @@
 2.8 (planned):
+* #157 Support HTTP method PATCH
 * #77 Support big file upload, remove maxSizeInMB in xitrum.conf
 * #81 Reload classes and routes in development mode
 * #76 Improve currentAction in Scalate templates

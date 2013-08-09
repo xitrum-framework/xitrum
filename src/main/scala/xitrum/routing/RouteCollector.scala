@@ -121,6 +121,10 @@ class RouteCollector extends Logger {
         case ( 1, "PUT") => routes.lastPUTs
         case ( 0, "PUT") => routes.otherPUTs
 
+        case (-1, "PATCH") => routes.firstPATCHs
+        case ( 1, "PATCH") => routes.lastPATCHs
+        case ( 0, "PATCH") => routes.otherPATCHs
+
         case (-1, "DELETE") => routes.firstDELETEs
         case ( 1, "DELETE") => routes.lastDELETEs
         case ( 0, "DELETE") => routes.otherDELETEs
@@ -220,6 +224,9 @@ class RouteCollector extends Logger {
 
     if (annotationDesc == Type.getDescriptor(classOf[PUT]))
       return Some("PUT", getString(annotationValue))
+
+    if (annotationDesc == Type.getDescriptor(classOf[PATCH]))
+      return Some("PATCH", getString(annotationValue))
 
     if (annotationDesc == Type.getDescriptor(classOf[DELETE]))
       return Some("DELETE", getString(annotationValue))
