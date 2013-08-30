@@ -4,7 +4,8 @@ import java.io.File
 import java.nio.charset.Charset
 import scala.util.control.NonFatal
 
-import com.hazelcast.client.{ClientConfig, ClientConfigBuilder, HazelcastClient}
+import com.hazelcast.client.HazelcastClient
+import com.hazelcast.client.config.XmlClientConfigBuilder
 import com.hazelcast.core.{Hazelcast, HazelcastInstance}
 
 import com.typesafe.config.{Config => TConfig, ConfigFactory}
@@ -130,7 +131,6 @@ object Config extends Logger {
   val BIG_TEXTUAL_RESPONSE_SIZE_IN_KB = 1
 
   private[this] val HAZELCAST_MODE_CLUSTER_MEMBER = "clusterMember"
-  private[this] val HAZELCAST_MODE_LITE_MEMBER    = "liteMember"
   private[this] val HAZELCAST_MODE_JAVA_CLIENT    = "javaClient"
 
   private[this] val DEFAULT_SECURE_KEY = "ajconghoaofuxahoi92chunghiaujivietnamlasdoclapjfltudoil98hanhphucup8"
@@ -218,24 +218,18 @@ object Config extends Logger {
    * sbt console mode and don't like this overhead.
    */
   lazy val hazelcastInstance: HazelcastInstance = {
-    // http://www.hazelcast.com/docs/2.4/manual/multi_html/ch12s07.html
+    // http://hazelcast.com/docs/3.0/manual/multi_html/ch12s07.html
     System.setProperty("hazelcast.logging.type", "slf4j")
 
-    // http://www.hazelcast.com/docs/2.4/manual/multi_html/ch15.html
-    // http://www.hazelcast.com/docs/2.4/manual/multi_html/ch07s03.html
-    if (xitrum.hazelcastMode == HAZELCAST_MODE_LITE_MEMBER)
-      System.setProperty("hazelcast.lite.member", "true")
-
-    if (xitrum.hazelcastMode == HAZELCAST_MODE_LITE_MEMBER || xitrum.hazelcastMode == HAZELCAST_MODE_CLUSTER_MEMBER) {
-      val path = Config.root + File.separator + "config" + File.separator + "hazelcast_cluster_or_lite_member.xml"
+    if (xitrum.hazelcastMode == HAZELCAST_MODE_CLUSTER_MEMBER) {
+      val path = Config.root + File.separator + "config" + File.separator + "hazelcast_cluster_member.xml"
       System.setProperty("hazelcast.config", path)
 
       // null: load from "hazelcast.config" system property above
-      // http://www.hazelcast.com/docs/2.4/manual/multi_html/ch12.html
+      // http://hazelcast.com/docs/3.0/manual/multi_html/ch12.html
       Hazelcast.newHazelcastInstance(null)
     } else {
-      // https://github.com/hazelcast/hazelcast/issues/93
-      val clientConfig = new ClientConfigBuilder("hazelcast_java_client.properties").build()
+      val clientConfig = new XmlClientConfigBuilder("hazelcast_java_client.xml").build()
       HazelcastClient.newHazelcastClient(clientConfig)
     }
   }
