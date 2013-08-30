@@ -1,3 +1,5 @@
+Use SBT 0.13.0 to compile. See project/build.properties.
+
 Debug client-server data receiving and sending
 ----------------------------------------------
 
@@ -45,6 +47,17 @@ Publish to Sonatype
 
 See:
 https://github.com/sbt/sbt.github.com/blob/gen-master/src/jekyll/using_sonatype.md
+
+Create ~/.sbt/0.13/sonatype.sbt (for SBT 0.12: ~/.sbt/sonatype.sbt) file:
+
+::
+
+  credentials += Credentials("Sonatype Nexus Repository Manager",
+                             "oss.sonatype.org",
+                             "<your username>",
+                             "<your password>")
+
+Then:
 
 1. Copy content of
      dev/build.sbt.end   to the end of build.sbt
