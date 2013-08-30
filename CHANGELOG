@@ -1,5 +1,4 @@
-2.8 (planned):
-* #157 Support HTTP method PATCH
+2.9 (planned):
 * #77 Support big file upload, remove maxSizeInMB in xitrum.conf
 * #81 Reload classes and routes in development mode
 * #76 Improve currentAction in Scalate templates
@@ -7,6 +6,10 @@
 * #70 Add Rails-like asset pipeline
 * #71 Add automatic CORS request handling for the whole site
 * #109 Use Akka log instead of using SLF4J directly
+
+2.8 (planned):
+* #157 Support HTTP method PATCH
+* #163 Update Twitter Chill from 0.3.0 to 0.3.1
 
 2.7:
 * #152 Fix: Static files in public directory are not served on Windows
