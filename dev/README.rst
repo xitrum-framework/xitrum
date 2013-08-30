@@ -79,3 +79,6 @@ After each new version release, please update these projects to use that new Xit
 
 Also update `gh-pages branch of Xitrum <https://github.com/ngocdaothanh/xitrum/tree/gh-pages>`_
 and `Xitrum guide <https://github.com/ngocdaothanh/xitrum-doc>`_.
+
+When a new SBT generation is released, also update
+`xitrum-sbt-plugin <https://github.com/ngocdaothanh/xitrum-sbt-plugin>`_.
