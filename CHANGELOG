@@ -8,6 +8,7 @@
 * #109 Use Akka log instead of using SLF4J directly
 
 2.8 (planned):
+* #164 Fix: publicUrl and resourceUrl return URL containing double slash if reverseProxy.baseUrl in xitrum.conf is set
 * #157 Support HTTP method PATCH
 * #158 Update Hazelcast from 2.6 to 3.0.1
 * #163 Update Twitter Chill from 0.3.0 to 0.3.1

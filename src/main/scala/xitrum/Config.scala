@@ -195,11 +195,14 @@ object Config extends Logger {
    * will cause the browser to send request to http://xitrum/postback/zOIc0v...
    */
   def withBaseUrl(path: String) = {
-    if (Config.baseUrl.isEmpty) {
+    if (Config.baseUrl.isEmpty)
       path
-    } else {
-      if (path.isEmpty) Config.baseUrl else Config.baseUrl + "/" + path
-    }
+    else if (path.isEmpty)
+      Config.baseUrl
+    else if (path.startsWith("/"))
+      Config.baseUrl + path
+    else
+      Config.baseUrl + "/" + path
   }
 
   //----------------------------------------------------------------------------
