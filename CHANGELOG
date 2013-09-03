@@ -7,7 +7,7 @@
 * #71 Add automatic CORS request handling for the whole site
 * #109 Use Akka log instead of using SLF4J directly
 
-2.8 (planned):
+2.8:
 * #164 Fix: publicUrl and resourceUrl return URL containing double slash if reverseProxy.baseUrl in xitrum.conf is set
 * #157 Support HTTP method PATCH
 * #161 Update SBT from 0.12.4 to 0.13.0
