@@ -219,23 +219,33 @@ trait SockJsAction extends Action with SockJsPrefix {
 
 trait SockJsNonWebSocketSessionActionActor extends ActionActor with SockJsAction {
   protected def lookupOrCreateNonWebSocketSessionActor(sessionId: String) {
-    val props = Props(new NonWebSocketSession(self, pathPrefix, this))
-
-    // Must use context.system.actorOf instead of context.actorOf, so that
-    // actorRef1 is not attached as a child to the current actor; otherwise
-    // when the current actor dies, actorRef1 will be forcefully killed
-    val actorRef1 = context.system.actorOf(props)
-
-    SockJsAction.actorRegistry ! ActorRegistry.Register(sessionId, actorRef1)
+    // Try to lookup first, then create later
+    SockJsAction.actorRegistry ! ActorRegistry.Lookup(sessionId)
     context.become({
-      case ActorRegistry.RegisterResultOk(`sessionId`, actorRef2) =>
+      case ActorRegistry.LookupResultOk(`sessionId`, actorRef) =>
         context.unbecome()
-        self ! (true, actorRef2)
+        self ! (false, actorRef)
 
-      case ActorRegistry.RegisterResultConflict(`sessionId`, actorRef2) =>
-        context.stop(actorRef1)
+      case ActorRegistry.LookupResultNone(`sessionId`) =>
         context.unbecome()
-        self ! (false, actorRef2)
+
+        // Must use context.system.actorOf instead of context.actorOf, so that
+        // actorRef1 is not attached as a child to the current actor; otherwise
+        // when the current actor dies, actorRef1 will be forcefully killed
+        val props     = Props(new NonWebSocketSession(self, pathPrefix, this))
+        val actorRef1 = context.system.actorOf(props)
+
+        SockJsAction.actorRegistry ! ActorRegistry.Register(sessionId, actorRef1)
+        context.become({
+          case ActorRegistry.RegisterResultOk(`sessionId`, actorRef2) =>
+            context.unbecome()
+            self ! (true, actorRef2)
+
+          case ActorRegistry.RegisterResultConflict(`sessionId`, actorRef2) =>
+            context.stop(actorRef1)
+            context.unbecome()
+            self ! (false, actorRef2)
+        }, discardOld = false)
     }, discardOld = false)
   }
 
