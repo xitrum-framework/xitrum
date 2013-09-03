@@ -4,14 +4,13 @@ import org.jboss.netty.bootstrap.ServerBootstrap
 import org.jboss.netty.channel.socket.nio.NioServerSocketChannelFactory
 import org.jboss.netty.channel.ChannelPipelineFactory
 
-import glokka.ActorRegistry
-
 import xitrum.handler.{
   DefaultHttpChannelPipelineFactory,
   FlashSocketPolicyServer,
   NetOption,
   SslChannelPipelineFactory
 }
+import xitrum.sockjs.SockJsAction
 
 object Server extends Logger {
   /**
@@ -33,7 +32,8 @@ object Server extends Logger {
     // letting it start lazily
     Cache.cache.size()
 
-    ActorRegistry.start()
+    // Trick to start actorRegistry on startup
+    SockJsAction.entropy()
 
     // templateEngine is lazy, force its initialization here
     Config.xitrum.templateEngine

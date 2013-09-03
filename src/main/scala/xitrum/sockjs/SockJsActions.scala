@@ -27,7 +27,12 @@ import xitrum.view.DocType
 // Reference implementation (need to read when in doubt):
 // https://github.com/sockjs/sockjs-node/tree/master/src
 object SockJsAction {
-  val LIMIT = if (Config.productionMode) 128 * 1024 else 4 * 1024
+  // All the chunking transports are closed by the server after 128K (production mode)
+  // or 4K (development mode) was sent, in order to force client to GC and reconnect.
+  // Last chunk is forcefully sent when limit is reached.
+  val CHUNKED_RESPONSE_LIMIT = if (Config.productionMode) 128 * 1024 else 4 * 1024
+
+  val actorRegistry = ActorRegistry.start(Config.actorSystem, getClass.getName)
 
   //----------------------------------------------------------------------------
 
@@ -186,8 +191,8 @@ trait SockJsAction extends Action with SockJsPrefix {
   private[this] var streamingBytesSent = 0
 
   /**
-   * All the chunking transports are closed by the server after 128K was
-   * send, in order to force client to GC and reconnect. The server doesn't have
+   * All the chunking transports are closed by the server after CHUNKED_RESPONSE_LIMIT
+   * bytes was sent, in order to force client to GC and reconnect. The server doesn't have
    * to send "c" frame.
    *
    * @return false if the channel will be closed when the channel write completes
@@ -197,7 +202,7 @@ trait SockJsAction extends Action with SockJsPrefix {
     // but in this case the result doesn't have to be precise
     val size = text.length
     streamingBytesSent += size
-    if (streamingBytesSent < SockJsAction.LIMIT) {
+    if (streamingBytesSent < SockJsAction.CHUNKED_RESPONSE_LIMIT) {
       if (isEventSource) respondEventSource(text) else respondText(text)
       true
     } else {
@@ -214,12 +219,28 @@ trait SockJsAction extends Action with SockJsPrefix {
 
 trait SockJsNonWebSocketSessionActionActor extends ActionActor with SockJsAction {
   protected def lookupOrCreateNonWebSocketSessionActor(sessionId: String) {
-    val propsMaker = () => Props(new NonWebSocketSession(self, pathPrefix, this))
-    ActorRegistry.actorRef ! ActorRegistry.LookupOrCreate(sessionId, propsMaker)
+    val props = Props(new NonWebSocketSession(self, pathPrefix, this))
+
+    // Must use context.system.actorOf instead of context.actorOf, so that
+    // actorRef1 is not attached as a child to the current actor; otherwise
+    // when the current actor dies, actorRef1 will be forcefully killed
+    val actorRef1 = context.system.actorOf(props)
+
+    SockJsAction.actorRegistry ! ActorRegistry.Register(sessionId, actorRef1)
+    context.become({
+      case ActorRegistry.RegisterResultOk(`sessionId`, actorRef2) =>
+        context.unbecome()
+        self ! (true, actorRef2)
+
+      case ActorRegistry.RegisterResultConflict(`sessionId`, actorRef2) =>
+        context.stop(actorRef1)
+        context.unbecome()
+        self ! (false, actorRef2)
+    }, discardOld = false)
   }
 
   protected def lookupNonWebSocketSessionActor(sessionId: String) {
-    ActorRegistry.actorRef ! ActorRegistry.Lookup(sessionId)
+    SockJsAction.actorRegistry ! ActorRegistry.Lookup(sessionId)
   }
 }
 
@@ -345,7 +366,6 @@ class SockJsXhrPollingReceive extends SockJsNonWebSocketSessionReceiverActionAct
     setCORS()
     setNoClientCache()
 
-    lookupOrCreateNonWebSocketSessionActor(sessionId)
     context.become {
       case (newlyCreated: Boolean, nonWebSocketSession: ActorRef) =>
         if (newlyCreated) {
@@ -356,6 +376,7 @@ class SockJsXhrPollingReceive extends SockJsNonWebSocketSessionReceiverActionAct
           context.become(receiveSubscribeResult(nonWebSocketSession))
         }
     }
+    lookupOrCreateNonWebSocketSessionActor(sessionId)
   }
 
   private def receiveSubscribeResult(nonWebSocketSession: ActorRef): Receive = {
@@ -424,10 +445,10 @@ class SockJsXhrSend extends SockJsNonWebSocketSessionActionActor with SkipCSRFCh
     val sessionId = param("sessionId")
     lookupNonWebSocketSessionActor(sessionId)
     context.become {
-      case None =>
+      case ActorRegistry.LookupResultNone(`sessionId`) =>
         respondDefault404Page()
 
-      case Some(nonWebSocketSession: ActorRef) =>
+      case ActorRegistry.LookupResultOk(`sessionId`, nonWebSocketSession) =>
         nonWebSocketSession ! MessagesFromSenderClient(messages)
         response.setStatus(HttpResponseStatus.NO_CONTENT)
         response.setHeader(HttpHeaders.Names.CONTENT_TYPE, "text/plain; charset=UTF-8")
@@ -462,7 +483,6 @@ class SockJsXhrStreamingReceive extends SockJsNonWebSocketSessionReceiverActionA
     response.setHeader(HttpHeaders.Names.CONTENT_TYPE, "application/javascript; charset=" + Config.xitrum.request.charset)
     respondBinary(SockJsAction.h2KB)
 
-    lookupOrCreateNonWebSocketSessionActor(sessionId)
     context.become {
       case (newlyCreated: Boolean, nonWebSocketSession: ActorRef) =>
         context.watch(nonWebSocketSession)
@@ -474,6 +494,7 @@ class SockJsXhrStreamingReceive extends SockJsNonWebSocketSessionReceiverActionA
           context.become(receiveSubscribeResult(nonWebSocketSession))
         }
     }
+    lookupOrCreateNonWebSocketSessionActor(sessionId)
   }
 
   private def receiveSubscribeResult(nonWebSocketSession: ActorRef): Receive = {
@@ -535,7 +556,6 @@ class SockJshtmlfileReceive extends SockJsNonWebSocketSessionReceiverActionActor
     setCORS()
     setNoClientCache()
 
-    lookupOrCreateNonWebSocketSessionActor(sessionId)
     context.become {
       case (newlyCreated: Boolean, nonWebSocketSession: ActorRef) =>
         context.watch(nonWebSocketSession)
@@ -549,6 +569,7 @@ class SockJshtmlfileReceive extends SockJsNonWebSocketSessionReceiverActionActor
           context.become(receiveSubscribeResult(nonWebSocketSession))
         }
     }
+    lookupOrCreateNonWebSocketSessionActor(sessionId)
   }
 
   private def receiveSubscribeResult(nonWebSocketSession: ActorRef): Receive = {
@@ -637,7 +658,6 @@ class SockJsJsonPPollingReceive extends SockJsNonWebSocketSessionReceiverActionA
     setCORS()
     setNoClientCache()
 
-    lookupOrCreateNonWebSocketSessionActor(sessionId)
     context.become {
       case (newlyCreated: Boolean, nonWebSocketSession: ActorRef) =>
         if (newlyCreated) {
@@ -648,6 +668,7 @@ class SockJsJsonPPollingReceive extends SockJsNonWebSocketSessionReceiverActionA
           context.become(receiveSubscribeResult(nonWebSocketSession))
         }
     }
+    lookupOrCreateNonWebSocketSessionActor(sessionId)
   }
 
   private def receiveSubscribeResult(nonWebSocketSession: ActorRef): Receive = {
@@ -737,10 +758,10 @@ class SockJsJsonPPollingSend extends SockJsNonWebSocketSessionActionActor with S
 
     lookupNonWebSocketSessionActor(sessionId)
     context.become {
-      case None =>
+      case ActorRegistry.LookupResultNone(`sessionId`) =>
         respondDefault404Page()
 
-      case Some(nonWebSocketSession: ActorRef) =>
+      case ActorRegistry.LookupResultOk(`sessionId`, nonWebSocketSession) =>
         nonWebSocketSession ! MessagesFromSenderClient(messages)
         // Konqueror does weird things on 204.
         // As a workaround we need to respond with something - let it be the string "ok".
@@ -762,7 +783,6 @@ class SockJEventSourceReceive extends SockJsNonWebSocketSessionReceiverActionAct
     setCORS()
     setNoClientCache()
 
-    lookupOrCreateNonWebSocketSessionActor(sessionId)
     context.become {
       case (newlyCreated: Boolean, nonWebSocketSession: ActorRef) =>
         context.watch(nonWebSocketSession)
@@ -774,6 +794,7 @@ class SockJEventSourceReceive extends SockJsNonWebSocketSessionReceiverActionAct
           context.become(receiveSubscribeResult(nonWebSocketSession))
         }
     }
+    lookupOrCreateNonWebSocketSessionActor(sessionId)
   }
 
   private def receiveSubscribeResult(nonWebSocketSession: ActorRef): Receive = {

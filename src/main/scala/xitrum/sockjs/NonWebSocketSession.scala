@@ -66,8 +66,7 @@ class NonWebSocketSession(var receiverClient: ActorRef, pathPrefix: String, acti
   // System.currentTimeMillis() is used.
   private[this] var lastSubscribedAt = 0L
 
-  // Until the timeout occurs, the server must constantly serve
-  // the close message
+  // Until the timeout occurs, the server must constantly serve the close message
   private[this] var closed = false
 
   override def preStart() {
@@ -77,7 +76,8 @@ class NonWebSocketSession(var receiverClient: ActorRef, pathPrefix: String, acti
 
     lastSubscribedAt = System.currentTimeMillis()
 
-    context.watch(receiverClient)  // Unsubscribed when stopped
+    // Unsubscribed when stopped
+    context.watch(receiverClient)
 
     // Once set, the receive timeout stays in effect (i.e. continues firing
     // repeatedly after inactivity periods). Duration.Undefined must be set
