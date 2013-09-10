@@ -6,13 +6,14 @@ import org.json4s.native._
 import org.json4s.native.JsonMethods._
 
 import xitrum.{Action, Config}
-import xitrum.annotation.{DELETE, GET, OPTIONS, PATCH, POST, PUT, SOCKJS, WEBSOCKET}
+import xitrum.annotation.{First, DELETE, GET, OPTIONS, PATCH, POST, PUT, SOCKJS, WEBSOCKET}
 import xitrum.annotation.swagger.{Swagger, SwaggerErrorResponse, SwaggerParam}
 
 case class ApiMethod(method: String, route: String)
 
+@First
 @GET("/swagger.json")
-@Swagger(summary = "Swagger API integration", notes = "Use this route in Swagger UI to see the doc")
+@Swagger(summary = "API doc", notes = "Use this route in Swagger UI to see the doc")
 class SwaggerAction extends Action {
   def execute() {
     val header =
@@ -94,8 +95,13 @@ class SwaggerAction extends Action {
     firstDELETEs ++ otherDELETEs ++ lastDELETEs
   }
 
-  private def cache(route: Route): String = route.cacheSecs match {
-    case 0    => ""
-    case secs => s"(action cache: ${route.cacheSecs} [sec])"
+  private def cache(route: Route): String = {
+    val secs = route.cacheSecs
+    if (route.cacheSecs == 0)
+      ""
+    else if (secs > 0)
+      s"(page cache: ${route.cacheSecs} [sec])"
+    else
+      s"(action cache: ${-route.cacheSecs} [sec])"
   }
 }
