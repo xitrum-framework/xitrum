@@ -14,12 +14,17 @@ object RouteCompiler {
     fragments.map(compilePatternFragment _)
   }
 
-  def decompile(routeTokens: Seq[RouteToken]): String = {
+  def decompile(routeTokens: Seq[RouteToken], swagger: Boolean = false): String = {
     if (routeTokens.isEmpty) {
       "/"
     } else {
       routeTokens.foldLeft("") { (acc, t) =>
-        val rawValue = if (t.isPlaceHolder) ":" + t.value else t.value
+        val rawValue =
+          if (t.isPlaceHolder) {
+            if (swagger) "{" + t.value + "}" else ":" + t.value
+          } else {
+            t.value
+          }
         val rawRegex = t.regex match {
           case None => ""
           case Some(r) =>

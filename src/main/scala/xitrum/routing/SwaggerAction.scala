@@ -35,7 +35,7 @@ class SwaggerAction extends Action {
     Option(klass.getAnnotation(classOf[Swagger]))
 
   private def route2Json(route: Route, doc: Swagger): Option[JObject] = {
-    val routePath = RouteCompiler.decompile(route.compiledPattern)
+    val routePath = RouteCompiler.decompile(route.compiledPattern, true)
     val nickname  = route.klass.getSimpleName
 
     val params = for {
