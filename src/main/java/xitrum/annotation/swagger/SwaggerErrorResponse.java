@@ -1,4 +1,4 @@
-package xitrum.swagger;
+package xitrum.annotation.swagger;
 
 import java.lang.annotation.ElementType;
 import java.lang.annotation.Retention;
@@ -8,9 +8,6 @@ import java.lang.annotation.Target;
 @Target(ElementType.METHOD)
 @Retention(RetentionPolicy.RUNTIME)
 public @interface SwaggerErrorResponse {
-
-	String code();
-
-	String reason();
-
+  String code();
+  String reason();
 }
