@@ -7,19 +7,19 @@ import org.json4s.native.JsonMethods._
 
 import xitrum.{Action, Config}
 import xitrum.annotation.{DELETE, GET, OPTIONS, PATCH, POST, PUT, SOCKJS, WEBSOCKET}
-import xitrum.annotation.swagger.{SwaggerDoc, SwaggerErrorResponse, SwaggerParameter}
+import xitrum.annotation.swagger.{Swagger, SwaggerErrorResponse, SwaggerParam}
 
 case class ApiMethod(method: String, route: String)
 
-@GET("/api-docs.json")
-@SwaggerDoc(summary = "Swagger API integration", notes = "Use this route in Swagger UI to see the doc")
-class SwaggerDocAction extends Action {
+@GET("/swagger.json")
+@Swagger(summary = "Swagger API integration", notes = "Use this route in Swagger UI to see the doc")
+class SwaggerAction extends Action {
   def execute() {
     val header =
       ("apiVersion"     -> "1.0") ~
-      ("basePath"       -> basePath) ~
+      ("basePath"       -> absUrlPrefix) ~
       ("swaggerVersion" -> "1.2") ~
-      ("resourcePath"   -> url[SwaggerDocAction])
+      ("resourcePath"   -> url[SwaggerAction])
 
     val apis = for {
       route <- routes
@@ -31,39 +31,41 @@ class SwaggerDocAction extends Action {
     respondJsonText(json)
   }
 
-  private def docOf(klass: Class[_]): Option[SwaggerDoc] =
-    Option(klass.getAnnotation(classOf[SwaggerDoc]))
+  private def docOf(klass: Class[_]): Option[Swagger] =
+    Option(klass.getAnnotation(classOf[Swagger]))
 
-  private def route2Json(route: Route, doc: SwaggerDoc): Option[JObject] = {
+  private def route2Json(route: Route, doc: Swagger): Option[JObject] = {
     val routePath = RouteCompiler.decompile(route.compiledPattern)
     val nickname  = route.klass.getSimpleName
 
-    val parameters = for {
-      parameter <- doc.parameters
-    } yield parameter2json(parameter)
+    val params = for {
+      param <- doc.params
+    } yield param2json(param)
 
     val errorResponses = for {
       response <- doc.errorResponses
     } yield error2json(response)
 
+    val cacheNote = cache(route)
+    val notes     = if (cacheNote.isEmpty) doc.notes else s"${doc.notes} ${cacheNote}"
+
     val operations = Seq[JObject](
       ("httpMethod"     -> route.httpMethod.toString) ~
       ("summary"        -> doc.summary) ~
-      ("notes"          -> s" ${doc.notes} ${cache(route)}") ~
+      ("notes"          -> notes) ~
       ("nickname"       -> nickname) ~
-      ("parameters"     -> parameters.toSeq) ~
+      ("parameters"     -> params.toSeq) ~
       ("errorResponses" -> errorResponses.toSeq))
 
     Some(("path" -> routePath) ~ ("operations" -> operations))
   }
 
-  private def parameter2json(parameter: SwaggerParameter): JObject = {
-    ("name"          -> parameter.name) ~
-    ("type"          -> parameter.typename) ~
-    ("dataType"      -> parameter.typename) ~
-    ("description"   -> parameter.description) ~
-    ("required"      -> parameter.required) ~
-    ("allowMultiple" -> parameter.allowMultiple)
+  private def param2json(param: SwaggerParam): JObject = {
+    ("name"          -> param.name) ~
+    ("paramType"     -> param.paramType) ~
+    ("type"          -> param.tpe) ~
+    ("description"   -> param.description) ~
+    ("required"      -> param.required)
   }
 
   private def error2json(response: SwaggerErrorResponse): JObject = {
@@ -90,10 +92,6 @@ class SwaggerDocAction extends Action {
     firstPUTs    ++ otherPUTs    ++ lastPUTs   ++
     firstPATCHs  ++ otherPATCHs  ++ lastPATCHs ++
     firstDELETEs ++ otherDELETEs ++ lastDELETEs
-  }
-
-  private def basePath: String = {
-    s"/${Config.baseUrl}"
   }
 
   private def cache(route: Route): String = route.cacheSecs match {

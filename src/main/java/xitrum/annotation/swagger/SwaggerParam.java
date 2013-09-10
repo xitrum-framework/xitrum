@@ -7,10 +7,11 @@ import java.lang.annotation.Target;
 
 @Target(ElementType.METHOD)
 @Retention(RetentionPolicy.RUNTIME)
-public @interface SwaggerParameter {
-  String  name()          default "";
-  String  typename()      default "";
-  String  description()   default "";
-  boolean required()      default false;
-  boolean allowMultiple() default false;
+/** https://github.com/wordnik/swagger-core/wiki/parameters */
+public @interface SwaggerParam {
+  String  name();
+  String  paramType()   default "path";
+  String  tpe();
+  String  description() default "";
+  boolean required()    default true;
 }

@@ -7,7 +7,7 @@ import java.lang.annotation.Target;
 
 @Target(ElementType.METHOD)
 @Retention(RetentionPolicy.RUNTIME)
-public @interface SwaggerDoc {
+public @interface Swagger {
   /** Brief description of the operation */
   String summary() default "";
 
@@ -15,7 +15,7 @@ public @interface SwaggerDoc {
   String notes() default "";
 
   /** Parameters */
-  SwaggerParameter[] parameters() default {};
+  SwaggerParam[] params() default {};
 
   /** Errors */
   SwaggerErrorResponse[] errorResponses() default {};
