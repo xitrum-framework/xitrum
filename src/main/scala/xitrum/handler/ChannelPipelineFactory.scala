@@ -10,6 +10,29 @@ import xitrum.handler.up._
 import xitrum.handler.down._
 
 object DefaultHttpChannelPipelineFactory {
+  // Put sharable handlers here so that they can be easily picked up by apps
+  // that want to use custom pipeline. Those app may only want a subset of
+  // default handlers.
+
+  // Upstream
+  lazy val noPipelining         = new NoPipelining
+  lazy val baseUrlRemover       = new BaseUrlRemover
+  lazy val basicAuth            = new BasicAuth
+  lazy val publicFileServer     = new PublicFileServer
+  lazy val publicResourceServer = new PublicResourceServer
+  lazy val request2Env          = new Request2Env
+  lazy val uriParser            = new UriParser
+  lazy val bodyParser           = new BodyParser
+  lazy val methodOverrider      = new MethodOverrider
+  lazy val dispatcher           = new Dispatcher
+
+  // Downstream
+  lazy val fixiOS6SafariPOST    = new FixiOS6SafariPOST
+  lazy val xSendFile            = new XSendFile
+  lazy val xSendResource        = new XSendResource
+  lazy val env2Response         = new Env2Response
+  lazy val responseCacher       = new ResponseCacher
+
   def removeUnusedHandlersForWebSocket(pipeline: ChannelPipeline) {
     // WebSocket handshaker in Netty dynamically changes the pipeline like this:
     // pipeline.remove(classOf[HttpChunkAggregator])
@@ -40,26 +63,7 @@ object DefaultHttpChannelPipelineFactory {
 }
 
 class DefaultHttpChannelPipelineFactory extends CPF {
-  // Sharable handlers
-
-  // Upstream
-  private[this] val noPipelining         = new NoPipelining
-  private[this] val baseUrlRemover       = new BaseUrlRemover
-  private[this] val basicAuth            = new BasicAuth
-  private[this] val publicFileServer     = new PublicFileServer
-  private[this] val publicResourceServer = new PublicResourceServer
-  private[this] val request2Env          = new Request2Env
-  private[this] val uriParser            = new UriParser
-  private[this] val bodyParser           = new BodyParser
-  private[this] val methodOverrider      = new MethodOverrider
-  private[this] val dispatcher           = new Dispatcher
-
-  // Downstream
-  private[this] val fixiOS6SafariPOST    = new FixiOS6SafariPOST
-  private[this] val xSendFile            = new XSendFile
-  private[this] val xSendResource        = new XSendResource
-  private[this] val env2Response         = new Env2Response
-  private[this] val responseCacher       = new ResponseCacher
+  import DefaultHttpChannelPipelineFactory._
 
   /**
    * You can override this method to customize the default pipeline.
