@@ -55,12 +55,12 @@ object RouteCollection {
     }
 
     new RouteCollection(
-      normal.firstGETs.map(_.toRoute),       normal.lastGETs.map(_.toRoute),       normal.otherGETs.map(_.toRoute),
-      normal.firstPOSTs.map(_.toRoute),      normal.lastPOSTs.map(_.toRoute),      normal.otherPOSTs.map(_.toRoute),
-      normal.firstPUTs.map(_.toRoute),       normal.lastPUTs.map(_.toRoute),       normal.otherPUTs.map(_.toRoute),
-      normal.firstPATCHs.map(_.toRoute),     normal.lastPATCHs.map(_.toRoute),     normal.otherPATCHs.map(_.toRoute),
-      normal.firstDELETEs.map(_.toRoute),    normal.lastDELETEs.map(_.toRoute),    normal.otherDELETEs.map(_.toRoute),
-      normal.firstOPTIONSs.map(_.toRoute),   normal.lastOPTIONSs.map(_.toRoute),   normal.otherOPTIONSs.map(_.toRoute),
+      normal.firstGETs      .map(_.toRoute), normal.lastGETs      .map(_.toRoute), normal.otherGETs      .map(_.toRoute),
+      normal.firstPOSTs     .map(_.toRoute), normal.lastPOSTs     .map(_.toRoute), normal.otherPOSTs     .map(_.toRoute),
+      normal.firstPUTs      .map(_.toRoute), normal.lastPUTs      .map(_.toRoute), normal.otherPUTs      .map(_.toRoute),
+      normal.firstPATCHs    .map(_.toRoute), normal.lastPATCHs    .map(_.toRoute), normal.otherPATCHs    .map(_.toRoute),
+      normal.firstDELETEs   .map(_.toRoute), normal.lastDELETEs   .map(_.toRoute), normal.otherDELETEs   .map(_.toRoute),
+      normal.firstOPTIONSs  .map(_.toRoute), normal.lastOPTIONSs  .map(_.toRoute), normal.otherOPTIONSs  .map(_.toRoute),
       normal.firstWEBSOCKETs.map(_.toRoute), normal.lastWEBSOCKETs.map(_.toRoute), normal.otherWEBSOCKETs.map(_.toRoute),
       new SockJsRouteMap(sockJsMap),
       normal.error404.map(Class.forName(_).asInstanceOf[Class[Action]]),
