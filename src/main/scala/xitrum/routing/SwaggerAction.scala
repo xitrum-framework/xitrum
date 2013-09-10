@@ -56,37 +56,32 @@ class SwaggerAction extends Action {
     val routePath = RouteCompiler.decompile(route.compiledPattern, true)
     val nickname  = route.klass.getSimpleName
 
-    val params = for {
-      param <- doc.params
-    } yield param2json(param)
-
-    val errorResponses = for {
-      response <- doc.responses
-    } yield error2json(response)
+    val params    = doc.params.map(param2json(_))
+    val responses = doc.responses.map(response2json(_))
 
     val cacheNote = cache(route)
     val notes     = if (cacheNote.isEmpty) doc.notes else s"${doc.notes} ${cacheNote}"
 
     val operations = Seq[JObject](
-      ("httpMethod"     -> route.httpMethod.toString) ~
-      ("summary"        -> doc.summary) ~
-      ("notes"          -> notes) ~
-      ("nickname"       -> nickname) ~
-      ("parameters"     -> params.toSeq) ~
-      ("errorResponses" -> errorResponses.toSeq))
+      ("httpMethod"       -> route.httpMethod.toString) ~
+      ("summary"          -> doc.summary) ~
+      ("notes"            -> notes) ~
+      ("nickname"         -> nickname) ~
+      ("parameters"       -> params.toSeq) ~
+      ("responseMessages" -> responses.toSeq))
 
     Some(("path" -> routePath) ~ ("operations" -> operations))
   }
 
   private def param2json(param: SwaggerParam): JObject = {
-    ("name"          -> param.name) ~
-    ("paramType"     -> param.paramType) ~
-    ("type"          -> param.valueType) ~
-    ("description"   -> param.description) ~
-    ("required"      -> param.required)
+    ("name"        -> param.name) ~
+    ("paramType"   -> param.paramType) ~
+    ("type"        -> param.valueType) ~
+    ("description" -> param.description) ~
+    ("required"    -> param.required)
   }
 
-  private def error2json(response: SwaggerResponse): JObject = {
+  private def response2json(response: SwaggerResponse): JObject = {
     ("code"    -> response.code) ~
     ("message" -> response.message)
   }
