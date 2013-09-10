@@ -1,4 +1,4 @@
-2.9 (planned):
+2.10 (planned):
 * #77 Support big file upload, remove maxSizeInMB in xitrum.conf
 * #81 Reload classes and routes in development mode
 * #76 Improve currentAction in Scalate templates
@@ -6,6 +6,12 @@
 * #70 Add Rails-like asset pipeline
 * #71 Add automatic CORS request handling for the whole site
 * #109 Use Akka log instead of using SLF4J directly
+
+2.9 (planned):
+* #169 Add Swagger Doc support
+* #168 Better support for custom handler
+* #167 Update Netty from 3.6.6.Final to 3.7.0.Final
+* #170 Update Glokka from 1.1 to 1.2
 
 2.8:
 * #164 Fix: publicUrl and resourceUrl return URL containing double slash if reverseProxy.baseUrl in xitrum.conf is set
