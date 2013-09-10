@@ -6,6 +6,7 @@ import ChannelHandler.Sharable
 
 import xitrum.Logger
 import xitrum.etag.NotModified
+import xitrum.handler.up.RequestAttacher
 
 /**
  * This handler sets "no-cache" for POST response to fix the problem with
@@ -27,13 +28,14 @@ class FixiOS6SafariPOST extends ChannelDownstreamHandler with Logger {
       return
     }
 
+    val request = RequestAttacher.retrieveOrSendDownstream(ctx, e)
+    if (request == null) return
+
     val response = m.asInstanceOf[HttpResponse]
 
-    // See ChannelPipelineFactory
-    // This is the last Xitrum handler, log the request
+    // This is the last Xitrum handler, log the response
     if (logger.isTraceEnabled) logger.trace(response.toString)
 
-    val request = ctx.getChannel.getAttachment.asInstanceOf[HttpRequest]
     if (request.getMethod == HttpMethod.POST && !response.containsHeader(HttpHeaders.Names.CACHE_CONTROL))
       NotModified.setNoClientCache(response)
 

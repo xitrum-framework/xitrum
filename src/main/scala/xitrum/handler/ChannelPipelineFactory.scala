@@ -9,15 +9,33 @@ import xitrum.Config
 import xitrum.handler.up._
 import xitrum.handler.down._
 
+/**
+ * Sharable handlers are put here so that they can be easily picked up by apps
+ * that want to use custom pipeline. Those apps may only want a subset of
+ * default handlers.
+ *
+ * When an app uses its own dispatcher (not Xitrum's routing/dispatcher) and
+ * only needs Xitrum's fast static file serving, it may use only these handlers:
+ *
+ * Upstream:
+ *   HttpRequestDecoder
+ *   noPipelining
+ *   requestAttacher
+ *   publicFileServer
+ *   its own dispatcher
+ *
+ * Downstream:
+ *   HttpResponseEncoder
+ *   ChunkedWriteHandler
+ *   xSendFile
+ */
 object DefaultHttpChannelPipelineFactory {
-  // Put sharable handlers here so that they can be easily picked up by apps
-  // that want to use custom pipeline. Those app may only want a subset of
-  // default handlers.
+  // Upstream sharable handlers
 
-  // Upstream
   lazy val noPipelining         = new NoPipelining
   lazy val baseUrlRemover       = new BaseUrlRemover
   lazy val basicAuth            = new BasicAuth
+  lazy val requestAttacher      = new RequestAttacher
   lazy val publicFileServer     = new PublicFileServer
   lazy val publicResourceServer = new PublicResourceServer
   lazy val request2Env          = new Request2Env
@@ -26,7 +44,8 @@ object DefaultHttpChannelPipelineFactory {
   lazy val methodOverrider      = new MethodOverrider
   lazy val dispatcher           = new Dispatcher
 
-  // Downstream
+  // Downstream sharable handlers
+
   lazy val fixiOS6SafariPOST    = new FixiOS6SafariPOST
   lazy val xSendFile            = new XSendFile
   lazy val xSendResource        = new XSendResource
@@ -40,6 +59,7 @@ object DefaultHttpChannelPipelineFactory {
     // pipeline.replace(classOf[HttpResponseEncoder], "wsencoder", new WebSocket08FrameEncoder(false))
 
     // Upstream
+
     pipeline.remove(classOf[NoPipelining])
     pipeline.remove(classOf[BaseUrlRemover])
     if (Config.xitrum.basicAuth.isDefined)
@@ -53,6 +73,7 @@ object DefaultHttpChannelPipelineFactory {
     pipeline.remove(classOf[Dispatcher])
 
     // Downstream
+
     pipeline.remove(classOf[ChunkedWriteHandler])
     pipeline.remove(classOf[FixiOS6SafariPOST])
     pipeline.remove(classOf[XSendFile])
@@ -77,14 +98,16 @@ class DefaultHttpChannelPipelineFactory extends CPF {
     val ret = Channels.pipeline()
 
     // Upstream
+
     ret.addLast("HttpRequestDecoder",   new HttpRequestDecoder)
     ret.addLast("HttpChunkAggregator",  new HttpChunkAggregator(Config.xitrum.request.maxSizeInMB * 1024 * 1024))
     ret.addLast("noPipelining",         noPipelining)
-    ret.addLast("baseUrlRemover",       baseUrlRemover)  // HttpRequest is attached to the channel here
+    ret.addLast("baseUrlRemover",       baseUrlRemover)
     if (Config.xitrum.basicAuth.isDefined)
     ret.addLast("basicAuth",            basicAuth)
-    ret.addLast("publicFileServer",     publicFileServer)
-    ret.addLast("publicResourceServer", publicResourceServer)
+    ret.addLast("requestAttacher",      requestAttacher)       // <- Must be before publicFileServer and publicResourceServer
+    ret.addLast("publicFileServer",     publicFileServer)      // because HttpRequest must be attached to the channel for
+    ret.addLast("publicResourceServer", publicResourceServer)  // use at xSendFile and xSendResource (and fixiOS6SafariPOST)
     ret.addLast("request2Env",          request2Env)
     ret.addLast("uriParser",            uriParser)
     ret.addLast("bodyParser",           bodyParser)
@@ -92,6 +115,7 @@ class DefaultHttpChannelPipelineFactory extends CPF {
     ret.addLast("dispatcher",           dispatcher)
 
     // Downstream
+
     ret.addLast("HttpResponseEncoder", new HttpResponseEncoder)
     ret.addLast("ChunkedWriteHandler", new ChunkedWriteHandler)  // For writing ChunkedFile, at XSendFile
     ret.addLast("fixiOS6SafariPOST",   fixiOS6SafariPOST)

@@ -19,7 +19,7 @@ import HttpVersion._
 import xitrum.{Config, Logger}
 import xitrum.etag.{Etag, NotModified}
 import xitrum.handler.AccessLog
-import xitrum.handler.up.NoPipelining
+import xitrum.handler.up.{NoPipelining, RequestAttacher}
 import xitrum.util.{Gzip, Mime}
 
 object XSendFile extends Logger {
@@ -233,6 +233,9 @@ class XSendFile extends ChannelDownstreamHandler {
       return
     }
 
+    val request = RequestAttacher.retrieveOrSendDownstream(ctx, e)
+    if (request == null) return
+
     val response = m.asInstanceOf[HttpResponse]
     val path     = response.getHeader(X_SENDFILE_HEADER)
     if (path == null) {
@@ -248,7 +251,6 @@ class XSendFile extends ChannelDownstreamHandler {
     val noLog = response.containsHeader(X_SENDFILE_HEADER_IS_FROM_CONTROLLER)
     if (noLog) response.removeHeader(X_SENDFILE_HEADER_IS_FROM_CONTROLLER)
 
-    val request = ctx.getChannel.getAttachment.asInstanceOf[HttpRequest]
     sendFile(ctx, e, request, response, path, noLog)
   }
 }

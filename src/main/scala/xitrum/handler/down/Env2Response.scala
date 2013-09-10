@@ -12,7 +12,6 @@ import HttpResponseStatus._
 import xitrum.Config
 import xitrum.etag.Etag
 import xitrum.handler.HandlerEnv
-import xitrum.handler.up.NoPipelining
 import xitrum.util.{ChannelBufferToBytes, Gzip, Mime}
 
 @Sharable
