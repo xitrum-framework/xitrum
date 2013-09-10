@@ -9,7 +9,7 @@ import org.jboss.netty.handler.codec.http.HttpResponseStatus
 
 import xitrum.{Action, Config}
 import xitrum.annotation.{First, DELETE, GET, OPTIONS, PATCH, POST, PUT, SOCKJS, WEBSOCKET}
-import xitrum.annotation.swagger.{Swagger, SwaggerErrorResponse, SwaggerParam}
+import xitrum.annotation.swagger.{Swagger, SwaggerParam, SwaggerResponse}
 
 case class ApiMethod(method: String, route: String)
 
@@ -61,7 +61,7 @@ class SwaggerAction extends Action {
     } yield param2json(param)
 
     val errorResponses = for {
-      response <- doc.errorResponses
+      response <- doc.responses
     } yield error2json(response)
 
     val cacheNote = cache(route)
@@ -86,9 +86,9 @@ class SwaggerAction extends Action {
     ("required"      -> param.required)
   }
 
-  private def error2json(response: SwaggerErrorResponse): JObject = {
-    ("code"   -> response.code) ~
-    ("reason" -> response.reason)
+  private def error2json(response: SwaggerResponse): JObject = {
+    ("code"    -> response.code) ~
+    ("message" -> response.message)
   }
 
   private def annotation2method(annotation: Any): Option[ApiMethod] = annotation match {

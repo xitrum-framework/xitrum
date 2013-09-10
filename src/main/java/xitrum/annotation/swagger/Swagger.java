@@ -8,15 +8,8 @@ import java.lang.annotation.Target;
 @Target(ElementType.METHOD)
 @Retention(RetentionPolicy.RUNTIME)
 public @interface Swagger {
-  /** Brief description of the operation */
-  String summary() default "";
-
-  /** Long description of the operation */
-  String notes() default "";
-
-  /** Parameters */
-  SwaggerParam[] params() default {};
-
-  /** Errors */
-  SwaggerErrorResponse[] errorResponses() default {};
+  String            summary()   default "";
+  String            notes()     default "";
+  SwaggerParam[]    params()    default {};
+  SwaggerResponse[] responses() default {};
 }

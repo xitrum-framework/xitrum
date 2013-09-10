@@ -7,7 +7,7 @@ import java.lang.annotation.Target;
 
 @Target(ElementType.METHOD)
 @Retention(RetentionPolicy.RUNTIME)
-public @interface SwaggerErrorResponse {
-  String code();
-  String reason();
+public @interface SwaggerResponse {
+  int    code();
+  String message();
 }
