@@ -6,7 +6,7 @@ import HttpHeaders.Values._
 import HttpResponseStatus._
 
 import xitrum.{Action, Config}
-import xitrum.annotation.GET
+import xitrum.annotation.{First, GET}
 import xitrum.etag.{Etag, NotModified}
 import xitrum.util.Gzip
 
@@ -22,6 +22,7 @@ object JSRoutesCache {
     Gzip.compress(routes.getBytes(Config.xitrum.request.charset))
 }
 
+@First
 @GET("xitrum/routes.js")
 class JSRoutesAction extends Action {
   def execute() {

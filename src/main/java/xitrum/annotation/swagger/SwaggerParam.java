@@ -9,9 +9,10 @@ import java.lang.annotation.Target;
 @Retention(RetentionPolicy.RUNTIME)
 /** https://github.com/wordnik/swagger-core/wiki/parameters */
 public @interface SwaggerParam {
+  // Default param type is "path", which is required
   String  name();
   String  paramType()   default "path";
-  String  tpe();
-  String  description() default "";
+  String  valueType();
   boolean required()    default true;
+  String  description() default "";
 }

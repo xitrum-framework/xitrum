@@ -5,6 +5,8 @@ import org.json4s.JsonDSL._
 import org.json4s.native._
 import org.json4s.native.JsonMethods._
 
+import org.jboss.netty.handler.codec.http.HttpResponseStatus
+
 import xitrum.{Action, Config}
 import xitrum.annotation.{First, DELETE, GET, OPTIONS, PATCH, POST, PUT, SOCKJS, WEBSOCKET}
 import xitrum.annotation.swagger.{Swagger, SwaggerErrorResponse, SwaggerParam}
@@ -12,12 +14,27 @@ import xitrum.annotation.swagger.{Swagger, SwaggerErrorResponse, SwaggerParam}
 case class ApiMethod(method: String, route: String)
 
 @First
-@GET("/swagger.json")
+@GET("/xitrum/swagger.json")
 @Swagger(summary = "API doc", notes = "Use this route in Swagger UI to see the doc")
 class SwaggerAction extends Action {
+  beforeFilter {
+    if (Config.productionMode) {
+      response.setStatus(HttpResponseStatus.NOT_FOUND)
+      respondText(
+        "For security reason, Swagger Doc is disabled in production mode. " +
+        "If you want to use it in production mode, run in development mode and " +
+        "save /xitrum/swagger.json as a static file in public directory."
+      )
+      false
+    } else {
+      true
+    }
+  }
+
   def execute() {
     val header =
-      ("apiVersion"     -> "1.0") ~
+      // Make this an option in xitrum.conf?
+      //("apiVersion"     -> "1.0") ~
       ("basePath"       -> absUrlPrefix) ~
       ("swaggerVersion" -> "1.2") ~
       ("resourcePath"   -> url[SwaggerAction])
@@ -64,7 +81,7 @@ class SwaggerAction extends Action {
   private def param2json(param: SwaggerParam): JObject = {
     ("name"          -> param.name) ~
     ("paramType"     -> param.paramType) ~
-    ("type"          -> param.tpe) ~
+    ("type"          -> param.valueType) ~
     ("description"   -> param.description) ~
     ("required"      -> param.required)
   }
