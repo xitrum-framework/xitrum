@@ -15,6 +15,10 @@ import xitrum.handler.down.XSendFile
 import xitrum.etag.NotModified
 import xitrum.util.PathSanitizer
 
+object PublicFileServer {
+  val PREFIX = "/public/"
+}
+
 /**
  * Serves static files in "public" directory.
  * See ChannelPipelineFactory, this handler is put after XSendFile.
@@ -35,6 +39,11 @@ class PublicFileServer extends SimpleChannelUpstreamHandler with BadClientSilenc
     }
 
     val pathInfo = request.getUri.split('?')(0)
+    if (!pathInfo.startsWith(PublicFileServer.PREFIX)) {
+      ctx.sendUpstream(e)
+      return
+    }
+
     absStaticPath(pathInfo) match {
       case None =>
         val response = new DefaultHttpResponse(HTTP_1_1, OK)
@@ -63,6 +72,6 @@ class PublicFileServer extends SimpleChannelUpstreamHandler with BadClientSilenc
   private def absStaticPath(pathInfo: String): Option[String] = {
     // Convert to absolute path
     // pathInfo starts with "/"
-    PathSanitizer.sanitize(pathInfo).map(Config.root + "/public" + _)
+    PathSanitizer.sanitize(pathInfo).map(Config.root + _)
   }
 }

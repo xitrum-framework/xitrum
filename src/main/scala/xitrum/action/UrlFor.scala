@@ -4,19 +4,20 @@ import scala.util.Random
 
 import xitrum.{Config, Action, SockJsActor, WebSocketActor}
 import xitrum.etag.Etag
+import xitrum.handler.up.PublicFileServer
 
 trait UrlFor {
   this: Action =>
 
   /** @param path Relative to the "public" directory, without leading "/" */
   def publicUrl(path: String) = {
-    val absPath     = Config.root + "/public/" + path
+    val absPath     = Config.root + PublicFileServer.PREFIX + path
     val forceReload = Etag.forFile(absPath, true) match {
       case Etag.NotFound                           => Random.nextLong.toString
       case Etag.TooBig(file)                       => file.lastModified
       case Etag.Small(bytes, etag, mimeo, gzipped) => etag
     }
-    Config.withBaseUrl("/" + path + "?" + forceReload)
+    Config.withBaseUrl(PublicFileServer.PREFIX + path + "?" + forceReload)
   }
 
   /** @param path Relative to an entry in classpath, without leading "/" */
