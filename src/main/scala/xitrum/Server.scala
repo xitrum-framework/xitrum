@@ -27,6 +27,13 @@ object Server extends Logger {
    * SSL codec handler will be automatically prepended for HTTPS server.
    */
   def start(httpChannelPipelineFactory: ChannelPipelineFactory) {
+    // Don't know why this doesn't work if put above Config.actorSystem
+    //
+    // Redirect Akka log to SLF4J
+    // http://doc.akka.io/docs/akka/2.0/scala/logging.html
+    // http://stackoverflow.com/questions/16202501/how-can-i-override-a-typesafe-config-list-value-on-the-command-line
+    System.setProperty("akka.loggers.0", "akka.event.slf4j.Slf4jLogger")
+
     // Because Hazelcast takes serveral seconds to start, we force it to
     // start before the web server begins receiving requests, instead of
     // letting it start lazily
