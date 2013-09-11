@@ -9,6 +9,7 @@
 
 2.9 (planned):
 * #169 Add Swagger Doc support
+* #173 Speed up routing by caching latest matched routes
 * #168 Better support for custom handler
 * #167 Update Netty from 3.6.6.Final to 3.7.0.Final
 * #171 Update Hazelcast from 3.0.1 to 3.0.2

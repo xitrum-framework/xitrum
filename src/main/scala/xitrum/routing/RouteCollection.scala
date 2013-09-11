@@ -6,8 +6,8 @@ import scala.collection.mutable.{ArrayBuffer, Map => MMap}
 import org.jboss.netty.handler.codec.http.HttpMethod
 
 import xitrum.{Action, Logger}
-import xitrum.scope.request.Params
-import xitrum.scope.request.PathInfo
+import xitrum.scope.request.{Params, PathInfo}
+import xitrum.util.LocalLRUCache
 
 object RouteCollection {
   def fromSerializable(acc: DiscoveredAcc): RouteCollection = {
@@ -263,10 +263,16 @@ class RouteCollection(
 
   //----------------------------------------------------------------------------
 
+  private val matchedRouteCache = LocalLRUCache[String, (Route, Params)](1000)
+
   def route(httpMethod: HttpMethod, pathInfo: PathInfo): Option[(Route, Params)] = {
     // This method is run for every request, thus should be fast
 
-    matchMethod(httpMethod) match {
+    val key   = httpMethod + pathInfo.encoded
+    val value = matchedRouteCache.get(key)
+    if (value != null) return Some(value)
+
+    val maybeCached = matchMethod(httpMethod) match {
       case None => None
 
       case Some((firsts, lasts, others)) =>
@@ -282,6 +288,8 @@ class RouteCollection(
           case s => s
         }
     }
+    maybeCached.foreach { value => matchedRouteCache.put(key, value) }
+    maybeCached
   }
 
   /** @return Option[(firsts, lasts, others)] */

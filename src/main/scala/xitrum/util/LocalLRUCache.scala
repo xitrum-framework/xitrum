@@ -1,6 +1,6 @@
 package xitrum.util
 
-import java.util.LinkedHashMap
+import java.util.{Collections, LinkedHashMap}
 import java.util.Map.Entry
 
 /**
@@ -13,6 +13,10 @@ import java.util.Map.Entry
  * Xitrum uses this for storing etags for static files. Each web server in a
  * cluster has its own cache of (path, mtime) -> etag.
  */
-class LocalLRUCache[K, V](capacity: Int) extends LinkedHashMap[K, V](capacity + 1, 0.75f, true) {
+private class NonThreadsafeLocalLRUCache[K, V](capacity: Int) extends LinkedHashMap[K, V](capacity + 1, 1.0f, true) {
   protected override def removeEldestEntry(eldest: Entry[K, V]) = size > capacity
+}
+
+object LocalLRUCache {
+  def apply[K, V](capacity: Int) = Collections.synchronizedMap(new NonThreadsafeLocalLRUCache[K, V](capacity))
 }
