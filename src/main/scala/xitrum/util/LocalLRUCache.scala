@@ -6,9 +6,7 @@ import java.util.Map.Entry
 /**
  * Non-threadsafe, non-distributed LRU cache.
  *
- * See:
- * http://littletechsecrets.wordpress.com/2008/11/16/simple-lru-cache-in-java/
- * http://amix.dk/blog/post/19465
+ * http://stackoverflow.com/questions/221525/how-would-you-implement-an-lru-cache-in-java-6
  *
  * Xitrum uses this for storing etags for static files. Each web server in a
  * cluster has its own cache of (path, mtime) -> etag.
