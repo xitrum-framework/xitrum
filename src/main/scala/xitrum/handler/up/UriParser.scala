@@ -37,16 +37,13 @@ class UriParser extends SimpleChannelUpstreamHandler with BadClientSilencer {
 
       env.pathInfo  = new PathInfo(pathWithoutTrailingSlash)
       env.uriParams = jParamsToParams(decoder.getParameters)
+      ctx.sendUpstream(e)
     } catch {
       case NonFatal(e) =>
         val msg = "Could not parse URI: " + request.getUri
         logger.warn(msg, e)
-
         ctx.getChannel.close()
-        return
     }
-
-    Channels.fireMessageReceived(ctx, env)
   }
 
   //----------------------------------------------------------------------------

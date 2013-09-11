@@ -49,7 +49,7 @@ class BodyParser extends SimpleChannelUpstreamHandler with BadClientSilencer {
       val (bodyParams, fileUploadParams) = decodeRequestBody(request)
       handlerEnv.bodyParams       = bodyParams
       handlerEnv.fileUploadParams = fileUploadParams
-      Channels.fireMessageReceived(ctx, handlerEnv)
+      ctx.sendUpstream(e)
     } catch {
       case NonFatal(e) =>
         val msg = "Could not parse body of request: " + request

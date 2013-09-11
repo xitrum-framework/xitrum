@@ -51,6 +51,6 @@ class MethodOverrider extends SimpleChannelUpstreamHandler with BadClientSilence
       }
     }
 
-    Channels.fireMessageReceived(ctx, env)
+    ctx.sendUpstream(e)
   }
 }
