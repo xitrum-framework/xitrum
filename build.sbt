@@ -16,10 +16,7 @@ scalacOptions ++= Seq(
 // Avoid problem when Xitrum is built with Java 7 but the projects that use Xitrum
 // are run with Java 6
 // java.lang.UnsupportedClassVersionError: xitrum/annotation/First : Unsupported major.minor version 51.0
-javacOptions ++= Seq(
-  "-source",
-  "1.6"
-)
+javacOptions ++= Seq("-source", "1.6", "-target", "1.6")
 
 // Put config directory in classpath for easier development (sbt console etc.)
 unmanagedBase in Runtime <<= baseDirectory { base => base / "config" }
