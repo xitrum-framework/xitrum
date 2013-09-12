@@ -106,7 +106,7 @@ class Config(val config: TConfig) extends Logger {
         klass.newInstance().asInstanceOf[TemplateEngine]
       } catch {
         case NonFatal(e) =>
-          Config.exitOnError("Cannot load template engine, please check config/xitrum.conf", e)
+          Config.exitOnError("Could not load template engine, please check config/xitrum.conf", e)
           null
       }
     } else {

@@ -2,7 +2,7 @@ organization := "tv.cntt"
 
 name := "xitrum"
 
-version := "2.9-SNAPSHOT"
+version := "2.10-SNAPSHOT"
 
 scalaVersion := "2.10.2"
 
@@ -35,7 +35,7 @@ libraryDependencies += "org.slf4j" % "slf4j-api" % "1.7.5" % "provided"
 libraryDependencies += "io.netty" % "netty" % "3.7.0.Final"
 
 // For clustering SockJS; Akka is included here
-libraryDependencies += "tv.cntt" %% "glokka" % "1.2-SNAPSHOT"
+libraryDependencies += "tv.cntt" %% "glokka" % "1.2"
 
 // Redirect Akka log to SLF4J
 libraryDependencies += "com.typesafe.akka" %% "akka-slf4j" % "2.2.1"
