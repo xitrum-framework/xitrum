@@ -10,7 +10,7 @@ import HttpHeaders.Values._
 import HttpResponseStatus._
 
 import xitrum.{Action, Config, Logger}
-import xitrum.util.{UrlSafeBase64, Gzip, Loader, LocalLRUCache, Mime}
+import xitrum.util.{UrlSafeBase64, Gzip, Loader, LocalLruCache, Mime}
 
 object Etag extends Logger {
   class Result
@@ -19,8 +19,8 @@ object Etag extends Logger {
   case class  Small(val bytes: Array[Byte], val etag: String, val mimeo: Option[String], val gzipped: Boolean) extends Result
 
   //                                                       path    mtime
-  private[this] val smallFileCache        = LocalLRUCache[(String, Long), Small](Config.xitrum.response.maxNumberOfCachedStaticFiles)
-  private[this] val gzippedSmallFileCache = LocalLRUCache[(String, Long), Small](Config.xitrum.response.maxNumberOfCachedStaticFiles)
+  private[this] val smallFileCache        = LocalLruCache[(String, Long), Small](Config.xitrum.response.maxNumberOfCachedStaticFiles)
+  private[this] val gzippedSmallFileCache = LocalLruCache[(String, Long), Small](Config.xitrum.response.maxNumberOfCachedStaticFiles)
 
   /** Etag without quotes is technically illegal. */
   def quote(etag: String) = "\"" + etag + "\""

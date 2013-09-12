@@ -6,4 +6,4 @@ package xitrum
  * trait if you want to skip the check. Subclasses of the controller will also not
  * be checked.
  */
-trait SkipCSRFCheck
+trait SkipCsrfCheck

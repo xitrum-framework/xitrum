@@ -7,12 +7,12 @@ import org.jboss.netty.channel.{ChannelFuture, ChannelFutureListener}
 import org.jboss.netty.handler.codec.http.{HttpMethod, HttpResponseStatus}
 
 import xitrum.action._
-import xitrum.exception.{InvalidAntiCSRFToken, InvalidInput, MissingParam, SessionExpired}
+import xitrum.exception.{InvalidAntiCsrfToken, InvalidInput, MissingParam, SessionExpired}
 import xitrum.handler.{AccessLog, HandlerEnv}
 import xitrum.handler.down.ResponseCacher
 import xitrum.handler.up.{Dispatcher, NoPipelining}
 import xitrum.scope.request.RequestEnv
-import xitrum.scope.session.{CSRF, SessionEnv}
+import xitrum.scope.session.{Csrf, SessionEnv}
 import xitrum.view.{Renderer, Responder}
 
 /**
@@ -59,8 +59,8 @@ trait Action extends RequestEnv
       if ((request.getMethod == HttpMethod.POST ||
            request.getMethod == HttpMethod.PUT ||
            request.getMethod == HttpMethod.DELETE) &&
-          !isInstanceOf[SkipCSRFCheck] &&
-          !CSRF.isValidToken(Action.this)) throw new InvalidAntiCSRFToken
+          !isInstanceOf[SkipCsrfCheck] &&
+          !Csrf.isValidToken(Action.this)) throw new InvalidAntiCsrfToken
 
       // Before filters:
       // When not passed, the before filters must explicitly respond to client,
@@ -95,9 +95,9 @@ trait Action extends RequestEnv
 
         // These exceptions are special cases:
         // We know that the exception is caused by the client (bad request)
-        if (e.isInstanceOf[SessionExpired] || e.isInstanceOf[InvalidAntiCSRFToken] || e.isInstanceOf[MissingParam] || e.isInstanceOf[InvalidInput]) {
+        if (e.isInstanceOf[SessionExpired] || e.isInstanceOf[InvalidAntiCsrfToken] || e.isInstanceOf[MissingParam] || e.isInstanceOf[InvalidInput]) {
           response.setStatus(HttpResponseStatus.BAD_REQUEST)
-          val msg = if (e.isInstanceOf[SessionExpired] || e.isInstanceOf[InvalidAntiCSRFToken]) {
+          val msg = if (e.isInstanceOf[SessionExpired] || e.isInstanceOf[InvalidAntiCsrfToken]) {
             session.clear()
             "Session expired. Please refresh your browser."
           } else if (e.isInstanceOf[MissingParam]) {

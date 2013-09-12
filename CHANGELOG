@@ -8,6 +8,7 @@
 * #109 Use Akka log instead of using SLF4J directly
 
 2.9 (planned):
+* #176 Change SkipCSRFCheck to SkipCsrfCheck
 * #169 Add Swagger Doc support
 * #173 Speed up routing by caching latest matched routes
 * #174 Redirect Akka log to SLF4J

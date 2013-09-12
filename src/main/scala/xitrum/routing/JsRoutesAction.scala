@@ -10,7 +10,7 @@ import xitrum.annotation.{First, GET}
 import xitrum.etag.{Etag, NotModified}
 import xitrum.util.Gzip
 
-object JSRoutesCache {
+object JsRoutesCache {
   // This value is stable, even across different servers in a cluster
   lazy val etag = Etag.forString(Config.routes.jsRoutes)
 
@@ -24,16 +24,16 @@ object JSRoutesCache {
 
 @First
 @GET("xitrum/routes.js")
-class JSRoutesAction extends Action {
+class JsRoutesAction extends Action {
   def execute() {
-    if (!Etag.respondIfEtagsIdentical(this, JSRoutesCache.etag)) {
+    if (!Etag.respondIfEtagsIdentical(this, JsRoutesCache.etag)) {
       NotModified.setClientCacheAggressively(response)
       response.setHeader(CONTENT_TYPE, "text/javascript")
       if (Gzip.isAccepted(request)) {
         response.setHeader(CONTENT_ENCODING, "gzip")
-        respondBinary(JSRoutesCache.gzippedRoutes)
+        respondBinary(JsRoutesCache.gzippedRoutes)
       } else {
-        jsRespond(JSRoutesCache.routes)
+        jsRespond(JsRoutesCache.routes)
       }
     }
   }

@@ -7,7 +7,7 @@ import HttpHeaders.Names
 
 import xitrum.{Config, Action}
 
-trait SessionEnv extends CSRF {
+trait SessionEnv extends Csrf {
   this: Action =>
 
   // Below are lazy because they are not always accessed by framwork/application

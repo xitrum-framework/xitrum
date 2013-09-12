@@ -1,6 +1,6 @@
 package xitrum.validator
 
-object URL extends Validator {
+object Url extends Validator {
   def v(name: String, value: Any) =
     if (value.asInstanceOf[String].contains("://"))
       None

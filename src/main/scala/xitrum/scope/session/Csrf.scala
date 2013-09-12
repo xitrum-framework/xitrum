@@ -3,14 +3,14 @@ package xitrum.scope.session
 import java.util.UUID
 
 import xitrum.Action
-import xitrum.exception.InvalidAntiCSRFToken
+import xitrum.exception.InvalidAntiCsrfToken
 import xitrum.util.SecureUrlSafeBase64
 
 /**
  * SecureBase64 is for preventing a user to mess with his own data to cheat the server.
  * CSRF is for preventing a user to fake other user data.
  */
-object CSRF {
+object Csrf {
   val TOKEN = "csrf-token"
 
   def isValidToken(action: Action): Boolean = {
@@ -21,7 +21,7 @@ object CSRF {
     // Cleaner for application developers when seeing access log
     bodyParams.remove(TOKEN)
 
-    val tokenInSession = action.antiCSRFToken
+    val tokenInSession = action.antiCsrfToken
     tokenInRequest == tokenInSession
   }
 
@@ -30,26 +30,26 @@ object CSRF {
    * (For example when using with GET requests, which does not include the token.)
    * Otherwise you should use SecureBase64.encrypt for shorter result.
    */
-  def encrypt(action: Action, any: Any): String = action.antiCSRFToken + SecureUrlSafeBase64.encrypt(any)
+  def encrypt(action: Action, any: Any): String = action.antiCsrfToken + SecureUrlSafeBase64.encrypt(any)
 
   def decrypt(action: Action, string: String): Any = {
-    val prefix = action.antiCSRFToken
-    if (!string.startsWith(prefix)) throw new InvalidAntiCSRFToken
+    val prefix = action.antiCsrfToken
+    if (!string.startsWith(prefix)) throw new InvalidAntiCsrfToken
 
     val base64String = string.substring(prefix.length)
     SecureUrlSafeBase64.decrypt(base64String) match {
-      case None       => throw new InvalidAntiCSRFToken
+      case None       => throw new InvalidAntiCsrfToken
       case Some(data) => data
     }
   }
 }
 
-trait CSRF {
+trait Csrf {
   this: Action =>
 
-  import CSRF._
+  import Csrf._
 
-  def antiCSRFToken: String = {
+  def antiCsrfToken: String = {
     sessiono(TOKEN) match {
       case Some(x) =>
         x.toString
@@ -63,9 +63,9 @@ trait CSRF {
 
   // Use String instead of Scala XML to avoid generating this (</meta>):
   // <meta name="csrf-token" content="d1d50807-5a0a-4d42-830a-a01a3628f2c8"></meta>
-  lazy val antiCSRFMeta  = "<meta name=\"" + TOKEN + "\" content=\"" + antiCSRFToken + "\" />"
+  lazy val antiCsrfMeta  = "<meta name=\"" + TOKEN + "\" content=\"" + antiCsrfToken + "\" />"
 
   // Use String instead of Scala XML to avoid generating this (</input>):
   // <input name="csrf-token" type="hidden" value="d1d50807-5a0a-4d42-830a-a01a3628f2c8"></input>
-  lazy val antiCSRFInput = "<input type=\"hidden\" name=\"" + TOKEN + "\" value=\"" + antiCSRFToken + "\"/>"
+  lazy val antiCsrfInput = "<input type=\"hidden\" name=\"" + TOKEN + "\" value=\"" + antiCsrfToken + "\"/>"
 }

@@ -11,10 +11,10 @@ import java.util.Map.Entry
  * Xitrum uses this for storing etags for static files. Each web server in a
  * cluster has its own cache of (path, mtime) -> etag.
  */
-private class NonThreadsafeLocalLRUCache[K, V](capacity: Int) extends LinkedHashMap[K, V](capacity + 1, 1.0f, true) {
+private class NonThreadsafeLocalLruCache[K, V](capacity: Int) extends LinkedHashMap[K, V](capacity + 1, 1.0f, true) {
   protected override def removeEldestEntry(eldest: Entry[K, V]) = size > capacity
 }
 
-object LocalLRUCache {
-  def apply[K, V](capacity: Int) = Collections.synchronizedMap(new NonThreadsafeLocalLRUCache[K, V](capacity))
+object LocalLruCache {
+  def apply[K, V](capacity: Int) = Collections.synchronizedMap(new NonThreadsafeLocalLruCache[K, V](capacity))
 }

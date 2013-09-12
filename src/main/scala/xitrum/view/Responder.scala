@@ -21,7 +21,7 @@ import xitrum.util.Json
  * When responding text, charset is automatically set, as advised by Google:
  * http://code.google.com/speed/page-speed/docs/rendering.html#SpecifyCharsetEarly
  */
-trait Responder extends JS with Flash with Knockout {
+trait Responder extends Js with Flash with Knockout {
   this: Action =>
 
   //----------------------------------------------------------------------------

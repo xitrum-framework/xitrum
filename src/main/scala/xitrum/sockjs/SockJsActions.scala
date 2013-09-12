@@ -11,7 +11,7 @@ import akka.actor.{Actor, ActorRef, PoisonPill, Props, Terminated}
 
 import glokka.ActorRegistry
 
-import xitrum.{Action, ActionActor, Config, SkipCSRFCheck, SockJsText}
+import xitrum.{Action, ActionActor, Config, SkipCsrfCheck, SockJsText}
 import xitrum.{WebSocketActor, WebSocketBinary, WebSocketPing, WebSocketPong, WebSocketText}
 import xitrum.annotation._
 import xitrum.etag.NotModified
@@ -366,7 +366,7 @@ class SockJsXhrPollingOPTIONSSend extends SockJsAction {
 }
 
 @POST(":serverId<[^\\.]+>/:sessionId<[^\\.]+>/xhr")
-class SockJsXhrPollingReceive extends SockJsNonWebSocketSessionReceiverActionActor with SkipCSRFCheck {
+class SockJsXhrPollingReceive extends SockJsNonWebSocketSessionReceiverActionActor with SkipCsrfCheck {
   def nLastTokensToRemoveFromPathInfo = 3
 
   def execute() {
@@ -431,7 +431,7 @@ class SockJsXhrPollingReceive extends SockJsNonWebSocketSessionReceiverActionAct
 }
 
 @POST(":serverId<[^\\.]+>/:sessionId<[^\\.]+>/xhr_send")
-class SockJsXhrSend extends SockJsNonWebSocketSessionActionActor with SkipCSRFCheck {
+class SockJsXhrSend extends SockJsNonWebSocketSessionActionActor with SkipCsrfCheck {
   def nLastTokensToRemoveFromPathInfo = 3
 
   def execute() {
@@ -478,7 +478,7 @@ class SockJsXhrStreamingOPTIONSReceive extends SockJsAction {
 }
 
 @POST(":serverId<[^\\.]+>/:sessionId<[^\\.]+>/xhr_streaming")
-class SockJsXhrStreamingReceive extends SockJsNonWebSocketSessionReceiverActionActor with SkipCSRFCheck {
+class SockJsXhrStreamingReceive extends SockJsNonWebSocketSessionReceiverActionActor with SkipCsrfCheck {
   def nLastTokensToRemoveFromPathInfo = 3
 
   def execute() {
@@ -731,7 +731,7 @@ class SockJsJsonPPollingReceive extends SockJsNonWebSocketSessionReceiverActionA
 }
 
 @POST(":serverId<[^\\.]+>/:sessionId<[^\\.]+>/jsonp_send")
-class SockJsJsonPPollingSend extends SockJsNonWebSocketSessionActionActor with SkipCSRFCheck {
+class SockJsJsonPPollingSend extends SockJsNonWebSocketSessionActionActor with SkipCsrfCheck {
   def nLastTokensToRemoveFromPathInfo = 3
 
   def execute() {
@@ -865,7 +865,7 @@ class SockJSWebsocketGET extends SockJsAction {
 // http://sockjs.github.com/sockjs-protocol/sockjs-protocol-0.3.3.html#section-6
 @Last
 @POST(":serverId<[^\\.]+>/:sessionId<[^\\.]+>/websocket")
-class SockJSWebsocketPOST extends SockJsAction with SkipCSRFCheck {
+class SockJSWebsocketPOST extends SockJsAction with SkipCsrfCheck {
   def nLastTokensToRemoveFromPathInfo = 3
 
   def execute() {

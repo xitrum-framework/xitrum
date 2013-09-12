@@ -7,7 +7,7 @@ import org.jboss.netty.handler.codec.http.HttpMethod
 
 import xitrum.{Action, Logger}
 import xitrum.scope.request.{Params, PathInfo}
-import xitrum.util.LocalLRUCache
+import xitrum.util.LocalLruCache
 
 object RouteCollection {
   def fromSerializable(acc: DiscoveredAcc): RouteCollection = {
@@ -263,7 +263,7 @@ class RouteCollection(
 
   //----------------------------------------------------------------------------
 
-  private val matchedRouteCache = LocalLRUCache[String, (Route, Params)](1000)
+  private val matchedRouteCache = LocalLruCache[String, (Route, Params)](1000)
 
   def route(httpMethod: HttpMethod, pathInfo: PathInfo): Option[(Route, Params)] = {
     // This method is run for every request, thus should be fast
