@@ -35,7 +35,7 @@ libraryDependencies += "org.slf4j" % "slf4j-api" % "1.7.5" % "provided"
 libraryDependencies += "io.netty" % "netty" % "3.7.0.Final"
 
 // For clustering SockJS; Akka is included here
-libraryDependencies += "tv.cntt" %% "glokka" % "1.1"
+libraryDependencies += "tv.cntt" %% "glokka" % "1.2-SNAPSHOT"
 
 // Redirect Akka log to SLF4J
 libraryDependencies += "com.typesafe.akka" %% "akka-slf4j" % "2.2.1"

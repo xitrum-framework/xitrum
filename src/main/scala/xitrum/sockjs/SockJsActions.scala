@@ -9,7 +9,7 @@ import org.jboss.netty.handler.codec.http.{DefaultCookie, HttpHeaders, HttpRespo
 
 import akka.actor.{Actor, ActorRef, PoisonPill, Props, Terminated}
 
-import glokka.ActorRegistry
+import glokka.Registry
 
 import xitrum.{Action, ActionActor, Config, SkipCsrfCheck, SockJsText}
 import xitrum.{WebSocketActor, WebSocketBinary, WebSocketPing, WebSocketPong, WebSocketText}
@@ -32,7 +32,7 @@ object SockJsAction {
   // Last chunk is forcefully sent when limit is reached.
   val CHUNKED_RESPONSE_LIMIT = if (Config.productionMode) 128 * 1024 else 4 * 1024
 
-  val actorRegistry = ActorRegistry.start(Config.actorSystem, getClass.getName)
+  val actorRegistry = Registry.start(Config.actorSystem, getClass.getName)
 
   //----------------------------------------------------------------------------
 
@@ -220,28 +220,28 @@ trait SockJsAction extends Action with SockJsPrefix {
 trait SockJsNonWebSocketSessionActionActor extends ActionActor with SockJsAction {
   protected def lookupOrCreateNonWebSocketSessionActor(sessionId: String) {
     // Try to lookup first, then create later
-    SockJsAction.actorRegistry ! ActorRegistry.Lookup(sessionId)
+    SockJsAction.actorRegistry ! Registry.LookupOrCreate(sessionId)
     context.become({
-      case ActorRegistry.LookupResultOk(`sessionId`, actorRef) =>
+      case Registry.LookupResultOk(`sessionId`, actorRef) =>
         context.unbecome()
         self ! (false, actorRef)
 
-      case ActorRegistry.LookupResultNone(`sessionId`) =>
-        context.unbecome()
-
+      case Registry.LookupResultNone(`sessionId`) =>
         // Must use context.system.actorOf instead of context.actorOf, so that
         // actorRef1 is not attached as a child to the current actor; otherwise
         // when the current actor dies, actorRef1 will be forcefully killed
         val props     = Props(new NonWebSocketSession(self, pathPrefix, this))
         val actorRef1 = context.system.actorOf(props)
+        SockJsAction.actorRegistry ! Registry.Register(sessionId, actorRef1)
 
-        SockJsAction.actorRegistry ! ActorRegistry.Register(sessionId, actorRef1)
+        // Throw the current "become" away, restoring the previous one
+        context.unbecome()
         context.become({
-          case ActorRegistry.RegisterResultOk(`sessionId`, actorRef2) =>
+          case Registry.RegisterResultOk(`sessionId`, actorRef2) =>
             context.unbecome()
             self ! (true, actorRef2)
 
-          case ActorRegistry.RegisterResultConflict(`sessionId`, actorRef2) =>
+          case Registry.RegisterResultConflict(`sessionId`, actorRef2) =>
             context.stop(actorRef1)
             context.unbecome()
             self ! (false, actorRef2)
@@ -250,7 +250,7 @@ trait SockJsNonWebSocketSessionActionActor extends ActionActor with SockJsAction
   }
 
   protected def lookupNonWebSocketSessionActor(sessionId: String) {
-    SockJsAction.actorRegistry ! ActorRegistry.Lookup(sessionId)
+    SockJsAction.actorRegistry ! Registry.Lookup(sessionId)
   }
 }
 
@@ -455,10 +455,10 @@ class SockJsXhrSend extends SockJsNonWebSocketSessionActionActor with SkipCsrfCh
     val sessionId = param("sessionId")
     lookupNonWebSocketSessionActor(sessionId)
     context.become {
-      case ActorRegistry.LookupResultNone(`sessionId`) =>
+      case Registry.LookupResultNone(`sessionId`) =>
         respondDefault404Page()
 
-      case ActorRegistry.LookupResultOk(`sessionId`, nonWebSocketSession) =>
+      case Registry.LookupResultOk(`sessionId`, nonWebSocketSession) =>
         nonWebSocketSession ! MessagesFromSenderClient(messages)
         response.setStatus(HttpResponseStatus.NO_CONTENT)
         response.setHeader(HttpHeaders.Names.CONTENT_TYPE, "text/plain; charset=UTF-8")
@@ -768,10 +768,10 @@ class SockJsJsonPPollingSend extends SockJsNonWebSocketSessionActionActor with S
 
     lookupNonWebSocketSessionActor(sessionId)
     context.become {
-      case ActorRegistry.LookupResultNone(`sessionId`) =>
+      case Registry.LookupResultNone(`sessionId`) =>
         respondDefault404Page()
 
-      case ActorRegistry.LookupResultOk(`sessionId`, nonWebSocketSession) =>
+      case Registry.LookupResultOk(`sessionId`, nonWebSocketSession) =>
         nonWebSocketSession ! MessagesFromSenderClient(messages)
         // Konqueror does weird things on 204.
         // As a workaround we need to respond with something - let it be the string "ok".

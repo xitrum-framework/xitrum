@@ -101,8 +101,14 @@ class Config(val config: TConfig) extends Logger {
   lazy val templateEngine: TemplateEngine = {
     if (config.hasPath("templateEngine")) {
       val className = config.getString("templateEngine")
-      val klass     = Class.forName(className)
-      klass.newInstance().asInstanceOf[TemplateEngine]
+      try {
+        val klass = Class.forName(className)
+        klass.newInstance().asInstanceOf[TemplateEngine]
+      } catch {
+        case NonFatal(e) =>
+          Config.exitOnError("Cannot load template engine, please check config/xitrum.conf", e)
+          null
+      }
     } else {
       logger.info("No template engine is configured")
       null
