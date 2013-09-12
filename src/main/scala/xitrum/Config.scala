@@ -266,27 +266,24 @@ object Config extends Logger {
    * Use lazy to avoid collecting routes if they are not used.
    * Sometimes we want to work in sbt console mode and don't like this overhead.
    */
-  lazy val routes: RouteCollection = {
-    val discoveredAcc = deserializeCacheFileOrRecollectWithRetry()
-    RouteCollection.fromSerializable(discoveredAcc)
-  }
+  lazy val routes = loadRouteCacheFileOrRecollectWithRetry()
 
-  /** @return (normal routes, SockJS routes) */
-  private def deserializeCacheFileOrRecollectWithRetry(retried: Boolean = false): DiscoveredAcc = {
+  private def loadRouteCacheFileOrRecollectWithRetry(retried: Boolean = false): RouteCollection = {
     try {
       logger.info("Load file " + ROUTES_CACHE + " or recollect routes...")
       val routeCollector = new RouteCollector
-      routeCollector.deserializeCacheFileOrRecollect(ROUTES_CACHE)
+      val discoveredAcc = routeCollector.deserializeCacheFileOrRecollect(ROUTES_CACHE)
+      RouteCollection.fromSerializable(discoveredAcc)
     } catch {
       case NonFatal(e) =>
         if (retried) {
           Config.exitOnError("Could not collect routes", e)
           throw e
         } else {
-          logger.info("Delete " + ROUTES_CACHE + " and retry")
+          logger.info("Could not load " + ROUTES_CACHE + ", delete and retry...")
           val file = new File(ROUTES_CACHE)
           file.delete()
-          deserializeCacheFileOrRecollectWithRetry(true)
+          loadRouteCacheFileOrRecollectWithRetry(true)
         }
     }
   }

@@ -8,11 +8,12 @@
 * #109 Use Akka log instead of using SLF4J directly
 
 2.9 (planned):
-* #176 Change SkipCSRFCheck to SkipCsrfCheck; same for antiCSRFMeta etc.
 * #169 Add Swagger Doc support
 * #173 Speed up routing by caching latest matched routes
 * #174 Redirect Akka log to SLF4J
 * #175 Optimize static file serving by readding /public/ prefix
+* #176 Change SkipCSRFCheck to SkipCsrfCheck; same for antiCSRFMeta etc.
+* #177 Make routes.cache loading more robust with class name change
 * #168 Better support for custom handler
 * #167 Update Netty from 3.6.6.Final to 3.7.0.Final
 * #171 Update Hazelcast from 3.0.1 to 3.0.2
