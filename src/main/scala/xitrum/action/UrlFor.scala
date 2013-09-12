@@ -11,13 +11,19 @@ trait UrlFor {
 
   /** @param path Relative to the "public" directory, without leading "/" */
   def publicUrl(path: String) = {
-    val absPath     = Config.root + PublicFileServer.PREFIX + path
+    val absPath     = Config.root + "/public/" + path
     val forceReload = Etag.forFile(absPath, true) match {
       case Etag.NotFound                           => Random.nextLong.toString
       case Etag.TooBig(file)                       => file.lastModified
       case Etag.Small(bytes, etag, mimeo, gzipped) => etag
     }
-    Config.withBaseUrl(PublicFileServer.PREFIX + path + "?" + forceReload)
+
+    // staticFileUrlPrefix: Starts and stops with "/", like "/static/", if any
+    val url = Config.xitrum.request.staticFileUrlPrefix match {
+      case None         => "/"    + path
+      case Some(prefix) => prefix + path
+    }
+    Config.withBaseUrl(url + "?" + forceReload)
   }
 
   /** @param path Relative to an entry in classpath, without leading "/" */

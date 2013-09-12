@@ -15,10 +15,6 @@ import xitrum.handler.down.XSendFile
 import xitrum.etag.NotModified
 import xitrum.util.PathSanitizer
 
-object PublicFileServer {
-  val PREFIX = "/public/"
-}
-
 /**
  * Serves static files in "public" directory.
  * See ChannelPipelineFactory, this handler is put after XSendFile.
@@ -39,12 +35,15 @@ class PublicFileServer extends SimpleChannelUpstreamHandler with BadClientSilenc
     }
 
     val pathInfo = request.getUri.split('?')(0)
-    if (!pathInfo.startsWith(PublicFileServer.PREFIX)) {
-      ctx.sendUpstream(e)
-      return
+    val prefixo  = Config.xitrum.request.staticFileUrlPrefix
+    prefixo.foreach { prefix =>
+      if (!pathInfo.startsWith(prefix)) {
+        ctx.sendUpstream(e)
+        return
+      }
     }
 
-    absStaticPath(pathInfo) match {
+    sanitizedAbsStaticPath(pathInfo, prefixo) match {
       case None =>
         val response = new DefaultHttpResponse(HTTP_1_1, OK)
         XSendFile.set404Page(response, false)
@@ -66,12 +65,22 @@ class PublicFileServer extends SimpleChannelUpstreamHandler with BadClientSilenc
     }
   }
 
-  //----------------------------------------------------------------------------
+  /**
+   * Sanitizes and returns absolute path.
+   *
+   * @param pathInfo Starts with "/"
+   * @param prefixo  Starts and stops with "/", like "/static/", if any
+   */
+  private def sanitizedAbsStaticPath(pathInfo: String, prefixo: Option[String]): Option[String] = {
+    PathSanitizer.sanitize(pathInfo).map { path =>
+      prefixo match {
+        case None =>
+          Config.root + "/public" + path
 
-  /** Sanitizes and returns absolute path. */
-  private def absStaticPath(pathInfo: String): Option[String] = {
-    // Convert to absolute path
-    // pathInfo starts with "/"
-    PathSanitizer.sanitize(pathInfo).map(Config.root + _)
+        case Some(prefix) =>
+          val withoutPrefix = path.substring(prefix.length)
+          Config.root + "/public/" + withoutPrefix
+      }
+    }
   }
 }

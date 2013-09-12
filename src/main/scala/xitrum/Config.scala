@@ -56,6 +56,9 @@ class RequestConfig(config: TConfig) {
   val maxSizeInMB    = config.getInt("maxSizeInMB")
   val filteredParams = config.getStringList("filteredParams")
 
+  // Starts and stops with "/", like "/static/", if any
+  val staticFileUrlPrefix = if (config.hasPath("staticFileUrlPrefix")) Some(config.getString("staticFileUrlPrefix")) else None
+
   val charset = Charset.forName(charsetName)
 }
 
