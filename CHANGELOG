@@ -8,6 +8,7 @@
 * #109 Use Akka log instead of using SLF4J directly
 
 2.10 (planned):
+* #182 Cache result of SwaggerAction at 1st access
 * #183 Fix: Dead actor sends Terminate message to itself
 * #93 Readd indices for xitrum.mq.MessageQueue
 

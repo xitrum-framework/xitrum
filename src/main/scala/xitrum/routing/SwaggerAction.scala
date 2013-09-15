@@ -13,41 +13,16 @@ import xitrum.annotation.swagger.{Swagger, SwaggerParam, SwaggerResponse}
 
 case class ApiMethod(method: String, route: String)
 
-@First
-@GET("/xitrum/swagger.json")
-@Swagger(summary = "API doc", notes = "Use this route in Swagger UI to see the doc")
-class SwaggerAction extends Action {
-  beforeFilter {
-    if (Config.productionMode) {
-      response.setStatus(HttpResponseStatus.NOT_FOUND)
-      respondText(
-        "For security reason, Swagger Doc is disabled in production mode. " +
-        "If you want to use it in production mode, run in development mode and " +
-        "save /xitrum/swagger.json as a static file in public directory."
-      )
-      false
-    } else {
-      true
-    }
-  }
+object SwaggerAction {
+  // Cache result of SwaggerAction at 1st access;
+  // Can't cache header because a server may have multiple addresses
+  lazy val apis = for {
+    route <- routes
+    doc   <- docOf(route.klass)
+    json  <- route2Json(route, doc)
+  } yield json
 
-  def execute() {
-    val header =
-      // Make this an option in xitrum.conf?
-      //("apiVersion"     -> "1.0") ~
-      ("basePath"       -> absUrlPrefix) ~
-      ("swaggerVersion" -> "1.2") ~
-      ("resourcePath"   -> url[SwaggerAction])
-
-    val apis = for {
-      route <- routes
-      doc   <- docOf(route.klass)
-      json  <- route2Json(route, doc)
-    } yield json
-
-    val json = pretty(render(header ~ ("apis" -> apis)))
-    respondJsonText(json)
-  }
+  //----------------------------------------------------------------------------
 
   private def docOf(klass: Class[_]): Option[Swagger] =
     Option(klass.getAnnotation(classOf[Swagger]))
@@ -115,5 +90,36 @@ class SwaggerAction extends Action {
       s"(page cache: ${route.cacheSecs} [sec])"
     else
       s"(action cache: ${-route.cacheSecs} [sec])"
+  }
+}
+
+@First
+@GET("/xitrum/swagger.json")
+@Swagger(summary = "API doc", notes = "Use this route in Swagger UI to see the doc")
+class SwaggerAction extends Action {
+  beforeFilter {
+    if (Config.productionMode) {
+      response.setStatus(HttpResponseStatus.NOT_FOUND)
+      respondText(
+        "For security reason, Swagger Doc is disabled in production mode. " +
+        "If you want to use it in production mode, run in development mode and " +
+        "save /xitrum/swagger.json as a static file in public directory."
+      )
+      false
+    } else {
+      true
+    }
+  }
+
+  def execute() {
+    val header =
+      // Make this an option in xitrum.conf?
+      //("apiVersion"     -> "1.0") ~
+      ("basePath"       -> absUrlPrefix) ~
+      ("swaggerVersion" -> "1.2") ~
+      ("resourcePath"   -> url[SwaggerAction])
+
+    val json = pretty(render(header ~ ("apis" -> SwaggerAction.apis)))
+    respondJsonText(json)
   }
 }
