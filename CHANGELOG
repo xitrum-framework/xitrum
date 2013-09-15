@@ -1,4 +1,4 @@
-2.10 (planned):
+2.11 (planned):
 * #77 Support big file upload, remove maxSizeInMB in xitrum.conf
 * #81 Reload classes and routes in development mode
 * #76 Improve currentAction in Scalate templates
@@ -6,6 +6,9 @@
 * #70 Add Rails-like asset pipeline
 * #71 Add automatic CORS request handling for the whole site
 * #109 Use Akka log instead of using SLF4J directly
+
+2.10 (planned):
+* #183 Fix: Dead actor sends Terminate message to itself
 
 2.9:
 * #169 Add Swagger Doc support

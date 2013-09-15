@@ -1,6 +1,6 @@
 package xitrum
 
-import akka.actor.Actor
+import akka.actor.{Actor, PoisonPill}
 import xitrum.handler.HandlerEnv
 
 /**
@@ -17,7 +17,12 @@ trait ActionActor extends Actor with Action {
       apply(env)
 
       // Don't use context.stop(self) to avoid leaking context outside this actor
-      addConnectionClosedListener { Config.actorSystem.stop(self) }
+      addConnectionClosedListener {
+        // The check is for avoiding "Dead actor sends Terminate msg to itself"
+        // See onDoneResponding below
+        // https://github.com/ngocdaothanh/xitrum/issues/183
+        if (!isDoneResponding) self ! PoisonPill
+      }
 
       dispatchWithFailsafe()
   }
@@ -25,6 +30,6 @@ trait ActionActor extends Actor with Action {
   override def onDoneResponding() {
     // Don't use context.stop(self) to avoid leaking context outside this actor,
     // just in case onDoneResponding is called from another thread
-    Config.actorSystem.stop(self)
+    self ! PoisonPill
   }
 }
