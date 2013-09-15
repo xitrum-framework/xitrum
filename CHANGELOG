@@ -9,6 +9,7 @@
 
 2.10 (planned):
 * #183 Fix: Dead actor sends Terminate message to itself
+* #93 Readd indices for xitrum.mq.MessageQueue
 
 2.9:
 * #169 Add Swagger Doc support

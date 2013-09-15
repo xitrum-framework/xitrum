@@ -21,7 +21,9 @@ import xitrum.scope.request.Params
 object MessageQueue {
   private[this] val TTL_SECONDS = 60
 
-  private[this] val map = Config.hazelcastInstance.getMap("xitrum/message-queue").asInstanceOf[IMap[Long, QueueMessage]]
+  private[this] val map = Config.hazelcastInstance.getMap[Long, QueueMessage]("xitrum/message-queue")
+  map.addIndex("topic",     false)  // Comparison: =
+  map.addIndex("timestamp", true)   // Comparison: >
 
   /** The listener returns true if it wants itself to be unsubscribe. */
   type MessageListener = (Seq[QueueMessage]) => Boolean
@@ -29,11 +31,6 @@ object MessageQueue {
   private[this] val messageListeners = MMap[String, ArrayBuffer[MessageListener]]()
 
   //----------------------------------------------------------------------------
-
-  // Commented out for now, because of this issue:
-  // https://github.com/hazelcast/hazelcast/issues/310
-  //map.addIndex("topic",     false)  // Comparison: =
-  //map.addIndex("timestamp", true)   // Comparison: >
 
   map.addEntryListener(new EntryListener[Long, QueueMessage] {
     def entryAdded(event: EntryEvent[Long, QueueMessage]) {
