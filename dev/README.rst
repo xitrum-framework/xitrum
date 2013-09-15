@@ -1,5 +1,34 @@
 Use SBT 0.13.0 to compile. See project/build.properties.
 
+How to update Swagger UI
+------------------------
+
+See:
+
+* SwaggerIndexAction
+* http://stackoverflow.com/questions/979975/how-to-get-the-value-from-url-parameter
+
+To update Swagger UI, copy dist from https://github.com/wordnik/swagger-ui to
+src/main/resources/public/xitrum as swagger-ui. Then replace
+"http://petstore.swagger.wordnik.com/api/api-docs" with this function call:
+
+::
+
+  var getUrl = function() {
+    if (!location.search) return '/xitrum/swagger.json';
+
+    var parts = location.search.substring(1).split('&');
+    for (var i = 0; i < parts.length; i++) {
+      var part = parts[i];
+      if (part.indexOf('url=') == 0) {
+        var url = part.substring('url='.length);
+        return url;
+      }
+    }
+
+    return '/xitrum/swagger.json';
+  }
+
 Debug client-server data receiving and sending
 ----------------------------------------------
 
