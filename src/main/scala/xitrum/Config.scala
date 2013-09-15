@@ -276,6 +276,9 @@ object Config extends Logger {
    */
   lazy val routes = loadRouteCacheFileOrRecollectWithRetry()
 
+  /** routes.reverseMappings is used heavily in URL generation, cache it here */
+  lazy val routesReverseMappings = routes.reverseMappings
+
   private def loadRouteCacheFileOrRecollectWithRetry(retried: Boolean = false): RouteCollection = {
     try {
       logger.info("Load file " + ROUTES_CACHE + " or recollect routes...")

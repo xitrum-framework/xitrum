@@ -6,8 +6,28 @@ import xitrum.{Config, Action, SockJsActor, WebSocketActor}
 import xitrum.etag.Etag
 import xitrum.handler.up.PublicFileServer
 
-trait UrlFor {
+trait Url {
   this: Action =>
+
+  lazy val absUrlPrefixWithoutScheme = {
+    val portSuffix =
+      if ((isSsl && serverPort == 443) || (!isSsl && serverPort == 80))
+        ""
+      else
+        ":" + serverPort
+    serverName + portSuffix + Config.baseUrl
+  }
+
+  lazy val absUrlPrefix          = scheme          + "://" + absUrlPrefixWithoutScheme
+  lazy val webSocketAbsUrlPrefix = webSocketScheme + "://" + absUrlPrefixWithoutScheme
+
+  // iPhone Safari throws error "location mismatch" if the request URL is
+  // http://example.com/ws
+  // but the response URL here is
+  // ws://example.com:80/ws
+  lazy val webSocketAbsRequestUrl = webSocketAbsUrlPrefix + request.getUri
+
+  //----------------------------------------------------------------------------
 
   /** @param path Relative to the "public" directory, without leading "/" */
   def publicUrl(path: String) = {
@@ -38,7 +58,7 @@ trait UrlFor {
 
   //----------------------------------------------------------------------------
 
-  def url(params: (String, Any)*) = Config.routes.reverseMappings(getClass).url(params:_*)
+  def url(params: (String, Any)*) = Config.routesReverseMappings(getClass).url(params:_*)
   lazy val url: String = url()
 
   def absUrl(params: (String, Any)*) = absUrlPrefix + url(params:_*)
@@ -51,7 +71,7 @@ trait UrlFor {
 
   def url[T <: Action : Manifest](params: (String, Any)*) = {
     val klass = manifest[T].runtimeClass.asInstanceOf[Class[Action]]
-    Config.routes.reverseMappings(klass).url(params:_*)
+    Config.routesReverseMappings(klass).url(params:_*)
   }
   def url[T <: Action : Manifest]: String = url[T]()
 
@@ -62,7 +82,7 @@ trait UrlFor {
 
   def webSocketAbsUrl[T <: WebSocketActor : Manifest](params: (String, Any)*) = {
     val klass = manifest[T].runtimeClass.asInstanceOf[Class[Action]]
-    webSocketAbsUrlPrefix + Config.routes.reverseMappings(klass).url(params:_*)
+    webSocketAbsUrlPrefix + Config.routesReverseMappings(klass).url(params:_*)
   }
   def webSocketAbsUrl[T <: WebSocketActor : Manifest]: String = webSocketAbsUrl[T]()
 

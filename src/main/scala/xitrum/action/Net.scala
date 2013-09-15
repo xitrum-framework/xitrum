@@ -118,22 +118,4 @@ trait Net {
       (xs(0), xs(1).toInt)
     }
   }
-
-  lazy val absUrlPrefixWithoutScheme = {
-    val portSuffix =
-      if ((isSsl && serverPort == 443) || (!isSsl && serverPort == 80))
-        ""
-      else
-        ":" + serverPort
-    serverName + portSuffix + Config.baseUrl
-  }
-
-  lazy val absUrlPrefix          = scheme          + "://" + absUrlPrefixWithoutScheme
-  lazy val webSocketAbsUrlPrefix = webSocketScheme + "://" + absUrlPrefixWithoutScheme
-
-  // iPhone Safari throws error "location mismatch" if the request URL is
-  // http://example.com/ws
-  // but the response URL here is
-  // ws://example.com:80/ws
-  lazy val webSocketAbsRequestUrl = webSocketAbsUrlPrefix + request.getUri
 }
