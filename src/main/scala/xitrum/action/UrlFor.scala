@@ -6,7 +6,7 @@ import xitrum.{Config, Action, SockJsActor, WebSocketActor}
 import xitrum.etag.Etag
 import xitrum.handler.up.PublicFileServer
 
-trait Url {
+trait UrlFor {
   this: Action =>
 
   lazy val absUrlPrefixWithoutScheme = {

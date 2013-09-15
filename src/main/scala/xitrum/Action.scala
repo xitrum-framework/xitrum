@@ -27,7 +27,7 @@ trait Action extends RequestEnv
   with Filter
   with BasicAuth
   with Redirect
-  with Url
+  with UrlFor
   with Renderer
   with Responder
   with I18n
