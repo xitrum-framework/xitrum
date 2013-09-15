@@ -226,8 +226,8 @@ trait SockJsNonWebSocketSessionActionActor extends ActionActor with SockJsAction
 trait SockJsNonWebSocketSessionReceiverActionActor extends SockJsNonWebSocketSessionActionActor {
   protected var nonWebSocketSession: ActorRef = _
 
-  // Call lookupOrCreateNonWebSocketSessionActor and continue here
-  // Here, context.becom(receiveNotification) may be called
+  // Call lookupOrCreateNonWebSocketSessionActor and continue with this method.
+  // Here, context.become(receiveNotification) may be called.
   protected def onLookupOrRecreateResult(newlyCreated: Boolean)
 
   protected def receiveNotification: Receive

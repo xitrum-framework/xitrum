@@ -2,7 +2,7 @@ package xitrum.sockjs
 
 import scala.collection.mutable.ArrayBuffer
 
-import akka.actor.{Actor, ActorRef, ActorSystem, PoisonPill, Props, ReceiveTimeout, Terminated}
+import akka.actor.{Actor, ActorRef, ActorSystem, Props, ReceiveTimeout, Terminated}
 import scala.concurrent.duration._
 
 import xitrum.{Action, Config, SockJsText}
@@ -87,9 +87,10 @@ class NonWebSocketSession(var receiverCliento: Option[ActorRef], pathPrefix: Str
     context.setReceiveTimeout(TIMEOUT_CONNECTION)
   }
 
-  override def postStop() {
+  private def unwatchAndStop() {
     context.unwatch(sockJsActorRef)
     receiverCliento.foreach(context.unwatch(_))
+    context.stop(self)
   }
 
   def receive = {
@@ -103,7 +104,7 @@ class NonWebSocketSession(var receiverCliento: Option[ActorRef], pathPrefix: Str
     case Terminated(monitored) =>
       if (monitored == sockJsActorRef) {
         // See CloseFromHandler
-        if (!closed) self ! PoisonPill
+        if (!closed) unwatchAndStop()
       } else {
         receiverCliento.foreach { receiverClient =>
           if (monitored == receiverClient) {
@@ -117,7 +118,7 @@ class NonWebSocketSession(var receiverCliento: Option[ActorRef], pathPrefix: Str
 
     // Similar to Terminated but no TIMEOUT_CONNECTION is needed
     case AbortFromReceiverClient =>
-      self ! PoisonPill
+      unwatchAndStop()
 
     case SubscribeFromReceiverClient =>
       if (closed) {
@@ -159,7 +160,7 @@ class NonWebSocketSession(var receiverCliento: Option[ActorRef], pathPrefix: Str
             // Stop to avoid out of memory if there's no subscriber for a long time
             val now = System.currentTimeMillis()
             if (now - lastSubscribedAt > TIMEOUT_CONNECTION_MILLIS) {
-              self ! PoisonPill
+              unwatchAndStop()
             } else {
               bufferForClientSubscriber += message
             }
@@ -174,7 +175,7 @@ class NonWebSocketSession(var receiverCliento: Option[ActorRef], pathPrefix: Str
     case ReceiveTimeout =>
       if (closed || receiverCliento.isEmpty) {
         // Closed or no subscriber for a long time
-        self ! PoisonPill
+        unwatchAndStop()
       } else {
         // No message for subscriber for a long time
         receiverCliento.get ! NotificationToReceiverClientHeartbeat
