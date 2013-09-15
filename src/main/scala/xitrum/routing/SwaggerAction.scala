@@ -98,13 +98,9 @@ object SwaggerAction {
 @Swagger(summary = "API doc", notes = "Use this route in Swagger UI to see the doc")
 class SwaggerAction extends Action {
   beforeFilter {
-    if (Config.productionMode) {
+    if (Config.xitrum.swaggerApiVersion.isEmpty) {
       response.setStatus(HttpResponseStatus.NOT_FOUND)
-      respondText(
-        "For security reason, Swagger Doc is disabled in production mode. " +
-        "If you want to use it in production mode, run in development mode and " +
-        "save /xitrum/swagger.json as a static file in public directory."
-      )
+      respondText("Swagger Doc is disabled")
       false
     } else {
       true
@@ -113,8 +109,7 @@ class SwaggerAction extends Action {
 
   def execute() {
     val header =
-      // Make this an option in xitrum.conf?
-      //("apiVersion"     -> "1.0") ~
+      ("apiVersion"     -> Config.xitrum.swaggerApiVersion.get) ~
       ("basePath"       -> absUrlPrefix) ~
       ("swaggerVersion" -> "1.2") ~
       ("resourcePath"   -> url[SwaggerAction])

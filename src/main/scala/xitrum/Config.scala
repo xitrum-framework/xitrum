@@ -119,6 +119,8 @@ class Config(val config: TConfig) extends Logger {
 
   val session = new SessionConfig(config.getConfig("session"))
 
+  val swaggerApiVersion = if (config.hasPath("swaggerApiVersion")) Some(config.getString("swaggerApiVersion")) else None
+
   val request = new RequestConfig(config.getConfig("request"))
 
   val response = new ResponseConfig(config.getConfig("response"))
