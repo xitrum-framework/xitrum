@@ -2,7 +2,7 @@ package xitrum.sockjs
 
 import scala.collection.mutable.ArrayBuffer
 
-import akka.actor.{Actor, ActorRef, ActorSystem, Props, ReceiveTimeout, Terminated}
+import akka.actor.{Actor, ActorRef, ActorSystem, PoisonPill, Props, ReceiveTimeout, Terminated}
 import scala.concurrent.duration._
 
 import xitrum.{Action, Config, SockJsText}
@@ -52,7 +52,7 @@ object NonWebSocketSession {
  * for subscriber for a long time.
  * See TIMEOUT_CONNECTION and TIMEOUT_HEARTBEAT in NonWebSocketSessions.
  */
-class NonWebSocketSession(var receiverClient: ActorRef, pathPrefix: String, action: Action) extends Actor {
+class NonWebSocketSession(var receiverCliento: Option[ActorRef], pathPrefix: String, action: Action) extends Actor {
   import NonWebSocketSession._
 
   private[this] var sockJsActorRef: ActorRef = _
@@ -70,14 +70,16 @@ class NonWebSocketSession(var receiverClient: ActorRef, pathPrefix: String, acti
   private[this] var closed = false
 
   override def preStart() {
-    // sockJsHandler.onClose is called at postStop
-    sockJsActorRef = Config.routes.sockJsRouteMap.createSockJsActor(pathPrefix)
+    // Attach sockJsActorRef to the current actor, so that sockJsActorRef is
+    // automatically stopped when the current actor stops
+    sockJsActorRef = Config.routes.sockJsRouteMap.createSockJsActor(context, pathPrefix)
+    context.watch(sockJsActorRef)
     sockJsActorRef ! (self, action)
 
     lastSubscribedAt = System.currentTimeMillis()
 
     // Unsubscribed when stopped
-    context.watch(receiverClient)
+    context.watch(receiverCliento.get)
 
     // Once set, the receive timeout stays in effect (i.e. continues firing
     // repeatedly after inactivity periods). Duration.Undefined must be set
@@ -86,7 +88,8 @@ class NonWebSocketSession(var receiverClient: ActorRef, pathPrefix: String, acti
   }
 
   override def postStop() {
-    Config.actorSystem.stop(sockJsActorRef)
+    context.unwatch(sockJsActorRef)
+    receiverCliento.foreach(context.unwatch(_))
   }
 
   def receive = {
@@ -98,28 +101,38 @@ class NonWebSocketSession(var receiverClient: ActorRef, pathPrefix: String, acti
     //
     // See also AbortFromReceiverClient below.
     case Terminated(monitored) =>
-      if (monitored == receiverClient) {
-        receiverClient = null
-        context.setReceiveTimeout(TIMEOUT_CONNECTION)
+      if (monitored == sockJsActorRef) {
+        // See CloseFromHandler
+        if (!closed) self ! PoisonPill
+      } else {
+        receiverCliento.foreach { receiverClient =>
+          if (monitored == receiverClient) {
+            context.unwatch(receiverClient)
+            receiverCliento = None
+
+            context.setReceiveTimeout(TIMEOUT_CONNECTION)
+          }
+        }
       }
 
     // Similar to Terminated but no TIMEOUT_CONNECTION is needed
     case AbortFromReceiverClient =>
-      context.stop(self)
+      self ! PoisonPill
 
     case SubscribeFromReceiverClient =>
       if (closed) {
         sender ! SubscribeResultToReceiverClientClosed
       } else {
         lastSubscribedAt = System.currentTimeMillis()
-        if (receiverClient == null) {
-          receiverClient = sender
-          context.watch(receiverClient)  // Unsubscribed when stopped
+        if (receiverCliento.isEmpty) {
+          receiverCliento = Some(sender)
+          context.watch(sender)
+
           if (bufferForClientSubscriber.isEmpty) {
-            receiverClient ! SubscribeResultToReceiverClientWaitForMessage
+            sender ! SubscribeResultToReceiverClientWaitForMessage
             context.setReceiveTimeout(TIMEOUT_HEARTBEAT)
           } else {
-            receiverClient ! SubscribeResultToReceiverClientMessages(bufferForClientSubscriber.toList)
+            sender ! SubscribeResultToReceiverClientMessages(bufferForClientSubscriber.toList)
             bufferForClientSubscriber.clear()
           }
         } else {
@@ -130,10 +143,10 @@ class NonWebSocketSession(var receiverClient: ActorRef, pathPrefix: String, acti
     case CloseFromHandler =>
       // Until the timeout occurs, the server must serve the close message
       closed = true
-      if (receiverClient != null) {
-        context.unwatch(receiverClient)
+      receiverCliento.foreach { receiverClient =>
         receiverClient ! NotificationToReceiverClientClosed
-        receiverClient = null
+        context.unwatch(receiverClient)
+        receiverCliento = None
       }
 
     case MessagesFromSenderClient(messages) =>
@@ -141,28 +154,30 @@ class NonWebSocketSession(var receiverClient: ActorRef, pathPrefix: String, acti
 
     case MessageFromHandler(message) =>
       if (!closed) {
-        if (receiverClient == null) {
-          // Stop to avoid out of memory if there's no subscriber for a long time
-          val now = System.currentTimeMillis()
-          if (now - lastSubscribedAt > TIMEOUT_CONNECTION_MILLIS) {
-            context.stop(self)
-          } else {
-            bufferForClientSubscriber += message
-          }
-        } else {
-          // buffer is empty at this moment
-          receiverClient ! NotificationToReceiverClientMessage(message)
-          context.setReceiveTimeout(TIMEOUT_CONNECTION)
+        receiverCliento match {
+          case None =>
+            // Stop to avoid out of memory if there's no subscriber for a long time
+            val now = System.currentTimeMillis()
+            if (now - lastSubscribedAt > TIMEOUT_CONNECTION_MILLIS) {
+              self ! PoisonPill
+            } else {
+              bufferForClientSubscriber += message
+            }
+
+          case Some(receiverClient) =>
+            // buffer is empty at this moment
+            receiverClient ! NotificationToReceiverClientMessage(message)
+            context.setReceiveTimeout(TIMEOUT_CONNECTION)
         }
       }
 
     case ReceiveTimeout =>
-      if (closed || receiverClient == null) {
+      if (closed || receiverCliento.isEmpty) {
         // Closed or no subscriber for a long time
-        context.stop(self)
+        self ! PoisonPill
       } else {
         // No message for subscriber for a long time
-        receiverClient ! NotificationToReceiverClientHeartbeat
+        receiverCliento.get ! NotificationToReceiverClientHeartbeat
         context.setReceiveTimeout(TIMEOUT_CONNECTION)
       }
   }

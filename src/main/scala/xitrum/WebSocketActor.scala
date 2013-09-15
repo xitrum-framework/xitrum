@@ -1,6 +1,6 @@
 package xitrum
 
-import akka.actor.Actor
+import akka.actor.{Actor, PoisonPill}
 
 import org.jboss.netty.buffer.{ChannelBuffer, ChannelBuffers}
 import org.jboss.netty.channel.{Channel, ChannelFuture, ChannelFutureListener}
@@ -40,7 +40,7 @@ trait WebSocketActor extends Actor with Action {
 
       if (acceptWebSocket()) {
         // Don't use context.stop(self) to avoid leaking context outside this actor
-        addConnectionClosedListener { Config.actorSystem.stop(self) }
+        addConnectionClosedListener { self ! PoisonPill }
 
         // Can't use dispatchWithFailsafe because it may respond normal HTTP
         // response; we have just upgraded the connection to WebSocket protocol

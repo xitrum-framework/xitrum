@@ -218,55 +218,59 @@ trait SockJsAction extends Action with SockJsPrefix {
 }
 
 trait SockJsNonWebSocketSessionActionActor extends ActionActor with SockJsAction {
-  protected def lookupOrCreateNonWebSocketSessionActor(sessionId: String) {
-    // Try to lookup first, then create later
-    SockJsAction.actorRegistry ! Registry.LookupOrCreate(sessionId)
-    context.become({
-      case Registry.LookupResultOk(`sessionId`, actorRef) =>
-        context.unbecome()
-        self ! (false, actorRef)
-
-      case Registry.LookupResultNone(`sessionId`) =>
-        // Must use context.system.actorOf instead of context.actorOf, so that
-        // actorRef1 is not attached as a child to the current actor; otherwise
-        // when the current actor dies, actorRef1 will be forcefully killed
-        val props     = Props(new NonWebSocketSession(self, pathPrefix, this))
-        val actorRef1 = context.system.actorOf(props)
-        SockJsAction.actorRegistry ! Registry.Register(sessionId, actorRef1)
-
-        // Throw the current "become" away, restoring the previous one
-        context.unbecome()
-        context.become({
-          case Registry.RegisterResultOk(`sessionId`, actorRef2) =>
-            context.unbecome()
-            self ! (true, actorRef2)
-
-          case Registry.RegisterResultConflict(`sessionId`, actorRef2) =>
-            context.stop(actorRef1)
-            context.unbecome()
-            self ! (false, actorRef2)
-        }, discardOld = false)
-    }, discardOld = false)
-  }
-
   protected def lookupNonWebSocketSessionActor(sessionId: String) {
     SockJsAction.actorRegistry ! Registry.Lookup(sessionId)
   }
 }
 
 trait SockJsNonWebSocketSessionReceiverActionActor extends SockJsNonWebSocketSessionActionActor {
-  protected var nonWebSocketSession: ActorRef = null
+  protected var nonWebSocketSession: ActorRef = _
 
-  protected def receiveNotification(nonWebSocketSession: ActorRef): Receive
+  // Call lookupOrCreateNonWebSocketSessionActor and continue here
+  // Here, context.becom(receiveNotification) may be called
+  protected def onLookupOrRecreateResult(newlyCreated: Boolean)
 
-  protected def becomeReceiveNotification(nonWebSocketSession: ActorRef) {
-    this.nonWebSocketSession = nonWebSocketSession
-    context.become(receiveNotification(nonWebSocketSession))
+  protected def receiveNotification: Receive
+
+  protected def lookupOrCreateNonWebSocketSessionActor(sessionId: String) {
+    // Try to lookup first, then create later
+    SockJsAction.actorRegistry ! Registry.LookupOrCreate(sessionId)
+    context.become({
+      case Registry.LookupResultOk(`sessionId`, actorRef) =>
+        nonWebSocketSession = actorRef
+        context.watch(nonWebSocketSession)
+        onLookupOrRecreateResult(false)
+
+      case Registry.LookupResultNone(`sessionId`) =>
+        // Must use context.system.actorOf instead of context.actorOf, so that
+        // actorRef1 is not attached as a child to the current actor; otherwise
+        // when the current actor dies, actorRef1 will be forcefully killed
+        val action: Action = this
+        val props          = Props(new NonWebSocketSession(Some(self), pathPrefix, action))
+        val actorRef1      = context.system.actorOf(props)
+        SockJsAction.actorRegistry ! Registry.Register(sessionId, actorRef1)
+
+        context.become({
+          case Registry.RegisterResultOk(`sessionId`, actorRef2) =>
+            nonWebSocketSession = actorRef2
+            context.watch(nonWebSocketSession)
+            onLookupOrRecreateResult(true)
+
+          case Registry.RegisterResultConflict(`sessionId`, actorRef2) =>
+            context.system.stop(actorRef1)
+            nonWebSocketSession = actorRef2
+            context.watch(nonWebSocketSession)
+            onLookupOrRecreateResult(false)
+        })
+    })
   }
 
   override def postStop() {
-    if (nonWebSocketSession != null && !isDoneResponding)
-      nonWebSocketSession ! AbortFromReceiverClient
+    if (nonWebSocketSession != null) {
+      context.unwatch(nonWebSocketSession)
+      if (!isDoneResponding) nonWebSocketSession ! AbortFromReceiverClient
+    }
+    super.postStop()
   }
 }
 
@@ -324,7 +328,7 @@ class SockJsInfoGET extends SockJsAction {
   def execute() {
     setCORS()
     setNoClientCache()
-    // FIXME: Retest if IE works when cookie_needed is set to true
+
     val sockJsClassAndOptions = Config.routes.sockJsRouteMap.lookup(pathPrefix)
     respondJsonText(
       """{"websocket": """      + sockJsClassAndOptions.websocket +
@@ -376,20 +380,19 @@ class SockJsXhrPollingReceive extends SockJsNonWebSocketSessionReceiverActionAct
     setCORS()
     setNoClientCache()
 
-    context.become {
-      case (newlyCreated: Boolean, nonWebSocketSession: ActorRef) =>
-        if (newlyCreated) {
-          respondJs("o\n")
-        } else {
-          nonWebSocketSession ! SubscribeFromReceiverClient
-          context.watch(nonWebSocketSession)
-          context.become(receiveSubscribeResult(nonWebSocketSession))
-        }
-    }
     lookupOrCreateNonWebSocketSessionActor(sessionId)
   }
 
-  private def receiveSubscribeResult(nonWebSocketSession: ActorRef): Receive = {
+  protected def onLookupOrRecreateResult(newlyCreated: Boolean) {
+    if (newlyCreated) {
+      respondJs("o\n")
+    } else {
+      nonWebSocketSession ! SubscribeFromReceiverClient
+      context.become(receiveSubscribeResult)
+    }
+  }
+
+  private def receiveSubscribeResult: Receive = {
     case SubscribeResultToReceiverClientAnotherConnectionStillOpen =>
       respondJs("c[2010,\"Another connection still open\"]\n")
       .addListener(ChannelFutureListener.CLOSE)
@@ -404,14 +407,14 @@ class SockJsXhrPollingReceive extends SockJsNonWebSocketSessionReceiverActionAct
       respondJs("a" + quoted + "\n")
 
     case SubscribeResultToReceiverClientWaitForMessage =>
-      becomeReceiveNotification(nonWebSocketSession)
+      context.become(receiveNotification)
 
-    case Terminated(`nonWebSocketSession`) =>
+    case Terminated(actorRef) if (actorRef == nonWebSocketSession) =>
       respondJs("c[2011,\"Server error\"]\n")
       .addListener(ChannelFutureListener.CLOSE)
   }
 
-  protected override def receiveNotification(nonWebSocketSession: ActorRef): Receive = {
+  protected override def receiveNotification: Receive = {
     case NotificationToReceiverClientMessage(message) =>
       val json   = Json.generate(Seq(message))
       val quoted = SockJsAction.quoteUnicode(json)
@@ -424,7 +427,7 @@ class SockJsXhrPollingReceive extends SockJsNonWebSocketSessionReceiverActionAct
       respondJs("c[3000,\"Go away!\"]\n")
       .addListener(ChannelFutureListener.CLOSE)
 
-    case Terminated(`nonWebSocketSession`) =>
+    case Terminated(actorRef) if (actorRef == nonWebSocketSession) =>
       respondJs("c[2011,\"Server error\"]\n")
       .addListener(ChannelFutureListener.CLOSE)
   }
@@ -493,21 +496,20 @@ class SockJsXhrStreamingReceive extends SockJsNonWebSocketSessionReceiverActionA
     response.setHeader(HttpHeaders.Names.CONTENT_TYPE, "application/javascript; charset=" + Config.xitrum.request.charset)
     respondBinary(SockJsAction.h2KB)
 
-    context.become {
-      case (newlyCreated: Boolean, nonWebSocketSession: ActorRef) =>
-        context.watch(nonWebSocketSession)
-        if (newlyCreated) {
-          respondStreamingWithLimit("o\n")
-          becomeReceiveNotification(nonWebSocketSession)
-        } else {
-          nonWebSocketSession ! SubscribeFromReceiverClient
-          context.become(receiveSubscribeResult(nonWebSocketSession))
-        }
-    }
     lookupOrCreateNonWebSocketSessionActor(sessionId)
   }
 
-  private def receiveSubscribeResult(nonWebSocketSession: ActorRef): Receive = {
+  protected def onLookupOrRecreateResult(newlyCreated: Boolean) {
+    if (newlyCreated) {
+      respondStreamingWithLimit("o\n")
+      context.become(receiveNotification)
+    } else {
+      nonWebSocketSession ! SubscribeFromReceiverClient
+      context.become(receiveSubscribeResult)
+    }
+  }
+
+  private def receiveSubscribeResult: Receive = {
     case SubscribeResultToReceiverClientAnotherConnectionStillOpen =>
       respondJs("c[2010,\"Another connection still open\"]\n")
       closeWithLastChunk()
@@ -520,17 +522,17 @@ class SockJsXhrStreamingReceive extends SockJsNonWebSocketSessionReceiverActionA
       val json   = Json.generate(messages)
       val quoted = SockJsAction.quoteUnicode(json)
       if (respondStreamingWithLimit("a" + quoted + "\n"))
-        becomeReceiveNotification(nonWebSocketSession)
+        context.become(receiveNotification)
 
     case SubscribeResultToReceiverClientWaitForMessage =>
-      becomeReceiveNotification(nonWebSocketSession)
+      context.become(receiveNotification)
 
-    case Terminated(`nonWebSocketSession`) =>
+    case Terminated(actorRef) if (actorRef == nonWebSocketSession) =>
       respondJs("c[2011,\"Server error\"]\n")
       closeWithLastChunk()
   }
 
-  protected override def receiveNotification(nonWebSocketSession: ActorRef): Receive = {
+  protected override def receiveNotification: Receive = {
     case NotificationToReceiverClientMessage(message) =>
       val json   = Json.generate(Seq(message))
       val quoted = SockJsAction.quoteUnicode(json)
@@ -543,7 +545,7 @@ class SockJsXhrStreamingReceive extends SockJsNonWebSocketSessionReceiverActionA
       respondJs("c[3000,\"Go away!\"]\n")
       closeWithLastChunk()
 
-    case Terminated(`nonWebSocketSession`) =>
+    case Terminated(actorRef) if (actorRef == nonWebSocketSession) =>
       respondJs("c[2011,\"Server error\"]\n")
       closeWithLastChunk()
   }
@@ -566,23 +568,22 @@ class SockJshtmlfileReceive extends SockJsNonWebSocketSessionReceiverActionActor
     setCORS()
     setNoClientCache()
 
-    context.become {
-      case (newlyCreated: Boolean, nonWebSocketSession: ActorRef) =>
-        context.watch(nonWebSocketSession)
-        if (newlyCreated) {
-          response.setChunked(true)
-          respondHtml(SockJsAction.htmlfile(callback, true))
-          respondText("<script>\np(\"o\");\n</script>\r\n")
-          becomeReceiveNotification(nonWebSocketSession)
-        } else {
-          nonWebSocketSession ! SubscribeFromReceiverClient
-          context.become(receiveSubscribeResult(nonWebSocketSession))
-        }
-    }
     lookupOrCreateNonWebSocketSessionActor(sessionId)
   }
 
-  private def receiveSubscribeResult(nonWebSocketSession: ActorRef): Receive = {
+  protected def onLookupOrRecreateResult(newlyCreated: Boolean) {
+    if (newlyCreated) {
+      response.setChunked(true)
+      respondHtml(SockJsAction.htmlfile(callback, true))
+      respondText("<script>\np(\"o\");\n</script>\r\n")
+      context.become(receiveNotification)
+    } else {
+      nonWebSocketSession ! SubscribeFromReceiverClient
+      context.become(receiveSubscribeResult)
+    }
+  }
+
+  private def receiveSubscribeResult: Receive = {
     case SubscribeResultToReceiverClientAnotherConnectionStillOpen =>
       respondHtml(
         SockJsAction.htmlfile(callback, false) +
@@ -607,14 +608,14 @@ class SockJshtmlfileReceive extends SockJsNonWebSocketSessionReceiverActionActor
       response.setChunked(true)
       respondHtml(SockJsAction.htmlfile(callback, true))
       if (respondStreamingWithLimit(buffer.toString))
-        becomeReceiveNotification(nonWebSocketSession)
+        context.become(receiveNotification)
 
     case SubscribeResultToReceiverClientWaitForMessage =>
       response.setChunked(true)
       respondHtml(SockJsAction.htmlfile(callback, true))
-      becomeReceiveNotification(nonWebSocketSession)
+      context.become(receiveNotification)
 
-    case Terminated(`nonWebSocketSession`) =>
+    case Terminated(actorRef) if (actorRef == nonWebSocketSession) =>
       respondHtml(
         SockJsAction.htmlfile(callback, false) +
         "<script>\np(\"c[2011,\\\"Server error\\\"]\");\n</script>\r\n"
@@ -622,7 +623,7 @@ class SockJshtmlfileReceive extends SockJsNonWebSocketSessionReceiverActionActor
       .addListener(ChannelFutureListener.CLOSE)
   }
 
-  protected override def receiveNotification(nonWebSocketSession: ActorRef): Receive = {
+  protected override def receiveNotification: Receive = {
     case NotificationToReceiverClientMessage(message) =>
       val buffer = new StringBuilder
       val json   = Json.generate(Seq(message))
@@ -642,7 +643,7 @@ class SockJshtmlfileReceive extends SockJsNonWebSocketSessionReceiverActionActor
       )
       closeWithLastChunk()
 
-    case Terminated(`nonWebSocketSession`) =>
+    case Terminated(actorRef) if (actorRef == nonWebSocketSession) =>
       respondHtml(
         SockJsAction.htmlfile(callback, false) +
         "<script>\np(\"c[2011,\\\"Server error\\\"]\");\n</script>\r\n"
@@ -668,20 +669,19 @@ class SockJsJsonPPollingReceive extends SockJsNonWebSocketSessionReceiverActionA
     setCORS()
     setNoClientCache()
 
-    context.become {
-      case (newlyCreated: Boolean, nonWebSocketSession: ActorRef) =>
-        if (newlyCreated) {
-          respondJs(callback + "(\"o\");\r\n")
-        } else {
-          nonWebSocketSession ! SubscribeFromReceiverClient
-          context.watch(nonWebSocketSession)
-          context.become(receiveSubscribeResult(nonWebSocketSession))
-        }
-    }
     lookupOrCreateNonWebSocketSessionActor(sessionId)
   }
 
-  private def receiveSubscribeResult(nonWebSocketSession: ActorRef): Receive = {
+  protected def onLookupOrRecreateResult(newlyCreated: Boolean) {
+    if (newlyCreated) {
+      respondJs(callback + "(\"o\");\r\n")
+    } else {
+      nonWebSocketSession ! SubscribeFromReceiverClient
+      context.become(receiveSubscribeResult)
+    }
+  }
+
+  private def receiveSubscribeResult: Receive = {
     case SubscribeResultToReceiverClientAnotherConnectionStillOpen =>
       respondJs(callback + "(\"c[2010,\\\"Another connection still open\\\"]\");\r\n")
       .addListener(ChannelFutureListener.CLOSE)
@@ -700,14 +700,14 @@ class SockJsJsonPPollingReceive extends SockJsNonWebSocketSessionReceiverActionA
       respondJs(buffer.toString)
 
     case SubscribeResultToReceiverClientWaitForMessage =>
-      becomeReceiveNotification(nonWebSocketSession)
+      context.become(receiveNotification)
 
-    case Terminated(`nonWebSocketSession`) =>
+    case Terminated(actorRef) if (actorRef == nonWebSocketSession) =>
       respondJs(callback + "(\"c[2011,\\\"Server error\\\"]\");\r\n")
       .addListener(ChannelFutureListener.CLOSE)
   }
 
-  protected override def receiveNotification(nonWebSocketSession: ActorRef): Receive = {
+  protected override def receiveNotification: Receive = {
     case NotificationToReceiverClientMessage(message) =>
       val buffer = new StringBuilder
       val json   = Json.generate(Seq(message))
@@ -724,7 +724,7 @@ class SockJsJsonPPollingReceive extends SockJsNonWebSocketSessionReceiverActionA
       respondJs(callback + "(\"c[3000,\\\"Go away!\\\"]\");\r\n")
       .addListener(ChannelFutureListener.CLOSE)
 
-    case Terminated(`nonWebSocketSession`) =>
+    case Terminated(actorRef) if (actorRef == nonWebSocketSession) =>
       respondJs(callback + "(\"c[2011,\\\"Server error\\\"]\");\r\n")
       .addListener(ChannelFutureListener.CLOSE)
   }
@@ -793,21 +793,20 @@ class SockJEventSourceReceive extends SockJsNonWebSocketSessionReceiverActionAct
     setCORS()
     setNoClientCache()
 
-    context.become {
-      case (newlyCreated: Boolean, nonWebSocketSession: ActorRef) =>
-        context.watch(nonWebSocketSession)
-        if (newlyCreated) {
-          respondEventSource("o")
-          becomeReceiveNotification(nonWebSocketSession)
-        } else {
-          nonWebSocketSession ! SubscribeFromReceiverClient
-          context.become(receiveSubscribeResult(nonWebSocketSession))
-        }
-    }
     lookupOrCreateNonWebSocketSessionActor(sessionId)
   }
 
-  private def receiveSubscribeResult(nonWebSocketSession: ActorRef): Receive = {
+  protected def onLookupOrRecreateResult(newlyCreated: Boolean) {
+    if (newlyCreated) {
+      respondEventSource("o")
+      context.become(receiveNotification)
+    } else {
+      nonWebSocketSession ! SubscribeFromReceiverClient
+      context.become(receiveSubscribeResult)
+    }
+  }
+
+  private def receiveSubscribeResult: Receive = {
     case SubscribeResultToReceiverClientAnotherConnectionStillOpen =>
       respondJs("c[2010,\"Another connection still open\"]\n")
       .addListener(ChannelFutureListener.CLOSE)
@@ -820,17 +819,17 @@ class SockJEventSourceReceive extends SockJsNonWebSocketSessionReceiverActionAct
       val json   = "a" + Json.generate(messages)
       val quoted = SockJsAction.quoteUnicode(json)
       if (respondStreamingWithLimit(quoted, true))
-        becomeReceiveNotification(nonWebSocketSession)
+        context.become(receiveNotification)
 
     case SubscribeResultToReceiverClientWaitForMessage =>
-      becomeReceiveNotification(nonWebSocketSession)
+      context.become(receiveNotification)
 
-    case Terminated(`nonWebSocketSession`) =>
+    case Terminated(actorRef) if (actorRef == nonWebSocketSession) =>
       respondJs("c[2011,\"Server error\"]\n")
       .addListener(ChannelFutureListener.CLOSE)
   }
 
-  protected override def receiveNotification(nonWebSocketSession: ActorRef): Receive = {
+  protected override def receiveNotification: Receive = {
     case NotificationToReceiverClientMessage(message) =>
       val json   = "a" + Json.generate(Seq(message))
       val quoted = SockJsAction.quoteUnicode(json)
@@ -843,7 +842,7 @@ class SockJEventSourceReceive extends SockJsNonWebSocketSessionReceiverActionAct
       respondJs("c[3000,\"Go away!\"]\n")
       closeWithLastChunk()
 
-    case Terminated(`nonWebSocketSession`) =>
+    case Terminated(actorRef) if (actorRef == nonWebSocketSession) =>
       respondEventSource("c[2011,\"Server error\"]")
       closeWithLastChunk()
   }
@@ -909,7 +908,7 @@ class SockJSWebsocket extends WebSocketActor with SockJsPrefix {
 
               respondWebSocketClose()
 
-  //            action.channel.close()
+//            action.channel.close()
           }
         }
 
@@ -934,6 +933,7 @@ class SockJSWebsocket extends WebSocketActor with SockJsPrefix {
 
   override def postStop() {
     if (sockJsActorRef != null) Config.actorSystem.stop(sockJsActorRef)
+    super.postStop()
   }
 }
 
@@ -964,5 +964,6 @@ class SockJSRawWebsocket extends WebSocketActor with SockJsPrefix {
 
   override def postStop() {
     if (sockJsActorRef != null) Config.actorSystem.stop(sockJsActorRef)
+    super.postStop()
   }
 }

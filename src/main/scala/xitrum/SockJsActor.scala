@@ -20,6 +20,7 @@ trait SockJsActor extends Actor with Action {
   def receive = {
     case (sessionActorRef: ActorRef, action: Action) =>
       this.sessionActorRef = sessionActorRef
+
       apply(action.handlerEnv)
       execute()
   }

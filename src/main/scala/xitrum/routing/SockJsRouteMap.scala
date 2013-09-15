@@ -2,7 +2,7 @@ package xitrum.routing
 
 import scala.collection.mutable.{Map => MMap}
 
-import akka.actor.{Actor, ActorRef, Props}
+import akka.actor.{Actor, ActorRef, ActorRefFactory, Props}
 import com.esotericsoftware.reflectasm.ConstructorAccess
 
 import xitrum.{Config, Logger, SockJsActor}
@@ -43,12 +43,16 @@ class SockJsRouteMap(map: Map[String, SockJsClassAndOptions]) extends Logger {
     }
   }
 
+  /** Creates actor attached to Config.actorSystem. */
   def createSockJsActor(pathPrefix: String): ActorRef = {
+    createSockJsActor(Config.actorSystem, pathPrefix)
+  }
+
+  /** Creates actor attached to the given context. */
+  def createSockJsActor(context: ActorRefFactory, pathPrefix: String): ActorRef = {
     val sockJsClassAndOptions = map(pathPrefix)
     val actorClass            = sockJsClassAndOptions.actorClass
-    Config.actorSystem.actorOf(Props {
-      ConstructorAccess.get(actorClass).newInstance().asInstanceOf[Actor]
-    })
+    context.actorOf(Props(ConstructorAccess.get(actorClass).newInstance()))
   }
 
   /** @param sockJsHandlerClass Normal SockJsHandler subclass or object class */
