@@ -14,7 +14,6 @@ object RouteCollection {
     val normal              = acc.normalRoutes
     val sockJsWithoutPrefix = acc.sockJsWithoutPrefixRoutes
     val sockJsMap           = acc.sockJsMap
-    val parentClassCacheMap = acc.parentClassCacheMap
 
     // Add prefixes to SockJS routes
     sockJsMap.keys.foreach { prefix =>
@@ -43,17 +42,6 @@ object RouteCollection {
       sockJsWithoutPrefix.otherWEBSOCKETs.foreach { r => normal.otherWEBSOCKETs.append(r.addPrefix(prefix)) }
     }
 
-    // Update normal routes with cacheSecs from parentClassCacheMap
-    Seq(
-      normal.firstGETs, normal.firstPOSTs, normal.firstPUTs, normal.firstPATCHs, normal.firstDELETEs, normal.firstOPTIONSs,
-      normal.lastGETs,  normal.lastPOSTs,  normal.lastPUTs,  normal.lastPATCHs,  normal.lastDELETEs,  normal.lastOPTIONSs,
-      normal.otherGETs, normal.otherPOSTs, normal.otherPUTs, normal.otherPATCHs, normal.otherDELETEs, normal.otherOPTIONSs
-    ).foreach { rs =>
-      rs.foreach { r =>
-        if (r.cacheSecs == 0) r.cacheSecs = getCacheSecsFromParent(r.actionClass, parentClassCacheMap)
-      }
-    }
-
     new RouteCollection(
       normal.firstGETs      .map(_.toRoute), normal.lastGETs      .map(_.toRoute), normal.otherGETs      .map(_.toRoute),
       normal.firstPOSTs     .map(_.toRoute), normal.lastPOSTs     .map(_.toRoute), normal.otherPOSTs     .map(_.toRoute),
@@ -66,18 +54,6 @@ object RouteCollection {
       normal.error404.map(Class.forName(_).asInstanceOf[Class[Action]]),
       normal.error500.map(Class.forName(_).asInstanceOf[Class[Action]])
     )
-  }
-
-  private def getCacheSecsFromParent(className: String, parentClassCacheMap: Map[String, Int]): Int = {
-    val klass      = Class.forName(className)
-    val superClass = klass.getSuperclass.getName
-    if (parentClassCacheMap.contains(superClass)) return parentClassCacheMap(superClass)
-
-    val found = klass.getInterfaces.map(_.getName).find { i => parentClassCacheMap.contains(i) }
-    found match {
-      case None    => 0
-      case Some(i) => parentClassCacheMap(i)
-    }
   }
 }
 

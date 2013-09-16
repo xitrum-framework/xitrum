@@ -20,16 +20,15 @@ case class DiscoveredAcc(
 /** Scan all classes to collect routes from actions. */
 class RouteCollector extends Logger {
   def deserializeCacheFileOrRecollect(cachedFileName: String): DiscoveredAcc = {
-    val actionTreeBuilder = Scanner.foldLeft(cachedFileName, new ActionTreeBuilder, discovered _)
-
     var acc = DiscoveredAcc(
       new SerializableRouteCollection,
       new SerializableRouteCollection,
       Map[String, SockJsClassAndOptions]()
     )
 
+    val actionTreeBuilder = Scanner.foldLeft(cachedFileName, new ActionTreeBuilder, discovered _)
     actionTreeBuilder.traverse { case (klass, annotations) =>
-      acc = processAnnotations(acc, klass, annotations)
+      //acc = processAnnotations(acc, klass, annotations)
     }
 
     acc
@@ -61,11 +60,12 @@ class RouteCollector extends Logger {
     val fromSockJs = className.startsWith(classOf[SockJsPrefix].getPackage.getName)
     val routes     = if (fromSockJs) acc.sockJsWithoutPrefixRoutes else acc.normalRoutes
 
-    collectNormalRoutes(routes, className, annotations)
-    val newSockJsMap = collectSockJsMap(acc.sockJsMap, className, annotations)
-    collectErrorRoutes(routes, className, annotations)
+//    collectNormalRoutes(routes, className, annotations)
+//    val newSockJsMap = collectSockJsMap(acc.sockJsMap, className, annotations)
+//    collectErrorRoutes(routes, className, annotations)
 
-    DiscoveredAcc(acc.normalRoutes, acc.sockJsWithoutPrefixRoutes, newSockJsMap)
+    //DiscoveredAcc(acc.normalRoutes, acc.sockJsWithoutPrefixRoutes, newSockJsMap)
+    acc
   }
 
   private def collectNormalRoutes(

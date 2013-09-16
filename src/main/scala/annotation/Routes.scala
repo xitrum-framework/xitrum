@@ -2,22 +2,27 @@ package xitrum.annotation
 
 import scala.annotation.StaticAnnotation
 
-case class GET   (paths: String*) extends StaticAnnotation
-case class POST  (paths: String*) extends StaticAnnotation
-case class PUT   (paths: String*) extends StaticAnnotation
-case class PATCH (paths: String*) extends StaticAnnotation
-case class DELETE(paths: String*) extends StaticAnnotation
+sealed trait Route        extends StaticAnnotation
+sealed trait Error        extends StaticAnnotation
+sealed trait RouteOrder   extends StaticAnnotation
+sealed trait SockJsOption extends StaticAnnotation
 
-case class OPTIONS(paths: String*) extends StaticAnnotation
+case class GET   (paths: String*) extends Route
+case class POST  (paths: String*) extends Route
+case class PUT   (paths: String*) extends Route
+case class PATCH (paths: String*) extends Route
+case class DELETE(paths: String*) extends Route
 
-case class WEBSOCKET(paths: String*) extends StaticAnnotation
-case class SOCKJS   (paths: String*) extends StaticAnnotation
+case class OPTIONS(paths: String*) extends Route
 
-class Error404 extends StaticAnnotation
-class Error500 extends StaticAnnotation
+case class WEBSOCKET(paths: String*) extends Route
+case class SOCKJS   (paths: String*) extends Route
 
-class First extends StaticAnnotation
-class Last  extends StaticAnnotation
+class Error404 extends Error
+class Error500 extends Error
 
-class SockJsCookieNeeded extends StaticAnnotation
-class SockJsNoWebSocket  extends StaticAnnotation
+class First extends RouteOrder
+class Last  extends RouteOrder
+
+class SockJsCookieNeeded extends SockJsOption
+class SockJsNoWebSocket  extends SockJsOption

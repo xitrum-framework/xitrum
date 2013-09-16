@@ -4,6 +4,7 @@ import scala.collection.mutable.ArrayBuffer
 import scala.reflect.runtime.universe
 
 import xitrum.Action
+import xitrum.annotation.{Type => XAT}
 
 /**
  * Intended for use by RouteCollector.
@@ -99,8 +100,6 @@ private case class ActionTreeBuilder(interface2Children: Map[String, Seq[String]
     }
   }
 
-  private def isCacheAnnotation(annotation: universe.Annotation) = {
-    // FIXME: Check if annotation is from CacheAnnotation
-    false
-  }
+  private def isCacheAnnotation(annotation: universe.Annotation) =
+    annotation.tpe <:< XAT.cache
 }
