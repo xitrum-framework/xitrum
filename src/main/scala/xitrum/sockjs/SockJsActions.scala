@@ -80,7 +80,7 @@ object SockJsAction {
   }
 
   /** Template for htmlfile transport */
-  def htmlfile(callback: String, with1024Spaces: Boolean): String = {
+  def htmlFile(callback: String, with1024Spaces: Boolean): String = {
     val template = htmlTemplateBefore + callback + htmlTemplateAfter
     if (with1024Spaces) template + s1KB else template
   }
@@ -217,13 +217,13 @@ trait SockJsAction extends Action with SockJsPrefix {
   }
 }
 
-trait SockJsNonWebSocketSessionActionActor extends ActionActor with SockJsAction {
+trait NonWebSocketSessionActionActor extends ActionActor with SockJsAction {
   protected def lookupNonWebSocketSessionActor(sessionId: String) {
     SockJsAction.actorRegistry ! Registry.Lookup(sessionId)
   }
 }
 
-trait SockJsNonWebSocketSessionReceiverActionActor extends SockJsNonWebSocketSessionActionActor {
+trait NonWebSocketSessionReceiverActionActor extends NonWebSocketSessionActionActor {
   protected var nonWebSocketSession: ActorRef = _
 
   // Call lookupOrCreateNonWebSocketSessionActor and continue with this method.
@@ -275,7 +275,7 @@ trait SockJsNonWebSocketSessionReceiverActionActor extends SockJsNonWebSocketSes
 }
 
 @GET("")
-class SockJsGreeting extends SockJsAction {
+class Greeting extends SockJsAction {
   def nLastTokensToRemoveFromPathInfo = 0
 
   def execute() {
@@ -285,7 +285,7 @@ class SockJsGreeting extends SockJsAction {
 
 @Last
 @GET(":iframe")
-class SockJsIframe extends SockJsAction {
+class Iframe extends SockJsAction {
   def nLastTokensToRemoveFromPathInfo = 1
 
   def execute() {
@@ -322,7 +322,7 @@ class SockJsIframe extends SockJsAction {
 }
 
 @GET("info")
-class SockJsInfoGET extends SockJsAction {
+class InfoGET extends SockJsAction {
   def nLastTokensToRemoveFromPathInfo = 1
 
   def execute() {
@@ -339,7 +339,7 @@ class SockJsInfoGET extends SockJsAction {
 }
 
 @OPTIONS("info")
-class SockJsInfoOPTIONS extends SockJsAction {
+class InfoOPTIONS extends SockJsAction {
   def nLastTokensToRemoveFromPathInfo = 1
 
   def execute() {
@@ -352,7 +352,7 @@ class SockJsInfoOPTIONS extends SockJsAction {
 }
 
 @OPTIONS(":serverId<[^\\.]+>/:sessionId<[^\\.]+>/xhr")
-class SockJsXhrPollingOPTIONSReceive extends SockJsAction {
+class XhrPollingOPTIONSReceive extends SockJsAction {
   def nLastTokensToRemoveFromPathInfo = 3
 
   def execute() {
@@ -361,7 +361,7 @@ class SockJsXhrPollingOPTIONSReceive extends SockJsAction {
 }
 
 @OPTIONS(":serverId<[^\\.]+>/:sessionId<[^\\.]+>/xhr_send")
-class SockJsXhrPollingOPTIONSSend extends SockJsAction {
+class XhrPollingOPTIONSSend extends SockJsAction {
   def nLastTokensToRemoveFromPathInfo = 3
 
   def execute() {
@@ -370,7 +370,7 @@ class SockJsXhrPollingOPTIONSSend extends SockJsAction {
 }
 
 @POST(":serverId<[^\\.]+>/:sessionId<[^\\.]+>/xhr")
-class SockJsXhrPollingReceive extends SockJsNonWebSocketSessionReceiverActionActor with SkipCsrfCheck {
+class XhrPollingReceive extends NonWebSocketSessionReceiverActionActor with SkipCsrfCheck {
   def nLastTokensToRemoveFromPathInfo = 3
 
   def execute() {
@@ -434,7 +434,7 @@ class SockJsXhrPollingReceive extends SockJsNonWebSocketSessionReceiverActionAct
 }
 
 @POST(":serverId<[^\\.]+>/:sessionId<[^\\.]+>/xhr_send")
-class SockJsXhrSend extends SockJsNonWebSocketSessionActionActor with SkipCsrfCheck {
+class XhrSend extends NonWebSocketSessionActionActor with SkipCsrfCheck {
   def nLastTokensToRemoveFromPathInfo = 3
 
   def execute() {
@@ -472,7 +472,7 @@ class SockJsXhrSend extends SockJsNonWebSocketSessionActionActor with SkipCsrfCh
 }
 
 @OPTIONS(":serverId<[^\\.]+>/:sessionId<[^\\.]+>/xhr_streaming")
-class SockJsXhrStreamingOPTIONSReceive extends SockJsAction {
+class XhrStreamingOPTIONSReceive extends SockJsAction {
   def nLastTokensToRemoveFromPathInfo = 3
 
   def execute() {
@@ -481,7 +481,7 @@ class SockJsXhrStreamingOPTIONSReceive extends SockJsAction {
 }
 
 @POST(":serverId<[^\\.]+>/:sessionId<[^\\.]+>/xhr_streaming")
-class SockJsXhrStreamingReceive extends SockJsNonWebSocketSessionReceiverActionActor with SkipCsrfCheck {
+class XhrStreamingReceive extends NonWebSocketSessionReceiverActionActor with SkipCsrfCheck {
   def nLastTokensToRemoveFromPathInfo = 3
 
   def execute() {
@@ -552,7 +552,7 @@ class SockJsXhrStreamingReceive extends SockJsNonWebSocketSessionReceiverActionA
 }
 
 @GET(":serverId<[^\\.]+>/:sessionId<[^\\.]+>/htmlfile")
-class SockJshtmlfileReceive extends SockJsNonWebSocketSessionReceiverActionActor {
+class HtmlFileReceive extends NonWebSocketSessionReceiverActionActor {
   def nLastTokensToRemoveFromPathInfo = 3
 
   var callback: String = null
@@ -574,7 +574,7 @@ class SockJshtmlfileReceive extends SockJsNonWebSocketSessionReceiverActionActor
   protected def onLookupOrRecreateResult(newlyCreated: Boolean) {
     if (newlyCreated) {
       response.setChunked(true)
-      respondHtml(SockJsAction.htmlfile(callback, true))
+      respondHtml(SockJsAction.htmlFile(callback, true))
       respondText("<script>\np(\"o\");\n</script>\r\n")
       context.become(receiveNotification)
     } else {
@@ -586,14 +586,14 @@ class SockJshtmlfileReceive extends SockJsNonWebSocketSessionReceiverActionActor
   private def receiveSubscribeResult: Receive = {
     case SubscribeResultToReceiverClientAnotherConnectionStillOpen =>
       respondHtml(
-        SockJsAction.htmlfile(callback, false) +
+        SockJsAction.htmlFile(callback, false) +
         "<script>\np(\"c[2010,\\\"Another connection still open\\\"]\");\n</script>\r\n"
       )
       .addListener(ChannelFutureListener.CLOSE)
 
     case SubscribeResultToReceiverClientClosed =>
       respondHtml(
-        SockJsAction.htmlfile(callback, false) +
+        SockJsAction.htmlFile(callback, false) +
         "<script>\np(\"c[3000,\\\"Go away!\\\"]\");\n</script>\r\n"
       )
       .addListener(ChannelFutureListener.CLOSE)
@@ -606,18 +606,18 @@ class SockJshtmlfileReceive extends SockJsNonWebSocketSessionReceiverActionActor
       buffer.append(jsEscape(quoted))
       buffer.append("\");\n</script>\r\n")
       response.setChunked(true)
-      respondHtml(SockJsAction.htmlfile(callback, true))
+      respondHtml(SockJsAction.htmlFile(callback, true))
       if (respondStreamingWithLimit(buffer.toString))
         context.become(receiveNotification)
 
     case SubscribeResultToReceiverClientWaitForMessage =>
       response.setChunked(true)
-      respondHtml(SockJsAction.htmlfile(callback, true))
+      respondHtml(SockJsAction.htmlFile(callback, true))
       context.become(receiveNotification)
 
     case Terminated(actorRef) if (actorRef == nonWebSocketSession) =>
       respondHtml(
-        SockJsAction.htmlfile(callback, false) +
+        SockJsAction.htmlFile(callback, false) +
         "<script>\np(\"c[2011,\\\"Server error\\\"]\");\n</script>\r\n"
       )
       .addListener(ChannelFutureListener.CLOSE)
@@ -638,14 +638,14 @@ class SockJshtmlfileReceive extends SockJsNonWebSocketSessionReceiverActionActor
 
     case NotificationToReceiverClientClosed =>
       respondHtml(
-        SockJsAction.htmlfile(callback, false) +
+        SockJsAction.htmlFile(callback, false) +
         "<script>\np(\"c[3000,\\\"Go away!\\\"]\");\n</script>\r\n"
       )
       closeWithLastChunk()
 
     case Terminated(actorRef) if (actorRef == nonWebSocketSession) =>
       respondHtml(
-        SockJsAction.htmlfile(callback, false) +
+        SockJsAction.htmlFile(callback, false) +
         "<script>\np(\"c[2011,\\\"Server error\\\"]\");\n</script>\r\n"
       )
       closeWithLastChunk()
@@ -653,7 +653,7 @@ class SockJshtmlfileReceive extends SockJsNonWebSocketSessionReceiverActionActor
 }
 
 @GET(":serverId<[^\\.]+>/:sessionId<[^\\.]+>/jsonp")
-class SockJsJsonPPollingReceive extends SockJsNonWebSocketSessionReceiverActionActor {
+class JsonPPollingReceive extends NonWebSocketSessionReceiverActionActor {
   def nLastTokensToRemoveFromPathInfo = 3
 
   var callback: String = null
@@ -731,7 +731,7 @@ class SockJsJsonPPollingReceive extends SockJsNonWebSocketSessionReceiverActionA
 }
 
 @POST(":serverId<[^\\.]+>/:sessionId<[^\\.]+>/jsonp_send")
-class SockJsJsonPPollingSend extends SockJsNonWebSocketSessionActionActor with SkipCsrfCheck {
+class JsonPPollingSend extends NonWebSocketSessionActionActor with SkipCsrfCheck {
   def nLastTokensToRemoveFromPathInfo = 3
 
   def execute() {
@@ -783,7 +783,7 @@ class SockJsJsonPPollingSend extends SockJsNonWebSocketSessionActionActor with S
 }
 
 @GET(":serverId<[^\\.]+>/:sessionId<[^\\.]+>/eventsource")
-class SockJEventSourceReceive extends SockJsNonWebSocketSessionReceiverActionActor {
+class EventSourceReceive extends NonWebSocketSessionReceiverActionActor {
   def nLastTokensToRemoveFromPathInfo = 3
 
   def execute() {
@@ -851,7 +851,7 @@ class SockJEventSourceReceive extends SockJsNonWebSocketSessionReceiverActionAct
 // http://sockjs.github.com/sockjs-protocol/sockjs-protocol-0.3.3.html#section-52
 @Last
 @GET(":serverId<[^\\.]+>/:sessionId<[^\\.]+>/websocket")
-class SockJSWebsocketGET extends SockJsAction {
+class WebsocketGET extends SockJsAction {
   def nLastTokensToRemoveFromPathInfo = 3
 
   def execute() {
@@ -864,7 +864,7 @@ class SockJSWebsocketGET extends SockJsAction {
 // http://sockjs.github.com/sockjs-protocol/sockjs-protocol-0.3.3.html#section-6
 @Last
 @POST(":serverId<[^\\.]+>/:sessionId<[^\\.]+>/websocket")
-class SockJSWebsocketPOST extends SockJsAction with SkipCsrfCheck {
+class WebsocketPOST extends SockJsAction with SkipCsrfCheck {
   def nLastTokensToRemoveFromPathInfo = 3
 
   def execute() {
@@ -875,7 +875,7 @@ class SockJSWebsocketPOST extends SockJsAction with SkipCsrfCheck {
 }
 
 @WEBSOCKET(":serverId<[^\\.]+>/:sessionId<[^\\.]+>/websocket")
-class SockJSWebsocket extends WebSocketActor with SockJsPrefix {
+class Websocket extends WebSocketActor with SockJsPrefix {
   def nLastTokensToRemoveFromPathInfo = 3
 
   private[this] var sockJsActorRef: ActorRef = _
@@ -938,7 +938,7 @@ class SockJSWebsocket extends WebSocketActor with SockJsPrefix {
 }
 
 @WEBSOCKET("websocket")
-class SockJSRawWebsocket extends WebSocketActor with SockJsPrefix {
+class RawWebsocket extends WebSocketActor with SockJsPrefix {
   def nLastTokensToRemoveFromPathInfo = 1
 
   private[this] var sockJsActorRef: ActorRef = _
