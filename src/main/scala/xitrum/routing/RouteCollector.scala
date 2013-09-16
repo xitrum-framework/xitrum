@@ -1,41 +1,47 @@
 package xitrum.routing
 
 import scala.collection.mutable.{ArrayBuffer, Map => MMap}
+import scala.reflect.runtime.universe
 import scala.util.control.NonFatal
 
 import org.objectweb.asm.{AnnotationVisitor, ClassReader, ClassVisitor, Opcodes, Type}
 import sclasner.{FileEntry, Scanner}
 
-import xitrum.{Logger, SockJsActor}
+import xitrum.{Action, Logger, SockJsActor}
 import xitrum.annotation._
 import xitrum.sockjs.SockJsPrefix
 
 case class DiscoveredAcc(
   normalRoutes:              SerializableRouteCollection,
   sockJsWithoutPrefixRoutes: SerializableRouteCollection,
-  sockJsMap:                 Map[String, SockJsClassAndOptions],
-  parentClassCacheMap:       Map[String, Int]
+  sockJsMap:                 Map[String, SockJsClassAndOptions]
 )
 
 /** Scan all classes to collect routes from actions. */
 class RouteCollector extends Logger {
   def deserializeCacheFileOrRecollect(cachedFileName: String): DiscoveredAcc = {
-    val acc = DiscoveredAcc(
-        new SerializableRouteCollection,
-        new SerializableRouteCollection,
-        Map[String, SockJsClassAndOptions](),
-        Map[String, Int]()
+    val actionTreeBuilder = Scanner.foldLeft(cachedFileName, new ActionTreeBuilder, discovered _)
+
+    var acc = DiscoveredAcc(
+      new SerializableRouteCollection,
+      new SerializableRouteCollection,
+      Map[String, SockJsClassAndOptions]()
     )
-    Scanner.foldLeft(cachedFileName, acc, discovered _)
+
+    actionTreeBuilder.traverse { case (klass, annotations) =>
+      acc = processAnnotations(acc, klass, annotations)
+    }
+
+    acc
   }
 
   //----------------------------------------------------------------------------
 
-  private def discovered(acc: DiscoveredAcc, entry: FileEntry): DiscoveredAcc = {
+  private def discovered(acc: ActionTreeBuilder, entry: FileEntry): ActionTreeBuilder = {
     try {
       if (entry.relPath.endsWith(".class")) {
         val reader = new ClassReader(entry.bytes)
-        processDiscovered(acc, reader)
+        acc.addBranches(reader.getClassName, reader.getInterfaces)
       } else {
         acc
       }
@@ -46,48 +52,27 @@ class RouteCollector extends Logger {
     }
   }
 
-  private def processDiscovered(acc: DiscoveredAcc, reader: ClassReader): DiscoveredAcc = {
-    val className  = reader.getClassName.replace('/', '.')
+  private def processAnnotations(
+      acc:         DiscoveredAcc,
+      klass:       Class[_ <: Action],
+      annotations: Seq[universe.Annotation]
+  ): DiscoveredAcc = {
+    val className  = klass.getName
     val fromSockJs = className.startsWith(classOf[SockJsPrefix].getPackage.getName)
     val routes     = if (fromSockJs) acc.sockJsWithoutPrefixRoutes else acc.normalRoutes
 
-    // http://asm.ow2.org/asm40/javadoc/user/org/objectweb/asm/AnnotationVisitor.html
-    //                     internalName  ->  annotation value (single value, not array)
-    val annotations = MMap[String,           Object]()
+    collectNormalRoutes(routes, className, annotations)
+    val newSockJsMap = collectSockJsMap(acc.sockJsMap, className, annotations)
+    collectErrorRoutes(routes, className, annotations)
 
-    reader.accept(new ClassVisitor(Opcodes.ASM4) {
-      override def visitAnnotation(desc: String, visible: Boolean): AnnotationVisitor = {
-        if (desc.indexOf("xitrum/annotation") > -1) {
-          annotations(desc) = null
-          new AnnotationVisitor(Opcodes.ASM4) {
-            override def visit(name: String, value: Object) {
-              annotations(desc) = value
-            }
-          }
-        } else {
-          null
-        }
-      }
-    }, ClassReader.SKIP_CODE | ClassReader.SKIP_DEBUG | ClassReader.SKIP_FRAMES)
-
-    if (annotations.isEmpty) {
-      acc
-    } else {
-      val newParentClassCacheMap = collectNormalRoutes(routes, acc.parentClassCacheMap, className, annotations)
-      val newSockJsMap           = collectSockJsMap(acc.sockJsMap, className, annotations)
-      collectErrorRoutes (routes, className, annotations)
-
-      DiscoveredAcc(acc.normalRoutes, acc.sockJsWithoutPrefixRoutes, newSockJsMap, newParentClassCacheMap)
-    }
+    DiscoveredAcc(acc.normalRoutes, acc.sockJsWithoutPrefixRoutes, newSockJsMap)
   }
 
   private def collectNormalRoutes(
-      routes:              SerializableRouteCollection,
-      parentClassCacheMap: Map[String, Int],
-      className:           String,
-      annotations:         MMap[String, Object]
-  ): Map[String, Int] =
-  {
+      routes:      SerializableRouteCollection,
+      className:   String,
+      annotations: MMap[String, Object]
+  ) {
     var routeOrder          = 0  // -1: first, 1: last, 0: other
     var cacheSecs           = 0  // < 0: cache action, > 0: cache page, 0: no cache
     var method_pattern_coll = ArrayBuffer[(String, String)]()
@@ -96,13 +81,6 @@ class RouteCollector extends Logger {
       optRouteOrder(desc)             .foreach { order => routeOrder = order }
       optCacheSecs(desc, value)       .foreach { secs  => cacheSecs  = secs  }
       optMethodAndPattern(desc, value).foreach { m_p   => method_pattern_coll.append(m_p) }
-    }
-
-    // Save cacheSecs, it may be used in direct subclass
-    // https://github.com/ngocdaothanh/xitrum/issues/118
-    if (method_pattern_coll.isEmpty && cacheSecs != 0) {
-      val newParentClassCacheMap = parentClassCacheMap.updated(className, cacheSecs)
-      return newParentClassCacheMap
     }
 
     method_pattern_coll.foreach { case (method, pattern) =>
@@ -139,8 +117,6 @@ class RouteCollector extends Logger {
       }
       coll.append(serializableRoute)
     }
-
-    parentClassCacheMap
   }
 
   private def collectErrorRoutes(

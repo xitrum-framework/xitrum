@@ -63,16 +63,16 @@ object SwaggerJsonAction {
     ("message" -> response.message)
   }
 
-  private def annotation2method(annotation: Any): Option[ApiMethod] = annotation match {
-    case method: GET       => Some(ApiMethod("GET",       method.value))
-    case method: POST      => Some(ApiMethod("POST",      method.value))
-    case method: PUT       => Some(ApiMethod("PUT",       method.value))
-    case method: DELETE    => Some(ApiMethod("DELETE",    method.value))
-    case method: PATCH     => Some(ApiMethod("PATCH",     method.value))
-    case method: OPTIONS   => Some(ApiMethod("OPTIONS",   method.value))
-    case method: SOCKJS    => Some(ApiMethod("SOCKJS",    method.value))
-    case method: WEBSOCKET => Some(ApiMethod("WEBSOCKET", method.value))
-    case _                 => None
+  private def annotation2method(annotation: Any): Seq[ApiMethod] = annotation match {
+    case method: GET       => method.paths.map(ApiMethod("GET",       _))
+    case method: POST      => method.paths.map(ApiMethod("POST",      _))
+    case method: PUT       => method.paths.map(ApiMethod("PUT",       _))
+    case method: DELETE    => method.paths.map(ApiMethod("DELETE",    _))
+    case method: PATCH     => method.paths.map(ApiMethod("PATCH",     _))
+    case method: OPTIONS   => method.paths.map(ApiMethod("OPTIONS",   _))
+    case method: SOCKJS    => method.paths.map(ApiMethod("SOCKJS",    _))
+    case method: WEBSOCKET => method.paths.map(ApiMethod("WEBSOCKET", _))
+    case _                 => Seq()
   }
 
   private def routes = {
