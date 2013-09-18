@@ -147,7 +147,7 @@ class RouteCollector extends Logger {
     val tpeSockJsCookieNeeded = universe.typeOf[SockJsCookieNeeded]
     annotations.foreach { case a =>
       val tpe = a.tpe
-      if (tpe == tpeSOCKJS)             pathPrefix   = a.toString
+      if (tpe == tpeSOCKJS)             pathPrefix   = a.scalaArgs(0).productElement(0).asInstanceOf[universe.Constant].value.toString
       if (tpe == tpeSockJsNoWebSocket)  noWebSocket  = true
       if (tpe == tpeSockJsCookieNeeded) cookieNeeded = true
     }
