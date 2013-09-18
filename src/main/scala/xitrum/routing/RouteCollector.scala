@@ -197,7 +197,7 @@ class RouteCollector extends Logger {
       None
   }
 
-  /** @return Option[(method, pattern)] */
+  /** @return Seq[(method, pattern)] */
   private def listMethodAndPattern(annotation: universe.Annotation): Seq[(String, String)] = {
     val tpe = annotation.tpe
 
