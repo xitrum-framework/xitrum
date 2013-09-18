@@ -28,7 +28,7 @@ class RouteCollector extends Logger {
 
     val actionTreeBuilder = Scanner.foldLeft(cachedFileName, new ActionTreeBuilder, discovered _)
     actionTreeBuilder.traverse { case (klass, annotations) =>
-      //acc = processAnnotations(acc, klass, annotations)
+      acc = processAnnotations(acc, klass, annotations)
     }
 
     acc
@@ -60,27 +60,26 @@ class RouteCollector extends Logger {
     val fromSockJs = className.startsWith(classOf[SockJsPrefix].getPackage.getName)
     val routes     = if (fromSockJs) acc.sockJsWithoutPrefixRoutes else acc.normalRoutes
 
-//    collectNormalRoutes(routes, className, annotations)
-//    val newSockJsMap = collectSockJsMap(acc.sockJsMap, className, annotations)
-//    collectErrorRoutes(routes, className, annotations)
+    collectNormalRoutes(routes, className, annotations)
+    val newSockJsMap = collectSockJsMap(acc.sockJsMap, className, annotations)
+    collectErrorRoutes(routes, className, annotations)
 
-    //DiscoveredAcc(acc.normalRoutes, acc.sockJsWithoutPrefixRoutes, newSockJsMap)
-    acc
+    DiscoveredAcc(acc.normalRoutes, acc.sockJsWithoutPrefixRoutes, newSockJsMap)
   }
 
   private def collectNormalRoutes(
       routes:      SerializableRouteCollection,
       className:   String,
-      annotations: MMap[String, Object]
+      annotations: Seq[universe.Annotation]
   ) {
     var routeOrder          = 0  // -1: first, 1: last, 0: other
     var cacheSecs           = 0  // < 0: cache action, > 0: cache page, 0: no cache
     var method_pattern_coll = ArrayBuffer[(String, String)]()
 
-    annotations.foreach { case (desc, value) =>
-      optRouteOrder(desc)             .foreach { order => routeOrder = order }
-      optCacheSecs(desc, value)       .foreach { secs  => cacheSecs  = secs  }
-      optMethodAndPattern(desc, value).foreach { m_p   => method_pattern_coll.append(m_p) }
+    annotations.foreach { a =>
+      optRouteOrder(a)       .foreach { order => routeOrder = order }
+      optCacheSecs(a)        .foreach { secs  => cacheSecs  = secs  }
+      listMethodAndPattern(a).foreach { m_p   => method_pattern_coll.append(m_p) }
     }
 
     method_pattern_coll.foreach { case (method, pattern) =>
@@ -122,28 +121,35 @@ class RouteCollector extends Logger {
   private def collectErrorRoutes(
       routes:      SerializableRouteCollection,
       className:   String,
-      annotations: MMap[String, Object])
+      annotations: Seq[universe.Annotation])
   {
-    annotations.foreach { case (desc, _) =>
-      if (desc == Type.getDescriptor(classOf[Error404])) routes.error404 = Some(className)
-      if (desc == Type.getDescriptor(classOf[Error500])) routes.error500 = Some(className)
+    val tpeError404 = universe.typeOf[Error404]
+    val tpeError500 = universe.typeOf[Error500]
+    annotations.foreach { case a =>
+      val tpe = a.tpe
+      if (tpe == tpeError404) routes.error404 = Some(className)
+      if (tpe == tpeError500) routes.error500 = Some(className)
     }
   }
 
   private def collectSockJsMap(
       sockJsMap:   Map[String, SockJsClassAndOptions],
       className:   String,
-      annotations: MMap[String, Object]
+      annotations: Seq[universe.Annotation]
   ): Map[String, SockJsClassAndOptions] =
   {
     var pathPrefix: String = null
     var noWebSocket  = false
     var cookieNeeded = false
 
-    annotations.foreach { case (desc, value) =>
-      if (desc == Type.getDescriptor(classOf[SOCKJS]))             pathPrefix   = getString(value)
-      if (desc == Type.getDescriptor(classOf[SockJsNoWebSocket]))  noWebSocket  = true
-      if (desc == Type.getDescriptor(classOf[SockJsCookieNeeded])) cookieNeeded = true
+    val tpeSOCKJS             = universe.typeOf[SOCKJS]
+    val tpeSockJsNoWebSocket  = universe.typeOf[SockJsNoWebSocket]
+    val tpeSockJsCookieNeeded = universe.typeOf[SockJsCookieNeeded]
+    annotations.foreach { case a =>
+      val tpe = a.tpe
+      if (tpe == tpeSOCKJS)             pathPrefix   = a.toString
+      if (tpe == tpeSockJsNoWebSocket)  noWebSocket  = true
+      if (tpe == tpeSockJsCookieNeeded) cookieNeeded = true
     }
 
     if (pathPrefix == null) {
@@ -156,69 +162,64 @@ class RouteCollector extends Logger {
 
   //----------------------------------------------------------------------------
 
-  private def optRouteOrder(annotationDesc: String): Option[Int] = {
-    if (annotationDesc == Type.getDescriptor(classOf[First])) return Some(-1)
-    if (annotationDesc == Type.getDescriptor(classOf[Last]))  return Some(1)
-    None
+  /** -1: first, 1: last, 0: other */
+  private def optRouteOrder(annotation: universe.Annotation): Option[Int] = {
+    val tpe = annotation.tpe
+    if (tpe == universe.typeOf[First])
+      Some(-1)
+    else if (tpe == universe.typeOf[Last])
+      Some(1)
+    else
+      None
   }
 
-  private def optCacheSecs(annotationDesc: String, annotationValue: Object): Option[Int] = {
-    if (annotationDesc == Type.getDescriptor(classOf[CacheActionDay]))
-      return Some(-getInt(annotationValue) * 24 * 60 * 60)
+  /** < 0: cache action, > 0: cache page, 0: no cache */
+  private def optCacheSecs(annotation: universe.Annotation): Option[Int] = {
+    val tpe = annotation.tpe
 
-    if (annotationDesc == Type.getDescriptor(classOf[CacheActionHour]))
-      return Some(-getInt(annotationValue)      * 60 * 60)
-
-    if (annotationDesc == Type.getDescriptor(classOf[CacheActionMinute]))
-      return Some(-getInt(annotationValue)           * 60)
-
-    if (annotationDesc == Type.getDescriptor(classOf[CacheActionSecond]))
-      return Some(-getInt(annotationValue))
-
-    if (annotationDesc == Type.getDescriptor(classOf[CachePageDay]))
-      return Some(getInt(annotationValue) * 24 * 60 * 60)
-
-    if (annotationDesc == Type.getDescriptor(classOf[CachePageHour]))
-      return Some(getInt(annotationValue)      * 60 * 60)
-
-    if (annotationDesc == Type.getDescriptor(classOf[CachePageMinute]))
-      return Some(getInt(annotationValue)           * 60)
-
-    if (annotationDesc == Type.getDescriptor(classOf[CachePageSecond]))
-      return Some(getInt(annotationValue))
-
-    None
+    if (tpe == universe.typeOf[CacheActionDay])
+      Some(-annotation.scalaArgs(0).toString.toInt * 24 * 60 * 60)
+    else if (tpe == universe.typeOf[CacheActionHour])
+      Some(-annotation.scalaArgs(0).toString.toInt      * 60 * 60)
+    else if (tpe == universe.typeOf[CacheActionMinute])
+      Some(-annotation.scalaArgs(0).toString.toInt           * 60)
+    else if (tpe == universe.typeOf[CacheActionSecond])
+      Some(-annotation.scalaArgs(0).toString.toInt)
+    else if (tpe == universe.typeOf[CachePageDay])
+      Some(annotation.scalaArgs(0).toString.toInt * 24 * 60 * 60)
+    else if (tpe == universe.typeOf[CachePageHour])
+      Some(annotation.scalaArgs(0).toString.toInt      * 60 * 60)
+    else if (tpe == universe.typeOf[CachePageMinute])
+      Some(annotation.scalaArgs(0).toString.toInt           * 60)
+    else if (tpe == universe.typeOf[CachePageSecond])
+      Some(annotation.scalaArgs(0).toString.toInt)
+    else
+      None
   }
 
   /** @return Option[(method, pattern)] */
-  private def optMethodAndPattern(annotationDesc: String, annotationValue: Object): Option[(String, String)] = {
-    if (annotationDesc == Type.getDescriptor(classOf[GET]))
-      return Some("GET", getString(annotationValue))
+  private def listMethodAndPattern(annotation: universe.Annotation): Seq[(String, String)] = {
+    val tpe = annotation.tpe
 
-    if (annotationDesc == Type.getDescriptor(classOf[POST]))
-      return Some("POST", getString(annotationValue))
-
-    if (annotationDesc == Type.getDescriptor(classOf[PUT]))
-      return Some("PUT", getString(annotationValue))
-
-    if (annotationDesc == Type.getDescriptor(classOf[PATCH]))
-      return Some("PATCH", getString(annotationValue))
-
-    if (annotationDesc == Type.getDescriptor(classOf[DELETE]))
-      return Some("DELETE", getString(annotationValue))
-
-    if (annotationDesc == Type.getDescriptor(classOf[OPTIONS]))
-      return Some("OPTIONS", getString(annotationValue))
-
-    if (annotationDesc == Type.getDescriptor(classOf[WEBSOCKET]))
-      return Some("WEBSOCKET", getString(annotationValue))
-
-    None
+    if (tpe == universe.typeOf[GET])
+      getStrings(annotation).map(("GET", _))
+    else if (tpe == universe.typeOf[POST])
+      getStrings(annotation).map(("POST", _))
+    else if (tpe == universe.typeOf[PUT])
+      getStrings(annotation).map(("PUT", _))
+    else if (tpe == universe.typeOf[PATCH])
+      getStrings(annotation).map(("PATCH", _))
+    else if (tpe == universe.typeOf[DELETE])
+      getStrings(annotation).map(("DELETE", _))
+    else if (tpe == universe.typeOf[OPTIONS])
+      getStrings(annotation).map(("OPTIONS", _))
+    else if (tpe == universe.typeOf[WEBSOCKET])
+      getStrings(annotation).map(("WEBSOCKET", _))
+    else
+      Seq()
   }
 
-  private def getInt(annotationValue: Object): Int =
-    annotationValue.toString.toInt
-
-  private def getString(annotationValue: Object): String =
-    annotationValue.toString
+  private def getStrings(annotation: universe.Annotation): Seq[String] = {
+    annotation.scalaArgs.map { tree => tree.productElement(0).asInstanceOf[universe.Constant].value.toString }
+  }
 }
