@@ -18,11 +18,11 @@ case class OPTIONS(paths: String*) extends Route
 case class WEBSOCKET(paths: String*) extends Route
 case class SOCKJS   (paths: String*) extends Route
 
-class Error404 extends Error
-class Error500 extends Error
-
 class First extends RouteOrder
 class Last  extends RouteOrder
 
-class SockJsCookieNeeded extends SockJsOption
-class SockJsNoWebSocket  extends SockJsOption
+class SockJsCookieNeeded extends StaticAnnotation
+class SockJsNoWebSocket  extends StaticAnnotation
+
+class Error404 extends Error
+class Error500 extends Error
