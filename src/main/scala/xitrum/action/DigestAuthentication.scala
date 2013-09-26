@@ -197,7 +197,7 @@ trait DigestAuthentication {
 
     response.setHeader(HttpHeaders.Names.WWW_AUTHENTICATE, http_digest_authentication_header)
     response.setStatus(HttpResponseStatus.UNAUTHORIZED)
-    renderText("HTTP Digest: Access denied.")
+    respondText("HTTP Digest: Access denied.")
   }
 
   /**
@@ -214,7 +214,7 @@ trait DigestAuthentication {
       "opaque=\"" + opaque + "\"," + "stale=TRUE"
     response.setHeader(HttpHeaders.Names.WWW_AUTHENTICATE, http_digest_authentication_header)
     response.setStatus(HttpResponseStatus.UNAUTHORIZED)
-    renderText("Invalid nonce")
+    respondText("Invalid nonce")
   }
 
   /**
@@ -253,10 +253,10 @@ trait DigestAuthentication {
 
   private def validateNonce2(nonce_from_client: String): Boolean = {
     val secret_token = getSecretTokenClient
-    val t = Integer.parseInt(Base64.base64Decode(nonce_from_client).split(":").first)
-    val digest_from_client = Base64.base64Decode(nonce_from_client).split(":").last
+    val t = Integer.parseInt(Base64.base64Decode(nonce_from_client).split(":")(0))
+    val digest_from_client = refArrayOps(Base64.base64Decode(nonce_from_client).split(":")).last
     val digest_server = hexaMessageDigest(t + ":" + secret_token, "MD5")
-    digest_server == digest_from_client && (t - now).abs <= seconds_time_out
+    digest_server == digest_from_client && intWrapper(t - now).abs <= seconds_time_out
   }
 
   private def now: Int = {
