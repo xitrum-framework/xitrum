@@ -106,7 +106,7 @@ class Config(val config: TConfig) extends Logger {
         klass.newInstance().asInstanceOf[TemplateEngine]
       } catch {
         case NonFatal(e) =>
-          Config.exitOnError("Could not load template engine, please check config/xitrum.conf", e)
+          Config.exitOnStartupError("Could not load template engine, please check config/xitrum.conf", e)
           null
       }
     } else {
@@ -160,7 +160,7 @@ object Config extends Logger {
       ConfigFactory.load()
     } catch {
       case NonFatal(e) =>
-        exitOnError("Could not load config/application.conf. For an example, see https://github.com/ngocdaothanh/xitrum-new/blob/master/config/application.conf", e)
+        exitOnStartupError("Could not load config/application.conf. For an example, see https://github.com/ngocdaothanh/xitrum-new/blob/master/config/application.conf", e)
         null
     }
   }
@@ -171,7 +171,7 @@ object Config extends Logger {
       new Config(application.getConfig("xitrum"))
     } catch {
       case NonFatal(e) =>
-        exitOnError("Could not load config/xitrum.conf. For an example, see https://github.com/ngocdaothanh/xitrum-new/blob/master/config/xitrum.conf", e)
+        exitOnStartupError("Could not load config/xitrum.conf. For an example, see https://github.com/ngocdaothanh/xitrum-new/blob/master/config/xitrum.conf", e)
         null
     }
   }
@@ -256,11 +256,11 @@ object Config extends Logger {
   }
 
   /**
-   * Shutdowns Hazelcast and call System.exit(-1).
-   * Once Hazelcast is started, calling System.exit(-1) does not stop
+   * Shutdowns Hazelcast and calls System.exit(-1).
+   * Once Hazelcast is started, calling only System.exit(-1) does not stop
    * the current process!
    */
-  def exitOnError(msg: String, e: Throwable) {
+  def exitOnStartupError(msg: String, e: Throwable) {
     logger.error(msg, e)
     Hazelcast.shutdownAll()
     System.exit(-1)
@@ -288,7 +288,7 @@ object Config extends Logger {
     } catch {
       case NonFatal(e) =>
         if (retried) {
-          Config.exitOnError("Could not collect routes", e)
+          Config.exitOnStartupError("Could not collect routes", e)
           throw e
         } else {
           logger.info("Could not load " + ROUTES_CACHE + ", delete and retry...")

@@ -41,7 +41,7 @@ object NetOption {
             "Check to see if there's another process already running at that address.")
             .format(hostnameOrIp, port, service)
         }
-        Config.exitOnError(msg, e)
+        Config.exitOnStartupError(msg, e)
     }
   }
 }
