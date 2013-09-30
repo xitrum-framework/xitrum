@@ -5,7 +5,6 @@ import scala.annotation.StaticAnnotation
 sealed trait Route        extends StaticAnnotation
 sealed trait Error        extends StaticAnnotation
 sealed trait RouteOrder   extends StaticAnnotation
-sealed trait SockJsOption extends StaticAnnotation
 
 case class GET   (paths: String*) extends Route
 case class POST  (paths: String*) extends Route

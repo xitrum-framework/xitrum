@@ -4,7 +4,7 @@ import scala.collection.mutable.ArrayBuffer
 import scala.reflect.runtime.universe
 
 import xitrum.Action
-import xitrum.annotation.Cache
+import xitrum.annotation.ActionAnnotations
 
 /**
  * Intended for use by RouteCollector.
@@ -14,92 +14,103 @@ import xitrum.annotation.Cache
  * trait. Traits are seen by ASM as interfaces. At this step, we build trees of
  * interface -> children.
  *
- * Lastly, RouteCollector calls "traverse" to walk through all direct and
- * indirect children of Action.
+ * Lastly, RouteCollector calls "getConcreteActionsAndAnnotations" to get
+ * concrete (non-trait) action classes and their annotations.
  *
  * This class is immutable because it will be serialized to routes.cache.
  *
- * @param interface2Children Map to save trees
+ * @param interface2Children Map to save trees; names are class names
  */
-private case class ActionTreeBuilder(interface2Children: Map[String, Seq[String]] = Map()) {
-  // Normal name: xitrum.Action
-  // Internal name: xitrum/Action
+private case class ActionTreeBuilder(
+    interface2Children: Map[String, Seq[String]] = Map()
+) {
   def addBranches(
       childInternalName:   String,
       parentInternalNames: Array[String]
   ): ActionTreeBuilder = {
+    // Class name: xitrum.Action
+    // Internal name: xitrum/Action
+    def internalName2ClassName(internalName: String) = internalName.replace('/', '.')
+
     if (parentInternalNames == null) return this
 
-    var ret = interface2Children
-    parentInternalNames.foreach { p =>
-      if (interface2Children.isDefinedAt(p)) {
-        val children    = interface2Children(p)
-        val newChildren = children :+ childInternalName
-        ret += p -> newChildren
+    val childClassName = internalName2ClassName(childInternalName)
+
+    var i2c = interface2Children
+    parentInternalNames.foreach { parentInternalName =>
+      val parentClassName = internalName2ClassName(parentInternalName)
+      if (interface2Children.isDefinedAt(parentClassName)) {
+        val children    = interface2Children(parentClassName)
+        val newChildren = children :+ childClassName
+        i2c += parentClassName -> newChildren
       } else {
-        ret += p -> Seq(childInternalName)
+        i2c += parentClassName -> Seq(childClassName)
       }
     }
 
-    ActionTreeBuilder(ret)
+    ActionTreeBuilder(i2c)
   }
 
   /**
-   * @param annotationsProcessor Will be passed a concrete (non-trait) Action class
-   * and a non-empty collection of annotations. Annotations of ancestors will be
-   * pushed down to descedants. If a parent declares cache info, its descedants
-   * will have that cache info. However, descedants may override annotations of
-   * ancestors. For example, if ancestor declares cache time of 5 minutes, but
-   * descedant declares 10 minutes, descedant will have 10 minutes in effect.
+   * Annotations of action ancestors will be pushed down to descedants. If a
+   * parent declares cache info, its descedants will have that cache info.
+   * Descedants may override annotations of ancestors. If ancestor declares
+   * cache time of 5 minutes, but descedant declares 10 minutes, descedant will
+   * have 10 minutes in effect.
+   *
+   * @return Concrete (non-trait) action classes and their annotations
    */
-  def traverse(annotationsProcessor: (Class[_ <: Action], Seq[universe.Annotation]) => Unit) {
-    // We are only interested in the Action tree
-    val actionRootInternalName = classOf[xitrum.Action].getName.replace('.', '/')
-    val runtimeMirror          = universe.runtimeMirror(getClass.getClassLoader)
-    preOrderTraverse(runtimeMirror, Seq(), actionRootInternalName, annotationsProcessor)
+  def getConcreteActionsAndAnnotations: Set[(Class[_ <: Action], ActionAnnotations)] = {
+    val concreteActions = getConcreteActions
+
+    val runtimeMirror = universe.runtimeMirror(getClass.getClassLoader)
+    var cache         = Map[Class[_ <: Action], ActionAnnotations]()
+
+    def getActionAccumulatedAnnotations(klass: Class[_ <: Action]): ActionAnnotations = {
+      cache.get(klass) match {
+        case Some(aa) => aa
+
+        case None =>
+          val parents = klass.getInterfaces
+          val parentAnnotations = parents.foldLeft(ActionAnnotations()) { case (acc, parent) =>
+            if (parent.isAssignableFrom(classOf[Action])) {
+              val aa = getActionAccumulatedAnnotations(parent.asInstanceOf[Class[_ <: Action]])
+              acc.overrideMe(aa)
+            } else {
+              acc
+            }
+          }
+
+          val annotations = runtimeMirror.classSymbol(klass).asClass.annotations
+          val ret         = parentAnnotations.overrideMe(annotations)
+
+          cache += klass -> ret
+          ret
+      }
+    }
+
+    concreteActions.map { ca => (ca, getActionAccumulatedAnnotations(ca)) }
   }
 
   //----------------------------------------------------------------------------
 
-  private def preOrderTraverse(
-      runtimeMirror:        universe.Mirror,
-      ancestorsAnnotations: Seq[universe.Annotation],
-      key:                  String,
-      annotationsProcessor: (Class[_ <: Action], Seq[universe.Annotation]) => Unit)
-  {
-    if (interface2Children.isDefinedAt(key)) {
-      val children = interface2Children(key)
-      children.foreach { internalName =>
-        val className            = internalName.replace('/', '.')
-        val klass                = Class.forName(className).asInstanceOf[Class[_ <: Action]]
-        val annotations          = runtimeMirror.classSymbol(klass).asClass.annotations
-        val effectiveAnnotations = overrideAncestorsAnnotations(ancestorsAnnotations, annotations)
+  private def getConcreteActions: Set[Class[_ <: Action]] = {
+    var concreteActions = Set[Class[_ <: Action]]()
 
-        if (!klass.isInterface && annotations.nonEmpty)
-          annotationsProcessor(klass, effectiveAnnotations)
-
-        preOrderTraverse(runtimeMirror, effectiveAnnotations, internalName, annotationsProcessor)
+    def traverseActionTree(className: String) {
+      if (interface2Children.isDefinedAt(className)) {
+        val children = interface2Children(className)
+        children.foreach { className =>
+          val klass = Class.forName(className).asInstanceOf[Class[_ <: Action]]
+          if (!klass.isInterface) concreteActions += klass  // Not interface => concrete
+          traverseActionTree(className)
+        }
       }
     }
-  }
 
-  /**
-   * Only overrides cache info. App developers should be responsible for ensuring
-   * the correctness of their routes.
-   */
-  private def overrideAncestorsAnnotations(
-      ancestorsAnnotations: Seq[universe.Annotation],
-      annotations:          Seq[universe.Annotation]
-  ): Seq[universe.Annotation] = {
-    val hadCacheAnnotation = annotations.exists(isCacheAnnotation(_))
-    if (hadCacheAnnotation) {
-      val noCacheAnnotations = ancestorsAnnotations.filterNot(isCacheAnnotation _)
-      noCacheAnnotations ++ annotations
-    } else {
-      ancestorsAnnotations ++ annotations
-    }
+    // We are only interested in the Action tree
+    val actionRoot = classOf[Action].getName
+    traverseActionTree(actionRoot)
+    concreteActions
   }
-
-  private def isCacheAnnotation(annotation: universe.Annotation) =
-    annotation.tpe <:< universe.typeOf[Cache]
 }
