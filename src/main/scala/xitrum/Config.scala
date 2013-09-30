@@ -52,9 +52,10 @@ class SessionConfig(config: TConfig) {
 }
 
 class RequestConfig(config: TConfig) {
-  val charsetName    = config.getString("charset")
-  val maxSizeInMB    = config.getInt("maxSizeInMB")
-  val filteredParams = config.getStringList("filteredParams")
+  val charsetName          = config.getString("charset")
+  val maxInitialLineLength = config.getInt("maxInitialLineLength")
+  val maxSizeInMB          = config.getInt("maxSizeInMB")
+  val filteredParams       = config.getStringList("filteredParams")
 
   // Starts and stops with "/", like "/static/", if any
   val staticFileUrlPrefix = if (config.hasPath("staticFileUrlPrefix")) Some(config.getString("staticFileUrlPrefix")) else None

@@ -12,6 +12,7 @@
 * #181 Swagger: Improve annotations
 * #182 Swagger: Cache result on 1st access
 * #185 Swagger: Include Swagger UI
+* #189 Add option to xitrum.conf to configure request maxInitialLineLength
 * #172 Replace Java annotations with Scala annotations
 * #183 Fix: Dead actor sends Terminate message to itself
 * #93 Readd indices for xitrum.mq.MessageQueue
