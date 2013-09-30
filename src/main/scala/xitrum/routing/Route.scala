@@ -65,7 +65,7 @@ class Route(
     // 0 < max2 <= max1
 
     val pathParams = MMap[String, Seq[String]]()
-    var i = 0   // i will go from 0 until max1
+    var i = 0  // i will go from 0 until max1
 
     // pathParams is updated along the way
     val matched = compiledPattern.forall { rt =>
@@ -77,15 +77,19 @@ class Route(
           } else {
             if (max2 < max1) {
               false
-            } else { // max2 = max1
-              matchRegex(pathParams, rt, pathTokens(i))
+            } else {  // max2 = max1
+              // Placeholder in URL can't be empty
+              val value = pathTokens(i)
+              if (value.length == 0) false else matchRegex(pathParams, rt, value)
             }
           }
         } else {
           if (rt.value == "*") {
             false
           } else {
-            matchRegex(pathParams, rt, pathTokens(i))
+            // Placeholder in URL can't be empty
+            val value = pathTokens(i)
+            if (value.length == 0) false else matchRegex(pathParams, rt, value)
           }
         }
       } else {
