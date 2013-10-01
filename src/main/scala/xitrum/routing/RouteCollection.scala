@@ -6,6 +6,7 @@ import scala.collection.mutable.{ArrayBuffer, Map => MMap}
 import org.jboss.netty.handler.codec.http.HttpMethod
 
 import xitrum.{Action, Logger}
+import xitrum.annotation.Swagger
 import xitrum.scope.request.{Params, PathInfo}
 import xitrum.util.LocalLruCache
 
@@ -14,6 +15,7 @@ object RouteCollection {
     val normal              = acc.normalRoutes
     val sockJsWithoutPrefix = acc.sockJsWithoutPrefixRoutes
     val sockJsMap           = acc.sockJsMap
+    val swaggerMap          = acc.swaggerMap
 
     // Add prefixes to SockJS routes
     sockJsMap.keys.foreach { prefix =>
@@ -51,6 +53,7 @@ object RouteCollection {
       normal.firstOPTIONSs  .map(_.toRoute), normal.lastOPTIONSs  .map(_.toRoute), normal.otherOPTIONSs  .map(_.toRoute),
       normal.firstWEBSOCKETs.map(_.toRoute), normal.lastWEBSOCKETs.map(_.toRoute), normal.otherWEBSOCKETs.map(_.toRoute),
       new SockJsRouteMap(sockJsMap),
+      swaggerMap,
       normal.error404.map(Class.forName(_).asInstanceOf[Class[Action]]),
       normal.error500.map(Class.forName(_).asInstanceOf[Class[Action]])
     )
@@ -88,6 +91,7 @@ class RouteCollection(
   val otherWEBSOCKETs: Seq[Route],
 
   val sockJsRouteMap: SockJsRouteMap,
+  val swaggerMap:     Map[Class[_ <: Action], Swagger],
 
   // 404.html and 500.html are used by default
   val error404: Option[Class[Action]],

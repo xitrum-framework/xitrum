@@ -12,7 +12,7 @@ class Route(
   val httpMethod: HttpMethod, val compiledPattern: Seq[RouteToken],
 
   // Out
-  val klass: Class[_], val cacheSecs: Int
+  val klass: Class[_ <: Action], val cacheSecs: Int
 )
 {
   def url(params: (String, Any)*) = {

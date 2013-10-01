@@ -19,20 +19,30 @@ object RouteCompiler {
       "/"
     } else {
       routeTokens.foldLeft("") { (acc, t) =>
-        val rawValue =
-          if (t.isPlaceHolder) {
-            if (swagger) "{" + t.value + "}" else ":" + t.value
-          } else {
-            t.value
+        if (swagger) {
+          val rawValue =
+            if (t.isPlaceHolder) {
+              "{" + t.value + "}"
+            } else {
+              t.value
+            }
+          acc + "/" + rawValue
+        } else {
+          val rawValue =
+            if (t.isPlaceHolder) {
+              ":" + t.value
+            } else {
+              t.value
+            }
+          val rawRegex = t.regex match {
+            case None => ""
+            case Some(r) =>
+              val string                = r.toString
+              val withoutGraveAndDollar = string.substring(1, string.length - 1)
+              "<" + withoutGraveAndDollar + ">"
           }
-        val rawRegex = t.regex match {
-          case None => ""
-          case Some(r) =>
-            val string = r.toString
-            val withoutGraveAndDollar = string.substring(1, string.length - 1)
-            "<" + withoutGraveAndDollar + ">"
+          acc + "/" + rawValue + rawRegex
         }
-        acc + "/" + rawValue + rawRegex
       }
     }
   }
