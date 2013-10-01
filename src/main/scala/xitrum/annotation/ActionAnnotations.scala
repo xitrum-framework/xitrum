@@ -2,6 +2,9 @@ package xitrum.annotation
 
 import scala.reflect.runtime.universe
 
+// http://docs.scala-lang.org/overviews/reflection/annotations-names-scopes.html
+// http://www.veebsbraindump.com/2013/01/reflecting-annotations-in-scala-2-10/
+
 case class ActionAnnotations(
   route:      Option[universe.Annotation] = None,
   routeOrder: Option[universe.Annotation] = None,
