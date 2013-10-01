@@ -145,7 +145,7 @@ class SwaggerIndexAction extends Action {
     // so that if there's no "url" param, it will load "/xitrum/swagger.json",
     // otherwise it will load the specified URL
     val json     = url[SwaggerJsonAction]
-    val res      = resourceUrl("xitrum/swagger-ui-130915/index.html")
+    val res      = resourceUrl("xitrum/swagger-ui-2.0.2/index.html")
     val location = if (json == "/xitrum/swagger.json") res else res + "&url=" + json
     redirectTo(location)
   }
