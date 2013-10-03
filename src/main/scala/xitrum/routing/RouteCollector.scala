@@ -241,78 +241,47 @@ class RouteCollector extends Logger {
       val summary   = scalaArgs.head.productElement(0).asInstanceOf[universe.Constant].value.toString
       val varargs   = scalaArgs.tail
 
-      val swaggerVarargs: Seq[Swagger.ParamOrResponse] = varargs.map { paramOrResponse =>
-        if (paramOrResponse.tpe == universe.typeOf[Swagger.Param]) {
-          // Ex: List(xitrum.annotation.Swagger.Param.apply, "title", xitrum.annotation.Swagger.Form, xitrum.annotation.Swagger.String, xitrum.annotation.Swagger.Param.apply$default$4)
-          val children = paramOrResponse.children
-
-          val name      = children(1).productElement(0).asInstanceOf[universe.Constant].value.toString
-          val paramType = children(2).toString
-          val valueType = children(3).toString
-
-          val description =
-            if (children(4).toString == "xitrum.annotation.Swagger.Param.apply$default$4")
-              ""
-            else
-              children(4).productElement(0).asInstanceOf[universe.Constant].value.toString
-
-          Swagger.Param(name, makeParamType(paramType), makeValueType(valueType), description)
-        } else if (paramOrResponse.tpe == universe.typeOf[Swagger.OptionalParam]) {
-          val children = paramOrResponse.children
-
-          val name      = children(1).productElement(0).asInstanceOf[universe.Constant].value.toString
-          val paramType = children(2).toString
-          val valueType = children(3).toString
-
-          val description =
-            if (children(4).toString == "xitrum.annotation.Swagger.OptionalParam.apply$default$4")
-              ""
-            else
-              children(4).productElement(0).asInstanceOf[universe.Constant].value.toString
-
-          Swagger.OptionalParam(name, makeParamType(paramType), makeValueType(valueType), description)
-        } else {  //if (paramOrResponse.tpe == universe.typeOf[Swagger.Response]) {
+      val swaggerVarargs: Seq[SwaggerParamOrResponse] = varargs.map { paramOrResponse =>
+        if (paramOrResponse.tpe == universe.typeOf[Swagger.Response]) {
           // Ex: List(xitrum.annotation.Swagger.Response.apply, 200, "ID of the newly created article will be returned")
           val children = paramOrResponse.children
 
-          val code    = children(1).toString.toInt
-          val message = children(2).productElement(0).asInstanceOf[universe.Constant].value.toString
+          val code = children(1).toString.toInt
+          val desc = children(2).productElement(0).asInstanceOf[universe.Constant].value.toString
 
-          Swagger.Response(code, message)
+          Swagger.Response(code, desc)
+        } else {  // param or optional param
+          // Ex:
+          // List(xitrum.annotation.Swagger.StringForm.apply, "title", xitrum.annotation.Swagger.StringForm.apply$default$2)
+          // List(xitrum.annotation.Swagger.StringForm.apply, "title", "desc")
+          val children = paramOrResponse.children
+
+          val name = children(1).productElement(0).asInstanceOf[universe.Constant].value.toString
+
+          val desc =
+            if (children(2).toString.startsWith("xitrum.annotation.Swagger"))
+              ""
+            else
+              children(2).productElement(0).asInstanceOf[universe.Constant].value.toString
+
+          // Use reflection to create annotation
+
+          // Ex: xitrum.annotation.Swagger.StringForm.apply
+          val child0         = children(0).toString
+          val scalaClassName = child0.substring(0, child0.length - ".apply".length)
+
+          val builder = new StringBuilder(scalaClassName)
+          builder.setCharAt("xitrum.annotation.Swagger".length, '$')
+
+          // Ex: xitrum.annotation.Swagger$StringForm
+          val javaClassName = builder.toString
+          val klass         = Class.forName(javaClassName)
+          val constructor   = klass.getConstructor(classOf[String], classOf[String])
+          constructor.newInstance(name, desc).asInstanceOf[SwaggerParamOrResponse]
         }
       }
 
       Swagger(summary, swaggerVarargs: _*)
-    }
-  }
-
-  private def makeParamType(paramType: String): Swagger.ParamType = {
-    paramType match {
-      case "xitrum.annotation.Swagger.Path"   => Swagger.Path
-      case "xitrum.annotation.Swagger.Query"  => Swagger.Query
-      case "xitrum.annotation.Swagger.Body"   => Swagger.Body
-      case "xitrum.annotation.Swagger.Header" => Swagger.Header
-      case "xitrum.annotation.Swagger.Form"   => Swagger.Form
-    }
-  }
-
-  private def makeValueType(valueType: String): Swagger.ValueType = {
-    valueType match {
-      case "xitrum.annotation.Swagger.Byte"  => Swagger.Byte
-      case "xitrum.annotation.Swagger.Int"   => Swagger.Int
-      case "xitrum.annotation.Swagger.Int32" => Swagger.Int32
-      case "xitrum.annotation.Swagger.Int64" => Swagger.Int64
-      case "xitrum.annotation.Swagger.Long"  => Swagger.Long
-
-      case "xitrum.annotation.Swagger.Number" => Swagger.Number
-      case "xitrum.annotation.Swagger.Float"  => Swagger.Float
-      case "xitrum.annotation.Swagger.Double" => Swagger.Double
-
-      case "xitrum.annotation.Swagger.String"  => Swagger.String
-      case "xitrum.annotation.Swagger.Boolean" => Swagger.Boolean
-
-      case "xitrum.annotation.Swagger.Date"     => Swagger.Date
-      case "xitrum.annotation.Swagger.DateTime" => Swagger.DateTime
     }
   }
 }

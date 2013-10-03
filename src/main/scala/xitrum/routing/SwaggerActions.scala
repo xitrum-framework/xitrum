@@ -9,7 +9,7 @@ import org.jboss.netty.handler.codec.http.HttpResponseStatus
 
 import xitrum.{Action, Config}
 import xitrum.annotation.{First, DELETE, GET, OPTIONS, PATCH, POST, PUT, SOCKJS, WEBSOCKET}
-import xitrum.annotation.Swagger
+import xitrum.annotation.{Swagger, SwaggerParamOrResponse}
 import xitrum.view.DocType
 
 case class ApiMethod(method: String, route: String)
@@ -32,9 +32,8 @@ object SwaggerJsonAction {
     val routePath = RouteCompiler.decompile(route.compiledPattern, true)
     val nickname  = route.klass.getSimpleName
 
-    val params         = doc.varargs.filter(_.isInstanceOf[Swagger.Param]).asInstanceOf[Seq[Swagger.Param]].map(param2json(_))
-    val optionalParams = doc.varargs.filter(_.isInstanceOf[Swagger.OptionalParam]).asInstanceOf[Seq[Swagger.OptionalParam]].map(optionalParam2json(_))
-    val responses      = doc.varargs.filter(_.isInstanceOf[Swagger.Response]).asInstanceOf[Seq[Swagger.Response]].map(response2json(_))
+    val params    = doc.varargs.filterNot(_.isInstanceOf[Swagger.Response]).map(param2json(_))
+    val responses = doc.varargs.filter(_.isInstanceOf[Swagger.Response]).asInstanceOf[Seq[Swagger.Response]].map(response2json(_))
 
     val cacheNote = cache(route)
     val notes     = if (cacheNote.isEmpty) "" else cacheNote
@@ -44,26 +43,49 @@ object SwaggerJsonAction {
       ("summary"          -> doc.desc) ~
       ("notes"            -> notes) ~
       ("nickname"         -> nickname) ~
-      ("parameters"       -> (params.toSeq ++ optionalParams.toSeq)) ~
+      ("parameters"       -> params.toSeq) ~
       ("responseMessages" -> responses.toSeq))
 
     Some(("path" -> routePath) ~ ("operations" -> operations))
   }
 
-  private def param2json(param: Swagger.Param): JObject = {
-    ("name"        -> param.name) ~
-    ("paramType"   -> param.paramType.toString) ~
-    ("type"        -> param.valueType.toString) ~
-    ("description" -> param.desc) ~
-    ("required"    -> true)
-  }
+  private def param2json(param: SwaggerParamOrResponse): JObject = {
+    // Use class name to extract paramType, valueType, and required
+    // See Swagger.scala
 
-  private def optionalParam2json(param: Swagger.OptionalParam): JObject = {
-    ("name"        -> param.name) ~
-    ("paramType"   -> param.paramType.toString) ~
-    ("type"        -> param.valueType.toString) ~
-    ("description" -> param.desc) ~
-    ("required"    -> false)
+    val klass          = param.getClass
+    val className      = klass.getName            // Ex: xitrum.annotation.Swagger$OptionalBytePath
+    val shortClassName = className.split('$')(1)  // Ex: OptionalBytePath
+
+    val paramType =
+           if (shortClassName.endsWith("Path"))   "path"
+      else if (shortClassName.endsWith("Query"))  "query"
+      else if (shortClassName.endsWith("Body"))   "body"
+      else if (shortClassName.endsWith("Header")) "header"
+      else                              "form"
+
+    val required = !shortClassName.startsWith("Optional")
+
+    val valueType =
+      if (required)
+        shortClassName.substring(0, shortClassName.length - paramType.length).toLowerCase
+      else
+        shortClassName.substring("Optional".length, shortClassName.length - paramType.length).toLowerCase
+
+    // Use reflection to extract name and desc
+
+    val nameMethod = klass.getMethod("name")
+    val name       = nameMethod.invoke(param).asInstanceOf[String]
+
+
+    val descMethod = klass.getMethod("desc")
+    val desc       = descMethod.invoke(param).asInstanceOf[String]
+
+    ("name"        -> name) ~
+    ("paramType"   -> paramType) ~
+    ("type"        -> valueType) ~
+    ("description" -> desc) ~
+    ("required"    -> required)
   }
 
   private def response2json(response: Swagger.Response): JObject = {
