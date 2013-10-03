@@ -4,7 +4,7 @@ import scala.annotation.StaticAnnotation
 
 // Put outside object Swagger so that in IDE like Eclipse, when typing Swagger.
 // ParamOrResponse is not shown, only appropriate things are shown
-sealed trait SwaggerParamOrResponse extends StaticAnnotation
+sealed trait SwaggerParamOrResponse
 
 object Swagger {
   // See:
