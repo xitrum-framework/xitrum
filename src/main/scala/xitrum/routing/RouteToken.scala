@@ -7,4 +7,4 @@ import scala.util.matching.Regex
  * RouteToken("articles", true, None) and
  * RouteToken("id", false, Some("[0-9]+".r))
  */
-case class RouteToken(value: String, isPlaceHolder: Boolean, regex: Option[Regex])
+case class RouteToken(value: String, isPlaceholder: Boolean, regex: Option[Regex])

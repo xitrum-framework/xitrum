@@ -21,7 +21,7 @@ object RouteCompiler {
       routeTokens.foldLeft("") { (acc, t) =>
         if (swagger) {
           val rawValue =
-            if (t.isPlaceHolder) {
+            if (t.isPlaceholder) {
               "{" + t.value + "}"
             } else {
               t.value
@@ -29,7 +29,7 @@ object RouteCompiler {
           acc + "/" + rawValue
         } else {
           val rawValue =
-            if (t.isPlaceHolder) {
+            if (t.isPlaceholder) {
               ":" + t.value
             } else {
               t.value
@@ -50,14 +50,14 @@ object RouteCompiler {
   //----------------------------------------------------------------------------
 
   private def compilePatternFragment(fragment: String): RouteToken = {
-    val isPlaceHolder         = fragment.startsWith(":")
+    val isPlaceholder         = fragment.startsWith(":")
     val regexMarkerStartIndex = fragment.indexOf("<")
 
     val value =
       if (regexMarkerStartIndex < 0) {
-        if (isPlaceHolder) fragment.substring(1) else fragment
+        if (isPlaceholder) fragment.substring(1) else fragment
       } else {
-        val valueStartIndex = if (isPlaceHolder) 1 else 0
+        val valueStartIndex = if (isPlaceholder) 1 else 0
         fragment.substring(valueStartIndex, regexMarkerStartIndex)
       }
 
@@ -68,6 +68,6 @@ object RouteCompiler {
         val regexString = fragment.substring(regexMarkerStartIndex + 1, fragment.length - 1)
         Some(("^" + regexString + "$").r)
       }
-    RouteToken(value, isPlaceHolder, regex)
+    RouteToken(value, isPlaceholder, regex)
   }
 }

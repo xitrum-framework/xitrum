@@ -58,7 +58,7 @@ trait UrlFor {
 
   //----------------------------------------------------------------------------
 
-  def url(params: (String, Any)*) = Config.routesReverseMappings(getClass).url(params:_*)
+  def url(params: (String, Any)*) = Config.routesReverseMappings(getClass).url(params)
   lazy val url: String = url()
 
   def absUrl(params: (String, Any)*) = absUrlPrefix + url(params:_*)
@@ -71,7 +71,7 @@ trait UrlFor {
 
   def url[T <: Action : Manifest](params: (String, Any)*) = {
     val klass = manifest[T].runtimeClass.asInstanceOf[Class[Action]]
-    Config.routesReverseMappings(klass).url(params:_*)
+    Config.routesReverseMappings(klass).url(params)
   }
   def url[T <: Action : Manifest]: String = url[T]()
 
@@ -82,7 +82,7 @@ trait UrlFor {
 
   def webSocketAbsUrl[T <: WebSocketActor : Manifest](params: (String, Any)*) = {
     val klass = manifest[T].runtimeClass.asInstanceOf[Class[Action]]
-    webSocketAbsUrlPrefix + Config.routesReverseMappings(klass).url(params:_*)
+    webSocketAbsUrlPrefix + Config.routesReverseMappings(klass).url(params)
   }
   def webSocketAbsUrl[T <: WebSocketActor : Manifest]: String = webSocketAbsUrl[T]()
 

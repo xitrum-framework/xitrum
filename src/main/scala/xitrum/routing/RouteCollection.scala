@@ -98,12 +98,14 @@ class RouteCollection(
   val error500: Option[Class[Action]]
 ) extends Logger
 {
-  lazy val reverseMappings: Map[Class[_], Route] = {
-    val mmap = MMap[Class[_], Route]()
-    allFirsts.foreach { r => mmap(r.klass) = r }
-    allLasts .foreach { r => mmap(r.klass) = r }
-    allOthers.foreach { r => mmap(r.klass) = r }
-    mmap.toMap
+  lazy val reverseMappings: Map[Class[_], ReverseRoute] = {
+    val mmap = MMap[Class[_], ArrayBuffer[Route]]()
+
+    allFirsts.foreach { r => mmap.getOrElseUpdate(r.klass, ArrayBuffer()).append(r) }
+    allLasts .foreach { r => mmap.getOrElseUpdate(r.klass, ArrayBuffer()).append(r) }
+    allOthers.foreach { r => mmap.getOrElseUpdate(r.klass, ArrayBuffer()).append(r) }
+
+    mmap.mapValues { routes => ReverseRoute(routes) }.toMap
   }
 
   /** For use from browser */
@@ -133,7 +135,7 @@ class RouteCollection(
 
     val xs = routeArray.map { route =>
       val ys = route.compiledPattern.map { rt =>
-        "['" + rt.value + "', " + rt.isPlaceHolder + "]"
+        "['" + rt.value + "', " + rt.isPlaceholder + "]"
       }
       "[[" + ys.mkString(", ") + "], '" + route.klass.getName + "']"
     }

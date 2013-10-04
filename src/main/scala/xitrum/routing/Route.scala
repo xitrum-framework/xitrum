@@ -15,13 +15,17 @@ class Route(
   val klass: Class[_ <: Action], val cacheSecs: Int
 )
 {
-  def url(params: (String, Any)*) = {
+  val numPlaceholders = compiledPattern.foldLeft(0) { (sum, rt) =>
+    if (rt.isPlaceholder) sum + 1 else sum
+  }
+
+  def url(params: Seq[(String, Any)]): Either[String, String] = {
     var map = params.toMap
     val tokens = compiledPattern.map { rt =>
-      if (rt.isPlaceHolder) {
+      if (rt.isPlaceholder) {
         val key = rt.value
         if (!map.isDefinedAt(key))
-          throw new Exception("Cannot compute reverse URL because there's no required key \"" + key + "\"")
+          return Left("Cannot compute reverse URL because there's no required key: \"" + key + "\"")
 
         val ret = map(key)
         map = map - key
@@ -34,7 +38,7 @@ class Route(
 
     val qse = new QueryStringEncoder(url, Config.xitrum.request.charset)
     for ((k, v) <- map) qse.addParam(k, v.toString)
-    qse.toString
+    Right(qse.toString)
   }
 
   /** @return None if not matched */
@@ -52,7 +56,7 @@ class Route(
       if (max2 == 0) return None
 
       val lastToken = compiledPattern.last
-      if (!lastToken.isPlaceHolder) return None
+      if (!lastToken.isPlaceholder) return None
     }
 
     // Special case
@@ -69,7 +73,7 @@ class Route(
 
     // pathParams is updated along the way
     val matched = compiledPattern.forall { rt =>
-      val ret = if (rt.isPlaceHolder) {
+      val ret = if (rt.isPlaceholder) {
         if (i == max2 - 1) {  // The last token
           if (rt.value == "*") {
             val value = pathTokens.slice(i, max1).mkString("/")
@@ -118,5 +122,34 @@ class Route(
             true
         }
     }
+  }
+}
+
+//------------------------------------------------------------------------------
+
+object ReverseRoute {
+  def apply(routes: Seq[Route]): ReverseRoute = {
+    val routesReverseSortedByNumPlaceholders = routes.sortBy(- _.numPlaceholders)
+    new ReverseRoute(routesReverseSortedByNumPlaceholders)
+  }
+}
+
+/**
+ * Routes are sorted reveresly by the number of placeholders because we want to
+ * fill as many placeholders as possible.
+ */
+class ReverseRoute(routesReverseSortedByNumPlaceholders: Seq[Route]) {
+  def url(params: Seq[(String, Any)]): String = {
+    var errorMsgs = Seq[String]()
+    routesReverseSortedByNumPlaceholders.foreach { r =>
+      r.url(params) match {
+        case Left(errorMsg) =>
+          errorMsgs = errorMsgs :+ errorMsg
+
+        case Right(ret) =>
+          return ret
+      }
+    }
+    throw new Exception(errorMsgs.mkString(", "))
   }
 }
