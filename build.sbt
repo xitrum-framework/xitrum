@@ -41,7 +41,7 @@ libraryDependencies += "com.typesafe.akka" %% "akka-slf4j" % "2.2.1"
 libraryDependencies += "tv.cntt" %% "sclasner" % "1.6"
 
 // For (de)serializing
-libraryDependencies += "com.twitter" %% "chill-bijection" % "0.3.2"
+libraryDependencies += "com.twitter" %% "chill-bijection" % "0.3.3"
 
 // For jsEscape
 libraryDependencies += "org.apache.commons" % "commons-lang3" % "3.1"

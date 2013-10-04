@@ -19,6 +19,7 @@
 * #93  Readd indices for xitrum.mq.MessageQueue
 * #132 Log network card interface
 * #183 Fix: Dead actor sends Terminate message to itself
+* #192 Update Twitter Chill from 0.3.2 to 0.3.3
 
 2.9:
 * #169 Add Swagger Doc support
