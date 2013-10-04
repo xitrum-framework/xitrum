@@ -36,6 +36,7 @@ object NetOption {
             ("Could not open port %d for %s server. " +
             "Check to see if there's another process already running on that port.")
             .format(port, service)
+
           case Some(hostnameOrIp) =>
             ("Could not open %s:%d for %s server. " +
             "Check to see if there's another process already running at that address.")

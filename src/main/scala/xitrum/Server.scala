@@ -77,6 +77,13 @@ object Server extends Logger {
     bootstrap.setPipelineFactory(channelPipelineFactory)
     NetOption.setOptions(bootstrap)
     NetOption.bind(service, bootstrap, port)
-    logger.info("{} server started on port {}", service, port)
+
+    Config.xitrum.interface match {
+      case None =>
+        logger.info(s"${service} server started on port ${port}")
+
+      case Some(hostnameOrIp) =>
+        logger.info(s"${service} server started on ${hostnameOrIp}:${port}")
+    }
   }
 }
