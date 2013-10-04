@@ -1,7 +1,7 @@
 Use SBT 0.13.0 to compile. See project/build.properties.
 
-How to update Swagger UI
-------------------------
+Update Swagger UI
+-----------------
 
 See:
 
@@ -28,6 +28,17 @@ src/main/resources/public/xitrum as swagger-ui. Then replace
 
     return '/xitrum/swagger.json';
   }
+
+Update src/main/resources/META-INF/mime.types
+---------------------------------------------
+
+This file is for determining content types for static files.
+
+See:
+
+* https://github.com/klacke/yaws/blob/master/priv/mime.types
+* http://svn.apache.org/repos/asf/httpd/httpd/trunk/docs/conf/mime.types
+* http://download.oracle.com/javaee/5/api/javax/activation/MimetypesFileTypeMap.html
 
 Debug client-server data receiving and sending
 ----------------------------------------------
