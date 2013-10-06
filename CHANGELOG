@@ -14,6 +14,7 @@
 * #185 Swagger: Include Swagger UI
 * #179 Add route aliasing
 * #189 Add option to xitrum.conf to configure request maxInitialLineLength
+* #193 Add request.staticFilePathRegex to xitrum.conf
 * #172 Replace Java annotations with Scala annotations
 * #191 Placeholder in URL can't be empty
 * #93  Readd indices for xitrum.mq.MessageQueue

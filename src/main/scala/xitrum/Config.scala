@@ -51,25 +51,26 @@ class SessionConfig(config: TConfig) {
   val secureKey  = config.getString("secureKey")
 }
 
+class StaticFileConfig(config: TConfig) {
+  val pathRegex = config.getString("pathRegex").r
+
+  val maxSizeInKBOfCachedFiles = config.getInt("maxSizeInKBOfCachedFiles")
+  val maxNumberOfCachedFiles   = config.getInt("maxNumberOfCachedFiles")
+
+  val revalidate = config.getBoolean("revalidate")
+}
+
 class RequestConfig(config: TConfig) {
   val charsetName          = config.getString("charset")
   val maxInitialLineLength = config.getInt("maxInitialLineLength")
   val maxSizeInMB          = config.getInt("maxSizeInMB")
   val filteredParams       = config.getStringList("filteredParams")
 
-  // Starts and stops with "/", like "/static/", if any
-  val staticFileUrlPrefix = if (config.hasPath("staticFileUrlPrefix")) Some(config.getString("staticFileUrlPrefix")) else None
-
   val charset = Charset.forName(charsetName)
 }
 
 class ResponseConfig(config: TConfig) {
   val autoGzip = config.getBoolean("autoGzip")
-
-  val maxSizeInKBOfCachedStaticFiles = config.getInt("maxSizeInKBOfCachedStaticFiles")
-  val maxNumberOfCachedStaticFiles   = config.getInt("maxNumberOfCachedStaticFiles")
-
-  val clientMustRevalidateStaticFiles = config.getBoolean("clientMustRevalidateStaticFiles")
 }
 
 class Config(val config: TConfig) extends Logger {
@@ -120,11 +121,13 @@ class Config(val config: TConfig) extends Logger {
 
   val session = new SessionConfig(config.getConfig("session"))
 
-  val swaggerApiVersion = if (config.hasPath("swaggerApiVersion")) Some(config.getString("swaggerApiVersion")) else None
+  val staticFile = new StaticFileConfig(config.getConfig("staticFile"))
 
   val request = new RequestConfig(config.getConfig("request"))
 
   val response = new ResponseConfig(config.getConfig("response"))
+
+  val swaggerApiVersion = if (config.hasPath("swaggerApiVersion")) Some(config.getString("swaggerApiVersion")) else None
 }
 
 //----------------------------------------------------------------------------

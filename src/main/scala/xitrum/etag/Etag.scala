@@ -19,8 +19,8 @@ object Etag extends Logger {
   case class  Small(val bytes: Array[Byte], val etag: String, val mimeo: Option[String], val gzipped: Boolean) extends Result
 
   //                                                       path    mtime
-  private[this] val smallFileCache        = LocalLruCache[(String, Long), Small](Config.xitrum.response.maxNumberOfCachedStaticFiles)
-  private[this] val gzippedSmallFileCache = LocalLruCache[(String, Long), Small](Config.xitrum.response.maxNumberOfCachedStaticFiles)
+  private[this] val smallFileCache        = LocalLruCache[(String, Long), Small](Config.xitrum.staticFile.maxNumberOfCachedFiles)
+  private[this] val gzippedSmallFileCache = LocalLruCache[(String, Long), Small](Config.xitrum.staticFile.maxNumberOfCachedFiles)
 
   /** Etag without quotes is technically illegal. */
   def quote(etag: String) = "\"" + etag + "\""
@@ -42,7 +42,7 @@ object Etag extends Logger {
     val file = new File(path)
     if (!file.exists) return NotFound
 
-    if (file.length > Config.xitrum.response.maxSizeInKBOfCachedStaticFiles * 1024) return TooBig(file)
+    if (file.length > Config.xitrum.staticFile.maxSizeInKBOfCachedFiles * 1024) return TooBig(file)
 
     val mtime = file.lastModified
     val key   = (path, mtime)

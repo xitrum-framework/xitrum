@@ -38,11 +38,7 @@ trait UrlFor {
       case Etag.Small(bytes, etag, mimeo, gzipped) => etag
     }
 
-    // staticFileUrlPrefix: Starts and stops with "/", like "/static/", if any
-    val url = Config.xitrum.request.staticFileUrlPrefix match {
-      case None         => "/"    + path
-      case Some(prefix) => prefix + path
-    }
+    val url = "/" + path
     Config.withBaseUrl(url + "?" + forceReload)
   }
 

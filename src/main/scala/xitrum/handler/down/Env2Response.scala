@@ -72,7 +72,7 @@ class Env2Response extends SimpleChannelDownstreamHandler {
       compareAndSetETag(request, response, etag1)
     } else {
       // It's not useful to calculate ETag for big response
-      if (channelBuffer.readableBytes > Config.xitrum.response.maxSizeInKBOfCachedStaticFiles * 1024) return false
+      if (channelBuffer.readableBytes > Config.xitrum.staticFile.maxSizeInKBOfCachedFiles * 1024) return false
 
       val etag2 = Etag.forBytes(ChannelBufferToBytes(channelBuffer))
       compareAndSetETag(request, response, etag2)
