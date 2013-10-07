@@ -266,6 +266,7 @@ object Config extends Logger {
    */
   def exitOnStartupError(msg: String, e: Throwable) {
     logger.error(msg, e)
+    logger.error("Xitrum could not start because of the above error. Xitrum will now stop the current process.")
     Hazelcast.shutdownAll()
     System.exit(-1)
   }
