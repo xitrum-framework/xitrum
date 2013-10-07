@@ -8,11 +8,12 @@
 * #109 Use Akka log instead of using SLF4J directly
 
 2.10 (planned):
-* #194 Fix: Wrong version (2.10.0) of scala-compiler, scala-reflect, and scalap is used
 * #180 Swagger: Add option to xitrum.conf to disable Swagger Doc
 * #181 Swagger: Improve annotations
 * #182 Swagger: Cache result on 1st access
 * #185 Swagger: Include Swagger UI
+* #183 Fix: Dead actor sends Terminate message to itself
+* #194 Fix: Wrong version (2.10.0) of scala-compiler, scala-reflect, and scalap is used
 * #51  Add bin/runner.bat for Windows
 * #93  Readd indices for xitrum.mq.MessageQueue
 * #179 Add route aliasing
@@ -21,8 +22,7 @@
 * #172 Replace Java annotations with Scala annotations
 * #191 Placeholder in URL can't be empty
 * #132 Log network card interface
-* #183 Fix: Dead actor sends Terminate message to itself
-* #192 Update Twitter Chill from 0.3.2 to 0.3.3
+* #192 Update Twitter Chill from 0.3.2 to 0.3.4
 
 2.9:
 * #169 Add Swagger Doc support
