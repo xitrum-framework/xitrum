@@ -20,6 +20,8 @@ case class DiscoveredAcc(
 
 /** Scan all classes to collect routes from actions. */
 class RouteCollector extends Logger {
+  import ActionAnnotations._
+
   def deserializeCacheFileOrRecollect(cachedFileName: String): DiscoveredAcc = {
     var acc = DiscoveredAcc(
       new SerializableRouteCollection,
@@ -129,12 +131,10 @@ class RouteCollector extends Logger {
       className:   String,
       annotations: ActionAnnotations)
   {
-    val tpeError404 = universe.typeOf[Error404]
-    val tpeError500 = universe.typeOf[Error500]
     annotations.error.foreach { case a =>
       val tpe = a.tpe
-      if (tpe == tpeError404) routes.error404 = Some(className)
-      if (tpe == tpeError500) routes.error500 = Some(className)
+      if (tpe == typeOfError404) routes.error404 = Some(className)
+      if (tpe == typeOfError500) routes.error500 = Some(className)
     }
   }
 
@@ -146,8 +146,8 @@ class RouteCollector extends Logger {
   {
     var pathPrefix: String = null
     annotations.route.foreach { case a =>
-      if (a.tpe == universe.typeOf[SOCKJS])
-        pathPrefix   = a.scalaArgs(0).productElement(0).asInstanceOf[universe.Constant].value.toString
+      if (a.tpe == typeOfSOCKJS)
+        pathPrefix = a.scalaArgs(0).productElement(0).asInstanceOf[universe.Constant].value.toString
     }
 
     if (pathPrefix == null) {
@@ -169,9 +169,9 @@ class RouteCollector extends Logger {
 
       case Some(annotation) =>
         val tpe = annotation.tpe
-        if (tpe == universe.typeOf[First])
+        if (tpe == typeOfFirst)
           -1
-        else if (tpe == universe.typeOf[Last])
+        else if (tpe == typeOfLast)
           1
         else
           0
@@ -186,21 +186,21 @@ class RouteCollector extends Logger {
       case Some(annotation) =>
         val tpe = annotation.tpe
 
-        if (tpe == universe.typeOf[CacheActionDay])
+        if (tpe == typeOfCacheActionDay)
           -annotation.scalaArgs(0).toString.toInt * 24 * 60 * 60
-        else if (tpe == universe.typeOf[CacheActionHour])
+        else if (tpe == typeOfCacheActionHour)
           -annotation.scalaArgs(0).toString.toInt      * 60 * 60
-        else if (tpe == universe.typeOf[CacheActionMinute])
+        else if (tpe == typeOfCacheActionMinute)
           -annotation.scalaArgs(0).toString.toInt           * 60
-        else if (tpe == universe.typeOf[CacheActionSecond])
+        else if (tpe == typeOfCacheActionSecond)
           -annotation.scalaArgs(0).toString.toInt
-        else if (tpe == universe.typeOf[CachePageDay])
+        else if (tpe == typeOfCachePageDay)
           annotation.scalaArgs(0).toString.toInt * 24 * 60 * 60
-        else if (tpe == universe.typeOf[CachePageHour])
+        else if (tpe == typeOfCachePageHour)
           annotation.scalaArgs(0).toString.toInt      * 60 * 60
-        else if (tpe == universe.typeOf[CachePageMinute])
+        else if (tpe == typeOfCachePageMinute)
           annotation.scalaArgs(0).toString.toInt           * 60
-        else if (tpe == universe.typeOf[CachePageSecond])
+        else if (tpe == typeOfCachePageSecond)
           annotation.scalaArgs(0).toString.toInt
         else
           0
@@ -211,19 +211,19 @@ class RouteCollector extends Logger {
   private def listMethodAndPattern(annotation: universe.Annotation): Seq[(String, String)] = {
     val tpe = annotation.tpe
 
-    if (tpe == universe.typeOf[GET])
+    if (tpe == typeOfGET)
       getStrings(annotation).map(("GET", _))
-    else if (tpe == universe.typeOf[POST])
+    else if (tpe == typeOfPOST)
       getStrings(annotation).map(("POST", _))
-    else if (tpe == universe.typeOf[PUT])
+    else if (tpe == typeOfPUT)
       getStrings(annotation).map(("PUT", _))
-    else if (tpe == universe.typeOf[PATCH])
+    else if (tpe == typeOfPATCH)
       getStrings(annotation).map(("PATCH", _))
-    else if (tpe == universe.typeOf[DELETE])
+    else if (tpe == typeOfDELETE)
       getStrings(annotation).map(("DELETE", _))
-    else if (tpe == universe.typeOf[OPTIONS])
+    else if (tpe == typeOfOPTIONS)
       getStrings(annotation).map(("OPTIONS", _))
-    else if (tpe == universe.typeOf[WEBSOCKET])
+    else if (tpe == typeOfWEBSOCKET)
       getStrings(annotation).map(("WEBSOCKET", _))
     else
       Seq()
@@ -242,7 +242,7 @@ class RouteCollector extends Logger {
       val varargs   = scalaArgs.tail
 
       val swaggerVarargs: Seq[SwaggerParamOrResponse] = varargs.map { paramOrResponse =>
-        if (paramOrResponse.tpe == universe.typeOf[Swagger.Response]) {
+        if (paramOrResponse.tpe == typeOfSwaggerResponse) {
           // Ex: List(xitrum.annotation.Swagger.Response.apply, 200, "ID of the newly created article will be returned")
           val children = paramOrResponse.children
 
