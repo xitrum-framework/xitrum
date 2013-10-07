@@ -9,7 +9,7 @@ case class CacheActionHour  (hours:   Int) extends Cache
 case class CacheActionMinute(minutes: Int) extends Cache
 case class CacheActionSecond(seconds: Int) extends Cache
 
-case class CachePageDay   (hours:   Int) extends Cache
-case class CachePageHour  (days:    Int) extends Cache
+case class CachePageDay   (days:    Int) extends Cache
+case class CachePageHour  (hours:   Int) extends Cache
 case class CachePageMinute(minutes: Int) extends Cache
 case class CachePageSecond(seconds: Int) extends Cache
