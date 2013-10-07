@@ -12,12 +12,13 @@
 * #181 Swagger: Improve annotations
 * #182 Swagger: Cache result on 1st access
 * #185 Swagger: Include Swagger UI
+* #51  Add bin/runner.bat for Windows
+* #93  Readd indices for xitrum.mq.MessageQueue
 * #179 Add route aliasing
 * #189 Add option to xitrum.conf to configure request maxInitialLineLength
 * #193 Add request.staticFilePathRegex to xitrum.conf
 * #172 Replace Java annotations with Scala annotations
 * #191 Placeholder in URL can't be empty
-* #93  Readd indices for xitrum.mq.MessageQueue
 * #132 Log network card interface
 * #183 Fix: Dead actor sends Terminate message to itself
 * #192 Update Twitter Chill from 0.3.2 to 0.3.3
