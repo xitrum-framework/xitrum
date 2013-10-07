@@ -63,5 +63,5 @@ trait Flash {
 
   // Use String instead of Scala XML to avoid generating this (</link>):
   // <link type="text/css" media="all" rel="stylesheet" href="/resources/public/xitrum/xitrum.css?DMtin-KdUgKxwWIyHp3E4A"></link>
-  lazy val xitrumCSS = "<link href=\"" + resourceUrl("xitrum/xitrum.css") + "\" type=\"text/css\" rel=\"stylesheet\" media=\"all\" />"
+  lazy val xitrumCss = "<link href=\"" + resourceUrl("xitrum/xitrum.css") + "\" type=\"text/css\" rel=\"stylesheet\" media=\"all\" />"
 }
