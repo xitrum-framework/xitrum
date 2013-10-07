@@ -8,6 +8,7 @@
 * #109 Use Akka log instead of using SLF4J directly
 
 2.10 (planned):
+* #194 Fix: Wrong version (2.10.0) of scala-compiler, scala-reflect, and scalap is used
 * #180 Swagger: Add option to xitrum.conf to disable Swagger Doc
 * #181 Swagger: Improve annotations
 * #182 Swagger: Cache result on 1st access
@@ -58,7 +59,7 @@
 * #150 Update Knockout.js from 2.2.1 to 2.3.0
 
 2.6:
-* #135 Bug: Hangs up on cached action
+* #135 Fix: Hangs up on cached action
 * #119 Close connection after sendUnsupportedWebSocketVersionResponse
 * #139 Add UnserializableSessionStore
 * #136 Update Netty to 3.6.6.Final

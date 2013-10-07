@@ -62,7 +62,7 @@ object SwaggerJsonAction {
       else if (shortClassName.endsWith("Query"))  "query"
       else if (shortClassName.endsWith("Body"))   "body"
       else if (shortClassName.endsWith("Header")) "header"
-      else                              "form"
+      else                                        "form"
 
     val required = !shortClassName.startsWith("Optional")
 

@@ -15,38 +15,6 @@ object ActionAnnotations {
 
   val typeOfSwagger = universe.typeOf[Swagger]
 
-  /* Do not use the below to avoid Scala reflection error:
-java.lang.RuntimeException: error reading Scala signature of xitrum.annotation.Swagger: 61435
-        at scala.reflect.internal.pickling.UnPickler.unpickle(UnPickler.scala:45)
-        at scala.reflect.runtime.JavaMirrors$JavaMirror.unpickleClass(JavaMirrors.scala:574)
-        at scala.reflect.runtime.SymbolLoaders$TopClassCompleter.complete(SymbolLoaders.scala:31)
-        at scala.reflect.internal.Symbols$Symbol.info(Symbols.scala:1217)
-        at scala.reflect.internal.pickling.UnPickler$Scan.scala$reflect$internal$pickling$UnPickler$Scan$$fromName$1(UnPickler.scala:207)
-        at scala.reflect.internal.pickling.UnPickler$Scan.readExtSymbol$1(UnPickler.scala:226)
-        at scala.reflect.internal.pickling.UnPickler$Scan.readSymbol(UnPickler.scala:250)
-        at scala.reflect.internal.pickling.UnPickler$Scan.readSymbolRef(UnPickler.scala:783)
-        at scala.reflect.internal.pickling.UnPickler$Scan.readType(UnPickler.scala:346)
-        at scala.reflect.internal.pickling.UnPickler$Scan$$anonfun$readTypeRef$1.apply(UnPickler.scala:792)
-        at scala.reflect.internal.pickling.UnPickler$Scan$$anonfun$readTypeRef$1.apply(UnPickler.scala:792)
-        at scala.reflect.internal.pickling.UnPickler$Scan.at(UnPickler.scala:171)
-        at scala.reflect.internal.pickling.UnPickler$Scan.readTypeRef(UnPickler.scala:792)
-        at scala.reflect.internal.pickling.UnPickler$Scan.readTree(UnPickler.scala:511)
-        at scala.reflect.internal.pickling.UnPickler$Scan$$anonfun$readAnnotArg$1.apply(UnPickler.scala:443)
-        at scala.reflect.internal.pickling.UnPickler$Scan$$anonfun$readAnnotArg$1.apply(UnPickler.scala:443)
-        at scala.reflect.internal.pickling.UnPickler$Scan.at(UnPickler.scala:171)
-        at scala.reflect.internal.pickling.UnPickler$Scan.readAnnotArg(UnPickler.scala:443)
-        at scala.reflect.internal.pickling.UnPickler$Scan.readAnnotationInfo(UnPickler.scala:477)
-        at scala.reflect.internal.pickling.UnPickler$Scan.readSymbolAnnotation(UnPickler.scala:491)
-        at scala.reflect.internal.pickling.UnPickler$Scan.run(UnPickler.scala:88)
-        at scala.reflect.internal.pickling.UnPickler.unpickle(UnPickler.scala:37)
-        at scala.reflect.runtime.JavaMirrors$JavaMirror.unpickleClass(JavaMirrors.scala:561)
-        at scala.reflect.runtime.SymbolLoaders$TopClassCompleter.complete(SymbolLoaders.scala:31)
-        at scala.reflect.internal.Symbols$Symbol.info(Symbols.scala:1217)
-        at scala.reflect.internal.Symbols$Symbol.initialize(Symbols.scala:1352)
-        at scala.reflect.internal.Symbols$Symbol.annotations(Symbols.scala:1559)
-*/
-  //val typeOfSwaggerResponse = universe.typeOf[Swagger.Response]
-
   val typeOfError404 = universe.typeOf[Error404]
   val typeOfError500 = universe.typeOf[Error500]
 
@@ -101,25 +69,27 @@ case class ActionAnnotations(
   def overrideMe(annotations: Seq[universe.Annotation]): ActionAnnotations = {
     var ret = this
     annotations.foreach { a =>
-      if (a.tpe <:< typeOfRoute)
+      val tpe = a.tpe
+
+      if (tpe <:< typeOfRoute)
         ret = ret.copy(route = Some(a))
 
-      else if (a.tpe <:< typeOfRouteOrder)
+      else if (tpe <:< typeOfRouteOrder)
         ret = ret.copy(routeOrder = Some(a))
 
-      else if (a.tpe <:< typeOfSockJsCookieNeeded)
+      else if (tpe <:< typeOfSockJsCookieNeeded)
         ret = ret.copy(sockJsCookieNeeded = Some(a))
 
-      else if (a.tpe <:< typeOfSockJsNoWebSocket)
+      else if (tpe <:< typeOfSockJsNoWebSocket)
         ret = ret.copy(sockJsNoWebSocket = Some(a))
 
-      else if (a.tpe <:< typeOfError)
+      else if (tpe <:< typeOfError)
         ret = ret.copy(error = Some(a))
 
-      else if (a.tpe <:< typeOfCache)
+      else if (tpe <:< typeOfCache)
         ret = ret.copy(cache = Some(a))
 
-      else if (a.tpe <:< typeOfSwagger)
+      else if (tpe <:< typeOfSwagger)
         ret = ret.copy(swagger = Some(a))
     }
     ret

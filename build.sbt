@@ -62,6 +62,20 @@ libraryDependencies += "com.hazelcast" % "hazelcast" % "3.0.2"
 // Hazelcast can be configured as cluster member, lite member, or Java client
 libraryDependencies += "com.hazelcast" % "hazelcast-client" % "3.0.2"
 
+// By default, version 2.10.0 of the libs below is used!!! ---------------------
+
+libraryDependencies <+= scalaVersion { sv =>
+  "org.scala-lang" % "scala-compiler" % sv
+}
+
+libraryDependencies <+= scalaVersion { sv =>
+  "org.scala-lang" % "scala-reflect" % sv
+}
+
+libraryDependencies <+= scalaVersion { sv =>
+  "org.scala-lang" % "scalap" % sv
+}
+
 // xitrum.imperatively uses Scala continuation, a compiler plugin --------------
 
 autoCompilerPlugins := true
