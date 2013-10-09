@@ -54,8 +54,8 @@ object SwaggerJsonAction {
     // See Swagger.scala
 
     val klass          = param.getClass
-    val className      = klass.getName            // Ex: xitrum.annotation.Swagger$OptionalBytePath
-    val shortClassName = className.split('$')(1)  // Ex: OptionalBytePath
+    val className      = klass.getName            // Ex: xitrum.annotation.Swagger$OptBytePath
+    val shortClassName = className.split('$')(1)  // Ex: OptBytePath
 
     val paramType =
            if (shortClassName.endsWith("Path"))   "path"
@@ -64,13 +64,13 @@ object SwaggerJsonAction {
       else if (shortClassName.endsWith("Header")) "header"
       else                                        "form"
 
-    val required = !shortClassName.startsWith("Optional")
+    val required = !shortClassName.startsWith("Opt")
 
     val valueType =
       if (required)
         shortClassName.substring(0, shortClassName.length - paramType.length).toLowerCase
       else
-        shortClassName.substring("Optional".length, shortClassName.length - paramType.length).toLowerCase
+        shortClassName.substring("Opt".length, shortClassName.length - paramType.length).toLowerCase
 
     // Use reflection to extract name and desc
 
