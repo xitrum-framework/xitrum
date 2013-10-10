@@ -17,8 +17,10 @@ import xitrum.handler.down.XSendFile
 import xitrum.sockjs.SockJsPrefix
 
 object Dispatcher {
+  private val classOfActor = classOf[Actor]
+
   def dispatch(klass: Class[_], handlerEnv: HandlerEnv) {
-    if (classOf[Actor].isAssignableFrom(klass)) {
+    if (classOfActor.isAssignableFrom(klass)) {
       val actorRef = Config.actorSystem.actorOf(Props {
         val actor = ConstructorAccess.get(klass).newInstance()
         setPathPrefixForSockJs(actor, handlerEnv)

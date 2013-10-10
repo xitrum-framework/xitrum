@@ -236,51 +236,57 @@ class RouteCollector extends Logger {
   //----------------------------------------------------------------------------
 
   private def collectSwagger(annotations: ActionAnnotations): Option[Swagger] = {
-    annotations.swagger.map { annotation =>
-      val args: Seq[SwaggerArg] = annotation.scalaArgs.map { arg =>
-        // Ex:
-        // List(xitrum.annotation.Swagger.Response.apply, 200, "ID of the newly created article will be returned")
-        // List(xitrum.annotation.Swagger.StringForm.apply, "title", xitrum.annotation.Swagger.StringForm.apply$default$2)
-        // List(xitrum.annotation.Swagger.StringForm.apply, "title", "desc")
-        val children = arg.children
+    val universeAnnotations = annotations.swaggers
+    if (universeAnnotations.isEmpty) {
+      None
+    } else {
+      var swaggerArgs = Seq[SwaggerArg]()
+      universeAnnotations.foreach { annotation =>
+        annotation.scalaArgs.foreach { scalaArg =>
+          // Ex:
+          // List(xitrum.annotation.Swagger.Response.apply, 200, "ID of the newly created article will be returned")
+          // List(xitrum.annotation.Swagger.StringForm.apply, "title", xitrum.annotation.Swagger.StringForm.apply$default$2)
+          // List(xitrum.annotation.Swagger.StringForm.apply, "title", "desc")
+          val children = scalaArg.children
 
-        val child0 = children(0).toString
-        if (child0 == "xitrum.annotation.Swagger.Summary.apply") {
-          val summary = children(2).productElement(0).asInstanceOf[universe.Constant].value.toString
-          Swagger.Summary(summary)
-        } else if (child0 == "xitrum.annotation.Swagger.Note.apply") {
-          val note = children(2).productElement(0).asInstanceOf[universe.Constant].value.toString
-          Swagger.Note(note)
-        } else if (child0 == "xitrum.annotation.Swagger.Response.apply") {
-          val code = children(1).toString.toInt
-          val desc = children(2).productElement(0).asInstanceOf[universe.Constant].value.toString
-          Swagger.Response(code, desc)
-        } else {  // param or optional param
-          val name = children(1).productElement(0).asInstanceOf[universe.Constant].value.toString
+          val child0 = children(0).toString
+          if (child0 == "xitrum.annotation.Swagger.Summary.apply") {
+            val summary = children(1).productElement(0).asInstanceOf[universe.Constant].value.toString
+            swaggerArgs = swaggerArgs :+ Swagger.Summary(summary)
+          } else if (child0 == "xitrum.annotation.Swagger.Note.apply") {
+            val note = children(1).productElement(0).asInstanceOf[universe.Constant].value.toString
+            swaggerArgs = swaggerArgs :+ Swagger.Note(note)
+          } else if (child0 == "xitrum.annotation.Swagger.Response.apply") {
+            val code = children(1).toString.toInt
+            val desc = children(2).productElement(0).asInstanceOf[universe.Constant].value.toString
+            swaggerArgs = swaggerArgs :+ Swagger.Response(code, desc)
+          } else {  // param or optional param
+            val name = children(1).productElement(0).asInstanceOf[universe.Constant].value.toString
 
-          val desc =
-            if (children(2).toString.startsWith("xitrum.annotation.Swagger"))
-              ""
-            else
-              children(2).productElement(0).asInstanceOf[universe.Constant].value.toString
+            val desc =
+              if (children(2).toString.startsWith("xitrum.annotation.Swagger"))
+                ""
+              else
+                children(2).productElement(0).asInstanceOf[universe.Constant].value.toString
 
-          // Use reflection to create annotation
+            // Use reflection to create annotation
 
-          // Ex: xitrum.annotation.Swagger.StringForm.apply
-          val scalaClassName = child0.substring(0, child0.length - ".apply".length)
+            // Ex: xitrum.annotation.Swagger.StringForm.apply
+            val scalaClassName = child0.substring(0, child0.length - ".apply".length)
 
-          val builder = new StringBuilder(scalaClassName)
-          builder.setCharAt("xitrum.annotation.Swagger".length, '$')
+            val builder = new StringBuilder(scalaClassName)
+            builder.setCharAt("xitrum.annotation.Swagger".length, '$')
 
-          // Ex: xitrum.annotation.Swagger$StringForm
-          val javaClassName = builder.toString
-          val klass         = Class.forName(javaClassName)
-          val constructor   = klass.getConstructor(classOf[String], classOf[String])
-          constructor.newInstance(name, desc).asInstanceOf[SwaggerArg]
+            // Ex: xitrum.annotation.Swagger$StringForm
+            val javaClassName = builder.toString
+            val klass         = Class.forName(javaClassName)
+            val constructor   = klass.getConstructor(classOf[String], classOf[String])
+            swaggerArgs = swaggerArgs :+ constructor.newInstance(name, desc).asInstanceOf[SwaggerArg]
+          }
         }
       }
 
-      Swagger(args: _*)
+      Some(Swagger(swaggerArgs: _*))
     }
   }
 }

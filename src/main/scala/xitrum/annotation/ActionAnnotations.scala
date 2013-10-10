@@ -52,7 +52,7 @@ case class ActionAnnotations(
 
   cache: Option[universe.Annotation] = None,
 
-  swagger: Option[universe.Annotation] = None
+  swaggers: Seq[universe.Annotation] = Seq[universe.Annotation]()
 ) {
   import ActionAnnotations._
 
@@ -63,7 +63,7 @@ case class ActionAnnotations(
     other.sockJsNoWebSocket  orElse sockJsNoWebSocket,
     other.error              orElse error,
     other.cache              orElse cache,
-    other.swagger            orElse swagger
+    swaggers ++ other.swaggers
   )
 
   def overrideMe(annotations: Seq[universe.Annotation]): ActionAnnotations = {
@@ -90,7 +90,7 @@ case class ActionAnnotations(
         ret = ret.copy(cache = Some(a))
 
       else if (tpe <:< typeOfSwagger)
-        ret = ret.copy(swagger = Some(a))
+        ret = ret.copy(swaggers = ret.swaggers :+ a)
     }
     ret
   }

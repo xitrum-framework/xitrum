@@ -73,7 +73,7 @@ private case class ActionTreeBuilder(
         case None =>
           val parents = klass.getInterfaces
           val parentAnnotations = parents.foldLeft(ActionAnnotations()) { case (acc, parent) =>
-            if (parent.isAssignableFrom(classOf[Action])) {
+            if (classOf[Action].isAssignableFrom(parent)) {
               val aa = getActionAccumulatedAnnotations(parent.asInstanceOf[Class[_ <: Action]])
               acc.overrideMe(aa)
             } else {
