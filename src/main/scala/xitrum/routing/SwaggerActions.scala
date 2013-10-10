@@ -9,7 +9,7 @@ import org.jboss.netty.handler.codec.http.HttpResponseStatus
 
 import xitrum.{Action, Config}
 import xitrum.annotation.{First, DELETE, GET, OPTIONS, PATCH, POST, PUT, SOCKJS, WEBSOCKET}
-import xitrum.annotation.{Swagger, SwaggerNoteOrParamOrResponse}
+import xitrum.annotation.{Swagger, SwaggerArg}
 import xitrum.view.DocType
 
 case class ApiMethod(method: String, route: String)
@@ -32,7 +32,7 @@ object SwaggerJsonAction {
     val routePath = RouteCompiler.decompile(route.compiledPattern, true)
     val nickname  = route.klass.getSimpleName
 
-
+    val summary   = doc.varargs.find(_.isInstanceOf[Swagger.Summary]).asInstanceOf[Option[Swagger.Summary]].map(_.summary).getOrElse("")
     val notes     = doc.varargs.filter(_.isInstanceOf[Swagger.Note]).asInstanceOf[Seq[Swagger.Note]].map(_.note).mkString(" ")
     val params    = doc.varargs.filterNot{ arg => arg.isInstanceOf[Swagger.Response] || arg.isInstanceOf[Swagger.Note] }.map(param2json(_))
     val responses = doc.varargs.filter(_.isInstanceOf[Swagger.Response]).asInstanceOf[Seq[Swagger.Response]].map(response2json(_))
@@ -48,7 +48,7 @@ object SwaggerJsonAction {
 
     val operations = Seq[JObject](
       ("httpMethod"       -> route.httpMethod.toString) ~
-      ("summary"          -> doc.summary) ~
+      ("summary"          -> summary) ~
       ("notes"            -> finalNotes) ~
       ("nickname"         -> nickname) ~
       ("parameters"       -> params.toSeq) ~
@@ -57,7 +57,7 @@ object SwaggerJsonAction {
     Some(("path" -> routePath) ~ ("operations" -> operations))
   }
 
-  private def param2json(param: SwaggerNoteOrParamOrResponse): JObject = {
+  private def param2json(param: SwaggerArg): JObject = {
     // Use class name to extract paramType, valueType, and required
     // See Swagger.scala
 
@@ -135,7 +135,10 @@ object SwaggerJsonAction {
 
 @First
 @GET("xitrum/swagger.json")
-@Swagger("JSON for Swagger Doc. Use this route in Swagger UI to see API doc of this whole project.")
+@Swagger(
+  Swagger.Summary("JSON for Swagger Doc of this whole project"),
+  Swagger.Note("Use this route in Swagger UI to see API doc.")
+)
 class SwaggerJsonAction extends Action {
   beforeFilter {
     if (Config.xitrum.swaggerApiVersion.isEmpty) {
