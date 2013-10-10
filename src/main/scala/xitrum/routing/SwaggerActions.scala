@@ -9,7 +9,7 @@ import org.jboss.netty.handler.codec.http.HttpResponseStatus
 
 import xitrum.{Action, Config}
 import xitrum.annotation.{First, DELETE, GET, OPTIONS, PATCH, POST, PUT, SOCKJS, WEBSOCKET}
-import xitrum.annotation.{Swagger, SwaggerParamOrResponse}
+import xitrum.annotation.{Swagger, SwaggerNoteOrParamOrResponse}
 import xitrum.view.DocType
 
 case class ApiMethod(method: String, route: String)
@@ -32,16 +32,24 @@ object SwaggerJsonAction {
     val routePath = RouteCompiler.decompile(route.compiledPattern, true)
     val nickname  = route.klass.getSimpleName
 
-    val params    = doc.varargs.filterNot(_.isInstanceOf[Swagger.Response]).map(param2json(_))
+
+    val notes     = doc.varargs.filter(_.isInstanceOf[Swagger.Note]).asInstanceOf[Seq[Swagger.Note]].map(_.note).mkString(" ")
+    val params    = doc.varargs.filterNot{ arg => arg.isInstanceOf[Swagger.Response] || arg.isInstanceOf[Swagger.Note] }.map(param2json(_))
     val responses = doc.varargs.filter(_.isInstanceOf[Swagger.Response]).asInstanceOf[Seq[Swagger.Response]].map(response2json(_))
 
-    val cacheNote = cache(route)
-    val notes     = if (cacheNote.isEmpty) "" else cacheNote
+    val cacheNote  = cache(route)
+    val finalNotes =
+      if (cacheNote.isEmpty)
+        notes
+      else if (notes.isEmpty)
+        cacheNote
+      else
+        notes + " " + cacheNote
 
     val operations = Seq[JObject](
       ("httpMethod"       -> route.httpMethod.toString) ~
-      ("summary"          -> doc.desc) ~
-      ("notes"            -> notes) ~
+      ("summary"          -> doc.summary) ~
+      ("notes"            -> finalNotes) ~
       ("nickname"         -> nickname) ~
       ("parameters"       -> params.toSeq) ~
       ("responseMessages" -> responses.toSeq))
@@ -49,7 +57,7 @@ object SwaggerJsonAction {
     Some(("path" -> routePath) ~ ("operations" -> operations))
   }
 
-  private def param2json(param: SwaggerParamOrResponse): JObject = {
+  private def param2json(param: SwaggerNoteOrParamOrResponse): JObject = {
     // Use class name to extract paramType, valueType, and required
     // See Swagger.scala
 
@@ -119,9 +127,9 @@ object SwaggerJsonAction {
     if (route.cacheSecs == 0)
       ""
     else if (secs > 0)
-      s"(page cache: ${route.cacheSecs} [sec])"
+      s"(Page cache: ${route.cacheSecs} [sec])"
     else
-      s"(action cache: ${-route.cacheSecs} [sec])"
+      s"(Pction cache: ${-route.cacheSecs} [sec])"
   }
 }
 

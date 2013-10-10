@@ -1,5 +1,6 @@
 2.11 (planned):
 * #196 Swagger: Rename Optional<ValueType><ParamType> to Opt<ValueType><ParamType>, ex: OptStringQuery
+* #199 Swagger: Add notes
 * #195 Rename xitrumCSS to xitrumCss
 * #159 Support dot in route
 * #77 Support big file upload, remove maxSizeInMB in xitrum.conf

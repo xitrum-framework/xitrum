@@ -241,7 +241,7 @@ class RouteCollector extends Logger {
       val summary   = scalaArgs.head.productElement(0).asInstanceOf[universe.Constant].value.toString
       val varargs   = scalaArgs.tail
 
-      val swaggerVarargs: Seq[SwaggerParamOrResponse] = varargs.map { paramOrResponse =>
+      val swaggerVarargs: Seq[SwaggerNoteOrParamOrResponse] = varargs.map { paramOrResponse =>
         // Ex:
         // List(xitrum.annotation.Swagger.Response.apply, 200, "ID of the newly created article will be returned")
         // List(xitrum.annotation.Swagger.StringForm.apply, "title", xitrum.annotation.Swagger.StringForm.apply$default$2)
@@ -252,8 +252,10 @@ class RouteCollector extends Logger {
         if (child0 == "xitrum.annotation.Swagger.Response.apply") {
           val code = children(1).toString.toInt
           val desc = children(2).productElement(0).asInstanceOf[universe.Constant].value.toString
-
           Swagger.Response(code, desc)
+        } else if (child0 == "xitrum.annotation.Swagger.Note.apply") {
+          val note = children(2).productElement(0).asInstanceOf[universe.Constant].value.toString
+          Swagger.Note(note)
         } else {  // param or optional param
           val name = children(1).productElement(0).asInstanceOf[universe.Constant].value.toString
 
@@ -275,7 +277,7 @@ class RouteCollector extends Logger {
           val javaClassName = builder.toString
           val klass         = Class.forName(javaClassName)
           val constructor   = klass.getConstructor(classOf[String], classOf[String])
-          constructor.newInstance(name, desc).asInstanceOf[SwaggerParamOrResponse]
+          constructor.newInstance(name, desc).asInstanceOf[SwaggerNoteOrParamOrResponse]
         }
       }
 
