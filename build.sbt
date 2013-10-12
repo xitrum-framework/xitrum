@@ -49,7 +49,7 @@ libraryDependencies += "org.apache.commons" % "commons-lang3" % "3.1"
 libraryDependencies += "org.json4s" %% "json4s-native" % "3.2.5"
 
 // For i18n
-libraryDependencies += "tv.cntt" %% "scaposer" % "1.2"
+libraryDependencies += "tv.cntt" %% "scaposer" % "1.3"
 
 // For compiling CoffeeScript to JavaScript
 libraryDependencies += "tv.cntt" % "rhinocoffeescript" % "1.6.3"
