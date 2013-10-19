@@ -5,6 +5,8 @@ var xitrum = {
 
   // See RouteToken.scala
   url: function(actionClassName, params) {
+    params = params || {};
+
     var findCompiledRouteByActionClassName = function() {
       for (var i = 0; i < XITRUM_ROUTES.length; i++) {
         var xs = XITRUM_ROUTES[i];
@@ -22,7 +24,7 @@ var xitrum = {
         if (s) {
           return s;
         } else {
-          throw "[url] Missing key: " + value + ", for: " + actionClassName;
+          throw '[url] Missing param "' + value + '" for "' + actionClassName + '"';
         }
       } else {
         return value;
