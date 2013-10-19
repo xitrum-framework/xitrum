@@ -34,7 +34,7 @@ object AccessLog extends Logger {
         request.getMethod + " " +
         request.getUri + " -> " +
         response.getStatus.getCode +
-        " (resource in JAR)"
+        " (JAR resource)"
       )
     }
   }

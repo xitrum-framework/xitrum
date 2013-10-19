@@ -46,9 +46,10 @@ object Server extends Logger {
     Config.xitrum.templateEngine
 
     val routes = Config.routes
-    routes.printRoutes()
-    routes.sockJsRouteMap.print()
-    routes.printErrorRoutes()
+    routes.logRoutes(false)
+    routes.sockJsRouteMap.log()
+    routes.logErrorRoutes()
+    routes.logRoutes(true)
 
     // Lastly, start the server(s) after necessary things have been prepared
     val portConfig = Config.xitrum.port

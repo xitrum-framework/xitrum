@@ -101,9 +101,9 @@ class RouteCollection(
   lazy val reverseMappings: Map[Class[_], ReverseRoute] = {
     val mmap = MMap[Class[_], ArrayBuffer[Route]]()
 
-    allFirsts.foreach { r => mmap.getOrElseUpdate(r.klass, ArrayBuffer()).append(r) }
-    allLasts .foreach { r => mmap.getOrElseUpdate(r.klass, ArrayBuffer()).append(r) }
-    allOthers.foreach { r => mmap.getOrElseUpdate(r.klass, ArrayBuffer()).append(r) }
+    allFirsts(None).foreach { r => mmap.getOrElseUpdate(r.klass, ArrayBuffer()).append(r) }
+    allOthers(None).foreach { r => mmap.getOrElseUpdate(r.klass, ArrayBuffer()).append(r) }
+    allLasts (None).foreach { r => mmap.getOrElseUpdate(r.klass, ArrayBuffer()).append(r) }
 
     mmap.mapValues { routes => ReverseRoute(routes) }.toMap
   }
@@ -152,8 +152,10 @@ class RouteCollection(
   }
 
   //----------------------------------------------------------------------------
+  // Run only at startup, speed is not a problem
 
-  def printRoutes() {
+  /** @param xitrumRoutes true: log only Xitrum routes, false: log only app routes */
+  def logRoutes(xitrumRoutes: Boolean) {
     // This method is only run once on start, speed is not a problem
 
     //                        method  pattern target
@@ -161,9 +163,9 @@ class RouteCollection(
     var others = ArrayBuffer[(String, String, String)]()
     val lasts  = ArrayBuffer[(String, String, String)]()
 
-    for (r <- allFirsts) firsts.append((r.httpMethod.toString, RouteCompiler.decompile(r.compiledPattern), targetWithCache(r)))
-    for (r <- allOthers) others.append((r.httpMethod.toString, RouteCompiler.decompile(r.compiledPattern), targetWithCache(r)))
-    for (r <- allLasts ) lasts .append((r.httpMethod.toString, RouteCompiler.decompile(r.compiledPattern), targetWithCache(r)))
+    for (r <- allFirsts(Some(xitrumRoutes))) firsts.append((r.httpMethod.toString, RouteCompiler.decompile(r.compiledPattern), targetWithCache(r)))
+    for (r <- allOthers(Some(xitrumRoutes))) others.append((r.httpMethod.toString, RouteCompiler.decompile(r.compiledPattern), targetWithCache(r)))
+    for (r <- allLasts (Some(xitrumRoutes))) lasts .append((r.httpMethod.toString, RouteCompiler.decompile(r.compiledPattern), targetWithCache(r)))
 
     // Sort by pattern
     var all = firsts ++ others.sortBy(_._2) ++ lasts
@@ -178,7 +180,10 @@ class RouteCollection(
     val logFormat = "%-" + methodHttpMaxLength + "s  %-" + patternMaxLength + "s  %s"
 
     val strings = all.map { case (m, p, cr) => logFormat.format(m, p, cr) }
-    logger.info("Routes:\n" + strings.mkString("\n"))
+    if (xitrumRoutes)
+      logger.info("Xitrum routes:\n" + strings.mkString("\n"))
+    else
+      logger.info("Normal routes:\n" + strings.mkString("\n"))
   }
 
   private def targetWithCache(route: Route): String = {
@@ -192,45 +197,85 @@ class RouteCollection(
       s"$target (page cache: ${formatTime(secs)})"
   }
 
-  def printErrorRoutes() {
+  def logErrorRoutes() {
     val strings = ArrayBuffer[String]()
     error404.foreach { klass => strings.append("404  " + klass.getName) }
     error500.foreach { klass => strings.append("500  " + klass.getName) }
     if (!strings.isEmpty) logger.info("Error routes:\n" + strings.mkString("\n"))
   }
 
-  private def allFirsts(): Seq[Route] = {
-    val ret = ArrayBuffer[Route]()
-    ret.appendAll(firstGETs)
-    ret.appendAll(firstPOSTs)
-    ret.appendAll(firstPUTs)
-    ret.appendAll(firstDELETEs)
-    ret.appendAll(firstOPTIONSs)
-    ret.appendAll(firstWEBSOCKETs)
-    ret
+  private def allFirsts(xitrumRoutes: Option[Boolean]): Seq[Route] = {
+    xitrumRoutes match {
+      case None =>
+        val ret = ArrayBuffer[Route]()
+        ret.appendAll(firstGETs)
+        ret.appendAll(firstPOSTs)
+        ret.appendAll(firstPUTs)
+        ret.appendAll(firstDELETEs)
+        ret.appendAll(firstOPTIONSs)
+        ret.appendAll(firstWEBSOCKETs)
+        ret
+
+      case Some(x) =>
+        val ret = ArrayBuffer[Route]()
+        ret.appendAll(firstGETs      .filter(_.klass.getName.startsWith("xitrum") == x))
+        ret.appendAll(firstPOSTs     .filter(_.klass.getName.startsWith("xitrum") == x))
+        ret.appendAll(firstPUTs      .filter(_.klass.getName.startsWith("xitrum") == x))
+        ret.appendAll(firstDELETEs   .filter(_.klass.getName.startsWith("xitrum") == x))
+        ret.appendAll(firstOPTIONSs  .filter(_.klass.getName.startsWith("xitrum") == x))
+        ret.appendAll(firstWEBSOCKETs.filter(_.klass.getName.startsWith("xitrum") == x))
+        ret
+    }
   }
 
-  private def allLasts(): Seq[Route] = {
-    val ret = ArrayBuffer[Route]()
-    ret.appendAll(lastGETs)
-    ret.appendAll(lastPOSTs)
-    ret.appendAll(lastPUTs)
-    ret.appendAll(lastDELETEs)
-    ret.appendAll(lastOPTIONSs)
-    ret.appendAll(lastWEBSOCKETs)
-    ret
+  private def allLasts(xitrumRoutes: Option[Boolean]): Seq[Route] = {
+    xitrumRoutes match {
+      case None =>
+        val ret = ArrayBuffer[Route]()
+        ret.appendAll(lastGETs)
+        ret.appendAll(lastPOSTs)
+        ret.appendAll(lastPUTs)
+        ret.appendAll(lastDELETEs)
+        ret.appendAll(lastOPTIONSs)
+        ret.appendAll(lastWEBSOCKETs)
+        ret
+
+      case Some(x) =>
+        val ret = ArrayBuffer[Route]()
+        ret.appendAll(lastGETs      .filter(_.klass.getName.startsWith("xitrum") == x))
+        ret.appendAll(lastPOSTs     .filter(_.klass.getName.startsWith("xitrum") == x))
+        ret.appendAll(lastPUTs      .filter(_.klass.getName.startsWith("xitrum") == x))
+        ret.appendAll(lastDELETEs   .filter(_.klass.getName.startsWith("xitrum") == x))
+        ret.appendAll(lastOPTIONSs  .filter(_.klass.getName.startsWith("xitrum") == x))
+        ret.appendAll(lastWEBSOCKETs.filter(_.klass.getName.startsWith("xitrum") == x))
+        ret
+    }
   }
 
-  private def allOthers(): Seq[Route] = {
-    val ret = ArrayBuffer[Route]()
-    ret.appendAll(otherGETs)
-    ret.appendAll(otherPOSTs)
-    ret.appendAll(otherPUTs)
-    ret.appendAll(otherPATCHs)
-    ret.appendAll(otherDELETEs)
-    ret.appendAll(otherOPTIONSs)
-    ret.appendAll(otherWEBSOCKETs)
-    ret
+  private def allOthers(xitrumRoutes: Option[Boolean]): Seq[Route] = {
+    xitrumRoutes match {
+      case None =>
+        val ret = ArrayBuffer[Route]()
+        ret.appendAll(otherGETs)
+        ret.appendAll(otherPOSTs)
+        ret.appendAll(otherPUTs)
+        ret.appendAll(otherPATCHs)
+        ret.appendAll(otherDELETEs)
+        ret.appendAll(otherOPTIONSs)
+        ret.appendAll(otherWEBSOCKETs)
+        ret
+
+      case Some(x) =>
+        val ret = ArrayBuffer[Route]()
+        ret.appendAll(otherGETs      .filter(_.klass.getName.startsWith("xitrum") == x))
+        ret.appendAll(otherPOSTs     .filter(_.klass.getName.startsWith("xitrum") == x))
+        ret.appendAll(otherPUTs      .filter(_.klass.getName.startsWith("xitrum") == x))
+        ret.appendAll(otherPATCHs    .filter(_.klass.getName.startsWith("xitrum") == x))
+        ret.appendAll(otherDELETEs   .filter(_.klass.getName.startsWith("xitrum") == x))
+        ret.appendAll(otherOPTIONSs  .filter(_.klass.getName.startsWith("xitrum") == x))
+        ret.appendAll(otherWEBSOCKETs.filter(_.klass.getName.startsWith("xitrum") == x))
+        ret
+    }
   }
 
   private def formatTime(seconds: Int): String = {
@@ -254,7 +299,7 @@ class RouteCollection(
 
   //----------------------------------------------------------------------------
 
-  private val matchedRouteCache = LocalLruCache[String, (Route, Params)](1000)
+  private val matchedRouteCache = LocalLruCache[String, (Route, Params)](1024)
 
   def route(httpMethod: HttpMethod, pathInfo: PathInfo): Option[(Route, Params)] = {
     // This method is run for every request, thus should be fast

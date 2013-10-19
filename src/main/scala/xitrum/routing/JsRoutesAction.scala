@@ -24,7 +24,7 @@ object JsRoutesCache {
 
 @First
 @GET("xitrum/routes.js")
-class JsRoutesAction extends Action {
+class JsRoutes extends Action {
   def execute() {
     if (!Etag.respondIfEtagsIdentical(this, JsRoutesCache.etag)) {
       NotModified.setClientCacheAggressively(response)
