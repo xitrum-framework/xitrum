@@ -14,7 +14,7 @@ import xitrum.view.DocType
 
 case class ApiMethod(method: String, route: String)
 
-object SwaggerJsonAction {
+object SwaggerJson {
   // See class SwaggerJsonAction.
   // Cache result of SwaggerAction at 1st access;
   // Can't cache header because a server may have multiple addresses
@@ -145,7 +145,7 @@ object SwaggerJsonAction {
   Swagger.Summary("JSON for Swagger Doc of this whole project"),
   Swagger.Note("Use this route in Swagger UI to see API doc.")
 )
-class SwaggerJsonAction extends Action {
+class SwaggerJson extends Action {
   beforeFilter {
     if (Config.xitrum.swaggerApiVersion.isEmpty) {
       response.setStatus(HttpResponseStatus.NOT_FOUND)
@@ -161,7 +161,7 @@ class SwaggerJsonAction extends Action {
     val apiVersion = Config.xitrum.swaggerApiVersion.get
 
     // relPath may already contain baseUrl, remove it to get resourcePath
-    val relPath      = url[SwaggerJsonAction]
+    val relPath      = url[SwaggerJson]
     val baseUrl      = Config.baseUrl
     val resourcePath = if (baseUrl.isEmpty) relPath else relPath.substring(baseUrl.length)
 
@@ -171,19 +171,19 @@ class SwaggerJsonAction extends Action {
       ("swaggerVersion" -> "1.2") ~
       ("resourcePath"   -> resourcePath)
 
-    val json = pretty(render(header ~ ("apis" -> SwaggerJsonAction.apis)))
+    val json = pretty(render(header ~ ("apis" -> SwaggerJson.apis)))
     respondJsonText(json)
   }
 }
 
 @First
 @GET("xitrum/swagger")
-class SwaggerIndexAction extends Action {
+class SwaggerUi extends Action {
   def execute() {
     // Redirect to index.html of Swagger Doc. index.html of Swagger Doc is modified
     // so that if there's no "url" param, it will load "/xitrum/swagger.json",
     // otherwise it will load the specified URL
-    val json     = url[SwaggerJsonAction]
+    val json     = url[SwaggerJson]
     val res      = resourceUrl("xitrum/swagger-ui-2.0.2/index.html")
     val location = if (json == "/xitrum/swagger.json") res else res + "&url=" + json
     redirectTo(location)

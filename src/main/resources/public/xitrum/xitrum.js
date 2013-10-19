@@ -3,31 +3,48 @@ var xitrum = {
     return $("meta[name='csrf-token']").attr("content");
   },
 
-  urlFor: function(actionClassName, params) {
-    var find = function() {
+  // See RouteToken.scala
+  url: function(actionClassName, params) {
+    var findCompiledRouteByActionClassName = function() {
       for (var i = 0; i < XITRUM_ROUTES.length; i++) {
         var xs = XITRUM_ROUTES[i];
         if (xs[1] === actionClassName) return xs[0];
       }
-      throw "[urlFor] No route for: " + actionClassName;
+      throw "[url] No route for: " + actionClassName;
     };
 
-    var compiledRoute = find();
+
+    var decompileNonDotRouteToken = function(token) {
+      var value         = token[0];
+      var isPlaceHolder = token[1];
+      if (isPlaceHolder) {
+        var s = params[value];
+        if (s) {
+          return s;
+        } else {
+          throw "[url] Missing key: " + value + ", for: " + actionClassName;
+        }
+      } else {
+        return value;
+      }
+    };
+
+    var compiledRoute = findCompiledRouteByActionClassName();
 
     var ret = XITRUM_BASE_URL;
     for (var i = 0; i < compiledRoute.length; i++) {
-      var xs            = compiledRoute[i];
-      var token         = xs[0];
-      var isPlaceHolder = xs[1];
-      if (isPlaceHolder) {
-        var s = params[token];
-        if (s) {
-          ret += "/" + s;
-        } else {
-          throw "[urlFor] Missing key: " + token + ", for: " + actionClassName;
-        }
+      var xs = compiledRoute[i];
+      // http://stackoverflow.com/questions/203739/why-does-instanceof-return-false-for-some-literals
+      // String => non dot route, Array => dot route
+      var isNonDotRoute = xs[0].constructor === String;
+      if (isNonDotRoute) {
+        ret += "/" + decompileNonDotRouteToken(xs);
       } else {
-        ret += "/" + token;
+        var dots = [];
+        for (var j = 0; j < xs.length; j ++) {
+          dots.push(decompileNonDotRouteToken(xs[j]));
+        }
+        ret += "/" + dots.join('.');
       }
     }
 

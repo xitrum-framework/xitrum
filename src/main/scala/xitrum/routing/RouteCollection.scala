@@ -135,7 +135,16 @@ class RouteCollection(
 
     val xs = routeArray.map { route =>
       val ys = route.compiledPattern.map { rt =>
-        "['" + rt.value + "', " + rt.isPlaceholder + "]"
+        if (rt.isInstanceOf[NonDotRouteToken]) {
+          val n = rt.asInstanceOf[NonDotRouteToken]
+          "['" + n.value + "', " + n.isPlaceholder + "]"
+        } else {
+          val d  = rt.asInstanceOf[DotRouteToken]
+          val ns = d.nonDotRouteTokens.map { n =>
+            "['" + n.value + "', " + n.isPlaceholder + "]"
+          }
+          "[" + ns.mkString(", ") + "]"
+        }
       }
       "[[" + ys.mkString(", ") + "], '" + route.klass.getName + "']"
     }
