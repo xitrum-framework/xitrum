@@ -62,7 +62,7 @@ object AccessLog extends Logger {
     action.request.getMethod + " " +
     action.request.getUri + " -> " +
     className +
-    (if (env.uriParams.nonEmpty)        ", uriParams: "        + RequestEnv.inspectParamsWithFilter(env.uriParams)        else "") +
+    (if (env.queryParams.nonEmpty)      ", queryParams: "      + RequestEnv.inspectParamsWithFilter(env.queryParams)      else "") +
     (if (env.bodyParams.nonEmpty)       ", bodyParams: "       + RequestEnv.inspectParamsWithFilter(env.bodyParams)       else "") +
     (if (env.pathParams.nonEmpty)       ", pathParams: "       + RequestEnv.inspectParamsWithFilter(env.pathParams)       else "") +
     (if (env.fileUploadParams.nonEmpty) ", fileUploadParams: " + RequestEnv.inspectParamsWithFilter(env.fileUploadParams) else "") +

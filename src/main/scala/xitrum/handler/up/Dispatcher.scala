@@ -50,11 +50,11 @@ class Dispatcher extends SimpleChannelUpstreamHandler with BadClientSilencer {
       return
     }
 
-    val env        = m.asInstanceOf[HandlerEnv]
-    val request    = env.request
-    val pathInfo   = env.pathInfo
-    val uriParams  = env.uriParams
-    val bodyParams = env.bodyParams
+    val env         = m.asInstanceOf[HandlerEnv]
+    val request     = env.request
+    val pathInfo    = env.pathInfo
+    val queryParams = env.queryParams
+    val bodyParams  = env.bodyParams
 
     // Look up GET if method is HEAD
     val requestMethod = if (request.getMethod == HttpMethod.HEAD) HttpMethod.GET else request.getMethod

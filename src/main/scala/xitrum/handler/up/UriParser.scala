@@ -35,8 +35,8 @@ class UriParser extends SimpleChannelUpstreamHandler with BadClientSilencer {
         else
           path
 
-      env.pathInfo  = new PathInfo(pathWithoutTrailingSlash)
-      env.uriParams = jParamsToParams(decoder.getParameters)
+      env.pathInfo    = new PathInfo(pathWithoutTrailingSlash)
+      env.queryParams = jParamsToParams(decoder.getParameters)
       ctx.sendUpstream(e)
     } catch {
       case NonFatal(e) =>
