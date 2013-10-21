@@ -3,60 +3,6 @@ var xitrum = {
     return $("meta[name='csrf-token']").attr("content");
   },
 
-  // See RouteToken.scala
-  url: function(actionClassName, params) {
-    params = params || {};
-
-    var findCompiledRouteByActionClassName = function() {
-      for (var i = 0; i < XITRUM_ROUTES.length; i++) {
-        var xs = XITRUM_ROUTES[i];
-        if (xs[1] === actionClassName) return xs[0];
-      }
-      throw "[url] No route for: " + actionClassName;
-    };
-
-
-    var decompileNonDotRouteToken = function(token) {
-      var value         = token[0];
-      var isPlaceHolder = token[1];
-      if (isPlaceHolder) {
-        var s = params[value];
-        if (s) {
-          return s;
-        } else {
-          throw '[url] Missing param "' + value + '" for "' + actionClassName + '"';
-        }
-      } else {
-        return value;
-      }
-    };
-
-    var compiledRoute = findCompiledRouteByActionClassName();
-
-    var ret = XITRUM_BASE_URL;
-    for (var i = 0; i < compiledRoute.length; i++) {
-      var xs = compiledRoute[i];
-      // http://stackoverflow.com/questions/203739/why-does-instanceof-return-false-for-some-literals
-      // String => non dot route, Array => dot route
-      var isNonDotRoute = xs[0].constructor === String;
-      if (isNonDotRoute) {
-        ret += "/" + decompileNonDotRouteToken(xs);
-      } else {
-        var dots = [];
-        for (var j = 0; j < xs.length; j ++) {
-          dots.push(decompileNonDotRouteToken(xs[j]));
-        }
-        ret += "/" + dots.join('.');
-      }
-    }
-
-    if (ret.length === 0) {
-      return "/";
-    } else {
-      return ret;
-    }
-  },
-
   postback: function(event) {
     var target1 = $(event.target);
 
