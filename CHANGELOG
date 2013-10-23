@@ -12,6 +12,7 @@
 * #198 Swagger: Add inheritance
 * #199 Swagger: Add notes
 * #159 Support dot in route
+* #206 Support index.html fallback
 * #204 Log Xitrum additional routes separately from app routes
 * #195 Rename xitrumCSS to xitrumCss
 * #211 Remove xitrum/routes.js
