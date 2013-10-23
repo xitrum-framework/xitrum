@@ -1,12 +1,3 @@
-2.12 (planned):
-* #77 Support big file upload, remove maxSizeInMB in xitrum.conf
-* #81 Reload classes and routes in development mode
-* #76 Improve currentAction in Scalate templates
-* #95 Add another template engine faster than Scalate
-* #70 Add Rails-like asset pipeline
-* #71 Add automatic CORS request handling for the whole site
-* #109 Use Akka log instead of using SLF4J directly
-
 2.11 (planned):
 * #196 Swagger: Rename Optional<ValueType><ParamType> to Opt<ValueType><ParamType>, ex: OptStringQuery
 * #198 Swagger: Add inheritance
