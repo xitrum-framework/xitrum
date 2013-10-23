@@ -1,5 +1,6 @@
 package xitrum.handler.up
 
+import java.io.File
 import scala.collection.mutable.{Map => MMap}
 
 import org.jboss.netty.channel._
@@ -15,6 +16,7 @@ import xitrum.{Action, ActionActor, Config}
 import xitrum.handler.HandlerEnv
 import xitrum.handler.down.XSendFile
 import xitrum.sockjs.SockJsPrefix
+import xitrum.etag.NotModified
 
 object Dispatcher {
   private val classOfActor = classOf[Actor]
@@ -65,6 +67,21 @@ class Dispatcher extends SimpleChannelUpstreamHandler with BadClientSilencer {
         Dispatcher.dispatch(route.klass, env)
 
       case None =>
+        // Try to fallback to index.html if it exists
+        val staticPath = Config.root + "/public" + pathInfo.decodedWithIndexHtml
+        val file       = new File(staticPath)
+        if (file.isFile && file.exists) {
+          val response = new DefaultHttpResponse(HTTP_1_1, OK)
+
+          if (!Config.xitrum.staticFile.revalidate)
+            NotModified.setClientCacheAggressively(response)
+
+          XSendFile.setHeader(response, staticPath, false)
+          env.response = response
+          ctx.getChannel.write(env)
+          return
+        }
+
         Config.routes.error404 match {
           case None =>
             val response = new DefaultHttpResponse(HTTP_1_1, NOT_FOUND)
