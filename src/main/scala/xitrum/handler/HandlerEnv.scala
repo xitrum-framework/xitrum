@@ -21,7 +21,7 @@ class HandlerEnv extends MHashMap[String, Any] {
 
   // Set by UriParser
   var pathInfo:         PathInfo         = null
-  var uriParams:        Params           = null
+  var queryParams:      Params           = null
 
   // Set by BodyParser
   var bodyParams:       Params           = null
@@ -47,7 +47,7 @@ class HandlerEnv extends MHashMap[String, Any] {
     val ret = MMap[String, Seq[String]]()
 
     // The order is important because we want the later to overwrite the former
-    ret ++= uriParams
+    ret ++= queryParams
     ret ++= bodyParams
     ret ++= pathParams
 

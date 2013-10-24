@@ -14,40 +14,37 @@ object RouteCompiler {
     fragments.map(compilePatternFragment _)
   }
 
-  def decompile(routeTokens: Seq[RouteToken], swagger: Boolean = false): String = {
+  def decompile(routeTokens: Seq[RouteToken], forSwagger: Boolean = false): String = {
     if (routeTokens.isEmpty) {
       "/"
     } else {
-      routeTokens.foldLeft("") { (acc, t) =>
-        val rawValue =
-          if (t.isPlaceHolder) {
-            if (swagger) "{" + t.value + "}" else ":" + t.value
-          } else {
-            t.value
-          }
-        val rawRegex = t.regex match {
-          case None => ""
-          case Some(r) =>
-            val string = r.toString
-            val withoutGraveAndDollar = string.substring(1, string.length - 1)
-            "<" + withoutGraveAndDollar + ">"
-        }
-        acc + "/" + rawValue + rawRegex
-      }
+      routeTokens.foldLeft("") { (acc, t) => acc + "/" + t.decompile(forSwagger) }
     }
   }
 
   //----------------------------------------------------------------------------
 
   private def compilePatternFragment(fragment: String): RouteToken = {
-    val isPlaceHolder         = fragment.startsWith(":")
+    val parts = fragment.split("\\.:")
+    if (parts.length == 1) {
+      compileNonDotPatternFragment(fragment)
+    } else {
+      val nonDotRouteTokens =
+        compileNonDotPatternFragment(parts.head) +:
+        parts.tail.map { part => compileNonDotPatternFragment(':' + part) }
+      DotRouteToken(nonDotRouteTokens)
+    }
+  }
+
+  private def compileNonDotPatternFragment(fragment: String): NonDotRouteToken = {
+    val isPlaceholder         = fragment.startsWith(":")
     val regexMarkerStartIndex = fragment.indexOf("<")
 
     val value =
       if (regexMarkerStartIndex < 0) {
-        if (isPlaceHolder) fragment.substring(1) else fragment
+        if (isPlaceholder) fragment.substring(1) else fragment
       } else {
-        val valueStartIndex = if (isPlaceHolder) 1 else 0
+        val valueStartIndex = if (isPlaceholder) 1 else 0
         fragment.substring(valueStartIndex, regexMarkerStartIndex)
       }
 
@@ -58,6 +55,6 @@ object RouteCompiler {
         val regexString = fragment.substring(regexMarkerStartIndex + 1, fragment.length - 1)
         Some(("^" + regexString + "$").r)
       }
-    RouteToken(value, isPlaceHolder, regex)
+    NonDotRouteToken(value, isPlaceholder, regex)
   }
 }

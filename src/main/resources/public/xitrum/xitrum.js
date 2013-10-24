@@ -3,41 +3,6 @@ var xitrum = {
     return $("meta[name='csrf-token']").attr("content");
   },
 
-  urlFor: function(actionClassName, params) {
-    var find = function() {
-      for (var i = 0; i < XITRUM_ROUTES.length; i++) {
-        var xs = XITRUM_ROUTES[i];
-        if (xs[1] === actionClassName) return xs[0];
-      }
-      throw "[urlFor] No route for: " + actionClassName;
-    };
-
-    var compiledRoute = find();
-
-    var ret = XITRUM_BASE_URL;
-    for (var i = 0; i < compiledRoute.length; i++) {
-      var xs            = compiledRoute[i];
-      var token         = xs[0];
-      var isPlaceHolder = xs[1];
-      if (isPlaceHolder) {
-        var s = params[token];
-        if (s) {
-          ret += "/" + s;
-        } else {
-          throw "[urlFor] Missing key: " + token + ", for: " + actionClassName;
-        }
-      } else {
-        ret += "/" + token;
-      }
-    }
-
-    if (ret.length === 0) {
-      return "/";
-    } else {
-      return ret;
-    }
-  },
-
   postback: function(event) {
     var target1 = $(event.target);
 

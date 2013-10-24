@@ -30,18 +30,18 @@ object XSendFile extends Logger {
   val CHUNK_SIZE        = 8 * 1024
   val X_SENDFILE_HEADER = "X-Sendfile"
 
-  // To avoid duplicate log like this when X_SENDFILE_HEADER is set by controller
+  // To avoid duplicate log like this when X_SENDFILE_HEADER is set by action
   // GET /echo/ -> 404 (static)
   // GET /echo/ -> xitrum.sockjs.SockJsController#iframe, pathParams: {iframe: } -> 404, 1 [ms]
-  val X_SENDFILE_HEADER_IS_FROM_CONTROLLER = "X-Sendfile-Is-From-Controller"
+  val X_SENDFILE_HEADER_IS_FROM_ACTION = "X-Sendfile-Is-From-Action"
 
   private[this] val abs404 = Config.root + "/public/404.html"
   private[this] val abs500 = Config.root + "/public/500.html"
 
   /** @param path see Renderer#renderFile */
-  def setHeader(response: HttpResponse, path: String, fromController: Boolean) {
+  def setHeader(response: HttpResponse, path: String, fromAction: Boolean) {
     response.setHeader(X_SENDFILE_HEADER, path)
-    if (fromController) response.setHeader(X_SENDFILE_HEADER_IS_FROM_CONTROLLER, "true")
+    if (fromAction) response.setHeader(X_SENDFILE_HEADER_IS_FROM_ACTION, "true")
     HttpHeaders.setContentLength(response, 0)  // Env2Response checks Content-Length
   }
 
@@ -248,8 +248,8 @@ class XSendFile extends ChannelDownstreamHandler {
 
     // See comment of X_SENDFILE_HEADER_IS_FROM_CONTROLLER
     // Remove non-standard header to avoid leaking information
-    val noLog = response.containsHeader(X_SENDFILE_HEADER_IS_FROM_CONTROLLER)
-    if (noLog) response.removeHeader(X_SENDFILE_HEADER_IS_FROM_CONTROLLER)
+    val noLog = response.containsHeader(X_SENDFILE_HEADER_IS_FROM_ACTION)
+    if (noLog) response.removeHeader(X_SENDFILE_HEADER_IS_FROM_ACTION)
 
     sendFile(ctx, e, request, response, path, noLog)
   }

@@ -64,6 +64,9 @@ trait RequestEnv extends ParamAccess {
   lazy val channel          = handlerEnv.channel
   lazy val request          = handlerEnv.request
   lazy val response         = handlerEnv.response
+  lazy val queryParams      = handlerEnv.queryParams
+  lazy val bodyParams       = handlerEnv.bodyParams
+  lazy val pathParams       = handlerEnv.pathParams
   lazy val textParams       = handlerEnv.textParams
   lazy val fileUploadParams = handlerEnv.fileUploadParams
 

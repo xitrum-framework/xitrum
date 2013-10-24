@@ -99,7 +99,7 @@ class DefaultHttpChannelPipelineFactory extends CPF {
 
     // Upstream
 
-    ret.addLast("HttpRequestDecoder",   new HttpRequestDecoder)
+    ret.addLast("HttpRequestDecoder",   new HttpRequestDecoder(Config.xitrum.request.maxInitialLineLength, 8192, 8192))
     ret.addLast("HttpChunkAggregator",  new HttpChunkAggregator(Config.xitrum.request.maxSizeInMB * 1024 * 1024))
     ret.addLast("noPipelining",         noPipelining)
     ret.addLast("baseUrlRemover",       baseUrlRemover)

@@ -46,9 +46,10 @@ object Server extends Logger {
     Config.xitrum.templateEngine
 
     val routes = Config.routes
-    routes.printRoutes()
-    routes.sockJsRouteMap.print()
-    routes.printErrorRoutes()
+    routes.logRoutes(false)
+    routes.sockJsRouteMap.log()
+    routes.logErrorRoutes()
+    routes.logRoutes(true)
 
     // Lastly, start the server(s) after necessary things have been prepared
     val portConfig = Config.xitrum.port
@@ -77,6 +78,13 @@ object Server extends Logger {
     bootstrap.setPipelineFactory(channelPipelineFactory)
     NetOption.setOptions(bootstrap)
     NetOption.bind(service, bootstrap, port)
-    logger.info("{} server started on port {}", service, port)
+
+    Config.xitrum.interface match {
+      case None =>
+        logger.info(s"${service} server started on port ${port}")
+
+      case Some(hostnameOrIp) =>
+        logger.info(s"${service} server started on ${hostnameOrIp}:${port}")
+    }
   }
 }

@@ -15,7 +15,7 @@ import xitrum.{Config, Logger, SockJsActor}
 class SockJsClassAndOptions(val actorClass: Class[_ <: SockJsActor], val websocket: Boolean, val cookieNeeded: Boolean) extends Serializable
 
 class SockJsRouteMap(map: Map[String, SockJsClassAndOptions]) extends Logger {
-  def print() {
+  def log() {
     // This method is only run once on start, speed is not a problem
 
     if (!map.isEmpty) {

@@ -2,15 +2,11 @@ organization := "tv.cntt"
 
 name := "xitrum"
 
-version := "2.10-SNAPSHOT"
+version := "2.11-SNAPSHOT"
 
-scalaVersion := "2.10.2"
+scalaVersion := "2.10.3"
 
-scalacOptions ++= Seq(
-  "-deprecation",
-  "-feature",
-  "-unchecked"
-)
+scalacOptions ++= Seq("-deprecation", "-feature", "-unchecked")
 
 // http://www.scala-sbt.org/release/docs/Detailed-Topics/Java-Sources
 // Avoid problem when Xitrum is built with Java 7 but the projects that use Xitrum
@@ -41,7 +37,7 @@ libraryDependencies += "com.typesafe.akka" %% "akka-slf4j" % "2.2.1"
 libraryDependencies += "tv.cntt" %% "sclasner" % "1.6"
 
 // For (de)serializing
-libraryDependencies += "com.twitter" %% "chill-bijection" % "0.3.2"
+libraryDependencies += "com.twitter" %% "chill-bijection" % "0.3.4"
 
 // For jsEscape
 libraryDependencies += "org.apache.commons" % "commons-lang3" % "3.1"
@@ -49,7 +45,7 @@ libraryDependencies += "org.apache.commons" % "commons-lang3" % "3.1"
 libraryDependencies += "org.json4s" %% "json4s-native" % "3.2.5"
 
 // For i18n
-libraryDependencies += "tv.cntt" %% "scaposer" % "1.2"
+libraryDependencies += "tv.cntt" %% "scaposer" % "1.3"
 
 // For compiling CoffeeScript to JavaScript
 libraryDependencies += "tv.cntt" % "rhinocoffeescript" % "1.6.3"
@@ -57,10 +53,24 @@ libraryDependencies += "tv.cntt" % "rhinocoffeescript" % "1.6.3"
 // Hazelcast is used for distributed cache and SockJS --------------------------
 
 // Infinispan is good but much heavier
-libraryDependencies += "com.hazelcast" % "hazelcast" % "3.0.2"
+libraryDependencies += "com.hazelcast" % "hazelcast" % "3.1"
 
 // Hazelcast can be configured as cluster member, lite member, or Java client
-libraryDependencies += "com.hazelcast" % "hazelcast-client" % "3.0.2"
+libraryDependencies += "com.hazelcast" % "hazelcast-client" % "3.1"
+
+// By default, version 2.10.0 of the libs below is used!!! ---------------------
+
+libraryDependencies <+= scalaVersion { sv =>
+  "org.scala-lang" % "scala-compiler" % sv
+}
+
+libraryDependencies <+= scalaVersion { sv =>
+  "org.scala-lang" % "scala-reflect" % sv
+}
+
+libraryDependencies <+= scalaVersion { sv =>
+  "org.scala-lang" % "scalap" % sv
+}
 
 // xitrum.imperatively uses Scala continuation, a compiler plugin --------------
 

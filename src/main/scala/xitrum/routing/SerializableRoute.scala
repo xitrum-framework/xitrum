@@ -17,20 +17,25 @@ class SerializableRoute(
     val prefixTokens = RouteCompiler.compile(prefix)
     val firstToken   = compiledPattern.head
 
+    // Replace "" with prefix, but for DotRouteToken, ".:foo" is OK
+    // (its first NonDotRouteToken is empty)
     val newCompiledPattern =
-      if (firstToken.value.isEmpty)
-        prefixTokens
-      else
+      if (firstToken.isInstanceOf[NonDotRouteToken]) {
+        if (firstToken.asInstanceOf[NonDotRouteToken].value.isEmpty)
+          prefixTokens
+        else
+          prefixTokens ++ compiledPattern
+      } else {
         prefixTokens ++ compiledPattern
+      }
 
     new SerializableRoute(httpMethod, newCompiledPattern, actionClass, cacheSecs)
   }
 
   def toRoute: Route = {
     new Route(
-      new HttpMethod(httpMethod),
-      compiledPattern, Class.forName(actionClass).asInstanceOf[Class[Action]],
-      cacheSecs
+      new HttpMethod(httpMethod), compiledPattern,
+      Class.forName(actionClass).asInstanceOf[Class[Action]], cacheSecs
     )
   }
 }

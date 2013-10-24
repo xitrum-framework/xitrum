@@ -1,19 +1,31 @@
 2.11 (planned):
-* #77 Support big file upload, remove maxSizeInMB in xitrum.conf
-* #81 Reload classes and routes in development mode
-* #76 Improve currentAction in Scalate templates
-* #95 Add another template engine faster than Scalate
-* #70 Add Rails-like asset pipeline
-* #71 Add automatic CORS request handling for the whole site
-* #109 Use Akka log instead of using SLF4J directly
+* #196 Swagger: Rename Optional<ValueType><ParamType> to Opt<ValueType><ParamType>, ex: OptStringQuery
+* #198 Swagger: Add inheritance
+* #199 Swagger: Add notes
+* #159 Support dot in route
+* #206 Support index.html fallback
+* #204 Log Xitrum additional routes separately from app routes
+* #195 Rename xitrumCSS to xitrumCss
+* #211 Remove xitrum/routes.js
+* #200 Update Scaposer from 1.2 to 1.3
+* #201 Update Hazelcast from 3.0.2 to 3.1
 
-2.10 (planned):
+2.10:
 * #180 Swagger: Add option to xitrum.conf to disable Swagger Doc
 * #181 Swagger: Improve annotations
 * #182 Swagger: Cache result on 1st access
 * #185 Swagger: Include Swagger UI
 * #183 Fix: Dead actor sends Terminate message to itself
-* #93 Readd indices for xitrum.mq.MessageQueue
+* #194 Fix: Wrong version (2.10.0) of scala-compiler, scala-reflect, and scalap is used
+* #51  Add bin/runner.bat for Windows
+* #93  Readd indices for xitrum.mq.MessageQueue
+* #179 Add route aliasing
+* #189 Add option to xitrum.conf to configure request maxInitialLineLength
+* #193 Add request.staticFilePathRegex to xitrum.conf
+* #172 Replace Java annotations with Scala annotations
+* #191 Placeholder in URL can't be empty
+* #132 Log network card interface
+* #192 Update Twitter Chill from 0.3.2 to 0.3.4
 
 2.9:
 * #169 Add Swagger Doc support
@@ -50,7 +62,7 @@
 * #150 Update Knockout.js from 2.2.1 to 2.3.0
 
 2.6:
-* #135 Bug: Hangs up on cached action
+* #135 Fix: Hangs up on cached action
 * #119 Close connection after sendUnsupportedWebSocketVersionResponse
 * #139 Add UnserializableSessionStore
 * #136 Update Netty to 3.6.6.Final

@@ -51,24 +51,26 @@ class SessionConfig(config: TConfig) {
   val secureKey  = config.getString("secureKey")
 }
 
-class RequestConfig(config: TConfig) {
-  val charsetName    = config.getString("charset")
-  val maxSizeInMB    = config.getInt("maxSizeInMB")
-  val filteredParams = config.getStringList("filteredParams")
+class StaticFileConfig(config: TConfig) {
+  val pathRegex = config.getString("pathRegex").r
 
-  // Starts and stops with "/", like "/static/", if any
-  val staticFileUrlPrefix = if (config.hasPath("staticFileUrlPrefix")) Some(config.getString("staticFileUrlPrefix")) else None
+  val maxSizeInKBOfCachedFiles = config.getInt("maxSizeInKBOfCachedFiles")
+  val maxNumberOfCachedFiles   = config.getInt("maxNumberOfCachedFiles")
+
+  val revalidate = config.getBoolean("revalidate")
+}
+
+class RequestConfig(config: TConfig) {
+  val charsetName          = config.getString("charset")
+  val maxInitialLineLength = config.getInt("maxInitialLineLength")
+  val maxSizeInMB          = config.getInt("maxSizeInMB")
+  val filteredParams       = config.getStringList("filteredParams")
 
   val charset = Charset.forName(charsetName)
 }
 
 class ResponseConfig(config: TConfig) {
   val autoGzip = config.getBoolean("autoGzip")
-
-  val maxSizeInKBOfCachedStaticFiles = config.getInt("maxSizeInKBOfCachedStaticFiles")
-  val maxNumberOfCachedStaticFiles   = config.getInt("maxNumberOfCachedStaticFiles")
-
-  val clientMustRevalidateStaticFiles = config.getBoolean("clientMustRevalidateStaticFiles")
 }
 
 class Config(val config: TConfig) extends Logger {
@@ -106,7 +108,7 @@ class Config(val config: TConfig) extends Logger {
         klass.newInstance().asInstanceOf[TemplateEngine]
       } catch {
         case NonFatal(e) =>
-          Config.exitOnError("Could not load template engine, please check config/xitrum.conf", e)
+          Config.exitOnStartupError("Could not load template engine, please check config/xitrum.conf", e)
           null
       }
     } else {
@@ -119,11 +121,13 @@ class Config(val config: TConfig) extends Logger {
 
   val session = new SessionConfig(config.getConfig("session"))
 
-  val swaggerApiVersion = if (config.hasPath("swaggerApiVersion")) Some(config.getString("swaggerApiVersion")) else None
+  val staticFile = new StaticFileConfig(config.getConfig("staticFile"))
 
   val request = new RequestConfig(config.getConfig("request"))
 
   val response = new ResponseConfig(config.getConfig("response"))
+
+  val swaggerApiVersion = if (config.hasPath("swaggerApiVersion")) Some(config.getString("swaggerApiVersion")) else None
 }
 
 //----------------------------------------------------------------------------
@@ -160,7 +164,7 @@ object Config extends Logger {
       ConfigFactory.load()
     } catch {
       case NonFatal(e) =>
-        exitOnError("Could not load config/application.conf. For an example, see https://github.com/ngocdaothanh/xitrum-new/blob/master/config/application.conf", e)
+        exitOnStartupError("Could not load config/application.conf. For an example, see https://github.com/ngocdaothanh/xitrum-new/blob/master/config/application.conf", e)
         null
     }
   }
@@ -171,7 +175,7 @@ object Config extends Logger {
       new Config(application.getConfig("xitrum"))
     } catch {
       case NonFatal(e) =>
-        exitOnError("Could not load config/xitrum.conf. For an example, see https://github.com/ngocdaothanh/xitrum-new/blob/master/config/xitrum.conf", e)
+        exitOnStartupError("Could not load config/xitrum.conf. For an example, see https://github.com/ngocdaothanh/xitrum-new/blob/master/config/xitrum.conf", e)
         null
     }
   }
@@ -256,12 +260,13 @@ object Config extends Logger {
   }
 
   /**
-   * Shutdowns Hazelcast and call System.exit(-1).
-   * Once Hazelcast is started, calling System.exit(-1) does not stop
+   * Shutdowns Hazelcast and calls System.exit(-1).
+   * Once Hazelcast is started, calling only System.exit(-1) does not stop
    * the current process!
    */
-  def exitOnError(msg: String, e: Throwable) {
+  def exitOnStartupError(msg: String, e: Throwable) {
     logger.error(msg, e)
+    logger.error("Xitrum could not start because of the above error. Xitrum will now stop the current process.")
     Hazelcast.shutdownAll()
     System.exit(-1)
   }
@@ -288,7 +293,7 @@ object Config extends Logger {
     } catch {
       case NonFatal(e) =>
         if (retried) {
-          Config.exitOnError("Could not collect routes", e)
+          Config.exitOnStartupError("Could not collect routes", e)
           throw e
         } else {
           logger.info("Could not load " + ROUTES_CACHE + ", delete and retry...")
