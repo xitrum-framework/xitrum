@@ -1,5 +1,6 @@
 2.11 (planned):
 * #215 Revert Hazelcast 3.x to 2.x
+* #216 Remove package xitrum.mq
 * #159 Support dot in route
 * #206 Support index.html fallback
 * #204 Log Xitrum additional routes separately from app routes
