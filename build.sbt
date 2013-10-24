@@ -53,10 +53,10 @@ libraryDependencies += "tv.cntt" % "rhinocoffeescript" % "1.6.3"
 // Hazelcast is used for distributed cache and SockJS --------------------------
 
 // Infinispan is good but much heavier
-libraryDependencies += "com.hazelcast" % "hazelcast" % "3.1"
+libraryDependencies += "com.hazelcast" % "hazelcast" % "2.6.4"
 
 // Hazelcast can be configured as cluster member, lite member, or Java client
-libraryDependencies += "com.hazelcast" % "hazelcast-client" % "3.1"
+libraryDependencies += "com.hazelcast" % "hazelcast-client" % "2.6.4"
 
 // By default, version 2.10.0 of the libs below is used!!! ---------------------
 

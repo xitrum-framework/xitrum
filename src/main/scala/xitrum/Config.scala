@@ -4,8 +4,7 @@ import java.io.File
 import java.nio.charset.Charset
 import scala.util.control.NonFatal
 
-import com.hazelcast.client.HazelcastClient
-import com.hazelcast.client.config.XmlClientConfigBuilder
+import com.hazelcast.client.{ClientConfig, ClientConfigBuilder, HazelcastClient}
 import com.hazelcast.core.{Hazelcast, HazelcastInstance}
 
 import com.typesafe.config.{Config => TConfig, ConfigFactory}
@@ -145,6 +144,8 @@ object Config extends Logger {
    */
   val BIG_TEXTUAL_RESPONSE_SIZE_IN_KB = 1
 
+  // Do not support "lite member" mode, because Hazelcast 3.x removed it anyway.
+  // Will update to Hazelcast 3.x again when it becomes more stable.
   private[this] val HAZELCAST_MODE_CLUSTER_MEMBER = "clusterMember"
   private[this] val HAZELCAST_MODE_JAVA_CLIENT    = "javaClient"
 
@@ -236,7 +237,7 @@ object Config extends Logger {
    * sbt console mode and don't like this overhead.
    */
   lazy val hazelcastInstance: HazelcastInstance = {
-    // http://hazelcast.com/docs/3.0/manual/multi_html/ch12s07.html
+    // http://www.hazelcast.com/docs/2.6/manual/multi_html/ch12s07.html
     System.setProperty("hazelcast.logging.type", "slf4j")
 
     if (xitrum.hazelcastMode == HAZELCAST_MODE_CLUSTER_MEMBER) {
@@ -244,10 +245,11 @@ object Config extends Logger {
       System.setProperty("hazelcast.config", path)
 
       // null: load from "hazelcast.config" system property above
-      // http://hazelcast.com/docs/3.0/manual/multi_html/ch12.html
+      // http://www.hazelcast.com/docs/2.6/manual/multi_html/ch12.html
       Hazelcast.newHazelcastInstance(null)
     } else {
-      val clientConfig = new XmlClientConfigBuilder("hazelcast_java_client.xml").build()
+      // https://github.com/hazelcast/hazelcast/issues/93
+      val clientConfig = new ClientConfigBuilder("hazelcast_java_client.properties").build()
       HazelcastClient.newHazelcastClient(clientConfig)
     }
   }

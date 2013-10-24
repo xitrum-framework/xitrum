@@ -4,7 +4,7 @@ import java.util.concurrent.TimeUnit
 import java.util.Map.Entry
 import scala.util.control.NonFatal
 
-import com.hazelcast.core.IMap
+import com.hazelcast.core.{IMap, MapEntry}
 import com.hazelcast.query.Predicate
 
 object Cache extends Logger {
@@ -25,7 +25,7 @@ object Cache extends Logger {
   private def removePrefix(keyPrefix: Any) {
     val keyPrefixS = keyPrefix.toString
     val prefixPredicate = new Predicate[String, Any] {
-      def apply(mapEntry: Entry[String, Any]) = mapEntry.getKey.startsWith(keyPrefixS)
+      def apply(mapEntry: MapEntry[String, Any]) = mapEntry.getKey.startsWith(keyPrefixS)
     }
 
     val keys = cache.keySet(prefixPredicate)
