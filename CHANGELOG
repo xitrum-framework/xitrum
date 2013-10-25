@@ -6,6 +6,7 @@
 * #204 Log Xitrum additional routes separately from app routes
 * #195 Rename xitrumCSS to xitrumCss
 * #211 Remove xitrum/routes.js
+* #220 Optimize xitrum.util.Loader.bytesFromInputStream
 * #196 Swagger: Rename Optional<ValueType><ParamType> to Opt<ValueType><ParamType>, ex: OptStringQuery
 * #198 Swagger: Add inheritance
 * #199 Swagger: Add notes
