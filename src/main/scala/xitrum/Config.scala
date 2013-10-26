@@ -100,8 +100,8 @@ class Config(val config: TConfig) extends Logger {
    * the template engine class, xitrum.Config can be used
    */
   lazy val templateEngine: TemplateEngine = {
-    if (config.hasPath("templateEngine")) {
-      val className = config.getString("templateEngine")
+    if (config.hasPath("template")) {
+      val className = config.getString("template.engine")
       try {
         val klass = Class.forName(className)
         klass.newInstance().asInstanceOf[TemplateEngine]
