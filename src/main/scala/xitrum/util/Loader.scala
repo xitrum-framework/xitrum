@@ -35,8 +35,9 @@ object Loader {
           ret = Arrays.copyOf(buffer, bytesRead)
         } else {
           // http://stackoverflow.com/questions/80476/how-to-concatenate-two-arrays-in-java
-          ret = Arrays.copyOf(ret, ret.length + bytesRead)
-          System.arraycopy(buffer, 0, ret, ret.length, bytesRead)
+          val oldLength = ret.length
+          ret = Arrays.copyOf(ret, oldLength + bytesRead)
+          System.arraycopy(buffer, 0, ret, oldLength, bytesRead)
         }
       }
 
