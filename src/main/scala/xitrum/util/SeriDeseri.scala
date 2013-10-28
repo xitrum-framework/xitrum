@@ -4,9 +4,9 @@ import scala.runtime.ScalaRunTime
 import scala.util.{Try, Success, Failure}
 
 import com.twitter.chill.KryoInjection
-import xitrum.Logger
+import xitrum.Log
 
-object SeriDeseri extends Logger {
+object SeriDeseri extends Log {
   def serialize(any: Any): Array[Byte] = KryoInjection(any)
 
   def deserialize(bytes: Array[Byte]): Option[Any] = {
@@ -15,7 +15,7 @@ object SeriDeseri extends Logger {
         Some(any)
 
       case Failure(e) =>
-        if (logger.isDebugEnabled) logger.debug("Could not deserialize: " + ScalaRunTime.stringOf(bytes), e)
+        if (log.isDebugEnabled) log.debug("Could not deserialize: " + ScalaRunTime.stringOf(bytes), e)
         None
     }
   }

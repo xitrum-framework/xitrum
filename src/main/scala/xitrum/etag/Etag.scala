@@ -9,10 +9,10 @@ import HttpHeaders.Names._
 import HttpHeaders.Values._
 import HttpResponseStatus._
 
-import xitrum.{Action, Config, Logger}
+import xitrum.{Action, Config, Log}
 import xitrum.util.{UrlSafeBase64, Gzip, Loader, LocalLruCache, Mime}
 
-object Etag extends Logger {
+object Etag extends Log {
   class Result
   case object NotFound                                                                                         extends Result
   case class  TooBig(file: File)                                                                               extends Result

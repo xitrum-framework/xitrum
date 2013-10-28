@@ -5,7 +5,7 @@ import scala.collection.mutable.{Map => MMap}
 import akka.actor.{Actor, ActorRef, ActorRefFactory, Props}
 import com.esotericsoftware.reflectasm.ConstructorAccess
 
-import xitrum.{Config, Logger, SockJsActor}
+import xitrum.{Config, Log, SockJsActor}
 
 // "websocket" and "cookieNeeded" members are named after SockJS option:
 // {"websocket": true/false, "cookie_needed": true/false, "origins": ["*:*"], "entropy": integer}
@@ -14,8 +14,8 @@ import xitrum.{Config, Logger, SockJsActor}
 // cookieNeeded: true means load balancers needs JSESSION cookie
 class SockJsClassAndOptions(val actorClass: Class[_ <: SockJsActor], val websocket: Boolean, val cookieNeeded: Boolean) extends Serializable
 
-class SockJsRouteMap(map: Map[String, SockJsClassAndOptions]) extends Logger {
-  def log() {
+class SockJsRouteMap(map: Map[String, SockJsClassAndOptions]) extends Log {
+  def logRoutes() {
     // This method is only run once on start, speed is not a problem
 
     if (!map.isEmpty) {
@@ -39,7 +39,7 @@ class SockJsRouteMap(map: Map[String, SockJsClassAndOptions]) extends Logger {
           "cookie_needed: " + sockJsClassAndOptions.cookieNeeded
         )
       }
-      logger.info("SockJS routes:\n" + strings.mkString("\n"))
+      log.info("SockJS routes:\n" + strings.mkString("\n"))
     }
   }
 

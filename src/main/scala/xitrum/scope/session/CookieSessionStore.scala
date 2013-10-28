@@ -5,11 +5,11 @@ import scala.util.control.NonFatal
 
 import org.jboss.netty.handler.codec.http.DefaultCookie
 
-import xitrum.{Config, Logger}
+import xitrum.{Config, Log}
 import xitrum.util.SecureUrlSafeBase64
 
 /** Compress big session cookie to try to avoid the 4KB limit. */
-class CookieSessionStore extends SessionStore with Logger {
+class CookieSessionStore extends SessionStore with Log {
   def restore(env: SessionEnv): Session = {
     // Cannot always get cookie, decrypt, deserialize, and type casting due to program changes etc.
     env.requestCookies.get(Config.xitrum.session.cookieName) match {
@@ -58,7 +58,7 @@ class CookieSessionStore extends SessionStore with Logger {
       val serialized = SecureUrlSafeBase64.encrypt(immutableMap, true)
       val cookieSize = serialized.length
       if (cookieSize > 4 * 1024) {
-        logger.error("Cookie size = " + cookieSize + " > 4KB limit: " + immutableMap)
+        log.error("Cookie size = " + cookieSize + " > 4KB limit: " + immutableMap)
         return
       }
 

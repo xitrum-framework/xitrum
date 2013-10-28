@@ -68,7 +68,7 @@ class NoPipelining extends SimpleChannelUpstreamHandler with BadClientSilencer {
 
     // See ChannelPipelineFactory
     // This is the first Xitrum handler, log the request
-    if (logger.isTraceEnabled) logger.trace(m.asInstanceOf[HttpRequest].toString)
+    if (log.isTraceEnabled) log.trace(m.asInstanceOf[HttpRequest].toString)
 
     NoPipelining.pauseReading(channel)
     ctx.sendUpstream(e)

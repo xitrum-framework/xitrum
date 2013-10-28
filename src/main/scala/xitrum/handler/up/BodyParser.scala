@@ -53,7 +53,7 @@ class BodyParser extends SimpleChannelUpstreamHandler with BadClientSilencer {
     } catch {
       case NonFatal(e) =>
         val msg = "Could not parse body of request: " + request
-        logger.warn(msg, e)
+        log.warn(msg, e)
         ctx.getChannel.close()
     }
   }

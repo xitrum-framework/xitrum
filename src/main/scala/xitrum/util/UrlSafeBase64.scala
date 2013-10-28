@@ -7,7 +7,7 @@ import org.jboss.netty.buffer.ChannelBuffers
 import org.jboss.netty.handler.codec.base64.{Base64 => B64, Base64Dialect}
 import org.jboss.netty.util.CharsetUtil.UTF_8
 
-import xitrum.Logger
+import xitrum.Log
 
 /**
  * URL-safe dialect is used:
@@ -15,7 +15,7 @@ import xitrum.Logger
  *
  * If you want to use standard dialect, use the feature in Netty directly.
  */
-object UrlSafeBase64 extends Logger {
+object UrlSafeBase64 extends Log {
   /**
    * The result contains no padding ("=" characters) so that it can be used as
    * request parameter name. (Netty POST body decoder prohibits "=" in parameter name.)
@@ -37,7 +37,7 @@ object UrlSafeBase64 extends Logger {
       Some(ChannelBufferToBytes(buffer))
     } catch {
       case NonFatal(e) =>
-        logger.debug("Could not decode base64 in URL-safe dialect: " + base64String)
+        log.debug("Could not decode base64 in URL-safe dialect: " + base64String)
         None
     }
   }

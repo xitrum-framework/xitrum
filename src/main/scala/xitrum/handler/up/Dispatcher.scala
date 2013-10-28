@@ -22,6 +22,9 @@ object Dispatcher {
   private val classOfActor = classOf[Actor]
 
   def dispatch(klass: Class[_], handlerEnv: HandlerEnv) {
+    // This method should be fast because it is run for every request
+    // => Use ReflectASM instead of normal reflection to create action instance
+
     if (classOfActor.isAssignableFrom(klass)) {
       val actorRef = Config.actorSystem.actorOf(Props {
         val actor = ConstructorAccess.get(klass).newInstance()

@@ -3,13 +3,13 @@ package xitrum.util
 import java.util.{Collections, LinkedHashMap, Map}
 import javax.script.ScriptException
 import tv.cntt.rhinocoffeescript.Compiler
-import xitrum.Logger
+import xitrum.Log
 
 /**
  * Compiled script is cached. Cache with size 1024. Least recently used element
  * is removed first.
  */
-object CoffeeScriptCompiler extends Logger {
+object CoffeeScriptCompiler extends Log {
   // http://www.java-blog.com/creating-simple-cache-java-linkedhashmap-anonymous-class
 
   private[this] val MAX_CACHE_SIZE = 1024
@@ -31,7 +31,7 @@ object CoffeeScriptCompiler extends Logger {
       Some(javaScript)
     } catch {
       case e: ScriptException =>
-        logger.warn("CoffeeScript syntax error at %d:%d".format(e.getLineNumber, e.getColumnNumber))
+        log.warn("CoffeeScript syntax error at %d:%d".format(e.getLineNumber, e.getColumnNumber))
         None
     }
   }

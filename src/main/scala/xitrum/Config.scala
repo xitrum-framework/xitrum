@@ -69,7 +69,7 @@ class ResponseConfig(config: TConfig) {
   val autoGzip = config.getBoolean("autoGzip")
 }
 
-class Config(val config: TConfig) extends Logger {
+class Config(val config: TConfig) extends Log {
   val basicAuth =
     if (config.hasPath("basicAuth"))
       Some(new BasicAuthConfig(config.getConfig("basicAuth")))
@@ -98,9 +98,9 @@ class Config(val config: TConfig) extends Logger {
    */
   lazy val templateEngine: TemplateEngine = {
     if (config.hasPath("template")) {
-      val className = config.getString("template.engine")
       try {
-        val klass = Class.forName(className)
+        val className = config.getString("template.engine")
+        val klass     = Class.forName(className)
         klass.newInstance().asInstanceOf[TemplateEngine]
       } catch {
         case NonFatal(e) =>
@@ -108,12 +108,24 @@ class Config(val config: TConfig) extends Logger {
           null
       }
     } else {
-      logger.info("No template engine is configured")
+      log.info("No template engine is configured")
       null
     }
   }
 
-  val hazelcastMode = config.getString("hazelcastMode")
+  lazy val cache: Cache = {
+    try {
+      val className   = config.getString("cache.engine")
+      val maxElems    = config.getInt("cache.maxElems")
+      val klass       = Class.forName(className)
+      val constructor = klass.getConstructor(classOf[Int])
+      constructor.newInstance(new Integer(maxElems)).asInstanceOf[Cache]
+    } catch {
+      case NonFatal(e) =>
+        Config.exitOnStartupError("Could not load cache engine, please check config/xitrum.conf", e)
+        null
+    }
+  }
 
   val session = new SessionConfig(config.getConfig("session"))
 
@@ -129,7 +141,7 @@ class Config(val config: TConfig) extends Logger {
 //----------------------------------------------------------------------------
 
 /** See config/xitrum.properties */
-object Config extends Logger {
+object Config extends Log {
   val ACTOR_SYSTEM_NAME = "xitrum"
 
   /**
@@ -217,7 +229,8 @@ object Config extends Logger {
 
   val sessionStore  = {
     val className = xitrum.session.store
-    Class.forName(className).newInstance().asInstanceOf[SessionStore]
+    val klass     = Class.forName(className)
+    klass.newInstance().asInstanceOf[SessionStore]
   }
 
   /** akka.actor.ActorSystem("xitrum") */
@@ -227,18 +240,13 @@ object Config extends Logger {
 
   def warnOnDefaultSecureKey() {
     if (xitrum.session.secureKey == DEFAULT_SECURE_KEY)
-      logger.warn("*** For security, change secureKey in config/xitrum.conf to your own! ***")
+      log.warn("*** For security, change secureKey in config/xitrum.conf to your own! ***")
   }
 
-  /**
-   * Shutdowns Hazelcast and calls System.exit(-1).
-   * Once Hazelcast is started, calling only System.exit(-1) does not stop
-   * the current process!
-   */
   def exitOnStartupError(msg: String, e: Throwable) {
-    logger.error(msg, e)
-    logger.error("Xitrum could not start because of the above error. Xitrum will now stop the current process.")
-    Hazelcast.shutdownAll()
+    log.error(msg, e)
+    log.error("Xitrum could not start because of the above error. Xitrum will now stop the current process.")
+    xitrum.cache.stop()
     System.exit(-1)
   }
 
@@ -257,7 +265,7 @@ object Config extends Logger {
 
   private def loadRouteCacheFileOrRecollectWithRetry(retried: Boolean = false): RouteCollection = {
     try {
-      logger.info("Load file " + ROUTES_CACHE + " or recollect routes...")
+      log.info("Load file " + ROUTES_CACHE + " or recollect routes...")
       val routeCollector = new RouteCollector
       val discoveredAcc = routeCollector.deserializeCacheFileOrRecollect(ROUTES_CACHE)
       RouteCollection.fromSerializable(discoveredAcc)
@@ -267,7 +275,7 @@ object Config extends Logger {
           Config.exitOnStartupError("Could not collect routes", e)
           throw e
         } else {
-          logger.info("Could not load " + ROUTES_CACHE + ", delete and retry...")
+          log.info("Could not load " + ROUTES_CACHE + ", delete and retry...")
           val file = new File(ROUTES_CACHE)
           file.delete()
           loadRouteCacheFileOrRecollectWithRetry(true)
