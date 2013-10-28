@@ -1,19 +1,6 @@
 package xitrum
 
-import java.util.concurrent.TimeUnit
-import java.util.Map.Entry
-import scala.util.control.NonFatal
-
-import com.hazelcast.core.{IMap, MapEntry}
-import com.hazelcast.query.Predicate
-
-object Cache extends Logger {
-  val cache = Config.hazelcastInstance.getMap("xitrum/cache").asInstanceOf[IMap[String, Any]]
-
-  def remove(key: Any) {
-    cache.removeAsync(key.toString)
-  }
-
+object Cache {
   def removeAction(actionClass: Class[_ <: Action]) {
     val keyPrefix = pageActionPrefix(actionClass)
     removePrefix(keyPrefix)
@@ -36,17 +23,7 @@ object Cache extends Logger {
     }
   }
 
-  //---------------------------------------------------------------------------
 
-  def put(key: Any, value: Any) {
-    if (logger.isDebugEnabled) logger.debug("Cache put: " + key)
-    cache.putAsync(key.toString, value)
-  }
-
-  def putSecond(key: Any, value: Any, seconds: Int) {
-    if (logger.isDebugEnabled) logger.debug("Cache put (" + seconds + "s): " + key)
-    cache.put(key.toString, value, seconds, TimeUnit.SECONDS)
-  }
   def putMinute(key: Any, value: Any, minutes: Int) { putSecond(key, value, minutes * 60) }
   def putHour  (key: Any, value: Any, hours:   Int) { putMinute(key, value, hours   * 60) }
   def putDay   (key: Any, value: Any, days:    Int) { putHour  (key, value, days    * 24) }
@@ -63,6 +40,9 @@ object Cache extends Logger {
   def putIfAbsentMinute(key: Any, value: Any, minutes: Int) { putIfAbsentSecond(key, value, minutes * 60) }
   def putIfAbsentHour  (key: Any, value: Any, hours:   Int) { putIfAbsentMinute(key, value, hours   * 60) }
   def putIfAbsentDay   (key: Any, value: Any, days:    Int) { putIfAbsentHour  (key, value, days    * 24) }
+
+
+
 
   //---------------------------------------------------------------------------
 
@@ -95,4 +75,23 @@ object Cache extends Logger {
   def tryCacheMinute[T](key: String, minutes: Int)(f: => T): T = tryCacheSecond(key, minutes * 60)(f)
   def tryCacheHour[T]  (key: String, hours:   Int)(f: => T): T = tryCacheMinute(key, hours   * 60)(f)
   def tryCacheDay[T]   (key: String, days:    Int)(f: => T): T = tryCacheHour  (key, days    * 24)(f)
+}
+
+/** All APIs are sync, not async, because cache should be fast. */
+trait Cache {
+
+
+  def remove(key: Any)
+
+  def put(key: Any, value: Any) {
+    if (logger.isDebugEnabled) logger.debug("Cache put: " + key)
+    cache.putAsync(key.toString, value)
+  }
+
+  def putSecond(key: Any, value: Any, seconds: Int) {
+    if (logger.isDebugEnabled) logger.debug("Cache put (" + seconds + "s): " + key)
+    cache.put(key.toString, value, seconds, TimeUnit.SECONDS)
+  }
+
+
 }

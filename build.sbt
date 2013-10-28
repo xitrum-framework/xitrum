@@ -9,9 +9,9 @@ scalaVersion := "2.10.3"
 scalacOptions ++= Seq("-deprecation", "-feature", "-unchecked")
 
 // http://www.scala-sbt.org/release/docs/Detailed-Topics/Java-Sources
-// Avoid problem when Xitrum is built with Java 7 but the projects that use Xitrum
+// Avoid problem when this lib is built with Java 7 but the projects that use it
 // are run with Java 6
-// java.lang.UnsupportedClassVersionError: xitrum/annotation/First : Unsupported major.minor version 51.0
+// java.lang.UnsupportedClassVersionError: Unsupported major.minor version 51.0
 javacOptions ++= Seq("-source", "1.6", "-target", "1.6")
 
 // Put config directory in classpath for easier development (sbt console etc.)
@@ -49,14 +49,6 @@ libraryDependencies += "tv.cntt" %% "scaposer" % "1.3"
 
 // For compiling CoffeeScript to JavaScript
 libraryDependencies += "tv.cntt" % "rhinocoffeescript" % "1.6.3"
-
-// Hazelcast is used for distributed cache and SockJS --------------------------
-
-// Infinispan is good but much heavier
-libraryDependencies += "com.hazelcast" % "hazelcast" % "2.6.4"
-
-// Hazelcast can be configured as cluster member, lite member, or Java client
-libraryDependencies += "com.hazelcast" % "hazelcast-client" % "2.6.4"
 
 // By default, version 2.10.0 of the libs below is used!!! ---------------------
 
