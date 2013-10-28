@@ -246,7 +246,11 @@ object Config extends Log {
   def exitOnStartupError(msg: String, e: Throwable) {
     log.error(msg, e)
     log.error("Xitrum could not start because of the above error. Xitrum will now stop the current process.")
-    xitrum.cache.stop()
+
+    // If the cache is Hazelcast, once it's started, calling only
+    // System.exit(-1) does not stop the current process!
+    if (xitrum.cache != null) xitrum.cache.stop()
+
     System.exit(-1)
   }
 
