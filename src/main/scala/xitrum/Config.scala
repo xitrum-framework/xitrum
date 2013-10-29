@@ -2,11 +2,8 @@ package xitrum
 
 import java.io.File
 import java.nio.charset.Charset
+import java.util.{Map => JMap}
 import scala.util.control.NonFatal
-
-import com.hazelcast.client.HazelcastClient
-import com.hazelcast.client.config.XmlClientConfigBuilder
-import com.hazelcast.core.{Hazelcast, HazelcastInstance}
 
 import com.typesafe.config.{Config => TConfig, ConfigFactory}
 import akka.actor.ActorSystem
@@ -16,7 +13,49 @@ import xitrum.routing.{DiscoveredAcc, RouteCollection, RouteCollector, Serializa
 import xitrum.view.TemplateEngine
 import xitrum.util.Loader
 
-//----------------------------------------------------------------------------
+//------------------------------------------------------------------------------
+
+/**
+ * Dual config means the config can be in either one of the 2 forms:
+ *
+ * config {
+ *   key = a.b.c
+ * }
+ *
+ * Or:
+ *
+ * config {
+ *   key {
+ *     "a.b.c" {
+ *       option1 = value1
+ *       option2 = value2
+ *     }
+ *   }
+ * }
+ *
+ */
+object DualConfig {
+  /** @return "a.b.c" in the description above */
+  def getString(config: TConfig, key: String) = {
+    val k = config.root.get(key).unwrapped  // String or java.util.Map
+    if (k.isInstanceOf[String]) {
+      k.toString
+    } else {
+      val m = k.asInstanceOf[JMap[String, Any]]
+      val i = m.keySet.iterator
+      i.next()
+    }
+  }
+
+  /** Used when "a.b.c" is a class name. */
+  def getClassInstance[T](config: TConfig, key: String): T = {
+    val className = getString(config, key)
+    val klass     = Class.forName(className)
+    klass.newInstance().asInstanceOf[T]
+  }
+}
+
+//------------------------------------------------------------------------------
 
 class BasicAuthConfig(config: TConfig) {
   val realm    = config.getString("realm")
@@ -46,32 +85,35 @@ class ReverseProxyConfig(config: TConfig) {
 }
 
 class SessionConfig(config: TConfig) {
-  val store      = config.getString("store")
   val cookieName = config.getString("cookieName")
   val secureKey  = config.getString("secureKey")
+
+  lazy val store = DualConfig.getClassInstance[SessionStore](config, "store")
+}
+
+class StaticFileConfig(config: TConfig) {
+  val pathRegex = config.getString("pathRegex").r
+
+  val maxSizeInKBOfCachedFiles = config.getInt("maxSizeInKBOfCachedFiles")
+  val maxNumberOfCachedFiles   = config.getInt("maxNumberOfCachedFiles")
+
+  val revalidate = config.getBoolean("revalidate")
 }
 
 class RequestConfig(config: TConfig) {
-  val charsetName    = config.getString("charset")
-  val maxSizeInMB    = config.getInt("maxSizeInMB")
-  val filteredParams = config.getStringList("filteredParams")
-
-  // Starts and stops with "/", like "/static/", if any
-  val staticFileUrlPrefix = if (config.hasPath("staticFileUrlPrefix")) Some(config.getString("staticFileUrlPrefix")) else None
+  val charsetName          = config.getString("charset")
+  val maxInitialLineLength = config.getInt("maxInitialLineLength")
+  val maxSizeInMB          = config.getInt("maxSizeInMB")
+  val filteredParams       = config.getStringList("filteredParams")
 
   val charset = Charset.forName(charsetName)
 }
 
 class ResponseConfig(config: TConfig) {
   val autoGzip = config.getBoolean("autoGzip")
-
-  val maxSizeInKBOfCachedStaticFiles = config.getInt("maxSizeInKBOfCachedStaticFiles")
-  val maxNumberOfCachedStaticFiles   = config.getInt("maxNumberOfCachedStaticFiles")
-
-  val clientMustRevalidateStaticFiles = config.getBoolean("clientMustRevalidateStaticFiles")
 }
 
-class Config(val config: TConfig) extends Logger {
+class Config(val config: TConfig) extends Log {
   val basicAuth =
     if (config.hasPath("basicAuth"))
       Some(new BasicAuthConfig(config.getConfig("basicAuth")))
@@ -96,40 +138,78 @@ class Config(val config: TConfig) extends Logger {
 
   /**
    * lazy: templateEngine is initialized after xitrum.Config, so that inside
-   * the template engine class, xitrum.Config can be used
+   * the template engine class, xitrum.Config can be used.
+   *
+   * Template config in xitrum.conf can be in 2 forms:
+   *
+   * template = my.template.Engine
+   *
+   * Or if the template engine needs additional options:
+   *
+   * template {
+   *   "my.template.Engine" {
+   *     option1 = value1
+   *     option2 = value2
+   *   }
+   * }
    */
   lazy val templateEngine: TemplateEngine = {
-    if (config.hasPath("templateEngine")) {
-      val className = config.getString("templateEngine")
+    if (config.hasPath("template")) {
       try {
-        val klass = Class.forName(className)
-        klass.newInstance().asInstanceOf[TemplateEngine]
+        DualConfig.getClassInstance[TemplateEngine](config, "template")
       } catch {
         case NonFatal(e) =>
-          Config.exitOnError("Could not load template engine, please check config/xitrum.conf", e)
+          Config.exitOnStartupError("Could not load template engine, please check config/xitrum.conf", e)
           null
       }
     } else {
-      logger.info("No template engine is configured")
+      log.info("No template engine is configured")
       null
     }
   }
 
-  val hazelcastMode = config.getString("hazelcastMode")
+  /**
+   * lazy: cache is initialized after xitrum.Config, so that inside
+   * the cache class, xitrum.Config can be used.
+   *
+   * Cache config in xitrum.conf can be in 2 forms:
+   *
+   * cache = my.Cache
+   *
+   * Or if the cache needs additional options:
+   *
+   * cache {
+   *   "my.Cache" {
+   *     option1 = value1
+   *     option2 = value2
+   *   }
+   * }
+   */
+  lazy val cache: Cache = {
+    try {
+      DualConfig.getClassInstance[Cache](config, "cache")
+    } catch {
+      case NonFatal(e) =>
+        Config.exitOnStartupError("Could not load cache engine, please check config/xitrum.conf", e)
+        null
+    }
+  }
 
   val session = new SessionConfig(config.getConfig("session"))
 
-  val swaggerApiVersion = if (config.hasPath("swaggerApiVersion")) Some(config.getString("swaggerApiVersion")) else None
+  val staticFile = new StaticFileConfig(config.getConfig("staticFile"))
 
   val request = new RequestConfig(config.getConfig("request"))
 
   val response = new ResponseConfig(config.getConfig("response"))
+
+  val swaggerApiVersion = if (config.hasPath("swaggerApiVersion")) Some(config.getString("swaggerApiVersion")) else None
 }
 
-//----------------------------------------------------------------------------
+//------------------------------------------------------------------------------
 
 /** See config/xitrum.properties */
-object Config extends Logger {
+object Config extends Log {
   val ACTOR_SYSTEM_NAME = "xitrum"
 
   /**
@@ -140,9 +220,6 @@ object Config extends Logger {
    * Google recommends > 150B-1KB
    */
   val BIG_TEXTUAL_RESPONSE_SIZE_IN_KB = 1
-
-  private[this] val HAZELCAST_MODE_CLUSTER_MEMBER = "clusterMember"
-  private[this] val HAZELCAST_MODE_JAVA_CLIENT    = "javaClient"
 
   private[this] val DEFAULT_SECURE_KEY = "ajconghoaofuxahoi92chunghiaujivietnamlasdoclapjfltudoil98hanhphucup8"
 
@@ -160,7 +237,7 @@ object Config extends Logger {
       ConfigFactory.load()
     } catch {
       case NonFatal(e) =>
-        exitOnError("Could not load config/application.conf. For an example, see https://github.com/ngocdaothanh/xitrum-new/blob/master/config/application.conf", e)
+        exitOnStartupError("Could not load config/application.conf. For an example, see https://github.com/ngocdaothanh/xitrum-new/blob/master/config/application.conf", e)
         null
     }
   }
@@ -171,7 +248,7 @@ object Config extends Logger {
       new Config(application.getConfig("xitrum"))
     } catch {
       case NonFatal(e) =>
-        exitOnError("Could not load config/xitrum.conf. For an example, see https://github.com/ngocdaothanh/xitrum-new/blob/master/config/xitrum.conf", e)
+        exitOnStartupError("Could not load config/xitrum.conf. For an example, see https://github.com/ngocdaothanh/xitrum-new/blob/master/config/xitrum.conf", e)
         null
     }
   }
@@ -218,51 +295,22 @@ object Config extends Logger {
 
   //----------------------------------------------------------------------------
 
-  val sessionStore  = {
-    val className = xitrum.session.store
-    Class.forName(className).newInstance().asInstanceOf[SessionStore]
-  }
-
   /** akka.actor.ActorSystem("xitrum") */
   val actorSystem = ActorSystem(ACTOR_SYSTEM_NAME)
-
-  /**
-   * Use lazy to avoid starting Hazelcast if it is not used.
-   * Starting Hazelcast takes several seconds, sometimes we want to work in
-   * sbt console mode and don't like this overhead.
-   */
-  lazy val hazelcastInstance: HazelcastInstance = {
-    // http://hazelcast.com/docs/3.0/manual/multi_html/ch12s07.html
-    System.setProperty("hazelcast.logging.type", "slf4j")
-
-    if (xitrum.hazelcastMode == HAZELCAST_MODE_CLUSTER_MEMBER) {
-      val path = Config.root + File.separator + "config" + File.separator + "hazelcast_cluster_member.xml"
-      System.setProperty("hazelcast.config", path)
-
-      // null: load from "hazelcast.config" system property above
-      // http://hazelcast.com/docs/3.0/manual/multi_html/ch12.html
-      Hazelcast.newHazelcastInstance(null)
-    } else {
-      val clientConfig = new XmlClientConfigBuilder("hazelcast_java_client.xml").build()
-      HazelcastClient.newHazelcastClient(clientConfig)
-    }
-  }
 
   //----------------------------------------------------------------------------
 
   def warnOnDefaultSecureKey() {
     if (xitrum.session.secureKey == DEFAULT_SECURE_KEY)
-      logger.warn("*** For security, change secureKey in config/xitrum.conf to your own! ***")
+      log.warn("*** For security, change secureKey in config/xitrum.conf to your own! ***")
   }
 
-  /**
-   * Shutdowns Hazelcast and call System.exit(-1).
-   * Once Hazelcast is started, calling System.exit(-1) does not stop
-   * the current process!
-   */
-  def exitOnError(msg: String, e: Throwable) {
-    logger.error(msg, e)
-    Hazelcast.shutdownAll()
+  def exitOnStartupError(msg: String, e: Throwable) {
+    log.error(msg, e)
+    log.error("Xitrum could not start because of the above error. Xitrum will now stop the current process.")
+
+    // Note: If the cache is Hazelcast, once it's started, calling only
+    // System.exit(-1) does not stop the current process!
     System.exit(-1)
   }
 
@@ -281,17 +329,17 @@ object Config extends Logger {
 
   private def loadRouteCacheFileOrRecollectWithRetry(retried: Boolean = false): RouteCollection = {
     try {
-      logger.info("Load file " + ROUTES_CACHE + " or recollect routes...")
+      log.info("Load file " + ROUTES_CACHE + " or recollect routes...")
       val routeCollector = new RouteCollector
       val discoveredAcc = routeCollector.deserializeCacheFileOrRecollect(ROUTES_CACHE)
       RouteCollection.fromSerializable(discoveredAcc)
     } catch {
       case NonFatal(e) =>
         if (retried) {
-          Config.exitOnError("Could not collect routes", e)
+          Config.exitOnStartupError("Could not collect routes", e)
           throw e
         } else {
-          logger.info("Could not load " + ROUTES_CACHE + ", delete and retry...")
+          log.info("Could not load " + ROUTES_CACHE + ", delete and retry...")
           val file = new File(ROUTES_CACHE)
           file.delete()
           loadRouteCacheFileOrRecollectWithRetry(true)

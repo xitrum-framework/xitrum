@@ -119,6 +119,25 @@ object SockJsAction {
   }
 }
 
+trait ServerIdSessionIdValidator extends Action {
+  // Server ID and session ID can't contain dots
+  // (placeholder in URL can't be empty, no need to check)
+  beforeFilter {
+    if (pathParams.contains("serverId") || pathParams.contains("sessionId")) {
+      val noDots = pathParams("serverId")(0).indexOf('.') < 0 && pathParams("sessionId")(0).indexOf('.') < 0
+      if (noDots) {
+        true
+      } else {
+        response.setStatus(HttpResponseStatus.NOT_FOUND)
+        respondText("")
+        false
+      }
+    } else {
+      true
+    }
+  }
+}
+
 trait SockJsPrefix {
   protected var pathPrefix = ""
 
@@ -140,7 +159,7 @@ trait SockJsPrefix {
   protected def nLastTokensToRemoveFromPathInfo: Int
 }
 
-trait SockJsAction extends Action with SockJsPrefix {
+trait SockJsAction extends ServerIdSessionIdValidator with SockJsPrefix {
   // JSESSIONID cookie must be echoed back if sent by the client, or created
   // http://groups.google.com/group/sockjs/browse_thread/thread/71dfdff6e8f1e5f7
   // Can't use beforeFilter, see comment of pathPrefix at the top of this controller.
@@ -173,7 +192,7 @@ trait SockJsAction extends Action with SockJsPrefix {
   }
 
   protected def callbackParam(): Option[String] = {
-    val paramName = if (handlerEnv.uriParams.isDefinedAt("c")) "c" else "callback"
+    val paramName = if (handlerEnv.queryParams.isDefinedAt("c")) "c" else "callback"
     val ret = paramo(paramName)
     if (ret == None) {
       response.setStatus(HttpResponseStatus.INTERNAL_SERVER_ERROR)
@@ -351,7 +370,7 @@ class InfoOPTIONS extends SockJsAction {
   }
 }
 
-@OPTIONS(":serverId<[^\\.]+>/:sessionId<[^\\.]+>/xhr")
+@OPTIONS(":serverId/:sessionId/xhr")
 class XhrPollingOPTIONSReceive extends SockJsAction {
   def nLastTokensToRemoveFromPathInfo = 3
 
@@ -360,7 +379,7 @@ class XhrPollingOPTIONSReceive extends SockJsAction {
   }
 }
 
-@OPTIONS(":serverId<[^\\.]+>/:sessionId<[^\\.]+>/xhr_send")
+@OPTIONS(":serverId/:sessionId/xhr_send")
 class XhrPollingOPTIONSSend extends SockJsAction {
   def nLastTokensToRemoveFromPathInfo = 3
 
@@ -369,7 +388,7 @@ class XhrPollingOPTIONSSend extends SockJsAction {
   }
 }
 
-@POST(":serverId<[^\\.]+>/:sessionId<[^\\.]+>/xhr")
+@POST(":serverId/:sessionId/xhr")
 class XhrPollingReceive extends NonWebSocketSessionReceiverActionActor with SkipCsrfCheck {
   def nLastTokensToRemoveFromPathInfo = 3
 
@@ -433,7 +452,7 @@ class XhrPollingReceive extends NonWebSocketSessionReceiverActionActor with Skip
   }
 }
 
-@POST(":serverId<[^\\.]+>/:sessionId<[^\\.]+>/xhr_send")
+@POST(":serverId/:sessionId/xhr_send")
 class XhrSend extends NonWebSocketSessionActionActor with SkipCsrfCheck {
   def nLastTokensToRemoveFromPathInfo = 3
 
@@ -471,7 +490,7 @@ class XhrSend extends NonWebSocketSessionActionActor with SkipCsrfCheck {
   }
 }
 
-@OPTIONS(":serverId<[^\\.]+>/:sessionId<[^\\.]+>/xhr_streaming")
+@OPTIONS(":serverId/:sessionId/xhr_streaming")
 class XhrStreamingOPTIONSReceive extends SockJsAction {
   def nLastTokensToRemoveFromPathInfo = 3
 
@@ -480,7 +499,7 @@ class XhrStreamingOPTIONSReceive extends SockJsAction {
   }
 }
 
-@POST(":serverId<[^\\.]+>/:sessionId<[^\\.]+>/xhr_streaming")
+@POST(":serverId/:sessionId/xhr_streaming")
 class XhrStreamingReceive extends NonWebSocketSessionReceiverActionActor with SkipCsrfCheck {
   def nLastTokensToRemoveFromPathInfo = 3
 
@@ -551,7 +570,7 @@ class XhrStreamingReceive extends NonWebSocketSessionReceiverActionActor with Sk
   }
 }
 
-@GET(":serverId<[^\\.]+>/:sessionId<[^\\.]+>/htmlfile")
+@GET(":serverId/:sessionId/htmlfile")
 class HtmlFileReceive extends NonWebSocketSessionReceiverActionActor {
   def nLastTokensToRemoveFromPathInfo = 3
 
@@ -652,7 +671,7 @@ class HtmlFileReceive extends NonWebSocketSessionReceiverActionActor {
   }
 }
 
-@GET(":serverId<[^\\.]+>/:sessionId<[^\\.]+>/jsonp")
+@GET(":serverId/:sessionId/jsonp")
 class JsonPPollingReceive extends NonWebSocketSessionReceiverActionActor {
   def nLastTokensToRemoveFromPathInfo = 3
 
@@ -730,7 +749,7 @@ class JsonPPollingReceive extends NonWebSocketSessionReceiverActionActor {
   }
 }
 
-@POST(":serverId<[^\\.]+>/:sessionId<[^\\.]+>/jsonp_send")
+@POST(":serverId/:sessionId/jsonp_send")
 class JsonPPollingSend extends NonWebSocketSessionActionActor with SkipCsrfCheck {
   def nLastTokensToRemoveFromPathInfo = 3
 
@@ -782,7 +801,7 @@ class JsonPPollingSend extends NonWebSocketSessionActionActor with SkipCsrfCheck
   }
 }
 
-@GET(":serverId<[^\\.]+>/:sessionId<[^\\.]+>/eventsource")
+@GET(":serverId/:sessionId/eventsource")
 class EventSourceReceive extends NonWebSocketSessionReceiverActionActor {
   def nLastTokensToRemoveFromPathInfo = 3
 
@@ -850,7 +869,7 @@ class EventSourceReceive extends NonWebSocketSessionReceiverActionActor {
 
 // http://sockjs.github.com/sockjs-protocol/sockjs-protocol-0.3.3.html#section-52
 @Last
-@GET(":serverId<[^\\.]+>/:sessionId<[^\\.]+>/websocket")
+@GET(":serverId/:sessionId/websocket")
 class WebsocketGET extends SockJsAction {
   def nLastTokensToRemoveFromPathInfo = 3
 
@@ -863,7 +882,7 @@ class WebsocketGET extends SockJsAction {
 // http://sockjs.github.com/sockjs-protocol/sockjs-protocol-0.3.3.html#section-54
 // http://sockjs.github.com/sockjs-protocol/sockjs-protocol-0.3.3.html#section-6
 @Last
-@POST(":serverId<[^\\.]+>/:sessionId<[^\\.]+>/websocket")
+@POST(":serverId/:sessionId/websocket")
 class WebsocketPOST extends SockJsAction with SkipCsrfCheck {
   def nLastTokensToRemoveFromPathInfo = 3
 
@@ -874,8 +893,8 @@ class WebsocketPOST extends SockJsAction with SkipCsrfCheck {
   }
 }
 
-@WEBSOCKET(":serverId<[^\\.]+>/:sessionId<[^\\.]+>/websocket")
-class Websocket extends WebSocketActor with SockJsPrefix {
+@WEBSOCKET(":serverId/:sessionId/websocket")
+class Websocket extends WebSocketActor with ServerIdSessionIdValidator with SockJsPrefix {
   def nLastTokensToRemoveFromPathInfo = 3
 
   private[this] var sockJsActorRef: ActorRef = _
@@ -938,7 +957,7 @@ class Websocket extends WebSocketActor with SockJsPrefix {
 }
 
 @WEBSOCKET("websocket")
-class RawWebsocket extends WebSocketActor with SockJsPrefix {
+class RawWebsocket extends WebSocketActor with ServerIdSessionIdValidator with SockJsPrefix {
   def nLastTokensToRemoveFromPathInfo = 1
 
   private[this] var sockJsActorRef: ActorRef = _

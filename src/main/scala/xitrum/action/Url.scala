@@ -6,7 +6,7 @@ import xitrum.{Config, Action, SockJsActor, WebSocketActor}
 import xitrum.etag.Etag
 import xitrum.handler.up.PublicFileServer
 
-trait UrlFor {
+trait Url {
   this: Action =>
 
   lazy val absUrlPrefixWithoutScheme = {
@@ -38,11 +38,7 @@ trait UrlFor {
       case Etag.Small(bytes, etag, mimeo, gzipped) => etag
     }
 
-    // staticFileUrlPrefix: Starts and stops with "/", like "/static/", if any
-    val url = Config.xitrum.request.staticFileUrlPrefix match {
-      case None         => "/"    + path
-      case Some(prefix) => prefix + path
-    }
+    val url = "/" + path
     Config.withBaseUrl(url + "?" + forceReload)
   }
 
@@ -58,7 +54,7 @@ trait UrlFor {
 
   //----------------------------------------------------------------------------
 
-  def url(params: (String, Any)*) = Config.routesReverseMappings(getClass).url(params:_*)
+  def url(params: (String, Any)*) = Config.routesReverseMappings(getClass).url(params.toMap)
   lazy val url: String = url()
 
   def absUrl(params: (String, Any)*) = absUrlPrefix + url(params:_*)
@@ -71,7 +67,7 @@ trait UrlFor {
 
   def url[T <: Action : Manifest](params: (String, Any)*) = {
     val klass = manifest[T].runtimeClass.asInstanceOf[Class[Action]]
-    Config.routesReverseMappings(klass).url(params:_*)
+    Config.routesReverseMappings(klass).url(params.toMap)
   }
   def url[T <: Action : Manifest]: String = url[T]()
 
@@ -82,7 +78,7 @@ trait UrlFor {
 
   def webSocketAbsUrl[T <: WebSocketActor : Manifest](params: (String, Any)*) = {
     val klass = manifest[T].runtimeClass.asInstanceOf[Class[Action]]
-    webSocketAbsUrlPrefix + Config.routesReverseMappings(klass).url(params:_*)
+    webSocketAbsUrlPrefix + Config.routesReverseMappings(klass).url(params.toMap)
   }
   def webSocketAbsUrl[T <: WebSocketActor : Manifest]: String = webSocketAbsUrl[T]()
 

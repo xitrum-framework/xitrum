@@ -1,5 +1,6 @@
 package xitrum.routing
 
+import scala.annotation.tailrec
 import scala.collection.mutable.{Map => MMap}
 import org.jboss.netty.handler.codec.http.{HttpMethod, QueryStringEncoder}
 
@@ -12,39 +13,33 @@ class Route(
   val httpMethod: HttpMethod, val compiledPattern: Seq[RouteToken],
 
   // Out
-  val klass: Class[_], val cacheSecs: Int
+  val klass: Class[_ <: Action], val cacheSecs: Int
 )
 {
-  def url(params: (String, Any)*) = {
-    var map = params.toMap
-    val tokens = compiledPattern.map { rt =>
-      if (rt.isPlaceHolder) {
-        val key = rt.value
-        if (!map.isDefinedAt(key))
-          throw new Exception("Cannot compute reverse URL because there's no required key \"" + key + "\"")
+  def numPlaceholders = compiledPattern.foldLeft(0) { (sum, rt) => sum + rt.numPlaceholders }
 
-        val ret = map(key)
-        map = map - key
-        ret
-      } else {
-        rt.value
-      }
+  def url(params: Map[String, Any]): Either[String, String] = {
+    ReverseRoute.collectReverseTokens(Seq[String](), compiledPattern, params) match {
+      case Left(e) => Left(e)
+
+      case Right((tokens, remainingParams)) =>
+        val url = Config.withBaseUrl("/" + tokens.mkString("/"))
+
+        // The remaining are put to query part on the URL
+        val qse = new QueryStringEncoder(url, Config.xitrum.request.charset)
+        for ((k, v) <- remainingParams) qse.addParam(k, v.toString)
+        Right(qse.toString)
     }
-    val url = Config.withBaseUrl("/" + tokens.mkString("/"))
-
-    val qse = new QueryStringEncoder(url, Config.xitrum.request.charset)
-    for ((k, v) <- map) qse.addParam(k, v.toString)
-    qse.toString
   }
 
   /** @return None if not matched */
   def matchRoute(pathTokens: Array[String]): Option[Params] = {
-    val max1 = pathTokens.size
-    val max2 = compiledPattern.size
+    val max1 = pathTokens.length
+    val max2 = compiledPattern.length
 
     // Check the number of tokens
     // max2 must be <= max1
-    // If max2 < max1, the last token must be "*" and non-fixed
+    // If max2 < max1, the last token must be placeholder "*"
 
     if (max2 > max1) return None
 
@@ -52,7 +47,8 @@ class Route(
       if (max2 == 0) return None
 
       val lastToken = compiledPattern.last
-      if (!lastToken.isPlaceHolder) return None
+      if (lastToken.isInstanceOf[DotRouteToken] ||
+          !lastToken.asInstanceOf[NonDotRouteToken].isPlaceholder) return None
     }
 
     // Special case
@@ -63,56 +59,26 @@ class Route(
     }
 
     // 0 < max2 <= max1
-
-    val pathParams = MMap[String, Seq[String]]()
-    var i = 0   // i will go from 0 until max1
-
     // pathParams is updated along the way
-    val matched = compiledPattern.forall { rt =>
-      val ret = if (rt.isPlaceHolder) {
-        if (i == max2 - 1) {  // The last token
-          if (rt.value == "*") {
-            val value = pathTokens.slice(i, max1).mkString("/")
-            matchRegex(pathParams, rt, value)
-          } else {
-            if (max2 < max1) {
-              false
-            } else { // max2 = max1
-              matchRegex(pathParams, rt, pathTokens(i))
-            }
-          }
-        } else {
-          if (rt.value == "*") {
-            false
-          } else {
-            matchRegex(pathParams, rt, pathTokens(i))
-          }
-        }
-      } else {
-        (rt.value == pathTokens(i))
-      }
-
-      i += 1
-      ret
-    }
-
+    val pathParams = MMap[String, Seq[String]]()
+    val matched    = matchTokens(pathParams, pathTokens, compiledPattern)
     if (matched) Some(pathParams) else None
   }
 
-  /** pathParams is updated */
-  private def matchRegex(pathParams: Params, rt: RouteToken, value: String): Boolean = {
-    rt.regex match {
-      case None =>
-        pathParams(rt.value) = Seq(value)
-        true
+  /** 0 < routeTokens.length <= pathTokens.length */
+  @tailrec
+  private def matchTokens(pathParams: Params, pathTokens: Seq[String], routeTokens: Seq[RouteToken]): Boolean = {
+    val routeTokensLength = routeTokens.length
+    val last              = routeTokensLength == 1
+    val matched           = routeTokens.head.matchToken(pathParams, pathTokens, last)
 
-      case Some(r) =>
-        r.findFirstIn(value) match {
-          case None => false
-          case _ =>
-            pathParams(rt.value) = Seq(value)
-            true
-        }
+    if (last) {
+      matched
+    } else {
+      if (matched)
+        matchTokens(pathParams, pathTokens.tail, routeTokens.tail)
+      else
+        false
     }
   }
 }

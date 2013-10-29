@@ -21,7 +21,7 @@ class HandlerEnv extends MHashMap[String, Any] {
 
   // Set by UriParser
   var pathInfo:         PathInfo         = null
-  var uriParams:        Params           = null
+  var queryParams:      Params           = null
 
   // Set by BodyParser
   var bodyParams:       Params           = null
@@ -32,8 +32,8 @@ class HandlerEnv extends MHashMap[String, Any] {
   var pathParams:       Params           = null  // The above params are real from the request, this one is logical from the request URL
 
   /**
-   * A merge of all text params (uriParams, bodyParams, pathParams), as contrast
-   * to file upload (fileParams).
+   * The merge of all text params (queryParams, bodyParams, and pathParams),
+   * as contrast to file upload (fileParams).
    *
    * A val not a def, for speed, so that the calculation is done only once.
    *
@@ -47,8 +47,19 @@ class HandlerEnv extends MHashMap[String, Any] {
     val ret = MMap[String, Seq[String]]()
 
     // The order is important because we want the later to overwrite the former
-    ret ++= uriParams
+    ret ++= queryParams
     ret ++= bodyParams
+    ret ++= pathParams
+
+    ret
+  }
+
+  /** The merge of queryParams and pathParams, things that appear in the request URL. */
+  lazy val urlParams: Params = {
+    val ret = MMap[String, Seq[String]]()
+
+    // The order is important because we want the later to overwrite the former
+    ret ++= queryParams
     ret ++= pathParams
 
     ret

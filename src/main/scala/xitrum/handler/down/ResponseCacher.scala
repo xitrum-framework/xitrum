@@ -1,6 +1,7 @@
 package xitrum.handler.down
 
-import scala.collection.immutable.{SortedMap, TreeMap}
+import scala.collection.immutable.SortedMap
+import scala.collection.mutable.{Map => MMap}
 
 import org.jboss.netty.channel.{ChannelHandler, SimpleChannelDownstreamHandler, ChannelHandlerContext, MessageEvent, Channels}
 import org.jboss.netty.buffer.ChannelBuffers
@@ -9,30 +10,54 @@ import org.jboss.netty.handler.codec.http.{DefaultHttpResponse, HttpHeaders, Htt
 import HttpResponseStatus.OK
 import HttpHeaders.Names.{CONTENT_ENCODING, CONTENT_TYPE}
 
-import xitrum.{Cache, Config, Logger}
+import xitrum.{Cache, Config, Log}
 import xitrum.Action
-import xitrum.scope.request.RequestEnv
+import xitrum.scope.request.Params
 import xitrum.handler.HandlerEnv
 import xitrum.util.{Gzip, Mime}
 
-object ResponseCacher extends Logger {
+object ResponseCacher extends Log {
   //                             statusCode  headers           content
   private type CachedResponse = (Int, Array[(String, String)], Array[Byte])
 
   def cacheResponse(env: HandlerEnv) {
-    val cacheSecs = env.route.cacheSecs
-    val key       = makeCacheKey(env)
-    if (!Cache.cache.containsKey(key)) { // Check to avoid the cost of serializing
+    val actionClass = env.route.klass
+    val urlParams   = env.urlParams
+    val gzipped     = Gzip.isAccepted(env.request)
+    val key         = makeCacheKey(actionClass, urlParams, gzipped)
+    val cache       = Config.xitrum.cache
+    if (!cache.isDefinedAt(key)) {  // Check to avoid the cost of serializing
       val response          = env.response
       val cachedResponse    = serializeResponse(env.request, response)
+      val cacheSecs         = env.route.cacheSecs
       val positiveCacheSecs = if (cacheSecs < 0) -cacheSecs else cacheSecs
-      Cache.putIfAbsentSecond(key, cachedResponse, positiveCacheSecs)
+      cache.putSecondIfAbsent(key, cachedResponse, positiveCacheSecs)
     }
   }
 
   def getCachedResponse(env: HandlerEnv): Option[HttpResponse] = {
-    val key = makeCacheKey(env)
-    Cache.getAs[CachedResponse](key).map(deserializeToResponse)
+    val actionClass = env.route.klass
+    val urlParams   = env.urlParams
+    val gzipped     = Gzip.isAccepted(env.request)
+    val key         = makeCacheKey(actionClass, urlParams, gzipped)
+    val cache       = Config.xitrum.cache
+    cache.getAs[CachedResponse](key).map(deserializeToResponse)
+  }
+
+  def removeCachedResponse(actionClass: Class[Action], urlParams: Params) {
+    val cache = Config.xitrum.cache
+
+    val keyTrue = makeCacheKey(actionClass, urlParams, true)
+    cache.remove(keyTrue)
+
+    val keyFalse = makeCacheKey(actionClass, urlParams, false)
+    cache.remove(keyFalse)
+  }
+
+  def removeCachedResponse(actionClass: Class[Action], urlParams: (String, Any)*) {
+    val params = MMap[String, Seq[String]]()
+    urlParams.foreach { case (k, v) => params += (k -> Seq(v.toString)) }
+    removeCachedResponse(actionClass, params)
   }
 
   //----------------------------------------------------------------------------
@@ -53,7 +78,7 @@ object ResponseCacher extends Logger {
     val bytes = Gzip.tryCompressBigTextualResponse(request, response)
 
     val headers = {
-      val list = response.getHeaders // JList[JMap.Entry[String, String]], JMap.Entry is not Serializable!
+      val list = response.getHeaders  // JList[JMap.Entry[String, String]], JMap.Entry is not Serializable!
       val size = list.size
       val ret = new Array[(String, String)](size)
       for (i <- 0 until size) {
@@ -74,55 +99,25 @@ object ResponseCacher extends Logger {
     response
   }
 
-  // uploadParams is not included in the key, only textParams is
-  private def makeCacheKey(env: HandlerEnv): String = {
+  /**
+   * Only route action class, urlParams, and gzipped is included in the key,
+   * because responses of requests other than GET requests should be cached.
+   */
+  private def makeCacheKey(actionClass: Class[_], urlParams: Params, gzipped: Boolean): String = {
     // See xitrum.scope.request.Params in xitrum/scope/request/package.scala
-    val sortedMap = (new TreeMap[String, Seq[String]]) ++ env.textParams
+    // Need to sort by keys so that the output is consistent
+    val sortedMap = SortedMap[String, Seq[String]]() ++ urlParams
 
-    val request = env.request
     val key =
-      Cache.pageActionPrefix(env.route.klass.asInstanceOf[Class[Action]]) + "/" +
-      request.getMethod + "/" +
-      inspectSortedParams(sortedMap)
-    if (Gzip.isAccepted(request)) key + "_gzipped" else key
-  }
-
-  // See RequestEnv.inspectParamsWithFilter
-  private def inspectSortedParams(params: SortedMap[String, Seq[String]]) = {
-    val sb = new StringBuilder
-    sb.append("{")
-
-    val keys = params.keys.toArray
-    val size = keys.size
-    for (i <- 0 until size) {
-      val key = keys(i)
-      val values = params(key)
-
-      sb.append(key)
-      sb.append(": ")
-
-      if (values.length == 0) {
-        sb.append("[EMPTY]")
-      } else if (values.length == 1) {
-        sb.append(values(0))
-      } else {
-        sb.append("[")
-        sb.append(values.mkString(", "))
-        sb.append("]")
-      }
-
-      if (i < size - 1) sb.append(", ")
-    }
-
-    sb.append("}")
-    sb.toString
+      "xitrum/page-action/" +
+      actionClass.getName + "/" +
+      sortedMap.toString
+    if (gzipped) key + "_gzipped" else key
   }
 }
 
 @Sharable
-class ResponseCacher extends SimpleChannelDownstreamHandler with Logger {
-  import ResponseCacher._
-
+class ResponseCacher extends SimpleChannelDownstreamHandler with Log {
   override def writeRequested(ctx: ChannelHandlerContext, e: MessageEvent) {
     val m = e.getMessage
     if (!m.isInstanceOf[HandlerEnv]) {
@@ -141,7 +136,8 @@ class ResponseCacher extends SimpleChannelDownstreamHandler with Logger {
     }
 
     val response = env.response
-    if (response.getStatus == OK && !response.isChunked && env.route.cacheSecs != 0) cacheResponse(env)
+    if (response.getStatus == OK && !response.isChunked && env.route.cacheSecs != 0)
+      ResponseCacher.cacheResponse(env)
 
     ctx.sendDownstream(e)
   }

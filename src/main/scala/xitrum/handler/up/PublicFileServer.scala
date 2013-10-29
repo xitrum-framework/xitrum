@@ -35,15 +35,12 @@ class PublicFileServer extends SimpleChannelUpstreamHandler with BadClientSilenc
     }
 
     val pathInfo = request.getUri.split('?')(0)
-    val prefixo  = Config.xitrum.request.staticFileUrlPrefix
-    prefixo.foreach { prefix =>
-      if (!pathInfo.startsWith(prefix)) {
-        ctx.sendUpstream(e)
-        return
-      }
+    if (Config.xitrum.staticFile.pathRegex.findFirstIn(pathInfo).isEmpty) {
+      ctx.sendUpstream(e)
+      return
     }
 
-    sanitizedAbsStaticPath(pathInfo, prefixo) match {
+    sanitizedAbsStaticPath(pathInfo) match {
       case None =>
         val response = new DefaultHttpResponse(HTTP_1_1, OK)
         XSendFile.set404Page(response, false)
@@ -54,7 +51,7 @@ class PublicFileServer extends SimpleChannelUpstreamHandler with BadClientSilenc
         if (file.isFile && file.exists) {
           val response = new DefaultHttpResponse(HTTP_1_1, OK)
 
-          if (!Config.xitrum.response.clientMustRevalidateStaticFiles)
+          if (!Config.xitrum.staticFile.revalidate)
             NotModified.setClientCacheAggressively(response)
 
           XSendFile.setHeader(response, abs, false)
@@ -71,16 +68,9 @@ class PublicFileServer extends SimpleChannelUpstreamHandler with BadClientSilenc
    * @param pathInfo Starts with "/"
    * @param prefixo  Starts and stops with "/", like "/static/", if any
    */
-  private def sanitizedAbsStaticPath(pathInfo: String, prefixo: Option[String]): Option[String] = {
+  private def sanitizedAbsStaticPath(pathInfo: String): Option[String] = {
     PathSanitizer.sanitize(pathInfo).map { path =>
-      prefixo match {
-        case None =>
-          Config.root + "/public" + path
-
-        case Some(prefix) =>
-          val withoutPrefix = path.substring(prefix.length)
-          Config.root + "/public/" + withoutPrefix
-      }
+      Config.root + "/public" + path
     }
   }
 }

@@ -7,7 +7,6 @@ import org.jboss.netty.channel.ChannelFuture
 
 import xitrum.{Config, Action}
 import xitrum.etag.{Etag, NotModified}
-import xitrum.routing.{JsRoutesCache, JsRoutesAction}
 
 // http://stackoverflow.com/questions/2703861/chromes-loading-indicator-keeps-spinning-during-xmlhttprequest
 // http://stackoverflow.com/questions/1735560/stop-the-browser-throbber-of-doom-while-loading-comet-server-push-xmlhttpreques
@@ -59,7 +58,6 @@ trait Js {
 
   lazy val jsDefaults = {
     val validatei18n = if (getLanguage == "en") "" else <script type="text/javascript" src={resourceUrl("xitrum/jquery.validate-1.11.1/localization/messages_"+ getLanguage +".js")}></script>
-    val jsRoutesAction = <script type="text/javascript" src={url[JsRoutesAction] + "?" + JsRoutesCache.etag}></script>
 
     if (Config.productionMode)
       <xml:group>
@@ -71,7 +69,6 @@ trait Js {
         <script type="text/javascript" src={resourceUrl("xitrum/knockout/knockout.mapping-2.4.1.min.js")}></script>
         <script type="text/javascript" src={resourceUrl("xitrum/sockjs-0.3.4.min.js")}></script>
         <script type="text/javascript" src={resourceUrl("xitrum/xitrum.js")}></script>
-        {jsRoutesAction}
       </xml:group>
     else
       <xml:group>
@@ -83,7 +80,6 @@ trait Js {
         <script type="text/javascript" src={resourceUrl("xitrum/knockout/knockout.mapping-2.4.1.js")}></script>
         <script type="text/javascript" src={resourceUrl("xitrum/sockjs-0.3.4.js")}></script>
         <script type="text/javascript" src={resourceUrl("xitrum/xitrum.js")}></script>
-        {jsRoutesAction}
       </xml:group>
   }
 

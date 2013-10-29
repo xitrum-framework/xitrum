@@ -19,4 +19,6 @@ class PathInfo(val encoded: String) {
   }
 
   val decoded = "/" + tokens.mkString("/")
+
+  val decodedWithIndexHtml = decoded + "/index.html"
 }

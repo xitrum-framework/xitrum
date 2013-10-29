@@ -1,7 +1,7 @@
 package xitrum.handler.up
 
 import org.jboss.netty.channel.{ChannelHandlerContext, ExceptionEvent, SimpleChannelUpstreamHandler}
-import xitrum.Logger
+import xitrum.Log
 
 /**
  * Bad client = closed connection, malformed request etc.
@@ -13,7 +13,7 @@ import xitrum.Logger
  * javax.net.ssl.SSLException: not an SSL/TLS record (Use http://... URL to connect to HTTPS server)
  * java.lang.IllegalArgumentException: empty text (Use https://... URL to connect to HTTP server)
  */
-trait BadClientSilencer extends Logger {
+trait BadClientSilencer extends Log {
   this: SimpleChannelUpstreamHandler =>
 
   override def exceptionCaught(ctx: ChannelHandlerContext, e: ExceptionEvent) {
@@ -26,6 +26,6 @@ trait BadClientSilencer extends Logger {
         !s.startsWith("java.io.IOException") &&
         !s.startsWith("javax.net.ssl.SSLException") &&
         !s.startsWith("java.lang.IllegalArgumentException"))
-      logger.debug(getClass.getName + " -> BadClientSilencer", throwable)
+      log.debug(getClass.getName + " -> BadClientSilencer", throwable)
   }
 }

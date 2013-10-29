@@ -12,7 +12,7 @@ import xitrum.handler.{
 }
 import xitrum.sockjs.SockJsAction
 
-object Server extends Logger {
+object Server extends Log {
   /**
    * Starts with default ChannelPipelineFactory provided by Xitrum.
    */
@@ -34,10 +34,9 @@ object Server extends Logger {
     // http://stackoverflow.com/questions/16202501/how-can-i-override-a-typesafe-config-list-value-on-the-command-line
     System.setProperty("akka.loggers.0", "akka.event.slf4j.Slf4jLogger")
 
-    // Because Hazelcast takes serveral seconds to start, we force it to
-    // start before the web server begins receiving requests, instead of
-    // letting it start lazily
-    Cache.cache.size()
+    Config.xitrum.templateEngine.start()
+    Config.xitrum.cache.start()
+    Config.xitrum.session.store.start()
 
     // Trick to start actorRegistry on startup
     SockJsAction.entropy()
@@ -46,9 +45,10 @@ object Server extends Logger {
     Config.xitrum.templateEngine
 
     val routes = Config.routes
-    routes.printRoutes()
-    routes.sockJsRouteMap.print()
-    routes.printErrorRoutes()
+    routes.logRoutes(false)
+    routes.sockJsRouteMap.logRoutes()
+    routes.logErrorRoutes()
+    routes.logRoutes(true)
 
     // Lastly, start the server(s) after necessary things have been prepared
     val portConfig = Config.xitrum.port
@@ -57,7 +57,7 @@ object Server extends Logger {
     if (portConfig.flashSocketPolicy.isDefined) FlashSocketPolicyServer.start()
 
     val mode = if (Config.productionMode) "production" else "development"
-    logger.info("Xitrum started in {} mode", mode)
+    log.info("Xitrum started in {} mode", mode)
 
     // This is a good timing to warn
     Config.warnOnDefaultSecureKey()
@@ -77,6 +77,13 @@ object Server extends Logger {
     bootstrap.setPipelineFactory(channelPipelineFactory)
     NetOption.setOptions(bootstrap)
     NetOption.bind(service, bootstrap, port)
-    logger.info("{} server started on port {}", service, port)
+
+    Config.xitrum.interface match {
+      case None =>
+        log.info(s"${service} server started on port ${port}")
+
+      case Some(hostnameOrIp) =>
+        log.info(s"${service} server started on ${hostnameOrIp}:${port}")
+    }
   }
 }

@@ -4,20 +4,20 @@ import java.net.SocketAddress
 import scala.collection.mutable.{Map => MMap}
 import org.jboss.netty.handler.codec.http.{HttpRequest, HttpResponse}
 
-import xitrum.{Action, Logger}
+import xitrum.{Action, Log}
 import xitrum.scope.request.RequestEnv
 import xitrum.action.Net
 
-object AccessLog extends Logger {
+object AccessLog extends Log {
   def logFlashSocketPolicyFileAccess(remoteAddress: SocketAddress) {
-    if (logger.isDebugEnabled) {
-      logger.debug(Net.clientIp(remoteAddress) + " (flash socket policy file)")
+    if (log.isDebugEnabled) {
+      log.debug(Net.clientIp(remoteAddress) + " (flash socket policy file)")
     }
   }
 
   def logStaticFileAccess(remoteAddress: SocketAddress, request: HttpRequest, response: HttpResponse) {
-    if (logger.isDebugEnabled) {
-      logger.debug(
+    if (log.isDebugEnabled) {
+      log.debug(
         Net.remoteIp(remoteAddress, request) + " " +
         request.getMethod + " " +
         request.getUri + " -> " +
@@ -28,27 +28,27 @@ object AccessLog extends Logger {
   }
 
   def logResourceInJarAccess(remoteAddress: SocketAddress, request: HttpRequest, response: HttpResponse) {
-    if (logger.isDebugEnabled) {
-      logger.debug(
+    if (log.isDebugEnabled) {
+      log.debug(
         Net.remoteIp(remoteAddress, request) + " " +
         request.getMethod + " " +
         request.getUri + " -> " +
         response.getStatus.getCode +
-        " (resource in JAR)"
+        " (JAR resource)"
       )
     }
   }
 
   def logActionAccess(action: Action, beginTimestamp: Long, cacheSecs: Int, hit: Boolean, e: Throwable = null) {
     if (e == null) {
-      if (logger.isDebugEnabled) logger.debug(msgWithTime(action.getClass.getName, action, beginTimestamp) + extraInfo(action, cacheSecs, hit))
+      if (log.isDebugEnabled) log.debug(msgWithTime(action.getClass.getName, action, beginTimestamp) + extraInfo(action, cacheSecs, hit))
     } else {
-      logger.error("Dispatch error " + msgWithTime(action.getClass.getName, action, beginTimestamp) + extraInfo(action, cacheSecs, hit), e)
+      log.error("Dispatch error " + msgWithTime(action.getClass.getName, action, beginTimestamp) + extraInfo(action, cacheSecs, hit), e)
     }
   }
 
   def logWebSocketAccess(className: String, action: Action, beginTimestamp: Long) {
-    if (logger.isDebugEnabled) logger.debug(msgWithTime(className, action, beginTimestamp) + extraInfo(action, 0, false))
+    if (log.isDebugEnabled) log.debug(msgWithTime(className, action, beginTimestamp) + extraInfo(action, 0, false))
   }
 
   //----------------------------------------------------------------------------
@@ -62,7 +62,7 @@ object AccessLog extends Logger {
     action.request.getMethod + " " +
     action.request.getUri + " -> " +
     className +
-    (if (env.uriParams.nonEmpty)        ", uriParams: "        + RequestEnv.inspectParamsWithFilter(env.uriParams)        else "") +
+    (if (env.queryParams.nonEmpty)      ", queryParams: "      + RequestEnv.inspectParamsWithFilter(env.queryParams)      else "") +
     (if (env.bodyParams.nonEmpty)       ", bodyParams: "       + RequestEnv.inspectParamsWithFilter(env.bodyParams)       else "") +
     (if (env.pathParams.nonEmpty)       ", pathParams: "       + RequestEnv.inspectParamsWithFilter(env.pathParams)       else "") +
     (if (env.fileUploadParams.nonEmpty) ", fileUploadParams: " + RequestEnv.inspectParamsWithFilter(env.fileUploadParams) else "") +

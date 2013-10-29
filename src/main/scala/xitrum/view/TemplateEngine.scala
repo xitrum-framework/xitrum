@@ -8,6 +8,9 @@ import xitrum.Action
  * for every rendering request. Thus it should be thread-safe.
  */
 trait TemplateEngine {
+  def start()
+  def stop()
+
   /**
    * Renders the template at the location identified by the given action class.
    *

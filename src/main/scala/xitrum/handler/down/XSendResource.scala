@@ -13,13 +13,13 @@ import HttpMethod._
 import HttpResponseStatus._
 import HttpVersion._
 
-import xitrum.{Config, Logger}
+import xitrum.{Config, Log}
 import xitrum.etag.{Etag, NotModified}
 import xitrum.handler.AccessLog
 import xitrum.handler.up.{NoPipelining, RequestAttacher}
 import xitrum.util.{Gzip, Mime}
 
-object XSendResource extends Logger {
+object XSendResource extends Log {
   // setClientCacheAggressively should be called at PublicResourceServer, not
   // here because XSendResource may be used by applications which does not want
   // to clients to cache.
