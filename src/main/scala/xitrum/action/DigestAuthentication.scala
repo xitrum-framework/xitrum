@@ -230,7 +230,7 @@ trait DigestAuthentication {
   // WARNING : If Hazelcast not work , DON'T USE THIS IMPLEMENTATION  
   private def generateNonce: String = {
     val uuid = java.util.UUID.randomUUID.toString
-    Cache.putIfAbsentSecond(uuid, uuid, seconds_time_out)
+    Cache.putSecondIfAbsent(uuid, uuid, seconds_time_out)
     uuid
   }
 
