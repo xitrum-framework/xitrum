@@ -1,11 +1,12 @@
 2.11 (planned):
 * #218 Make Hazelcast optional
 * #221 xitrum.conf: Improve config of template engine, cache, and session store
-* #216 Remove package xitrum.mq
 * #159 Support dot in route
 * #206 Support index.html fallback
 * #204 Log Xitrum additional routes separately from app routes
+* #223 Rename logger to log
 * #195 Rename xitrumCSS to xitrumCss
+* #216 Remove package xitrum.mq
 * #211 Remove xitrum/routes.js
 * #220 Optimize xitrum.util.Loader.bytesFromInputStream
 * #196 Swagger: Rename Optional<ValueType><ParamType> to Opt<ValueType><ParamType>, ex: OptStringQuery
