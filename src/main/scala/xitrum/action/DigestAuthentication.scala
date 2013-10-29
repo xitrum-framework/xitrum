@@ -1,7 +1,6 @@
 package xitrum.action
 
-import xitrum.Action
-import xitrum.Cache
+import xitrum.{Action, Config}
 import org.jboss.netty.handler.codec.http.HttpHeaders
 import org.jboss.netty.handler.codec.http.HttpResponseStatus
 import java.security.MessageDigest
@@ -230,12 +229,12 @@ trait DigestAuthentication {
   // WARNING : If Hazelcast not work , DON'T USE THIS IMPLEMENTATION  
   private def generateNonce: String = {
     val uuid = java.util.UUID.randomUUID.toString
-    Cache.putSecondIfAbsent(uuid, uuid, seconds_time_out)
+    Config.xitrum.cache.putSecondIfAbsent(uuid, uuid, seconds_time_out)
     uuid
   }
 
   private def validateNonce(nonce_from_client: String): Boolean = {
-    Cache.getAs[String](nonce_from_client) match {
+    Config.xitrum.cache.getAs[String](nonce_from_client) match {
       case None => false
       case Some(a) => true
     }
