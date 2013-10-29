@@ -12,7 +12,7 @@ import xitrum.handler.{
 }
 import xitrum.sockjs.SockJsAction
 
-object Server extends Logger {
+object Server extends Log {
   /**
    * Starts with default ChannelPipelineFactory provided by Xitrum.
    */
@@ -34,10 +34,9 @@ object Server extends Logger {
     // http://stackoverflow.com/questions/16202501/how-can-i-override-a-typesafe-config-list-value-on-the-command-line
     System.setProperty("akka.loggers.0", "akka.event.slf4j.Slf4jLogger")
 
-    // Because Hazelcast takes serveral seconds to start, we force it to
-    // start before the web server begins receiving requests, instead of
-    // letting it start lazily
-    Cache.cache.size()
+    Config.xitrum.templateEngine.start()
+    Config.xitrum.cache.start()
+    Config.xitrum.session.store.start()
 
     // Trick to start actorRegistry on startup
     SockJsAction.entropy()
@@ -47,7 +46,7 @@ object Server extends Logger {
 
     val routes = Config.routes
     routes.logRoutes(false)
-    routes.sockJsRouteMap.log()
+    routes.sockJsRouteMap.logRoutes()
     routes.logErrorRoutes()
     routes.logRoutes(true)
 
@@ -58,7 +57,7 @@ object Server extends Logger {
     if (portConfig.flashSocketPolicy.isDefined) FlashSocketPolicyServer.start()
 
     val mode = if (Config.productionMode) "production" else "development"
-    logger.info("Xitrum started in {} mode", mode)
+    log.info("Xitrum started in {} mode", mode)
 
     // This is a good timing to warn
     Config.warnOnDefaultSecureKey()
@@ -81,10 +80,10 @@ object Server extends Logger {
 
     Config.xitrum.interface match {
       case None =>
-        logger.info(s"${service} server started on port ${port}")
+        log.info(s"${service} server started on port ${port}")
 
       case Some(hostnameOrIp) =>
-        logger.info(s"${service} server started on ${hostnameOrIp}:${port}")
+        log.info(s"${service} server started on ${hostnameOrIp}:${port}")
     }
   }
 }

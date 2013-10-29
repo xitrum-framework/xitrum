@@ -5,7 +5,7 @@ import scala.collection.mutable.{ArrayBuffer, Map => MMap}
 
 import org.jboss.netty.handler.codec.http.HttpMethod
 
-import xitrum.{Action, Logger}
+import xitrum.{Action, Log}
 import xitrum.annotation.Swagger
 import xitrum.scope.request.{Params, PathInfo}
 import xitrum.util.LocalLruCache
@@ -96,7 +96,7 @@ class RouteCollection(
   // 404.html and 500.html are used by default
   val error404: Option[Class[Action]],
   val error500: Option[Class[Action]]
-) extends Logger
+) extends Log
 {
   lazy val reverseMappings: Map[Class[_], ReverseRoute] = {
     val mmap = MMap[Class[_], ArrayBuffer[Route]]()
@@ -181,9 +181,9 @@ class RouteCollection(
 
     val strings = all.map { case (m, p, cr) => logFormat.format(m, p, cr) }
     if (xitrumRoutes)
-      logger.info("Xitrum routes:\n" + strings.mkString("\n"))
+      log.info("Xitrum routes:\n" + strings.mkString("\n"))
     else
-      logger.info("Normal routes:\n" + strings.mkString("\n"))
+      log.info("Normal routes:\n" + strings.mkString("\n"))
   }
 
   private def targetWithCache(route: Route): String = {
@@ -201,7 +201,7 @@ class RouteCollection(
     val strings = ArrayBuffer[String]()
     error404.foreach { klass => strings.append("404  " + klass.getName) }
     error500.foreach { klass => strings.append("500  " + klass.getName) }
-    if (!strings.isEmpty) logger.info("Error routes:\n" + strings.mkString("\n"))
+    if (!strings.isEmpty) log.info("Error routes:\n" + strings.mkString("\n"))
   }
 
   private def allFirsts(xitrumRoutes: Option[Boolean]): Seq[Route] = {

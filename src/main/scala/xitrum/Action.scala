@@ -22,12 +22,12 @@ import xitrum.view.{Renderer, Responder}
  */
 trait Action extends RequestEnv
   with SessionEnv
-  with Logger
+  with Log
   with Net
   with Filter
   with BasicAuth
   with Redirect
-  with UrlFor
+  with Url
   with Renderer
   with Responder
   with I18n
@@ -86,7 +86,7 @@ trait Action extends RequestEnv
     } catch {
       case NonFatal(e) =>
         if (forwarding) {
-          logger.warn("Error", e)
+          log.warn("Error", e)
           return
         }
 
@@ -146,7 +146,7 @@ trait Action extends RequestEnv
   private def tryCache(f: => Unit): Boolean = {
     ResponseCacher.getCachedResponse(handlerEnv) match {
       case None =>
-        f
+        f  // Execute f
         false
 
       case Some(response) =>

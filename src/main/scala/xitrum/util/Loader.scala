@@ -1,25 +1,52 @@
 package xitrum.util
 
 import java.io.{FileInputStream, InputStream}
-import java.util.Properties
+import java.util.{Arrays, Properties}
 
 import org.jboss.netty.util.CharsetUtil.UTF_8
 
 object Loader {
   private[this] val BUFFER_SIZE = 1024
 
-  /** The input stream will be closed by this method after reading */
+  /** The input stream will be closed by this method after reading. */
   def bytesFromInputStream(is: InputStream): Array[Byte] = {
     if (is == null) return null
 
-    var ret    = Array[Byte]()
-    var buffer = new Array[Byte](BUFFER_SIZE)
-    while (is.available > 0) {  // "available" is not always the exact size
-      val bytesRead = is.read(buffer)
-      ret = ret ++ buffer.take(bytesRead)
+    // Shorter version, but not optimized:
+    //
+    // var ret    = Array[Byte]()
+    // var buffer = new Array[Byte](BUFFER_SIZE)
+    // while (is.available() > 0) {
+    //   val bytesRead = is.read(buffer)
+    //   ret = ret ++ buffer.take(bytesRead)
+    // }
+
+    // "available" does not always return the exact number of bytes left
+    if (is.available() > 0) {
+      var buffer = new Array[Byte](BUFFER_SIZE)
+
+      // Use null to avoid creating empty Array[Byte] unnecessarily
+      var ret: Array[Byte] = null
+
+      while (is.available() > 0) {
+        val bytesRead = is.read(buffer)
+
+        if (ret == null) {
+          ret = Arrays.copyOf(buffer, bytesRead)
+        } else {
+          // http://stackoverflow.com/questions/80476/how-to-concatenate-two-arrays-in-java
+          val oldLength = ret.length
+          ret = Arrays.copyOf(ret, oldLength + bytesRead)
+          System.arraycopy(buffer, 0, ret, oldLength, bytesRead)
+        }
+      }
+
+      is.close()
+      ret
+    } else {
+      is.close()
+      Array[Byte]()
     }
-    is.close()
-    ret
   }
 
   //----------------------------------------------------------------------------

@@ -8,7 +8,7 @@ import org.slf4j.LoggerFactory
  *
  * We use a trait for better speed, because getStackTrace is slow.
  */
-trait Logger {
-  /** Logger name is inferred from the class name. */
-  lazy val logger = LoggerFactory.getLogger(getClass)
+trait Log {
+  /** Log name is inferred from the class name. */
+  lazy val log = LoggerFactory.getLogger(getClass)
 }

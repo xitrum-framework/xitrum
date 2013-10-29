@@ -16,13 +16,13 @@ import HttpMethod._
 import HttpResponseStatus._
 import HttpVersion._
 
-import xitrum.{Config, Logger}
+import xitrum.{Config, Log}
 import xitrum.etag.{Etag, NotModified}
 import xitrum.handler.AccessLog
 import xitrum.handler.up.{NoPipelining, RequestAttacher}
 import xitrum.util.{Gzip, Mime}
 
-object XSendFile extends Logger {
+object XSendFile extends Log {
   // setClientCacheAggressively should be called at PublicFileServer, not
   // here because XSendFile may be used by applications which does not want
   // to clients to cache.
@@ -206,7 +206,7 @@ object XSendFile extends Logger {
       }
     } catch {
       case NonFatal(e) =>
-        logger.warn("Unsupported Range spec: " + spec)
+        log.warn("Unsupported Range spec: " + spec)
         None
     }
   }

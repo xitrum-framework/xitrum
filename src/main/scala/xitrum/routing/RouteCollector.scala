@@ -7,7 +7,7 @@ import scala.util.control.NonFatal
 import org.objectweb.asm.{AnnotationVisitor, ClassReader, ClassVisitor, Opcodes, Type}
 import sclasner.{FileEntry, Scanner}
 
-import xitrum.{Action, Logger, SockJsActor}
+import xitrum.{Action, Log, SockJsActor}
 import xitrum.annotation._
 import xitrum.sockjs.SockJsPrefix
 
@@ -19,7 +19,7 @@ case class DiscoveredAcc(
 )
 
 /** Scan all classes to collect routes from actions. */
-class RouteCollector extends Logger {
+class RouteCollector extends Log {
   import ActionAnnotations._
 
   def deserializeCacheFileOrRecollect(cachedFileName: String): DiscoveredAcc = {
@@ -51,7 +51,7 @@ class RouteCollector extends Logger {
       }
     } catch {
       case NonFatal(e) =>
-        logger.warn("Could not scan route for " + entry.relPath + " in " + entry.container, e)
+        log.warn("Could not scan route for " + entry.relPath + " in " + entry.container, e)
         acc
     }
   }

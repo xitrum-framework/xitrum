@@ -405,7 +405,7 @@ trait Responder extends Js with Flash with Knockout {
       throw new IllegalStateException("Double response")
     } catch {
       case NonFatal(e) =>
-        logger.warn("Double response! This double response is ignored.", e)
+        log.warn("Double response! This double response is ignored.", e)
     }
     null  // This may cause NPE on double response if the ChannelFuture result is used
   }
