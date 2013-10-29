@@ -44,14 +44,14 @@ trait SessionEnv extends Csrf {
   /** To reset session: session.clear() */
   lazy val session = {
     sessionTouched = true
-    Config.sessionStore.restore(this)
+    Config.xitrum.session.store.restore(this)
   }
 
   def sessiono[T](key: String)(implicit d: T DefaultsTo String): Option[T] =
     session.get(key).map(_.asInstanceOf[T])
 
   def setCookieAndSessionIfTouchedOnRespond() {
-    if (sessionTouched) Config.sessionStore.store(session, this)
+    if (sessionTouched) Config.xitrum.session.store.store(session, this)
 
     if (responseCookies.nonEmpty) {
       // To avoid accidental duplicate cookies, if cookie path is not set,

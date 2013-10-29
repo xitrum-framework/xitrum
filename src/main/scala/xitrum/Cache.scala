@@ -5,7 +5,7 @@ package xitrum
  * take callbacks, because cache should be fast. The point of using cache is
  * to become faster. There's no point in using a slow cache.
  */
-abstract class Cache(maxElems: Int) {
+abstract class Cache {
   /**
    * Cache engine like Hazelcast may take serveral seconds to start, this method
    * is called at Xitrum server start to force the cahe to start, instead of

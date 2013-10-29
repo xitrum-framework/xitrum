@@ -35,6 +35,7 @@ object Server extends Log {
     System.setProperty("akka.loggers.0", "akka.event.slf4j.Slf4jLogger")
 
     Config.xitrum.cache.start()
+    Config.xitrum.session.store.start()
 
     // Trick to start actorRegistry on startup
     SockJsAction.entropy()

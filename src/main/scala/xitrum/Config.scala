@@ -2,6 +2,7 @@ package xitrum
 
 import java.io.File
 import java.nio.charset.Charset
+import java.util.{Map => JMap}
 import scala.util.control.NonFatal
 
 import com.typesafe.config.{Config => TConfig, ConfigFactory}
@@ -12,7 +13,49 @@ import xitrum.routing.{DiscoveredAcc, RouteCollection, RouteCollector, Serializa
 import xitrum.view.TemplateEngine
 import xitrum.util.Loader
 
-//----------------------------------------------------------------------------
+//------------------------------------------------------------------------------
+
+/**
+ * Dual config means the config can be in either one of the 2 forms:
+ *
+ * config {
+ *   key = a.b.c
+ * }
+ *
+ * Or:
+ *
+ * config {
+ *   key {
+ *     "a.b.c" {
+ *       option1 = value1
+ *       option2 = value2
+ *     }
+ *   }
+ * }
+ *
+ */
+object DualConfig {
+  /** @return "a.b.c" in the description above */
+  def getString(config: TConfig, key: String) = {
+    val k = config.root.get(key).unwrapped  // String or java.util.Map
+    if (k.isInstanceOf[String]) {
+      k.toString
+    } else {
+      val m = k.asInstanceOf[JMap[String, Any]]
+      val i = m.keySet.iterator
+      i.next()
+    }
+  }
+
+  /** Used when "a.b.c" is a class name. */
+  def getClassInstance[T](config: TConfig, key: String): T = {
+    val className = getString(config, key)
+    val klass     = Class.forName(className)
+    klass.newInstance().asInstanceOf[T]
+  }
+}
+
+//------------------------------------------------------------------------------
 
 class BasicAuthConfig(config: TConfig) {
   val realm    = config.getString("realm")
@@ -42,9 +85,10 @@ class ReverseProxyConfig(config: TConfig) {
 }
 
 class SessionConfig(config: TConfig) {
-  val store      = config.getString("store")
   val cookieName = config.getString("cookieName")
   val secureKey  = config.getString("secureKey")
+
+  lazy val store = DualConfig.getClassInstance[SessionStore](config, "store")
 }
 
 class StaticFileConfig(config: TConfig) {
@@ -94,14 +138,25 @@ class Config(val config: TConfig) extends Log {
 
   /**
    * lazy: templateEngine is initialized after xitrum.Config, so that inside
-   * the template engine class, xitrum.Config can be used
+   * the template engine class, xitrum.Config can be used.
+   *
+   * Template config in xitrum.conf can be in 2 forms:
+   *
+   * template = my.template.Engine
+   *
+   * Or if the template engine needs additional options:
+   *
+   * template {
+   *   "my.template.Engine" {
+   *     option1 = value1
+   *     option2 = value2
+   *   }
+   * }
    */
   lazy val templateEngine: TemplateEngine = {
     if (config.hasPath("template")) {
       try {
-        val className = config.getString("template.engine")
-        val klass     = Class.forName(className)
-        klass.newInstance().asInstanceOf[TemplateEngine]
+        DualConfig.getClassInstance[TemplateEngine](config, "template")
       } catch {
         case NonFatal(e) =>
           Config.exitOnStartupError("Could not load template engine, please check config/xitrum.conf", e)
@@ -113,13 +168,26 @@ class Config(val config: TConfig) extends Log {
     }
   }
 
+  /**
+   * lazy: cache is initialized after xitrum.Config, so that inside
+   * the cache class, xitrum.Config can be used.
+   *
+   * Cache config in xitrum.conf can be in 2 forms:
+   *
+   * cache = my.Cache
+   *
+   * Or if the cache needs additional options:
+   *
+   * cache {
+   *   "my.Cache" {
+   *     option1 = value1
+   *     option2 = value2
+   *   }
+   * }
+   */
   lazy val cache: Cache = {
     try {
-      val className   = config.getString("cache.engine")
-      val maxElems    = config.getInt("cache.maxElems")
-      val klass       = Class.forName(className)
-      val constructor = klass.getConstructor(classOf[Int])
-      constructor.newInstance(new Integer(maxElems)).asInstanceOf[Cache]
+      DualConfig.getClassInstance[Cache](config, "cache")
     } catch {
       case NonFatal(e) =>
         Config.exitOnStartupError("Could not load cache engine, please check config/xitrum.conf", e)
@@ -138,7 +206,7 @@ class Config(val config: TConfig) extends Log {
   val swaggerApiVersion = if (config.hasPath("swaggerApiVersion")) Some(config.getString("swaggerApiVersion")) else None
 }
 
-//----------------------------------------------------------------------------
+//------------------------------------------------------------------------------
 
 /** See config/xitrum.properties */
 object Config extends Log {
@@ -227,12 +295,6 @@ object Config extends Log {
 
   //----------------------------------------------------------------------------
 
-  val sessionStore  = {
-    val className = xitrum.session.store
-    val klass     = Class.forName(className)
-    klass.newInstance().asInstanceOf[SessionStore]
-  }
-
   /** akka.actor.ActorSystem("xitrum") */
   val actorSystem = ActorSystem(ACTOR_SYSTEM_NAME)
 
@@ -247,10 +309,8 @@ object Config extends Log {
     log.error(msg, e)
     log.error("Xitrum could not start because of the above error. Xitrum will now stop the current process.")
 
-    // If the cache is Hazelcast, once it's started, calling only
+    // Note: If the cache is Hazelcast, once it's started, calling only
     // System.exit(-1) does not stop the current process!
-    if (xitrum.cache != null) xitrum.cache.stop()
-
     System.exit(-1)
   }
 

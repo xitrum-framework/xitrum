@@ -10,33 +10,8 @@ import xitrum.util.SecureUrlSafeBase64
 
 /** Compress big session cookie to try to avoid the 4KB limit. */
 class CookieSessionStore extends SessionStore with Log {
-  def restore(env: SessionEnv): Session = {
-    // Cannot always get cookie, decrypt, deserialize, and type casting due to program changes etc.
-    env.requestCookies.get(Config.xitrum.session.cookieName) match {
-      case None =>
-        MMap[String, Any]()
-
-      // See "store" method to know why this map needs to be immutable
-      case Some(encryptedImmutableMap) =>
-        SecureUrlSafeBase64.decrypt(encryptedImmutableMap, true) match {
-          case None =>
-            MMap[String, Any]()
-
-          case Some(any) =>
-            val immutableMap = try {
-              any.asInstanceOf[Map[String, Any]]
-            } catch {
-              case NonFatal(e) =>
-                MMap[String, Any]()
-            }
-
-            // Convert to mutable map
-            val ret = MMap[String, Any]()
-            ret ++= immutableMap
-            ret
-       }
-    }
-  }
+  def start() {}
+  def stop() {}
 
   def store(session: Session, env: SessionEnv) {
     val sessionCookieName = Config.xitrum.session.cookieName
@@ -70,6 +45,34 @@ class CookieSessionStore extends SessionStore with Log {
         cookie.setHttpOnly(true)
         env.responseCookies.append(cookie)
       }
+    }
+  }
+
+  def restore(env: SessionEnv): Session = {
+    // Cannot always get cookie, decrypt, deserialize, and type casting due to program changes etc.
+    env.requestCookies.get(Config.xitrum.session.cookieName) match {
+      case None =>
+        MMap[String, Any]()
+
+      // See "store" method to know why this map needs to be immutable
+      case Some(encryptedImmutableMap) =>
+        SecureUrlSafeBase64.decrypt(encryptedImmutableMap, true) match {
+          case None =>
+            MMap[String, Any]()
+
+          case Some(any) =>
+            val immutableMap = try {
+              any.asInstanceOf[Map[String, Any]]
+            } catch {
+              case NonFatal(e) =>
+                MMap[String, Any]()
+            }
+
+            // Convert to mutable map
+            val ret = MMap[String, Any]()
+            ret ++= immutableMap
+            ret
+       }
     }
   }
 }

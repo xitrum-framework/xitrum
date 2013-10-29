@@ -1,9 +1,9 @@
 2.11 (planned):
-* #215 Revert Hazelcast 3.x to 2.x
+* #218 Make Hazelcast optional
+* #221 xitrum.conf: Improve config of template engine, cache, and session store
 * #216 Remove package xitrum.mq
 * #159 Support dot in route
 * #206 Support index.html fallback
-* #221 Merge template engine config to xitrum.conf
 * #204 Log Xitrum additional routes separately from app routes
 * #195 Rename xitrumCSS to xitrumCss
 * #211 Remove xitrum/routes.js
