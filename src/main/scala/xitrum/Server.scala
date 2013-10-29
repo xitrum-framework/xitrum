@@ -34,6 +34,7 @@ object Server extends Log {
     // http://stackoverflow.com/questions/16202501/how-can-i-override-a-typesafe-config-list-value-on-the-command-line
     System.setProperty("akka.loggers.0", "akka.event.slf4j.Slf4jLogger")
 
+    Config.xitrum.templateEngine.start()
     Config.xitrum.cache.start()
     Config.xitrum.session.store.start()
 
