@@ -114,7 +114,8 @@ After each new version release, please update these projects to use that new Xit
 
 * `xitrum-new <https://github.com/ngocdaothanh/xitrum-new>`_
 * `xitrum-demos <https://github.com/ngocdaothanh/xitrum-demos>`_
-* `xitrum-modularized-demo <https://github.com/ngocdaothanh/xitrum-modularized-demo>`_
+* `xitrum-placeholder <https://github.com/georgeOsdDev/xitrum-placeholder>`_
+* `xitrum-multimodule-demo <https://github.com/ngocdaothanh/xitrum-multimodule-demo>`_
 * `comy <https://github.com/ngocdaothanh/comy>`_
 
 Also update `gh-pages branch of Xitrum <https://github.com/ngocdaothanh/xitrum/tree/gh-pages>`_
