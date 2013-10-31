@@ -1,6 +1,7 @@
+
 // http://www.cakesolutions.net/teamblogs/2012/01/28/publishing-sbt-projects-to-nexus/
 // https://groups.google.com/forum/?fromgroups=#!topic/simple-build-tool/wuiMh-Ue_iw
-addSbtPlugin("com.typesafe.sbt" % "sbt-pgp" % "0.8.2")
+addSbtPlugin("com.typesafe.sbt" % "sbt-pgp" % "0.8.1")
 
 // https://github.com/jrudolph/sbt-dependency-graph
 addSbtPlugin("net.virtual-void" % "sbt-dependency-graph" % "0.7.4")

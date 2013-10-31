@@ -1,3 +1,4 @@
+
 // Ignore Java annotations to avoid Scaladoc crash
 // (Commented out because Java annotations have been replaced with Scala ones)
 //scalacOptions in (Compile, doc) ++= Seq("-skip-packages", "xitrum.annotation")
