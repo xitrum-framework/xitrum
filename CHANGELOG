@@ -1,4 +1,4 @@
-2.11 (planned):
+2.11:
 * #218 Make Hazelcast optional
 * #221 xitrum.conf: Improve config of template engine, cache, and session store
 * #159 Support dot in route
