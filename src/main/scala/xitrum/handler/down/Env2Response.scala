@@ -34,7 +34,7 @@ class Env2Response extends SimpleChannelDownstreamHandler {
     else if (!tryEtag(request, response))
       Gzip.tryCompressBigTextualResponse(request, response)
 
-    Env2Response.setDefaultCORS(env)
+    setCORS(env)
 
     // Keep alive, channel reading resuming/closing etc. are handled
     // by the code that sends the response (Responder#respond)
@@ -96,14 +96,12 @@ class Env2Response extends SimpleChannelDownstreamHandler {
     }
   }
 
-}
-object Env2Response {
   /** Set default CORS setting for the whole site. */
-  def setDefaultCORS(env: HandlerEnv) {
-    if (Config.xitrum.response.corsAllowOrigins.isDefined) setCORS(env, Config.xitrum.response.corsAllowOrigins.get)
-  }
+  private def setCORS(env: HandlerEnv) {
+    if (Config.xitrum.response.corsAllowOrigins.isEmpty) return
 
-  def setCORS(env: HandlerEnv, corsAllowOrigins: Seq[String]) {
+    val corsAllowOrigins = Config.xitrum.response.corsAllowOrigins.get
+
     val request  = env.request
     val response = env.response
 
@@ -115,14 +113,14 @@ object Env2Response {
 
     // Access-Control-Allow-Origin
     if (!response.containsHeader(HttpHeaders.Names.ACCESS_CONTROL_ALLOW_ORIGIN)) {
-      if (corsAllowOrigins(0).equals("*")){
-          if (requestOrigin == null || requestOrigin == "null"){
+      if (corsAllowOrigins(0).equals("*")) {
+          if (requestOrigin == null || requestOrigin == "null") {
             response.setHeader(HttpHeaders.Names.ACCESS_CONTROL_ALLOW_ORIGIN, "*")
           } else {
             response.setHeader(HttpHeaders.Names.ACCESS_CONTROL_ALLOW_ORIGIN, requestOrigin)
           }
       } else {
-        if (corsAllowOrigins.contains(requestOrigin)){
+        if (corsAllowOrigins.contains(requestOrigin)) {
           response.setHeader(HttpHeaders.Names.ACCESS_CONTROL_ALLOW_ORIGIN, requestOrigin)
         } else {
           response.setHeader(HttpHeaders.Names.ACCESS_CONTROL_ALLOW_ORIGIN, corsAllowOrigins.mkString(", "))
