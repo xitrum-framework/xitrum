@@ -58,7 +58,7 @@ class Env2Response extends SimpleChannelDownstreamHandler {
    */
   private def tryEtag(request: HttpRequest, response: HttpResponse): Boolean = {
     if (response.containsHeader(CACHE_CONTROL) &&
-        response.getHeader(CACHE_CONTROL).toLowerCase().contains("no-cache"))
+        response.getHeader(CACHE_CONTROL).toLowerCase.contains("no-cache"))
       return false
 
     if (response.getStatus != OK)
@@ -106,48 +106,44 @@ class Env2Response extends SimpleChannelDownstreamHandler {
     val response = env.response
 
     // Access-Control-Max-Age
-    if (env.request.getMethod == HttpMethod.OPTIONS)
+    if (env.request.getMethod == OPTIONS)
       NotModified.setClientCacheAggressively(response)
 
-    val requestOrigin = request.getHeader(HttpHeaders.Names.ORIGIN)
+    val requestOrigin = request.getHeader(ORIGIN)
 
     // Access-Control-Allow-Origin
-    if (!response.containsHeader(HttpHeaders.Names.ACCESS_CONTROL_ALLOW_ORIGIN)) {
+    if (!response.containsHeader(ACCESS_CONTROL_ALLOW_ORIGIN)) {
       if (corsAllowOrigins(0).equals("*")) {
-          if (requestOrigin == null || requestOrigin == "null") {
-            response.setHeader(HttpHeaders.Names.ACCESS_CONTROL_ALLOW_ORIGIN, "*")
-          } else {
-            response.setHeader(HttpHeaders.Names.ACCESS_CONTROL_ALLOW_ORIGIN, requestOrigin)
-          }
+        if (requestOrigin == null || requestOrigin == "null") {
+          response.setHeader(ACCESS_CONTROL_ALLOW_ORIGIN, "*")
+        } else {
+          response.setHeader(ACCESS_CONTROL_ALLOW_ORIGIN, requestOrigin)
+        }
       } else {
         if (corsAllowOrigins.contains(requestOrigin)) {
-          response.setHeader(HttpHeaders.Names.ACCESS_CONTROL_ALLOW_ORIGIN, requestOrigin)
+          response.setHeader(ACCESS_CONTROL_ALLOW_ORIGIN, requestOrigin)
         } else {
-          response.setHeader(HttpHeaders.Names.ACCESS_CONTROL_ALLOW_ORIGIN, corsAllowOrigins.mkString(", "))
+          response.setHeader(ACCESS_CONTROL_ALLOW_ORIGIN, corsAllowOrigins.mkString(", "))
         }
       }
     }
 
     // Access-Control-Allow-Credentials
-    if (!response.containsHeader(HttpHeaders.Names.ACCESS_CONTROL_ALLOW_CREDENTIALS)) {
-      response.setHeader(HttpHeaders.Names.ACCESS_CONTROL_ALLOW_CREDENTIALS, true)
+    if (!response.containsHeader(ACCESS_CONTROL_ALLOW_CREDENTIALS)) {
+      response.setHeader(ACCESS_CONTROL_ALLOW_CREDENTIALS, true)
     }
 
     // Access-Control-Allow-Methods
-    var allowMethods = HttpMethod.OPTIONS.getName
     if (env.route != null) {
-      println("env.route.klass: " + env.route.klass)
-
-      Config.routes.corsAllowMethods.get(env.route.klass) match {
-          case Some(methods) => allowMethods = allowMethods + ", " + methods
-          case ignore =>
-      }
+      val allowMethods =
+        OPTIONS.getName + ", " +
+        Config.routes.corsAllowMethods.get(env.route.klass).get
+      response.setHeader(ACCESS_CONTROL_ALLOW_METHODS, allowMethods)
     }
-    response.setHeader(HttpHeaders.Names.ACCESS_CONTROL_ALLOW_METHODS, allowMethods)
 
     // Access-Control-Allow-Headers
-    val accessControlRequestHeaders = request.getHeader(HttpHeaders.Names.ACCESS_CONTROL_REQUEST_HEADERS)
+    val accessControlRequestHeaders = request.getHeader(ACCESS_CONTROL_REQUEST_HEADERS)
     if (accessControlRequestHeaders != null)
-      response.setHeader(HttpHeaders.Names.ACCESS_CONTROL_ALLOW_HEADERS, accessControlRequestHeaders)
+      response.setHeader(ACCESS_CONTROL_ALLOW_HEADERS, accessControlRequestHeaders)
   }
 }
