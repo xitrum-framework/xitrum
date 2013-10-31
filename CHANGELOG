@@ -9,6 +9,7 @@
 * #216 Remove package xitrum.mq
 * #211 Remove xitrum/routes.js
 * #220 Optimize xitrum.util.Loader.bytesFromInputStream
+* #227 Optimize xitrum.util.Json by avoid creating formats at every call
 * #196 Swagger: Rename Optional<ValueType><ParamType> to Opt<ValueType><ParamType>, ex: OptStringQuery
 * #198 Swagger: Add inheritance
 * #199 Swagger: Add notes

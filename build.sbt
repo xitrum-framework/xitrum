@@ -50,19 +50,16 @@ libraryDependencies += "tv.cntt" %% "scaposer" % "1.3"
 // For compiling CoffeeScript to JavaScript
 libraryDependencies += "tv.cntt" % "rhinocoffeescript" % "1.6.3"
 
-// By default, version 2.10.0 of the libs below is used!!! ---------------------
+//------------------------------------------------------------------------------
+// JSON4S uses scalap 2.10.0, which in turn uses scala-compiler 2.10.0, which in
+// turn uses scala-reflect 2.10.0. We need to force "scalaVersion" above, because
+// Scala annotations (used by routes and Swagger) compiled by a newer version
+// can't be read by an older version.
+//
+// Also, we must release a new version of Xitrum every time a new version of
+// Scala is released.
 
-libraryDependencies <+= scalaVersion { sv =>
-  "org.scala-lang" % "scala-compiler" % sv
-}
-
-libraryDependencies <+= scalaVersion { sv =>
-  "org.scala-lang" % "scala-reflect" % sv
-}
-
-libraryDependencies <+= scalaVersion { sv =>
-  "org.scala-lang" % "scalap" % sv
-}
+libraryDependencies <+= scalaVersion { sv => "org.scala-lang" % "scalap" % sv }
 
 // xitrum.imperatively uses Scala continuation, a compiler plugin --------------
 
