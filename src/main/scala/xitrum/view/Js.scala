@@ -65,7 +65,7 @@ trait Js {
         <script type="text/javascript" src={resourceUrl("xitrum/jquery.validate-1.11.1/jquery.validate.min.js")}></script>
         <script type="text/javascript" src={resourceUrl("xitrum/jquery.validate-1.11.1/additional-methods.min.js")}></script>
         {validatei18n}
-        <script type="text/javascript" src={resourceUrl("xitrum/knockout/knockout-2.3.0.min.js")}></script>
+        <script type="text/javascript" src={resourceUrl("xitrum/knockout/knockout-3.0.0.min.js")}></script>
         <script type="text/javascript" src={resourceUrl("xitrum/knockout/knockout.mapping-2.4.1.min.js")}></script>
         <script type="text/javascript" src={resourceUrl("xitrum/sockjs-0.3.4.min.js")}></script>
         <script type="text/javascript" src={resourceUrl("xitrum/xitrum.js")}></script>
@@ -76,7 +76,7 @@ trait Js {
         <script type="text/javascript" src={resourceUrl("xitrum/jquery.validate-1.11.1/jquery.validate.js")}></script>
         <script type="text/javascript" src={resourceUrl("xitrum/jquery.validate-1.11.1/additional-methods.js")}></script>
         {validatei18n}
-        <script type="text/javascript" src={resourceUrl("xitrum/knockout/knockout-2.3.0.js")}></script>
+        <script type="text/javascript" src={resourceUrl("xitrum/knockout/knockout-3.0.0.js")}></script>
         <script type="text/javascript" src={resourceUrl("xitrum/knockout/knockout.mapping-2.4.1.js")}></script>
         <script type="text/javascript" src={resourceUrl("xitrum/sockjs-0.3.4.js")}></script>
         <script type="text/javascript" src={resourceUrl("xitrum/xitrum.js")}></script>
