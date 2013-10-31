@@ -31,7 +31,7 @@ libraryDependencies += "io.netty" % "netty" % "3.7.0.Final"
 libraryDependencies += "tv.cntt" %% "glokka" % "1.3"
 
 // Redirect Akka log to SLF4J
-libraryDependencies += "com.typesafe.akka" %% "akka-slf4j" % "2.2.1"
+libraryDependencies += "com.typesafe.akka" %% "akka-slf4j" % "2.2.3"
 
 // For scanning routes
 libraryDependencies += "tv.cntt" %% "sclasner" % "1.6"
