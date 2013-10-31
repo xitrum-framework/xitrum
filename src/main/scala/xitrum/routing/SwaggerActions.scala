@@ -8,7 +8,7 @@ import org.json4s.native.JsonMethods._
 import org.jboss.netty.handler.codec.http.HttpResponseStatus
 
 import xitrum.{Action, Config}
-import xitrum.annotation.{First, DELETE, GET, OPTIONS, PATCH, POST, PUT, SOCKJS, WEBSOCKET}
+import xitrum.annotation.{First, DELETE, GET, PATCH, POST, PUT, SOCKJS, WEBSOCKET}
 import xitrum.annotation.{Swagger, SwaggerArg}
 import xitrum.view.DocType
 
@@ -113,7 +113,6 @@ object SwaggerJson {
     case method: PUT       => method.paths.map(ApiMethod("PUT",       _))
     case method: DELETE    => method.paths.map(ApiMethod("DELETE",    _))
     case method: PATCH     => method.paths.map(ApiMethod("PATCH",     _))
-    case method: OPTIONS   => method.paths.map(ApiMethod("OPTIONS",   _))
     case method: SOCKJS    => method.paths.map(ApiMethod("SOCKJS",    _))
     case method: WEBSOCKET => method.paths.map(ApiMethod("WEBSOCKET", _))
     case _                 => Seq()

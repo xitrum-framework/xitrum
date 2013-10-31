@@ -12,8 +12,6 @@ case class PUT   (paths: String*) extends Route
 case class PATCH (paths: String*) extends Route
 case class DELETE(paths: String*) extends Route
 
-case class OPTIONS(paths: String*) extends Route
-
 case class WEBSOCKET(paths: String*) extends Route
 case class SOCKJS   (paths: String*) extends Route
 

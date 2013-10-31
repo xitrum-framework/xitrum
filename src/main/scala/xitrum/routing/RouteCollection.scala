@@ -24,7 +24,6 @@ object RouteCollection {
       sockJsWithoutPrefix.firstPUTs      .foreach { r => normal.firstPUTs      .append(r.addPrefix(prefix)) }
       sockJsWithoutPrefix.firstPATCHs    .foreach { r => normal.firstPATCHs    .append(r.addPrefix(prefix)) }
       sockJsWithoutPrefix.firstDELETEs   .foreach { r => normal.firstDELETEs   .append(r.addPrefix(prefix)) }
-      sockJsWithoutPrefix.firstOPTIONSs  .foreach { r => normal.firstOPTIONSs  .append(r.addPrefix(prefix)) }
       sockJsWithoutPrefix.firstWEBSOCKETs.foreach { r => normal.firstWEBSOCKETs.append(r.addPrefix(prefix)) }
 
       sockJsWithoutPrefix.lastGETs      .foreach { r => normal.lastGETs      .append(r.addPrefix(prefix)) }
@@ -32,7 +31,6 @@ object RouteCollection {
       sockJsWithoutPrefix.lastPUTs      .foreach { r => normal.lastPUTs      .append(r.addPrefix(prefix)) }
       sockJsWithoutPrefix.lastPATCHs    .foreach { r => normal.lastPATCHs    .append(r.addPrefix(prefix)) }
       sockJsWithoutPrefix.lastDELETEs   .foreach { r => normal.lastDELETEs   .append(r.addPrefix(prefix)) }
-      sockJsWithoutPrefix.lastOPTIONSs  .foreach { r => normal.lastOPTIONSs  .append(r.addPrefix(prefix)) }
       sockJsWithoutPrefix.lastWEBSOCKETs.foreach { r => normal.lastWEBSOCKETs.append(r.addPrefix(prefix)) }
 
       sockJsWithoutPrefix.otherGETs      .foreach { r => normal.otherGETs      .append(r.addPrefix(prefix)) }
@@ -40,7 +38,6 @@ object RouteCollection {
       sockJsWithoutPrefix.otherPUTs      .foreach { r => normal.otherPUTs      .append(r.addPrefix(prefix)) }
       sockJsWithoutPrefix.otherPATCHs    .foreach { r => normal.otherPATCHs    .append(r.addPrefix(prefix)) }
       sockJsWithoutPrefix.otherDELETEs   .foreach { r => normal.otherDELETEs   .append(r.addPrefix(prefix)) }
-      sockJsWithoutPrefix.otherOPTIONSs  .foreach { r => normal.otherOPTIONSs  .append(r.addPrefix(prefix)) }
       sockJsWithoutPrefix.otherWEBSOCKETs.foreach { r => normal.otherWEBSOCKETs.append(r.addPrefix(prefix)) }
     }
 
@@ -50,7 +47,6 @@ object RouteCollection {
       normal.firstPUTs      .map(_.toRoute), normal.lastPUTs      .map(_.toRoute), normal.otherPUTs      .map(_.toRoute),
       normal.firstPATCHs    .map(_.toRoute), normal.lastPATCHs    .map(_.toRoute), normal.otherPATCHs    .map(_.toRoute),
       normal.firstDELETEs   .map(_.toRoute), normal.lastDELETEs   .map(_.toRoute), normal.otherDELETEs   .map(_.toRoute),
-      normal.firstOPTIONSs  .map(_.toRoute), normal.lastOPTIONSs  .map(_.toRoute), normal.otherOPTIONSs  .map(_.toRoute),
       normal.firstWEBSOCKETs.map(_.toRoute), normal.lastWEBSOCKETs.map(_.toRoute), normal.otherWEBSOCKETs.map(_.toRoute),
       new SockJsRouteMap(sockJsMap),
       swaggerMap,
@@ -82,10 +78,6 @@ class RouteCollection(
   val lastDELETEs:  Seq[Route],
   val otherDELETEs: Seq[Route],
 
-  val firstOPTIONSs: Seq[Route],
-  val lastOPTIONSs:  Seq[Route],
-  val otherOPTIONSs: Seq[Route],
-
   val firstWEBSOCKETs: Seq[Route],
   val lastWEBSOCKETs:  Seq[Route],
   val otherWEBSOCKETs: Seq[Route],
@@ -108,47 +100,30 @@ class RouteCollection(
     mmap.mapValues { routes => ReverseRoute(routes) }.toMap
   }
 
-  /** For use from browser */
-  lazy val jsRoutes = {
+  // No need to store OPTIONS here
+  // Value example: "GET, HEAD, POST"
+  lazy val corsAllowMethods: Map[Class[_], String] = {
+    val ret = MMap[Class[_], String]()
+
     val routeArray = ArrayBuffer[Route]()
+    routeArray.appendAll(allFirsts(None))
+    routeArray.appendAll(allOthers(None))
+    routeArray.appendAll(allLasts(None))
 
-    routeArray.appendAll(firstGETs)
-    routeArray.appendAll(firstPOSTs)
-    routeArray.appendAll(firstPUTs)
-    routeArray.appendAll(firstPATCHs)
-    routeArray.appendAll(firstOPTIONSs)
-    routeArray.appendAll(firstWEBSOCKETs)
+    routeArray.foreach { r =>
+      val klass  = r.klass
+      val method = if (r.httpMethod.getName == "GET") "GET, HEAD" else r.httpMethod.getName
 
-    routeArray.appendAll(otherGETs)
-    routeArray.appendAll(otherPOSTs)
-    routeArray.appendAll(otherPUTs)
-    routeArray.appendAll(otherPATCHs)
-    routeArray.appendAll(otherOPTIONSs)
-    routeArray.appendAll(otherWEBSOCKETs)
+      ret.get(klass) match {
+        case None =>
+          ret(klass) = method
 
-    routeArray.appendAll(lastGETs)
-    routeArray.appendAll(lastPOSTs)
-    routeArray.appendAll(lastPUTs)
-    routeArray.appendAll(lastPATCHs)
-    routeArray.appendAll(lastOPTIONSs)
-    routeArray.appendAll(lastWEBSOCKETs)
-
-    val xs = routeArray.map { route =>
-      val ys = route.compiledPattern.map { rt =>
-        if (rt.isInstanceOf[NonDotRouteToken]) {
-          val n = rt.asInstanceOf[NonDotRouteToken]
-          "['" + n.value + "', " + n.isPlaceholder + "]"
-        } else {
-          val d  = rt.asInstanceOf[DotRouteToken]
-          val ns = d.nonDotRouteTokens.map { n =>
-            "['" + n.value + "', " + n.isPlaceholder + "]"
-          }
-          "[" + ns.mkString(", ") + "]"
-        }
+        case Some(methods) =>
+          if (!methods.contains(method)) ret(klass) = methods + ", " + method
       }
-      "[[" + ys.mkString(", ") + "], '" + route.klass.getName + "']"
     }
-    "[" + xs.mkString(", ") + "]"
+
+    ret.toMap
   }
 
   //----------------------------------------------------------------------------
@@ -204,6 +179,12 @@ class RouteCollection(
     if (!strings.isEmpty) log.info("Error routes:\n" + strings.mkString("\n"))
   }
 
+  /**
+   * @param xitrumRoutes
+   * - None: No filter, return all routes
+   * - Some(true): Only return Xitrum internal routes
+   * - Some(false): Only return non Xitrum internal routes
+   */
   private def allFirsts(xitrumRoutes: Option[Boolean]): Seq[Route] = {
     xitrumRoutes match {
       case None =>
@@ -212,7 +193,6 @@ class RouteCollection(
         ret.appendAll(firstPOSTs)
         ret.appendAll(firstPUTs)
         ret.appendAll(firstDELETEs)
-        ret.appendAll(firstOPTIONSs)
         ret.appendAll(firstWEBSOCKETs)
         ret
 
@@ -222,12 +202,12 @@ class RouteCollection(
         ret.appendAll(firstPOSTs     .filter(_.klass.getName.startsWith("xitrum") == x))
         ret.appendAll(firstPUTs      .filter(_.klass.getName.startsWith("xitrum") == x))
         ret.appendAll(firstDELETEs   .filter(_.klass.getName.startsWith("xitrum") == x))
-        ret.appendAll(firstOPTIONSs  .filter(_.klass.getName.startsWith("xitrum") == x))
         ret.appendAll(firstWEBSOCKETs.filter(_.klass.getName.startsWith("xitrum") == x))
         ret
     }
   }
 
+  /** See allFirsts */
   private def allLasts(xitrumRoutes: Option[Boolean]): Seq[Route] = {
     xitrumRoutes match {
       case None =>
@@ -236,7 +216,6 @@ class RouteCollection(
         ret.appendAll(lastPOSTs)
         ret.appendAll(lastPUTs)
         ret.appendAll(lastDELETEs)
-        ret.appendAll(lastOPTIONSs)
         ret.appendAll(lastWEBSOCKETs)
         ret
 
@@ -246,12 +225,12 @@ class RouteCollection(
         ret.appendAll(lastPOSTs     .filter(_.klass.getName.startsWith("xitrum") == x))
         ret.appendAll(lastPUTs      .filter(_.klass.getName.startsWith("xitrum") == x))
         ret.appendAll(lastDELETEs   .filter(_.klass.getName.startsWith("xitrum") == x))
-        ret.appendAll(lastOPTIONSs  .filter(_.klass.getName.startsWith("xitrum") == x))
         ret.appendAll(lastWEBSOCKETs.filter(_.klass.getName.startsWith("xitrum") == x))
         ret
     }
   }
 
+  /** See allFirsts */
   private def allOthers(xitrumRoutes: Option[Boolean]): Seq[Route] = {
     xitrumRoutes match {
       case None =>
@@ -261,7 +240,6 @@ class RouteCollection(
         ret.appendAll(otherPUTs)
         ret.appendAll(otherPATCHs)
         ret.appendAll(otherDELETEs)
-        ret.appendAll(otherOPTIONSs)
         ret.appendAll(otherWEBSOCKETs)
         ret
 
@@ -272,7 +250,6 @@ class RouteCollection(
         ret.appendAll(otherPUTs      .filter(_.klass.getName.startsWith("xitrum") == x))
         ret.appendAll(otherPATCHs    .filter(_.klass.getName.startsWith("xitrum") == x))
         ret.appendAll(otherDELETEs   .filter(_.klass.getName.startsWith("xitrum") == x))
-        ret.appendAll(otherOPTIONSs  .filter(_.klass.getName.startsWith("xitrum") == x))
         ret.appendAll(otherWEBSOCKETs.filter(_.klass.getName.startsWith("xitrum") == x))
         ret
     }
@@ -331,13 +308,12 @@ class RouteCollection(
   /** @return Option[(firsts, lasts, others)] */
   private def matchMethod(httpMethod: HttpMethod): Option[(Seq[Route], Seq[Route], Seq[Route])] = {
     val methodName = httpMethod.getName
-    if (methodName == "GET")        return Some(firstGETs,       lastGETs,       otherGETs)
-    if (methodName == "POST")       return Some(firstPOSTs,      lastPOSTs,      otherPOSTs)
-    if (methodName == "PUT")        return Some(firstPUTs,       lastPUTs,       otherPUTs)
-    if (methodName == "PATCH")      return Some(firstPATCHs,     lastPATCHs,     otherPATCHs)
-    if (methodName == "DELETE")     return Some(firstDELETEs,    lastDELETEs,    otherDELETEs)
-    if (methodName == "OPTIONS")    return Some(firstOPTIONSs,   lastOPTIONSs,   otherOPTIONSs)
-    if (methodName == "WEBSOCKET")  return Some(firstWEBSOCKETs, lastWEBSOCKETs, otherWEBSOCKETs)
+    if (methodName == "GET")       return Some(firstGETs,       lastGETs,       otherGETs)
+    if (methodName == "POST")      return Some(firstPOSTs,      lastPOSTs,      otherPOSTs)
+    if (methodName == "PUT")       return Some(firstPUTs,       lastPUTs,       otherPUTs)
+    if (methodName == "PATCH")     return Some(firstPATCHs,     lastPATCHs,     otherPATCHs)
+    if (methodName == "DELETE")    return Some(firstDELETEs,    lastDELETEs,    otherDELETEs)
+    if (methodName == "WEBSOCKET") return Some(firstWEBSOCKETs, lastWEBSOCKETs, otherWEBSOCKETs)
     None
   }
 

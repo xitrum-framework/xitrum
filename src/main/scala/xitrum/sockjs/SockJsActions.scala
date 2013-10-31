@@ -8,13 +8,11 @@ import org.jboss.netty.buffer.ChannelBuffers
 import org.jboss.netty.handler.codec.http.{DefaultCookie, HttpHeaders, HttpResponseStatus}
 
 import akka.actor.{Actor, ActorRef, PoisonPill, Props, Terminated}
-
 import glokka.Registry
 
 import xitrum.{Action, ActionActor, Config, SkipCsrfCheck, SockJsText}
 import xitrum.{WebSocketActor, WebSocketBinary, WebSocketPing, WebSocketPong, WebSocketText}
 import xitrum.annotation._
-import xitrum.etag.NotModified
 import xitrum.scope.request.PathInfo
 import xitrum.util.Json
 import xitrum.view.DocType
@@ -172,25 +170,6 @@ trait SockJsAction extends ServerIdSessionIdValidator with SockJsPrefix {
     }
   }
 
-  protected def setCORS() {
-    val requestOrigin  = request.getHeader(HttpHeaders.Names.ORIGIN)
-    val responseOrigin = if (requestOrigin == null || requestOrigin == "null") "*" else requestOrigin
-    response.setHeader(HttpHeaders.Names.ACCESS_CONTROL_ALLOW_ORIGIN,      responseOrigin)
-    response.setHeader(HttpHeaders.Names.ACCESS_CONTROL_ALLOW_CREDENTIALS, "true")
-
-    val accessControlRequestHeaders = request.getHeader(HttpHeaders.Names.ACCESS_CONTROL_REQUEST_HEADERS)
-    if (accessControlRequestHeaders != null)
-      response.setHeader(HttpHeaders.Names.ACCESS_CONTROL_ALLOW_HEADERS, accessControlRequestHeaders)
-  }
-
-  protected def xhrOPTIONS() {
-    response.setStatus(HttpResponseStatus.NO_CONTENT)
-    response.setHeader(HttpHeaders.Names.ACCESS_CONTROL_ALLOW_METHODS, "OPTIONS, POST")
-    setCORS()
-    setClientCacheAggressively()
-    respond()
-  }
-
   protected def callbackParam(): Option[String] = {
     val paramName = if (handlerEnv.queryParams.isDefinedAt("c")) "c" else "callback"
     val ret = paramo(paramName)
@@ -345,7 +324,6 @@ class InfoGET extends SockJsAction {
   def nLastTokensToRemoveFromPathInfo = 1
 
   def execute() {
-    setCORS()
     setNoClientCache()
 
     val sockJsClassAndOptions = Config.routes.sockJsRouteMap.lookup(pathPrefix)
@@ -357,37 +335,6 @@ class InfoGET extends SockJsAction {
   }
 }
 
-@OPTIONS("info")
-class InfoOPTIONS extends SockJsAction {
-  def nLastTokensToRemoveFromPathInfo = 1
-
-  def execute() {
-    response.setStatus(HttpResponseStatus.NO_CONTENT)
-    response.setHeader(HttpHeaders.Names.ACCESS_CONTROL_ALLOW_METHODS, "OPTIONS, GET")
-    setCORS()
-    setClientCacheAggressively()
-    respond()
-  }
-}
-
-@OPTIONS(":serverId/:sessionId/xhr")
-class XhrPollingOPTIONSReceive extends SockJsAction {
-  def nLastTokensToRemoveFromPathInfo = 3
-
-  def execute() {
-    xhrOPTIONS()
-  }
-}
-
-@OPTIONS(":serverId/:sessionId/xhr_send")
-class XhrPollingOPTIONSSend extends SockJsAction {
-  def nLastTokensToRemoveFromPathInfo = 3
-
-  def execute() {
-    xhrOPTIONS()
-  }
-}
-
 @POST(":serverId/:sessionId/xhr")
 class XhrPollingReceive extends NonWebSocketSessionReceiverActionActor with SkipCsrfCheck {
   def nLastTokensToRemoveFromPathInfo = 3
@@ -396,7 +343,6 @@ class XhrPollingReceive extends NonWebSocketSessionReceiverActionActor with Skip
     val sessionId = param("sessionId")
 
     handleCookie()
-    setCORS()
     setNoClientCache()
 
     lookupOrCreateNonWebSocketSessionActor(sessionId)
@@ -484,18 +430,8 @@ class XhrSend extends NonWebSocketSessionActionActor with SkipCsrfCheck {
         nonWebSocketSession ! MessagesFromSenderClient(messages)
         response.setStatus(HttpResponseStatus.NO_CONTENT)
         response.setHeader(HttpHeaders.Names.CONTENT_TYPE, "text/plain; charset=UTF-8")
-        setCORS()
         respond()
     }
-  }
-}
-
-@OPTIONS(":serverId/:sessionId/xhr_streaming")
-class XhrStreamingOPTIONSReceive extends SockJsAction {
-  def nLastTokensToRemoveFromPathInfo = 3
-
-  def execute() {
-    xhrOPTIONS()
   }
 }
 
@@ -507,7 +443,6 @@ class XhrStreamingReceive extends NonWebSocketSessionReceiverActionActor with Sk
     val sessionId = param("sessionId")
 
     handleCookie()
-    setCORS()
     setNoClientCache()
 
     // There's always 2KB prelude, even for immediate close frame
@@ -584,7 +519,6 @@ class HtmlFileReceive extends NonWebSocketSessionReceiverActionActor {
     val sessionId = param("sessionId")
 
     handleCookie()
-    setCORS()
     setNoClientCache()
 
     lookupOrCreateNonWebSocketSessionActor(sessionId)
@@ -685,7 +619,6 @@ class JsonPPollingReceive extends NonWebSocketSessionReceiverActionActor {
     val sessionId = param("sessionId")
 
     handleCookie()
-    setCORS()
     setNoClientCache()
 
     lookupOrCreateNonWebSocketSessionActor(sessionId)
@@ -794,7 +727,6 @@ class JsonPPollingSend extends NonWebSocketSessionActionActor with SkipCsrfCheck
         nonWebSocketSession ! MessagesFromSenderClient(messages)
         // Konqueror does weird things on 204.
         // As a workaround we need to respond with something - let it be the string "ok".
-        setCORS()
         setNoClientCache()
         respondText("ok")
     }
@@ -809,7 +741,6 @@ class EventSourceReceive extends NonWebSocketSessionReceiverActionActor {
     val sessionId = param("sessionId")
 
     handleCookie()
-    setCORS()
     setNoClientCache()
 
     lookupOrCreateNonWebSocketSessionActor(sessionId)

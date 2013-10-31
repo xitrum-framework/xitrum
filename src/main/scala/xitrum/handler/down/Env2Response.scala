@@ -3,7 +3,6 @@ package xitrum.handler.down
 import org.jboss.netty.buffer.ChannelBuffers
 import org.jboss.netty.channel.{ChannelHandler, SimpleChannelDownstreamHandler, ChannelHandlerContext, MessageEvent, Channels}
 import org.jboss.netty.handler.codec.http.{HttpHeaders, HttpMethod, HttpRequest, HttpResponse, HttpResponseStatus}
-
 import ChannelHandler.Sharable
 import HttpHeaders.Names._
 import HttpMethod._
@@ -13,6 +12,7 @@ import xitrum.Config
 import xitrum.etag.Etag
 import xitrum.handler.HandlerEnv
 import xitrum.util.{ChannelBufferToBytes, Gzip, Mime}
+import xitrum.etag.NotModified
 
 @Sharable
 class Env2Response extends SimpleChannelDownstreamHandler {
@@ -33,6 +33,8 @@ class Env2Response extends SimpleChannelDownstreamHandler {
       response.setContent(ChannelBuffers.EMPTY_BUFFER)
     else if (!tryEtag(request, response))
       Gzip.tryCompressBigTextualResponse(request, response)
+
+    Env2Response.setDefaultCORS(env)
 
     // Keep alive, channel reading resuming/closing etc. are handled
     // by the code that sends the response (Responder#respond)
@@ -92,5 +94,62 @@ class Env2Response extends SimpleChannelDownstreamHandler {
       Etag.set(response, etag)
       false
     }
+  }
+
+}
+object Env2Response {
+  /** Set default CORS setting for the whole site. */
+  def setDefaultCORS(env: HandlerEnv) {
+    if (Config.xitrum.response.corsAllowOrigins.isDefined) setCORS(env, Config.xitrum.response.corsAllowOrigins.get)
+  }
+
+  def setCORS(env: HandlerEnv, corsAllowOrigins: Seq[String]) {
+    val request  = env.request
+    val response = env.response
+
+    // Access-Control-Max-Age
+    if (env.request.getMethod == HttpMethod.OPTIONS)
+      NotModified.setClientCacheAggressively(response)
+
+    val requestOrigin = request.getHeader(HttpHeaders.Names.ORIGIN)
+
+    // Access-Control-Allow-Origin
+    if (!response.containsHeader(HttpHeaders.Names.ACCESS_CONTROL_ALLOW_ORIGIN)) {
+      if (corsAllowOrigins(0).equals("*")){
+          if (requestOrigin == null || requestOrigin == "null"){
+            response.setHeader(HttpHeaders.Names.ACCESS_CONTROL_ALLOW_ORIGIN, "*")
+          } else {
+            response.setHeader(HttpHeaders.Names.ACCESS_CONTROL_ALLOW_ORIGIN, requestOrigin)
+          }
+      } else {
+        if (corsAllowOrigins.contains(requestOrigin)){
+          response.setHeader(HttpHeaders.Names.ACCESS_CONTROL_ALLOW_ORIGIN, requestOrigin)
+        } else {
+          response.setHeader(HttpHeaders.Names.ACCESS_CONTROL_ALLOW_ORIGIN, corsAllowOrigins.mkString(", "))
+        }
+      }
+    }
+
+    // Access-Control-Allow-Credentials
+    if (!response.containsHeader(HttpHeaders.Names.ACCESS_CONTROL_ALLOW_CREDENTIALS)) {
+      response.setHeader(HttpHeaders.Names.ACCESS_CONTROL_ALLOW_CREDENTIALS, true)
+    }
+
+    // Access-Control-Allow-Methods
+    var allowMethods = HttpMethod.OPTIONS.getName
+    if (env.route != null) {
+      println("env.route.klass: " + env.route.klass)
+
+      Config.routes.corsAllowMethods.get(env.route.klass) match {
+          case Some(methods) => allowMethods = allowMethods + ", " + methods
+          case ignore =>
+      }
+    }
+    response.setHeader(HttpHeaders.Names.ACCESS_CONTROL_ALLOW_METHODS, allowMethods)
+
+    // Access-Control-Allow-Headers
+    val accessControlRequestHeaders = request.getHeader(HttpHeaders.Names.ACCESS_CONTROL_REQUEST_HEADERS)
+    if (accessControlRequestHeaders != null)
+      response.setHeader(HttpHeaders.Names.ACCESS_CONTROL_ALLOW_HEADERS, accessControlRequestHeaders)
   }
 }

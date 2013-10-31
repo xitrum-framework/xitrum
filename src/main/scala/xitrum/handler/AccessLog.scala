@@ -51,6 +51,10 @@ object AccessLog extends Log {
     if (log.isDebugEnabled) log.debug(msgWithTime(className, action, beginTimestamp) + extraInfo(action, 0, false))
   }
 
+  def logOPTIONS(request: HttpRequest) {
+    log.debug("OPTIONS " + request.getUri)
+  }
+
   //----------------------------------------------------------------------------
 
   private def msgWithTime(className: String, action: Action, beginTimestamp: Long) = {

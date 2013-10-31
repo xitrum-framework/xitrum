@@ -3,6 +3,8 @@ package xitrum
 import java.io.File
 import java.nio.charset.Charset
 import java.util.{Map => JMap}
+
+import scala.collection.JavaConverters._
 import scala.util.control.NonFatal
 
 import com.typesafe.config.{Config => TConfig, ConfigFactory}
@@ -80,7 +82,7 @@ class KeystoreConfig(config: TConfig) {
 }
 
 class ReverseProxyConfig(config: TConfig) {
-  val ips     = config.getStringList("ips")
+  val ips     = config.getStringList("ips").asScala
   val baseUrl = config.getString("baseUrl")
 }
 
@@ -104,13 +106,14 @@ class RequestConfig(config: TConfig) {
   val charsetName          = config.getString("charset")
   val maxInitialLineLength = config.getInt("maxInitialLineLength")
   val maxSizeInMB          = config.getInt("maxSizeInMB")
-  val filteredParams       = config.getStringList("filteredParams")
+  val filteredParams       = config.getStringList("filteredParams").asScala
 
   val charset = Charset.forName(charsetName)
 }
 
 class ResponseConfig(config: TConfig) {
-  val autoGzip = config.getBoolean("autoGzip")
+  val autoGzip         = config.getBoolean("autoGzip")
+  val corsAllowOrigins = if (config.hasPath("corsAllowOrigins")) Some(config.getStringList("corsAllowOrigins").asScala) else None
 }
 
 class Config(val config: TConfig) extends Log {

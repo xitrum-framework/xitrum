@@ -13,10 +13,10 @@ import akka.actor.{Actor, Props}
 import com.esotericsoftware.reflectasm.ConstructorAccess
 
 import xitrum.{Action, ActionActor, Config}
-import xitrum.handler.HandlerEnv
+import xitrum.etag.NotModified
+import xitrum.handler.{AccessLog, HandlerEnv}
 import xitrum.handler.down.XSendFile
 import xitrum.sockjs.SockJsPrefix
-import xitrum.etag.NotModified
 
 object Dispatcher {
   private val classOfActor = classOf[Actor]
@@ -61,8 +61,29 @@ class Dispatcher extends SimpleChannelUpstreamHandler with BadClientSilencer {
     val queryParams = env.queryParams
     val bodyParams  = env.bodyParams
 
+    // Handle OPTIONS request
+    if (request.getMethod == HttpMethod.OPTIONS) {
+      Config.routes.route(HttpMethod.GET,    pathInfo) orElse
+      Config.routes.route(HttpMethod.POST,   pathInfo) orElse
+      Config.routes.route(HttpMethod.PUT,    pathInfo) orElse
+      Config.routes.route(HttpMethod.PATCH,  pathInfo) orElse
+      Config.routes.route(HttpMethod.DELETE, pathInfo) match {
+        case Some((route, pathParams)) =>
+          env.route = route
+          env.response = new DefaultHttpResponse(HTTP_1_1, NO_CONTENT)
+          ctx.getChannel.write(env)
+          AccessLog.logOPTIONS(request)
+
+        case None =>
+          // TODO: Handle 404
+      }
+
+      return
+    }
+
     // Look up GET if method is HEAD
     val requestMethod = if (request.getMethod == HttpMethod.HEAD) HttpMethod.GET else request.getMethod
+
     Config.routes.route(requestMethod, pathInfo) match {
       case Some((route, pathParams)) =>
         env.route      = route

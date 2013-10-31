@@ -114,10 +114,6 @@ class RouteCollector extends Log {
         case ( 1, "DELETE") => routes.lastDELETEs
         case ( 0, "DELETE") => routes.otherDELETEs
 
-        case (-1, "OPTIONS") => routes.firstOPTIONSs
-        case ( 1, "OPTIONS") => routes.lastOPTIONSs
-        case ( 0, "OPTIONS") => routes.otherOPTIONSs
-
         case (-1, "WEBSOCKET") => routes.firstWEBSOCKETs
         case ( 1, "WEBSOCKET") => routes.lastWEBSOCKETs
         case ( 0, "WEBSOCKET") => routes.otherWEBSOCKETs
@@ -221,8 +217,6 @@ class RouteCollector extends Log {
       getStrings(annotation).map(("PATCH", _))
     else if (tpe == typeOfDELETE)
       getStrings(annotation).map(("DELETE", _))
-    else if (tpe == typeOfOPTIONS)
-      getStrings(annotation).map(("OPTIONS", _))
     else if (tpe == typeOfWEBSOCKET)
       getStrings(annotation).map(("WEBSOCKET", _))
     else

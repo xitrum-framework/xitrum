@@ -23,7 +23,6 @@ object ActionAnnotations {
   val typeOfPUT       = universe.typeOf[PUT]
   val typeOfPATCH     = universe.typeOf[PATCH]
   val typeOfDELETE    = universe.typeOf[DELETE]
-  val typeOfOPTIONS   = universe.typeOf[OPTIONS]
   val typeOfWEBSOCKET = universe.typeOf[WEBSOCKET]
   val typeOfSOCKJS    = universe.typeOf[SOCKJS]
 
