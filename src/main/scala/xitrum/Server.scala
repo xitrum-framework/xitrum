@@ -34,15 +34,12 @@ object Server extends Log {
     // http://stackoverflow.com/questions/16202501/how-can-i-override-a-typesafe-config-list-value-on-the-command-line
     System.setProperty("akka.loggers.0", "akka.event.slf4j.Slf4jLogger")
 
-    Config.xitrum.templateEngine.start()
+    Config.xitrum.templateEngine.foreach(_.start())
     Config.xitrum.cache.start()
     Config.xitrum.session.store.start()
 
     // Trick to start actorRegistry on startup
     SockJsAction.entropy()
-
-    // templateEngine is lazy, force its initialization here
-    Config.xitrum.templateEngine
 
     val routes = Config.routes
     routes.logRoutes(false)

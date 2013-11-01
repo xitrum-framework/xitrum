@@ -48,8 +48,15 @@ trait Renderer {
    * @param options specific to the configured template engine
    */
   def renderView(customLayout: () => Any, location: Class[_ <: Action], options: Map[String, Any]): String = {
-    renderedView = Config.xitrum.templateEngine.renderView(location, this, options)
-    customLayout.apply().toString
+    Config.xitrum.templateEngine match {
+      case Some(engine) =>
+        renderedView = engine.renderView(location, this, options)
+        customLayout.apply().toString
+
+      case None =>
+        log.warn("No template engine is configured")
+        ""
+    }
   }
 
   def renderView(location: Class[_ <: Action], options: Map[String, Any]): String =
@@ -76,7 +83,16 @@ trait Renderer {
   //----------------------------------------------------------------------------
 
   def renderViewNoLayout(location: Class[_ <: Action], options: Map[String, Any]): String =
-    Config.xitrum.templateEngine.renderView(location, this, options)
+    Config.xitrum.templateEngine match {
+      case Some(engine) =>
+        val ret = engine.renderView(location, this, options)
+        renderedView = ret
+        ret
+
+      case None =>
+        log.warn("No template engine is configured")
+        ""
+    }
 
   def renderViewNoLayout(location: Class[_ <: Action]): String =
     renderViewNoLayout(location, Map())
@@ -90,7 +106,14 @@ trait Renderer {
   //----------------------------------------------------------------------------
 
   def renderFragment(location: Class[_ <: Action], fragment: String, options: Map[String, Any]): String =
-    Config.xitrum.templateEngine.renderFragment(location, fragment, this, options)
+    Config.xitrum.templateEngine match {
+      case Some(engine) =>
+        engine.renderFragment(location, fragment, this, options)
+
+      case None =>
+        log.warn("No template engine is configured")
+        ""
+    }
 
   def renderFragment(fragment: String, options: Map[String, Any]): String =
     renderFragment(getClass, fragment, options)
