@@ -4,20 +4,19 @@ import org.json4s.{DefaultFormats, NoTypeHints}
 import org.json4s.native.Serialization
 
 object Json {
-  private implicit val generateFormats = Serialization.formats(NoTypeHints)
-  private implicit val parseFormats    = DefaultFormats
+  private implicit val noTypeHints = Serialization.formats(NoTypeHints)
 
   /**
    * Generates JSON string from Scala object (case class, Map, Seq etc.).
    * See https://github.com/json4s/json4s#serialization
    */
-  def generate(caseObject: AnyRef): String =
-    Serialization.write(caseObject)(generateFormats)
+  def generate(scalaObject: AnyRef): String =
+    Serialization.write(scalaObject)(noTypeHints)
 
   /**
    * Parses JSON string to Scala object (case class, Map, Seq etc.).
    * See https://github.com/json4s/json4s#serialization
    */
   def parse[T](jsonString: String)(implicit m: Manifest[T]): T =
-    Serialization.read[T](jsonString)(parseFormats, m)
+    Serialization.read[T](jsonString)(DefaultFormats, m)
 }
