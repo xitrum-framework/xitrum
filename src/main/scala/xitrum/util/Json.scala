@@ -8,14 +8,14 @@ object Json {
   private implicit val parseFormats    = DefaultFormats
 
   /**
-   * Generates JSON string from case objects etc.
+   * Generates JSON string from Scala object (case class, Map, Seq etc.).
    * See https://github.com/json4s/json4s#serialization
    */
   def generate(caseObject: AnyRef): String =
     Serialization.write(caseObject)(generateFormats)
 
   /**
-   * Parses JSON string to case object.
+   * Parses JSON string to Scala object (case class, Map, Seq etc.).
    * See https://github.com/json4s/json4s#serialization
    */
   def parse[T](jsonString: String)(implicit m: Manifest[T]): T =
