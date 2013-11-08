@@ -25,7 +25,7 @@ resolvers += "SonatypeReleases" at "http://oss.sonatype.org/content/repositories
 libraryDependencies += "org.slf4j" % "slf4j-api" % "1.7.5" % "provided"
 
 // Netty is the core of Xitrum's HTTP(S) feature
-libraryDependencies += "io.netty" % "netty" % "3.7.0.Final"
+libraryDependencies += "io.netty" % "netty" % "3.8.0.Final"
 
 // For clustering SockJS; Akka is included here
 libraryDependencies += "tv.cntt" %% "glokka" % "1.3"
