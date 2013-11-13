@@ -113,7 +113,7 @@ class RequestConfig(config: TConfig) {
 
 class ResponseConfig(config: TConfig) {
   val autoGzip         = config.getBoolean("autoGzip")
-  val corsAllowOrigins = if (config.hasPath("corsAllowOrigins")) Some(config.getStringList("corsAllowOrigins").asScala) else None
+  val corsAllowOrigins = if (config.hasPath("corsAllowOrigins")) config.getStringList("corsAllowOrigins").asScala else Seq[String]()
 }
 
 class Config(val config: TConfig) extends Log {

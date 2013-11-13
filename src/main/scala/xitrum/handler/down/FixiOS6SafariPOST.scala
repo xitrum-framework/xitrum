@@ -33,9 +33,6 @@ class FixiOS6SafariPOST extends ChannelDownstreamHandler with Log {
 
     val response = m.asInstanceOf[HttpResponse]
 
-    // This is the last Xitrum handler, log the response
-    if (log.isTraceEnabled) log.trace(response.toString)
-
     if (request.getMethod == HttpMethod.POST && !response.containsHeader(HttpHeaders.Names.CACHE_CONTROL))
       NotModified.setNoClientCache(response)
 

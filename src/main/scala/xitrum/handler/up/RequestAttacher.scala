@@ -6,6 +6,8 @@ import org.jboss.netty.handler.codec.http.HttpRequest
 import org.jboss.netty.channel.SimpleChannelUpstreamHandler
 import org.jboss.netty.channel.MessageEvent
 
+import xitrum.handler.Attachment
+
 object RequestAttacher {
   /**
    * FixiOS6SafariPOST, XSendFile, and XSendResource require the HttpRequest to be
@@ -15,9 +17,9 @@ object RequestAttacher {
    * See DefaultHttpChannelPipelineFactory.
    */
   def retrieveOrSendDownstream(ctx: ChannelHandlerContext, e: ChannelEvent): HttpRequest = {
-    val request = ctx.getChannel.getAttachment.asInstanceOf[HttpRequest]
-    if (request == null) ctx.sendDownstream(e)
-    request
+    val attachment = ctx.getChannel.getAttachment.asInstanceOf[Attachment]
+    if (attachment == null) ctx.sendDownstream(e)
+    attachment.request
   }
 }
 
@@ -34,8 +36,9 @@ class RequestAttacher extends SimpleChannelUpstreamHandler with BadClientSilence
       return
     }
 
-    val request = m.asInstanceOf[HttpRequest]
-    ctx.getChannel.setAttachment(request)
+    val request    = m.asInstanceOf[HttpRequest]
+    val attachment = Attachment(request, None)
+    ctx.getChannel.setAttachment(attachment)
     ctx.sendUpstream(e)
   }
 }

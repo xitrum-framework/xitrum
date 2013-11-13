@@ -2,7 +2,6 @@ package xitrum.handler.up
 
 import java.io.File
 import scala.collection.mutable.{Map => MMap}
-
 import org.jboss.netty.channel._
 import org.jboss.netty.handler.codec.http._
 import ChannelHandler.Sharable
@@ -14,7 +13,7 @@ import com.esotericsoftware.reflectasm.ConstructorAccess
 
 import xitrum.{Action, ActionActor, Config}
 import xitrum.etag.NotModified
-import xitrum.handler.{AccessLog, HandlerEnv}
+import xitrum.handler.{AccessLog, Attachment, HandlerEnv}
 import xitrum.handler.down.XSendFile
 import xitrum.scope.request.PathInfo
 import xitrum.sockjs.SockJsPrefix
@@ -60,7 +59,20 @@ class Dispatcher extends SimpleChannelUpstreamHandler with BadClientSilencer {
     val request  = env.request
     val pathInfo = env.pathInfo
 
-    if (handleOPTIONS(ctx, env, request, pathInfo)) return
+    val attached = ctx.getChannel.getAttachment.asInstanceOf[Attachment]
+    val attachment = {
+      if (attached != null) {
+        Attachment(attached.request, Some(pathInfo))
+      } else {
+        Attachment(request, Some(pathInfo))
+      }
+    }
+    // pathInfo will be checked in OPTIONSResponse
+    ctx.getChannel.setAttachment(attachment)
+    if (request.getMethod == HttpMethod.OPTIONS) {
+      ctx.getChannel.write(env)
+      return
+    }
 
     // Look up GET if method is HEAD
     val requestMethod = if (request.getMethod == HttpMethod.HEAD) HttpMethod.GET else request.getMethod
@@ -68,6 +80,7 @@ class Dispatcher extends SimpleChannelUpstreamHandler with BadClientSilencer {
       case Some((route, pathParams)) =>
         env.route      = route
         env.pathParams = pathParams
+        env.response.setStatus(OK)
         Dispatcher.dispatch(route.klass, env)
 
       case None =>
@@ -76,30 +89,7 @@ class Dispatcher extends SimpleChannelUpstreamHandler with BadClientSilencer {
   }
 
   /** @return true if the request has been handled */
-  private def handleOPTIONS(ctx: ChannelHandlerContext, env: HandlerEnv, request: HttpRequest, pathInfo: PathInfo): Boolean = {
-    if (request.getMethod == HttpMethod.OPTIONS) {
-      Config.routes.route(HttpMethod.GET,    pathInfo) orElse
-      Config.routes.route(HttpMethod.POST,   pathInfo) orElse
-      Config.routes.route(HttpMethod.PUT,    pathInfo) orElse
-      Config.routes.route(HttpMethod.PATCH,  pathInfo) orElse
-      Config.routes.route(HttpMethod.DELETE, pathInfo) match {
-        case Some((route, pathParams)) =>
-          env.route = route
-          env.response = new DefaultHttpResponse(HTTP_1_1, NO_CONTENT)
-          ctx.getChannel.write(env)
-          AccessLog.logOPTIONS(request)
-
-        case None =>
-          handle404(ctx, env)
-      }
-      true
-    } else {
-      false
-    }
-  }
-
-  /** @return true if the request has been handled */
-  private def handleIndexHtmlFallback(ctx: ChannelHandlerContext, env: HandlerEnv, pathInfo: PathInfo):Boolean = {
+  private def handleIndexHtmlFallback(ctx: ChannelHandlerContext, env: HandlerEnv, pathInfo: PathInfo): Boolean = {
     // Try to fallback to index.html if it exists
     val staticPath = Config.root + "/public" + pathInfo.decodedWithIndexHtml
     val file       = new File(staticPath)

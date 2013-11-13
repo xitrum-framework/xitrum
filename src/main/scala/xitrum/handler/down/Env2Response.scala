@@ -12,7 +12,6 @@ import xitrum.Config
 import xitrum.etag.Etag
 import xitrum.handler.HandlerEnv
 import xitrum.util.{ChannelBufferToBytes, Gzip, Mime}
-import xitrum.etag.NotModified
 
 @Sharable
 class Env2Response extends SimpleChannelDownstreamHandler {
@@ -28,13 +27,11 @@ class Env2Response extends SimpleChannelDownstreamHandler {
     val response = env.response
     val future   = e.getFuture
 
-    if (request.getMethod == HEAD && response.getStatus == OK)
+    if ((request.getMethod == HEAD || request.getMethod == OPTIONS) && response.getStatus == OK)
       // http://stackoverflow.com/questions/3854842/content-length-header-with-head-requests
       response.setContent(ChannelBuffers.EMPTY_BUFFER)
     else if (!tryEtag(request, response))
       Gzip.tryCompressBigTextualResponse(request, response)
-
-    setCORS(env)
 
     // Keep alive, channel reading resuming/closing etc. are handled
     // by the code that sends the response (Responder#respond)
@@ -94,56 +91,5 @@ class Env2Response extends SimpleChannelDownstreamHandler {
       Etag.set(response, etag)
       false
     }
-  }
-
-  /** Set default CORS setting for the whole site. */
-  private def setCORS(env: HandlerEnv) {
-    if (Config.xitrum.response.corsAllowOrigins.isEmpty) return
-
-    val corsAllowOrigins = Config.xitrum.response.corsAllowOrigins.get
-
-    val request  = env.request
-    val response = env.response
-
-    // Access-Control-Max-Age
-    if (env.request.getMethod == OPTIONS)
-      NotModified.setClientCacheAggressively(response)
-
-    val requestOrigin = request.getHeader(ORIGIN)
-
-    // Access-Control-Allow-Origin
-    if (!response.containsHeader(ACCESS_CONTROL_ALLOW_ORIGIN)) {
-      if (corsAllowOrigins(0).equals("*")) {
-        if (requestOrigin == null || requestOrigin == "null") {
-          response.setHeader(ACCESS_CONTROL_ALLOW_ORIGIN, "*")
-        } else {
-          response.setHeader(ACCESS_CONTROL_ALLOW_ORIGIN, requestOrigin)
-        }
-      } else {
-        if (corsAllowOrigins.contains(requestOrigin)) {
-          response.setHeader(ACCESS_CONTROL_ALLOW_ORIGIN, requestOrigin)
-        } else {
-          response.setHeader(ACCESS_CONTROL_ALLOW_ORIGIN, corsAllowOrigins.mkString(", "))
-        }
-      }
-    }
-
-    // Access-Control-Allow-Credentials
-    if (!response.containsHeader(ACCESS_CONTROL_ALLOW_CREDENTIALS)) {
-      response.setHeader(ACCESS_CONTROL_ALLOW_CREDENTIALS, true)
-    }
-
-    // Access-Control-Allow-Methods
-    if (env.route != null) {
-      val allowMethods =
-        OPTIONS.getName + ", " +
-        Config.routes.corsAllowMethods.get(env.route.klass).get
-      response.setHeader(ACCESS_CONTROL_ALLOW_METHODS, allowMethods)
-    }
-
-    // Access-Control-Allow-Headers
-    val accessControlRequestHeaders = request.getHeader(ACCESS_CONTROL_REQUEST_HEADERS)
-    if (accessControlRequestHeaders != null)
-      response.setHeader(ACCESS_CONTROL_ALLOW_HEADERS, accessControlRequestHeaders)
   }
 }

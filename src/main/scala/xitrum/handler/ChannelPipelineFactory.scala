@@ -46,6 +46,8 @@ object DefaultHttpChannelPipelineFactory {
 
   // Downstream sharable handlers
 
+  lazy val setCORS              = new SetCORS
+  lazy val OPTIONSResponse      = new OPTIONSResponse
   lazy val fixiOS6SafariPOST    = new FixiOS6SafariPOST
   lazy val xSendFile            = new XSendFile
   lazy val xSendResource        = new XSendResource
@@ -75,6 +77,8 @@ object DefaultHttpChannelPipelineFactory {
     // Downstream
 
     pipeline.remove(classOf[ChunkedWriteHandler])
+    pipeline.remove(classOf[SetCORS])
+    pipeline.remove(classOf[OPTIONSResponse])
     pipeline.remove(classOf[FixiOS6SafariPOST])
     pipeline.remove(classOf[XSendFile])
     pipeline.remove(classOf[XSendResource])
@@ -118,6 +122,8 @@ class DefaultHttpChannelPipelineFactory extends CPF {
 
     ret.addLast("HttpResponseEncoder", new HttpResponseEncoder)
     ret.addLast("ChunkedWriteHandler", new ChunkedWriteHandler)  // For writing ChunkedFile, at XSendFile
+    ret.addLast("setCORS",             setCORS)
+    ret.addLast("OPTIONSResponse",     OPTIONSResponse)
     ret.addLast("fixiOS6SafariPOST",   fixiOS6SafariPOST)
     ret.addLast("xSendFile",           xSendFile)
     ret.addLast("xSendResource",       xSendResource)

@@ -29,7 +29,7 @@ class PublicFileServer extends SimpleChannelUpstreamHandler with BadClientSilenc
     }
 
     val request = m.asInstanceOf[HttpRequest]
-    if (request.getMethod != GET && request.getMethod != HEAD) {
+    if (request.getMethod != GET && request.getMethod != HEAD && request.getMethod != OPTIONS) {
       ctx.sendUpstream(e)
       return
     }
@@ -42,7 +42,7 @@ class PublicFileServer extends SimpleChannelUpstreamHandler with BadClientSilenc
 
     sanitizedAbsStaticPath(pathInfo) match {
       case None =>
-        val response = new DefaultHttpResponse(HTTP_1_1, OK)
+        val response = new DefaultHttpResponse(HTTP_1_1, NOT_FOUND)
         XSendFile.set404Page(response, false)
         ctx.getChannel.write(response)
 
@@ -50,7 +50,10 @@ class PublicFileServer extends SimpleChannelUpstreamHandler with BadClientSilenc
         val file = new File(abs)
         if (file.isFile && file.exists) {
           val response = new DefaultHttpResponse(HTTP_1_1, OK)
-
+          if (request.getMethod == OPTIONS) {
+            ctx.getChannel.write(response)
+            return
+          }
           if (!Config.xitrum.staticFile.revalidate)
             NotModified.setClientCacheAggressively(response)
 

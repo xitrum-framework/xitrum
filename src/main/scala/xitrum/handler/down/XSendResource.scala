@@ -55,7 +55,7 @@ object XSendResource extends Log {
           if (gzipped)         response.setHeader(CONTENT_ENCODING, "gzip")
 
           HttpHeaders.setContentLength(response, bytes.length)
-          if (request.getMethod == HEAD && response.getStatus == OK)
+          if ((request.getMethod == HEAD || request.getMethod == OPTIONS) && response.getStatus == OK)
             // http://stackoverflow.com/questions/3854842/content-length-header-with-head-requests
             response.setContent(ChannelBuffers.EMPTY_BUFFER)
           else

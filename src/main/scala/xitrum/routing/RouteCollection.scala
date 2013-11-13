@@ -100,32 +100,6 @@ class RouteCollection(
     mmap.mapValues { routes => ReverseRoute(routes) }.toMap
   }
 
-  // No need to store OPTIONS here
-  // Value example: "GET, HEAD, POST"
-  lazy val corsAllowMethods: Map[Class[_], String] = {
-    val ret = MMap[Class[_], String]()
-
-    val routeArray = ArrayBuffer[Route]()
-    routeArray.appendAll(allFirsts(None))
-    routeArray.appendAll(allOthers(None))
-    routeArray.appendAll(allLasts(None))
-
-    routeArray.foreach { r =>
-      val klass  = r.klass
-      val method = if (r.httpMethod.getName == "GET") "GET, HEAD" else r.httpMethod.getName
-
-      ret.get(klass) match {
-        case None =>
-          ret(klass) = method
-
-        case Some(methods) =>
-          if (!methods.contains(method)) ret(klass) = methods + ", " + method
-      }
-    }
-
-    ret.toMap
-  }
-
   //----------------------------------------------------------------------------
   // Run only at startup, speed is not a problem
 
@@ -327,5 +301,31 @@ class RouteCollection(
       case Some(params) => Some(route, params)
       case None         => matchAndExtractPathParams(tokens, routes.tail)
     }
+  }
+
+  /** Used at SetCORS & OPTIONSResponse. */
+  def tryAllMethods(pathInfo: PathInfo): Seq[HttpMethod] = {
+    var methods = Seq[HttpMethod]()
+    route(HttpMethod.GET, pathInfo) match {
+      case Some(_) => methods = methods :+ HttpMethod.GET :+ HttpMethod.HEAD
+      case None =>
+    }
+    route(HttpMethod.POST, pathInfo) match {
+      case Some(_) => methods = methods :+ HttpMethod.POST
+      case None =>
+    }
+    route(HttpMethod.PUT, pathInfo) match {
+      case Some(_) => methods = methods :+ HttpMethod.PUT
+      case None =>
+    }
+    route(HttpMethod.PATCH, pathInfo) match {
+      case Some(_) => methods = methods :+ HttpMethod.PATCH
+      case None =>
+    }
+    route(HttpMethod.DELETE, pathInfo) match {
+      case Some(_) => methods = methods :+ HttpMethod.DELETE
+      case None =>
+    }
+    methods
   }
 }
