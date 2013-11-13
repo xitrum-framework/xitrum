@@ -40,12 +40,12 @@ object XSendFile extends Log {
 
   /** @param path see Renderer#renderFile */
   def setHeader(response: HttpResponse, path: String, fromAction: Boolean) {
-    response.setHeader(X_SENDFILE_HEADER, path)
-    if (fromAction) response.setHeader(X_SENDFILE_HEADER_IS_FROM_ACTION, "true")
+    HttpHeaders.setHeader(response, X_SENDFILE_HEADER, path)
+    if (fromAction) HttpHeaders.setHeader(response, X_SENDFILE_HEADER_IS_FROM_ACTION, "true")
     HttpHeaders.setContentLength(response, 0)  // Env2Response checks Content-Length
   }
 
-  def isHeaderSet(response: HttpResponse) = response.containsHeader(X_SENDFILE_HEADER)
+  def isHeaderSet(response: HttpResponse) = response.headers.contains(X_SENDFILE_HEADER)
 
   def set404Page(response: HttpResponse, fromController: Boolean) {
     response.setStatus(NOT_FOUND)
@@ -84,8 +84,8 @@ object XSendFile extends Log {
           response.setContent(ChannelBuffers.EMPTY_BUFFER)
         } else {
           Etag.set(response, etag)
-          if (mimeo.isDefined) response.setHeader(CONTENT_TYPE,     mimeo.get)
-          if (gzipped)         response.setHeader(CONTENT_ENCODING, "gzip")
+          if (mimeo.isDefined) HttpHeaders.setHeader(response, CONTENT_TYPE,     mimeo.get)
+          if (gzipped)         HttpHeaders.setHeader(response, CONTENT_ENCODING, "gzip")
 
           HttpHeaders.setContentLength(response, bytes.length)
           if ((request.getMethod == HEAD || request.getMethod == OPTIONS) && response.getStatus == OK)
@@ -102,7 +102,7 @@ object XSendFile extends Log {
         // LAST_MODIFIED is not reliable as ETAG when this is a cluster of web servers,
         // but it's still good to give it a try
         val lastModifiedRfc2822 = NotModified.formatRfc2822(file.lastModified)
-        if (request.getHeader(IF_MODIFIED_SINCE) == lastModifiedRfc2822) {
+        if (HttpHeaders.getHeader(request, IF_MODIFIED_SINCE) == lastModifiedRfc2822) {
           response.setStatus(NOT_MODIFIED)
           HttpHeaders.setContentLength(response, 0)
           NoPipelining.setResponseHeaderAndResumeReadingForKeepAliveRequestOrCloseOnComplete(request, response, channel, e.getFuture)
@@ -119,14 +119,14 @@ object XSendFile extends Log {
             case Some((startIndex, endIndex)) =>
               val endIndex2 = if (endIndex >= 0) endIndex else raf.length - 1
               response.setStatus(PARTIAL_CONTENT)
-              response.setHeader(ACCEPT_RANGES, BYTES)
-              response.setHeader(CONTENT_RANGE, "bytes " + startIndex + "-" + endIndex2 + "/" + raf.length)
+              HttpHeaders.setHeader(response, ACCEPT_RANGES, BYTES)
+              HttpHeaders.setHeader(response, CONTENT_RANGE, "bytes " + startIndex + "-" + endIndex2 + "/" + raf.length)
               (startIndex, endIndex2 - startIndex + 1)
           }
 
           HttpHeaders.setContentLength(response, length)
-          response.setHeader(LAST_MODIFIED, lastModifiedRfc2822)
-          if (mimeo.isDefined) response.setHeader(CONTENT_TYPE, mimeo.get)
+          HttpHeaders.setHeader(response, LAST_MODIFIED, lastModifiedRfc2822)
+          if (mimeo.isDefined) HttpHeaders.setHeader(response, CONTENT_TYPE, mimeo.get)
           NoPipelining.setResponseHeaderForKeepAliveRequest(request, response)
           if (!noLog) AccessLog.logStaticFileAccess(remoteAddress, request, response)
 
@@ -180,7 +180,7 @@ object XSendFile extends Log {
    * @return None or Some((start index, end index)), negative end index means file length - 1
    */
   private def getRangeFromRequest(request: HttpRequest): Option[(Long, Long)] = {
-    val spec = request.getHeader(RANGE)
+    val spec = HttpHeaders.getHeader(request, RANGE)
 
     try {
       if (spec == null) {
@@ -237,19 +237,19 @@ class XSendFile extends ChannelDownstreamHandler {
     if (request == null) return
 
     val response = m.asInstanceOf[HttpResponse]
-    val path     = response.getHeader(X_SENDFILE_HEADER)
+    val path     = HttpHeaders.getHeader(response, X_SENDFILE_HEADER)
     if (path == null) {
       ctx.sendDownstream(e)
       return
     }
 
     // Remove non-standard header to avoid leaking information
-    response.removeHeader(X_SENDFILE_HEADER)
+    HttpHeaders.removeHeader(response, X_SENDFILE_HEADER)
 
     // See comment of X_SENDFILE_HEADER_IS_FROM_CONTROLLER
     // Remove non-standard header to avoid leaking information
-    val noLog = response.containsHeader(X_SENDFILE_HEADER_IS_FROM_ACTION)
-    if (noLog) response.removeHeader(X_SENDFILE_HEADER_IS_FROM_ACTION)
+    val noLog = response.headers.contains(X_SENDFILE_HEADER_IS_FROM_ACTION)
+    if (noLog) HttpHeaders.removeHeader(response, X_SENDFILE_HEADER_IS_FROM_ACTION)
 
     sendFile(ctx, e, request, response, path, noLog)
   }

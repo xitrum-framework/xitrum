@@ -12,7 +12,7 @@ object NoPipelining {
   // https://github.com/veebs/netty/commit/64f529945282e41eb475952fde382f234da8eec7
   def setResponseHeaderForKeepAliveRequest(request: HttpRequest, response: HttpResponse) {
     if (HttpHeaders.isKeepAlive(request))
-      response.setHeader(HttpHeaders.Names.CONNECTION, HttpHeaders.Values.KEEP_ALIVE)
+      HttpHeaders.setHeader(response, HttpHeaders.Names.CONNECTION, HttpHeaders.Values.KEEP_ALIVE)
   }
 
   /**
@@ -37,7 +37,7 @@ object NoPipelining {
       request: HttpRequest, response: HttpResponse,
       channel: Channel, channelFuture: ChannelFuture) {
     if (HttpHeaders.isKeepAlive(request)) {
-      response.setHeader(HttpHeaders.Names.CONNECTION, HttpHeaders.Values.KEEP_ALIVE)
+      HttpHeaders.setHeader(response, HttpHeaders.Names.CONNECTION, HttpHeaders.Values.KEEP_ALIVE)
       channelFuture.addListener(new ChannelFutureListener() {
         def operationComplete(future: ChannelFuture) { channel.setReadable(true) }
       })

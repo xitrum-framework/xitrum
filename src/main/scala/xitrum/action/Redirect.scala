@@ -18,7 +18,7 @@ trait Redirect {
   def redirectTo(location: String, status: HttpResponseStatus = FOUND): ChannelFuture = {
     response.setStatus(status)
     HttpHeaders.setContentLength(response, 0)
-    response.setHeader(LOCATION, location)
+    HttpHeaders.setHeader(response, LOCATION, location)
     respond()
   }
 

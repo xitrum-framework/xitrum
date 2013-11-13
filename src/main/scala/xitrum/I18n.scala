@@ -1,7 +1,9 @@
 package xitrum
 
 import scala.util.control.NonFatal
-import org.jboss.netty.handler.codec.http.HttpHeaders.Names
+import org.jboss.netty.handler.codec.http.HttpHeaders
+import HttpHeaders.Names
+
 import xitrum.i18n.PoLoader
 
 trait I18n {
@@ -15,7 +17,7 @@ trait I18n {
 
   /** @return List of languages sorted by priority from high to low */
   def browserLanguages: Array[String] = {
-    val header = request.getHeader(Names.ACCEPT_LANGUAGE)
+    val header = HttpHeaders.getHeader(request, Names.ACCEPT_LANGUAGE)
     if (header == null) return Array()
 
     val langs = header.split(",")

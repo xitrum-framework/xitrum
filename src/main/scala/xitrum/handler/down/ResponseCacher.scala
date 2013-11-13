@@ -78,7 +78,7 @@ object ResponseCacher extends Log {
     val bytes = Gzip.tryCompressBigTextualResponse(request, response)
 
     val headers = {
-      val list = response.getHeaders  // JList[JMap.Entry[String, String]], JMap.Entry is not Serializable!
+      val list = response.headers.entries  // JList[JMap.Entry[String, String]], JMap.Entry is not Serializable!
       val size = list.size
       val ret = new Array[(String, String)](size)
       for (i <- 0 until size) {
@@ -94,7 +94,7 @@ object ResponseCacher extends Log {
   private def deserializeToResponse(cachedResponse: CachedResponse): HttpResponse = {
     val (status, headers, bytes) = cachedResponse
     val response = new DefaultHttpResponse(HttpVersion.HTTP_1_1, HttpResponseStatus.valueOf(status))
-    for ((k, v) <- headers) response.addHeader(k, v)
+    for ((k, v) <- headers) HttpHeaders.addHeader(response, k, v)
     response.setContent(ChannelBuffers.wrappedBuffer(bytes))
     response
   }

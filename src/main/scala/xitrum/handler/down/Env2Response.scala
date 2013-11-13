@@ -54,8 +54,8 @@ class Env2Response extends SimpleChannelDownstreamHandler {
    * @return true if the NO_MODIFIED response is set by this method
    */
   private def tryEtag(request: HttpRequest, response: HttpResponse): Boolean = {
-    if (response.containsHeader(CACHE_CONTROL) &&
-        response.getHeader(CACHE_CONTROL).toLowerCase.contains("no-cache"))
+    if (response.headers.contains(CACHE_CONTROL) &&
+        HttpHeaders.getHeader(response, CACHE_CONTROL).toLowerCase.contains("no-cache"))
       return false
 
     if (response.getStatus != OK)
@@ -66,7 +66,7 @@ class Env2Response extends SimpleChannelDownstreamHandler {
     if (contentLengthInHeader == 0 || contentLengthInHeader != channelBuffer.readableBytes) return false
 
     // No need to calculate ETag if it has been set, e.g. by the controller
-    val etag1 = response.getHeader(ETAG)
+    val etag1 = HttpHeaders.getHeader(response, ETAG)
     if (etag1 != null) {
       compareAndSetETag(request, response, etag1)
     } else {
@@ -83,7 +83,7 @@ class Env2Response extends SimpleChannelDownstreamHandler {
       // Only send headers, the response content is set to empty
       // (decrease response transmission time)
       response.setStatus(NOT_MODIFIED)
-      response.removeHeader(CONTENT_TYPE)  // http://sockjs.github.com/sockjs-protocol/sockjs-protocol-0.3.3.html#section-25
+      HttpHeaders.removeHeader(response, CONTENT_TYPE) // http://sockjs.github.com/sockjs-protocol/sockjs-protocol-0.3.3.html#section-25
       HttpHeaders.setContentLength(response, 0)
       response.setContent(ChannelBuffers.EMPTY_BUFFER)
       true

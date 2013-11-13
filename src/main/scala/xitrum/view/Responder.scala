@@ -72,11 +72,11 @@ trait Responder extends Js with Flash with Knockout {
   private def respondHeadersForFirstChunk() {
     if (nonChunkedResponseOrFirstChunkSent) return
 
-    if (!response.containsHeader(CONTENT_TYPE))
-      response.setHeader(CONTENT_TYPE, "application/octet-stream")
+    if (!response.headers.contains(CONTENT_TYPE))
+      HttpHeaders.setHeader(response, CONTENT_TYPE, "application/octet-stream")
 
     // There should be no CONTENT_LENGTH header
-    response.removeHeader(CONTENT_LENGTH)
+    HttpHeaders.removeHeader(response, CONTENT_LENGTH)
 
     setNoClientCache()
 
@@ -147,7 +147,7 @@ trait Responder extends Js with Flash with Knockout {
         text.toString
       }
 
-    if (!nonChunkedResponseOrFirstChunkSent && !response.containsHeader(CONTENT_TYPE)) {
+    if (!nonChunkedResponseOrFirstChunkSent && !response.headers.contains(CONTENT_TYPE)) {
       // Set content type
       if (fallbackContentType != null) {
         // https://developers.google.com/speed/docs/best-practices/rendering#SpecifyCharsetEarly
@@ -157,12 +157,12 @@ trait Responder extends Js with Flash with Knockout {
           else
             fallbackContentType + "; charset=" + Config.xitrum.request.charset
 
-        response.setHeader(CONTENT_TYPE, withCharset)
+        HttpHeaders.setHeader(response, CONTENT_TYPE, withCharset)
       } else {
         if (textIsXml)
-          response.setHeader(CONTENT_TYPE, "application/xml; charset=" + Config.xitrum.request.charset)
+          HttpHeaders.setHeader(response, CONTENT_TYPE, "application/xml; charset=" + Config.xitrum.request.charset)
         else
-          response.setHeader(CONTENT_TYPE, "text/plain; charset=" + Config.xitrum.request.charset)
+          HttpHeaders.setHeader(response, CONTENT_TYPE, "text/plain; charset=" + Config.xitrum.request.charset)
       }
     }
 
@@ -305,8 +305,8 @@ trait Responder extends Js with Flash with Knockout {
       respondHeadersForFirstChunk()
       channel.write(new DefaultHttpChunk(channelBuffer))
     } else {
-      if (!response.containsHeader(CONTENT_TYPE))
-        response.setHeader(CONTENT_TYPE, "application/octet-stream")
+      if (!response.headers.contains(CONTENT_TYPE))
+        HttpHeaders.setHeader(response, CONTENT_TYPE, "application/octet-stream")
       HttpHeaders.setContentLength(response, channelBuffer.readableBytes)
       response.setContent(channelBuffer)
       respond()
@@ -355,7 +355,7 @@ trait Responder extends Js with Flash with Knockout {
    */
   def respondEventSource(data: Any, event: String = "message"): ChannelFuture = {
     if (!nonChunkedResponseOrFirstChunkSent) {
-      response.setHeader(CONTENT_TYPE, "text/event-stream; charset=UTF-8")
+      HttpHeaders.setHeader(response, CONTENT_TYPE, "text/event-stream; charset=UTF-8")
       response.setChunked(true)
       respondText("\r\n")  // Send a new line prelude, due to a bug in Opera
     }

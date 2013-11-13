@@ -26,7 +26,7 @@ object Etag extends Log {
   def quote(etag: String) = "\"" + etag + "\""
 
   def set(response: HttpResponse, etag: String) {
-    response.setHeader(ETAG, Etag.quote(etag))
+    HttpHeaders.setHeader(response, ETAG, Etag.quote(etag))
   }
 
   def forBytes(bytes: Array[Byte]): String = {
@@ -83,7 +83,7 @@ object Etag extends Log {
   //----------------------------------------------------------------------------
 
   def areEtagsIdentical(request: HttpRequest, etag: String) =
-    (request.getHeader(IF_NONE_MATCH) == quote(etag))
+    (HttpHeaders.getHeader(request, IF_NONE_MATCH) == quote(etag))
 
   /** @return true if NOT_MODIFIED response has been sent */
   def respondIfEtagsIdentical(action: Action, etag: String) = {

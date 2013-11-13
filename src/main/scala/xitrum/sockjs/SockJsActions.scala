@@ -429,7 +429,7 @@ class XhrSend extends NonWebSocketSessionActionActor with SkipCsrfCheck {
       case Registry.LookupResultOk(`sessionId`, nonWebSocketSession) =>
         nonWebSocketSession ! MessagesFromSenderClient(messages)
         response.setStatus(HttpResponseStatus.NO_CONTENT)
-        response.setHeader(HttpHeaders.Names.CONTENT_TYPE, "text/plain; charset=UTF-8")
+        HttpHeaders.setHeader(response, HttpHeaders.Names.CONTENT_TYPE, "text/plain; charset=UTF-8")
         respond()
     }
   }
@@ -447,7 +447,7 @@ class XhrStreamingReceive extends NonWebSocketSessionReceiverActionActor with Sk
 
     // There's always 2KB prelude, even for immediate close frame
     response.setChunked(true)
-    response.setHeader(HttpHeaders.Names.CONTENT_TYPE, "application/javascript; charset=" + Config.xitrum.request.charset)
+    HttpHeaders.setHeader(response, HttpHeaders.Names.CONTENT_TYPE, "application/javascript; charset=" + Config.xitrum.request.charset)
     respondBinary(SockJsAction.h2KB)
 
     lookupOrCreateNonWebSocketSessionActor(sessionId)
@@ -688,7 +688,7 @@ class JsonPPollingSend extends NonWebSocketSessionActionActor with SkipCsrfCheck
 
   def execute() {
     val body: String = try {
-      val contentType = request.getHeader(HttpHeaders.Names.CONTENT_TYPE)
+      val contentType = HttpHeaders.getHeader(request, HttpHeaders.Names.CONTENT_TYPE)
       if (contentType != null && contentType.toLowerCase.startsWith(HttpHeaders.Values.APPLICATION_X_WWW_FORM_URLENCODED)) {
         param("d")
       } else {
@@ -819,7 +819,7 @@ class WebsocketPOST extends SockJsAction with SkipCsrfCheck {
 
   def execute() {
     response.setStatus(HttpResponseStatus.METHOD_NOT_ALLOWED)
-    response.setHeader(HttpHeaders.Names.ALLOW, "GET")
+    HttpHeaders.setHeader(response, HttpHeaders.Names.ALLOW, "GET")
     respond()
   }
 }

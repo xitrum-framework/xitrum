@@ -66,7 +66,7 @@ class BodyParser extends SimpleChannelUpstreamHandler with BadClientSilencer {
     if (!method.equals(HttpMethod.POST) && !method.equals(HttpMethod.PUT) && !method.equals(HttpMethod.PATCH))
       return (MMap[String, Seq[String]](), MMap[String, Seq[FileUpload]]())
 
-    val requestContentType = request.getHeader(HttpHeaders.Names.CONTENT_TYPE)
+    val requestContentType = HttpHeaders.getHeader(request, HttpHeaders.Names.CONTENT_TYPE)
     if (requestContentType == null)
       return (MMap[String, Seq[String]](), MMap[String, Seq[FileUpload]]())
 

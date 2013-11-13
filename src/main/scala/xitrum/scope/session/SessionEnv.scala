@@ -21,7 +21,7 @@ trait SessionEnv extends Csrf {
    */
   lazy val requestCookies: Map[String, String] = {
     val decoder = new CookieDecoder
-    val header  = request.getHeader(Names.COOKIE)
+    val header  = HttpHeaders.getHeader(request, Names.COOKIE)
     if (header == null) {
       Map[String, String]()
     } else {
@@ -66,7 +66,7 @@ trait SessionEnv extends Csrf {
 
         val encoder = new CookieEncoder(true)
         encoder.addCookie(cookie)
-        response.addHeader(Names.SET_COOKIE, encoder.encode())
+        HttpHeaders.addHeader(response, Names.SET_COOKIE, encoder.encode())
       }
     }
   }

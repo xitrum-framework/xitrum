@@ -27,7 +27,7 @@ object BasicAuth {
   }
 
   private def getUsernameAndPassword(request: HttpRequest): Option[(String, String)] = {
-    val authorization = request.getHeader(HttpHeaders.Names.AUTHORIZATION)
+    val authorization = HttpHeaders.getHeader(request, HttpHeaders.Names.AUTHORIZATION)
     if (authorization == null || !authorization.startsWith("Basic ")) {
       None
     } else {
@@ -44,11 +44,11 @@ object BasicAuth {
   }
 
   private def respondBasic(channel: Channel, request: HttpRequest, response: HttpResponse, realm: String) {
-    response.setHeader(HttpHeaders.Names.WWW_AUTHENTICATE, "Basic realm=\"" + realm + "\"")
+    HttpHeaders.setHeader(response, HttpHeaders.Names.WWW_AUTHENTICATE, "Basic realm=\"" + realm + "\"")
     response.setStatus(HttpResponseStatus.UNAUTHORIZED)
 
     val cb = ChannelBuffers.copiedBuffer("Wrong username or password", Config.xitrum.request.charset)
-    response.setHeader(HttpHeaders.Names.CONTENT_TYPE, "text/plain; charset=" + Config.xitrum.request.charset)
+    HttpHeaders.setHeader(response, HttpHeaders.Names.CONTENT_TYPE, "text/plain; charset=" + Config.xitrum.request.charset)
     HttpHeaders.setContentLength(response, cb.readableBytes)
     response.setContent(cb)
 

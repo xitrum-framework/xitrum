@@ -31,11 +31,11 @@ object XSendResource extends Log {
   val X_SENDRESOURCE_HEADER_IS_FROM_CONTROLLER = "X-Sendresource-Is-From-Controller"
 
   def setHeader(response: HttpResponse, path: String, fromController: Boolean) {
-    response.setHeader(X_SENDRESOURCE_HEADER, path)
-    if (fromController) response.setHeader(X_SENDRESOURCE_HEADER_IS_FROM_CONTROLLER, "true")
+    HttpHeaders.setHeader(response, X_SENDRESOURCE_HEADER, path)
+    if (fromController) HttpHeaders.setHeader(response, X_SENDRESOURCE_HEADER_IS_FROM_CONTROLLER, "true")
   }
 
-  def isHeaderSet(response: HttpResponse) = response.containsHeader(X_SENDRESOURCE_HEADER)
+  def isHeaderSet(response: HttpResponse) = response.headers.contains(X_SENDRESOURCE_HEADER)
 
   /** @return false if not found */
   def sendResource(ctx: ChannelHandlerContext, e: ChannelEvent, request: HttpRequest, response: HttpResponse, path: String, noLog: Boolean) {
@@ -51,8 +51,8 @@ object XSendResource extends Log {
           response.setContent(ChannelBuffers.EMPTY_BUFFER)
         } else {
           Etag.set(response, etag)
-          if (mimeo.isDefined) response.setHeader(CONTENT_TYPE, mimeo.get)
-          if (gzipped)         response.setHeader(CONTENT_ENCODING, "gzip")
+          if (mimeo.isDefined) HttpHeaders.setHeader(response, CONTENT_TYPE, mimeo.get)
+          if (gzipped)         HttpHeaders.setHeader(response, CONTENT_ENCODING, "gzip")
 
           HttpHeaders.setContentLength(response, bytes.length)
           if ((request.getMethod == HEAD || request.getMethod == OPTIONS) && response.getStatus == OK)
@@ -97,19 +97,19 @@ class XSendResource extends ChannelDownstreamHandler {
     if (request == null) return
 
     val response = m.asInstanceOf[HttpResponse]
-    val path     = response.getHeader(X_SENDRESOURCE_HEADER)
+    val path     = HttpHeaders.getHeader(response, X_SENDRESOURCE_HEADER)
     if (path == null) {
       ctx.sendDownstream(e)
       return
     }
 
     // Remove non-standard header to avoid leaking information
-    response.removeHeader(X_SENDRESOURCE_HEADER)
+    HttpHeaders.removeHeader(response, X_SENDRESOURCE_HEADER)
 
     // See comment of X_SENDRESOURCE_HEADER_IS_FROM_CONTROLLER
     // Remove non-standard header to avoid leaking information
-    val noLog = response.containsHeader(X_SENDRESOURCE_HEADER_IS_FROM_CONTROLLER)
-    if (noLog) response.removeHeader(X_SENDRESOURCE_HEADER_IS_FROM_CONTROLLER)
+    val noLog = response.headers.contains(X_SENDRESOURCE_HEADER_IS_FROM_CONTROLLER)
+    if (noLog) HttpHeaders.removeHeader(response, X_SENDRESOURCE_HEADER_IS_FROM_CONTROLLER)
 
     sendResource(ctx, e, request, response, path, noLog)
   }

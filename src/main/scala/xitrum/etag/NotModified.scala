@@ -36,18 +36,18 @@ object NotModified {
    * http://mrcoles.com/blog/cookies-max-age-vs-expires/
    */
   def setClientCacheAggressively(response: HttpResponse) {
-    if (!response.containsHeader(CACHE_CONTROL))
-      response.setHeader(CACHE_CONTROL, "public, " + MAX_AGE + "=" + SECS_IN_A_YEAR)
+    if (!response.headers.contains(CACHE_CONTROL))
+      HttpHeaders.setHeader(response, CACHE_CONTROL, "public, " + MAX_AGE + "=" + SECS_IN_A_YEAR)
 
     // CORS:
     // http://sockjs.github.com/sockjs-protocol/sockjs-protocol-0.3.3.html#section-7
-    if (!response.containsHeader(ACCESS_CONTROL_MAX_AGE))
-      response.setHeader(ACCESS_CONTROL_MAX_AGE, SECS_IN_A_YEAR)
+    if (!response.headers.contains(ACCESS_CONTROL_MAX_AGE))
+      HttpHeaders.setHeader(response, ACCESS_CONTROL_MAX_AGE, SECS_IN_A_YEAR)
 
     // Note that SECS_IN_A_YEAR * 1000 is different from SECS_IN_A_YEAR * 1000L
     // because of integer overflow!
-    if (!response.containsHeader(EXPIRES))
-      response.setHeader(EXPIRES, formatRfc2822(System.currentTimeMillis() + SECS_IN_A_YEAR * 1000L))
+    if (!response.headers.contains(EXPIRES))
+      HttpHeaders.setHeader(response, EXPIRES, formatRfc2822(System.currentTimeMillis() + SECS_IN_A_YEAR * 1000L))
   }
 
   /**
@@ -57,8 +57,8 @@ object NotModified {
    */
   def setNoClientCache(response: HttpResponse) {
     // http://sockjs.github.com/sockjs-protocol/sockjs-protocol-0.3.html#section-11
-    response.removeHeader(EXPIRES)
-    response.removeHeader(LAST_MODIFIED)
-    response.setHeader(CACHE_CONTROL, "no-store, no-cache, must-revalidate, max-age=0")
+    HttpHeaders.removeHeader(response, EXPIRES)
+    HttpHeaders.removeHeader(response, LAST_MODIFIED)
+    HttpHeaders.setHeader(response, CACHE_CONTROL, "no-store, no-cache, must-revalidate, max-age=0")
   }
 }

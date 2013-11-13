@@ -16,7 +16,7 @@ trait Js {
   private val buffer = new StringBuilder
 
   // lazy because request is null when this instance is created
-  lazy val isAjax = request.containsHeader("X-Requested-With")
+  lazy val isAjax = request.headers.contains("X-Requested-With")
 
   def jsAddToView(js: Any) {
     buffer.append(js.toString)

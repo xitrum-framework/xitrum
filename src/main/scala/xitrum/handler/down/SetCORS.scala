@@ -40,49 +40,49 @@ class SetCORS extends ChannelDownstreamHandler with Log {
       return
     }
 
-    val requestOrigin = request.getHeader(ORIGIN)
+    val requestOrigin = HttpHeaders.getHeader(request, ORIGIN)
 
     // Access-Control-Allow-Origin
-    if (!response.containsHeader(ACCESS_CONTROL_ALLOW_ORIGIN)) {
+    if (!response.headers.contains(ACCESS_CONTROL_ALLOW_ORIGIN)) {
       if (corsAllowOrigins(0).equals("*")) {
         if (requestOrigin == null || requestOrigin == "null")
-          response.setHeader(ACCESS_CONTROL_ALLOW_ORIGIN, "*")
+          HttpHeaders.setHeader(response, ACCESS_CONTROL_ALLOW_ORIGIN, "*")
         else
-          response.setHeader(ACCESS_CONTROL_ALLOW_ORIGIN, requestOrigin)
+          HttpHeaders.setHeader(response, ACCESS_CONTROL_ALLOW_ORIGIN, requestOrigin)
       } else {
         if (corsAllowOrigins.contains(requestOrigin))
-          response.setHeader(ACCESS_CONTROL_ALLOW_ORIGIN, requestOrigin)
+          HttpHeaders.setHeader(response, ACCESS_CONTROL_ALLOW_ORIGIN, requestOrigin)
         else
-          response.setHeader(ACCESS_CONTROL_ALLOW_ORIGIN, corsAllowOrigins.mkString(", "))
+          HttpHeaders.setHeader(response, ACCESS_CONTROL_ALLOW_ORIGIN, corsAllowOrigins.mkString(", "))
       }
     }
 
     // Access-Control-Allow-Credentials
-    if (!response.containsHeader(ACCESS_CONTROL_ALLOW_CREDENTIALS))
-      response.setHeader(ACCESS_CONTROL_ALLOW_CREDENTIALS, true)
+    if (!response.headers.contains(ACCESS_CONTROL_ALLOW_CREDENTIALS))
+      HttpHeaders.setHeader(response, ACCESS_CONTROL_ALLOW_CREDENTIALS, true)
 
     // Access-Control-Allow-Methods
-    if (!response.containsHeader(ACCESS_CONTROL_ALLOW_METHODS)) {
+    if (!response.headers.contains(ACCESS_CONTROL_ALLOW_METHODS)) {
       val attachment = ctx.getChannel.getAttachment.asInstanceOf[Attachment]
       if (attachment != null) {
         attachment.pathInfo match {
           case Some(pathInfo) =>
             val allowMethods = OPTIONS +: Config.routes.tryAllMethods(pathInfo)
-            response.setHeader(ACCESS_CONTROL_ALLOW_METHODS, allowMethods.mkString(", "))
+            HttpHeaders.setHeader(response, ACCESS_CONTROL_ALLOW_METHODS, allowMethods.mkString(", "))
 
           case None =>
             if (response.getStatus == NOT_FOUND)
-              response.setHeader(ACCESS_CONTROL_ALLOW_METHODS, OPTIONS.getName)
+              HttpHeaders.setHeader(response, ACCESS_CONTROL_ALLOW_METHODS, OPTIONS.getName)
             else
-              response.setHeader(ACCESS_CONTROL_ALLOW_METHODS, OPTIONS.getName + ", "+ GET.getName + ", " + HEAD.getName)
+              HttpHeaders.setHeader(response, ACCESS_CONTROL_ALLOW_METHODS, OPTIONS.getName + ", "+ GET.getName + ", " + HEAD.getName)
         }
       }
     }
 
     // Access-Control-Allow-Headers
-    val accessControlRequestHeaders = request.getHeader(ACCESS_CONTROL_REQUEST_HEADERS)
-    if (accessControlRequestHeaders != null && !response.containsHeader(ACCESS_CONTROL_ALLOW_HEADERS))
-      response.setHeader(ACCESS_CONTROL_ALLOW_HEADERS, accessControlRequestHeaders)
+    val accessControlRequestHeaders = HttpHeaders.getHeader(request, ACCESS_CONTROL_REQUEST_HEADERS)
+    if (accessControlRequestHeaders != null && !response.headers.contains(ACCESS_CONTROL_ALLOW_HEADERS))
+      HttpHeaders.setHeader(response, ACCESS_CONTROL_ALLOW_HEADERS, accessControlRequestHeaders)
 
     ctx.sendDownstream(e)
   }

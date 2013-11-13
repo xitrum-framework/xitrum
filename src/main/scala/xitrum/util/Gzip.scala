@@ -57,7 +57,7 @@ object Gzip {
 
   def isAccepted(request: HttpRequest) = {
     if (Config.xitrum.response.autoGzip) {
-      val acceptEncoding = request.getHeader(ACCEPT_ENCODING)
+      val acceptEncoding = HttpHeaders.getHeader(request, ACCEPT_ENCODING)
       (acceptEncoding != null && acceptEncoding.contains("gzip"))
     } else {
       false
@@ -74,8 +74,8 @@ object Gzip {
     val bytes         = ChannelBufferToBytes(channelBuffer)
 
     if (!isAccepted(request) ||
-        response.containsHeader(CONTENT_ENCODING) ||
-        !Mime.isTextual(response.getHeader(CONTENT_TYPE)) ||
+        response.headers.contains(CONTENT_ENCODING) ||
+        !Mime.isTextual(HttpHeaders.getHeader(response, CONTENT_TYPE)) ||
         bytes.length < Config.BIG_TEXTUAL_RESPONSE_SIZE_IN_KB * 1024) {
       return bytes
     }
@@ -84,7 +84,7 @@ object Gzip {
 
     // Update CONTENT_LENGTH and set CONTENT_ENCODING
     HttpHeaders.setContentLength(response, gzippedBytes.length)
-    response.setHeader(CONTENT_ENCODING, "gzip")
+    HttpHeaders.setHeader(response, CONTENT_ENCODING, "gzip")
 
     response.setContent(ChannelBuffers.wrappedBuffer(gzippedBytes))
     gzippedBytes

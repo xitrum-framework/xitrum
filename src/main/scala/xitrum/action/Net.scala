@@ -2,9 +2,9 @@ package xitrum.action
 
 import java.net.{InetSocketAddress, SocketAddress}
 
-import org.jboss.netty.handler.codec.http.HttpRequest
-import org.jboss.netty.handler.codec.http.HttpHeaders.Names.HOST
+import org.jboss.netty.handler.codec.http.{HttpHeaders, HttpRequest}
 import org.jboss.netty.handler.ssl.SslHandler
+import HttpHeaders.Names.HOST
 
 import xitrum.{Action, Config}
 
@@ -51,7 +51,7 @@ object Net {
     if (proxyNotAllowed(ip)) {
       ip
     } else {
-      val xForwardedFor = request.getHeader("X-Forwarded-For")
+      val xForwardedFor = HttpHeaders.getHeader(request, "X-Forwarded-For")
       if (xForwardedFor == null)
         ip
       else
@@ -86,15 +86,15 @@ trait Net {
       if (proxyNotAllowed) {
         false
       } else {
-        val xForwardedProto = request.getHeader("X-Forwarded-Proto")
+        val xForwardedProto = HttpHeaders.getHeader(request, "X-Forwarded-Proto")
         if (xForwardedProto != null)
           (xForwardedProto == "https")
         else {
-          val xForwardedScheme = request.getHeader("X-Forwarded-Scheme")
+          val xForwardedScheme = HttpHeaders.getHeader(request, "X-Forwarded-Scheme")
           if (xForwardedScheme != null)
             (xForwardedScheme == "https")
           else {
-            val xForwardedSsl = request.getHeader("X-Forwarded-Ssl")
+            val xForwardedSsl = HttpHeaders.getHeader(request, "X-Forwarded-Ssl")
             if (xForwardedSsl != null)
               (xForwardedSsl == "on")
             else
@@ -109,7 +109,7 @@ trait Net {
   lazy val webSocketScheme = if (isSsl) "wss"   else "ws"
 
   lazy val (serverName, serverPort) = {
-    val np = request.getHeader(HOST)  // Ex: localhost, localhost:3000
+    val np = HttpHeaders.getHeader(request, HOST)  // Ex: localhost, localhost:3000
     val xs = np.split(':')
     if (xs.length == 1) {
       val port = if (isSsl) 443 else 80
