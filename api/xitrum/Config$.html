@@ -35,13 +35,13 @@
         <span class="kind">object</span>
       </span>
       <span class="symbol">
-        <span class="name">Config</span><span class="result"> extends <a href="Logger.html" class="extype" name="xitrum.Logger">Logger</a></span>
+        <span class="name">Config</span><span class="result"> extends <a href="Log.html" class="extype" name="xitrum.Log">Log</a></span>
       </span>
       </h4>
       
           <div id="comment" class="fullcommenttop"><div class="comment cmt"><p>See config/xitrum.properties</p></div><div class="toggleContainer block">
           <span class="toggle">Linear Supertypes</span>
-          <div class="superTypes hiddenContent"><a href="Logger.html" class="extype" name="xitrum.Logger">Logger</a>, <span class="extype" name="scala.AnyRef">AnyRef</span>, <span class="extype" name="scala.Any">Any</span></div>
+          <div class="superTypes hiddenContent"><a href="Log.html" class="extype" name="xitrum.Log">Log</a>, <span class="extype" name="scala.AnyRef">AnyRef</span>, <span class="extype" name="scala.Any">Any</span></div>
         </div></div>
         
 
@@ -59,7 +59,7 @@
                 <span class="filtertype">Inherited<br />
                 </span>
                 <ol id="linearization">
-                  <li class="in" name="xitrum.Config"><span>Config</span></li><li class="in" name="xitrum.Logger"><span>Logger</span></li><li class="in" name="scala.AnyRef"><span>AnyRef</span></li><li class="in" name="scala.Any"><span>Any</span></li>
+                  <li class="in" name="xitrum.Config"><span>Config</span></li><li class="in" name="xitrum.Log"><span>Log</span></li><li class="in" name="scala.AnyRef"><span>AnyRef</span></li><li class="in" name="scala.Any"><span>Any</span></li>
                 </ol>
               </div><div id="ancestors">
             <span class="filtertype"></span>
@@ -278,7 +278,7 @@ http://code.google.com/speed/page-speed/docs/payload.html#GzipCompression</p><p>
       </span>
       </h4>
       <div class="fullcomment"><dl class="attributes block"> <dt>Definition Classes</dt><dd>AnyRef → Any</dd></dl></div>
-    </li><li name="xitrum.Config#exitOnStartupError" visbl="pub" data-isabs="false" fullComment="yes" group="Ungrouped">
+    </li><li name="xitrum.Config#exitOnStartupError" visbl="pub" data-isabs="false" fullComment="no" group="Ungrouped">
       <a id="exitOnStartupError(msg:String,e:Throwable):Unit"></a>
       <a id="exitOnStartupError(String,Throwable):Unit"></a>
       <h4 class="signature">
@@ -290,10 +290,7 @@ http://code.google.com/speed/page-speed/docs/payload.html#GzipCompression</p><p>
         <span class="name">exitOnStartupError</span><span class="params">(<span name="msg">msg: <span class="extype" name="scala.Predef.String">String</span></span>, <span name="e">e: <span class="extype" name="scala.Throwable">Throwable</span></span>)</span><span class="result">: <span class="extype" name="scala.Unit">Unit</span></span>
       </span>
       </h4>
-      <p class="shortcomment cmt">Shutdowns Hazelcast and calls System.</p><div class="fullcomment"><div class="comment cmt"><p>Shutdowns Hazelcast and calls System.exit(-1).
-Once Hazelcast is started, calling only System.exit(-1) does not stop
-the current process!
-</p></div></div>
+      
     </li><li name="scala.AnyRef#finalize" visbl="prt" data-isabs="false" fullComment="yes" group="Ungrouped">
       <a id="finalize():Unit"></a>
       <a id="finalize():Unit"></a>
@@ -339,22 +336,6 @@ the current process!
       </span>
       </h4>
       <div class="fullcomment"><dl class="attributes block"> <dt>Definition Classes</dt><dd>AnyRef → Any</dd></dl></div>
-    </li><li name="xitrum.Config#hazelcastInstance" visbl="pub" data-isabs="false" fullComment="yes" group="Ungrouped">
-      <a id="hazelcastInstance:com.hazelcast.core.HazelcastInstance"></a>
-      <a id="hazelcastInstance:HazelcastInstance"></a>
-      <h4 class="signature">
-      <span class="modifier_kind">
-        <span class="modifier"></span>
-        <span class="kind">lazy val</span>
-      </span>
-      <span class="symbol">
-        <span class="name">hazelcastInstance</span><span class="result">: <span class="extype" name="com.hazelcast.core.HazelcastInstance">HazelcastInstance</span></span>
-      </span>
-      </h4>
-      <p class="shortcomment cmt">Use lazy to avoid starting Hazelcast if it is not used.</p><div class="fullcomment"><div class="comment cmt"><p>Use lazy to avoid starting Hazelcast if it is not used.
-Starting Hazelcast takes several seconds, sometimes we want to work in
-sbt console mode and don't like this overhead.
-</p></div></div>
     </li><li name="scala.Any#isInstanceOf" visbl="pub" data-isabs="false" fullComment="yes" group="Ungrouped">
       <a id="isInstanceOf[T0]:Boolean"></a>
       <a id="isInstanceOf[T0]:Boolean"></a>
@@ -368,19 +349,19 @@ sbt console mode and don't like this overhead.
       </span>
       </h4>
       <div class="fullcomment"><dl class="attributes block"> <dt>Definition Classes</dt><dd>Any</dd></dl></div>
-    </li><li name="xitrum.Logger#logger" visbl="pub" data-isabs="false" fullComment="yes" group="Ungrouped">
-      <a id="logger:org.slf4j.Logger"></a>
-      <a id="logger:org.slf4j.Logger"></a>
+    </li><li name="xitrum.Log#log" visbl="pub" data-isabs="false" fullComment="yes" group="Ungrouped">
+      <a id="log:org.slf4j.Logger"></a>
+      <a id="log:Logger"></a>
       <h4 class="signature">
       <span class="modifier_kind">
         <span class="modifier"></span>
         <span class="kind">lazy val</span>
       </span>
       <span class="symbol">
-        <span class="name">logger</span><span class="result">: <span class="extype" name="org.slf4j.Logger">org.slf4j.Logger</span></span>
+        <span class="name">log</span><span class="result">: <span class="extype" name="org.slf4j.Logger">Logger</span></span>
       </span>
       </h4>
-      <p class="shortcomment cmt">Logger name is inferred from the class name.</p><div class="fullcomment"><div class="comment cmt"><p>Logger name is inferred from the class name.</p></div><dl class="attributes block"> <dt>Definition Classes</dt><dd><a href="Logger.html" class="extype" name="xitrum.Logger">Logger</a></dd></dl></div>
+      <p class="shortcomment cmt">Log name is inferred from the class name.</p><div class="fullcomment"><div class="comment cmt"><p>Log name is inferred from the class name.</p></div><dl class="attributes block"> <dt>Definition Classes</dt><dd><a href="Log.html" class="extype" name="xitrum.Log">Log</a></dd></dl></div>
     </li><li name="scala.AnyRef#ne" visbl="pub" data-isabs="false" fullComment="yes" group="Ungrouped">
       <a id="ne(x$1:AnyRef):Boolean"></a>
       <a id="ne(AnyRef):Boolean"></a>
@@ -479,19 +460,6 @@ Sometimes we want to work in sbt console mode and don't like this overhead.
       </span>
       </h4>
       <p class="shortcomment cmt">routes.</p><div class="fullcomment"><div class="comment cmt"><p>routes.reverseMappings is used heavily in URL generation, cache it here</p></div></div>
-    </li><li name="xitrum.Config#sessionStore" visbl="pub" data-isabs="false" fullComment="no" group="Ungrouped">
-      <a id="sessionStore:xitrum.scope.session.SessionStore"></a>
-      <a id="sessionStore:SessionStore"></a>
-      <h4 class="signature">
-      <span class="modifier_kind">
-        <span class="modifier"></span>
-        <span class="kind">val</span>
-      </span>
-      <span class="symbol">
-        <span class="name">sessionStore</span><span class="result">: <a href="scope/session/SessionStore.html" class="extype" name="xitrum.scope.session.SessionStore">SessionStore</a></span>
-      </span>
-      </h4>
-      
     </li><li name="scala.AnyRef#synchronized" visbl="pub" data-isabs="false" fullComment="yes" group="Ungrouped">
       <a id="synchronized[T0](x$1:=&gt;T0):T0"></a>
       <a id="synchronized[T0](⇒T0):T0"></a>
@@ -626,8 +594,8 @@ will cause the browser to send request to http://xitrum/postback/zOIc0v...
         </div>
 
         <div id="inheritedMembers">
-        <div class="parent" name="xitrum.Logger">
-              <h3>Inherited from <a href="Logger.html" class="extype" name="xitrum.Logger">Logger</a></h3>
+        <div class="parent" name="xitrum.Log">
+              <h3>Inherited from <a href="Log.html" class="extype" name="xitrum.Log">Log</a></h3>
             </div><div class="parent" name="scala.AnyRef">
               <h3>Inherited from <span class="extype" name="scala.AnyRef">AnyRef</span></h3>
             </div><div class="parent" name="scala.Any">

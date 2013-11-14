@@ -24,31 +24,31 @@
         </head>
         <body class="type">
       <div id="definition">
-        <img src="../../lib/class_big.png" />
+        <img src="../../lib/trait_big.png" />
         <p id="owner"><a href="../package.html" class="extype" name="xitrum">xitrum</a>.<a href="package.html" class="extype" name="xitrum.routing">routing</a></p>
         <h1>RouteToken</h1>
       </div>
 
       <h4 id="signature" class="signature">
       <span class="modifier_kind">
-        <span class="modifier"></span>
-        <span class="kind">case class</span>
+        <span class="modifier">sealed </span>
+        <span class="kind">trait</span>
       </span>
       <span class="symbol">
-        <span class="name">RouteToken</span><span class="params">(<span name="value">value: <span class="extype" name="scala.Predef.String">String</span></span>, <span name="isPlaceholder">isPlaceholder: <span class="extype" name="scala.Boolean">Boolean</span></span>, <span name="regex">regex: <span class="extype" name="scala.Option">Option</span>[<span class="extype" name="scala.util.matching.Regex">Regex</span>]</span>)</span><span class="result"> extends <span class="extype" name="scala.Product">Product</span> with <span class="extype" name="scala.Serializable">Serializable</span></span>
+        <span class="name">RouteToken</span><span class="result"> extends <span class="extype" name="scala.AnyRef">AnyRef</span></span>
       </span>
       </h4>
       
-          <div id="comment" class="fullcommenttop"><div class="comment cmt"><p>&quot;/articles/:id&lt;[0-9]+&gt;&quot; gives 2 tokens:
-RouteToken(&quot;articles&quot;, true, None) and
-RouteToken(&quot;id&quot;, false, Some(&quot;[0-9]+&quot;.r))
-</p></div><div class="toggleContainer block">
+          <div id="comment" class="fullcommenttop"><div class="toggleContainer block">
           <span class="toggle">Linear Supertypes</span>
-          <div class="superTypes hiddenContent"><span class="extype" name="scala.Serializable">Serializable</span>, <span class="extype" name="java.io.Serializable">Serializable</span>, <span class="extype" name="scala.Product">Product</span>, <span class="extype" name="scala.Equals">Equals</span>, <span class="extype" name="scala.AnyRef">AnyRef</span>, <span class="extype" name="scala.Any">Any</span></div>
+          <div class="superTypes hiddenContent"><span class="extype" name="scala.AnyRef">AnyRef</span>, <span class="extype" name="scala.Any">Any</span></div>
+        </div><div class="toggleContainer block">
+          <span class="toggle">Known Subclasses</span>
+          <div class="subClasses hiddenContent"><a href="DotRouteToken.html" class="extype" name="xitrum.routing.DotRouteToken">DotRouteToken</a>, <a href="NonDotRouteToken.html" class="extype" name="xitrum.routing.NonDotRouteToken">NonDotRouteToken</a></div>
         </div><div class="toggleContainer block diagram-container" id="inheritance-diagram-container">
                 <span class="toggle diagram-link">Type Hierarchy</span>
                 <a href="http://docs.scala-lang.org/overviews/scaladoc/usage.html#diagrams" target="_blank" class="diagram-help">Learn more about scaladoc diagrams</a>
-                <div class="diagram" id="inheritance-diagram"><svg class="class-diagram" id="graph70" viewBox="0.00 0.00 200.00 120.00" height="120pt" width="200pt" xmlns:xlink="http://www.w3.org/1999/xlink" xmlns="http://www.w3.org/2000/svg"><g transform="scale(1 1) rotate(0) translate(4 116)" class="graph" id="graph1"><polygon points="-4,5 -4,-116 197,-116 197,5 -4,5" stroke="white" fill="white"></polygon><g class="cluster" id="graph2"></g><g class="cluster" id="graph3"></g><!-- node0 --><g class="node this class" id="graph70_0"><a xlink:title="xitrum.routing.RouteToken (this class)" xlink:href="#inheritance-diagram"><polygon points="139,-50 43,-50 43,-24 139,-24 139,-50" stroke="#115f3b" fill="#0a955b"></polygon><image xlink:href="../../lib/class_diagram.png" y="-45" x="53" preserveAspectRatio="xMinYMin meet" height="16px" width="16px"></image><text fill="#ffffff" font-size="10.00" font-family="Arial" y="-34.6667" x="75" text-anchor="start">RouteToken</text></a></g><!-- node1 --><g class="node trait" id="graph70_1"><a xlink:title="scala.Product"><polygon points="78,-112 3.55271e-14,-112 0,-86 78,-86 78,-112" stroke="#37657d" fill="#498aad"></polygon><image xlink:href="../../lib/trait_diagram.png" y="-107" x="10" preserveAspectRatio="xMinYMin meet" height="16px" width="16px"></image><text fill="#ffffff" font-size="10.00" font-family="Arial" y="-96.6667" x="32" text-anchor="start">Product</text></a></g><!-- node1&#45;&gt;node0 --><g class="edge inheritance" id="graph70_1_0"><a xlink:title="RouteToken is a subtype of Product"><path d="M53.2628,-81.9943C61.6908,-71.9456 72.2013,-59.4138 79.988,-50.1297" stroke="#d4d4d4" fill="none"></path><polygon points="51.9001,-80.8958 50.0279,-85.8514 54.5818,-83.145 51.9001,-80.8958" stroke="#d4d4d4" fill="none"></polygon></a></g><!-- node2 --><g class="node trait" id="graph70_2"><a xlink:title="scala.Serializable"><polygon points="192,-112 96,-112 96,-86 192,-86 192,-112" stroke="#37657d" fill="#498aad"></polygon><image xlink:href="../../lib/trait_diagram.png" y="-107" x="106" preserveAspectRatio="xMinYMin meet" height="16px" width="16px"></image><text fill="#ffffff" font-size="10.00" font-family="Arial" y="-96.6667" x="128" text-anchor="start">Serializable</text></a></g><!-- node2&#45;&gt;node0 --><g class="edge inheritance" id="graph70_2_0"><a xlink:title="RouteToken is a subtype of Serializable"><path d="M129.463,-81.9943C120.873,-71.9456 110.16,-59.4138 102.224,-50.1297" stroke="#d4d4d4" fill="none"></path><polygon points="128.181,-83.1879 132.76,-85.8514 130.841,-80.9136 128.181,-83.1879" stroke="#d4d4d4" fill="none"></polygon></a></g></g></svg></div>
+                <div class="diagram" id="inheritance-diagram"><svg class="class-diagram" id="graph67" viewBox="0.00 0.00 264.00 158.00" height="158pt" width="264pt" xmlns:xlink="http://www.w3.org/1999/xlink" xmlns="http://www.w3.org/2000/svg"><g transform="scale(1 1) rotate(0) translate(4 154)" class="graph" id="graph1"><polygon points="-4,5 -4,-154 261,-154 261,5 -4,5" stroke="white" fill="white"></polygon><g class="cluster" id="graph2"></g><g class="cluster" id="graph3"></g><!-- node0 --><g class="node this trait" id="graph67_0"><a xlink:title="xitrum.routing.RouteToken (this trait)" xlink:href="#inheritance-diagram"><polygon points="171,-88 75,-88 75,-62 171,-62 171,-88" stroke="#37657d" fill="#498aad"></polygon><image xlink:href="../../lib/trait_diagram.png" y="-83" x="85" preserveAspectRatio="xMinYMin meet" height="16px" width="16px"></image><text fill="#ffffff" font-size="10.00" font-family="Arial" y="-72.6667" x="107" text-anchor="start">RouteToken</text></a></g><!-- node1 --><g class="node class" id="graph67_1"><a xlink:title="xitrum.routing.DotRouteToken" xlink:href="DotRouteToken.html#inheritance-diagram"><polygon points="110,-26 3.55271e-14,-26 0,-1.24345e-14 110,-3.55271e-15 110,-26" stroke="#115f3b" fill="#0a955b"></polygon><image xlink:href="../../lib/class_diagram.png" y="-21" x="10" preserveAspectRatio="xMinYMin meet" height="16px" width="16px"></image><text fill="#ffffff" font-size="10.00" font-family="Arial" y="-10.6667" x="32" text-anchor="start">DotRouteToken</text></a></g><!-- node0&#45;&gt;node1 --><g class="edge inheritance" id="graph67_0_1"><a xlink:title="DotRouteToken is a subtype of RouteToken"><path d="M104.641,-58.2605C93.5709,-48.1676 79.673,-35.496 69.4003,-26.1297" stroke="#d4d4d4" fill="none"></path><polygon points="103.705,-59.7758 108.579,-61.8514 106.063,-57.1894 103.705,-59.7758" stroke="#d4d4d4" fill="none"></polygon></a></g><!-- node2 --><g class="node class" id="graph67_2"><a xlink:title="xitrum.routing.NonDotRouteToken" xlink:href="NonDotRouteToken.html#inheritance-diagram"><polygon points="256,-26 128,-26 128,-1.24345e-14 256,-3.55271e-15 256,-26" stroke="#115f3b" fill="#0a955b"></polygon><image xlink:href="../../lib/class_diagram.png" y="-21" x="138" preserveAspectRatio="xMinYMin meet" height="16px" width="16px"></image><text fill="#ffffff" font-size="10.00" font-family="Arial" y="-10.6667" x="160" text-anchor="start">NonDotRouteToken</text></a></g><!-- node0&#45;&gt;node2 --><g class="edge inheritance" id="graph67_0_2"><a xlink:title="NonDotRouteToken is a subtype of RouteToken"><path d="M141.629,-58.2605C152.862,-48.1676 166.964,-35.496 177.388,-26.1297" stroke="#d4d4d4" fill="none"></path><polygon points="140.183,-57.2078 137.633,-61.8514 142.522,-59.8112 140.183,-57.2078" stroke="#d4d4d4" fill="none"></polygon></a></g><!-- node3 --><g class="node class" id="graph67_3"><a xlink:title="scala.AnyRef"><polygon points="161,-150 85,-150 85,-124 161,-124 161,-150" stroke="#115f3b" fill="#0a955b"></polygon><image xlink:href="../../lib/class_diagram.png" y="-145" x="95" preserveAspectRatio="xMinYMin meet" height="16px" width="16px"></image><text fill="#ffffff" font-size="10.00" font-family="Arial" y="-134.667" x="117" text-anchor="start">AnyRef</text></a></g><!-- node3&#45;&gt;node0 --><g class="edge inheritance" id="graph67_3_0"><a xlink:title="RouteToken is a subtype of AnyRef"><path d="M123,-118.646C123,-108.843 123,-97.003 123,-88.1297" stroke="#d4d4d4" fill="none"></path><polygon points="121.25,-118.851 123,-123.851 124.75,-118.851 121.25,-118.851" stroke="#d4d4d4" fill="none"></polygon></a></g></g></svg></div>
               </div></div>
         
 
@@ -66,7 +66,7 @@ RouteToken(&quot;id&quot;, false, Some(&quot;[0-9]+&quot;.r))
                 <span class="filtertype">Inherited<br />
                 </span>
                 <ol id="linearization">
-                  <li class="in" name="xitrum.routing.RouteToken"><span>RouteToken</span></li><li class="in" name="scala.Serializable"><span>Serializable</span></li><li class="in" name="java.io.Serializable"><span>Serializable</span></li><li class="in" name="scala.Product"><span>Product</span></li><li class="in" name="scala.Equals"><span>Equals</span></li><li class="in" name="scala.AnyRef"><span>AnyRef</span></li><li class="in" name="scala.Any"><span>Any</span></li>
+                  <li class="in" name="xitrum.routing.RouteToken"><span>RouteToken</span></li><li class="in" name="scala.AnyRef"><span>AnyRef</span></li><li class="in" name="scala.Any"><span>Any</span></li>
                 </ol>
               </div><div id="ancestors">
             <span class="filtertype"></span>
@@ -84,30 +84,78 @@ RouteToken(&quot;id&quot;, false, Some(&quot;[0-9]+&quot;.r))
 
       <div id="template">
         <div id="allMembers">
-        <div id="constructors" class="members">
-              <h3>Instance Constructors</h3>
-              <ol><li name="xitrum.routing.RouteToken#&lt;init&gt;" visbl="pub" data-isabs="false" fullComment="no" group="Ungrouped">
-      <a id="&lt;init&gt;(value:String,isPlaceholder:Boolean,regex:Option[scala.util.matching.Regex]):xitrum.routing.RouteToken"></a>
-      <a id="&lt;init&gt;:RouteToken"></a>
-      <h4 class="signature">
-      <span class="modifier_kind">
-        <span class="modifier"></span>
-        <span class="kind">new</span>
-      </span>
-      <span class="symbol">
-        <span class="name">RouteToken</span><span class="params">(<span name="value">value: <span class="extype" name="scala.Predef.String">String</span></span>, <span name="isPlaceholder">isPlaceholder: <span class="extype" name="scala.Boolean">Boolean</span></span>, <span name="regex">regex: <span class="extype" name="scala.Option">Option</span>[<span class="extype" name="scala.util.matching.Regex">Regex</span>]</span>)</span>
-      </span>
-      </h4>
-      
-    </li></ol>
-            </div>
-
         
 
         
 
         <div id="values" class="values members">
-              <h3>Value Members</h3>
+              <h3>Abstract Value Members</h3>
+              <ol><li name="xitrum.routing.RouteToken#decompile" visbl="pub" data-isabs="true" fullComment="yes" group="Ungrouped">
+      <a id="decompile(forSwagger:Boolean):String"></a>
+      <a id="decompile(Boolean):String"></a>
+      <h4 class="signature">
+      <span class="modifier_kind">
+        <span class="modifier">abstract </span>
+        <span class="kind">def</span>
+      </span>
+      <span class="symbol">
+        <span class="name">decompile</span><span class="params">(<span name="forSwagger">forSwagger: <span class="extype" name="scala.Boolean">Boolean</span></span>)</span><span class="result">: <span class="extype" name="scala.Predef.String">String</span></span>
+      </span>
+      </h4>
+      <p class="shortcomment cmt">Reconstruct NonDotRouteToken(&quot;id&quot;, true, Some(&quot;[0-9]+&quot;.</p><div class="fullcomment"><div class="comment cmt"><p>Reconstruct NonDotRouteToken(&quot;id&quot;, true, Some(&quot;[0-9]+&quot;.r)):
+- Not for Swagger =&gt; &quot;:id&lt;[0-9]+&gt;&quot;
+- For Swagger     =&gt; {id}
+</p></div></div>
+    </li><li name="xitrum.routing.RouteToken#matchToken" visbl="pub" data-isabs="true" fullComment="yes" group="Ungrouped">
+      <a id="matchToken(pathParams:xitrum.scope.request.Params,pathTokens:Seq[String],last:Boolean):Boolean"></a>
+      <a id="matchToken(Params,Seq[String],Boolean):Boolean"></a>
+      <h4 class="signature">
+      <span class="modifier_kind">
+        <span class="modifier">abstract </span>
+        <span class="kind">def</span>
+      </span>
+      <span class="symbol">
+        <span class="name">matchToken</span><span class="params">(<span name="pathParams">pathParams: <a href="../scope/request/package.html#Params=scala.collection.mutable.Map[String,Seq[String]]" class="extmbr" name="xitrum.scope.request.Params">Params</a></span>, <span name="pathTokens">pathTokens: <span class="extype" name="scala.Seq">Seq</span>[<span class="extype" name="scala.Predef.String">String</span>]</span>, <span name="last">last: <span class="extype" name="scala.Boolean">Boolean</span></span>)</span><span class="result">: <span class="extype" name="scala.Boolean">Boolean</span></span>
+      </span>
+      </h4>
+      <p class="shortcomment cmt"></p><div class="fullcomment"><div class="comment cmt"></div><dl class="paramcmts block"><dt class="param">pathParams</dt><dd class="cmt"><p>May be updated if matched
+</p></dd><dt class="param">last</dt><dd class="cmt"><p>Used when matching &quot;*&quot;
+</p></dd></dl></div>
+    </li><li name="xitrum.routing.RouteToken#numPlaceholders" visbl="pub" data-isabs="true" fullComment="no" group="Ungrouped">
+      <a id="numPlaceholders:Int"></a>
+      <a id="numPlaceholders:Int"></a>
+      <h4 class="signature">
+      <span class="modifier_kind">
+        <span class="modifier">abstract </span>
+        <span class="kind">def</span>
+      </span>
+      <span class="symbol">
+        <span class="name">numPlaceholders</span><span class="result">: <span class="extype" name="scala.Int">Int</span></span>
+      </span>
+      </h4>
+      <p class="shortcomment cmt">Used by ReverseRoute
+(reverse routes are cached, thus no need to cache numPlaceholders as &quot;val&quot;)
+</p>
+    </li><li name="xitrum.routing.RouteToken#url" visbl="pub" data-isabs="true" fullComment="yes" group="Ungrouped">
+      <a id="url(params:Map[String,Any]):Either[String,(Any,Map[String,Any])]"></a>
+      <a id="url(Map[String,Any]):Either[String,(Any,Map[String,Any])]"></a>
+      <h4 class="signature">
+      <span class="modifier_kind">
+        <span class="modifier">abstract </span>
+        <span class="kind">def</span>
+      </span>
+      <span class="symbol">
+        <span class="name">url</span><span class="params">(<span name="params">params: <span class="extype" name="scala.Predef.Map">Map</span>[<span class="extype" name="scala.Predef.String">String</span>, <span class="extype" name="scala.Any">Any</span>]</span>)</span><span class="result">: <span class="extype" name="scala.Either">Either</span>[<span class="extype" name="scala.Predef.String">String</span>, (<span class="extype" name="scala.Any">Any</span>, <span class="extype" name="scala.Predef.Map">Map</span>[<span class="extype" name="scala.Predef.String">String</span>, <span class="extype" name="scala.Any">Any</span>])]</span>
+      </span>
+      </h4>
+      <p class="shortcomment cmt"></p><div class="fullcomment"><div class="comment cmt"></div><dl class="paramcmts block"><dt class="param">params</dt><dd class="cmt"><p>Used when isPlaceholder is true
+</p></dd><dt>returns</dt><dd class="cmt"><p>Left(error) or Right((token value, remaining params))
+</p></dd></dl></div>
+    </li></ol>
+            </div>
+
+        <div id="values" class="values members">
+              <h3>Concrete Value Members</h3>
               <ol><li name="scala.AnyRef#!=" visbl="pub" data-isabs="false" fullComment="yes" group="Ungrouped">
       <a id="!=(x$1:AnyRef):Boolean"></a>
       <a id="!=(AnyRef):Boolean"></a>
@@ -218,6 +266,19 @@ RouteToken(&quot;id&quot;, false, Some(&quot;[0-9]+&quot;.r))
       </span>
       </h4>
       <div class="fullcomment"><dl class="attributes block"> <dt>Definition Classes</dt><dd>AnyRef</dd></dl></div>
+    </li><li name="scala.AnyRef#equals" visbl="pub" data-isabs="false" fullComment="yes" group="Ungrouped">
+      <a id="equals(x$1:Any):Boolean"></a>
+      <a id="equals(Any):Boolean"></a>
+      <h4 class="signature">
+      <span class="modifier_kind">
+        <span class="modifier"></span>
+        <span class="kind">def</span>
+      </span>
+      <span class="symbol">
+        <span class="name">equals</span><span class="params">(<span name="arg0">arg0: <span class="extype" name="scala.Any">Any</span></span>)</span><span class="result">: <span class="extype" name="scala.Boolean">Boolean</span></span>
+      </span>
+      </h4>
+      <div class="fullcomment"><dl class="attributes block"> <dt>Definition Classes</dt><dd>AnyRef → Any</dd></dl></div>
     </li><li name="scala.AnyRef#finalize" visbl="prt" data-isabs="false" fullComment="yes" group="Ungrouped">
       <a id="finalize():Unit"></a>
       <a id="finalize():Unit"></a>
@@ -250,6 +311,19 @@ RouteToken(&quot;id&quot;, false, Some(&quot;[0-9]+&quot;.r))
       </span>
       </h4>
       <div class="fullcomment"><dl class="attributes block"> <dt>Definition Classes</dt><dd>AnyRef → Any</dd></dl></div>
+    </li><li name="scala.AnyRef#hashCode" visbl="pub" data-isabs="false" fullComment="yes" group="Ungrouped">
+      <a id="hashCode():Int"></a>
+      <a id="hashCode():Int"></a>
+      <h4 class="signature">
+      <span class="modifier_kind">
+        <span class="modifier"></span>
+        <span class="kind">def</span>
+      </span>
+      <span class="symbol">
+        <span class="name">hashCode</span><span class="params">()</span><span class="result">: <span class="extype" name="scala.Int">Int</span></span>
+      </span>
+      </h4>
+      <div class="fullcomment"><dl class="attributes block"> <dt>Definition Classes</dt><dd>AnyRef → Any</dd></dl></div>
     </li><li name="scala.Any#isInstanceOf" visbl="pub" data-isabs="false" fullComment="yes" group="Ungrouped">
       <a id="isInstanceOf[T0]:Boolean"></a>
       <a id="isInstanceOf[T0]:Boolean"></a>
@@ -263,19 +337,6 @@ RouteToken(&quot;id&quot;, false, Some(&quot;[0-9]+&quot;.r))
       </span>
       </h4>
       <div class="fullcomment"><dl class="attributes block"> <dt>Definition Classes</dt><dd>Any</dd></dl></div>
-    </li><li name="xitrum.routing.RouteToken#isPlaceholder" visbl="pub" data-isabs="false" fullComment="no" group="Ungrouped">
-      <a id="isPlaceholder:Boolean"></a>
-      <a id="isPlaceholder:Boolean"></a>
-      <h4 class="signature">
-      <span class="modifier_kind">
-        <span class="modifier"></span>
-        <span class="kind">val</span>
-      </span>
-      <span class="symbol">
-        <span class="name">isPlaceholder</span><span class="result">: <span class="extype" name="scala.Boolean">Boolean</span></span>
-      </span>
-      </h4>
-      
     </li><li name="scala.AnyRef#ne" visbl="pub" data-isabs="false" fullComment="yes" group="Ungrouped">
       <a id="ne(x$1:AnyRef):Boolean"></a>
       <a id="ne(AnyRef):Boolean"></a>
@@ -315,19 +376,6 @@ RouteToken(&quot;id&quot;, false, Some(&quot;[0-9]+&quot;.r))
       </span>
       </h4>
       <div class="fullcomment"><dl class="attributes block"> <dt>Definition Classes</dt><dd>AnyRef</dd></dl></div>
-    </li><li name="xitrum.routing.RouteToken#regex" visbl="pub" data-isabs="false" fullComment="no" group="Ungrouped">
-      <a id="regex:Option[scala.util.matching.Regex]"></a>
-      <a id="regex:Option[Regex]"></a>
-      <h4 class="signature">
-      <span class="modifier_kind">
-        <span class="modifier"></span>
-        <span class="kind">val</span>
-      </span>
-      <span class="symbol">
-        <span class="name">regex</span><span class="result">: <span class="extype" name="scala.Option">Option</span>[<span class="extype" name="scala.util.matching.Regex">Regex</span>]</span>
-      </span>
-      </h4>
-      
     </li><li name="scala.AnyRef#synchronized" visbl="pub" data-isabs="false" fullComment="yes" group="Ungrouped">
       <a id="synchronized[T0](x$1:=&gt;T0):T0"></a>
       <a id="synchronized[T0](⇒T0):T0"></a>
@@ -341,19 +389,19 @@ RouteToken(&quot;id&quot;, false, Some(&quot;[0-9]+&quot;.r))
       </span>
       </h4>
       <div class="fullcomment"><dl class="attributes block"> <dt>Definition Classes</dt><dd>AnyRef</dd></dl></div>
-    </li><li name="xitrum.routing.RouteToken#value" visbl="pub" data-isabs="false" fullComment="no" group="Ungrouped">
-      <a id="value:String"></a>
-      <a id="value:String"></a>
+    </li><li name="scala.AnyRef#toString" visbl="pub" data-isabs="false" fullComment="yes" group="Ungrouped">
+      <a id="toString():String"></a>
+      <a id="toString():String"></a>
       <h4 class="signature">
       <span class="modifier_kind">
         <span class="modifier"></span>
-        <span class="kind">val</span>
+        <span class="kind">def</span>
       </span>
       <span class="symbol">
-        <span class="name">value</span><span class="result">: <span class="extype" name="scala.Predef.String">String</span></span>
+        <span class="name">toString</span><span class="params">()</span><span class="result">: <span class="extype" name="java.lang.String">String</span></span>
       </span>
       </h4>
-      
+      <div class="fullcomment"><dl class="attributes block"> <dt>Definition Classes</dt><dd>AnyRef → Any</dd></dl></div>
     </li><li name="scala.AnyRef#wait" visbl="pub" data-isabs="false" fullComment="yes" group="Ungrouped">
       <a id="wait():Unit"></a>
       <a id="wait():Unit"></a>
@@ -420,15 +468,7 @@ RouteToken(&quot;id&quot;, false, Some(&quot;[0-9]+&quot;.r))
         </div>
 
         <div id="inheritedMembers">
-        <div class="parent" name="scala.Serializable">
-              <h3>Inherited from <span class="extype" name="scala.Serializable">Serializable</span></h3>
-            </div><div class="parent" name="java.io.Serializable">
-              <h3>Inherited from <span class="extype" name="java.io.Serializable">Serializable</span></h3>
-            </div><div class="parent" name="scala.Product">
-              <h3>Inherited from <span class="extype" name="scala.Product">Product</span></h3>
-            </div><div class="parent" name="scala.Equals">
-              <h3>Inherited from <span class="extype" name="scala.Equals">Equals</span></h3>
-            </div><div class="parent" name="scala.AnyRef">
+        <div class="parent" name="scala.AnyRef">
               <h3>Inherited from <span class="extype" name="scala.AnyRef">AnyRef</span></h3>
             </div><div class="parent" name="scala.Any">
               <h3>Inherited from <span class="extype" name="scala.Any">Any</span></h3>

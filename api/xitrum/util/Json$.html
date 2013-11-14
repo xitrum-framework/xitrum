@@ -228,7 +228,7 @@
               
         </dd></dl></div>
     </li><li name="xitrum.util.Json#generate" visbl="pub" data-isabs="false" fullComment="yes" group="Ungrouped">
-      <a id="generate(caseObject:AnyRef):String"></a>
+      <a id="generate(scalaObject:AnyRef):String"></a>
       <a id="generate(AnyRef):String"></a>
       <h4 class="signature">
       <span class="modifier_kind">
@@ -236,10 +236,10 @@
         <span class="kind">def</span>
       </span>
       <span class="symbol">
-        <span class="name">generate</span><span class="params">(<span name="caseObject">caseObject: <span class="extype" name="scala.AnyRef">AnyRef</span></span>)</span><span class="result">: <span class="extype" name="scala.Predef.String">String</span></span>
+        <span class="name">generate</span><span class="params">(<span name="scalaObject">scalaObject: <span class="extype" name="scala.AnyRef">AnyRef</span></span>)</span><span class="result">: <span class="extype" name="scala.Predef.String">String</span></span>
       </span>
       </h4>
-      <p class="shortcomment cmt">Generates JSON string from case objects etc.</p><div class="fullcomment"><div class="comment cmt"><p>Generates JSON string from case objects etc.
+      <p class="shortcomment cmt">Generates JSON string from Scala object (case class, Map, Seq etc.</p><div class="fullcomment"><div class="comment cmt"><p>Generates JSON string from Scala object (case class, Map, Seq etc.).
 See https://github.com/json4s/json4s#serialization
 </p></div></div>
     </li><li name="scala.AnyRef#getClass" visbl="pub" data-isabs="false" fullComment="yes" group="Ungrouped">
@@ -332,7 +332,7 @@ See https://github.com/json4s/json4s#serialization
         <span class="name">parse</span><span class="tparams">[<span name="T">T</span>]</span><span class="params">(<span name="jsonString">jsonString: <span class="extype" name="scala.Predef.String">String</span></span>)</span><span class="params">(<span class="implicit">implicit </span><span name="m">m: <span class="extype" name="scala.Predef.Manifest">Manifest</span>[<span class="extype" name="xitrum.util.Json.parse.T">T</span>]</span>)</span><span class="result">: <span class="extype" name="xitrum.util.Json.parse.T">T</span></span>
       </span>
       </h4>
-      <p class="shortcomment cmt">Parses JSON string to case object.</p><div class="fullcomment"><div class="comment cmt"><p>Parses JSON string to case object.
+      <p class="shortcomment cmt">Parses JSON string to Scala object (case class, Map, Seq etc.</p><div class="fullcomment"><div class="comment cmt"><p>Parses JSON string to Scala object (case class, Map, Seq etc.).
 See https://github.com/json4s/json4s#serialization
 </p></div></div>
     </li><li name="scala.AnyRef#synchronized" visbl="pub" data-isabs="false" fullComment="yes" group="Ungrouped">
