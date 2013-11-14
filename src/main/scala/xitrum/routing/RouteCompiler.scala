@@ -1,16 +1,29 @@
 package xitrum.routing
 
-object RouteCompiler {
+import xitrum.Log
+
+object RouteCompiler extends Log {
   /**
    * Given the pattern "/articles/:id<[0-9]+>", compiles to
    * Seq(RouteToken("articles", true, None), RouteToken("id", false, Some("[0-9]+".r)))
    */
   def compile(pattern: String): Seq[RouteToken] = {
-    // See PathInfo#tokens
     // Remove slash prefix if any so that app developers can write
-    // "/articles" or "articles" and the resuls are the same
+    // "/articles" or "articles", the resul will be the same
     val noSlashPrefix = if (pattern.startsWith("/")) pattern.substring(1) else pattern
-    val fragments     = noSlashPrefix.split("/", -1)
+
+    // Remove slash suffix; routes that end with "/" are ugly
+    //
+    // See noSlashSuffix in UriParser; because of that preprocessing, a real
+    // request with trailing '/' will still be matched
+    val noSlashSuffix = if (noSlashPrefix.endsWith("/")) {
+      noSlashPrefix.substring(0, noSlashPrefix.length - 1)
+    } else {
+      noSlashPrefix
+    }
+
+    // split("/", -1): see PathInfo#tokens
+    val fragments = noSlashSuffix.split("/", -1)
     fragments.map(compilePatternFragment _)
   }
 

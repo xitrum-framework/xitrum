@@ -29,13 +29,13 @@ class UriParser extends SimpleChannelUpstreamHandler with BadClientSilencer {
       val path    = decoder.getPath
 
       // Treat "articles" and "articles/" the same
-      val pathWithoutTrailingSlash =
+      val noSlashSuffix =
         if (path.endsWith("/"))
           path.substring(0, path.length - 1)
         else
           path
 
-      env.pathInfo    = new PathInfo(pathWithoutTrailingSlash)
+      env.pathInfo    = new PathInfo(noSlashSuffix)
       env.queryParams = jParamsToParams(decoder.getParameters)
       ctx.sendUpstream(e)
     } catch {
