@@ -33,7 +33,7 @@ class Route(
   }
 
   /** @return None if not matched */
-  def matchRoute(pathTokens: Array[String]): Option[Params] = {
+  def matchRoute(pathTokens: Seq[String]): Option[Params] = {
     val max1 = pathTokens.length
     val max2 = compiledPattern.length
 
