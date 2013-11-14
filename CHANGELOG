@@ -6,6 +6,7 @@
 * #209 Support automatic OPTIONS request handling for the whole site
 * #71  Support automatic CORS request handling for the whole site
 * #204 Log Xitrum additional routes separately from app routes
+* #233 Add xitrum.Log package object for convenience use
 * #223 Rename logger to log
 * #195 Rename xitrumCSS to xitrumCss
 * #216 Remove package xitrum.mq
