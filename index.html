@@ -97,7 +97,7 @@ import xitrum.annotation.GET
 @GET("url/to/HelloActor")
 class HelloActor extends ActionActor {
   def execute() {
-    logger.info("Actor started, remoteIp: " + remoteIp)
+    log.info("Actor started, remoteIp: " + remoteIp)
 
     val anotherActorRef = actorFor("someService")
     anotherActorRef ! "someRequest"
@@ -113,7 +113,7 @@ class HelloActor extends ActionActor {
   }
 
   override def postStop() {
-    logger.info("Actor stopped")
+    log.info("Actor stopped")
     super.postStop()
   }
 }
@@ -135,7 +135,7 @@ import xitrum.annotation.WEBSOCKET
 @WEBSOCKET("url/to/EchoWebSocketActor")
 class EchoWebSocketActor extends WebSocketActor {
   def execute() {
-    logger.info("onOpen, remoteIp: " + remoteIp)
+    log.info("onOpen, remoteIp: " + remoteIp)
 
     context.become {
       case WebSocketText(text) =>
@@ -154,7 +154,7 @@ class EchoWebSocketActor extends WebSocketActor {
   }
 
   override def postStop() {
-    logger.info("onStop")
+    log.info("onStop")
     super.postStop()
   }
 }
@@ -169,7 +169,7 @@ import xitrum.annotation.SOCKJS
 @SOCKJS("url/to/EchoSockJsActor")
 class EchoSockJsActor extends SockJsActor {
   def execute() {
-    logger.info("onOpen, remoteIp: " + remoteIp)
+    log.info("onOpen, remoteIp: " + remoteIp)
 
     context.become {
       case SockJsText(text) =>
@@ -178,7 +178,7 @@ class EchoSockJsActor extends SockJsActor {
   }
 
   override def postStop() {
-    logger.info("onStop")
+    log.info("onStop")
     super.postStop()
   }
 }
