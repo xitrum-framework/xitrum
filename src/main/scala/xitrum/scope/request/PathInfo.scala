@@ -20,5 +20,9 @@ class PathInfo(val encoded: String) {
 
   val decoded = "/" + tokens.mkString("/")
 
-  val decodedWithIndexHtml = decoded + "/index.html"
+  val decodedWithIndexHtml =
+    if (decoded.endsWith("/"))
+      decoded + "index.html"
+    else
+      decoded + "/index.html"
 }
