@@ -73,27 +73,27 @@ WebSocket
      * respondText, respondView etc.
      */
     def execute() {
-      logger.debug("onOpen")
+      log..debug("onOpen")
 
       context.become {
         case WebSocketText(text) =>
-          logger.info("onTextMessage: " + text)
+          log.info("onTextMessage: " + text)
           respondWebSocketText(text.toUpperCase)
 
         case WebSocketBinary(bytes) {
-          logger.info("onBinaryMessage: " + bytes)
+          log.info("onBinaryMessage: " + bytes)
           respondWebSocketBinary(bytes)
 
         case WebSocketPing =>
-          logger.debug("onPing")
+          log.debug("onPing")
 
         case WebSocketPong =>
-          logger.debug("onPong")
+          log.debug("onPong")
       }
     }
 
     override def postStop() {
-      logger.debug("onClose")
+      log.debug("onClose")
       super.postStop()
     }
   }
@@ -172,17 +172,17 @@ Xitrum automatically does it for you.
      * respondText, respondView etc.
      */
     def execute() {
-      logger.info("onOpen")
+      log.info("onOpen")
 
       context.become {
         case SockJsText(text) =>
-          logger.info("onMessage: " + text)
+          log.info("onMessage: " + text)
           respondSockJsText(text)
       }
     }
 
     override def postStop() {
-      logger.info("onClose")
+      log.info("onClose")
       super.postStop()
     }
   }

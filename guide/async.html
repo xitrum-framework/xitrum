@@ -7,7 +7,7 @@
   <head>
     <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
     
-    <title>Async response &mdash; Xitrum 2.10 documentation</title>
+    <title>Async response &mdash; Xitrum 2.12 documentation</title>
     
     <link rel="stylesheet" href="_static/nature.css" type="text/css" />
     <link rel="stylesheet" href="_static/pygments.css" type="text/css" />
@@ -15,7 +15,7 @@
     <script type="text/javascript">
       var DOCUMENTATION_OPTIONS = {
         URL_ROOT:    '',
-        VERSION:     '2.10',
+        VERSION:     '2.12',
         COLLAPSE_INDEX: false,
         FILE_SUFFIX: '.html',
         HAS_SOURCE:  true
@@ -24,7 +24,7 @@
     <script type="text/javascript" src="_static/jquery.js"></script>
     <script type="text/javascript" src="_static/underscore.js"></script>
     <script type="text/javascript" src="_static/doctools.js"></script>
-    <link rel="top" title="Xitrum 2.10 documentation" href="index.html" />
+    <link rel="top" title="Xitrum 2.12 documentation" href="index.html" />
     <link rel="next" title="Static files" href="static.html" />
     <link rel="prev" title="JavaScript and JSON" href="js.html" /> 
   </head>
@@ -41,7 +41,7 @@
         <li class="right" >
           <a href="js.html" title="JavaScript and JSON"
              accesskey="P">previous</a> |</li>
-        <li><a href="index.html">Xitrum 2.10 documentation</a> &raquo;</li> 
+        <li><a href="index.html">Xitrum 2.12 documentation</a> &raquo;</li> 
       </ul>
     </div>  
 
@@ -111,27 +111,27 @@ class EchoWebSocketActor extends WebSocketActor {
    * respondText, respondView etc.
    */
   def execute() {
-    logger.debug("onOpen")
+    log..debug("onOpen")
 
     context.become {
       case WebSocketText(text) =&gt;
-        logger.info("onTextMessage: " + text)
+        log.info("onTextMessage: " + text)
         respondWebSocketText(text.toUpperCase)
 
       case WebSocketBinary(bytes) {
-        logger.info("onBinaryMessage: " + bytes)
+        log.info("onBinaryMessage: " + bytes)
         respondWebSocketBinary(bytes)
 
       case WebSocketPing =&gt;
-        logger.debug("onPing")
+        log.debug("onPing")
 
       case WebSocketPong =&gt;
-        logger.debug("onPong")
+        log.debug("onPong")
     }
   }
 
   override def postStop() {
-    logger.debug("onClose")
+    log.debug("onClose")
     super.postStop()
   }
 }</pre>
@@ -196,17 +196,17 @@ class EchoSockJsActor extends SockJsActor {
    * respondText, respondView etc.
    */
   def execute() {
-    logger.info("onOpen")
+    log.info("onOpen")
 
     context.become {
       case SockJsText(text) =&gt;
-        logger.info("onMessage: " + text)
+        log.info("onMessage: " + text)
         respondSockJsText(text)
     }
   }
 
   override def postStop() {
-    logger.info("onClose")
+    log.info("onClose")
     super.postStop()
   }
 }</pre>
@@ -364,7 +364,7 @@ respondEventSource("data2")  // Event name defaults to "message"</pre>
         <li class="right" >
           <a href="js.html" title="JavaScript and JSON"
              >previous</a> |</li>
-        <li><a href="index.html">Xitrum 2.10 documentation</a> &raquo;</li> 
+        <li><a href="index.html">Xitrum 2.12 documentation</a> &raquo;</li> 
       </ul>
     </div>
     <div class="footer">

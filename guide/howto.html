@@ -7,7 +7,7 @@
   <head>
     <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
     
-    <title>HOWTO &mdash; Xitrum 2.10 documentation</title>
+    <title>HOWTO &mdash; Xitrum 2.12 documentation</title>
     
     <link rel="stylesheet" href="_static/nature.css" type="text/css" />
     <link rel="stylesheet" href="_static/pygments.css" type="text/css" />
@@ -15,7 +15,7 @@
     <script type="text/javascript">
       var DOCUMENTATION_OPTIONS = {
         URL_ROOT:    '',
-        VERSION:     '2.10',
+        VERSION:     '2.12',
         COLLAPSE_INDEX: false,
         FILE_SUFFIX: '.html',
         HAS_SOURCE:  true
@@ -24,7 +24,7 @@
     <script type="text/javascript" src="_static/jquery.js"></script>
     <script type="text/javascript" src="_static/underscore.js"></script>
     <script type="text/javascript" src="_static/doctools.js"></script>
-    <link rel="top" title="Xitrum 2.10 documentation" href="index.html" />
+    <link rel="top" title="Xitrum 2.12 documentation" href="index.html" />
     <link rel="next" title="Netty handlers" href="handler.html" />
     <link rel="prev" title="Clustering with Akka" href="cluster.html" /> 
   </head>
@@ -41,7 +41,7 @@
         <li class="right" >
           <a href="cluster.html" title="Clustering with Akka"
              accesskey="P">previous</a> |</li>
-        <li><a href="index.html">Xitrum 2.10 documentation</a> &raquo;</li> 
+        <li><a href="index.html">Xitrum 2.12 documentation</a> &raquo;</li> 
       </ul>
     </div>  
 
@@ -109,6 +109,13 @@ else
 </div>
 <div class="section" id="basic-authentication">
 <h2>Basic authentication<a class="headerlink" href="#basic-authentication" title="Permalink to this headline">¶</a></h2>
+<p>You can protect the whole site or just certain actions with
+<a class="reference external" href="http://en.wikipedia.org/wiki/Basic_access_authentication">basic authentication</a>.</p>
+<p>Note that Xitrum does not support
+<a class="reference external" href="http://en.wikipedia.org/wiki/Digest_access_authentication">digest authentication</a>
+because it provides a false sense of security. It is vulnerable to a man-in-the-middle attack.
+For better security, you should use HTTPS, which Xitrum has built-in support
+(no need for additional reverse proxy like Apache or Nginx just to add HTTPS support).</p>
 <div class="section" id="config-basic-authentication-for-the-whole-site">
 <h3>Config basic authentication for the whole site<a class="headerlink" href="#config-basic-authentication-for-the-whole-site" title="Permalink to this headline">¶</a></h3>
 <p>In config/xitrum.conf:</p>
@@ -135,23 +142,44 @@ class MyAction extends Action {
 </div>
 <div class="section" id="log">
 <h2>Log<a class="headerlink" href="#log" title="Permalink to this headline">¶</a></h2>
-<p>Xitrum actions extend trait xitrum.Logger, which provides <tt class="docutils literal"><span class="pre">logger</span></tt>.
-In any action, you can do like this:</p>
-<div class="highlight-python"><div class="highlight"><pre><span class="n">logger</span><span class="o">.</span><span class="n">debug</span><span class="p">(</span><span class="s">&quot;Hello World&quot;</span><span class="p">)</span>
+<div class="section" id="use-object-xitrum-log-directly">
+<h3>Use object xitrum.Log directly<a class="headerlink" href="#use-object-xitrum-log-directly" title="Permalink to this headline">¶</a></h3>
+<p>From anywhere, you can call like this directly:</p>
+<div class="highlight-python"><div class="highlight"><pre><span class="n">xitrum</span><span class="o">.</span><span class="n">Log</span><span class="o">.</span><span class="n">debug</span><span class="p">(</span><span class="s">&quot;My debug msg&quot;</span><span class="p">)</span>
+<span class="n">xitrum</span><span class="o">.</span><span class="n">Log</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s">&quot;My info msg&quot;</span><span class="p">)</span>
+<span class="o">...</span>
 </pre></div>
 </div>
-<p>Of course you can extend xitrum.Logger any time you want:</p>
-<div class="highlight-python"><pre>object MyModel extends xitrum.Logger {
+</div>
+<div class="section" id="use-trait-xitrum-log">
+<h3>Use trait xitrum.Log<a class="headerlink" href="#use-trait-xitrum-log" title="Permalink to this headline">¶</a></h3>
+<p>If you want to have the information about where (which class) the log has been
+made, you should extend trait xitrum.Log</p>
+<div class="highlight-python"><pre>package my_package
+
+object MyModel extends xitrum.Log {
+  xitrum.Log.debug("My debug msg")
+  xitrum.Log.info("My info msg")
   ...
 }</pre>
 </div>
-<p>In build.sbt, notice this line:</p>
-<div class="highlight-python"><div class="highlight"><pre><span class="n">libraryDependencies</span> <span class="o">+=</span> <span class="s">&quot;ch.qos.logback&quot;</span> <span class="o">%</span> <span class="s">&quot;logback-classic&quot;</span> <span class="o">%</span> <span class="s">&quot;1.0.9&quot;</span>
+<p>In file log/xitrum.log you will see that the log messages comes from <tt class="docutils literal"><span class="pre">MyModel</span></tt>.</p>
+<p>Xitrum actions extend trait xitrum.Log, which provides <tt class="docutils literal"><span class="pre">log</span></tt>.
+In any action, you can do like this:</p>
+<div class="highlight-python"><div class="highlight"><pre><span class="n">log</span><span class="o">.</span><span class="n">debug</span><span class="p">(</span><span class="s">&quot;Hello World&quot;</span><span class="p">)</span>
+</pre></div>
+</div>
+</div>
+<div class="section" id="config-log-level-log-output-file-etc">
+<h3>Config log level, log output file etc.<a class="headerlink" href="#config-log-level-log-output-file-etc" title="Permalink to this headline">¶</a></h3>
+<p>In build.sbt, there&#8217;s this line:</p>
+<div class="highlight-python"><div class="highlight"><pre><span class="n">libraryDependencies</span> <span class="o">+=</span> <span class="s">&quot;ch.qos.logback&quot;</span> <span class="o">%</span> <span class="s">&quot;logback-classic&quot;</span> <span class="o">%</span> <span class="s">&quot;1.0.13&quot;</span>
 </pre></div>
 </div>
 <p>This means that <a class="reference external" href="http://logback.qos.ch/">Logback</a> is used by default.
-Logback config file is at <tt class="docutils literal"><span class="pre">config/logback.xml</span></tt>.
 You may replace Logback with any implementation of SLF4J.</p>
+<p>Logback config file is at <tt class="docutils literal"><span class="pre">config/logback.xml</span></tt>.</p>
+</div>
 </div>
 <div class="section" id="load-config-files">
 <h2>Load config files<a class="headerlink" href="#load-config-files" title="Permalink to this headline">¶</a></h2>
@@ -159,7 +187,7 @@ You may replace Logback with any implementation of SLF4J.</p>
 <h3>JSON file<a class="headerlink" href="#json-file" title="Permalink to this headline">¶</a></h3>
 <p>JSON is neat for config files that need nested structures.</p>
 <p>Save your own config files in &#8220;config&#8221; directory. This directory is put into
-classpath in development mode by build.sbt and in production mode by bin/runner (and bin/runner.bat).</p>
+classpath in development mode by build.sbt and in production mode by script/runner (and script/runner.bat).</p>
 <p>myconfig.json:</p>
 <div class="highlight-python"><div class="highlight"><pre><span class="p">{</span>
   <span class="s">&quot;username&quot;</span><span class="p">:</span> <span class="s">&quot;God&quot;</span><span class="p">,</span>
@@ -279,7 +307,12 @@ val html = Markdown("input")</pre>
 <li><a class="reference internal" href="#add-basic-authentication-to-an-action">Add basic authentication to an action</a></li>
 </ul>
 </li>
-<li><a class="reference internal" href="#log">Log</a></li>
+<li><a class="reference internal" href="#log">Log</a><ul>
+<li><a class="reference internal" href="#use-object-xitrum-log-directly">Use object xitrum.Log directly</a></li>
+<li><a class="reference internal" href="#use-trait-xitrum-log">Use trait xitrum.Log</a></li>
+<li><a class="reference internal" href="#config-log-level-log-output-file-etc">Config log level, log output file etc.</a></li>
+</ul>
+</li>
 <li><a class="reference internal" href="#load-config-files">Load config files</a><ul>
 <li><a class="reference internal" href="#json-file">JSON file</a></li>
 <li><a class="reference internal" href="#properties-file">Properties file</a></li>
@@ -332,7 +365,7 @@ val html = Markdown("input")</pre>
         <li class="right" >
           <a href="cluster.html" title="Clustering with Akka"
              >previous</a> |</li>
-        <li><a href="index.html">Xitrum 2.10 documentation</a> &raquo;</li> 
+        <li><a href="index.html">Xitrum 2.12 documentation</a> &raquo;</li> 
       </ul>
     </div>
     <div class="footer">

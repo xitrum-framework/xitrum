@@ -7,7 +7,7 @@
   <head>
     <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
     
-    <title>Action and view &mdash; Xitrum 2.10 documentation</title>
+    <title>Action and view &mdash; Xitrum 2.12 documentation</title>
     
     <link rel="stylesheet" href="_static/nature.css" type="text/css" />
     <link rel="stylesheet" href="_static/pygments.css" type="text/css" />
@@ -15,7 +15,7 @@
     <script type="text/javascript">
       var DOCUMENTATION_OPTIONS = {
         URL_ROOT:    '',
-        VERSION:     '2.10',
+        VERSION:     '2.12',
         COLLAPSE_INDEX: false,
         FILE_SUFFIX: '.html',
         HAS_SOURCE:  true
@@ -24,7 +24,7 @@
     <script type="text/javascript" src="_static/jquery.js"></script>
     <script type="text/javascript" src="_static/underscore.js"></script>
     <script type="text/javascript" src="_static/doctools.js"></script>
-    <link rel="top" title="Xitrum 2.10 documentation" href="index.html" />
+    <link rel="top" title="Xitrum 2.12 documentation" href="index.html" />
     <link rel="next" title="RESTful APIs" href="restful.html" />
     <link rel="prev" title="Development flow with SBT, Eclipse/IntelliJ IDEA, and JRebel" href="dev.html" /> 
   </head>
@@ -41,7 +41,7 @@
         <li class="right" >
           <a href="dev.html" title="Development flow with SBT, Eclipse/IntelliJ IDEA, and JRebel"
              accesskey="P">previous</a> |</li>
-        <li><a href="index.html">Xitrum 2.10 documentation</a> &raquo;</li> 
+        <li><a href="index.html">Xitrum 2.12 documentation</a> &raquo;</li> 
       </ul>
     </div>  
 
@@ -151,8 +151,8 @@ class MyAction extends Action {
 !!! 5
 html
   head
-    != antiCSRFMeta
-    != xitrumCSS
+    != antiCsrfMeta
+    != xitrumCss
     != jsDefaults
     title Welcome to Xitrum
 
@@ -163,7 +163,7 @@ html
     != jsForView</pre>
 </div>
 <ul class="simple">
-<li><tt class="docutils literal"><span class="pre">xitrumCSS</span></tt> includes the default CSS for Xitrum. You may remove it if you
+<li><tt class="docutils literal"><span class="pre">xitrumCss</span></tt> includes the default CSS for Xitrum. You may remove it if you
 don&#8217;t like.</li>
 <li><tt class="docutils literal"><span class="pre">jsDefaults</span></tt> includes jQuery, jQuery Validate plugin etc.
 should be put at layout&#8217;s &lt;head&gt;.</li>
@@ -197,12 +197,12 @@ is stricter.</p>
 <p>To pass things from action to Mustache template, you must use <tt class="docutils literal"><span class="pre">at</span></tt>:</p>
 <p>Action:</p>
 <div class="highlight-python"><div class="highlight"><pre><span class="n">at</span><span class="p">(</span><span class="s">&quot;name&quot;</span><span class="p">)</span> <span class="o">=</span> <span class="s">&quot;Jack&quot;</span>
-<span class="n">at</span><span class="p">(</span><span class="s">&quot;xitrumCSS&quot;</span><span class="p">)</span> <span class="o">=</span> <span class="n">xitrumCSS</span>
+<span class="n">at</span><span class="p">(</span><span class="s">&quot;xitrumCss&quot;</span><span class="p">)</span> <span class="o">=</span> <span class="n">xitrumCss</span>
 </pre></div>
 </div>
 <p>Mustache template:</p>
 <div class="highlight-python"><pre>My name is {{name}}
-{{xitrumCSS}}</pre>
+{{xitrumCss}}</pre>
 </div>
 <p>Note that you can&#8217;t use the below keys for <tt class="docutils literal"><span class="pre">at</span></tt> map to pass things to Scalate
 template, because they&#8217;re already used:</p>
@@ -265,8 +265,8 @@ trait AppAction extends Action {
 <div class="highlight-python"><pre>!!! 5
 html
   head
-    != antiCSRFMeta
-    != xitrumCSS
+    != antiCsrfMeta
+    != xitrumCss
     != jsDefaults
     title Welcome to Xitrum
 
@@ -303,8 +303,8 @@ trait AppAction extends Action {
   override def layout = DocType.html5(
     &lt;html&gt;
       &lt;head&gt;
-        {antiCSRFMeta}
-        {xitrumCSS}
+        {antiCsrfMeta}
+        {xitrumCss}
         {jsDefaults}
         &lt;title&gt;Welcome to Xitrum&lt;/title&gt;
       &lt;/head&gt;
@@ -323,8 +323,8 @@ trait AppAction extends Action {
   DocType.html5(
     &lt;html&gt;
       &lt;head&gt;
-        {antiCSRFMeta}
-        {xitrumCSS}
+        {antiCsrfMeta}
+        {xitrumCss}
         {jsDefaults}
         &lt;title&gt;Welcome to Xitrum&lt;/title&gt;
       &lt;/head&gt;
@@ -438,7 +438,7 @@ scr/main/scalate/mypackage/MyAction/_myfragment.jade:</p>
         <li class="right" >
           <a href="dev.html" title="Development flow with SBT, Eclipse/IntelliJ IDEA, and JRebel"
              >previous</a> |</li>
-        <li><a href="index.html">Xitrum 2.10 documentation</a> &raquo;</li> 
+        <li><a href="index.html">Xitrum 2.12 documentation</a> &raquo;</li> 
       </ul>
     </div>
     <div class="footer">

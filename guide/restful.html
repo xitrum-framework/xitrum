@@ -7,7 +7,7 @@
   <head>
     <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
     
-    <title>RESTful APIs &mdash; Xitrum 2.10 documentation</title>
+    <title>RESTful APIs &mdash; Xitrum 2.12 documentation</title>
     
     <link rel="stylesheet" href="_static/nature.css" type="text/css" />
     <link rel="stylesheet" href="_static/pygments.css" type="text/css" />
@@ -15,7 +15,7 @@
     <script type="text/javascript">
       var DOCUMENTATION_OPTIONS = {
         URL_ROOT:    '',
-        VERSION:     '2.10',
+        VERSION:     '2.12',
         COLLAPSE_INDEX: false,
         FILE_SUFFIX: '.html',
         HAS_SOURCE:  true
@@ -24,7 +24,7 @@
     <script type="text/javascript" src="_static/jquery.js"></script>
     <script type="text/javascript" src="_static/underscore.js"></script>
     <script type="text/javascript" src="_static/doctools.js"></script>
-    <link rel="top" title="Xitrum 2.10 documentation" href="index.html" />
+    <link rel="top" title="Xitrum 2.12 documentation" href="index.html" />
     <link rel="next" title="Template engines" href="template_engines.html" />
     <link rel="prev" title="Action and view" href="action_view.html" /> 
   </head>
@@ -41,7 +41,7 @@
         <li class="right" >
           <a href="action_view.html" title="Action and view"
              accesskey="P">previous</a> |</li>
-        <li><a href="index.html">Xitrum 2.10 documentation</a> &raquo;</li> 
+        <li><a href="index.html">Xitrum 2.12 documentation</a> &raquo;</li> 
       </ul>
     </div>  
 
@@ -67,7 +67,7 @@ class ArticlesShow extends Action {
 }</pre>
 </div>
 <p>The same for POST, PUT, PATCH, DELETE, and OPTIONS.
-HEAD is automatically handled by Xitrum as GET.</p>
+Xitrum automatically handles HEAD as GET with empty response body.</p>
 <p>For HTTP clients that do not support PUT and DELETE (like normal browsers), to
 simulate PUT and DELETE, send a POST with _method=put or _method=delete in the
 request body.</p>
@@ -125,6 +125,18 @@ class Image extends Action {
 }</pre>
 </div>
 </div>
+<div class="section" id="dot-in-route">
+<h2>Dot in route<a class="headerlink" href="#dot-in-route" title="Permalink to this headline">¶</a></h2>
+<div class="highlight-python"><pre>@GET("articles/:id", "articles/:id.:format")
+class ArticlesShow extends Action {
+  def execute() {
+    val id     = param[Int]("id")
+    val format = paramo("format").getOrElse("html")
+    // ...
+  }
+}</pre>
+</div>
+</div>
 <div class="section" id="regex-in-route">
 <h2>Regex in route<a class="headerlink" href="#regex-in-route" title="Permalink to this headline">¶</a></h2>
 <p>Regex can be used in routes to specify requirements:</p>
@@ -135,7 +147,7 @@ class Image extends Action {
 <h2>Anti-CSRF<a class="headerlink" href="#anti-csrf" title="Permalink to this headline">¶</a></h2>
 <p>For non-GET requests, Xitrum protects your web application from
 <a class="reference external" href="http://en.wikipedia.org/wiki/CSRF">Cross-site request forgery</a> by default.</p>
-<p>When you include <tt class="docutils literal"><span class="pre">antiCSRFMeta</span></tt> in your layout:</p>
+<p>When you include <tt class="docutils literal"><span class="pre">antiCsrfMeta</span></tt> in your layout:</p>
 <div class="highlight-python"><pre>import xitrum.Action
 import xitrum.view.DocType
 
@@ -143,8 +155,8 @@ trait AppAction extends Action {
   override def layout = DocType.html5(
     &lt;html&gt;
       &lt;head&gt;
-        {antiCSRFMeta}
-        {xitrumCSS}
+        {antiCsrfMeta}
+        {xitrumCss}
         {jsDefaults}
         &lt;title&gt;Welcome to Xitrum&lt;/title&gt;
       &lt;/head&gt;
@@ -171,10 +183,10 @@ trait AppAction extends Action {
 jQuery.</p>
 </div>
 <div class="section" id="anticsrfinput">
-<h2>antiCSRFInput<a class="headerlink" href="#anticsrfinput" title="Permalink to this headline">¶</a></h2>
-<p>If you manually write form in Scalate template, use <tt class="docutils literal"><span class="pre">antiCSRFInput</span></tt>:</p>
+<h2>antiCsrfInput<a class="headerlink" href="#anticsrfinput" title="Permalink to this headline">¶</a></h2>
+<p>If you manually write form in Scalate template, use <tt class="docutils literal"><span class="pre">antiCsrfInput</span></tt>:</p>
 <div class="highlight-python"><pre>form(method="post" action={url[AdminAddGroup]})
-  != antiCSRFInput
+  != antiCsrfInput
 
   label Group name *
   input.required(type="text" name="name" placeholder="Required")
@@ -222,35 +234,50 @@ out of the box. Add <tt class="docutils literal"><span class="pre">&#64;Swagger<
 Xitrum will generate <a class="reference external" href="https://github.com/wordnik/swagger-core/wiki/API-Declaration">/xitrum/swagger.json</a>.
 This file can be used with <a class="reference external" href="https://github.com/wordnik/swagger-ui">Swagger UI</a>
 to generate interactive API documentation.</p>
-<p>Xitrum includes Swagger UI. Access it at the path <tt class="docutils literal"><span class="pre">/xitrum/swagger</span></tt> of your program.</p>
+<p>Xitrum includes Swagger UI. Access it at the path <tt class="docutils literal"><span class="pre">/xitrum/swagger</span></tt> of your program,
+e.g. <a class="reference external" href="http://localhost:8000/xitrum/swagger">http://localhost:8000/xitrum/swagger</a>.</p>
 <img alt="_images/swagger.png" src="_images/swagger.png" />
 <p>Let&#8217;s see <a class="reference external" href="https://github.com/georgeOsdDev/xitrum-placeholder">an example</a>:</p>
 <div class="highlight-python"><pre>import xitrum.{Action, SkipCsrfCheck}
 import xitrum.annotation.{GET, Swagger}
 
-trait Api extends Action with SkipCsrfCheck
-
-@GET("image/:width/:height")
 @Swagger(
-  "Generate image",
-  Swagger.IntPath("width",  "Image width, should not be bigger than 2000"),
-  Swagger.IntPath("height", "Image height, should not be bigger than 2000"),
-  Swagger.OptionalStringQuery("text",  "Text to render on the image"),
+  Swagger.Note("Dimensions should not be bigger than 2000 x 2000")
+  Swagger.OptStringQuery("text", "Text to render on the image, default: Placeholder"),
   Swagger.Response(200, "PNG image"),
   Swagger.Response(400, "Width or height is invalid or too big")
 )
-class ImageApi extends Api {
+trait ImageApi extends Action with SkipCsrfCheck {
+  lazy val text = paramo("text").getOrElse("Placeholder")
+}
+
+@GET("image/:width/:height")
+@Swagger(  // &lt;-- Inherits other info from ImageApi
+  Swagger.Summary("Generate rectangle image"),
+  Swagger.IntPath("width"),
+  Swagger.IntPath("height")
+)
+class RectImageApi extends Api {
   def execute {
     val width  = param[Int]("width")
     val height = param[Int]("height")
-    val text   = paramo("text").getOrElse("Dummy text")
+    // ...
+  }
+}
+
+@GET("image/:width")
+@Swagger(  // &lt;-- Inherits other info from ImageApi
+  Swagger.Summary("Generate square image"),
+  Swagger.IntPath("width")
+)
+class SquareImageApi extends Api {
+  def execute {
+    val width  = param[Int]("width")
     // ...
   }
 }</pre>
 </div>
-<p>Read more about <a class="reference external" href="https://github.com/wordnik/swagger-core/wiki/Parameters">paramType</a>
-and <a class="reference external" href="https://github.com/wordnik/swagger-core/wiki/Datatypes">valueType</a>.</p>
-<p>/xitrum/swagger.json will look like this:</p>
+<p>/xitrum/swagger.json will look like this (note the inheritance):</p>
 <div class="highlight-python"><div class="highlight"><pre><span class="p">{</span>
   <span class="s">&quot;basePath&quot;</span><span class="p">:</span><span class="s">&quot;http://localhost:8000&quot;</span><span class="p">,</span>
   <span class="s">&quot;swaggerVersion&quot;</span><span class="p">:</span><span class="s">&quot;1.2&quot;</span><span class="p">,</span>
@@ -259,35 +286,61 @@ and <a class="reference external" href="https://github.com/wordnik/swagger-core/
     <span class="s">&quot;path&quot;</span><span class="p">:</span><span class="s">&quot;/xitrum/swagger.json&quot;</span><span class="p">,</span>
     <span class="s">&quot;operations&quot;</span><span class="p">:[{</span>
       <span class="s">&quot;httpMethod&quot;</span><span class="p">:</span><span class="s">&quot;GET&quot;</span><span class="p">,</span>
-      <span class="s">&quot;summary&quot;</span><span class="p">:</span><span class="s">&quot;API doc&quot;</span><span class="p">,</span>
-      <span class="s">&quot;notes&quot;</span><span class="p">:</span><span class="s">&quot;Use this route in Swagger UI to see the doc&quot;</span><span class="p">,</span>
+      <span class="s">&quot;summary&quot;</span><span class="p">:</span><span class="s">&quot;JSON for Swagger Doc of this whole project&quot;</span><span class="p">,</span>
+      <span class="s">&quot;notes&quot;</span><span class="p">:</span><span class="s">&quot;Use this route in Swagger UI to see API doc.&quot;</span><span class="p">,</span>
       <span class="s">&quot;nickname&quot;</span><span class="p">:</span><span class="s">&quot;SwaggerAction&quot;</span><span class="p">,</span>
       <span class="s">&quot;parameters&quot;</span><span class="p">:[],</span>
       <span class="s">&quot;responseMessages&quot;</span><span class="p">:[]</span>
     <span class="p">}]</span>
   <span class="p">},{</span>
-    <span class="s">&quot;path&quot;</span><span class="p">:</span><span class="s">&quot;/image/{width}&quot;</span><span class="p">,</span>
+    <span class="s">&quot;path&quot;</span><span class="p">:</span><span class="s">&quot;/image/{width}/{height}&quot;</span><span class="p">,</span>
     <span class="s">&quot;operations&quot;</span><span class="p">:[{</span>
       <span class="s">&quot;httpMethod&quot;</span><span class="p">:</span><span class="s">&quot;GET&quot;</span><span class="p">,</span>
-      <span class="s">&quot;summary&quot;</span><span class="p">:</span><span class="s">&quot;Generate image&quot;</span><span class="p">,</span>
-      <span class="s">&quot;nickname&quot;</span><span class="p">:</span><span class="s">&quot;ImageAPI&quot;</span><span class="p">,</span>
+      <span class="s">&quot;summary&quot;</span><span class="p">:</span><span class="s">&quot;Generate rectangle image&quot;</span><span class="p">,</span>
+      <span class="s">&quot;notes&quot;</span><span class="p">:</span><span class="s">&quot;Dimensions should not be bigger than 2000 x 2000&quot;</span><span class="p">,</span>
+      <span class="s">&quot;nickname&quot;</span><span class="p">:</span><span class="s">&quot;RectImageApi&quot;</span><span class="p">,</span>
       <span class="s">&quot;parameters&quot;</span><span class="p">:[{</span>
         <span class="s">&quot;name&quot;</span><span class="p">:</span><span class="s">&quot;width&quot;</span><span class="p">,</span>
         <span class="s">&quot;paramType&quot;</span><span class="p">:</span><span class="s">&quot;path&quot;</span><span class="p">,</span>
         <span class="s">&quot;type&quot;</span><span class="p">:</span><span class="s">&quot;integer&quot;</span><span class="p">,</span>
-        <span class="s">&quot;description&quot;</span><span class="p">:</span><span class="s">&quot;Image width, should not be bigger than 2000&quot;</span><span class="p">,</span>
         <span class="s">&quot;required&quot;</span><span class="p">:</span><span class="n">true</span>
       <span class="p">},{</span>
         <span class="s">&quot;name&quot;</span><span class="p">:</span><span class="s">&quot;height&quot;</span><span class="p">,</span>
         <span class="s">&quot;paramType&quot;</span><span class="p">:</span><span class="s">&quot;path&quot;</span><span class="p">,</span>
         <span class="s">&quot;type&quot;</span><span class="p">:</span><span class="s">&quot;integer&quot;</span><span class="p">,</span>
-        <span class="s">&quot;description&quot;</span><span class="p">:</span><span class="s">&quot;Image height, should not be bigger than 2000&quot;</span><span class="p">,</span>
         <span class="s">&quot;required&quot;</span><span class="p">:</span><span class="n">true</span>
       <span class="p">},{</span>
         <span class="s">&quot;name&quot;</span><span class="p">:</span><span class="s">&quot;text&quot;</span><span class="p">,</span>
         <span class="s">&quot;paramType&quot;</span><span class="p">:</span><span class="s">&quot;query&quot;</span><span class="p">,</span>
         <span class="s">&quot;type&quot;</span><span class="p">:</span><span class="s">&quot;string&quot;</span><span class="p">,</span>
-        <span class="s">&quot;description&quot;</span><span class="p">:</span><span class="s">&quot;Text to render on the image&quot;</span><span class="p">,</span>
+        <span class="s">&quot;description&quot;</span><span class="p">:</span><span class="s">&quot;Text to render on the image, default: Placeholder&quot;</span><span class="p">,</span>
+        <span class="s">&quot;required&quot;</span><span class="p">:</span><span class="n">false</span>
+      <span class="p">}],</span>
+      <span class="s">&quot;responseMessages&quot;</span><span class="p">:[{</span>
+        <span class="s">&quot;code&quot;</span><span class="p">:</span><span class="s">&quot;200&quot;</span><span class="p">,</span>
+        <span class="s">&quot;message&quot;</span><span class="p">:</span><span class="s">&quot;PNG image&quot;</span>
+      <span class="p">},{</span>
+        <span class="s">&quot;code&quot;</span><span class="p">:</span><span class="s">&quot;400&quot;</span><span class="p">,</span>
+        <span class="s">&quot;message&quot;</span><span class="p">:</span><span class="s">&quot;Width is invalid or too big&quot;</span>
+      <span class="p">}]</span>
+    <span class="p">}]</span>
+  <span class="p">},{</span>
+    <span class="s">&quot;path&quot;</span><span class="p">:</span><span class="s">&quot;/image/{width}&quot;</span><span class="p">,</span>
+    <span class="s">&quot;operations&quot;</span><span class="p">:[{</span>
+      <span class="s">&quot;httpMethod&quot;</span><span class="p">:</span><span class="s">&quot;GET&quot;</span><span class="p">,</span>
+      <span class="s">&quot;summary&quot;</span><span class="p">:</span><span class="s">&quot;Generate square image&quot;</span><span class="p">,</span>
+      <span class="s">&quot;notes&quot;</span><span class="p">:</span><span class="s">&quot;Dimensions should not be bigger than 2000 x 2000&quot;</span><span class="p">,</span>
+      <span class="s">&quot;nickname&quot;</span><span class="p">:</span><span class="s">&quot;SquareImageApi&quot;</span><span class="p">,</span>
+      <span class="s">&quot;parameters&quot;</span><span class="p">:[{</span>
+        <span class="s">&quot;name&quot;</span><span class="p">:</span><span class="s">&quot;width&quot;</span><span class="p">,</span>
+        <span class="s">&quot;paramType&quot;</span><span class="p">:</span><span class="s">&quot;path&quot;</span><span class="p">,</span>
+        <span class="s">&quot;type&quot;</span><span class="p">:</span><span class="s">&quot;integer&quot;</span><span class="p">,</span>
+        <span class="s">&quot;required&quot;</span><span class="p">:</span><span class="n">true</span>
+      <span class="p">},{</span>
+        <span class="s">&quot;name&quot;</span><span class="p">:</span><span class="s">&quot;text&quot;</span><span class="p">,</span>
+        <span class="s">&quot;paramType&quot;</span><span class="p">:</span><span class="s">&quot;query&quot;</span><span class="p">,</span>
+        <span class="s">&quot;type&quot;</span><span class="p">:</span><span class="s">&quot;string&quot;</span><span class="p">,</span>
+        <span class="s">&quot;description&quot;</span><span class="p">:</span><span class="s">&quot;Text to render on the image, default: Placeholder&quot;</span><span class="p">,</span>
         <span class="s">&quot;required&quot;</span><span class="p">:</span><span class="n">false</span>
       <span class="p">}],</span>
       <span class="s">&quot;responseMessages&quot;</span><span class="p">:[{</span>
@@ -303,14 +356,16 @@ and <a class="reference external" href="https://github.com/wordnik/swagger-core/
 </pre></div>
 </div>
 <p>Swagger UI uses the above information to generate interactive API doc.</p>
-<p>Params other than Swagger.IntPath and Swagger.OptionalStringQuery above: BytePath, IntQuery, OptionalStringForm etc.
+<p>Params other than Swagger.IntPath and Swagger.OptStringQuery above: BytePath, IntQuery, OptStringForm etc.
 They are in the form:</p>
 <ul class="simple">
-<li>&lt;Value type&gt;&lt;Param type&gt;</li>
-<li>Optional&lt;Value type&gt;&lt;Param type&gt;</li>
+<li>&lt;Value type&gt;&lt;Param type&gt; (required parameter)</li>
+<li>Opt&lt;Value type&gt;&lt;Param type&gt; (optional parameter)</li>
 </ul>
 <p>Value type: Byte, Int, Int32, Int64, Long, Number, Float, Double, String, Boolean, Date DateTime</p>
 <p>Param type: Path, Query, Body, Header, Form</p>
+<p>Read more about <a class="reference external" href="https://github.com/wordnik/swagger-core/wiki/Datatypes">value type</a>
+and <a class="reference external" href="https://github.com/wordnik/swagger-core/wiki/Parameters">param type</a>.</p>
 </div>
 </div>
 
@@ -326,9 +381,10 @@ They are in the form:</p>
 <li><a class="reference internal" href="#route-cache">Route cache</a></li>
 <li><a class="reference internal" href="#route-order-with-first-and-last">Route order with first and last</a></li>
 <li><a class="reference internal" href="#multiple-paths-for-one-action">Multiple paths for one action</a></li>
+<li><a class="reference internal" href="#dot-in-route">Dot in route</a></li>
 <li><a class="reference internal" href="#regex-in-route">Regex in route</a></li>
 <li><a class="reference internal" href="#anti-csrf">Anti-CSRF</a></li>
-<li><a class="reference internal" href="#anticsrfinput">antiCSRFInput</a></li>
+<li><a class="reference internal" href="#anticsrfinput">antiCsrfInput</a></li>
 <li><a class="reference internal" href="#skipcsrfcheck">SkipCsrfCheck</a></li>
 <li><a class="reference internal" href="#getting-entire-request-body">Getting entire request body</a></li>
 <li><a class="reference internal" href="#documenting-api">Documenting API</a></li>
@@ -376,7 +432,7 @@ They are in the form:</p>
         <li class="right" >
           <a href="action_view.html" title="Action and view"
              >previous</a> |</li>
-        <li><a href="index.html">Xitrum 2.10 documentation</a> &raquo;</li> 
+        <li><a href="index.html">Xitrum 2.12 documentation</a> &raquo;</li> 
       </ul>
     </div>
     <div class="footer">

@@ -117,8 +117,8 @@ scr/main/scalate/mypackage/MyAction.jade:
   !!! 5
   html
     head
-      != antiCSRFMeta
-      != xitrumCSS
+      != antiCsrfMeta
+      != xitrumCss
       != jsDefaults
       title Welcome to Xitrum
 
@@ -128,7 +128,7 @@ scr/main/scalate/mypackage/MyAction.jade:
 
       != jsForView
 
-* ``xitrumCSS`` includes the default CSS for Xitrum. You may remove it if you
+* ``xitrumCss`` includes the default CSS for Xitrum. You may remove it if you
   don't like.
 * ``jsDefaults`` includes jQuery, jQuery Validate plugin etc.
   should be put at layout's <head>.
@@ -174,14 +174,14 @@ Action:
 ::
 
   at("name") = "Jack"
-  at("xitrumCSS") = xitrumCSS
+  at("xitrumCss") = xitrumCss
 
 Mustache template:
 
 ::
 
   My name is {{name}}
-  {{xitrumCSS}}
+  {{xitrumCss}}
 
 Note that you can't use the below keys for ``at`` map to pass things to Scalate
 template, because they're already used:
@@ -263,8 +263,8 @@ src/main/scalate/mypackage/AppAction.jade
   !!! 5
   html
     head
-      != antiCSRFMeta
-      != xitrumCSS
+      != antiCsrfMeta
+      != xitrumCss
       != jsDefaults
       title Welcome to Xitrum
 
@@ -311,8 +311,8 @@ AppAction.scala
     override def layout = DocType.html5(
       <html>
         <head>
-          {antiCSRFMeta}
-          {xitrumCSS}
+          {antiCsrfMeta}
+          {xitrumCss}
           {jsDefaults}
           <title>Welcome to Xitrum</title>
         </head>
@@ -333,8 +333,8 @@ Pass layout directly in respondView
     DocType.html5(
       <html>
         <head>
-          {antiCSRFMeta}
-          {xitrumCSS}
+          {antiCsrfMeta}
+          {xitrumCss}
           {jsDefaults}
           <title>Welcome to Xitrum</title>
         </head>

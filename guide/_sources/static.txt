@@ -44,6 +44,14 @@ To send a static file on disk from your action, use ``respondFile``.
   respondFile("/absolute/path")
   respondFile("path/relative/to/the/current/working/directory")
 
+index.html fallback
+-------------------
+
+If there's no route (no action) for URL ``/foo/bar`` (or ``/foo/bar/``),
+Xitrum will try to look for static file ``public/foo/bar/index.html``
+(in the "public" directory). If the file exists, Xitrum will respond it
+to the client.
+
 404 and 500
 -----------
 

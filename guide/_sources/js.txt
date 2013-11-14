@@ -35,8 +35,8 @@ In your layout, call ``jsForView``:
     override def layout = DocType.html5(
       <html>
         <head>
-          {antiCSRFMeta}
-          {xitrumCSS}
+          {antiCsrfMeta}
+          {xitrumCss}
           {jsDefaults}
         </head>
         <body>

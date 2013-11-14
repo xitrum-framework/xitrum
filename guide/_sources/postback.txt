@@ -31,8 +31,8 @@ AppAction.scala
     override def layout = DocType.html5(
       <html>
         <head>
-          {antiCSRFMeta}
-          {xitrumCSS}
+          {antiCsrfMeta}
+          {xitrumCss}
           {jsDefaults}
           <title>Welcome to Xitrum</title>
         </head>
@@ -57,7 +57,7 @@ Articles.scala
   @GET("articles/:id")
   class ArticlesShow extends AppAction {
     def execute() {
-      val id = param("id")
+      val id      = param("id")
       val article = Article.find(id)
       respondInlineView(
         <h1>{article.title}</h1>

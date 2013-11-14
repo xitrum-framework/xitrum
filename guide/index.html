@@ -7,7 +7,7 @@
   <head>
     <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
     
-    <title>Xitrum Guide &mdash; Xitrum 2.10 documentation</title>
+    <title>Xitrum Guide &mdash; Xitrum 2.12 documentation</title>
     
     <link rel="stylesheet" href="_static/nature.css" type="text/css" />
     <link rel="stylesheet" href="_static/pygments.css" type="text/css" />
@@ -15,7 +15,7 @@
     <script type="text/javascript">
       var DOCUMENTATION_OPTIONS = {
         URL_ROOT:    '',
-        VERSION:     '2.10',
+        VERSION:     '2.12',
         COLLAPSE_INDEX: false,
         FILE_SUFFIX: '.html',
         HAS_SOURCE:  true
@@ -24,7 +24,7 @@
     <script type="text/javascript" src="_static/jquery.js"></script>
     <script type="text/javascript" src="_static/underscore.js"></script>
     <script type="text/javascript" src="_static/doctools.js"></script>
-    <link rel="top" title="Xitrum 2.10 documentation" href="#" />
+    <link rel="top" title="Xitrum 2.12 documentation" href="#" />
     <link rel="next" title="Introduction" href="intro.html" /> 
   </head>
   <body>
@@ -37,7 +37,7 @@
         <li class="right" >
           <a href="intro.html" title="Introduction"
              accesskey="N">next</a> |</li>
-        <li><a href="#">Xitrum 2.10 documentation</a> &raquo;</li> 
+        <li><a href="#">Xitrum 2.12 documentation</a> &raquo;</li> 
       </ul>
     </div>  
 
@@ -48,7 +48,6 @@
             
   <div class="section" id="xitrum-guide">
 <h1>Xitrum Guide<a class="headerlink" href="#xitrum-guide" title="Permalink to this headline">¶</a></h1>
-<p><a href="xitrum.pdf" title="PDF"><img src="xitrum-pdf.png"/></a></p>
 <div class="toctree-wrapper compound">
 <ul>
 <li class="toctree-l1"><a class="reference internal" href="intro.html">Introduction</a><ul>
@@ -91,9 +90,10 @@
 <li class="toctree-l2"><a class="reference internal" href="restful.html#route-cache">Route cache</a></li>
 <li class="toctree-l2"><a class="reference internal" href="restful.html#route-order-with-first-and-last">Route order with first and last</a></li>
 <li class="toctree-l2"><a class="reference internal" href="restful.html#multiple-paths-for-one-action">Multiple paths for one action</a></li>
+<li class="toctree-l2"><a class="reference internal" href="restful.html#dot-in-route">Dot in route</a></li>
 <li class="toctree-l2"><a class="reference internal" href="restful.html#regex-in-route">Regex in route</a></li>
 <li class="toctree-l2"><a class="reference internal" href="restful.html#anti-csrf">Anti-CSRF</a></li>
-<li class="toctree-l2"><a class="reference internal" href="restful.html#anticsrfinput">antiCSRFInput</a></li>
+<li class="toctree-l2"><a class="reference internal" href="restful.html#anticsrfinput">antiCsrfInput</a></li>
 <li class="toctree-l2"><a class="reference internal" href="restful.html#skipcsrfcheck">SkipCsrfCheck</a></li>
 <li class="toctree-l2"><a class="reference internal" href="restful.html#getting-entire-request-body">Getting entire request body</a></li>
 <li class="toctree-l2"><a class="reference internal" href="restful.html#documenting-api">Documenting API</a></li>
@@ -140,6 +140,7 @@
 </li>
 <li class="toctree-l1"><a class="reference internal" href="static.html">Static files</a><ul>
 <li class="toctree-l2"><a class="reference internal" href="static.html#serve-static-files-on-disk">Serve static files on disk</a></li>
+<li class="toctree-l2"><a class="reference internal" href="static.html#index-html-fallback">index.html fallback</a></li>
 <li class="toctree-l2"><a class="reference internal" href="static.html#and-500">404 and 500</a></li>
 <li class="toctree-l2"><a class="reference internal" href="static.html#serve-resource-files-in-classpath">Serve resource files in classpath</a></li>
 <li class="toctree-l2"><a class="reference internal" href="static.html#client-side-cache-with-etag-and-max-age">Client side cache with ETag and max-age</a></li>
@@ -203,7 +204,8 @@
 <li class="toctree-l2"><a class="reference internal" href="deploy.html#haproxy">HAProxy</a></li>
 <li class="toctree-l2"><a class="reference internal" href="deploy.html#package-directory">Package directory</a></li>
 <li class="toctree-l2"><a class="reference internal" href="deploy.html#customize-xitrum-package">Customize xitrum-package</a></li>
-<li class="toctree-l2"><a class="reference internal" href="deploy.html#start-xitrum-in-production-mode">Start Xitrum in production mode</a></li>
+<li class="toctree-l2"><a class="reference internal" href="deploy.html#start-xitrum-in-production-mode-when-the-system-starts">Start Xitrum in production mode when the system starts</a></li>
+<li class="toctree-l2"><a class="reference internal" href="deploy.html#set-up-port-forwarding">Set up port forwarding</a></li>
 <li class="toctree-l2"><a class="reference internal" href="deploy.html#tune-linux-for-many-connections">Tune Linux for many connections</a><ul>
 <li class="toctree-l3"><a class="reference internal" href="deploy.html#increase-open-file-limit">Increase open file limit</a></li>
 <li class="toctree-l3"><a class="reference internal" href="deploy.html#tune-kernel">Tune kernel</a></li>
@@ -232,7 +234,12 @@
 <li class="toctree-l3"><a class="reference internal" href="howto.html#add-basic-authentication-to-an-action">Add basic authentication to an action</a></li>
 </ul>
 </li>
-<li class="toctree-l2"><a class="reference internal" href="howto.html#log">Log</a></li>
+<li class="toctree-l2"><a class="reference internal" href="howto.html#log">Log</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="howto.html#use-object-xitrum-log-directly">Use object xitrum.Log directly</a></li>
+<li class="toctree-l3"><a class="reference internal" href="howto.html#use-trait-xitrum-log">Use trait xitrum.Log</a></li>
+<li class="toctree-l3"><a class="reference internal" href="howto.html#config-log-level-log-output-file-etc">Config log level, log output file etc.</a></li>
+</ul>
+</li>
 <li class="toctree-l2"><a class="reference internal" href="howto.html#load-config-files">Load config files</a><ul>
 <li class="toctree-l3"><a class="reference internal" href="howto.html#json-file">JSON file</a></li>
 <li class="toctree-l3"><a class="reference internal" href="howto.html#properties-file">Properties file</a></li>
@@ -299,7 +306,7 @@
         <li class="right" >
           <a href="intro.html" title="Introduction"
              >next</a> |</li>
-        <li><a href="#">Xitrum 2.10 documentation</a> &raquo;</li> 
+        <li><a href="#">Xitrum 2.12 documentation</a> &raquo;</li> 
       </ul>
     </div>
     <div class="footer">

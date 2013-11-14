@@ -10,7 +10,7 @@ MyUpload.scalate:
 ::
 
   form(method="post" action={url[MyUpload]} enctype="multipart/form-data")
-    != antiCSRFInput
+    != antiCsrfInput
 
     label Please select a file:
     input(type="file" name="myFile")

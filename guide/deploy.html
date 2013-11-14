@@ -7,7 +7,7 @@
   <head>
     <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
     
-    <title>Deploy to production server &mdash; Xitrum 2.10 documentation</title>
+    <title>Deploy to production server &mdash; Xitrum 2.12 documentation</title>
     
     <link rel="stylesheet" href="_static/nature.css" type="text/css" />
     <link rel="stylesheet" href="_static/pygments.css" type="text/css" />
@@ -15,7 +15,7 @@
     <script type="text/javascript">
       var DOCUMENTATION_OPTIONS = {
         URL_ROOT:    '',
-        VERSION:     '2.10',
+        VERSION:     '2.12',
         COLLAPSE_INDEX: false,
         FILE_SUFFIX: '.html',
         HAS_SOURCE:  true
@@ -24,7 +24,7 @@
     <script type="text/javascript" src="_static/jquery.js"></script>
     <script type="text/javascript" src="_static/underscore.js"></script>
     <script type="text/javascript" src="_static/doctools.js"></script>
-    <link rel="top" title="Xitrum 2.10 documentation" href="index.html" />
+    <link rel="top" title="Xitrum 2.12 documentation" href="index.html" />
     <link rel="next" title="Clustering with Akka" href="cluster.html" />
     <link rel="prev" title="I18n" href="i18n.html" /> 
   </head>
@@ -41,7 +41,7 @@
         <li class="right" >
           <a href="i18n.html" title="I18n"
              accesskey="P">previous</a> |</li>
-        <li><a href="index.html">Xitrum 2.10 documentation</a> &raquo;</li> 
+        <li><a href="index.html">Xitrum 2.12 documentation</a> &raquo;</li> 
       </ul>
     </div>  
 
@@ -55,7 +55,7 @@
 <p>You may run Xitrum directly:</p>
 <div class="highlight-python"><pre>Browser ------ Xitrum instance</pre>
 </div>
-<p>Or behind a load balancer like HAProxy, or reverse proxy like Nginx:</p>
+<p>Or behind a load balancer like HAProxy, or reverse proxy like Apache or Nginx:</p>
 <div class="highlight-python"><pre>Browser ------ Load balancer/Reverse proxy -+---- Xitrum instance1
                                             +---- Xitrum instance2</pre>
 </div>
@@ -90,24 +90,67 @@ deploy to production server:</p>
 </div>
 <div class="section" id="customize-xitrum-package">
 <h2>Customize xitrum-package<a class="headerlink" href="#customize-xitrum-package" title="Permalink to this headline">¶</a></h2>
-<p>By default <tt class="docutils literal"><span class="pre">sbt/sbt</span> <span class="pre">xitrum-package</span></tt> command simply copies <tt class="docutils literal"><span class="pre">config</span></tt> and <tt class="docutils literal"><span class="pre">public</span></tt>
-directories to <tt class="docutils literal"><span class="pre">target/xitrum</span></tt>. If you want it to copy additional files
-and directories (README, INSTALL, doc etc.), config <tt class="docutils literal"><span class="pre">build.sbt</span></tt> like this:</p>
-<div class="highlight-python"><div class="highlight"><pre><span class="n">TODO</span>
-</pre></div>
+<p>By default <tt class="docutils literal"><span class="pre">sbt/sbt</span> <span class="pre">xitrum-package</span></tt> command is configured to copy directories
+<tt class="docutils literal"><span class="pre">config</span></tt>, <tt class="docutils literal"><span class="pre">public</span></tt>, and <tt class="docutils literal"><span class="pre">script</span></tt> to <tt class="docutils literal"><span class="pre">target/xitrum</span></tt>. If you want it to
+copy additional directories or files change <tt class="docutils literal"><span class="pre">build.sbt</span></tt> like this:</p>
+<div class="highlight-python"><pre>XitrumPackage.copy("config", "public, "script", "doc/README.txt", "etc.")</pre>
 </div>
+<p>See <a class="reference external" href="https://github.com/ngocdaothanh/xitrum-package">xitrum-package homepage</a>
+for more information.</p>
 </div>
-<div class="section" id="start-xitrum-in-production-mode">
-<h2>Start Xitrum in production mode<a class="headerlink" href="#start-xitrum-in-production-mode" title="Permalink to this headline">¶</a></h2>
-<p><tt class="docutils literal"><span class="pre">bin/runner</span></tt> (for <a href="#id1"><span class="problematic" id="id2">*</span></a>nix) and <tt class="docutils literal"><span class="pre">bin/runner.bat</span></tt> (for Windows) are the script to
+<div class="section" id="start-xitrum-in-production-mode-when-the-system-starts">
+<h2>Start Xitrum in production mode when the system starts<a class="headerlink" href="#start-xitrum-in-production-mode-when-the-system-starts" title="Permalink to this headline">¶</a></h2>
+<p><tt class="docutils literal"><span class="pre">script/runner</span></tt> (for <a href="#id1"><span class="problematic" id="id2">*</span></a>nix) and <tt class="docutils literal"><span class="pre">script/runner.bat</span></tt> (for Windows) are the script to
 run any object with <tt class="docutils literal"><span class="pre">main</span></tt> method. Use it to start the web server in production
 environment.</p>
-<div class="highlight-python"><pre>bin/runner quickstart.Boot</pre>
+<div class="highlight-python"><pre>script/runner quickstart.Boot</pre>
 </div>
-<p>You may want to modify <tt class="docutils literal"><span class="pre">runner</span></tt> and <tt class="docutils literal"><span class="pre">runner.bat</span></tt> to tune JVM settings. Also see <tt class="docutils literal"><span class="pre">config/xitrum.conf</span></tt>.</p>
-<p>To start Xitrum in background when the system starts, <a class="reference external" href="http://cr.yp.to/daemontools.html">daemontools</a>
+<p>You may want to modify <tt class="docutils literal"><span class="pre">runner</span></tt> (or <tt class="docutils literal"><span class="pre">runner.bat</span></tt>) to tune JVM settings. Also see <tt class="docutils literal"><span class="pre">config/xitrum.conf</span></tt>.</p>
+<p>To start Xitrum in background on Linux when the system starts, <a class="reference external" href="http://cr.yp.to/daemontools.html">daemontools</a>
 is a very good tool. To install it on CentOS, see
 <a class="reference external" href="http://whomwah.com/2008/11/04/installing-daemontools-on-centos5-x86_64/">this instruction</a>.</p>
+<p>Or use <a class="reference external" href="http://supervisord.org/">Supervisord</a>.
+<tt class="docutils literal"><span class="pre">/etc/supervisord.conf</span></tt> example:</p>
+<div class="highlight-python"><pre>[program:my_app]
+directory=/path/to/my_app
+command=/path/to/my_app/script/runner quickstart.Boot
+autostart=true
+autorestart=true
+startsecs=3
+user=my_user
+redirect_stderr=true
+stdout_logfile=/path/to/my_app/log/stdout.log
+stdout_logfile_maxbytes=10MB
+stdout_logfile_backups=7
+stdout_capture_maxbytes=1MB
+stdout_events_enabled=false
+environment=PATH=/usr/local/bin:/bin:/usr/bin:/usr/local/sbin:/usr/sbin:/sbin:/opt/aws/bin:~/bin</pre>
+</div>
+</div>
+<div class="section" id="set-up-port-forwarding">
+<h2>Set up port forwarding<a class="headerlink" href="#set-up-port-forwarding" title="Permalink to this headline">¶</a></h2>
+<p>Xitrum listens on port 8000 and 4430 by default.
+You can change these ports in <tt class="docutils literal"><span class="pre">config/xitrum.conf</span></tt>.</p>
+<p>You can update <tt class="docutils literal"><span class="pre">/etc/sysconfig/iptables</span></tt> with these commands to forward port
+80 to 8000 and 443 to 4430:</p>
+<div class="highlight-python"><pre>sudo su - root
+chmod 700 /etc/sysconfig/iptables
+iptables-restore &lt; /etc/sysconfig/iptables
+iptables -A PREROUTING -t nat -i eth0 -p tcp --dport 80 -j REDIRECT --to-port 8000
+iptables -A PREROUTING -t nat -i eth0 -p tcp --dport 443 -j REDIRECT --to-port 4430
+iptables -t nat -I OUTPUT -p tcp -d 127.0.0.1 --dport 80 -j REDIRECT --to-ports 8000
+iptables -t nat -I OUTPUT -p tcp -d 127.0.0.1 --dport 443 -j REDIRECT --to-ports 4430
+iptables-save -c &gt; /etc/sysconfig/iptables
+chmod 644 /etc/sysconfig/iptables</pre>
+</div>
+<p>Of course for example if you have Apache running on port 80 and 443, you have to stop it:</p>
+<div class="highlight-python"><pre>sudo /etc/init.d/httpd stop
+sudo chkconfig httpd off</pre>
+</div>
+<p>Good read:</p>
+<ul class="simple">
+<li><a class="reference external" href="http://www.frozentux.net/iptables-tutorial/chunkyhtml/">Iptables tutorial</a></li>
+</ul>
 </div>
 <div class="section" id="tune-linux-for-many-connections">
 <h2>Tune Linux for many connections<a class="headerlink" href="#tune-linux-for-many-connections" title="Permalink to this headline">¶</a></h2>
@@ -115,7 +158,6 @@ is a very good tool. To install it on CentOS, see
 <p>Good read:</p>
 <ul class="simple">
 <li><a class="reference external" href="http://www.frozentux.net/ipsysctl-tutorial/chunkyhtml/">Ipsysctl tutorial</a></li>
-<li><a class="reference external" href="http://www.frozentux.net/iptables-tutorial/chunkyhtml/">Iptables tutorial</a></li>
 <li><a class="reference external" href="http://www.frozentux.net/ipsysctl-tutorial/chunkyhtml/tcpvariables.html">TCP variables</a></li>
 </ul>
 <div class="section" id="increase-open-file-limit">
@@ -197,7 +239,7 @@ sign up and create git repository.</p>
 <h3>Create Procfile<a class="headerlink" href="#create-procfile" title="Permalink to this headline">¶</a></h3>
 <p>Create Procfile and save it at project root directory. Heroku reads this file and
 executes on start. Port number is ginven by Heroku automatically as <tt class="docutils literal"><span class="pre">$PORT</span></tt>.</p>
-<div class="highlight-python"><pre>web: target/xitrum/bin/runner &lt;YOUR_PACKAGE.YOUR_MAIN_CLASS&gt; $PORT</pre>
+<div class="highlight-python"><pre>web: target/xitrum/script/runner &lt;YOUR_PACKAGE.YOUR_MAIN_CLASS&gt; $PORT</pre>
 </div>
 </div>
 <div class="section" id="change-port-setting">
@@ -265,7 +307,8 @@ for <tt class="docutils literal"><span class="pre">xitrum-package</span></tt>.</
 <li><a class="reference internal" href="#haproxy">HAProxy</a></li>
 <li><a class="reference internal" href="#package-directory">Package directory</a></li>
 <li><a class="reference internal" href="#customize-xitrum-package">Customize xitrum-package</a></li>
-<li><a class="reference internal" href="#start-xitrum-in-production-mode">Start Xitrum in production mode</a></li>
+<li><a class="reference internal" href="#start-xitrum-in-production-mode-when-the-system-starts">Start Xitrum in production mode when the system starts</a></li>
+<li><a class="reference internal" href="#set-up-port-forwarding">Set up port forwarding</a></li>
 <li><a class="reference internal" href="#tune-linux-for-many-connections">Tune Linux for many connections</a><ul>
 <li><a class="reference internal" href="#increase-open-file-limit">Increase open file limit</a></li>
 <li><a class="reference internal" href="#tune-kernel">Tune kernel</a></li>
@@ -325,7 +368,7 @@ for <tt class="docutils literal"><span class="pre">xitrum-package</span></tt>.</
         <li class="right" >
           <a href="i18n.html" title="I18n"
              >previous</a> |</li>
-        <li><a href="index.html">Xitrum 2.10 documentation</a> &raquo;</li> 
+        <li><a href="index.html">Xitrum 2.12 documentation</a> &raquo;</li> 
       </ul>
     </div>
     <div class="footer">

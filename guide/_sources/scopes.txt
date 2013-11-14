@@ -71,8 +71,8 @@ AppAction.scala
     override def layout = DocType.html5(
       <html>
         <head>
-          {antiCSRFMeta}
-          {xitrumCSS}
+          {antiCsrfMeta}
+          {xitrumCss}
           {jsDefaults}
           <title>{if (at.isDefinedAt("title")) "My Site - " + at("title") else "My Site"}</title>
         </head>
@@ -125,8 +125,8 @@ AppAction.scala
     override def layout = DocType.html5(
       <html>
         <head>
-          {antiCSRFMeta}
-          {xitrumCSS}
+          {antiCsrfMeta}
+          {xitrumCss}
           {jsDefaults}
           <title>{if (RVar.title.isDefined) "My Site - " + RVar.title.get else "My Site"}</title>
         </head>

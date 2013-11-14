@@ -19,7 +19,7 @@ You can write RESTful APIs for iPhone, Android applications etc. very easily.
   }
 
 The same for POST, PUT, PATCH, DELETE, and OPTIONS.
-HEAD is automatically handled by Xitrum as GET.
+Xitrum automatically handles HEAD as GET with empty response body.
 
 For HTTP clients that do not support PUT and DELETE (like normal browsers), to
 simulate PUT and DELETE, send a POST with _method=put or _method=delete in the
@@ -93,6 +93,20 @@ Multiple paths for one action
     }
   }
 
+Dot in route
+------------
+
+::
+
+  @GET("articles/:id", "articles/:id.:format")
+  class ArticlesShow extends Action {
+    def execute() {
+      val id     = param[Int]("id")
+      val format = paramo("format").getOrElse("html")
+      // ...
+    }
+  }
+
 Regex in route
 --------------
 
@@ -108,7 +122,7 @@ Anti-CSRF
 For non-GET requests, Xitrum protects your web application from
 `Cross-site request forgery <http://en.wikipedia.org/wiki/CSRF>`_ by default.
 
-When you include ``antiCSRFMeta`` in your layout:
+When you include ``antiCsrfMeta`` in your layout:
 
 ::
 
@@ -119,8 +133,8 @@ When you include ``antiCSRFMeta`` in your layout:
     override def layout = DocType.html5(
       <html>
         <head>
-          {antiCSRFMeta}
-          {xitrumCSS}
+          {antiCsrfMeta}
+          {xitrumCss}
           {jsDefaults}
           <title>Welcome to Xitrum</title>
         </head>
@@ -149,15 +163,15 @@ The ``<head>`` part will include something like this:
 The token will be automatically included in all non-GET Ajax requests sent by
 jQuery.
 
-antiCSRFInput
+antiCsrfInput
 -------------
 
-If you manually write form in Scalate template, use ``antiCSRFInput``:
+If you manually write form in Scalate template, use ``antiCsrfInput``:
 
 ::
 
   form(method="post" action={url[AdminAddGroup]})
-    != antiCSRFInput
+    != antiCsrfInput
 
     label Group name *
     input.required(type="text" name="name" placeholder="Required")
@@ -212,7 +226,8 @@ Xitrum will generate `/xitrum/swagger.json <https://github.com/wordnik/swagger-c
 This file can be used with `Swagger UI <https://github.com/wordnik/swagger-ui>`_
 to generate interactive API documentation.
 
-Xitrum includes Swagger UI. Access it at the path ``/xitrum/swagger`` of your program.
+Xitrum includes Swagger UI. Access it at the path ``/xitrum/swagger`` of your program,
+e.g. http://localhost:8000/xitrum/swagger.
 
 .. image:: swagger.png
 
@@ -223,30 +238,43 @@ Let's see `an example <https://github.com/georgeOsdDev/xitrum-placeholder>`_:
   import xitrum.{Action, SkipCsrfCheck}
   import xitrum.annotation.{GET, Swagger}
 
-  trait Api extends Action with SkipCsrfCheck
-
-  @GET("image/:width/:height")
   @Swagger(
-    "Generate image",
-    Swagger.IntPath("width",  "Image width, should not be bigger than 2000"),
-    Swagger.IntPath("height", "Image height, should not be bigger than 2000"),
-    Swagger.OptionalStringQuery("text",  "Text to render on the image"),
+    Swagger.Note("Dimensions should not be bigger than 2000 x 2000")
+    Swagger.OptStringQuery("text", "Text to render on the image, default: Placeholder"),
     Swagger.Response(200, "PNG image"),
     Swagger.Response(400, "Width or height is invalid or too big")
   )
-  class ImageApi extends Api {
+  trait ImageApi extends Action with SkipCsrfCheck {
+    lazy val text = paramo("text").getOrElse("Placeholder")
+  }
+
+  @GET("image/:width/:height")
+  @Swagger(  // <-- Inherits other info from ImageApi
+    Swagger.Summary("Generate rectangle image"),
+    Swagger.IntPath("width"),
+    Swagger.IntPath("height")
+  )
+  class RectImageApi extends Api {
     def execute {
       val width  = param[Int]("width")
       val height = param[Int]("height")
-      val text   = paramo("text").getOrElse("Dummy text")
       // ...
     }
   }
 
-Read more about `paramType <https://github.com/wordnik/swagger-core/wiki/Parameters>`_
-and `valueType <https://github.com/wordnik/swagger-core/wiki/Datatypes>`_.
+  @GET("image/:width")
+  @Swagger(  // <-- Inherits other info from ImageApi
+    Swagger.Summary("Generate square image"),
+    Swagger.IntPath("width")
+  )
+  class SquareImageApi extends Api {
+    def execute {
+      val width  = param[Int]("width")
+      // ...
+    }
+  }
 
-/xitrum/swagger.json will look like this:
+/xitrum/swagger.json will look like this (note the inheritance):
 
 ::
 
@@ -258,35 +286,61 @@ and `valueType <https://github.com/wordnik/swagger-core/wiki/Datatypes>`_.
       "path":"/xitrum/swagger.json",
       "operations":[{
         "httpMethod":"GET",
-        "summary":"API doc",
-        "notes":"Use this route in Swagger UI to see the doc",
+        "summary":"JSON for Swagger Doc of this whole project",
+        "notes":"Use this route in Swagger UI to see API doc.",
         "nickname":"SwaggerAction",
         "parameters":[],
         "responseMessages":[]
       }]
     },{
-      "path":"/image/{width}",
+      "path":"/image/{width}/{height}",
       "operations":[{
         "httpMethod":"GET",
-        "summary":"Generate image",
-        "nickname":"ImageAPI",
+        "summary":"Generate rectangle image",
+        "notes":"Dimensions should not be bigger than 2000 x 2000",
+        "nickname":"RectImageApi",
         "parameters":[{
           "name":"width",
           "paramType":"path",
           "type":"integer",
-          "description":"Image width, should not be bigger than 2000",
           "required":true
         },{
           "name":"height",
           "paramType":"path",
           "type":"integer",
-          "description":"Image height, should not be bigger than 2000",
           "required":true
         },{
           "name":"text",
           "paramType":"query",
           "type":"string",
-          "description":"Text to render on the image",
+          "description":"Text to render on the image, default: Placeholder",
+          "required":false
+        }],
+        "responseMessages":[{
+          "code":"200",
+          "message":"PNG image"
+        },{
+          "code":"400",
+          "message":"Width is invalid or too big"
+        }]
+      }]
+    },{
+      "path":"/image/{width}",
+      "operations":[{
+        "httpMethod":"GET",
+        "summary":"Generate square image",
+        "notes":"Dimensions should not be bigger than 2000 x 2000",
+        "nickname":"SquareImageApi",
+        "parameters":[{
+          "name":"width",
+          "paramType":"path",
+          "type":"integer",
+          "required":true
+        },{
+          "name":"text",
+          "paramType":"query",
+          "type":"string",
+          "description":"Text to render on the image, default: Placeholder",
           "required":false
         }],
         "responseMessages":[{
@@ -302,12 +356,15 @@ and `valueType <https://github.com/wordnik/swagger-core/wiki/Datatypes>`_.
 
 Swagger UI uses the above information to generate interactive API doc.
 
-Params other than Swagger.IntPath and Swagger.OptionalStringQuery above: BytePath, IntQuery, OptionalStringForm etc.
+Params other than Swagger.IntPath and Swagger.OptStringQuery above: BytePath, IntQuery, OptStringForm etc.
 They are in the form:
 
-* <Value type><Param type>
-* Optional<Value type><Param type>
+* <Value type><Param type> (required parameter)
+* Opt<Value type><Param type> (optional parameter)
 
 Value type: Byte, Int, Int32, Int64, Long, Number, Float, Double, String, Boolean, Date DateTime
 
 Param type: Path, Query, Body, Header, Form
+
+Read more about `value type <https://github.com/wordnik/swagger-core/wiki/Datatypes>`_
+and `param type <https://github.com/wordnik/swagger-core/wiki/Parameters>`_.

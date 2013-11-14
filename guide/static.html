@@ -7,7 +7,7 @@
   <head>
     <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
     
-    <title>Static files &mdash; Xitrum 2.10 documentation</title>
+    <title>Static files &mdash; Xitrum 2.12 documentation</title>
     
     <link rel="stylesheet" href="_static/nature.css" type="text/css" />
     <link rel="stylesheet" href="_static/pygments.css" type="text/css" />
@@ -15,7 +15,7 @@
     <script type="text/javascript">
       var DOCUMENTATION_OPTIONS = {
         URL_ROOT:    '',
-        VERSION:     '2.10',
+        VERSION:     '2.12',
         COLLAPSE_INDEX: false,
         FILE_SUFFIX: '.html',
         HAS_SOURCE:  true
@@ -24,7 +24,7 @@
     <script type="text/javascript" src="_static/jquery.js"></script>
     <script type="text/javascript" src="_static/underscore.js"></script>
     <script type="text/javascript" src="_static/doctools.js"></script>
-    <link rel="top" title="Xitrum 2.10 documentation" href="index.html" />
+    <link rel="top" title="Xitrum 2.12 documentation" href="index.html" />
     <link rel="next" title="Serve flash socket policy file" href="flash.html" />
     <link rel="prev" title="Async response" href="async.html" /> 
   </head>
@@ -41,7 +41,7 @@
         <li class="right" >
           <a href="async.html" title="Async response"
              accesskey="P">previous</a> |</li>
-        <li><a href="index.html">Xitrum 2.10 documentation</a> &raquo;</li> 
+        <li><a href="index.html">Xitrum 2.12 documentation</a> &raquo;</li> 
       </ul>
     </div>  
 
@@ -83,6 +83,13 @@ URLs to them are in the form:</p>
 <span class="n">respondFile</span><span class="p">(</span><span class="s">&quot;path/relative/to/the/current/working/directory&quot;</span><span class="p">)</span>
 </pre></div>
 </div>
+</div>
+<div class="section" id="index-html-fallback">
+<h2>index.html fallback<a class="headerlink" href="#index-html-fallback" title="Permalink to this headline">¶</a></h2>
+<p>If there&#8217;s no route (no action) for URL <tt class="docutils literal"><span class="pre">/foo/bar</span></tt> (or <tt class="docutils literal"><span class="pre">/foo/bar/</span></tt>),
+Xitrum will try to look for static file <tt class="docutils literal"><span class="pre">public/foo/bar/index.html</span></tt>
+(in the &#8220;public&#8221; directory). If the file exists, Xitrum will respond it
+to the client.</p>
 </div>
 <div class="section" id="and-500">
 <h2>404 and 500<a class="headerlink" href="#and-500" title="Permalink to this headline">¶</a></h2>
@@ -183,6 +190,7 @@ in <tt class="docutils literal"><span class="pre">config/xitrum.conf</span></tt>
   <ul>
 <li><a class="reference internal" href="#">Static files</a><ul>
 <li><a class="reference internal" href="#serve-static-files-on-disk">Serve static files on disk</a></li>
+<li><a class="reference internal" href="#index-html-fallback">index.html fallback</a></li>
 <li><a class="reference internal" href="#and-500">404 and 500</a></li>
 <li><a class="reference internal" href="#serve-resource-files-in-classpath">Serve resource files in classpath</a></li>
 <li><a class="reference internal" href="#client-side-cache-with-etag-and-max-age">Client side cache with ETag and max-age</a></li>
@@ -232,7 +240,7 @@ in <tt class="docutils literal"><span class="pre">config/xitrum.conf</span></tt>
         <li class="right" >
           <a href="async.html" title="Async response"
              >previous</a> |</li>
-        <li><a href="index.html">Xitrum 2.10 documentation</a> &raquo;</li> 
+        <li><a href="index.html">Xitrum 2.12 documentation</a> &raquo;</li> 
       </ul>
     </div>
     <div class="footer">
