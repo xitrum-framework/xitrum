@@ -1,5 +1,7 @@
 var xitrum = {
-  antiCSRFToken: function() {
+  ajaxLoaderImg: null,
+
+  antiCsrfToken: function() {
     return $("meta[name='csrf-token']").attr("content");
   },
 
@@ -31,8 +33,12 @@ var xitrum = {
        data = data + target1.serialize();
     }
 
+    // Hide the inputs to avoid user double submit
     target1.hide();
-    target1.after('<img src="' + XITRUM_BASE_URL + '/resources/public/xitrum/ajax-loader.gif" />');
+
+    // Display Ajax loading (animation) image if any
+    if (this.ajaxLoaderImg != null)
+      target1.after('<img src="' + ajaxLoaderImg + '" />');
 
     $.ajax({
       type: "POST",
@@ -98,7 +104,7 @@ var xitrum = {
 $(function() {
   $(document).ajaxSend(function(e, req, options) {
     if (options.type != "GET") {
-      options.data += (options.data.length > 0 ? "&" : "") + "csrf-token=" + xitrum.antiCSRFToken();
+      options.data += (options.data.length > 0 ? "&" : "") + "csrf-token=" + xitrum.antiCsrfToken();
     }
   });
 

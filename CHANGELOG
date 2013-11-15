@@ -1,3 +1,6 @@
+2.13 (planned):
+* #234 Fix bug XITRUM_BASE_URL does not exist in xitrum.js
+
 2.12:
 * #230 Fix bug Routes with trailing '/' are not matched
 * #218 Make Hazelcast optional
