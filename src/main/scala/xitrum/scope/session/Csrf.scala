@@ -11,14 +11,14 @@ import xitrum.util.SecureUrlSafeBase64
  * CSRF is for preventing a user to fake other user data.
  */
 object Csrf {
-  val TOKEN = "csrf-token"
-  val XTOKEN = s"X-${TOKEN}"
+  val TOKEN         = "csrf-token"
+  val X_CSRF_HEADER = "X-CSRF-Token"
 
   def isValidToken(action: Action): Boolean = {
     // The token must be in the request body for more security
     val bodyParams     = action.handlerEnv.bodyParams
     val headers        = action.handlerEnv.request.headers
-    val tokenInRequest = Option(headers.get(XTOKEN)).getOrElse(action.param(TOKEN, bodyParams))
+    val tokenInRequest = Option(headers.get(X_CSRF_HEADER)).getOrElse(action.param(TOKEN, bodyParams))
 
     // Cleaner for application developers when seeing access log
     bodyParams.remove(TOKEN)

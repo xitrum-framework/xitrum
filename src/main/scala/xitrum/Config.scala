@@ -279,22 +279,26 @@ object Config extends Log {
 
   val baseUrl = xitrum.reverseProxy.map(_.baseUrl).getOrElse("")
 
-  /**
-   * @param path with leading "/"
-   *
-   * Avoids returning path with double "//" prefix. Something like
-   * //xitrum/postback/zOIc0v...
-   * will cause the browser to send request to http://xitrum/postback/zOIc0v...
-   */
-  def withBaseUrl(path: String) = {
-    if (Config.baseUrl.isEmpty)
-      path
-    else if (path.isEmpty)
-      Config.baseUrl
-    else if (path.startsWith("/"))
-      Config.baseUrl + path
-    else
-      Config.baseUrl + "/" + path
+  def withBaseUrl(path: String): String = {
+    // Avoid returning path with double "//" prefix.
+    // Something like:
+    // //xitrum/postback/zOIc0v...
+    // will cause the browser to send request to http://xitrum/postback/zOIc0v...
+    if (baseUrl.isEmpty) {
+      if (path.isEmpty)
+        "/"
+      else if (path.startsWith("/"))
+        path
+      else
+        "/" + path
+    } else {
+      if (path.isEmpty)
+        baseUrl
+      else if (path.startsWith("/"))
+        baseUrl + path
+      else
+        baseUrl + "/" + path
+    }
   }
 
   //----------------------------------------------------------------------------

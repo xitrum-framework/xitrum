@@ -66,7 +66,7 @@ trait Js {
         <script type="text/javascript" src={resourceUrl("xitrum/jquery.validate-1.11.1/additional-methods.min.js")}></script>
         {validatei18n}
         <script type="text/javascript" src={resourceUrl("xitrum/sockjs-0.3.4.min.js")}></script>
-        <script type="text/javascript" src={resourceUrl("xitrum/xitrum.js")}></script>
+        <script type="text/javascript" src={url[xitrum.js]}></script>
       </xml:group>
     else
       <xml:group>
@@ -75,7 +75,7 @@ trait Js {
         <script type="text/javascript" src={resourceUrl("xitrum/jquery.validate-1.11.1/additional-methods.js")}></script>
         {validatei18n}
         <script type="text/javascript" src={resourceUrl("xitrum/sockjs-0.3.4.js")}></script>
-        <script type="text/javascript" src={resourceUrl("xitrum/xitrum.js")}></script>
+        <script type="text/javascript" src={url[xitrum.js]}></script>
       </xml:group>
   }
 
