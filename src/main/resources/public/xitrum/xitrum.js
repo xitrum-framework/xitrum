@@ -1,5 +1,5 @@
 var xitrum = {
-  ajaxLoaderImg: null,
+  ajaxLoadingImg: null,
 
   antiCsrfToken: function() {
     return $("meta[name='csrf-token']").attr("content");
@@ -37,8 +37,8 @@ var xitrum = {
     target1.hide();
 
     // Display Ajax loading (animation) image if any
-    if (this.ajaxLoaderImg != null)
-      target1.after('<img src="' + ajaxLoaderImg + '" />');
+    if (this.ajaxLoadingImg != null)
+      target1.after('<img src="' + ajaxLoadingImg + '" />');
 
     $.ajax({
       type: "POST",
