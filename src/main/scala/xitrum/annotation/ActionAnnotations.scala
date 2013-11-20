@@ -41,7 +41,7 @@ object ActionAnnotations {
 }
 
 case class ActionAnnotations(
-  route:      Option[universe.Annotation] = None,
+  routes:     Seq[universe.Annotation] = Seq(),
   routeOrder: Option[universe.Annotation] = None,
 
   sockJsCookieNeeded: Option[universe.Annotation] = None,
@@ -56,7 +56,7 @@ case class ActionAnnotations(
   import ActionAnnotations._
 
   def overrideMe(other: ActionAnnotations) = ActionAnnotations(
-    other.route              orElse route,
+    routes ++ other.routes,
     other.routeOrder         orElse routeOrder,
     other.sockJsCookieNeeded orElse sockJsCookieNeeded,
     other.sockJsNoWebSocket  orElse sockJsNoWebSocket,
@@ -71,7 +71,7 @@ case class ActionAnnotations(
       val tpe = a.tpe
 
       if (tpe <:< typeOfRoute)
-        ret = ret.copy(route = Some(a))
+        ret = ret.copy(routes = ret.routes :+ a)
 
       else if (tpe <:< typeOfRouteOrder)
         ret = ret.copy(routeOrder = Some(a))

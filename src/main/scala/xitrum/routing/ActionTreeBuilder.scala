@@ -21,9 +21,7 @@ import xitrum.annotation.ActionAnnotations
  *
  * @param interface2Children Map to save trees; names are class names
  */
-private case class ActionTreeBuilder(
-    interface2Children: Map[String, Seq[String]] = Map()
-) {
+private case class ActionTreeBuilder(interface2Children: Map[String, Seq[String]] = Map()) {
   def addBranches(
       childInternalName:   String,
       parentInternalNames: Array[String]

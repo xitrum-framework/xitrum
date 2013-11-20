@@ -1,6 +1,7 @@
 2.13 (planned):
 * #234 xitrum.js: Fix bug XITRUM_BASE_URL does not exist
 * #237 xitrum.js: Add withBaseUrl
+* #239 Readd feature: One action can have multiple routes
 * #238 CSRF token can be set in header
 * #145 Split Knockout.js to a separate module
 

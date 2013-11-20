@@ -86,7 +86,7 @@ class RouteCollector extends Log {
     var cacheSecs           = optCacheSecs(annotations.cache)        // < 0: cache action, > 0: cache page, 0: no cache
     var method_pattern_coll = ArrayBuffer[(String, String)]()
 
-    annotations.route.foreach { a =>
+    annotations.routes.foreach { a =>
       listMethodAndPattern(a).foreach { m_p   => method_pattern_coll.append(m_p) }
     }
 
@@ -141,7 +141,7 @@ class RouteCollector extends Log {
   ): Map[String, SockJsClassAndOptions] =
   {
     var pathPrefix: String = null
-    annotations.route.foreach { case a =>
+    annotations.routes.foreach { case a =>
       if (a.tpe == typeOfSOCKJS)
         pathPrefix = a.scalaArgs(0).productElement(0).asInstanceOf[universe.Constant].value.toString
     }
