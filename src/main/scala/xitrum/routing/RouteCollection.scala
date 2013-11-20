@@ -11,11 +11,12 @@ import xitrum.scope.request.{Params, PathInfo}
 import xitrum.util.LocalLruCache
 
 object RouteCollection {
-  def fromSerializable(acc: DiscoveredAcc): RouteCollection = {
+  def fromSerializable(acc: DiscoveredAcc, withSwagger: Boolean): RouteCollection = {
     val normal              = acc.normalRoutes
     val sockJsWithoutPrefix = acc.sockJsWithoutPrefixRoutes
     val sockJsMap           = acc.sockJsMap
-    val swaggerMap          = acc.swaggerMap
+
+    val swaggerMap: Map[Class[_ <: Action], Swagger] = if (withSwagger) acc.swaggerMap else Map.empty
 
     // Add prefixes to SockJS routes
     sockJsMap.keys.foreach { prefix =>
@@ -41,8 +42,17 @@ object RouteCollection {
       sockJsWithoutPrefix.otherWEBSOCKETs.foreach { r => normal.otherWEBSOCKETs.append(r.addPrefix(prefix)) }
     }
 
+    val firstGETs =
+      if (withSwagger)
+        normal.firstGETs
+      else
+        normal.firstGETs.filterNot { r =>
+          val className = r.actionClass
+          className == classOf[SwaggerJson].getName || className == classOf[SwaggerUi].getName
+        }
+
     new RouteCollection(
-      normal.firstGETs      .map(_.toRoute), normal.lastGETs      .map(_.toRoute), normal.otherGETs      .map(_.toRoute),
+      firstGETs             .map(_.toRoute), normal.lastGETs      .map(_.toRoute), normal.otherGETs      .map(_.toRoute),
       normal.firstPOSTs     .map(_.toRoute), normal.lastPOSTs     .map(_.toRoute), normal.otherPOSTs     .map(_.toRoute),
       normal.firstPUTs      .map(_.toRoute), normal.lastPUTs      .map(_.toRoute), normal.otherPUTs      .map(_.toRoute),
       normal.firstPATCHs    .map(_.toRoute), normal.lastPATCHs    .map(_.toRoute), normal.otherPATCHs    .map(_.toRoute),

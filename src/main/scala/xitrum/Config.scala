@@ -339,8 +339,9 @@ object Config extends Log {
     try {
       log.info("Load file " + ROUTES_CACHE + " or recollect routes...")
       val routeCollector = new RouteCollector
-      val discoveredAcc = routeCollector.deserializeCacheFileOrRecollect(ROUTES_CACHE)
-      RouteCollection.fromSerializable(discoveredAcc)
+      val discoveredAcc  = routeCollector.deserializeCacheFileOrRecollect(ROUTES_CACHE)
+      val withSwagger    = xitrum.swaggerApiVersion.isDefined
+      RouteCollection.fromSerializable(discoveredAcc, withSwagger)
     } catch {
       case NonFatal(e) =>
         if (retried) {
