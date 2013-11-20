@@ -1,6 +1,6 @@
 package xitrum
 
-import xitrum.annotation.GET
+import xitrum.annotation.{First, GET}
 
 object js {
   val body =
@@ -150,6 +150,7 @@ $(function() {
 }
 
 /** To innclude xitrum.js in your view, use: url[xitrum.js]. */
+@First
 @GET("xitrum/xitrum.js")
 class js extends Action {
   def execute() {
