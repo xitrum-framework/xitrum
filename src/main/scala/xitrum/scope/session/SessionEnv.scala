@@ -1,6 +1,6 @@
 package xitrum.scope.session
 
-import scala.collection.mutable.{ArrayBuffer, HashMap}
+import scala.collection.mutable.{ArrayBuffer, HashMap => MHashMap}
 
 import org.jboss.netty.handler.codec.http.{HttpRequest, Cookie, CookieDecoder, CookieEncoder, HttpHeaders}
 import HttpHeaders.Names
@@ -27,7 +27,7 @@ trait SessionEnv extends Csrf {
     } else {
       val cookies  = decoder.decode(header)
       val iterator = cookies.iterator
-      val acc      = new HashMap[String, String]
+      val acc      = new MHashMap[String, String]
       while (iterator.hasNext()) {
         val cookie = iterator.next()
         acc(cookie.getName) = cookie.getValue
