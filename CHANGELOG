@@ -2,6 +2,7 @@
 * #234 xitrum.js: Fix bug XITRUM_BASE_URL does not exist
 * #237 xitrum.js: Add withBaseUrl
 * #239 Readd feature: One action can have multiple routes
+* #242 Add atJs; atJs("key") returns the JSON form of at("key")
 * #236 Remove Swagger related routes when it is disabled
 * #238 CSRF token can be set in header
 * #145 Split Knockout.js to a separate module

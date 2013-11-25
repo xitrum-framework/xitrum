@@ -6,12 +6,11 @@ import org.scalatest.Matchers
 
 import xitrum.Action
 
-
 private class AtTestClass(val a: String, val b: Double)
+
 private case class AtTestCaseClass(a: String, b: Int)
 
 class AtTest extends FlatSpec with Matchers {
-
   behavior of "At"
 
   it should "store objects" in {
@@ -47,16 +46,12 @@ class AtTest extends FlatSpec with Matchers {
     at.toJson("class") should equal("""{"a":"a_field","b":10.5}""")
     at.toJson("caseclass") should equal("""{"a":"a_field","b":10}""")
   }
-  
+
   it should "render json4s JValue to json" in {
     import org.json4s.JsonDSL._
-    
+
     val at = new At
-
-    at("jobject") = 
-      ("a" -> 1) ~ ("b" -> 2) ~ ("c", 3)
-
+    at("jobject") = ("a" -> 1) ~ ("b" -> 2) ~ ("c", 3)
     at.toJson("jobject") should equal("""{"a":1,"b":2,"c":3}""")
   }
-
 }

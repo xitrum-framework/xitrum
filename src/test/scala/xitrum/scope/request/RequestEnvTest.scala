@@ -5,13 +5,15 @@ import org.scalatest.FlatSpec
 import xitrum.Action
 
 class RequestEnvTest extends FlatSpec with Matchers {
-
   behavior of "RequestEnv"
 
-  it should "should have atjs method" in {
-    val dummy = new Action() { def execute() {} }
-    dummy.at("test_string") = "abc"
-    dummy.atjs("test_string") should equal ("\"abc\"")
-  }
+  it should "should have atJs method" in {
+    val action = new Action() { def execute() {} }
 
+    action.at("test_string") = "abc"
+    action.atJs("test_string") should equal("\"abc\"")
+
+    action.at("test_array") = Seq(1, 2, 3)
+    action.atJs("test_array") should equal("[1,2,3]")
+  }
 }
