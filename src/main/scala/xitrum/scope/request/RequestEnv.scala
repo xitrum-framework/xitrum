@@ -72,4 +72,6 @@ trait RequestEnv extends ParamAccess {
   lazy val fileUploadParams = handlerEnv.fileUploadParams
 
   lazy val at = new At
+  
+  def atjs(key: String) = at.toJson(key)
 }

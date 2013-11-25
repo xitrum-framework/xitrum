@@ -50,6 +50,9 @@ libraryDependencies += "tv.cntt" %% "scaposer" % "1.3"
 // For compiling CoffeeScript to JavaScript
 libraryDependencies += "tv.cntt" % "rhinocoffeescript" % "1.6.3"
 
+// For test
+libraryDependencies += "org.scalatest" %% "scalatest" % "2.0" % "test"
+
 //------------------------------------------------------------------------------
 // JSON4S uses scalap 2.10.0, which in turn uses scala-compiler 2.10.0, which in
 // turn uses scala-reflect 2.10.0. We need to force "scalaVersion" above, because
