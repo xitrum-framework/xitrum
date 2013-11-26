@@ -233,9 +233,6 @@ class XSendFile extends ChannelDownstreamHandler {
       return
     }
 
-    val request = RequestAttacher.retrieveOrSendDownstream(ctx, e)
-    if (request == null) return
-
     val response = m.asInstanceOf[HttpResponse]
     val path     = HttpHeaders.getHeader(response, X_SENDFILE_HEADER)
     if (path == null) {
@@ -251,6 +248,8 @@ class XSendFile extends ChannelDownstreamHandler {
     val noLog = response.headers.contains(X_SENDFILE_HEADER_IS_FROM_ACTION)
     if (noLog) HttpHeaders.removeHeader(response, X_SENDFILE_HEADER_IS_FROM_ACTION)
 
-    sendFile(ctx, e, request, response, path, noLog)
+    RequestAttacher.retrieveOrSendDownstream(ctx, e).foreach { request =>
+      sendFile(ctx, e, request, response, path, noLog)
+    }
   }
 }

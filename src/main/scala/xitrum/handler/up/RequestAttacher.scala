@@ -16,10 +16,14 @@ object RequestAttacher {
    *
    * See DefaultHttpChannelPipelineFactory.
    */
-  def retrieveOrSendDownstream(ctx: ChannelHandlerContext, e: ChannelEvent): HttpRequest = {
+  def retrieveOrSendDownstream(ctx: ChannelHandlerContext, e: ChannelEvent): Option[HttpRequest] = {
     val attachment = ctx.getChannel.getAttachment.asInstanceOf[Attachment]
-    if (attachment == null) ctx.sendDownstream(e)
-    attachment.request
+    if (attachment == null) {
+      ctx.sendDownstream(e)
+      None
+    } else {
+      Some(attachment.request)
+    }
   }
 }
 

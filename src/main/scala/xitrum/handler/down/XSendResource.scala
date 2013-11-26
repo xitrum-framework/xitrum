@@ -93,9 +93,6 @@ class XSendResource extends ChannelDownstreamHandler {
       return
     }
 
-    val request = RequestAttacher.retrieveOrSendDownstream(ctx, e)
-    if (request == null) return
-
     val response = m.asInstanceOf[HttpResponse]
     val path     = HttpHeaders.getHeader(response, X_SENDRESOURCE_HEADER)
     if (path == null) {
@@ -111,6 +108,8 @@ class XSendResource extends ChannelDownstreamHandler {
     val noLog = response.headers.contains(X_SENDRESOURCE_HEADER_IS_FROM_CONTROLLER)
     if (noLog) HttpHeaders.removeHeader(response, X_SENDRESOURCE_HEADER_IS_FROM_CONTROLLER)
 
-    sendResource(ctx, e, request, response, path, noLog)
+    RequestAttacher.retrieveOrSendDownstream(ctx, e) foreach { request =>
+      sendResource(ctx, e, request, response, path, noLog)
+    }
   }
 }

@@ -27,31 +27,30 @@ class OPTIONSResponse extends ChannelDownstreamHandler {
       return
     }
 
-    val request = RequestAttacher.retrieveOrSendDownstream(ctx, e)
-    if (request == null) return
+    RequestAttacher.retrieveOrSendDownstream(ctx, e).foreach { request =>
+      if (request.getMethod == OPTIONS) {
+        AccessLog.logOPTIONS(request)
+        val response = m.asInstanceOf[HttpResponse]
+        val attachment = ctx.getChannel.getAttachment.asInstanceOf[Attachment]
+        if (attachment != null) {
+          attachment.pathInfo match {
+            // Case of dynamic resources.
+            case Some(pathInfo) =>
+              if (!Config.routes.tryAllMethods(pathInfo).isEmpty)
+                response.setStatus(NO_CONTENT)
+              else
+                response.setStatus(NOT_FOUND)
 
-    if (request.getMethod == OPTIONS) {
-      AccessLog.logOPTIONS(request)
-      val response = m.asInstanceOf[HttpResponse]
-      val attachment = ctx.getChannel.getAttachment.asInstanceOf[Attachment]
-      if (attachment != null) {
-        attachment.pathInfo match {
-          // Case of dynamic resources.
-          case Some(pathInfo) =>
-            if (!Config.routes.tryAllMethods(pathInfo).isEmpty)
-              response.setStatus(NO_CONTENT)
-            else
-              response.setStatus(NOT_FOUND)
-
-          // Case of static files/resources.
-          case None =>
-            if (response.getStatus != NOT_FOUND) response.setStatus(NO_CONTENT)
+            // Case of static files/resources.
+            case None =>
+              if (response.getStatus != NOT_FOUND) response.setStatus(NO_CONTENT)
+          }
         }
+        HttpHeaders.setContentLength(response, 0)
+        NotModified.setClientCacheAggressively(response)
+        response.setContent(ChannelBuffers.EMPTY_BUFFER)
       }
-      HttpHeaders.setContentLength(response, 0)
-      NotModified.setClientCacheAggressively(response)
-      response.setContent(ChannelBuffers.EMPTY_BUFFER)
+      ctx.sendDownstream(e)
     }
-    ctx.sendDownstream(e)
   }
 }

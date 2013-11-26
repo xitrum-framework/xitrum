@@ -28,14 +28,13 @@ class FixiOS6SafariPOST extends ChannelDownstreamHandler with Log {
       return
     }
 
-    val request = RequestAttacher.retrieveOrSendDownstream(ctx, e)
-    if (request == null) return
+    RequestAttacher.retrieveOrSendDownstream(ctx, e).foreach { request =>
+      val response = m.asInstanceOf[HttpResponse]
 
-    val response = m.asInstanceOf[HttpResponse]
+      if (request.getMethod == HttpMethod.POST && !response.headers.contains(HttpHeaders.Names.CACHE_CONTROL))
+        NotModified.setNoClientCache(response)
 
-    if (request.getMethod == HttpMethod.POST && !response.headers.contains(HttpHeaders.Names.CACHE_CONTROL))
-      NotModified.setNoClientCache(response)
-
-    ctx.sendDownstream(e)
+      ctx.sendDownstream(e)
+    }
   }
 }
