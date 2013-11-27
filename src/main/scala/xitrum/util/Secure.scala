@@ -13,20 +13,22 @@ import org.jboss.netty.util.CharsetUtil.UTF_8
 import xitrum.Config
 
 /**
- * See https://github.com/mmcgrana/ring/blob/master/ring-core/src/ring/middleware/session/cookie.clj
- *
  * Note that Secure is for preventing a user to mess with his own data to cheat the server.
  * CSRF is for preventing a user to fake other user's data.
  */
 object Secure {
-  /** Always returns same output for same input. */
+  // See https://github.com/mmcgrana/ring/blob/master/ring-core/src/ring/middleware/session/cookie.clj
+
+  /** Encrypts using the key in config/xitrum.conf. */
   def encrypt(data: Array[Byte]): Array[Byte] =
     encrypt(data, Config.xitrum.session.secureKey)
 
+  /** Decrypts using the key in config/xitrum.conf. */
   def decrypt(data: Array[Byte]): Option[Array[Byte]] =
     decrypt(data, Config.xitrum.session.secureKey)
 
   def encrypt(data: Array[Byte], key: String): Array[Byte] = {
+    // Always returns same output for same input
     val bkey  = makeKey(key)
     val data2 = encryptWithoutSeal(data, bkey)
     seal(data2, bkey)

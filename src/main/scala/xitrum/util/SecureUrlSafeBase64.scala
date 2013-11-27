@@ -4,6 +4,7 @@ import xitrum.Config
 
 /** Combination of Secure and UrlSafeBase64. */
 object SecureUrlSafeBase64 {
+  /** Encrypts using the key in config/xitrum.conf. */
   def encrypt(any: Any, forCookie: Boolean = false): String =
     encrypt(any, Config.xitrum.session.secureKey, forCookie)
 
@@ -42,6 +43,7 @@ object SecureUrlSafeBase64 {
     }
   }
 
+  /** Decrypts using the key in config/xitrum.conf. */
   def decrypt(base64String: String, forCookie: Boolean = false): Option[Any] =
     decrypt(base64String, Config.xitrum.session.secureKey, forCookie)
 
