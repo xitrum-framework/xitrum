@@ -196,7 +196,7 @@
       </h4>
       <p class="shortcomment cmt"></p><div class="fullcomment"><div class="comment cmt"></div><dl class="paramcmts block"><dt class="param">base64String</dt><dd class="cmt"><p>may contain optional padding (&quot;=&quot; characters)</p></dd><dt class="param">forCookie</dt><dd class="cmt"><p>If true, tries to GZIP uncompress if the input is compressed
 </p></dd></dl></div>
-    </li><li name="xitrum.util.SecureUrlSafeBase64#decrypt" visbl="pub" data-isabs="false" fullComment="no" group="Ungrouped">
+    </li><li name="xitrum.util.SecureUrlSafeBase64#decrypt" visbl="pub" data-isabs="false" fullComment="yes" group="Ungrouped">
       <a id="decrypt(base64String:String,forCookie:Boolean):Option[Any]"></a>
       <a id="decrypt(String,Boolean):Option[Any]"></a>
       <h4 class="signature">
@@ -208,7 +208,7 @@
         <span class="name">decrypt</span><span class="params">(<span name="base64String">base64String: <span class="extype" name="scala.Predef.String">String</span></span>, <span name="forCookie">forCookie: <span class="extype" name="scala.Boolean">Boolean</span> = <span class="symbol">false</span></span>)</span><span class="result">: <span class="extype" name="scala.Option">Option</span>[<span class="extype" name="scala.Any">Any</span>]</span>
       </span>
       </h4>
-      
+      <p class="shortcomment cmt">Decrypts using the key in config/xitrum.</p><div class="fullcomment"><div class="comment cmt"><p>Decrypts using the key in config/xitrum.conf.</p></div></div>
     </li><li name="xitrum.util.SecureUrlSafeBase64#encrypt" visbl="pub" data-isabs="false" fullComment="yes" group="Ungrouped">
       <a id="encrypt(any:Any,key:String,forCookie:Boolean):String"></a>
       <a id="encrypt(Any,String,Boolean):String"></a>
@@ -226,7 +226,7 @@ request parameter name.</p><div class="fullcomment"><div class="comment cmt"><p>
 request parameter name. (Netty POST body decoder prohibits &quot;=&quot; in parameter name.)</p><p>See http://en.wikipedia.org/wiki/Base_64#Padding
 </p></div><dl class="paramcmts block"><dt class="param">forCookie</dt><dd class="cmt"><p>If true, tries to GZIP compress if &gt; 4KB; the result may &gt; 4KB
 </p></dd></dl></div>
-    </li><li name="xitrum.util.SecureUrlSafeBase64#encrypt" visbl="pub" data-isabs="false" fullComment="no" group="Ungrouped">
+    </li><li name="xitrum.util.SecureUrlSafeBase64#encrypt" visbl="pub" data-isabs="false" fullComment="yes" group="Ungrouped">
       <a id="encrypt(any:Any,forCookie:Boolean):String"></a>
       <a id="encrypt(Any,Boolean):String"></a>
       <h4 class="signature">
@@ -238,7 +238,7 @@ request parameter name. (Netty POST body decoder prohibits &quot;=&quot; in para
         <span class="name">encrypt</span><span class="params">(<span name="any">any: <span class="extype" name="scala.Any">Any</span></span>, <span name="forCookie">forCookie: <span class="extype" name="scala.Boolean">Boolean</span> = <span class="symbol">false</span></span>)</span><span class="result">: <span class="extype" name="scala.Predef.String">String</span></span>
       </span>
       </h4>
-      
+      <p class="shortcomment cmt">Encrypts using the key in config/xitrum.</p><div class="fullcomment"><div class="comment cmt"><p>Encrypts using the key in config/xitrum.conf.</p></div></div>
     </li><li name="scala.AnyRef#eq" visbl="pub" data-isabs="false" fullComment="yes" group="Ungrouped">
       <a id="eq(x$1:AnyRef):Boolean"></a>
       <a id="eq(AnyRef):Boolean"></a>

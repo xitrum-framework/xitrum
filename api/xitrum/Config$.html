@@ -361,7 +361,7 @@ http://code.google.com/speed/page-speed/docs/payload.html#GzipCompression</p><p>
         <span class="name">log</span><span class="result">: <span class="extype" name="org.slf4j.Logger">Logger</span></span>
       </span>
       </h4>
-      <p class="shortcomment cmt">Log name is inferred from the class name.</p><div class="fullcomment"><div class="comment cmt"><p>Log name is inferred from the class name.</p></div><dl class="attributes block"> <dt>Definition Classes</dt><dd><a href="Log.html" class="extype" name="xitrum.Log">Log</a></dd></dl></div>
+      <p class="shortcomment cmt">Log name is inferred from name of the class extending this trait.</p><div class="fullcomment"><div class="comment cmt"><p>Log name is inferred from name of the class extending this trait.</p></div><dl class="attributes block"> <dt>Definition Classes</dt><dd><a href="Log.html" class="extype" name="xitrum.Log">Log</a></dd></dl></div>
     </li><li name="scala.AnyRef#ne" visbl="pub" data-isabs="false" fullComment="yes" group="Ungrouped">
       <a id="ne(x$1:AnyRef):Boolean"></a>
       <a id="ne(AnyRef):Boolean"></a>
@@ -556,7 +556,7 @@ Sometimes we want to work in sbt console mode and don't like this overhead.
       </span>
       </h4>
       
-    </li><li name="xitrum.Config#withBaseUrl" visbl="pub" data-isabs="false" fullComment="yes" group="Ungrouped">
+    </li><li name="xitrum.Config#withBaseUrl" visbl="pub" data-isabs="false" fullComment="no" group="Ungrouped">
       <a id="withBaseUrl(path:String):String"></a>
       <a id="withBaseUrl(String):String"></a>
       <h4 class="signature">
@@ -568,10 +568,7 @@ Sometimes we want to work in sbt console mode and don't like this overhead.
         <span class="name">withBaseUrl</span><span class="params">(<span name="path">path: <span class="extype" name="scala.Predef.String">String</span></span>)</span><span class="result">: <span class="extype" name="scala.Predef.String">String</span></span>
       </span>
       </h4>
-      <p class="shortcomment cmt"></p><div class="fullcomment"><div class="comment cmt"></div><dl class="paramcmts block"><dt class="param">path</dt><dd class="cmt"><p>with leading &quot;/&quot;</p><p>Avoids returning path with double &quot;//&quot; prefix. Something like
-//xitrum/postback/zOIc0v...
-will cause the browser to send request to http://xitrum/postback/zOIc0v...
-</p></dd></dl></div>
+      
     </li><li name="xitrum.Config#xitrum" visbl="pub" data-isabs="false" fullComment="yes" group="Ungrouped">
       <a id="xitrum:xitrum.Config"></a>
       <a id="xitrum:Config"></a>
