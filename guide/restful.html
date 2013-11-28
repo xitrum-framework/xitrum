@@ -204,7 +204,7 @@ described in the previous section, you need to use <tt class="docutils literal">
 <p>When you create APIs for machines, e.g. smartphones, you may want to skip this
 automatic CSRF check. Add the trait xitrum.SkipCsrfCheck to you action:</p>
 <div class="highlight-python"><pre>import xitrum.{Action, SkipCsrfCheck}
-import xitrum.annotatin.POST
+import xitrum.annotation.POST
 
 trait Api extends Action with SkipCsrfCheck
 

@@ -12,7 +12,7 @@ You can write RESTful APIs for iPhone, Android applications etc. very easily.
   class ArticlesIndex extends Action {
     def execute() {...}
   }
-  
+
   @GET("articles/:id")
   class ArticlesShow extends Action {
     def execute() {...}
@@ -72,7 +72,7 @@ You must make sure the second route be checked first. ``First`` is for this purp
   class ArticlesShow extends Action {
     def execute() {...}
   }
-  
+
   @GET("articles/new")
   class ArticlesNew extends Action {
     def execute() {...}
@@ -181,7 +181,7 @@ described in the previous section, you need to use ``antiCsrfInput`` or
   form(method="post" action={url[AdminAddGroup]})
     != antiCsrfInput
 
-::    
+::
 
   form(method="post" action={url[AdminAddGroup]})
     input(type="hidden" name="csrf-token" value={antiCsrfToken})
@@ -195,7 +195,7 @@ automatic CSRF check. Add the trait xitrum.SkipCsrfCheck to you action:
 ::
 
   import xitrum.{Action, SkipCsrfCheck}
-  import xitrum.annotatin.POST
+  import xitrum.annotation.POST
 
   trait Api extends Action with SkipCsrfCheck
 
