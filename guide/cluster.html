@@ -7,7 +7,7 @@
   <head>
     <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
     
-    <title>Clustering with Akka &mdash; Xitrum 2.12 documentation</title>
+    <title>Clustering with Akka and Hazelcast &mdash; Xitrum 2.13 documentation</title>
     
     <link rel="stylesheet" href="_static/nature.css" type="text/css" />
     <link rel="stylesheet" href="_static/pygments.css" type="text/css" />
@@ -15,7 +15,7 @@
     <script type="text/javascript">
       var DOCUMENTATION_OPTIONS = {
         URL_ROOT:    '',
-        VERSION:     '2.12',
+        VERSION:     '2.13',
         COLLAPSE_INDEX: false,
         FILE_SUFFIX: '.html',
         HAS_SOURCE:  true
@@ -24,7 +24,7 @@
     <script type="text/javascript" src="_static/jquery.js"></script>
     <script type="text/javascript" src="_static/underscore.js"></script>
     <script type="text/javascript" src="_static/doctools.js"></script>
-    <link rel="top" title="Xitrum 2.12 documentation" href="index.html" />
+    <link rel="top" title="Xitrum 2.13 documentation" href="index.html" />
     <link rel="next" title="HOWTO" href="howto.html" />
     <link rel="prev" title="Deploy to production server" href="deploy.html" /> 
   </head>
@@ -41,7 +41,7 @@
         <li class="right" >
           <a href="deploy.html" title="Deploy to production server"
              accesskey="P">previous</a> |</li>
-        <li><a href="index.html">Xitrum 2.12 documentation</a> &raquo;</li> 
+        <li><a href="index.html">Xitrum 2.13 documentation</a> &raquo;</li> 
       </ul>
     </div>  
 
@@ -50,8 +50,8 @@
         <div class="bodywrapper">
           <div class="body">
             
-  <div class="section" id="clustering-with-akka">
-<h1>Clustering with Akka<a class="headerlink" href="#clustering-with-akka" title="Permalink to this headline">¶</a></h1>
+  <div class="section" id="clustering-with-akka-and-hazelcast">
+<h1>Clustering with Akka and Hazelcast<a class="headerlink" href="#clustering-with-akka-and-hazelcast" title="Permalink to this headline">¶</a></h1>
 <p>Xitrum is designed in mind to run in production environment as multiple instances
 behind a proxy server or load balancer:</p>
 <div class="highlight-python"><pre>                              / Xitrum instance 1
@@ -59,11 +59,12 @@ Load balancer/proxy server ---- Xitrum instance 2
                               \ Xitrum instance 3</pre>
 </div>
 <p>Cache, sessions, and SockJS sessions can be clustered out of the box thanks to
-<a class="reference external" href="http://akka.io/">Akka</a> and <a class="reference external" href="http://www.hazelcast.com/">Hazelcast</a>.</p>
-<p>For sessions, of course you can store them in cookie. If you do so, you don&#8217;t need
-to store them in <a class="reference internal" href="scopes.html"><em>HazelcastSessionStore cluster</em></a>.</p>
-<p>Please see <tt class="docutils literal"><span class="pre">config/akka.conf</span></tt> and and read <a class="reference external" href="http://akka.io/docs/">Akka doc</a>
-to know how to config.</p>
+<a class="reference external" href="http://akka.io/">Akka</a> and <a class="reference external" href="https://github.com/ngocdaothanh/xitrum-hazelcast">Hazelcast</a>.</p>
+<p>For sessions, you can also <a class="reference internal" href="scopes.html"><em>store them in cookie</em></a>.</p>
+<p>With Hazelcast, Xitrum instances become in-process memory cache servers. You don&#8217;t
+need seperate things like Memcache.</p>
+<p>Please see <tt class="docutils literal"><span class="pre">config/akka.conf</span></tt>, and read <a class="reference external" href="http://akka.io/docs/">Akka doc</a> and
+<a class="reference external" href="http://hazelcast.com/docs.jsp">Hazelcast doc</a> to know how to config.</p>
 </div>
 
 
@@ -112,7 +113,7 @@ to know how to config.</p>
         <li class="right" >
           <a href="deploy.html" title="Deploy to production server"
              >previous</a> |</li>
-        <li><a href="index.html">Xitrum 2.12 documentation</a> &raquo;</li> 
+        <li><a href="index.html">Xitrum 2.13 documentation</a> &raquo;</li> 
       </ul>
     </div>
     <div class="footer">

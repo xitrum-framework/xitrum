@@ -7,7 +7,7 @@
   <head>
     <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
     
-    <title>Scopes &mdash; Xitrum 2.12 documentation</title>
+    <title>Scopes &mdash; Xitrum 2.13 documentation</title>
     
     <link rel="stylesheet" href="_static/nature.css" type="text/css" />
     <link rel="stylesheet" href="_static/pygments.css" type="text/css" />
@@ -15,7 +15,7 @@
     <script type="text/javascript">
       var DOCUMENTATION_OPTIONS = {
         URL_ROOT:    '',
-        VERSION:     '2.12',
+        VERSION:     '2.13',
         COLLAPSE_INDEX: false,
         FILE_SUFFIX: '.html',
         HAS_SOURCE:  true
@@ -24,7 +24,7 @@
     <script type="text/javascript" src="_static/jquery.js"></script>
     <script type="text/javascript" src="_static/underscore.js"></script>
     <script type="text/javascript" src="_static/doctools.js"></script>
-    <link rel="top" title="Xitrum 2.12 documentation" href="index.html" />
+    <link rel="top" title="Xitrum 2.13 documentation" href="index.html" />
     <link rel="next" title="Validation" href="validation.html" />
     <link rel="prev" title="Serve flash socket policy file" href="flash.html" /> 
   </head>
@@ -41,7 +41,7 @@
         <li class="right" >
           <a href="flash.html" title="Serve flash socket policy file"
              accesskey="P">previous</a> |</li>
-        <li><a href="index.html">Xitrum 2.12 documentation</a> &raquo;</li> 
+        <li><a href="index.html">Xitrum 2.13 documentation</a> &raquo;</li> 
       </ul>
     </div>  
 
@@ -119,6 +119,29 @@ trait AppAction extends Action {
     &lt;/html&gt;
   )
 }</pre>
+</div>
+</div>
+<div class="section" id="atjs">
+<h3>&#8220;atJs&#8221;<a class="headerlink" href="#atjs" title="Permalink to this headline">¶</a></h3>
+<p><tt class="docutils literal"><span class="pre">atJs</span></tt> helper method automatically converts <tt class="docutils literal"><span class="pre">at(&quot;key&quot;)</span></tt> to JSON.
+It is useful when you need to pass model from Scala to JavaScript.</p>
+<p><tt class="docutils literal"><span class="pre">atJs(&quot;key&quot;)</span></tt> is equivalent to <tt class="docutils literal"><span class="pre">xitrum.util.Json.generate(at(&quot;key&quot;))</span></tt>:</p>
+<p>Action.scala</p>
+<div class="highlight-python"><pre>case class User(login: String, name: String)
+
+...
+
+def execute() {
+  at("user") = User("admin", "Admin")
+  respondView()
+}</pre>
+</div>
+<p>Action.ssp</p>
+<div class="highlight-python"><pre>&lt;script type="text/javascript"&gt;
+  var user = ${atJs("user")};
+  alert(user.login);
+  alert(user.name);
+&lt;/script&gt;</pre>
 </div>
 </div>
 <div class="section" id="requestvar">
@@ -259,42 +282,51 @@ else
 </div>
 <div class="section" id="session-store">
 <h3>Session store<a class="headerlink" href="#session-store" title="Permalink to this headline">¶</a></h3>
-<p>In config/xitrum.conf (<a class="reference external" href="https://github.com/ngocdaothanh/xitrum/blob/master/plugin/src/main/resources/xitrum_resources/config/xitrum.conf">example</a>),
+<p>In <a class="reference external" href="https://github.com/ngocdaothanh/xitrum-new/blob/master/config/xitrum.conf">config/xitrum.conf</a>
 you can config the session store:</p>
-<div class="highlight-python"><pre>...
-session {
-  # Store sessions on client side
-  store = xitrum.scope.session.CookieSessionStore
-
-  # Store sessions on server side
-  #store = xitrum.scope.session.HazelcastSessionStore
-  #store = xitrum.scope.session.UnserializableSessionStore
-
-  # If you run multiple sites on the same domain, make sure that there's no
-  # cookie name conflict between sites
-  cookieName = _session
-
-  # Key to encrypt session cookie etc.
-  # Do not use the example below! Use your own!
-  # If you deploy your application to several instances be sure to use the same key!
-  secureKey = ajconghoaofuxahoi92chunghiaujivietnamlasdoclapjfltudoil98hanhphucup8
-}
-...</pre>
+<p>It can be in one of the following 2 forms, depending on the session store you use:</p>
+<div class="highlight-python"><div class="highlight"><pre><span class="n">store</span> <span class="o">=</span> <span class="n">my</span><span class="o">.</span><span class="n">session</span><span class="o">.</span><span class="n">StoreClassName</span>
+</pre></div>
 </div>
-<p>Server side session store is recommended when using continuations-based actions,
+<p>Or:</p>
+<div class="highlight-python"><pre>store {
+  "my.session.StoreClassName" {
+    option1 = value1
+    option2 = value2
+  }
+}</pre>
+</div>
+<p>Xitrum provides 2 simple stores, you can use it right away:</p>
+<div class="highlight-python"><div class="highlight"><pre><span class="c"># Store sessions on client side</span>
+<span class="n">store</span> <span class="o">=</span> <span class="n">xitrum</span><span class="o">.</span><span class="n">scope</span><span class="o">.</span><span class="n">session</span><span class="o">.</span><span class="n">CookieSessionStore</span>
+</pre></div>
+</div>
+<p>And:</p>
+<div class="highlight-python"><pre># Simple in-memory server side session store
+store {
+  "xitrum.local.LruSessionStore" {
+    maxElems = 10000
+  }
+}</pre>
+</div>
+<p>Server side session store is recommended when using
+<a class="reference external" href="https://github.com/ngocdaothanh/xitrum-demos/blob/master/src/main/scala/demos/action/BoringGreeter.scala">continuations-based actions</a>,
 since serialized continuations are usually too big to store in cookies.</p>
-<p>HazelcastSessionStore is cluster-aware, but things you store in it must be serializable.</p>
-<p>If you must store unserializable things, use UnserializableSessionStore.
-If you use UnserializableSessionStore and still want to run a Xitrum cluster,
-you must use a load balancer with sticky sessions configured.</p>
+<p>If you run multiple servers in a cluster, you can
+<a class="reference external" href="https://github.com/ngocdaothanh/xitrum-hazelcast">use Hazelcast to store cluster-aware sessions</a>,</p>
+<p>Note that when you use <tt class="docutils literal"><span class="pre">CookieSessionStore</span></tt> or Hazelcast, your session data must be
+serializable. If you must store unserializable things, use <tt class="docutils literal"><span class="pre">LruSessionStore</span></tt>.
+If you use <tt class="docutils literal"><span class="pre">LruSessionStore</span></tt> and still want to run a cluster of multiple servers,
+you must use a load balancer that supports sticky sessions.</p>
 <p>The three default session stores above are enough for normal cases.
-But if you have a special case and want to implement your own session store,
+If you have a special case and want to implement your own session store,
 extend
 <a class="reference external" href="https://github.com/ngocdaothanh/xitrum/blob/master/src/main/scala/xitrum/session/SessionStore.scala">SessionStore</a>
 or
 <a class="reference external" href="https://github.com/ngocdaothanh/xitrum/blob/master/src/main/scala/xitrum/session/ServerSessionStore.scala">ServerSessionStore</a>
 and implement the abstract methods.</p>
-<p>Then to tell Xitrum to use your session store, set its class name to xitrum.conf.</p>
+<p>Store sessions on client side cookie when you can, because it&#8217;s more scalable.
+Store sessions on server side (memory or DB) when you must.</p>
 <p>Good read:
 <a class="reference external" href="http://www.technicalinfo.net/papers/WebBasedSessionManagement.html">Web Based Session Management - Best practices in managing HTTP-based client sessions</a>.</p>
 </div>
@@ -333,6 +365,7 @@ and <tt class="docutils literal"><span class="pre">isAdmin</span></tt>.</p>
 <li><a class="reference internal" href="#kinds-of-params">Kinds of params</a></li>
 <li><a class="reference internal" href="#accesing-params">Accesing params</a></li>
 <li><a class="reference internal" href="#at">&#8220;at&#8221;</a></li>
+<li><a class="reference internal" href="#atjs">&#8220;atJs&#8221;</a></li>
 <li><a class="reference internal" href="#requestvar">RequestVar</a></li>
 </ul>
 </li>
@@ -388,7 +421,7 @@ and <tt class="docutils literal"><span class="pre">isAdmin</span></tt>.</p>
         <li class="right" >
           <a href="flash.html" title="Serve flash socket policy file"
              >previous</a> |</li>
-        <li><a href="index.html">Xitrum 2.12 documentation</a> &raquo;</li> 
+        <li><a href="index.html">Xitrum 2.13 documentation</a> &raquo;</li> 
       </ul>
     </div>
     <div class="footer">

@@ -7,7 +7,7 @@
   <head>
     <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
     
-    <title>Server-side cache &mdash; Xitrum 2.12 documentation</title>
+    <title>Server-side cache &mdash; Xitrum 2.13 documentation</title>
     
     <link rel="stylesheet" href="_static/nature.css" type="text/css" />
     <link rel="stylesheet" href="_static/pygments.css" type="text/css" />
@@ -15,7 +15,7 @@
     <script type="text/javascript">
       var DOCUMENTATION_OPTIONS = {
         URL_ROOT:    '',
-        VERSION:     '2.12',
+        VERSION:     '2.13',
         COLLAPSE_INDEX: false,
         FILE_SUFFIX: '.html',
         HAS_SOURCE:  true
@@ -24,7 +24,7 @@
     <script type="text/javascript" src="_static/jquery.js"></script>
     <script type="text/javascript" src="_static/underscore.js"></script>
     <script type="text/javascript" src="_static/doctools.js"></script>
-    <link rel="top" title="Xitrum 2.12 documentation" href="index.html" />
+    <link rel="top" title="Xitrum 2.13 documentation" href="index.html" />
     <link rel="next" title="I18n" href="i18n.html" />
     <link rel="prev" title="Filters" href="filter.html" /> 
   </head>
@@ -41,7 +41,7 @@
         <li class="right" >
           <a href="filter.html" title="Filters"
              accesskey="P">previous</a> |</li>
-        <li><a href="index.html">Xitrum 2.12 documentation</a> &raquo;</li> 
+        <li><a href="index.html">Xitrum 2.13 documentation</a> &raquo;</li> 
       </ul>
     </div>  
 
@@ -52,6 +52,7 @@
             
   <div class="section" id="server-side-cache">
 <h1>Server-side cache<a class="headerlink" href="#server-side-cache" title="Permalink to this headline">¶</a></h1>
+<p>Also see the chaper about <a class="reference internal" href="cluster.html"><em>clustering</em></a>.</p>
 <p>Xitrum provides extensive client-side and server-side caching for faster responding.
 At the web server layer, small files are cached in memory, big files are sent
 using NIO&#8217;s zero copy. Xitrum&#8217;s static file serving speed is
@@ -65,17 +66,7 @@ a static file), you may set headers for clients to cache aggressively.
 In that case, call <tt class="docutils literal"><span class="pre">setClientCacheAggressively()</span></tt> in your action.</p>
 <p>Sometimes you may want to prevent client-side caching.
 In that case, call <tt class="docutils literal"><span class="pre">setNoClientCache()</span></tt> in your action.</p>
-<p>Cache in the following section refers to server-side cache.</p>
-<p><a class="reference external" href="http://www.hazelcast.com/">Hazelcast</a>
-is integrated for page, action, and object cache. Of course you can
-use it for other things (distributed processing etc.) in your application.</p>
-<p>With Hazelcast, Xitrum instances become in-process memory cache servers. You don&#8217;t
-need seperate things like Memcache. Please see the chaper about <a class="reference internal" href="cluster.html"><em>clustering</em></a>.</p>
-<div class="highlight-python"><pre>                              / Xitrum/memory cache instance 1
-Load balancer/proxy server ---- Xitrum/memory cache instance 2
-                              \ Xitrum/memory cache instance 3</pre>
-</div>
-<p>Cache works with async response.</p>
+<p>Server-side cache is discussed in more details below.</p>
 <div class="section" id="cache-page-or-action">
 <h2>Cache page or action<a class="headerlink" href="#cache-page-or-action" title="Permalink to this headline">¶</a></h2>
 <div class="highlight-python"><pre>import xitrum.Action
@@ -100,7 +91,8 @@ class ArticlesShow extends Action {
 </div>
 <div class="section" id="cache-object">
 <h2>Cache object<a class="headerlink" href="#cache-object" title="Permalink to this headline">¶</a></h2>
-<p>You use methods in <tt class="docutils literal"><span class="pre">xitrum.Cache</span></tt>.</p>
+<p>You use methods in <tt class="docutils literal"><span class="pre">xitrum.Config.xitrum.cache</span></tt>, it&#8217;s an instance of
+<a class="reference external" href="http://ngocdaothanh.github.io/xitrum/api/index.html#xitrum.Cache">xitrum.Cache</a>.</p>
 <p>Without an explicit TTL (time to live):</p>
 <ul class="simple">
 <li>put(key, value)</li>
@@ -138,58 +130,46 @@ class ArticlesShow extends Action {
 <p>With <tt class="docutils literal"><span class="pre">removePrefix</span></tt>, you have the power to form hierarchical cache based on prefix.
 For example you want to cache things related to an article, then when the article
 changes, you want to remove all those things.</p>
-<div class="highlight-python"><pre>import xitrum.Cache
+<div class="highlight-python"><pre>import xitrum.Config.xitrum.cache
 
 // Cache with a prefix
 val prefix = "articles/" + article.id
-Cache.put(prefix + "/likes", likes)
-Cache.put(prefix + "/comments", comments)
+cache.put(prefix + "/likes", likes)
+cache.put(prefix + "/comments", comments)
 
 // Later, when something happens and you want to remove all cache related to the article
-Cache.remove(prefix)</pre>
+cache.remove(prefix)</pre>
 </div>
 </div>
 <div class="section" id="config">
 <h2>Config<a class="headerlink" href="#config" title="Permalink to this headline">¶</a></h2>
-<p>Hazelcast is powerful. It supports distributed cache. Please see its documentation.</p>
-<p><tt class="docutils literal"><span class="pre">config/hazelcast.xml</span></tt> sample:</p>
-<div class="highlight-python"><pre>&lt;?xml version="1.0" encoding="UTF-8"?&gt;
-&lt;hazelcast xsi:schemaLocation="http://www.hazelcast.com/schema/config hazelcast-basic.xsd"
-           xmlns="http://www.hazelcast.com/schema/config"
-           xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"&gt;
-  &lt;group&gt;
-    &lt;name&gt;myapp&lt;/name&gt;
-    &lt;password&gt;dev-pass&lt;/password&gt;
-  &lt;/group&gt;
-
-  &lt;network&gt;
-    &lt;port auto-increment="true"&gt;5701&lt;/port&gt;
-    &lt;join&gt;
-      &lt;multicast enabled="true"&gt;
-        &lt;multicast-group&gt;224.2.2.3&lt;/multicast-group&gt;
-        &lt;multicast-port&gt;54327&lt;/multicast-port&gt;
-      &lt;/multicast&gt;
-      &lt;tcp-ip enabled="true"&gt;
-        &lt;interface&gt;127.0.0.1&lt;/interface&gt;
-      &lt;/tcp-ip&gt;
-    &lt;/join&gt;
-  &lt;/network&gt;
-
-  &lt;!-- For page, action, object cache --&gt;
-  &lt;map name="xitrum"&gt;
-    &lt;backup-count&gt;0&lt;/backup-count&gt;
-    &lt;eviction-policy&gt;LRU&lt;/eviction-policy&gt;
-    &lt;max-size&gt;100000&lt;/max-size&gt;
-    &lt;eviction-percentage&gt;25&lt;/eviction-percentage&gt;
-  &lt;/map&gt;
-&lt;/hazelcast&gt;</pre>
+<p>The cache feature in Xitrum is provided by cache engines. You can choose the
+engine that suits your need.</p>
+<p>In <a class="reference external" href="https://github.com/ngocdaothanh/xitrum-new/blob/master/config/xitrum.conf">config/xitrum.conf</a>,
+you can config cache engine in one of the following 2 forms, depending on the engine you choose:</p>
+<div class="highlight-python"><div class="highlight"><pre><span class="n">cache</span> <span class="o">=</span> <span class="n">my</span><span class="o">.</span><span class="n">cache</span><span class="o">.</span><span class="n">EngineClassName</span>
+</pre></div>
 </div>
-<p>Note that Xitrum instances of the same group (cluster) should have the same
-<tt class="docutils literal"><span class="pre">&lt;group&gt;/&lt;name&gt;</span></tt>. Hazelcast provides a monitor tool, <tt class="docutils literal"><span class="pre">&lt;group&gt;/&lt;password&gt;</span></tt>
-is the password for the tool to connect to the group.</p>
-<img alt="http://www.hazelcast.com/resources/monitor-screen.png" src="http://www.hazelcast.com/resources/monitor-screen.png" />
-<p>Please see <a class="reference external" href="http://www.hazelcast.com/docs/2.5/manual/multi_html/ch12.html">Hazelcast&#8217;s documentation</a>
-for more information how to config <tt class="docutils literal"><span class="pre">config/hazelcast.xml</span></tt>.</p>
+<p>Or:</p>
+<div class="highlight-python"><pre>cache {
+  "my.cache.EngineClassName" {
+    option1 = value1
+    option2 = value2
+  }
+}</pre>
+</div>
+<p>Xitrum provides this one:</p>
+<div class="highlight-python"><pre>cache {
+  # Simple in-memory cache
+  "xitrum.local.LruCache" {
+    maxElems = 10000
+  }
+}</pre>
+</div>
+<p>If you have a cluster of servers, you can use <a class="reference external" href="https://github.com/ngocdaothanh/xitrum-hazelcast">Hazelcast</a>.</p>
+<p>If you want to create your own cache engine, implement the
+<a class="reference external" href="https://github.com/ngocdaothanh/xitrum/blob/master/src/main/scala/xitrum/Cache.scala">interface</a>
+<tt class="docutils literal"><span class="pre">xitrum.Cache</span></tt>.</p>
 </div>
 <div class="section" id="how-cache-works">
 <h2>How cache works<a class="headerlink" href="#how-cache-works" title="Permalink to this headline">¶</a></h2>
@@ -212,6 +192,19 @@ request        the cache already exists?
   store response to cache</pre>
 </div>
 </div>
+<div class="section" id="xitrum-util-locallrucache">
+<h2>xitrum.util.LocalLruCache<a class="headerlink" href="#xitrum-util-locallrucache" title="Permalink to this headline">¶</a></h2>
+<p>The above cache is the cache shared by the whole system. If you only want a
+small convenient cache, you can use <tt class="docutils literal"><span class="pre">xitrum.util.LocalLruCache</span></tt>.</p>
+<div class="highlight-python"><pre>import xitrum.util.LocalLruCache
+
+// LRU (Least Recently Used) cache that can contain 1000 elements.
+// Keys and values are both of type String.
+val cache = LocalLruCache[String, String](1000)</pre>
+</div>
+<p>The returned <tt class="docutils literal"><span class="pre">cache</span></tt> is a <a class="reference external" href="http://docs.oracle.com/javase/6/docs/api/java/util/LinkedHashMap.html">java.util.LinkedHashMap</a>.
+You can call <tt class="docutils literal"><span class="pre">LinkedHashMap</span></tt> methods from it.</p>
+</div>
 </div>
 
 
@@ -228,6 +221,7 @@ request        the cache already exists?
 <li><a class="reference internal" href="#remove-cache">Remove cache</a></li>
 <li><a class="reference internal" href="#config">Config</a></li>
 <li><a class="reference internal" href="#how-cache-works">How cache works</a></li>
+<li><a class="reference internal" href="#xitrum-util-locallrucache">xitrum.util.LocalLruCache</a></li>
 </ul>
 </li>
 </ul>
@@ -272,7 +266,7 @@ request        the cache already exists?
         <li class="right" >
           <a href="filter.html" title="Filters"
              >previous</a> |</li>
-        <li><a href="index.html">Xitrum 2.12 documentation</a> &raquo;</li> 
+        <li><a href="index.html">Xitrum 2.13 documentation</a> &raquo;</li> 
       </ul>
     </div>
     <div class="footer">

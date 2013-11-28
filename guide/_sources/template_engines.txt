@@ -1,72 +1,39 @@
 Template engines
 ================
 
-The configured template engine will be called when renderView, renderFragment,
-or respondView is called.
+The configured template engine will be called when :doc:`renderView, renderFragment,
+or respondView </action_view>` is called.
 
 Config template engine
 ----------------------
 
-The default template engine is `xitrum-scalate <https://github.com/ngocdaothanh/xitrum-scalate>`_.
-
-config/xitrum.conf:
-
-::
-
-  templateEngine = xitrum.view.Scalate
-
-You can change ``templateEngine`` to another one. Note that each template engine
-may require its own config. In the case of Scalate:
-
-project/plugins.sbt:
+In `config/xitrum.conf <https://github.com/ngocdaothanh/xitrum-new/blob/master/config/xitrum.conf>`_,
+template engine can be configured in one of the following 2 forms, depending on the engine you use:
 
 ::
 
-  // For compiling Scalate templates in the compile phase of SBT
-  addSbtPlugin("com.mojolly.scalate" % "xsbt-scalate-generator" % "0.4.2")
+  template = my.template.EngineClassName
 
-build.sbt:
-
-::
-
-  // Import xsbt-scalate-generator keys; this must be at top of build.sbt, or SBT will complain
-  import ScalateKeys._
-
-  ...
-  ...
-
-  libraryDependencies += "tv.cntt" %% "xitrum-scalate" % "1.2"
-
-  // Precompile Scalate
-  seq(scalateSettings:_*)
-
-  scalateTemplateConfig in Compile := Seq(TemplateConfig(
-    file("src") / "main" / "scalate",  // See config/scalate.conf
-    Seq(),
-    Seq(Binding("helper", "xitrum.Action", true))
-  ))
-
-config/scalate.conf (included in application.conf):
+Or:
 
 ::
 
-  scalate {
-    defaultType = jade              # jade, mustache, scaml, or ssp
-    dir         = src/main/scalate  # Only used in development mode
+  template {
+    "my.template.EngineClassName" {
+      option1 = value1
+      option2 = value2
+    }
   }
+
+The default template engine is `xitrum-scalate <https://github.com/ngocdaothanh/xitrum-scalate>`_.
 
 Remove template engine
 ----------------------
 
 If you create only RESTful APIs in your project, normally you don't call
 renderView, renderFragment, or respondView. In this case, you can even remove
-template engine from your project to make it lighter. Just comment out like this:
-
-config/xitrum.conf:
-
-::
-
-  #templateEngine = xitrum.view.Scalate
+template engine from your project to make it lighter. Just remove or comment out
+the ``templateEngine`` in config/xitrum.conf.
 
 Then remove template related configs from your project.
 

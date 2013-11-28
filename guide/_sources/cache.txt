@@ -1,6 +1,8 @@
 Server-side cache
 =================
 
+Also see the chaper about :doc:`clustering </cluster>`.
+
 Xitrum provides extensive client-side and server-side caching for faster responding.
 At the web server layer, small files are cached in memory, big files are sent
 using NIO's zero copy. Xitrum's static file serving speed is
@@ -17,22 +19,7 @@ In that case, call ``setClientCacheAggressively()`` in your action.
 Sometimes you may want to prevent client-side caching.
 In that case, call ``setNoClientCache()`` in your action.
 
-Cache in the following section refers to server-side cache.
-
-`Hazelcast <http://www.hazelcast.com/>`_
-is integrated for page, action, and object cache. Of course you can
-use it for other things (distributed processing etc.) in your application.
-
-With Hazelcast, Xitrum instances become in-process memory cache servers. You don't
-need seperate things like Memcache. Please see the chaper about :doc:`clustering </cluster>`.
-
-::
-
-                                / Xitrum/memory cache instance 1
-  Load balancer/proxy server ---- Xitrum/memory cache instance 2
-                                \ Xitrum/memory cache instance 3
-
-Cache works with async response.
+Server-side cache is discussed in more details below.
 
 Cache page or action
 --------------------
@@ -61,7 +48,8 @@ Cache page or action
 Cache object
 ------------
 
-You use methods in ``xitrum.Cache``.
+You use methods in ``xitrum.Config.xitrum.cache``, it's an instance of
+`xitrum.Cache <http://ngocdaothanh.github.io/xitrum/api/index.html#xitrum.Cache>`_.
 
 Without an explicit TTL (time to live):
 
@@ -109,64 +97,56 @@ changes, you want to remove all those things.
 
 ::
 
-  import xitrum.Cache
+  import xitrum.Config.xitrum.cache
 
   // Cache with a prefix
   val prefix = "articles/" + article.id
-  Cache.put(prefix + "/likes", likes)
-  Cache.put(prefix + "/comments", comments)
+  cache.put(prefix + "/likes", likes)
+  cache.put(prefix + "/comments", comments)
 
   // Later, when something happens and you want to remove all cache related to the article
-  Cache.remove(prefix)
+  cache.remove(prefix)
 
 Config
 ------
 
-Hazelcast is powerful. It supports distributed cache. Please see its documentation.
+The cache feature in Xitrum is provided by cache engines. You can choose the
+engine that suits your need.
 
-``config/hazelcast.xml`` sample:
+In `config/xitrum.conf <https://github.com/ngocdaothanh/xitrum-new/blob/master/config/xitrum.conf>`_,
+you can config cache engine in one of the following 2 forms, depending on the engine you choose:
 
 ::
 
-  <?xml version="1.0" encoding="UTF-8"?>
-  <hazelcast xsi:schemaLocation="http://www.hazelcast.com/schema/config hazelcast-basic.xsd"
-             xmlns="http://www.hazelcast.com/schema/config"
-             xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance">
-    <group>
-      <name>myapp</name>
-      <password>dev-pass</password>
-    </group>
+  cache = my.cache.EngineClassName
 
-    <network>
-      <port auto-increment="true">5701</port>
-      <join>
-        <multicast enabled="true">
-          <multicast-group>224.2.2.3</multicast-group>
-          <multicast-port>54327</multicast-port>
-        </multicast>
-        <tcp-ip enabled="true">
-          <interface>127.0.0.1</interface>
-        </tcp-ip>
-      </join>
-    </network>
+Or:
 
-    <!-- For page, action, object cache -->
-    <map name="xitrum">
-      <backup-count>0</backup-count>
-      <eviction-policy>LRU</eviction-policy>
-      <max-size>100000</max-size>
-      <eviction-percentage>25</eviction-percentage>
-    </map>
-  </hazelcast>
+::
 
-Note that Xitrum instances of the same group (cluster) should have the same
-``<group>/<name>``. Hazelcast provides a monitor tool, ``<group>/<password>``
-is the password for the tool to connect to the group.
+  cache {
+    "my.cache.EngineClassName" {
+      option1 = value1
+      option2 = value2
+    }
+  }
 
-.. image:: http://www.hazelcast.com/resources/monitor-screen.png
+Xitrum provides this one:
 
-Please see `Hazelcast's documentation <http://www.hazelcast.com/docs/2.5/manual/multi_html/ch12.html>`_
-for more information how to config ``config/hazelcast.xml``.
+::
+
+  cache {
+    # Simple in-memory cache
+    "xitrum.local.LruCache" {
+      maxElems = 10000
+    }
+  }
+
+If you have a cluster of servers, you can use `Hazelcast <https://github.com/ngocdaothanh/xitrum-hazelcast>`_.
+
+If you want to create your own cache engine, implement the
+`interface <https://github.com/ngocdaothanh/xitrum/blob/master/src/main/scala/xitrum/Cache.scala>`_
+``xitrum.Cache``.
 
 How cache works
 ---------------
@@ -195,3 +175,20 @@ Downstream
                            |
   <---------YES------------+
     store response to cache
+
+xitrum.util.LocalLruCache
+-------------------------
+
+The above cache is the cache shared by the whole system. If you only want a
+small convenient cache, you can use ``xitrum.util.LocalLruCache``.
+
+::
+
+  import xitrum.util.LocalLruCache
+
+  // LRU (Least Recently Used) cache that can contain 1000 elements.
+  // Keys and values are both of type String.
+  val cache = LocalLruCache[String, String](1000)
+
+The returned ``cache`` is a `java.util.LinkedHashMap <http://docs.oracle.com/javase/6/docs/api/java/util/LinkedHashMap.html>`_.
+You can call ``LinkedHashMap`` methods from it.

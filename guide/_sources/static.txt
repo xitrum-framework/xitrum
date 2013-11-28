@@ -126,7 +126,7 @@ static files on disk and in classpath.
 ETags for small files are MD5 of file content. They are cached for later use.
 Keys of cache entries are ``(file path, modified time)``. Because modified time
 on different servers may differ, each web server in a cluster has its own local
-ETag cache, not based on Hazelcast.
+ETag cache.
 
 For big files, only modified time is used as ETag. This is not perfect because not
 identical file on different servers may have different ETag, but it is still better

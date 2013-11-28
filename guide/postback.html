@@ -7,7 +7,7 @@
   <head>
     <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
     
-    <title>Postbacks &mdash; Xitrum 2.12 documentation</title>
+    <title>Postbacks &mdash; Xitrum 2.13 documentation</title>
     
     <link rel="stylesheet" href="_static/nature.css" type="text/css" />
     <link rel="stylesheet" href="_static/pygments.css" type="text/css" />
@@ -15,7 +15,7 @@
     <script type="text/javascript">
       var DOCUMENTATION_OPTIONS = {
         URL_ROOT:    '',
-        VERSION:     '2.12',
+        VERSION:     '2.13',
         COLLAPSE_INDEX: false,
         FILE_SUFFIX: '.html',
         HAS_SOURCE:  true
@@ -24,7 +24,7 @@
     <script type="text/javascript" src="_static/jquery.js"></script>
     <script type="text/javascript" src="_static/underscore.js"></script>
     <script type="text/javascript" src="_static/doctools.js"></script>
-    <link rel="top" title="Xitrum 2.12 documentation" href="index.html" />
+    <link rel="top" title="Xitrum 2.13 documentation" href="index.html" />
     <link rel="next" title="XML" href="xml.html" />
     <link rel="prev" title="Template engines" href="template_engines.html" /> 
   </head>
@@ -41,7 +41,7 @@
         <li class="right" >
           <a href="template_engines.html" title="Template engines"
              accesskey="P">previous</a> |</li>
-        <li><a href="index.html">Xitrum 2.12 documentation</a> &raquo;</li> 
+        <li><a href="index.html">Xitrum 2.13 documentation</a> &raquo;</li> 
       </ul>
     </div>  
 
@@ -185,6 +185,17 @@ extra params with the postback.</p>
 </div>
 <p><tt class="docutils literal"><span class="pre">#myform</span></tt> is the jQuery selector to select the form that contains extra params.</p>
 </div>
+<div class="section" id="display-animation-image-while-ajax-is-loading">
+<h2>Display animation image while Ajax is loading<a class="headerlink" href="#display-animation-image-while-ajax-is-loading" title="Permalink to this headline">¶</a></h2>
+<p>If you want to display image like this while Ajax is loading</p>
+<img alt="_images/ajax_loading.gif" src="_images/ajax_loading.gif" />
+<p>please call this JS snippet after including <tt class="docutils literal"><span class="pre">jsDefaults</span></tt> (which includes
+<a class="reference external" href="https://github.com/ngocdaothanh/xitrum/blob/master/src/main/scala/xitrum/js.scala">xitrum.js</a>)
+in your view template:</p>
+<div class="highlight-python"><div class="highlight"><pre><span class="n">xitrum</span><span class="o">.</span><span class="n">ajaxLoadingImg</span> <span class="o">=</span> <span class="s">&#39;path/to/your/image&#39;</span><span class="p">;</span>
+</pre></div>
+</div>
+</div>
 </div>
 
 
@@ -201,6 +212,7 @@ extra params with the postback.</p>
 <li><a class="reference internal" href="#non-form">Non-form</a></li>
 <li><a class="reference internal" href="#confirmation-dialog">Confirmation dialog</a></li>
 <li><a class="reference internal" href="#extra-params">Extra params</a></li>
+<li><a class="reference internal" href="#display-animation-image-while-ajax-is-loading">Display animation image while Ajax is loading</a></li>
 </ul>
 </li>
 </ul>
@@ -245,7 +257,7 @@ extra params with the postback.</p>
         <li class="right" >
           <a href="template_engines.html" title="Template engines"
              >previous</a> |</li>
-        <li><a href="index.html">Xitrum 2.12 documentation</a> &raquo;</li> 
+        <li><a href="index.html">Xitrum 2.13 documentation</a> &raquo;</li> 
       </ul>
     </div>
     <div class="footer">

@@ -7,7 +7,7 @@
   <head>
     <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
     
-    <title>Template engines &mdash; Xitrum 2.12 documentation</title>
+    <title>Template engines &mdash; Xitrum 2.13 documentation</title>
     
     <link rel="stylesheet" href="_static/nature.css" type="text/css" />
     <link rel="stylesheet" href="_static/pygments.css" type="text/css" />
@@ -15,7 +15,7 @@
     <script type="text/javascript">
       var DOCUMENTATION_OPTIONS = {
         URL_ROOT:    '',
-        VERSION:     '2.12',
+        VERSION:     '2.13',
         COLLAPSE_INDEX: false,
         FILE_SUFFIX: '.html',
         HAS_SOURCE:  true
@@ -24,7 +24,7 @@
     <script type="text/javascript" src="_static/jquery.js"></script>
     <script type="text/javascript" src="_static/underscore.js"></script>
     <script type="text/javascript" src="_static/doctools.js"></script>
-    <link rel="top" title="Xitrum 2.12 documentation" href="index.html" />
+    <link rel="top" title="Xitrum 2.13 documentation" href="index.html" />
     <link rel="next" title="Postbacks" href="postback.html" />
     <link rel="prev" title="RESTful APIs" href="restful.html" /> 
   </head>
@@ -41,7 +41,7 @@
         <li class="right" >
           <a href="restful.html" title="RESTful APIs"
              accesskey="P">previous</a> |</li>
-        <li><a href="index.html">Xitrum 2.12 documentation</a> &raquo;</li> 
+        <li><a href="index.html">Xitrum 2.13 documentation</a> &raquo;</li> 
       </ul>
     </div>  
 
@@ -52,55 +52,31 @@
             
   <div class="section" id="template-engines">
 <h1>Template engines<a class="headerlink" href="#template-engines" title="Permalink to this headline">¶</a></h1>
-<p>The configured template engine will be called when renderView, renderFragment,
-or respondView is called.</p>
+<p>The configured template engine will be called when <a class="reference internal" href="action_view.html"><em>renderView, renderFragment,
+or respondView</em></a> is called.</p>
 <div class="section" id="config-template-engine">
 <h2>Config template engine<a class="headerlink" href="#config-template-engine" title="Permalink to this headline">¶</a></h2>
-<p>The default template engine is <a class="reference external" href="https://github.com/ngocdaothanh/xitrum-scalate">xitrum-scalate</a>.</p>
-<p>config/xitrum.conf:</p>
-<div class="highlight-python"><div class="highlight"><pre><span class="n">templateEngine</span> <span class="o">=</span> <span class="n">xitrum</span><span class="o">.</span><span class="n">view</span><span class="o">.</span><span class="n">Scalate</span>
+<p>In <a class="reference external" href="https://github.com/ngocdaothanh/xitrum-new/blob/master/config/xitrum.conf">config/xitrum.conf</a>,
+template engine can be configured in one of the following 2 forms, depending on the engine you use:</p>
+<div class="highlight-python"><div class="highlight"><pre><span class="n">template</span> <span class="o">=</span> <span class="n">my</span><span class="o">.</span><span class="n">template</span><span class="o">.</span><span class="n">EngineClassName</span>
 </pre></div>
 </div>
-<p>You can change <tt class="docutils literal"><span class="pre">templateEngine</span></tt> to another one. Note that each template engine
-may require its own config. In the case of Scalate:</p>
-<p>project/plugins.sbt:</p>
-<div class="highlight-python"><pre>// For compiling Scalate templates in the compile phase of SBT
-addSbtPlugin("com.mojolly.scalate" % "xsbt-scalate-generator" % "0.4.2")</pre>
-</div>
-<p>build.sbt:</p>
-<div class="highlight-python"><pre>// Import xsbt-scalate-generator keys; this must be at top of build.sbt, or SBT will complain
-import ScalateKeys._
-
-...
-...
-
-libraryDependencies += "tv.cntt" %% "xitrum-scalate" % "1.2"
-
-// Precompile Scalate
-seq(scalateSettings:_*)
-
-scalateTemplateConfig in Compile := Seq(TemplateConfig(
-  file("src") / "main" / "scalate",  // See config/scalate.conf
-  Seq(),
-  Seq(Binding("helper", "xitrum.Action", true))
-))</pre>
-</div>
-<p>config/scalate.conf (included in application.conf):</p>
-<div class="highlight-python"><pre>scalate {
-  defaultType = jade              # jade, mustache, scaml, or ssp
-  dir         = src/main/scalate  # Only used in development mode
+<p>Or:</p>
+<div class="highlight-python"><pre>template {
+  "my.template.EngineClassName" {
+    option1 = value1
+    option2 = value2
+  }
 }</pre>
 </div>
+<p>The default template engine is <a class="reference external" href="https://github.com/ngocdaothanh/xitrum-scalate">xitrum-scalate</a>.</p>
 </div>
 <div class="section" id="remove-template-engine">
 <h2>Remove template engine<a class="headerlink" href="#remove-template-engine" title="Permalink to this headline">¶</a></h2>
 <p>If you create only RESTful APIs in your project, normally you don&#8217;t call
 renderView, renderFragment, or respondView. In this case, you can even remove
-template engine from your project to make it lighter. Just comment out like this:</p>
-<p>config/xitrum.conf:</p>
-<div class="highlight-python"><div class="highlight"><pre><span class="c">#templateEngine = xitrum.view.Scalate</span>
-</pre></div>
-</div>
+template engine from your project to make it lighter. Just remove or comment out
+the <tt class="docutils literal"><span class="pre">templateEngine</span></tt> in config/xitrum.conf.</p>
 <p>Then remove template related configs from your project.</p>
 </div>
 <div class="section" id="create-your-own-template-engine">
@@ -168,7 +144,7 @@ Then set your class in config/xitrum.conf.</p>
         <li class="right" >
           <a href="restful.html" title="RESTful APIs"
              >previous</a> |</li>
-        <li><a href="index.html">Xitrum 2.12 documentation</a> &raquo;</li> 
+        <li><a href="index.html">Xitrum 2.13 documentation</a> &raquo;</li> 
       </ul>
     </div>
     <div class="footer">

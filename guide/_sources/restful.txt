@@ -160,28 +160,31 @@ The ``<head>`` part will include something like this:
     ...
   </html>
 
-The token will be automatically included in all non-GET Ajax requests sent by
-jQuery.
+The token will be automatically included in all non-GET Ajax requests as
+``X-CSRF-Token`` header sent by jQuery if you include
+`xitrum.js <https://github.com/ngocdaothanh/xitrum/blob/master/src/main/scala/xitrum/js.scala>`_
+in your view template. xitrum.js is included in ``jsDefaults``.
 
-antiCsrfInput
--------------
+antiCsrfInput and antiCsrfToken
+-------------------------------
 
-If you manually write form in Scalate template, use ``antiCsrfInput``:
+Xitrum takes CSRF token from ``X-CSRF-Token`` request header. If the header does
+not exists, Xitrum takes the token from ``csrf-token`` request body param
+(note: not param in the URL).
+
+If you manually write forms, and you don't use the meta tag and xitrum.js as
+described in the previous section, you need to use ``antiCsrfInput`` or
+``antiCsrfToken``:
 
 ::
 
   form(method="post" action={url[AdminAddGroup]})
     != antiCsrfInput
 
-    label Group name *
-    input.required(type="text" name="name" placeholder="Required")
-    br
+::    
 
-    label Group description
-    input(type="text" name="desc")
-    br
-
-    input(type="submit" value="Add")
+  form(method="post" action={url[AdminAddGroup]})
+    input(type="hidden" name="csrf-token" value={antiCsrfToken})
 
 SkipCsrfCheck
 -------------

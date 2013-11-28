@@ -7,7 +7,7 @@
   <head>
     <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
     
-    <title>HOWTO &mdash; Xitrum 2.12 documentation</title>
+    <title>HOWTO &mdash; Xitrum 2.13 documentation</title>
     
     <link rel="stylesheet" href="_static/nature.css" type="text/css" />
     <link rel="stylesheet" href="_static/pygments.css" type="text/css" />
@@ -15,7 +15,7 @@
     <script type="text/javascript">
       var DOCUMENTATION_OPTIONS = {
         URL_ROOT:    '',
-        VERSION:     '2.12',
+        VERSION:     '2.13',
         COLLAPSE_INDEX: false,
         FILE_SUFFIX: '.html',
         HAS_SOURCE:  true
@@ -24,9 +24,9 @@
     <script type="text/javascript" src="_static/jquery.js"></script>
     <script type="text/javascript" src="_static/underscore.js"></script>
     <script type="text/javascript" src="_static/doctools.js"></script>
-    <link rel="top" title="Xitrum 2.12 documentation" href="index.html" />
+    <link rel="top" title="Xitrum 2.13 documentation" href="index.html" />
     <link rel="next" title="Netty handlers" href="handler.html" />
-    <link rel="prev" title="Clustering with Akka" href="cluster.html" /> 
+    <link rel="prev" title="Clustering with Akka and Hazelcast" href="cluster.html" /> 
   </head>
   <body>
     <div class="related">
@@ -39,9 +39,9 @@
           <a href="handler.html" title="Netty handlers"
              accesskey="N">next</a> |</li>
         <li class="right" >
-          <a href="cluster.html" title="Clustering with Akka"
+          <a href="cluster.html" title="Clustering with Akka and Hazelcast"
              accesskey="P">previous</a> |</li>
-        <li><a href="index.html">Xitrum 2.12 documentation</a> &raquo;</li> 
+        <li><a href="index.html">Xitrum 2.13 documentation</a> &raquo;</li> 
       </ul>
     </div>  
 
@@ -276,6 +276,32 @@ val decrypted = SecureUrlSafeBase64.decrypt(encrypted, "my key").asInstanceOf[Op
 <p>If no key is specified, <tt class="docutils literal"><span class="pre">secureKey</span></tt> in xitrum.conf file in config directory
 is used.</p>
 </div>
+<div class="section" id="serialize-and-deserialize">
+<h2>Serialize and deserialize<a class="headerlink" href="#serialize-and-deserialize" title="Permalink to this headline">¶</a></h2>
+<p>To serialize to Array[Byte]:</p>
+<div class="highlight-python"><pre>import xitrum.util.SeriDeseri
+val bytes = SeriDeseri.serialize("my serializable object")</pre>
+</div>
+<p>To deserialize bytes back:</p>
+<div class="highlight-python"><pre>val option: Option[Any] = SeriDeseri.deserialize(bytes)</pre>
+</div>
+</div>
+<div class="section" id="multiple-sites-at-the-same-domain-name">
+<h2>Multiple sites at the same domain name<a class="headerlink" href="#multiple-sites-at-the-same-domain-name" title="Permalink to this headline">¶</a></h2>
+<p>If you want to use a reverse proxy like Nginx to run multiple different sites
+at the same domain name:</p>
+<div class="highlight-python"><pre>http://example.com/site1/...
+http://example.com/site2/...</pre>
+</div>
+<p>You can config baseUrl in config/xitrum.conf.</p>
+<p>In your JS code, to have the correct URLs for Ajax requests, use <tt class="docutils literal"><span class="pre">withBaseUrl</span></tt>
+in <a class="reference external" href="https://github.com/ngocdaothanh/xitrum/blob/master/src/main/scala/xitrum/js.scala">xitrum.js</a>.</p>
+<div class="highlight-python"><div class="highlight"><pre><span class="c"># If the current site&#39;s baseUrl is &quot;site1&quot;, the result will be:</span>
+<span class="c"># /site1/path/to/my/action</span>
+<span class="n">xitrum</span><span class="o">.</span><span class="n">withBaseUrl</span><span class="p">(</span><span class="s">&#39;/path/to/my/action&#39;</span><span class="p">)</span>
+</pre></div>
+</div>
+</div>
 <div class="section" id="convert-markdown-text-to-html">
 <h2>Convert Markdown text to HTML<a class="headerlink" href="#convert-markdown-text-to-html" title="Permalink to this headline">¶</a></h2>
 <p>If you have already configured your project to use <a class="reference internal" href="template_engines.html"><em>Scalate template engine</em></a>,
@@ -320,6 +346,8 @@ val html = Markdown("input")</pre>
 </ul>
 </li>
 <li><a class="reference internal" href="#encrypt-data">Encrypt data</a></li>
+<li><a class="reference internal" href="#serialize-and-deserialize">Serialize and deserialize</a></li>
+<li><a class="reference internal" href="#multiple-sites-at-the-same-domain-name">Multiple sites at the same domain name</a></li>
 <li><a class="reference internal" href="#convert-markdown-text-to-html">Convert Markdown text to HTML</a></li>
 </ul>
 </li>
@@ -327,7 +355,7 @@ val html = Markdown("input")</pre>
 
   <h4>Previous topic</h4>
   <p class="topless"><a href="cluster.html"
-                        title="previous chapter">Clustering with Akka</a></p>
+                        title="previous chapter">Clustering with Akka and Hazelcast</a></p>
   <h4>Next topic</h4>
   <p class="topless"><a href="handler.html"
                         title="next chapter">Netty handlers</a></p>
@@ -363,9 +391,9 @@ val html = Markdown("input")</pre>
           <a href="handler.html" title="Netty handlers"
              >next</a> |</li>
         <li class="right" >
-          <a href="cluster.html" title="Clustering with Akka"
+          <a href="cluster.html" title="Clustering with Akka and Hazelcast"
              >previous</a> |</li>
-        <li><a href="index.html">Xitrum 2.12 documentation</a> &raquo;</li> 
+        <li><a href="index.html">Xitrum 2.13 documentation</a> &raquo;</li> 
       </ul>
     </div>
     <div class="footer">

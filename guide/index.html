@@ -7,7 +7,7 @@
   <head>
     <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
 
-    <title>Xitrum Guide &mdash; Xitrum 2.12 documentation</title>
+    <title>Xitrum Guide &mdash; Xitrum 2.13 documentation</title>
 
     <link rel="stylesheet" href="_static/nature.css" type="text/css" />
     <link rel="stylesheet" href="_static/pygments.css" type="text/css" />
@@ -15,7 +15,7 @@
     <script type="text/javascript">
       var DOCUMENTATION_OPTIONS = {
         URL_ROOT:    '',
-        VERSION:     '2.12',
+        VERSION:     '2.13',
         COLLAPSE_INDEX: false,
         FILE_SUFFIX: '.html',
         HAS_SOURCE:  true
@@ -24,7 +24,7 @@
     <script type="text/javascript" src="_static/jquery.js"></script>
     <script type="text/javascript" src="_static/underscore.js"></script>
     <script type="text/javascript" src="_static/doctools.js"></script>
-    <link rel="top" title="Xitrum 2.12 documentation" href="#" />
+    <link rel="top" title="Xitrum 2.13 documentation" href="#" />
     <link rel="next" title="Introduction" href="intro.html" />
   </head>
   <body>
@@ -37,7 +37,7 @@
         <li class="right" >
           <a href="intro.html" title="Introduction"
              accesskey="N">next</a> |</li>
-        <li><a href="#">Xitrum 2.12 documentation</a> &raquo;</li>
+        <li><a href="#">Xitrum 2.13 documentation</a> &raquo;</li>
       </ul>
     </div>
 
@@ -94,7 +94,7 @@
 <li class="toctree-l2"><a class="reference internal" href="restful.html#dot-in-route">Dot in route</a></li>
 <li class="toctree-l2"><a class="reference internal" href="restful.html#regex-in-route">Regex in route</a></li>
 <li class="toctree-l2"><a class="reference internal" href="restful.html#anti-csrf">Anti-CSRF</a></li>
-<li class="toctree-l2"><a class="reference internal" href="restful.html#anticsrfinput">antiCsrfInput</a></li>
+<li class="toctree-l2"><a class="reference internal" href="restful.html#anticsrfinput-and-anticsrftoken">antiCsrfInput and antiCsrfToken</a></li>
 <li class="toctree-l2"><a class="reference internal" href="restful.html#skipcsrfcheck">SkipCsrfCheck</a></li>
 <li class="toctree-l2"><a class="reference internal" href="restful.html#getting-entire-request-body">Getting entire request body</a></li>
 <li class="toctree-l2"><a class="reference internal" href="restful.html#documenting-api">Documenting API</a></li>
@@ -112,6 +112,7 @@
 <li class="toctree-l2"><a class="reference internal" href="postback.html#non-form">Non-form</a></li>
 <li class="toctree-l2"><a class="reference internal" href="postback.html#confirmation-dialog">Confirmation dialog</a></li>
 <li class="toctree-l2"><a class="reference internal" href="postback.html#extra-params">Extra params</a></li>
+<li class="toctree-l2"><a class="reference internal" href="postback.html#display-animation-image-while-ajax-is-loading">Display animation image while Ajax is loading</a></li>
 </ul>
 </li>
 <li class="toctree-l1"><a class="reference internal" href="xml.html">XML</a><ul>
@@ -127,6 +128,7 @@
 </ul>
 </li>
 <li class="toctree-l2"><a class="reference internal" href="js.html#json">JSON</a></li>
+<li class="toctree-l2"><a class="reference internal" href="js.html#plugin-for-knockout-js">Plugin for Knockout.js</a></li>
 </ul>
 </li>
 <li class="toctree-l1"><a class="reference internal" href="async.html">Async response</a><ul>
@@ -155,6 +157,7 @@
 <li class="toctree-l3"><a class="reference internal" href="scopes.html#kinds-of-params">Kinds of params</a></li>
 <li class="toctree-l3"><a class="reference internal" href="scopes.html#accesing-params">Accesing params</a></li>
 <li class="toctree-l3"><a class="reference internal" href="scopes.html#at">&#8220;at&#8221;</a></li>
+<li class="toctree-l3"><a class="reference internal" href="scopes.html#atjs">&#8220;atJs&#8221;</a></li>
 <li class="toctree-l3"><a class="reference internal" href="scopes.html#requestvar">RequestVar</a></li>
 </ul>
 </li>
@@ -190,6 +193,7 @@
 <li class="toctree-l2"><a class="reference internal" href="cache.html#remove-cache">Remove cache</a></li>
 <li class="toctree-l2"><a class="reference internal" href="cache.html#config">Config</a></li>
 <li class="toctree-l2"><a class="reference internal" href="cache.html#how-cache-works">How cache works</a></li>
+<li class="toctree-l2"><a class="reference internal" href="cache.html#xitrum-util-locallrucache">xitrum.util.LocalLruCache</a></li>
 </ul>
 </li>
 <li class="toctree-l1"><a class="reference internal" href="i18n.html">I18n</a><ul>
@@ -224,7 +228,7 @@
 </li>
 </ul>
 </li>
-<li class="toctree-l1"><a class="reference internal" href="cluster.html">Clustering with Akka</a></li>
+<li class="toctree-l1"><a class="reference internal" href="cluster.html">Clustering with Akka and Hazelcast</a></li>
 <li class="toctree-l1"><a class="reference internal" href="howto.html">HOWTO</a><ul>
 <li class="toctree-l2"><a class="reference internal" href="howto.html#link-to-an-action">Link to an action</a></li>
 <li class="toctree-l2"><a class="reference internal" href="howto.html#redirect-to-another-action">Redirect to another action</a></li>
@@ -248,6 +252,8 @@
 </ul>
 </li>
 <li class="toctree-l2"><a class="reference internal" href="howto.html#encrypt-data">Encrypt data</a></li>
+<li class="toctree-l2"><a class="reference internal" href="howto.html#serialize-and-deserialize">Serialize and deserialize</a></li>
+<li class="toctree-l2"><a class="reference internal" href="howto.html#multiple-sites-at-the-same-domain-name">Multiple sites at the same domain name</a></li>
 <li class="toctree-l2"><a class="reference internal" href="howto.html#convert-markdown-text-to-html">Convert Markdown text to HTML</a></li>
 </ul>
 </li>
@@ -307,7 +313,7 @@
         <li class="right" >
           <a href="intro.html" title="Introduction"
              >next</a> |</li>
-        <li><a href="#">Xitrum 2.12 documentation</a> &raquo;</li>
+        <li><a href="#">Xitrum 2.13 documentation</a> &raquo;</li>
       </ul>
     </div>
     <div class="footer">

@@ -14,8 +14,6 @@ your Xitrum project, you can use them directly if you want.
 * `Akka <http://akka.io/>`_:
   For SockJS. Akka depends on `Typesafe Config <https://github.com/typesafehub/config>`_,
   which is also used by Xitrum.
-* `Hazelcast <http://www.hazelcast.com/>`_:
-  For distributing caches and server side sessions.
 * `Rhino <https://developer.mozilla.org/en-US/docs/Rhino>`_:
   For Scalate to compile CoffeeScript to JavaScript.
 * `JSON4S <https://github.com/json4s/json4s>`_:

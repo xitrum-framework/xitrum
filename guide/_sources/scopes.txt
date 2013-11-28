@@ -84,6 +84,37 @@ AppAction.scala
     )
   }
 
+"atJs"
+~~~~~~
+
+``atJs`` helper method automatically converts ``at("key")`` to JSON.
+It is useful when you need to pass model from Scala to JavaScript.
+
+``atJs("key")`` is equivalent to ``xitrum.util.Json.generate(at("key"))``:
+
+Action.scala
+
+::
+
+  case class User(login: String, name: String)
+
+  ...
+
+  def execute() {
+    at("user") = User("admin", "Admin")
+    respondView()
+  }
+
+Action.ssp
+
+::
+
+  <script type="text/javascript">
+    var user = ${atJs("user")};
+    alert(user.login);
+    alert(user.name);
+  </script>
+
 RequestVar
 ~~~~~~~~~~
 
@@ -267,49 +298,66 @@ Display the username:
 Session store
 ~~~~~~~~~~~~~
 
-In config/xitrum.conf (`example <https://github.com/ngocdaothanh/xitrum/blob/master/plugin/src/main/resources/xitrum_resources/config/xitrum.conf>`_),
+In `config/xitrum.conf <https://github.com/ngocdaothanh/xitrum-new/blob/master/config/xitrum.conf>`_
 you can config the session store:
+
+It can be in one of the following 2 forms, depending on the session store you use:
 
 ::
 
-  ...
-  session {
-    # Store sessions on client side
-    store = xitrum.scope.session.CookieSessionStore
+  store = my.session.StoreClassName
 
-    # Store sessions on server side
-    #store = xitrum.scope.session.HazelcastSessionStore
-    #store = xitrum.scope.session.UnserializableSessionStore
+Or:
 
-    # If you run multiple sites on the same domain, make sure that there's no
-    # cookie name conflict between sites
-    cookieName = _session
+::
 
-    # Key to encrypt session cookie etc.
-    # Do not use the example below! Use your own!
-    # If you deploy your application to several instances be sure to use the same key!
-    secureKey = ajconghoaofuxahoi92chunghiaujivietnamlasdoclapjfltudoil98hanhphucup8
+  store {
+    "my.session.StoreClassName" {
+      option1 = value1
+      option2 = value2
+    }
   }
-  ...
 
-Server side session store is recommended when using continuations-based actions,
-since serialized continuations are usually too big to store in cookies. 
+Xitrum provides 2 simple stores, you can use it right away:
 
-HazelcastSessionStore is cluster-aware, but things you store in it must be serializable.
+::
 
-If you must store unserializable things, use UnserializableSessionStore.
-If you use UnserializableSessionStore and still want to run a Xitrum cluster,
-you must use a load balancer with sticky sessions configured.
+  # Store sessions on client side
+  store = xitrum.scope.session.CookieSessionStore
+
+And:
+
+::
+
+  # Simple in-memory server side session store
+  store {
+    "xitrum.local.LruSessionStore" {
+      maxElems = 10000
+    }
+  }
+
+Server side session store is recommended when using
+`continuations-based actions <https://github.com/ngocdaothanh/xitrum-demos/blob/master/src/main/scala/demos/action/BoringGreeter.scala>`_,
+since serialized continuations are usually too big to store in cookies.
+
+If you run multiple servers in a cluster, you can
+`use Hazelcast to store cluster-aware sessions <https://github.com/ngocdaothanh/xitrum-hazelcast>`_,
+
+Note that when you use ``CookieSessionStore`` or Hazelcast, your session data must be
+serializable. If you must store unserializable things, use ``LruSessionStore``.
+If you use ``LruSessionStore`` and still want to run a cluster of multiple servers,
+you must use a load balancer that supports sticky sessions.
 
 The three default session stores above are enough for normal cases.
-But if you have a special case and want to implement your own session store,
+If you have a special case and want to implement your own session store,
 extend
 `SessionStore <https://github.com/ngocdaothanh/xitrum/blob/master/src/main/scala/xitrum/session/SessionStore.scala>`_
 or
 `ServerSessionStore <https://github.com/ngocdaothanh/xitrum/blob/master/src/main/scala/xitrum/session/ServerSessionStore.scala>`_
 and implement the abstract methods.
 
-Then to tell Xitrum to use your session store, set its class name to xitrum.conf.
+Store sessions on client side cookie when you can, because it's more scalable.
+Store sessions on server side (memory or DB) when you must.
 
 Good read:
 `Web Based Session Management - Best practices in managing HTTP-based client sessions <http://www.technicalinfo.net/papers/WebBasedSessionManagement.html>`_.

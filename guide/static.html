@@ -7,7 +7,7 @@
   <head>
     <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
     
-    <title>Static files &mdash; Xitrum 2.12 documentation</title>
+    <title>Static files &mdash; Xitrum 2.13 documentation</title>
     
     <link rel="stylesheet" href="_static/nature.css" type="text/css" />
     <link rel="stylesheet" href="_static/pygments.css" type="text/css" />
@@ -15,7 +15,7 @@
     <script type="text/javascript">
       var DOCUMENTATION_OPTIONS = {
         URL_ROOT:    '',
-        VERSION:     '2.12',
+        VERSION:     '2.13',
         COLLAPSE_INDEX: false,
         FILE_SUFFIX: '.html',
         HAS_SOURCE:  true
@@ -24,7 +24,7 @@
     <script type="text/javascript" src="_static/jquery.js"></script>
     <script type="text/javascript" src="_static/underscore.js"></script>
     <script type="text/javascript" src="_static/doctools.js"></script>
-    <link rel="top" title="Xitrum 2.12 documentation" href="index.html" />
+    <link rel="top" title="Xitrum 2.13 documentation" href="index.html" />
     <link rel="next" title="Serve flash socket policy file" href="flash.html" />
     <link rel="prev" title="Async response" href="async.html" /> 
   </head>
@@ -41,7 +41,7 @@
         <li class="right" >
           <a href="async.html" title="Async response"
              accesskey="P">previous</a> |</li>
-        <li><a href="index.html">Xitrum 2.12 documentation</a> &raquo;</li> 
+        <li><a href="index.html">Xitrum 2.13 documentation</a> &raquo;</li> 
       </ul>
     </div>  
 
@@ -148,7 +148,7 @@ static files on disk and in classpath.</p>
 <p>ETags for small files are MD5 of file content. They are cached for later use.
 Keys of cache entries are <tt class="docutils literal"><span class="pre">(file</span> <span class="pre">path,</span> <span class="pre">modified</span> <span class="pre">time)</span></tt>. Because modified time
 on different servers may differ, each web server in a cluster has its own local
-ETag cache, not based on Hazelcast.</p>
+ETag cache.</p>
 <p>For big files, only modified time is used as ETag. This is not perfect because not
 identical file on different servers may have different ETag, but it is still better
 than no ETag at all.</p>
@@ -240,7 +240,7 @@ in <tt class="docutils literal"><span class="pre">config/xitrum.conf</span></tt>
         <li class="right" >
           <a href="async.html" title="Async response"
              >previous</a> |</li>
-        <li><a href="index.html">Xitrum 2.12 documentation</a> &raquo;</li> 
+        <li><a href="index.html">Xitrum 2.13 documentation</a> &raquo;</li> 
       </ul>
     </div>
     <div class="footer">

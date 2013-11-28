@@ -89,3 +89,8 @@ To respond JSON:
 
 JSON is also neat for config files that need nested structures.
 See :doc:`Load config files </howto>`.
+
+Plugin for Knockout.js
+----------------------
+
+See https://github.com/ngocdaothanh/xitrum-ko

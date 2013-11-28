@@ -290,6 +290,44 @@ You can specify a key for encryption:
 If no key is specified, ``secureKey`` in xitrum.conf file in config directory
 is used.
 
+Serialize and deserialize
+-------------------------
+
+To serialize to Array[Byte]:
+
+::
+
+  import xitrum.util.SeriDeseri
+  val bytes = SeriDeseri.serialize("my serializable object")
+
+To deserialize bytes back:
+
+::
+
+  val option: Option[Any] = SeriDeseri.deserialize(bytes)
+
+Multiple sites at the same domain name
+--------------------------------------
+
+If you want to use a reverse proxy like Nginx to run multiple different sites
+at the same domain name:
+
+::
+
+  http://example.com/site1/...
+  http://example.com/site2/...
+
+You can config baseUrl in config/xitrum.conf.
+
+In your JS code, to have the correct URLs for Ajax requests, use ``withBaseUrl``
+in `xitrum.js <https://github.com/ngocdaothanh/xitrum/blob/master/src/main/scala/xitrum/js.scala>`_.
+
+::
+
+  # If the current site's baseUrl is "site1", the result will be:
+  # /site1/path/to/my/action
+  xitrum.withBaseUrl('/path/to/my/action')
+
 Convert Markdown text to HTML
 -----------------------------
 
