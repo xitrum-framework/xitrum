@@ -60,13 +60,20 @@ Create dependency graph
 Demo:
 http://ngocdaothanh.github.io/xitrum/guide/deps.html
 
-See https://github.com/jrudolph/sbt-dependency-graph.
+Generate target/dependencies-compile.dot:
+
+::
+
+  sbt dependency-dot
 
 Convert dependencies-compile.dot to deps.png:
 
 ::
 
   dot -Tpng dependencies-compile.dot > deps.png
+
+See:
+https://github.com/jrudolph/sbt-dependency-graph.
 
 Publish to local
 ----------------
