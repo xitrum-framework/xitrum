@@ -191,7 +191,7 @@ trait AppAction extends Action {
 </div>
 <div class="section" id="cookie">
 <h2>Cookie<a class="headerlink" href="#cookie" title="Permalink to this headline">¶</a></h2>
-<p><a class="reference external" href="http://en.wikipedia.org/wiki/HTTP_cookie#Domain_and_Path">Read Wikipedia about cookie path etc.</a></p>
+<p>Read Wikipedia about <a class="reference external" href="http://en.wikipedia.org/wiki/HTTP_cookie">cookies</a>.</p>
 <p>Inside an action, use <tt class="docutils literal"><span class="pre">requestCookies</span></tt>, a <tt class="docutils literal"><span class="pre">Map[String,</span> <span class="pre">String]</span></tt>, to read cookies sent by browser.</p>
 <div class="highlight-python"><pre>requestCookies.get("myCookie") match {
   case None         =&gt; ...
@@ -213,11 +213,36 @@ delete cookie when the browser closes windows, set max age to <tt class="docutil
 <div class="highlight-python"><div class="highlight"><pre><span class="n">cookie</span><span class="o">.</span><span class="n">setMaxAge</span><span class="p">(</span><span class="n">Integer</span><span class="o">.</span><span class="n">MIN_VALUE</span><span class="p">)</span>
 </pre></div>
 </div>
-<p>Note that <a class="reference external" href="http://mrcoles.com/blog/cookies-max-age-vs-expires/">Internet Explorer does not support &#8220;max-age&#8221;</a>,
+<p><a class="reference external" href="http://mrcoles.com/blog/cookies-max-age-vs-expires/">Internet Explorer does not support &#8220;max-age&#8221;</a>,
 but Netty detects and outputs either &#8220;max-age&#8221; or &#8220;expires&#8221; properly. Don&#8217;t worry!</p>
+<p>Browsers will not send cookie attributes back to the server. They will
+<a class="reference external" href="http://en.wikipedia.org/wiki/HTTP_cookie#Cookie_attributes">only send the cookie name-value pairs</a>.</p>
 <p>If you want to sign your cookie value to prevent user from tampering, use
-<tt class="docutils literal"><span class="pre">xitrum.util.SecureUrlSafeBase64.encrypt</span></tt> and <tt class="docutils literal"><span class="pre">xitrum.util.SecureUrlSafeBase64.encrypt</span></tt>.
+<tt class="docutils literal"><span class="pre">xitrum.util.SecureUrlSafeBase64.encrypt</span></tt> and <tt class="docutils literal"><span class="pre">xitrum.util.SecureUrlSafeBase64.decrypt</span></tt>.
 For more information, see <a class="reference internal" href="howto.html"><em>How to encrypt data</em></a>.</p>
+<div class="section" id="allowed-characters-in-cookie">
+<h3>Allowed characters in cookie<a class="headerlink" href="#allowed-characters-in-cookie" title="Permalink to this headline">¶</a></h3>
+<p>You cannot use <a class="reference external" href="http://stackoverflow.com/questions/1969232/allowed-characters-in-cookies">arbitrary characters in cookie</a>.
+For example, if you need to use UTF-8 characters, you need to encode them.
+You can use <tt class="docutils literal"><span class="pre">xitrum.utill.UrlSafeBase64</span></tt> or <tt class="docutils literal"><span class="pre">xitrum.util.SecureUrlSafeBase64</span></tt>.</p>
+<p>Write cookie example:</p>
+<div class="highlight-python"><pre>import org.jboss.netty.util.CharsetUtil
+import xitrum.util.UrlSafeBase64
+
+val value   = """{"identity":"epicport.com/u/caiiiycuk@gmail.com","first_name":"Александр"}"""
+val encoded = UrlSafeBase64.noPaddingEncode(value.getBytes(CharsetUtil.UTF_8))
+val cookie  = new DefaultCookie("profile", encoded)
+responseCookies.append(cookie)</pre>
+</div>
+<p>Read cookie example:</p>
+<div class="highlight-python"><pre>requestCookies.get("profile").foreach { encoded =&gt;
+  UrlSafeBase64.autoPaddingDecode(encoded).foreach { bytes =&gt;
+    val value = new String(bytes, CharsetUtil.UTF_8)
+    println("profile: " + value)
+  }
+}</pre>
+</div>
+</div>
 </div>
 <div class="section" id="session">
 <h2>Session<a class="headerlink" href="#session" title="Permalink to this headline">¶</a></h2>
@@ -369,7 +394,10 @@ and <tt class="docutils literal"><span class="pre">isAdmin</span></tt>.</p>
 <li><a class="reference internal" href="#requestvar">RequestVar</a></li>
 </ul>
 </li>
-<li><a class="reference internal" href="#cookie">Cookie</a></li>
+<li><a class="reference internal" href="#cookie">Cookie</a><ul>
+<li><a class="reference internal" href="#allowed-characters-in-cookie">Allowed characters in cookie</a></li>
+</ul>
+</li>
 <li><a class="reference internal" href="#session">Session</a><ul>
 <li><a class="reference internal" href="#session-clear">session.clear()</a></li>
 <li><a class="reference internal" href="#sessionvar">SessionVar</a></li>

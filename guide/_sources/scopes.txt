@@ -172,7 +172,7 @@ AppAction.scala
 Cookie
 ------
 
-`Read Wikipedia about cookie path etc. <http://en.wikipedia.org/wiki/HTTP_cookie#Domain_and_Path>`_
+Read Wikipedia about `cookies <http://en.wikipedia.org/wiki/HTTP_cookie>`_.
 
 Inside an action, use ``requestCookies``, a ``Map[String, String]``, to read cookies sent by browser.
 
@@ -204,12 +204,45 @@ delete cookie when the browser closes windows, set max age to ``Integer.MIN_VALU
 
   cookie.setMaxAge(Integer.MIN_VALUE)
 
-Note that `Internet Explorer does not support "max-age" <http://mrcoles.com/blog/cookies-max-age-vs-expires/>`_,
+`Internet Explorer does not support "max-age" <http://mrcoles.com/blog/cookies-max-age-vs-expires/>`_,
 but Netty detects and outputs either "max-age" or "expires" properly. Don't worry!
 
+Browsers will not send cookie attributes back to the server. They will
+`only send the cookie name-value pairs <http://en.wikipedia.org/wiki/HTTP_cookie#Cookie_attributes>`_.
+
 If you want to sign your cookie value to prevent user from tampering, use
-``xitrum.util.SecureUrlSafeBase64.encrypt`` and ``xitrum.util.SecureUrlSafeBase64.encrypt``.
+``xitrum.util.SecureUrlSafeBase64.encrypt`` and ``xitrum.util.SecureUrlSafeBase64.decrypt``.
 For more information, see :doc:`How to encrypt data </howto>`.
+
+Allowed characters in cookie
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+You cannot use `arbitrary characters in cookie <http://stackoverflow.com/questions/1969232/allowed-characters-in-cookies>`_.
+For example, if you need to use UTF-8 characters, you need to encode them.
+You can use ``xitrum.utill.UrlSafeBase64`` or ``xitrum.util.SecureUrlSafeBase64``.
+
+Write cookie example:
+
+::
+
+  import org.jboss.netty.util.CharsetUtil
+  import xitrum.util.UrlSafeBase64
+
+  val value   = """{"identity":"epicport.com/u/caiiiycuk@gmail.com","first_name":"Александр"}"""
+  val encoded = UrlSafeBase64.noPaddingEncode(value.getBytes(CharsetUtil.UTF_8))
+  val cookie  = new DefaultCookie("profile", encoded)
+  responseCookies.append(cookie)
+
+Read cookie example:
+
+::
+
+  requestCookies.get("profile").foreach { encoded =>
+    UrlSafeBase64.autoPaddingDecode(encoded).foreach { bytes =>
+      val value = new String(bytes, CharsetUtil.UTF_8)
+      println("profile: " + value)
+    }
+  }
 
 Session
 -------
