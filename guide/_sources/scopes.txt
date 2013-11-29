@@ -228,7 +228,7 @@ Write cookie example:
   import org.jboss.netty.util.CharsetUtil
   import xitrum.util.UrlSafeBase64
 
-  val value   = """{"identity":"epicport.com/u/caiiiycuk@gmail.com","first_name":"Александр"}"""
+  val value   = """{"identity":"example@gmail.com","first_name":"Александр"}"""
   val encoded = UrlSafeBase64.noPaddingEncode(value.getBytes(CharsetUtil.UTF_8))
   val cookie  = new DefaultCookie("profile", encoded)
   responseCookies.append(cookie)
