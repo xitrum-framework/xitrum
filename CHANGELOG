@@ -1,3 +1,6 @@
+2.14:
+* #245 Rename "atJs" to "atJson"
+
 2.13:
 * #239 Readd feature: One action can have multiple routes
 * #236 Remove Swagger related routes when it is disabled

@@ -73,5 +73,5 @@ trait RequestEnv extends ParamAccess {
 
   lazy val at = new At
 
-  def atJs(key: String) = at.toJson(key)
+  def atJson(key: String) = at.toJson(key)
 }
