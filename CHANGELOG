@@ -1,4 +1,5 @@
 2.14:
+* #244 Easier way to get request content as string and JSON
 * #245 Rename "atJs" to "atJson"
 
 2.13:

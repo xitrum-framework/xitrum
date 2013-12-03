@@ -5,6 +5,7 @@ import scala.collection.mutable.{Map => MMap}
 import xitrum.{Config, Action}
 import xitrum.handler.HandlerEnv
 import xitrum.routing.Route
+import xitrum.util.Json
 
 object RequestEnv {
   def inspectParamsWithFilter(params: MMap[String, _ <: Seq[AnyRef]]): String = {
@@ -74,4 +75,13 @@ trait RequestEnv extends ParamAccess {
   lazy val at = new At
 
   def atJson(key: String) = at.toJson(key)
+
+  lazy val requestContentString = {
+    val channelBuffer = request.getContent
+    channelBuffer.toString(Config.xitrum.request.charset)
+  }
+
+  /** Ex: val json = requestContentJson[Map[String, String]] */
+  def requestContentJson[T](implicit m: Manifest[T]): T =
+    Json.parse[T](requestContentString)(m)
 }
