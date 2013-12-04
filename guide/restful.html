@@ -224,7 +224,9 @@ class CreateTodoAPI extends Api {
 <p>To get the entire request body, use <a class="reference external" href="http://netty.io/3.6/api/org/jboss/netty/handler/codec/http/HttpRequest.html">request.getContent</a>.
 It returns <a class="reference external" href="http://netty.io/3.6/api/org/jboss/netty/buffer/ChannelBuffer.html">ChannelBuffer</a>,
 which has <tt class="docutils literal"><span class="pre">toString(Charset)</span></tt> method.</p>
-<div class="highlight-python"><pre>val body = request.getContent.toString(io.netty.util.CharsetUtil.UTF_8)</pre>
+<div class="highlight-python"><pre>import org.jboss.netty.util.CharsetUtil.UTF_8
+
+val body = request.getContent.toString(UTF_8)</pre>
 </div>
 </div>
 <div class="section" id="documenting-api">

@@ -218,7 +218,9 @@ which has ``toString(Charset)`` method.
 
 ::
 
-  val body = request.getContent.toString(io.netty.util.CharsetUtil.UTF_8)
+  import org.jboss.netty.util.CharsetUtil.UTF_8
+
+  val body = request.getContent.toString(UTF_8)
 
 Documenting API
 ---------------
