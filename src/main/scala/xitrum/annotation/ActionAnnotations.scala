@@ -38,35 +38,10 @@ object ActionAnnotations {
   val typeOfCachePageHour   = universe.typeOf[CachePageHour]
   val typeOfCachePageMinute = universe.typeOf[CachePageMinute]
   val typeOfCachePageSecond = universe.typeOf[CachePageSecond]
-}
 
-case class ActionAnnotations(
-  routes:     Seq[universe.Annotation] = Seq(),
-  routeOrder: Option[universe.Annotation] = None,
+  def fromUniverse(annotations: Seq[universe.Annotation]): ActionAnnotations = {
+    var ret = ActionAnnotations()
 
-  sockJsCookieNeeded: Option[universe.Annotation] = None,
-  sockJsNoWebSocket:  Option[universe.Annotation] = None,
-
-  error: Option[universe.Annotation] = None,
-
-  cache: Option[universe.Annotation] = None,
-
-  swaggers: Seq[universe.Annotation] = Seq[universe.Annotation]()
-) {
-  import ActionAnnotations._
-
-  def overrideMe(other: ActionAnnotations) = ActionAnnotations(
-    routes ++ other.routes,
-    other.routeOrder         orElse routeOrder,
-    other.sockJsCookieNeeded orElse sockJsCookieNeeded,
-    other.sockJsNoWebSocket  orElse sockJsNoWebSocket,
-    other.error              orElse error,
-    other.cache              orElse cache,
-    swaggers ++ other.swaggers
-  )
-
-  def overrideMe(annotations: Seq[universe.Annotation]): ActionAnnotations = {
-    var ret = this
     annotations.foreach { a =>
       val tpe = a.tpe
 
@@ -90,6 +65,63 @@ case class ActionAnnotations(
 
       else if (tpe <:< typeOfSwagger)
         ret = ret.copy(swaggers = ret.swaggers :+ a)
+    }
+
+    ret
+  }
+}
+
+case class ActionAnnotations(
+  routes:     Seq[universe.Annotation] = Seq(),
+  routeOrder: Option[universe.Annotation] = None,
+
+  sockJsCookieNeeded: Option[universe.Annotation] = None,
+  sockJsNoWebSocket:  Option[universe.Annotation] = None,
+
+  error: Option[universe.Annotation] = None,
+
+  cache: Option[universe.Annotation] = None,
+
+  swaggers: Seq[universe.Annotation] = Seq[universe.Annotation]()
+) {
+  import ActionAnnotations._
+
+  /**
+   * Only inherit sockJsCookieNeeded, sockJsNoWebSocket, cache, and swaggers.
+   * Do not inherit routes, routeOrder, and error.
+   * Current values if exist will override those in ancestor.
+   */
+  def inherit(ancestor: ActionAnnotations) = ActionAnnotations(
+    routes,
+    routeOrder,
+    sockJsCookieNeeded orElse ancestor.sockJsCookieNeeded,
+    sockJsNoWebSocket  orElse ancestor.sockJsNoWebSocket,
+    error,
+    cache              orElse ancestor.cache,
+    ancestor.swaggers ++ swaggers
+  )
+
+  /**
+   * Only inherit sockJsCookieNeeded, sockJsNoWebSocket, cache, and swaggers.
+   * Do not inherit routes, routeOrder, and error.
+   * Current values if exist will override those in ancestor.
+   */
+  def inherit(annotations: Seq[universe.Annotation]): ActionAnnotations = {
+    var ret = this
+    annotations.foreach { a =>
+      val tpe = a.tpe
+
+      if (sockJsCookieNeeded.isEmpty && tpe <:< typeOfSockJsCookieNeeded)
+        ret = ret.copy(sockJsCookieNeeded = Some(a))
+
+      else if (sockJsNoWebSocket.isEmpty && tpe <:< typeOfSockJsNoWebSocket)
+        ret = ret.copy(sockJsNoWebSocket = Some(a))
+
+      else if (cache.isEmpty && tpe <:< typeOfCache)
+        ret = ret.copy(cache = Some(a))
+
+      else if (tpe <:< typeOfSwagger)
+        ret = ret.copy(swaggers = a +: ret.swaggers)
     }
     ret
   }

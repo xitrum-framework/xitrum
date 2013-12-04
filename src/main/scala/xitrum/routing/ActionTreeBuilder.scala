@@ -1,5 +1,6 @@
 package xitrum.routing
 
+import java.lang.reflect.Modifier
 import scala.collection.mutable.ArrayBuffer
 import scala.reflect.runtime.universe
 
@@ -10,43 +11,46 @@ import xitrum.annotation.ActionAnnotations
  * Intended for use by RouteCollector.
  *
  * For each .class file, RouteCollector uses ASM's ClassReader to load it, then
- * calls "addBranches" to pass its class name and interface names. Action is a
- * trait. Traits are seen by ASM as interfaces. At this step, we build trees of
- * interface -> children.
+ * calls "addBranches" to pass its class name, super class name, and interface names.
+ * At this step, we build trees of parent -> children.
  *
  * Lastly, RouteCollector calls "getConcreteActionsAndAnnotations" to get
- * concrete (non-trait) action classes and their annotations.
+ * concrete (non-trait, non-abstract) action classes and their annotations.
  *
  * This class is immutable because it will be serialized to routes.cache.
  *
- * @param interface2Children Map to save trees; names are class names
+ * @param parent2Children Map to save trees; names are class names
  */
-private case class ActionTreeBuilder(interface2Children: Map[String, Seq[String]] = Map()) {
+private case class ActionTreeBuilder(parent2Children: Map[String, Seq[String]] = Map()) {
   def addBranches(
-      childInternalName:   String,
-      parentInternalNames: Array[String]
+      childInternalName:      String,
+      superInternalName:      String,
+      interfaceInternalNames: Array[String]
   ): ActionTreeBuilder = {
-    // Class name: xitrum.Action
-    // Internal name: xitrum/Action
-    def internalName2ClassName(internalName: String) = internalName.replace('/', '.')
+    if (superInternalName == null || interfaceInternalNames == null) return this
 
-    if (parentInternalNames == null) return this
+    // Optimize: Ignore Java and Scala default classes; these can be thousands
+    if (childInternalName.startsWith("java/")  ||
+        childInternalName.startsWith("javax/") ||
+        childInternalName.startsWith("scala/") ||
+        childInternalName.startsWith("sun/")   ||
+        childInternalName.startsWith("com/sun/")) return this
+
+    val parentInternalNames = Seq(superInternalName) ++ interfaceInternalNames
+    val parentClassNames    = parentInternalNames.map(internalName2ClassName _)
 
     val childClassName = internalName2ClassName(childInternalName)
-
-    var i2c = interface2Children
-    parentInternalNames.foreach { parentInternalName =>
-      val parentClassName = internalName2ClassName(parentInternalName)
-      if (interface2Children.isDefinedAt(parentClassName)) {
-        val children    = interface2Children(parentClassName)
+    val p2c            = parentClassNames.foldLeft(parent2Children) { case (acc, parentClassName) =>
+      if (acc.isDefinedAt(parentClassName)) {
+        val children    = parent2Children(parentClassName)
         val newChildren = children :+ childClassName
-        i2c += parentClassName -> newChildren
+        acc + (parentClassName -> newChildren)
       } else {
-        i2c += parentClassName -> Seq(childClassName)
+        acc + (parentClassName -> Seq(childClassName))
       }
     }
 
-    ActionTreeBuilder(i2c)
+    ActionTreeBuilder(p2c)
   }
 
   /**
@@ -69,19 +73,22 @@ private case class ActionTreeBuilder(interface2Children: Map[String, Seq[String]
         case Some(aa) => aa
 
         case None =>
-          val parents = klass.getInterfaces
-          val parentAnnotations = parents.foldLeft(ActionAnnotations()) { case (acc, parent) =>
-            if (classOf[Action].isAssignableFrom(parent)) {
-              val aa = getActionAccumulatedAnnotations(parent.asInstanceOf[Class[_ <: Action]])
-              acc.overrideMe(aa)
+          val parentClasses     = Seq(klass.getSuperclass) ++ klass.getInterfaces
+          val parentAnnotations = parentClasses.foldLeft(ActionAnnotations()) { case (acc, parentClass) =>
+            // parentClass is null if klass is a trait/interface
+            if (parentClass == null) {
+              acc
+            } else if (classOf[Action].isAssignableFrom(parentClass)) {
+              val aa = getActionAccumulatedAnnotations(parentClass.asInstanceOf[Class[_ <: Action]])
+              acc.inherit(aa)
             } else {
               acc
             }
           }
 
-          val annotations = runtimeMirror.classSymbol(klass).asClass.annotations
-          val ret         = parentAnnotations.overrideMe(annotations)
-
+          val universeAnnotations = runtimeMirror.classSymbol(klass).asClass.annotations
+          val thisAnnotationsOnly = ActionAnnotations.fromUniverse(universeAnnotations)
+          val ret                 = thisAnnotationsOnly.inherit(parentAnnotations)
           cache += klass -> ret
           ret
       }
@@ -92,15 +99,20 @@ private case class ActionTreeBuilder(interface2Children: Map[String, Seq[String]
 
   //----------------------------------------------------------------------------
 
+  // Class name: xitrum.Action
+  // Internal name: xitrum/Action
+  private def internalName2ClassName(internalName: String) = internalName.replace('/', '.')
+
   private def getConcreteActions: Set[Class[_ <: Action]] = {
     var concreteActions = Set[Class[_ <: Action]]()
 
     def traverseActionTree(className: String) {
-      if (interface2Children.isDefinedAt(className)) {
-        val children = interface2Children(className)
+      if (parent2Children.isDefinedAt(className)) {
+        val children = parent2Children(className)
         children.foreach { className =>
-          val klass = Class.forName(className).asInstanceOf[Class[_ <: Action]]
-          if (!klass.isInterface) concreteActions += klass  // Not interface => concrete
+          val klass    = Class.forName(className)
+          val concrete = !klass.isInterface && !Modifier.isAbstract(klass.getModifiers)
+          if (concrete) concreteActions += klass.asInstanceOf[Class[_ <: Action]]
           traverseActionTree(className)
         }
       }

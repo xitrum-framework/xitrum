@@ -45,7 +45,7 @@ class RouteCollector extends Log {
     try {
       if (entry.relPath.endsWith(".class")) {
         val reader = new ClassReader(entry.bytes)
-        acc.addBranches(reader.getClassName, reader.getInterfaces)
+        acc.addBranches(reader.getClassName, reader.getSuperName, reader.getInterfaces)
       } else {
         acc
       }
