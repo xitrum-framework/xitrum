@@ -3,6 +3,7 @@
 * #245 Rename "atJs" to "atJson"
 * #248 Collect all routes
 * #249 Improve inheritance rule of route annotations
+* #250 CORS allow-origin should not be set for domain not specified in xitrum.conf
 
 2.13:
 * #239 Readd feature: One action can have multiple routes
