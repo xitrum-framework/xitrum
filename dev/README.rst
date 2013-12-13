@@ -1,4 +1,4 @@
-Use SBT 0.13.0 to compile. See project/build.properties.
+Use SBT 0.13.1 to compile. See project/build.properties.
 
 Update Swagger UI
 -----------------
