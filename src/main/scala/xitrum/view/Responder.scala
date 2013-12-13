@@ -347,8 +347,7 @@ trait Responder extends Js with Flash {
 
   /**
    * To respond event source, call this method as many time as you want.
-   * Event Source response is a special kind of chunked response.
-   * Data must be Must be  UTF-8.
+   * Event Source response is a special kind of chunked response, data must be UTF-8.
    * See:
    * - http://sockjs.github.com/sockjs-protocol/sockjs-protocol-0.3.3.html#section-94
    * - http://dev.w3.org/html5/eventsource/

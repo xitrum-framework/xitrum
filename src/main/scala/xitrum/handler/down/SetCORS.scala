@@ -48,10 +48,7 @@ class SetCORS extends ChannelDownstreamHandler with Log {
           else
             HttpHeaders.setHeader(response, ACCESS_CONTROL_ALLOW_ORIGIN, requestOrigin)
         } else {
-          if (corsAllowOrigins.contains(requestOrigin))
-            HttpHeaders.setHeader(response, ACCESS_CONTROL_ALLOW_ORIGIN, requestOrigin)
-          else
-            HttpHeaders.setHeader(response, ACCESS_CONTROL_ALLOW_ORIGIN, corsAllowOrigins.mkString(", "))
+          if (corsAllowOrigins.contains(requestOrigin)) HttpHeaders.setHeader(response, ACCESS_CONTROL_ALLOW_ORIGIN, requestOrigin)
         }
       }
 
