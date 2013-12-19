@@ -55,7 +55,7 @@ Without an explicit TTL (time to live):
 
 * put(key, value)
 
-Without an explicit TTL:
+With an explicit TTL:
 
 * putSecond(key, value, seconds)
 * putMinute(key, value, minutes)
