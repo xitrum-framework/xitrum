@@ -240,16 +240,16 @@ and Controller can be inferred from these variables.
       </span>
       </h4>
       
-    </li><li name="xitrum.scope.request.RequestEnv#atJs" visbl="pub" data-isabs="false" fullComment="no" group="Ungrouped">
-      <a id="atJs(key:String):String"></a>
-      <a id="atJs(String):String"></a>
+    </li><li name="xitrum.scope.request.RequestEnv#atJson" visbl="pub" data-isabs="false" fullComment="no" group="Ungrouped">
+      <a id="atJson(key:String):String"></a>
+      <a id="atJson(String):String"></a>
       <h4 class="signature">
       <span class="modifier_kind">
         <span class="modifier"></span>
         <span class="kind">def</span>
       </span>
       <span class="symbol">
-        <span class="name">atJs</span><span class="params">(<span name="key">key: <span class="extype" name="scala.Predef.String">String</span></span>)</span><span class="result">: <span class="extype" name="scala.Predef.String">String</span></span>
+        <span class="name">atJson</span><span class="params">(<span name="key">key: <span class="extype" name="scala.Predef.String">String</span></span>)</span><span class="result">: <span class="extype" name="scala.Predef.String">String</span></span>
       </span>
       </h4>
       
@@ -548,6 +548,32 @@ and Controller can be inferred from these variables.
       </span>
       <span class="symbol">
         <span class="name">request</span><span class="result">: <span class="extype" name="org.jboss.netty.handler.codec.http.HttpRequest">HttpRequest</span></span>
+      </span>
+      </h4>
+      
+    </li><li name="xitrum.scope.request.RequestEnv#requestContentJson" visbl="pub" data-isabs="false" fullComment="no" group="Ungrouped">
+      <a id="requestContentJson[T](implicitm:Manifest[T]):T"></a>
+      <a id="requestContentJson[T](Manifest[T]):T"></a>
+      <h4 class="signature">
+      <span class="modifier_kind">
+        <span class="modifier"></span>
+        <span class="kind">def</span>
+      </span>
+      <span class="symbol">
+        <span class="name">requestContentJson</span><span class="tparams">[<span name="T">T</span>]</span><span class="params">(<span class="implicit">implicit </span><span name="m">m: <span class="extype" name="scala.Predef.Manifest">Manifest</span>[<span class="extype" name="xitrum.scope.request.RequestEnv.requestContentJson.T">T</span>]</span>)</span><span class="result">: <span class="extype" name="xitrum.scope.request.RequestEnv.requestContentJson.T">T</span></span>
+      </span>
+      </h4>
+      <p class="shortcomment cmt">Ex: val json = requestContentJson[Map[String, String]]</p>
+    </li><li name="xitrum.scope.request.RequestEnv#requestContentString" visbl="pub" data-isabs="false" fullComment="no" group="Ungrouped">
+      <a id="requestContentString:String"></a>
+      <a id="requestContentString:String"></a>
+      <h4 class="signature">
+      <span class="modifier_kind">
+        <span class="modifier"></span>
+        <span class="kind">lazy val</span>
+      </span>
+      <span class="symbol">
+        <span class="name">requestContentString</span><span class="result">: <span class="extype" name="java.lang.String">String</span></span>
       </span>
       </h4>
       

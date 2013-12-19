@@ -412,16 +412,16 @@ Actions have to implement this method.
       </span>
       </h4>
       <div class="fullcomment"><dl class="attributes block"> <dt>Definition Classes</dt><dd><a href="../scope/request/RequestEnv.html" class="extype" name="xitrum.scope.request.RequestEnv">RequestEnv</a></dd></dl></div>
-    </li><li name="xitrum.scope.request.RequestEnv#atJs" visbl="pub" data-isabs="false" fullComment="yes" group="Ungrouped">
-      <a id="atJs(key:String):String"></a>
-      <a id="atJs(String):String"></a>
+    </li><li name="xitrum.scope.request.RequestEnv#atJson" visbl="pub" data-isabs="false" fullComment="yes" group="Ungrouped">
+      <a id="atJson(key:String):String"></a>
+      <a id="atJson(String):String"></a>
       <h4 class="signature">
       <span class="modifier_kind">
         <span class="modifier"></span>
         <span class="kind">def</span>
       </span>
       <span class="symbol">
-        <span class="name">atJs</span><span class="params">(<span name="key">key: <span class="extype" name="scala.Predef.String">String</span></span>)</span><span class="result">: <span class="extype" name="scala.Predef.String">String</span></span>
+        <span class="name">atJson</span><span class="params">(<span name="key">key: <span class="extype" name="scala.Predef.String">String</span></span>)</span><span class="result">: <span class="extype" name="scala.Predef.String">String</span></span>
       </span>
       </h4>
       <div class="fullcomment"><dl class="attributes block"> <dt>Definition Classes</dt><dd><a href="../scope/request/RequestEnv.html" class="extype" name="xitrum.scope.request.RequestEnv">RequestEnv</a></dd></dl></div>
@@ -1486,6 +1486,32 @@ then calls the layout function.
       </span>
       </h4>
       <div class="fullcomment"><dl class="attributes block"> <dt>Definition Classes</dt><dd><a href="../scope/request/RequestEnv.html" class="extype" name="xitrum.scope.request.RequestEnv">RequestEnv</a></dd></dl></div>
+    </li><li name="xitrum.scope.request.RequestEnv#requestContentJson" visbl="pub" data-isabs="false" fullComment="yes" group="Ungrouped">
+      <a id="requestContentJson[T](implicitm:Manifest[T]):T"></a>
+      <a id="requestContentJson[T](Manifest[T]):T"></a>
+      <h4 class="signature">
+      <span class="modifier_kind">
+        <span class="modifier"></span>
+        <span class="kind">def</span>
+      </span>
+      <span class="symbol">
+        <span class="name">requestContentJson</span><span class="tparams">[<span name="T">T</span>]</span><span class="params">(<span class="implicit">implicit </span><span name="m">m: <span class="extype" name="scala.Predef.Manifest">Manifest</span>[<span class="extype" name="xitrum.scope.request.RequestEnv.requestContentJson.T">T</span>]</span>)</span><span class="result">: <span class="extype" name="xitrum.scope.request.RequestEnv.requestContentJson.T">T</span></span>
+      </span>
+      </h4>
+      <p class="shortcomment cmt">Ex: val json = requestContentJson[Map[String, String]]</p><div class="fullcomment"><div class="comment cmt"><p>Ex: val json = requestContentJson[Map[String, String]]</p></div><dl class="attributes block"> <dt>Definition Classes</dt><dd><a href="../scope/request/RequestEnv.html" class="extype" name="xitrum.scope.request.RequestEnv">RequestEnv</a></dd></dl></div>
+    </li><li name="xitrum.scope.request.RequestEnv#requestContentString" visbl="pub" data-isabs="false" fullComment="yes" group="Ungrouped">
+      <a id="requestContentString:String"></a>
+      <a id="requestContentString:String"></a>
+      <h4 class="signature">
+      <span class="modifier_kind">
+        <span class="modifier"></span>
+        <span class="kind">lazy val</span>
+      </span>
+      <span class="symbol">
+        <span class="name">requestContentString</span><span class="result">: <span class="extype" name="java.lang.String">String</span></span>
+      </span>
+      </h4>
+      <div class="fullcomment"><dl class="attributes block"> <dt>Definition Classes</dt><dd><a href="../scope/request/RequestEnv.html" class="extype" name="xitrum.scope.request.RequestEnv">RequestEnv</a></dd></dl></div>
     </li><li name="xitrum.scope.session.SessionEnv#requestCookies" visbl="pub" data-isabs="false" fullComment="yes" group="Ungrouped">
       <a id="requestCookies:Map[String,String]"></a>
       <a id="requestCookies:Map[String,String]"></a>
@@ -1593,8 +1619,7 @@ http://en.wikipedia.org/wiki/HTTP_cookie#Cookie_attributes
       </span>
       </h4>
       <p class="shortcomment cmt">To respond event source, call this method as many time as you want.</p><div class="fullcomment"><div class="comment cmt"><p>To respond event source, call this method as many time as you want.
-Event Source response is a special kind of chunked response.
-Data must be Must be  UTF-8.
+Event Source response is a special kind of chunked response, data must be UTF-8.
 See:
 - http://sockjs.github.com/sockjs-protocol/sockjs-protocol-0.3.3.html#section-94
 - http://dev.w3.org/html5/eventsource/
