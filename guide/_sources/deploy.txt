@@ -14,23 +14,6 @@ Or behind a load balancer like HAProxy, or reverse proxy like Apache or Nginx:
   Browser ------ Load balancer/Reverse proxy -+---- Xitrum instance1
                                               +---- Xitrum instance2
 
-If you use WebSocket or SockJS feature in Xitrum and want to run Xitrum behind
-Nginx 1.2, you must install additional module like
-`nginx_tcp_proxy_module <https://github.com/yaoweibin/nginx_tcp_proxy_module>`_.
-Nginx 1.3+ supports WebSocket natively.
-
-HAProxy is much easier to use. It suits Xitrum because as mentioned in
-:doc:`the section about caching </cache>`, Xitrum serves static files
-`very fast <https://gist.github.com/3293596>`_. You don't need to use static file
-serving feature in Nginx.
-
-HAProxy
--------
-
-To config HAProxy for SockJS, see `this example <https://github.com/sockjs/sockjs-node/blob/master/examples/haproxy.cfg>`_.
-
-To have HAProxy reload config file without restarting, see `this discussion <http://serverfault.com/questions/165883/is-there-a-way-to-add-more-backend-server-to-haproxy-without-restarting-haproxy>`_.
-
 Package directory
 -----------------
 
@@ -63,6 +46,105 @@ copy additional directories or files change ``build.sbt`` like this:
 
 See `xitrum-package homepage <https://github.com/ngocdaothanh/xitrum-package>`_
 for more information.
+
+Install Oracle JDK on CentOS or Ubuntu manually
+-----------------------------------------------
+
+This guide is here for convenient reference. You can certainly install Java from
+a package manager.
+
+Check installed alternatives:
+
+::
+
+  sudo update-alternatives --list java
+
+Output example:
+
+::
+
+  /usr/lib/jvm/jdk1.7.0_15/bin/java
+  /usr/lib/jvm/jdk1.7.0_25/bin/java
+
+Check machine environment (32 bit or 64 bit):
+
+::
+
+  file /sbin/init
+
+Output example:
+
+::
+
+  /sbin/init: ELF 64-bit LSB shared object, x86-64, version 1 (SYSV), dynamically linked (uses shared libs), for GNU/Linux 2.6.24, BuildID[sha1]=0x4efe732752ed9f8cc491de1c8a271eb7f4144a5c, stripped
+
+Download JDK from `Oracle <http://www.oracle.com/technetwork/java/javase/downloads/jdk7-downloads-1880260.html>`_.
+There's a `trick <http://stackoverflow.com/questions/10268583/how-to-automate-download-and-instalation-of-java-jdk-on-linux>`_
+to download jdk without browser:
+
+::
+
+  wget --no-cookies --header "Cookie: gpw_e24=http%3A%2F%2Fwww.oracle.com" "http://download.oracle.com/otn-pub/java/jdk/7u45-b18/jdk-7u45-linux-x64.tar.gz"
+
+Unarchive and move it:
+
+::
+
+  tar -xzvf jdk-7u45-linux-x64.tar.gz
+  sudo mv jdk1.7.0_45 /usr/lib/jvm/jdk1.7.0_45
+
+Register commands as an alternative:
+
+::
+
+  sudo update-alternatives --install "/usr/bin/java" "java" "/usr/lib/jvm/jdk1.7.0_45/bin/java" 1
+  sudo update-alternatives --install "/usr/bin/javac" "javac" "/usr/lib/jvm/jdk1.7.0_45/bin/javac" 1
+  sudo update-alternatives --install "/usr/bin/javap" "javap" "/usr/lib/jvm/jdk1.7.0_45/bin/javap" 1
+  sudo update-alternatives --install "/usr/bin/javaws" "javaws" "/usr/lib/jvm/jdk1.7.0_45/bin/javaws" 1
+
+Chose new path with interactive shell:
+
+::
+
+  sudo update-alternatives --config java
+
+Output example:
+
+::
+
+  There are 3 choices for the alternative java (providing /usr/bin/java).
+
+    Selection    Path                               Priority   Status
+  ------------------------------------------------------------
+  * 0            /usr/lib/jvm/jdk1.7.0_25/bin/java   50001     auto mode
+    1            /usr/lib/jvm/jdk1.7.0_15/bin/java   50000     manual mode
+    2            /usr/lib/jvm/jdk1.7.0_25/bin/java   50001     manual mode
+    3            /usr/lib/jvm/jdk1.7.0_45/bin/java   1         manual mode
+
+  Press enter to keep the current choice[*], or type selection number: 3
+  update-alternatives: using /usr/lib/jvm/jdk1.7.0_45/bin/java to provide /usr/bin/java (java) in manual mode
+
+Check version:
+
+::
+
+  java -version
+
+Output example:
+
+::
+
+  java version "1.7.0_45"
+  Java(TM) SE Runtime Environment (build 1.7.0_45-b18)
+  Java HotSpot(TM) 64-Bit Server VM (build 24.45-b08, mixed mode)
+
+Do also:
+
+::
+
+  sudo update-alternatives --config javac
+  sudo update-alternatives --config javap
+  sudo update-alternatives --config javaws
 
 Start Xitrum in production mode when the system starts
 ------------------------------------------------------
@@ -229,6 +311,37 @@ To tune temporarily, you can do like this:
 
   sudo sysctl -w net.core.somaxconn=1024
 
+HAProxy tips
+------------
+
+To config HAProxy for SockJS, see `this example <https://github.com/sockjs/sockjs-node/blob/master/examples/haproxy.cfg>`_.
+
+To have HAProxy reload config file without restarting, see `this discussion <http://serverfault.com/questions/165883/is-there-a-way-to-add-more-backend-server-to-haproxy-without-restarting-haproxy>`_.
+
+HAProxy is much easier to use than Nginx. It suits Xitrum because as mentioned in
+:doc:`the section about caching </cache>`, Xitrum serves static files
+`very fast <https://gist.github.com/3293596>`_. You don't have to use the static file
+serving feature in Nginx.
+
+Nginx tips
+----------
+
+If you use WebSocket or SockJS feature in Xitrum and want to run Xitrum behind
+Nginx 1.2, you must install additional module like
+`nginx_tcp_proxy_module <https://github.com/yaoweibin/nginx_tcp_proxy_module>`_.
+Nginx 1.3+ supports WebSocket natively.
+
+Nginx by default uses HTTP 1.0 protocol for reverse proxy. If your backend server
+returns chunked response, you need to tell Nginx to use HTTP 1.1 like this:
+
+::
+
+  location / {
+    proxy_http_version 1.1;
+    proxy_pass http://127.0.0.1:8000;
+  }
+
+
 Deploy to Heroku
 ----------------
 
@@ -322,3 +435,4 @@ Deploy process is hooked by git push.
 
 
 See also `Official document for Scala <https://devcenter.heroku.com/articles/getting-started-with-scala>`_.
+

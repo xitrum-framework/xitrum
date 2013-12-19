@@ -7,7 +7,7 @@
   <head>
     <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
     
-    <title>Deploy to production server &mdash; Xitrum 2.13 documentation</title>
+    <title>Deploy to production server &mdash; Xitrum 2.14 documentation</title>
     
     <link rel="stylesheet" href="_static/nature.css" type="text/css" />
     <link rel="stylesheet" href="_static/pygments.css" type="text/css" />
@@ -15,7 +15,7 @@
     <script type="text/javascript">
       var DOCUMENTATION_OPTIONS = {
         URL_ROOT:    '',
-        VERSION:     '2.13',
+        VERSION:     '2.14',
         COLLAPSE_INDEX: false,
         FILE_SUFFIX: '.html',
         HAS_SOURCE:  true
@@ -24,7 +24,7 @@
     <script type="text/javascript" src="_static/jquery.js"></script>
     <script type="text/javascript" src="_static/underscore.js"></script>
     <script type="text/javascript" src="_static/doctools.js"></script>
-    <link rel="top" title="Xitrum 2.13 documentation" href="index.html" />
+    <link rel="top" title="Xitrum 2.14 documentation" href="index.html" />
     <link rel="next" title="Clustering with Akka and Hazelcast" href="cluster.html" />
     <link rel="prev" title="I18n" href="i18n.html" /> 
   </head>
@@ -41,7 +41,7 @@
         <li class="right" >
           <a href="i18n.html" title="I18n"
              accesskey="P">previous</a> |</li>
-        <li><a href="index.html">Xitrum 2.13 documentation</a> &raquo;</li> 
+        <li><a href="index.html">Xitrum 2.14 documentation</a> &raquo;</li> 
       </ul>
     </div>  
 
@@ -58,19 +58,6 @@
 <p>Or behind a load balancer like HAProxy, or reverse proxy like Apache or Nginx:</p>
 <div class="highlight-python"><pre>Browser ------ Load balancer/Reverse proxy -+---- Xitrum instance1
                                             +---- Xitrum instance2</pre>
-</div>
-<p>If you use WebSocket or SockJS feature in Xitrum and want to run Xitrum behind
-Nginx 1.2, you must install additional module like
-<a class="reference external" href="https://github.com/yaoweibin/nginx_tcp_proxy_module">nginx_tcp_proxy_module</a>.
-Nginx 1.3+ supports WebSocket natively.</p>
-<p>HAProxy is much easier to use. It suits Xitrum because as mentioned in
-<a class="reference internal" href="cache.html"><em>the section about caching</em></a>, Xitrum serves static files
-<a class="reference external" href="https://gist.github.com/3293596">very fast</a>. You don&#8217;t need to use static file
-serving feature in Nginx.</p>
-<div class="section" id="haproxy">
-<h2>HAProxy<a class="headerlink" href="#haproxy" title="Permalink to this headline">¶</a></h2>
-<p>To config HAProxy for SockJS, see <a class="reference external" href="https://github.com/sockjs/sockjs-node/blob/master/examples/haproxy.cfg">this example</a>.</p>
-<p>To have HAProxy reload config file without restarting, see <a class="reference external" href="http://serverfault.com/questions/165883/is-there-a-way-to-add-more-backend-server-to-haproxy-without-restarting-haproxy">this discussion</a>.</p>
 </div>
 <div class="section" id="package-directory">
 <h2>Package directory<a class="headerlink" href="#package-directory" title="Permalink to this headline">¶</a></h2>
@@ -97,6 +84,70 @@ copy additional directories or files change <tt class="docutils literal"><span c
 </div>
 <p>See <a class="reference external" href="https://github.com/ngocdaothanh/xitrum-package">xitrum-package homepage</a>
 for more information.</p>
+</div>
+<div class="section" id="install-oracle-jdk-on-centos-or-ubuntu-manually">
+<h2>Install Oracle JDK on CentOS or Ubuntu manually<a class="headerlink" href="#install-oracle-jdk-on-centos-or-ubuntu-manually" title="Permalink to this headline">¶</a></h2>
+<p>This guide is here for convenient reference. You can certainly install Java from
+a package manager.</p>
+<p>Check installed alternatives:</p>
+<div class="highlight-python"><pre>sudo update-alternatives --list java</pre>
+</div>
+<p>Output example:</p>
+<div class="highlight-python"><pre>/usr/lib/jvm/jdk1.7.0_15/bin/java
+/usr/lib/jvm/jdk1.7.0_25/bin/java</pre>
+</div>
+<p>Check machine environment (32 bit or 64 bit):</p>
+<div class="highlight-python"><div class="highlight"><pre><span class="nb">file</span> <span class="o">/</span><span class="n">sbin</span><span class="o">/</span><span class="n">init</span>
+</pre></div>
+</div>
+<p>Output example:</p>
+<div class="highlight-python"><pre>/sbin/init: ELF 64-bit LSB shared object, x86-64, version 1 (SYSV), dynamically linked (uses shared libs), for GNU/Linux 2.6.24, BuildID[sha1]=0x4efe732752ed9f8cc491de1c8a271eb7f4144a5c, stripped</pre>
+</div>
+<p>Download JDK from <a class="reference external" href="http://www.oracle.com/technetwork/java/javase/downloads/jdk7-downloads-1880260.html">Oracle</a>.
+There&#8217;s a <a class="reference external" href="http://stackoverflow.com/questions/10268583/how-to-automate-download-and-instalation-of-java-jdk-on-linux">trick</a>
+to download jdk without browser:</p>
+<div class="highlight-python"><pre>wget --no-cookies --header "Cookie: gpw_e24=http%3A%2F%2Fwww.oracle.com" "http://download.oracle.com/otn-pub/java/jdk/7u45-b18/jdk-7u45-linux-x64.tar.gz"</pre>
+</div>
+<p>Unarchive and move it:</p>
+<div class="highlight-python"><pre>tar -xzvf jdk-7u45-linux-x64.tar.gz
+sudo mv jdk1.7.0_45 /usr/lib/jvm/jdk1.7.0_45</pre>
+</div>
+<p>Register commands as an alternative:</p>
+<div class="highlight-python"><pre>sudo update-alternatives --install "/usr/bin/java" "java" "/usr/lib/jvm/jdk1.7.0_45/bin/java" 1
+sudo update-alternatives --install "/usr/bin/javac" "javac" "/usr/lib/jvm/jdk1.7.0_45/bin/javac" 1
+sudo update-alternatives --install "/usr/bin/javap" "javap" "/usr/lib/jvm/jdk1.7.0_45/bin/javap" 1
+sudo update-alternatives --install "/usr/bin/javaws" "javaws" "/usr/lib/jvm/jdk1.7.0_45/bin/javaws" 1</pre>
+</div>
+<p>Chose new path with interactive shell:</p>
+<div class="highlight-python"><pre>sudo update-alternatives --config java</pre>
+</div>
+<p>Output example:</p>
+<div class="highlight-python"><pre>There are 3 choices for the alternative java (providing /usr/bin/java).
+
+  Selection    Path                               Priority   Status
+------------------------------------------------------------
+* 0            /usr/lib/jvm/jdk1.7.0_25/bin/java   50001     auto mode
+  1            /usr/lib/jvm/jdk1.7.0_15/bin/java   50000     manual mode
+  2            /usr/lib/jvm/jdk1.7.0_25/bin/java   50001     manual mode
+  3            /usr/lib/jvm/jdk1.7.0_45/bin/java   1         manual mode
+
+Press enter to keep the current choice[*], or type selection number: 3
+update-alternatives: using /usr/lib/jvm/jdk1.7.0_45/bin/java to provide /usr/bin/java (java) in manual mode</pre>
+</div>
+<p>Check version:</p>
+<div class="highlight-python"><div class="highlight"><pre><span class="n">java</span> <span class="o">-</span><span class="n">version</span>
+</pre></div>
+</div>
+<p>Output example:</p>
+<div class="highlight-python"><pre>java version "1.7.0_45"
+Java(TM) SE Runtime Environment (build 1.7.0_45-b18)
+Java HotSpot(TM) 64-Bit Server VM (build 24.45-b08, mixed mode)</pre>
+</div>
+<p>Do also:</p>
+<div class="highlight-python"><pre>sudo update-alternatives --config javac
+sudo update-alternatives --config javap
+sudo update-alternatives --config javaws</pre>
+</div>
 </div>
 <div class="section" id="start-xitrum-in-production-mode-when-the-system-starts">
 <h2>Start Xitrum in production mode when the system starts<a class="headerlink" href="#start-xitrum-in-production-mode-when-the-system-starts" title="Permalink to this headline">¶</a></h2>
@@ -227,6 +278,29 @@ but you also need to tune the kernel as above.</p>
 </div>
 </div>
 </div>
+<div class="section" id="haproxy-tips">
+<h2>HAProxy tips<a class="headerlink" href="#haproxy-tips" title="Permalink to this headline">¶</a></h2>
+<p>To config HAProxy for SockJS, see <a class="reference external" href="https://github.com/sockjs/sockjs-node/blob/master/examples/haproxy.cfg">this example</a>.</p>
+<p>To have HAProxy reload config file without restarting, see <a class="reference external" href="http://serverfault.com/questions/165883/is-there-a-way-to-add-more-backend-server-to-haproxy-without-restarting-haproxy">this discussion</a>.</p>
+<p>HAProxy is much easier to use than Nginx. It suits Xitrum because as mentioned in
+<a class="reference internal" href="cache.html"><em>the section about caching</em></a>, Xitrum serves static files
+<a class="reference external" href="https://gist.github.com/3293596">very fast</a>. You don&#8217;t have to use the static file
+serving feature in Nginx.</p>
+</div>
+<div class="section" id="nginx-tips">
+<h2>Nginx tips<a class="headerlink" href="#nginx-tips" title="Permalink to this headline">¶</a></h2>
+<p>If you use WebSocket or SockJS feature in Xitrum and want to run Xitrum behind
+Nginx 1.2, you must install additional module like
+<a class="reference external" href="https://github.com/yaoweibin/nginx_tcp_proxy_module">nginx_tcp_proxy_module</a>.
+Nginx 1.3+ supports WebSocket natively.</p>
+<p>Nginx by default uses HTTP 1.0 protocol for reverse proxy. If your backend server
+returns chunked response, you need to tell Nginx to use HTTP 1.1 like this:</p>
+<div class="highlight-python"><pre>location / {
+  proxy_http_version 1.1;
+  proxy_pass http://127.0.0.1:8000;
+}</pre>
+</div>
+</div>
 <div class="section" id="deploy-to-heroku">
 <h2>Deploy to Heroku<a class="headerlink" href="#deploy-to-heroku" title="Permalink to this headline">¶</a></h2>
 <p>You may run Xitrum at <a class="reference external" href="https://www.heroku.com/">Heroku</a>.</p>
@@ -304,9 +378,9 @@ for <tt class="docutils literal"><span class="pre">xitrum-package</span></tt>.</
   <h3><a href="index.html">Table Of Contents</a></h3>
   <ul>
 <li><a class="reference internal" href="#">Deploy to production server</a><ul>
-<li><a class="reference internal" href="#haproxy">HAProxy</a></li>
 <li><a class="reference internal" href="#package-directory">Package directory</a></li>
 <li><a class="reference internal" href="#customize-xitrum-package">Customize xitrum-package</a></li>
+<li><a class="reference internal" href="#install-oracle-jdk-on-centos-or-ubuntu-manually">Install Oracle JDK on CentOS or Ubuntu manually</a></li>
 <li><a class="reference internal" href="#start-xitrum-in-production-mode-when-the-system-starts">Start Xitrum in production mode when the system starts</a></li>
 <li><a class="reference internal" href="#set-up-port-forwarding">Set up port forwarding</a></li>
 <li><a class="reference internal" href="#tune-linux-for-many-connections">Tune Linux for many connections</a><ul>
@@ -315,6 +389,8 @@ for <tt class="docutils literal"><span class="pre">xitrum-package</span></tt>.</
 <li><a class="reference internal" href="#note-about-backlog">Note about backlog</a></li>
 </ul>
 </li>
+<li><a class="reference internal" href="#haproxy-tips">HAProxy tips</a></li>
+<li><a class="reference internal" href="#nginx-tips">Nginx tips</a></li>
 <li><a class="reference internal" href="#deploy-to-heroku">Deploy to Heroku</a><ul>
 <li><a class="reference internal" href="#sign-up-and-create-repository">Sign up and create repository</a></li>
 <li><a class="reference internal" href="#create-procfile">Create Procfile</a></li>
@@ -368,7 +444,7 @@ for <tt class="docutils literal"><span class="pre">xitrum-package</span></tt>.</
         <li class="right" >
           <a href="i18n.html" title="I18n"
              >previous</a> |</li>
-        <li><a href="index.html">Xitrum 2.13 documentation</a> &raquo;</li> 
+        <li><a href="index.html">Xitrum 2.14 documentation</a> &raquo;</li> 
       </ul>
     </div>
     <div class="footer">

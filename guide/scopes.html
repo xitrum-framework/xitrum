@@ -7,7 +7,7 @@
   <head>
     <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
     
-    <title>Scopes &mdash; Xitrum 2.13 documentation</title>
+    <title>Scopes &mdash; Xitrum 2.14 documentation</title>
     
     <link rel="stylesheet" href="_static/nature.css" type="text/css" />
     <link rel="stylesheet" href="_static/pygments.css" type="text/css" />
@@ -15,7 +15,7 @@
     <script type="text/javascript">
       var DOCUMENTATION_OPTIONS = {
         URL_ROOT:    '',
-        VERSION:     '2.13',
+        VERSION:     '2.14',
         COLLAPSE_INDEX: false,
         FILE_SUFFIX: '.html',
         HAS_SOURCE:  true
@@ -24,7 +24,7 @@
     <script type="text/javascript" src="_static/jquery.js"></script>
     <script type="text/javascript" src="_static/underscore.js"></script>
     <script type="text/javascript" src="_static/doctools.js"></script>
-    <link rel="top" title="Xitrum 2.13 documentation" href="index.html" />
+    <link rel="top" title="Xitrum 2.14 documentation" href="index.html" />
     <link rel="next" title="Validation" href="validation.html" />
     <link rel="prev" title="Serve flash socket policy file" href="flash.html" /> 
   </head>
@@ -41,7 +41,7 @@
         <li class="right" >
           <a href="flash.html" title="Serve flash socket policy file"
              accesskey="P">previous</a> |</li>
-        <li><a href="index.html">Xitrum 2.13 documentation</a> &raquo;</li> 
+        <li><a href="index.html">Xitrum 2.14 documentation</a> &raquo;</li> 
       </ul>
     </div>  
 
@@ -65,7 +65,7 @@
 </ol>
 <p>These params are merged in the above order as <tt class="docutils literal"><span class="pre">textParams</span></tt>
 (from 1 to 3, the latter will override the former).</p>
-<p><tt class="docutils literal"><span class="pre">fileUploadParams</span></tt> is of type scala.collection.mutable.Map[String, List[<a class="reference external" href="http://netty.io/3.6/api/org/jboss/netty/handler/codec/http/multipart/FileUpload.html">FileUpload</a>]].</p>
+<p><tt class="docutils literal"><span class="pre">fileUploadParams</span></tt> is of type scala.collection.mutable.Map[String, List[<a class="reference external" href="http://netty.io/3.8/api/org/jboss/netty/handler/codec/http/multipart/FileUpload.html">FileUpload</a>]].</p>
 </div>
 <div class="section" id="accesing-params">
 <h3>Accesing params<a class="headerlink" href="#accesing-params" title="Permalink to this headline">¶</a></h3>
@@ -121,11 +121,11 @@ trait AppAction extends Action {
 }</pre>
 </div>
 </div>
-<div class="section" id="atjs">
-<h3>&#8220;atJs&#8221;<a class="headerlink" href="#atjs" title="Permalink to this headline">¶</a></h3>
-<p><tt class="docutils literal"><span class="pre">atJs</span></tt> helper method automatically converts <tt class="docutils literal"><span class="pre">at(&quot;key&quot;)</span></tt> to JSON.
+<div class="section" id="atjson">
+<h3>&#8220;atJson&#8221;<a class="headerlink" href="#atjson" title="Permalink to this headline">¶</a></h3>
+<p><tt class="docutils literal"><span class="pre">atJson</span></tt> helper method automatically converts <tt class="docutils literal"><span class="pre">at(&quot;key&quot;)</span></tt> to JSON.
 It is useful when you need to pass model from Scala to JavaScript.</p>
-<p><tt class="docutils literal"><span class="pre">atJs(&quot;key&quot;)</span></tt> is equivalent to <tt class="docutils literal"><span class="pre">xitrum.util.Json.generate(at(&quot;key&quot;))</span></tt>:</p>
+<p><tt class="docutils literal"><span class="pre">atJson(&quot;key&quot;)</span></tt> is equivalent to <tt class="docutils literal"><span class="pre">xitrum.util.Json.generate(at(&quot;key&quot;))</span></tt>:</p>
 <p>Action.scala</p>
 <div class="highlight-python"><pre>case class User(login: String, name: String)
 
@@ -138,7 +138,7 @@ def execute() {
 </div>
 <p>Action.ssp</p>
 <div class="highlight-python"><pre>&lt;script type="text/javascript"&gt;
-  var user = ${atJs("user")};
+  var user = ${atJson("user")};
   alert(user.login);
   alert(user.name);
 &lt;/script&gt;</pre>
@@ -198,8 +198,8 @@ trait AppAction extends Action {
   case Some(string) =&gt; ...
 }</pre>
 </div>
-<p>To send cookie to browser, create an instance of <a class="reference external" href="http://netty.io/3.6/api/org/jboss/netty/handler/codec/http/DefaultCookie.html">DefaultCookie</a>
-and append it to <tt class="docutils literal"><span class="pre">responseCookies</span></tt>, an <tt class="docutils literal"><span class="pre">ArrayBuffer</span></tt> that contains <a class="reference external" href="http://netty.io/3.6/api/org/jboss/netty/handler/codec/http/Cookie.html">Cookie</a>.</p>
+<p>To send cookie to browser, create an instance of <a class="reference external" href="http://netty.io/3.8/api/org/jboss/netty/handler/codec/http/DefaultCookie.html">DefaultCookie</a>
+and append it to <tt class="docutils literal"><span class="pre">responseCookies</span></tt>, an <tt class="docutils literal"><span class="pre">ArrayBuffer</span></tt> that contains <a class="reference external" href="http://netty.io/3.8/api/org/jboss/netty/handler/codec/http/Cookie.html">Cookie</a>.</p>
 <div class="highlight-python"><pre>val cookie = new DefaultCookie("name", "value")
 cookie.setHttpOnly(true)  // true: JavaScript cannot access this cookie
 responseCookies.append(cookie)</pre>
@@ -229,7 +229,7 @@ You can use <tt class="docutils literal"><span class="pre">xitrum.utill.UrlSafeB
 <div class="highlight-python"><pre>import org.jboss.netty.util.CharsetUtil
 import xitrum.util.UrlSafeBase64
 
-val value   = """{"identity":"example@gmail.com","first_name":"Александр"}"""
+val value   = """{"identity":"example@gmail.com","first_name":"Alexander"}"""
 val encoded = UrlSafeBase64.noPaddingEncode(value.getBytes(CharsetUtil.UTF_8))
 val cookie  = new DefaultCookie("profile", encoded)
 responseCookies.append(cookie)</pre>
@@ -390,7 +390,7 @@ and <tt class="docutils literal"><span class="pre">isAdmin</span></tt>.</p>
 <li><a class="reference internal" href="#kinds-of-params">Kinds of params</a></li>
 <li><a class="reference internal" href="#accesing-params">Accesing params</a></li>
 <li><a class="reference internal" href="#at">&#8220;at&#8221;</a></li>
-<li><a class="reference internal" href="#atjs">&#8220;atJs&#8221;</a></li>
+<li><a class="reference internal" href="#atjson">&#8220;atJson&#8221;</a></li>
 <li><a class="reference internal" href="#requestvar">RequestVar</a></li>
 </ul>
 </li>
@@ -449,7 +449,7 @@ and <tt class="docutils literal"><span class="pre">isAdmin</span></tt>.</p>
         <li class="right" >
           <a href="flash.html" title="Serve flash socket policy file"
              >previous</a> |</li>
-        <li><a href="index.html">Xitrum 2.13 documentation</a> &raquo;</li> 
+        <li><a href="index.html">Xitrum 2.14 documentation</a> &raquo;</li> 
       </ul>
     </div>
     <div class="footer">

@@ -7,7 +7,7 @@
   <head>
     <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
 
-    <title>Xitrum Guide &mdash; Xitrum 2.13 documentation</title>
+    <title>Xitrum Guide &mdash; Xitrum 2.14 documentation</title>
 
     <link rel="stylesheet" href="_static/nature.css" type="text/css" />
     <link rel="stylesheet" href="_static/pygments.css" type="text/css" />
@@ -15,7 +15,7 @@
     <script type="text/javascript">
       var DOCUMENTATION_OPTIONS = {
         URL_ROOT:    '',
-        VERSION:     '2.13',
+        VERSION:     '2.14',
         COLLAPSE_INDEX: false,
         FILE_SUFFIX: '.html',
         HAS_SOURCE:  true
@@ -24,7 +24,7 @@
     <script type="text/javascript" src="_static/jquery.js"></script>
     <script type="text/javascript" src="_static/underscore.js"></script>
     <script type="text/javascript" src="_static/doctools.js"></script>
-    <link rel="top" title="Xitrum 2.13 documentation" href="#" />
+    <link rel="top" title="Xitrum 2.14 documentation" href="#" />
     <link rel="next" title="Introduction" href="intro.html" />
   </head>
   <body>
@@ -37,7 +37,7 @@
         <li class="right" >
           <a href="intro.html" title="Introduction"
              accesskey="N">next</a> |</li>
-        <li><a href="#">Xitrum 2.13 documentation</a> &raquo;</li>
+        <li><a href="#">Xitrum 2.14 documentation</a> &raquo;</li>
       </ul>
     </div>
 
@@ -96,7 +96,7 @@
 <li class="toctree-l2"><a class="reference internal" href="restful.html#anti-csrf">Anti-CSRF</a></li>
 <li class="toctree-l2"><a class="reference internal" href="restful.html#anticsrfinput-and-anticsrftoken">antiCsrfInput and antiCsrfToken</a></li>
 <li class="toctree-l2"><a class="reference internal" href="restful.html#skipcsrfcheck">SkipCsrfCheck</a></li>
-<li class="toctree-l2"><a class="reference internal" href="restful.html#getting-entire-request-body">Getting entire request body</a></li>
+<li class="toctree-l2"><a class="reference internal" href="restful.html#getting-entire-request-content">Getting entire request content</a></li>
 <li class="toctree-l2"><a class="reference internal" href="restful.html#documenting-api">Documenting API</a></li>
 </ul>
 </li>
@@ -157,7 +157,7 @@
 <li class="toctree-l3"><a class="reference internal" href="scopes.html#kinds-of-params">Kinds of params</a></li>
 <li class="toctree-l3"><a class="reference internal" href="scopes.html#accesing-params">Accesing params</a></li>
 <li class="toctree-l3"><a class="reference internal" href="scopes.html#at">&#8220;at&#8221;</a></li>
-<li class="toctree-l3"><a class="reference internal" href="scopes.html#atjs">&#8220;atJs&#8221;</a></li>
+<li class="toctree-l3"><a class="reference internal" href="scopes.html#atjson">&#8220;atJson&#8221;</a></li>
 <li class="toctree-l3"><a class="reference internal" href="scopes.html#requestvar">RequestVar</a></li>
 </ul>
 </li>
@@ -209,9 +209,9 @@
 </ul>
 </li>
 <li class="toctree-l1"><a class="reference internal" href="deploy.html">Deploy to production server</a><ul>
-<li class="toctree-l2"><a class="reference internal" href="deploy.html#haproxy">HAProxy</a></li>
 <li class="toctree-l2"><a class="reference internal" href="deploy.html#package-directory">Package directory</a></li>
 <li class="toctree-l2"><a class="reference internal" href="deploy.html#customize-xitrum-package">Customize xitrum-package</a></li>
+<li class="toctree-l2"><a class="reference internal" href="deploy.html#install-oracle-jdk-on-centos-or-ubuntu-manually">Install Oracle JDK on CentOS or Ubuntu manually</a></li>
 <li class="toctree-l2"><a class="reference internal" href="deploy.html#start-xitrum-in-production-mode-when-the-system-starts">Start Xitrum in production mode when the system starts</a></li>
 <li class="toctree-l2"><a class="reference internal" href="deploy.html#set-up-port-forwarding">Set up port forwarding</a></li>
 <li class="toctree-l2"><a class="reference internal" href="deploy.html#tune-linux-for-many-connections">Tune Linux for many connections</a><ul>
@@ -220,6 +220,8 @@
 <li class="toctree-l3"><a class="reference internal" href="deploy.html#note-about-backlog">Note about backlog</a></li>
 </ul>
 </li>
+<li class="toctree-l2"><a class="reference internal" href="deploy.html#haproxy-tips">HAProxy tips</a></li>
+<li class="toctree-l2"><a class="reference internal" href="deploy.html#nginx-tips">Nginx tips</a></li>
 <li class="toctree-l2"><a class="reference internal" href="deploy.html#deploy-to-heroku">Deploy to Heroku</a><ul>
 <li class="toctree-l3"><a class="reference internal" href="deploy.html#sign-up-and-create-repository">Sign up and create repository</a></li>
 <li class="toctree-l3"><a class="reference internal" href="deploy.html#create-procfile">Create Procfile</a></li>
@@ -316,7 +318,7 @@
         <li class="right" >
           <a href="intro.html" title="Introduction"
              >next</a> |</li>
-        <li><a href="#">Xitrum 2.13 documentation</a> &raquo;</li>
+        <li><a href="#">Xitrum 2.14 documentation</a> &raquo;</li>
       </ul>
     </div>
     <div class="footer">

@@ -7,7 +7,7 @@
   <head>
     <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
     
-    <title>RESTful APIs &mdash; Xitrum 2.13 documentation</title>
+    <title>RESTful APIs &mdash; Xitrum 2.14 documentation</title>
     
     <link rel="stylesheet" href="_static/nature.css" type="text/css" />
     <link rel="stylesheet" href="_static/pygments.css" type="text/css" />
@@ -15,7 +15,7 @@
     <script type="text/javascript">
       var DOCUMENTATION_OPTIONS = {
         URL_ROOT:    '',
-        VERSION:     '2.13',
+        VERSION:     '2.14',
         COLLAPSE_INDEX: false,
         FILE_SUFFIX: '.html',
         HAS_SOURCE:  true
@@ -24,7 +24,7 @@
     <script type="text/javascript" src="_static/jquery.js"></script>
     <script type="text/javascript" src="_static/underscore.js"></script>
     <script type="text/javascript" src="_static/doctools.js"></script>
-    <link rel="top" title="Xitrum 2.13 documentation" href="index.html" />
+    <link rel="top" title="Xitrum 2.14 documentation" href="index.html" />
     <link rel="next" title="Template engines" href="template_engines.html" />
     <link rel="prev" title="Action and view" href="action_view.html" /> 
   </head>
@@ -41,7 +41,7 @@
         <li class="right" >
           <a href="action_view.html" title="Action and view"
              accesskey="P">previous</a> |</li>
-        <li><a href="index.html">Xitrum 2.13 documentation</a> &raquo;</li> 
+        <li><a href="index.html">Xitrum 2.14 documentation</a> &raquo;</li> 
       </ul>
     </div>  
 
@@ -182,7 +182,10 @@ trait AppAction extends Action {
 <p>The token will be automatically included in all non-GET Ajax requests as
 <tt class="docutils literal"><span class="pre">X-CSRF-Token</span></tt> header sent by jQuery if you include
 <a class="reference external" href="https://github.com/ngocdaothanh/xitrum/blob/master/src/main/scala/xitrum/js.scala">xitrum.js</a>
-in your view template. xitrum.js is included in <tt class="docutils literal"><span class="pre">jsDefaults</span></tt>.</p>
+in your view template. xitrum.js is included in <tt class="docutils literal"><span class="pre">jsDefaults</span></tt>. If you don&#8217;t
+use <tt class="docutils literal"><span class="pre">jsDefaults</span></tt>, you can include xitrum.js in your template like this:</p>
+<div class="highlight-python"><pre>&lt;script type="text/javascript" src={url[xitrum.js]}&gt;&lt;/script&gt;</pre>
+</div>
 </div>
 <div class="section" id="anticsrfinput-and-anticsrftoken">
 <h2>antiCsrfInput and antiCsrfToken<a class="headerlink" href="#anticsrfinput-and-anticsrftoken" title="Permalink to this headline">¶</a></h2>
@@ -219,15 +222,18 @@ class CreateTodoAPI extends Api {
 }</pre>
 </div>
 </div>
-<div class="section" id="getting-entire-request-body">
-<h2>Getting entire request body<a class="headerlink" href="#getting-entire-request-body" title="Permalink to this headline">¶</a></h2>
-<p>To get the entire request body, use <a class="reference external" href="http://netty.io/3.6/api/org/jboss/netty/handler/codec/http/HttpRequest.html">request.getContent</a>.
-It returns <a class="reference external" href="http://netty.io/3.6/api/org/jboss/netty/buffer/ChannelBuffer.html">ChannelBuffer</a>,
-which has <tt class="docutils literal"><span class="pre">toString(Charset)</span></tt> method.</p>
-<div class="highlight-python"><pre>import org.jboss.netty.util.CharsetUtil.UTF_8
-
-val body = request.getContent.toString(UTF_8)</pre>
+<div class="section" id="getting-entire-request-content">
+<h2>Getting entire request content<a class="headerlink" href="#getting-entire-request-content" title="Permalink to this headline">¶</a></h2>
+<p>Usually, when the request content type is not <tt class="docutils literal"><span class="pre">application/x-www-form-urlencoded</span></tt>,
+you may need to get the entire request content (and parse it manually etc.).</p>
+<p>To get it as a string:</p>
+<div class="highlight-python"><pre>val body = requestContentString</pre>
 </div>
+<p>To get it as a string and parse it as JSON:</p>
+<div class="highlight-python"><pre>val myMap = requestContentJson[Map[String, Int]]</pre>
+</div>
+<p>If you want to full control, use <a class="reference external" href="http://netty.io/3.8/api/org/jboss/netty/handler/codec/http/HttpRequest.html">request.getContent</a>.
+It returns a <a class="reference external" href="http://netty.io/3.8/api/org/jboss/netty/buffer/ChannelBuffer.html">ChannelBuffer</a>.</p>
 </div>
 <div class="section" id="documenting-api">
 <h2>Documenting API<a class="headerlink" href="#documenting-api" title="Permalink to this headline">¶</a></h2>
@@ -388,7 +394,7 @@ and <a class="reference external" href="https://github.com/wordnik/swagger-core/
 <li><a class="reference internal" href="#anti-csrf">Anti-CSRF</a></li>
 <li><a class="reference internal" href="#anticsrfinput-and-anticsrftoken">antiCsrfInput and antiCsrfToken</a></li>
 <li><a class="reference internal" href="#skipcsrfcheck">SkipCsrfCheck</a></li>
-<li><a class="reference internal" href="#getting-entire-request-body">Getting entire request body</a></li>
+<li><a class="reference internal" href="#getting-entire-request-content">Getting entire request content</a></li>
 <li><a class="reference internal" href="#documenting-api">Documenting API</a></li>
 </ul>
 </li>
@@ -434,7 +440,7 @@ and <a class="reference external" href="https://github.com/wordnik/swagger-core/
         <li class="right" >
           <a href="action_view.html" title="Action and view"
              >previous</a> |</li>
-        <li><a href="index.html">Xitrum 2.13 documentation</a> &raquo;</li> 
+        <li><a href="index.html">Xitrum 2.14 documentation</a> &raquo;</li> 
       </ul>
     </div>
     <div class="footer">
