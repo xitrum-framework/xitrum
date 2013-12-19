@@ -6,6 +6,7 @@
 * #249 Improve inheritance rule of route annotations
 * #250 CORS allow-origin should not be set for domain not specified in xitrum.conf
 * #253 Update JSON4S from 3.2.5 to 3.2.6
+* #254 Update Swagger UI from 2.0.2 to 2.0.3
 
 2.13:
 * #239 Readd feature: One action can have multiple routes

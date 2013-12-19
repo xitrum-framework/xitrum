@@ -8,9 +8,26 @@ See:
 * SwaggerIndexAction
 * http://stackoverflow.com/questions/979975/how-to-get-the-value-from-url-parameter
 
-To update Swagger UI, copy dist from https://github.com/wordnik/swagger-ui to
-src/main/resources/public/xitrum as swagger-ui. Then replace
-"http://petstore.swagger.wordnik.com/api/api-docs" with this function call:
+To update Swagger UI, copy dist directory from https://github.com/wordnik/swagger-ui
+to src/main/resources/public/xitrum as swagger-ui. Then in its index.html, replace:
+
+::
+
+  ...
+  window.swaggerUi = new SwaggerUi({
+  url: "http://petstore.swagger.wordnik.com/api/api-docs",
+  ...
+
+with:
+
+::
+
+  ...
+  window.swaggerUi = new SwaggerUi({
+  url: getUrl(),
+  ...
+
+getUrl:
 
 ::
 
@@ -27,7 +44,7 @@ src/main/resources/public/xitrum as swagger-ui. Then replace
     }
 
     return '/xitrum/swagger.json';
-  }
+  };
 
 Update src/main/resources/META-INF/mime.types
 ---------------------------------------------
