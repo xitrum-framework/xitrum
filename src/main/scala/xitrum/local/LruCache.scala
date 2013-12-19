@@ -17,7 +17,11 @@ class LruCache extends Cache {
     // }
     val className = getClass.getName
     val maxElems  = Config.xitrum.config.getInt("cache.\"" + className + "\".maxElems")
-    LocalLruCache[Any, (Int, Any)](maxElems)
+
+    // Use Int for expireAtSec, not Long, because we only need second precision,
+    // not millisenod precision:
+    //            key   expireAtSec value
+    LocalLruCache[Any, (Int,        Any)](maxElems)
   }
 
   def start() {}
@@ -30,13 +34,16 @@ class LruCache extends Cache {
     if (tuple == null) {
       None
     } else {
-      val expireSec = tuple._1
-      val value     = tuple._2
-      if (expireSec < 0) {
+      val expireAtSec = tuple._1
+      val value       = tuple._2
+      if (expireAtSec < 0) {
         Some(value)
       } else {
-        val nowSec = (System.currentTimeMillis() / 1000.0).intValue()
-        if (expireSec < nowSec) None else Some(value)
+        // Compare at millisec precision for a little more correctness, so that
+        // when TTL is 1s and 1500ms has passed, the result will more likely be
+        // None
+        val nowMs = System.currentTimeMillis()
+        if (expireAtSec.toLong * 1000L < nowMs) None else Some(value)
       }
     }
   }
@@ -50,7 +57,8 @@ class LruCache extends Cache {
   }
 
   def putSecond(key: Any, value: Any, seconds: Int) {
-    cache.put(key, ((System.currentTimeMillis() / 1000.0 + seconds).intValue(), value))
+    val expireAtSec = (System.currentTimeMillis() / 1000L + seconds).toInt
+    cache.put(key, (expireAtSec, value))
   }
 
   def putSecondIfAbsent(key: Any, value: Any, seconds: Int) {
