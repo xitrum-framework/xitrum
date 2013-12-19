@@ -2,7 +2,7 @@ organization := "tv.cntt"
 
 name := "xitrum"
 
-version := "2.14-SNAPSHOT"
+version := "2.15-SNAPSHOT"
 
 scalaVersion := "2.10.3"
 
@@ -42,7 +42,7 @@ libraryDependencies += "com.twitter" %% "chill-bijection" % "0.3.5"
 // For jsEscape
 libraryDependencies += "org.apache.commons" % "commons-lang3" % "3.1"
 
-libraryDependencies += "org.json4s" %% "json4s-native" % "3.2.5"
+libraryDependencies += "org.json4s" %% "json4s-native" % "3.2.6"
 
 // For i18n
 libraryDependencies += "tv.cntt" %% "scaposer" % "1.3"
