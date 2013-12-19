@@ -35,8 +35,8 @@ class LruCache extends Cache {
       if (expireSec < 0) {
         Some(value)
       } else {
-        val nowMs = System.currentTimeMillis()
-        if (expireSec.toLong * 1000 < nowMs) None else Some(value)
+        val nowSec = (System.currentTimeMillis() / 1000.0).intValue()
+        if (expireSec < nowSec) None else Some(value)
       }
     }
   }
@@ -50,7 +50,7 @@ class LruCache extends Cache {
   }
 
   def putSecond(key: Any, value: Any, seconds: Int) {
-    cache.put(key, (seconds, value))
+    cache.put(key, ((System.currentTimeMillis() / 1000.0 + seconds).intValue(), value))
   }
 
   def putSecondIfAbsent(key: Any, value: Any, seconds: Int) {
