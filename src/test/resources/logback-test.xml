@@ -18,11 +18,9 @@
   </appender>
 
   <!-- Should be set to INFO in production mode for speed  -->
-  <root level="ERROR">
+  <root level="DEBUG">
     <!-- Should be commented out in production mode for speed -->
     <appender-ref ref="CONSOLE"/>
-	<!--
     <appender-ref ref="FILE"/>
-    -->
   </root>
 </configuration>

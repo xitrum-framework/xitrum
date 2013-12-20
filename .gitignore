@@ -1,4 +1,6 @@
+log
 project/project
 project/target
 target
+routes.cache
 .*
