@@ -1,3 +1,6 @@
+2.15:
+* #255 Update Netty from 3.8.0 to 3.9.0
+
 2.14:
 * #252 Fix cache TTL bug
 * #244 Easier way to get request content as string and JSON
