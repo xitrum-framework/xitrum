@@ -101,7 +101,7 @@ class RouteCollection(
 ) extends Log
 {
   lazy val reverseMappings: Map[Class[_], ReverseRoute] = {
-    val mmap = MMap[Class[_], ArrayBuffer[Route]]()
+    val mmap = MMap.empty[Class[_], ArrayBuffer[Route]]
 
     allFirsts(None).foreach { r => mmap.getOrElseUpdate(r.klass, ArrayBuffer()).append(r) }
     allOthers(None).foreach { r => mmap.getOrElseUpdate(r.klass, ArrayBuffer()).append(r) }
@@ -118,9 +118,9 @@ class RouteCollection(
     // This method is only run once on start, speed is not a problem
 
     //                        method  pattern target
-    val firsts = ArrayBuffer[(String, String, String)]()
-    var others = ArrayBuffer[(String, String, String)]()
-    val lasts  = ArrayBuffer[(String, String, String)]()
+    val firsts = ArrayBuffer.empty[(String, String, String)]
+    var others = ArrayBuffer.empty[(String, String, String)]
+    val lasts  = ArrayBuffer.empty[(String, String, String)]
 
     for (r <- allFirsts(Some(xitrumRoutes))) firsts.append((r.httpMethod.toString, RouteCompiler.decompile(r.compiledPattern), targetWithCache(r)))
     for (r <- allOthers(Some(xitrumRoutes))) others.append((r.httpMethod.toString, RouteCompiler.decompile(r.compiledPattern), targetWithCache(r)))
@@ -157,7 +157,7 @@ class RouteCollection(
   }
 
   def logErrorRoutes() {
-    val strings = ArrayBuffer[String]()
+    val strings = ArrayBuffer.empty[String]
     error404.foreach { klass => strings.append("404  " + klass.getName) }
     error500.foreach { klass => strings.append("500  " + klass.getName) }
     if (!strings.isEmpty) log.info("Error routes:\n" + strings.mkString("\n"))
@@ -172,7 +172,7 @@ class RouteCollection(
   private def allFirsts(xitrumRoutes: Option[Boolean]): Seq[Route] = {
     xitrumRoutes match {
       case None =>
-        val ret = ArrayBuffer[Route]()
+        val ret = ArrayBuffer.empty[Route]
         ret.appendAll(firstGETs)
         ret.appendAll(firstPOSTs)
         ret.appendAll(firstPUTs)
@@ -181,7 +181,7 @@ class RouteCollection(
         ret
 
       case Some(x) =>
-        val ret = ArrayBuffer[Route]()
+        val ret = ArrayBuffer.empty[Route]
         ret.appendAll(firstGETs      .filter(_.klass.getName.startsWith("xitrum") == x))
         ret.appendAll(firstPOSTs     .filter(_.klass.getName.startsWith("xitrum") == x))
         ret.appendAll(firstPUTs      .filter(_.klass.getName.startsWith("xitrum") == x))
@@ -195,7 +195,7 @@ class RouteCollection(
   private def allLasts(xitrumRoutes: Option[Boolean]): Seq[Route] = {
     xitrumRoutes match {
       case None =>
-        val ret = ArrayBuffer[Route]()
+        val ret = ArrayBuffer.empty[Route]
         ret.appendAll(lastGETs)
         ret.appendAll(lastPOSTs)
         ret.appendAll(lastPUTs)
@@ -204,7 +204,7 @@ class RouteCollection(
         ret
 
       case Some(x) =>
-        val ret = ArrayBuffer[Route]()
+        val ret = ArrayBuffer.empty[Route]
         ret.appendAll(lastGETs      .filter(_.klass.getName.startsWith("xitrum") == x))
         ret.appendAll(lastPOSTs     .filter(_.klass.getName.startsWith("xitrum") == x))
         ret.appendAll(lastPUTs      .filter(_.klass.getName.startsWith("xitrum") == x))
@@ -218,7 +218,7 @@ class RouteCollection(
   private def allOthers(xitrumRoutes: Option[Boolean]): Seq[Route] = {
     xitrumRoutes match {
       case None =>
-        val ret = ArrayBuffer[Route]()
+        val ret = ArrayBuffer.empty[Route]
         ret.appendAll(otherGETs)
         ret.appendAll(otherPOSTs)
         ret.appendAll(otherPUTs)
@@ -228,7 +228,7 @@ class RouteCollection(
         ret
 
       case Some(x) =>
-        val ret = ArrayBuffer[Route]()
+        val ret = ArrayBuffer.empty[Route]
         ret.appendAll(otherGETs      .filter(_.klass.getName.startsWith("xitrum") == x))
         ret.appendAll(otherPOSTs     .filter(_.klass.getName.startsWith("xitrum") == x))
         ret.appendAll(otherPUTs      .filter(_.klass.getName.startsWith("xitrum") == x))

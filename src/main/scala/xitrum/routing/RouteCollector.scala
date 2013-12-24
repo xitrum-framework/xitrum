@@ -84,7 +84,7 @@ class RouteCollector extends Log {
   ) {
     var routeOrder          = optRouteOrder(annotations.routeOrder)  // -1: first, 1: last, 0: other
     var cacheSecs           = optCacheSecs(annotations.cache)        // < 0: cache action, > 0: cache page, 0: no cache
-    var method_pattern_coll = ArrayBuffer[(String, String)]()
+    var method_pattern_coll = ArrayBuffer.empty[(String, String)]
 
     annotations.routes.foreach { a =>
       listMethodAndPattern(a).foreach { m_p   => method_pattern_coll.append(m_p) }

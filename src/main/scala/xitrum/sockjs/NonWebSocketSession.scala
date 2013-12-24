@@ -58,7 +58,7 @@ class NonWebSocketSession(var receiverCliento: Option[ActorRef], pathPrefix: Str
   private[this] var sockJsActorRef: ActorRef = _
 
   // Messages from handler to client are buffered here
-  private[this] val bufferForClientSubscriber = ArrayBuffer[String]()
+  private[this] val bufferForClientSubscriber = ArrayBuffer.empty[String]
 
   // ReceiveTimeout may not occurred if there's frequent Publish, thus we
   // need to manually check if there's no subscriber for a long time.

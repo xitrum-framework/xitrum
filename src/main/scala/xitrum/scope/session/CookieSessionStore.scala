@@ -52,24 +52,24 @@ class CookieSessionStore extends SessionStore with Log {
     // Cannot always get cookie, decrypt, deserialize, and type casting due to program changes etc.
     env.requestCookies.get(Config.xitrum.session.cookieName) match {
       case None =>
-        MMap[String, Any]()
+        MMap.empty[String, Any]
 
       // See "store" method to know why this map needs to be immutable
       case Some(encryptedImmutableMap) =>
         SecureUrlSafeBase64.decrypt(encryptedImmutableMap, true) match {
           case None =>
-            MMap[String, Any]()
+            MMap.empty[String, Any]
 
           case Some(any) =>
             val immutableMap = try {
               any.asInstanceOf[Map[String, Any]]
             } catch {
               case NonFatal(e) =>
-                MMap[String, Any]()
+                MMap.empty[String, Any]
             }
 
             // Convert to mutable map
-            val ret = MMap[String, Any]()
+            val ret = MMap.empty[String, Any]
             ret ++= immutableMap
             ret
        }

@@ -7,8 +7,6 @@ import xitrum.scope.session.ServerSessionStore
 import xitrum.util.LocalLruCache
 
 class LruSessionStore extends ServerSessionStore {
-  //private[this] val store = MMap[String, Map[String, Any]]()
-
   private[this] val store = {
     // xitrum {
     //   session {

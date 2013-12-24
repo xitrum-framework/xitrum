@@ -54,13 +54,13 @@ class Route(
     // Special case
     // 0 = max2 <= max1
     if (max2 == 0) {
-      if (max1 == 0) return Some(MMap[String, Seq[String]]())
+      if (max1 == 0) return Some(MMap.empty[String, Seq[String]])
       return None
     }
 
     // 0 < max2 <= max1
     // pathParams is updated along the way
-    val pathParams = MMap[String, Seq[String]]()
+    val pathParams = MMap.empty[String, Seq[String]]
     val matched    = matchTokens(pathParams, pathTokens, compiledPattern)
     if (matched) Some(pathParams) else None
   }

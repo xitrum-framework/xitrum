@@ -14,7 +14,7 @@ object Loader {
 
     // Shorter version, but not optimized:
     //
-    // var ret    = Array[Byte]()
+    // var ret    = Array.empty[Byte]
     // var buffer = new Array[Byte](BUFFER_SIZE)
     // while (is.available() > 0) {
     //   val bytesRead = is.read(buffer)
@@ -45,7 +45,7 @@ object Loader {
       ret
     } else {
       is.close()
-      Array[Byte]()
+      Array.empty[Byte]
     }
   }
 

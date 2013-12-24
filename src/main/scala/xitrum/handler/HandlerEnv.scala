@@ -44,7 +44,7 @@ class HandlerEnv extends MHashMap[String, Any] {
    * textParams.
    */
   lazy val textParams: Params = {
-    val ret = MMap[String, Seq[String]]()
+    val ret = MMap.empty[String, Seq[String]]
 
     // The order is important because we want the later to overwrite the former
     ret ++= queryParams
@@ -56,7 +56,7 @@ class HandlerEnv extends MHashMap[String, Any] {
 
   /** The merge of queryParams and pathParams, things that appear in the request URL. */
   lazy val urlParams: Params = {
-    val ret = MMap[String, Seq[String]]()
+    val ret = MMap.empty[String, Seq[String]]
 
     // The order is important because we want the later to overwrite the former
     ret ++= queryParams

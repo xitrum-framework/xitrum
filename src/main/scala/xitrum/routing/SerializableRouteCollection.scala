@@ -5,29 +5,29 @@ import scala.collection.mutable.ArrayBuffer
 import xitrum.Action
 
 class SerializableRouteCollection extends Serializable {
-  val firstGETs = ArrayBuffer[SerializableRoute]()
-  val lastGETs  = ArrayBuffer[SerializableRoute]()
-  val otherGETs = ArrayBuffer[SerializableRoute]()
+  val firstGETs = ArrayBuffer.empty[SerializableRoute]
+  val lastGETs  = ArrayBuffer.empty[SerializableRoute]
+  val otherGETs = ArrayBuffer.empty[SerializableRoute]
 
-  val firstPOSTs = ArrayBuffer[SerializableRoute]()
-  val lastPOSTs  = ArrayBuffer[SerializableRoute]()
-  val otherPOSTs = ArrayBuffer[SerializableRoute]()
+  val firstPOSTs = ArrayBuffer.empty[SerializableRoute]
+  val lastPOSTs  = ArrayBuffer.empty[SerializableRoute]
+  val otherPOSTs = ArrayBuffer.empty[SerializableRoute]
 
-  val firstPUTs = ArrayBuffer[SerializableRoute]()
-  val lastPUTs  = ArrayBuffer[SerializableRoute]()
-  val otherPUTs = ArrayBuffer[SerializableRoute]()
+  val firstPUTs = ArrayBuffer.empty[SerializableRoute]
+  val lastPUTs  = ArrayBuffer.empty[SerializableRoute]
+  val otherPUTs = ArrayBuffer.empty[SerializableRoute]
 
-  val firstPATCHs = ArrayBuffer[SerializableRoute]()
-  val lastPATCHs  = ArrayBuffer[SerializableRoute]()
-  val otherPATCHs = ArrayBuffer[SerializableRoute]()
+  val firstPATCHs = ArrayBuffer.empty[SerializableRoute]
+  val lastPATCHs  = ArrayBuffer.empty[SerializableRoute]
+  val otherPATCHs = ArrayBuffer.empty[SerializableRoute]
 
-  val firstDELETEs = ArrayBuffer[SerializableRoute]()
-  val lastDELETEs  = ArrayBuffer[SerializableRoute]()
-  val otherDELETEs = ArrayBuffer[SerializableRoute]()
+  val firstDELETEs = ArrayBuffer.empty[SerializableRoute]
+  val lastDELETEs  = ArrayBuffer.empty[SerializableRoute]
+  val otherDELETEs = ArrayBuffer.empty[SerializableRoute]
 
-  val firstWEBSOCKETs = ArrayBuffer[SerializableRoute]()
-  val lastWEBSOCKETs  = ArrayBuffer[SerializableRoute]()
-  val otherWEBSOCKETs = ArrayBuffer[SerializableRoute]()
+  val firstWEBSOCKETs = ArrayBuffer.empty[SerializableRoute]
+  val lastWEBSOCKETs  = ArrayBuffer.empty[SerializableRoute]
+  val otherWEBSOCKETs = ArrayBuffer.empty[SerializableRoute]
 
   // 404.html and 500.html are used by default
   var error404: Option[String] = None

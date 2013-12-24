@@ -64,11 +64,11 @@ class BodyParser extends SimpleChannelUpstreamHandler with BadClientSilencer {
   private def decodeRequestBody(request: HttpRequest): (MMap[String, Seq[String]], MMap[String, Seq[FileUpload]]) = {
     val method = request.getMethod
     if (!method.equals(HttpMethod.POST) && !method.equals(HttpMethod.PUT) && !method.equals(HttpMethod.PATCH))
-      return (MMap[String, Seq[String]](), MMap[String, Seq[FileUpload]]())
+      return (MMap.empty[String, Seq[String]], MMap.empty[String, Seq[FileUpload]])
 
     val requestContentType = HttpHeaders.getHeader(request, HttpHeaders.Names.CONTENT_TYPE)
     if (requestContentType == null)
-      return (MMap[String, Seq[String]](), MMap[String, Seq[FileUpload]]())
+      return (MMap.empty[String, Seq[String]], MMap.empty[String, Seq[FileUpload]])
 
     val requestContentTypeLowerCase = requestContentType.toLowerCase
     if (!requestContentTypeLowerCase.startsWith(HttpHeaders.Values.APPLICATION_X_WWW_FORM_URLENCODED) &&
@@ -78,8 +78,8 @@ class BodyParser extends SimpleChannelUpstreamHandler with BadClientSilencer {
     val decoder = new HttpPostRequestDecoder(factory, request)
     val datas   = decoder.getBodyHttpDatas
 
-    val bodyParams = MMap[String, Seq[String]]()
-    val fileParams = MMap[String, Seq[FileUpload]]()
+    val bodyParams = MMap.empty[String, Seq[String]]
+    val fileParams = MMap.empty[String, Seq[FileUpload]]
 
     val it = datas.iterator
     while (it.hasNext()) {

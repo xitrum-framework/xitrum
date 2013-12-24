@@ -8,7 +8,7 @@ import xitrum.routing.Route
 trait Filter {
   this: Action =>
 
-  private val beforeFilters = ArrayBuffer[() => Boolean]()
+  private val beforeFilters = ArrayBuffer.empty[() => Boolean]
 
   def beforeFilter(f: => Boolean) {
     beforeFilters.append(() => f)
@@ -19,7 +19,7 @@ trait Filter {
 
   //----------------------------------------------------------------------------
 
-  private val afterFilters = ArrayBuffer[() => Any]()
+  private val afterFilters = ArrayBuffer.empty[() => Any]
 
   def afterFilter(f: => Any) {
     afterFilters.append(() => f)
@@ -30,7 +30,7 @@ trait Filter {
 
   //----------------------------------------------------------------------------
 
-  private val aroundFilters = ArrayBuffer[(() => Any) => Any]()
+  private val aroundFilters = ArrayBuffer.empty[(() => Any) => Any]
 
   def aroundFilter(f: (() => Any) => Any) {
     aroundFilters.append(f)

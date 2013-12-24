@@ -55,7 +55,7 @@ object ResponseCacher extends Log {
   }
 
   def removeCachedResponse(actionClass: Class[Action], urlParams: (String, Any)*) {
-    val params = MMap[String, Seq[String]]()
+    val params = MMap.empty[String, Seq[String]]
     urlParams.foreach { case (k, v) => params += (k -> Seq(v.toString)) }
     removeCachedResponse(actionClass, params)
   }

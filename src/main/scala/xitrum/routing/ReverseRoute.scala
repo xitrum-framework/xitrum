@@ -31,7 +31,7 @@ object ReverseRoute {
  */
 class ReverseRoute(routesReverseSortedByNumPlaceholders: Seq[Route]) {
   def url(params: Map[String, Any]): String = {
-    var errorMsgs = Seq[String]()
+    var errorMsgs = Seq.empty[String]
     routesReverseSortedByNumPlaceholders.foreach { r =>
       r.url(params) match {
         case Left(errorMsg) =>

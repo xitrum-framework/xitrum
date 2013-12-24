@@ -8,7 +8,7 @@ import scaposer.{Po, Parser}
 import xitrum.util.Loader
 
 object PoLoader {
-  private[this] val cache = MMap[String, Po]()
+  private[this] val cache = MMap.empty[String, Po]
 
   /**
    * @return Merge of all po files of the language, or an empty Po when there's
@@ -18,7 +18,7 @@ object PoLoader {
     if (cache.isDefinedAt(language)) return cache(language)
 
     val urlEnum = getClass.getClassLoader.getResources("i18n/" + language + ".po")
-    val buffer  = ListBuffer[Po]()
+    val buffer  = ListBuffer.empty[Po]
     while (urlEnum.hasMoreElements) {
       val url    = urlEnum.nextElement
       val is     = url.openStream
