@@ -23,7 +23,7 @@ trait SessionEnv extends Csrf {
     val decoder = new CookieDecoder
     val header  = HttpHeaders.getHeader(request, Names.COOKIE)
     if (header == null) {
-      Map[String, String]()
+      Map.empty[String, String]
     } else {
       val cookies  = decoder.decode(header)
       val iterator = cookies.iterator

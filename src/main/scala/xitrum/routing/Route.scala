@@ -19,7 +19,7 @@ class Route(
   def numPlaceholders = compiledPattern.foldLeft(0) { (sum, rt) => sum + rt.numPlaceholders }
 
   def url(params: Map[String, Any]): Either[String, String] = {
-    ReverseRoute.collectReverseTokens(Seq[String](), compiledPattern, params) match {
+    ReverseRoute.collectReverseTokens(Seq.empty[String], compiledPattern, params) match {
       case Left(e) => Left(e)
 
       case Right((tokens, remainingParams)) =>

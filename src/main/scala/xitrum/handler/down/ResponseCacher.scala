@@ -106,7 +106,7 @@ object ResponseCacher extends Log {
   private def makeCacheKey(actionClass: Class[_], urlParams: Params, gzipped: Boolean): String = {
     // See xitrum.scope.request.Params in xitrum/scope/request/package.scala
     // Need to sort by keys so that the output is consistent
-    val sortedMap = SortedMap[String, Seq[String]]() ++ urlParams
+    val sortedMap = SortedMap.empty[String, Seq[String]] ++ urlParams
 
     val key =
       "xitrum/page-action/" +

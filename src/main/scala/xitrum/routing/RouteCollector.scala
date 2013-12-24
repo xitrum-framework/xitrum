@@ -26,8 +26,8 @@ class RouteCollector extends Log {
     var acc = DiscoveredAcc(
       new SerializableRouteCollection,
       new SerializableRouteCollection,
-      Map[String, SockJsClassAndOptions](),
-      Map[Class[_ <: Action], Swagger]()
+      Map.empty[String, SockJsClassAndOptions],
+      Map.empty[Class[_ <: Action], Swagger]
     )
 
     val actionTreeBuilder = Scanner.foldLeft(cachedFileName, new ActionTreeBuilder, discovered _)
@@ -234,7 +234,7 @@ class RouteCollector extends Log {
     if (universeAnnotations.isEmpty) {
       None
     } else {
-      var swaggerArgs = Seq[SwaggerArg]()
+      var swaggerArgs = Seq.empty[SwaggerArg]
       universeAnnotations.foreach { annotation =>
         annotation.scalaArgs.foreach { scalaArg =>
           // Ex:

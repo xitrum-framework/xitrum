@@ -66,7 +66,7 @@ private case class ActionTreeBuilder(parent2Children: Map[String, Seq[String]] =
     val concreteActions = getConcreteActions
 
     val runtimeMirror = universe.runtimeMirror(getClass.getClassLoader)
-    var cache         = Map[Class[_ <: Action], ActionAnnotations]()
+    var cache         = Map.empty[Class[_ <: Action], ActionAnnotations]
 
     def getActionAccumulatedAnnotations(klass: Class[_ <: Action]): ActionAnnotations = {
       cache.get(klass) match {
@@ -104,7 +104,7 @@ private case class ActionTreeBuilder(parent2Children: Map[String, Seq[String]] =
   private def internalName2ClassName(internalName: String) = internalName.replace('/', '.')
 
   private def getConcreteActions: Set[Class[_ <: Action]] = {
-    var concreteActions = Set[Class[_ <: Action]]()
+    var concreteActions = Set.empty[Class[_ <: Action]]
 
     def traverseActionTree(className: String) {
       if (parent2Children.isDefinedAt(className)) {

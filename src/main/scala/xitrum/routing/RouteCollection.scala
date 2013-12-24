@@ -315,7 +315,7 @@ class RouteCollection(
 
   /** Used at SetCORS & OPTIONSResponse. */
   def tryAllMethods(pathInfo: PathInfo): Seq[HttpMethod] = {
-    var methods = Seq[HttpMethod]()
+    var methods = Seq.empty[HttpMethod]
     route(HttpMethod.GET, pathInfo) match {
       case Some(_) => methods = methods :+ HttpMethod.GET :+ HttpMethod.HEAD
       case None =>

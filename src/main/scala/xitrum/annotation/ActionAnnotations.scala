@@ -72,7 +72,7 @@ object ActionAnnotations {
 }
 
 case class ActionAnnotations(
-  routes:     Seq[universe.Annotation] = Seq(),
+  routes:     Seq[universe.Annotation] = Seq.empty,
   routeOrder: Option[universe.Annotation] = None,
 
   sockJsCookieNeeded: Option[universe.Annotation] = None,
@@ -82,7 +82,7 @@ case class ActionAnnotations(
 
   cache: Option[universe.Annotation] = None,
 
-  swaggers: Seq[universe.Annotation] = Seq[universe.Annotation]()
+  swaggers: Seq[universe.Annotation] = Seq.empty[universe.Annotation]
 ) {
   import ActionAnnotations._
 

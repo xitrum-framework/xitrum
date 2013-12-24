@@ -129,7 +129,7 @@ case class DotRouteToken(nonDotRouteTokens: Seq[NonDotRouteToken]) extends Route
   def numPlaceholders = nonDotRouteTokens.foldLeft(0) { (sum, rt) => sum + rt.numPlaceholders }
 
   def url(params: Map[String, Any]) = {
-    ReverseRoute.collectReverseTokens(Seq[String](), nonDotRouteTokens, params) match {
+    ReverseRoute.collectReverseTokens(Seq.empty[String], nonDotRouteTokens, params) match {
       case Left(e) => Left(e)
 
       case Right((dots, remainingParams)) =>
