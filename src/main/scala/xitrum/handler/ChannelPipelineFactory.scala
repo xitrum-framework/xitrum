@@ -1,7 +1,7 @@
 package xitrum.handler
 
 import org.jboss.netty.channel.{Channels, ChannelPipeline, ChannelPipelineFactory => CPF}
-import org.jboss.netty.handler.codec.http.{HttpRequestDecoder, HttpChunkAggregator, HttpResponseEncoder}
+import org.jboss.netty.handler.codec.http.{HttpRequestDecoder, HttpResponseEncoder}
 import org.jboss.netty.handler.execution.{ExecutionHandler, OrderedMemoryAwareThreadPoolExecutor}
 import org.jboss.netty.handler.stream.ChunkedWriteHandler
 
@@ -35,12 +35,9 @@ object DefaultHttpChannelPipelineFactory {
   lazy val noPipelining         = new NoPipelining
   lazy val baseUrlRemover       = new BaseUrlRemover
   lazy val basicAuth            = new BasicAuth
-  lazy val requestAttacher      = new RequestAttacher
   lazy val publicFileServer     = new PublicFileServer
   lazy val publicResourceServer = new PublicResourceServer
-  lazy val request2Env          = new Request2Env
   lazy val uriParser            = new UriParser
-  lazy val bodyParser           = new BodyParser
   lazy val methodOverrider      = new MethodOverrider
   lazy val dispatcher           = new Dispatcher
 
@@ -62,15 +59,14 @@ object DefaultHttpChannelPipelineFactory {
 
     // Upstream
 
+    pipeline.remove(classOf[BodyParser])
     pipeline.remove(classOf[NoPipelining])
     pipeline.remove(classOf[BaseUrlRemover])
     if (Config.xitrum.basicAuth.isDefined)
     pipeline.remove(classOf[BasicAuth])
     pipeline.remove(classOf[PublicFileServer])
     pipeline.remove(classOf[PublicResourceServer])
-    pipeline.remove(classOf[Request2Env])
     pipeline.remove(classOf[UriParser])
-    pipeline.remove(classOf[BodyParser])
     pipeline.remove(classOf[MethodOverrider])
     pipeline.remove(classOf[Dispatcher])
 
@@ -104,17 +100,14 @@ class DefaultHttpChannelPipelineFactory extends CPF {
     // Upstream
 
     ret.addLast("HttpRequestDecoder",   new HttpRequestDecoder(Config.xitrum.request.maxInitialLineLength, 8192, 8192))
-    ret.addLast("HttpChunkAggregator",  new HttpChunkAggregator(Config.xitrum.request.maxSizeInMB * 1024 * 1024))
+    ret.addLast("bodyParser",           new BodyParser)          // Request is converted to HandlerEnv here
     ret.addLast("noPipelining",         noPipelining)
     ret.addLast("baseUrlRemover",       baseUrlRemover)
     if (Config.xitrum.basicAuth.isDefined)
     ret.addLast("basicAuth",            basicAuth)
-    ret.addLast("requestAttacher",      requestAttacher)       // <- Must be before publicFileServer and publicResourceServer
-    ret.addLast("publicFileServer",     publicFileServer)      // because HttpRequest must be attached to the channel for
-    ret.addLast("publicResourceServer", publicResourceServer)  // use at xSendFile and xSendResource (and fixiOS6SafariPOST)
-    ret.addLast("request2Env",          request2Env)
+    ret.addLast("publicFileServer",     publicFileServer)
+    ret.addLast("publicResourceServer", publicResourceServer)
     ret.addLast("uriParser",            uriParser)
-    ret.addLast("bodyParser",           bodyParser)
     ret.addLast("methodOverrider",      methodOverrider)
     ret.addLast("dispatcher",           dispatcher)
 
@@ -122,12 +115,12 @@ class DefaultHttpChannelPipelineFactory extends CPF {
 
     ret.addLast("HttpResponseEncoder", new HttpResponseEncoder)
     ret.addLast("ChunkedWriteHandler", new ChunkedWriteHandler)  // For writing ChunkedFile, at XSendFile
+    ret.addLast("env2Response",        env2Response)
     ret.addLast("setCORS",             setCORS)
     ret.addLast("OPTIONSResponse",     OPTIONSResponse)
     ret.addLast("fixiOS6SafariPOST",   fixiOS6SafariPOST)
     ret.addLast("xSendFile",           xSendFile)
     ret.addLast("xSendResource",       xSendResource)
-    ret.addLast("env2Response",        env2Response)
     ret.addLast("responseCacher",      responseCacher)
 
     ret

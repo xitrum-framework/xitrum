@@ -5,25 +5,28 @@ import org.jboss.netty.handler.codec.http.{DefaultHttpResponse, HttpResponseStat
 import ChannelHandler.Sharable
 
 import xitrum.Config
+import xitrum.handler.HandlerEnv
 import xitrum.handler.down.XSendFile
 
 @Sharable
 class BaseUrlRemover extends SimpleChannelUpstreamHandler with BadClientSilencer {
   override def messageReceived(ctx: ChannelHandlerContext, e: MessageEvent) {
     val m = e.getMessage
-    if (!m.isInstanceOf[HttpRequest]) {
+    if (!m.isInstanceOf[HandlerEnv]) {
       ctx.sendUpstream(e)
       return
     }
 
-    val request = m.asInstanceOf[HttpRequest]
+    val env     = m.asInstanceOf[HandlerEnv]
+    val request = env.request
     val channel = ctx.getChannel
 
     remove(request.getUri) match {
       case None =>
-        val response = new DefaultHttpResponse(HttpVersion.HTTP_1_1, HttpResponseStatus.NOT_FOUND)
+        val response = env.response
+        response.setStatus(HttpResponseStatus.NOT_FOUND)
         XSendFile.set404Page(response, false)
-        channel.write(response)
+        channel.write(env)
 
       case Some(withoutBaseUri) =>
         request.setUri(withoutBaseUri)

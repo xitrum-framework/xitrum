@@ -42,7 +42,7 @@ object Etag extends Log {
     val file = new File(path)
     if (!file.exists) return NotFound
 
-    if (file.length > Config.xitrum.staticFile.maxSizeInKBOfCachedFiles * 1024) return TooBig(file)
+    if (file.length > Config.xitrum.staticFile.maxSizeInBytesOfCachedFiles) return TooBig(file)
 
     val mtime = file.lastModified
     val key   = (path, mtime)

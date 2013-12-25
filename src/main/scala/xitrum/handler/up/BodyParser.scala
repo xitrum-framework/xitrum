@@ -4,10 +4,9 @@ import java.nio.charset.Charset
 import scala.collection.mutable.{Map => MMap}
 import scala.util.control.NonFatal
 
-import org.jboss.netty.channel.{ChannelHandler, SimpleChannelUpstreamHandler, ChannelHandlerContext, MessageEvent, ExceptionEvent, Channels}
-import org.jboss.netty.handler.codec.http.{HttpHeaders, HttpMethod, HttpRequest}
-import org.jboss.netty.handler.codec.http.multipart.{Attribute, DefaultHttpDataFactory, DiskAttribute, DiskFileUpload, FileUpload, HttpPostRequestDecoder, InterfaceHttpData}
-import ChannelHandler.Sharable
+import org.jboss.netty.channel.{Channel, ChannelHandler, SimpleChannelUpstreamHandler, ChannelHandlerContext, ChannelStateEvent, MessageEvent, ExceptionEvent, Channels}
+import org.jboss.netty.handler.codec.http.{DefaultHttpResponse, HttpHeaders, HttpMethod, HttpRequest, HttpChunk, HttpResponseStatus, HttpVersion}
+import org.jboss.netty.handler.codec.http.multipart.{Attribute, DefaultHttpDataFactory, DiskAttribute, DiskFileUpload, FileUpload, HttpPostRequestDecoder, InterfaceHttpData, HttpData}
 import InterfaceHttpData.HttpDataType
 
 import xitrum.Config
@@ -23,85 +22,142 @@ object BodyParser {
 
   // Creating factory should be after the above for the factory to take effect of the settings
 
-  // TODO: Use chunk mode, remove HttpChunkAggregator, see org.jboss.netty.example.http.upload.HttpRequestHandler
-  //val factory = new DefaultHttpDataFactory(DefaultHttpDataFactory.MINSIZE)  // Save to disk if size exceeds MINSIZE
+  // https://github.com/ngocdaothanh/xitrum/issues/77
+  // Save a field to disk if its size exceeds MINSIZE
+  val factory = new DefaultHttpDataFactory(DefaultHttpDataFactory.MINSIZE)
 
-  // "Save to disk if size exceeds MINSIZE" only works in chunk mode, not compatible with HttpChunkAggregator
-  // When the file is too big, it will cause java.lang.NullPointerException: buffer (AbstractDiskHttpData.java:173)
-  val factory = new DefaultHttpDataFactory(Config.xitrum.request.maxSizeInMB * 1024 * 1024)
+  // Limit each field, including file upload
+  if (Config.xitrum.request.maxSizeInBytes > 0)
+    factory.setMaxLimit(Config.xitrum.request.maxSizeInBytes)
 }
 
-@Sharable
+// Based on the file upload example in Netty.
 class BodyParser extends SimpleChannelUpstreamHandler with BadClientSilencer {
   import BodyParser._
 
+  private[this] var decoder: HttpPostRequestDecoder = _
+  private[this] var env:     HandlerEnv             = _
+
+  private[this] var readingChunks = false
+  private[this] var bytesReceived = 0L
+
+  override def channelClosed(ctx: ChannelHandlerContext, e: ChannelStateEvent) {
+    if (decoder != null) decoder.cleanFiles()
+  }
+
   override def messageReceived(ctx: ChannelHandlerContext, e: MessageEvent) {
-    val m = e.getMessage
-    if (!m.isInstanceOf[HandlerEnv]) {
-      ctx.sendUpstream(e)
-      return
-    }
-
-    val handlerEnv = m.asInstanceOf[HandlerEnv]
-    val request    = handlerEnv.request
-
+    val m       = e.getMessage
+    val channel = ctx.getChannel
     try {
-      val (bodyParams, fileUploadParams) = decodeRequestBody(request)
-      handlerEnv.bodyParams       = bodyParams
-      handlerEnv.fileUploadParams = fileUploadParams
-      ctx.sendUpstream(e)
+      if (m.isInstanceOf[HttpRequest] && !readingChunks) {
+        handleHttpRequest(ctx, m.asInstanceOf[HttpRequest])
+      } else if (m.isInstanceOf[HttpChunk] && readingChunks) {
+        handleHttpChunk(ctx, m.asInstanceOf[HttpChunk])
+      } else {
+        ctx.sendUpstream(e)
+      }
     } catch {
       case NonFatal(e) =>
-        val msg = "Could not parse body of request: " + request
+        val msg = "Could not parse content body of request: " + m
         log.warn(msg, e)
-        ctx.getChannel.close()
+        channel.close()
     }
   }
 
   //----------------------------------------------------------------------------
 
-  // May throw exception on decode error
-  private def decodeRequestBody(request: HttpRequest): (MMap[String, Seq[String]], MMap[String, Seq[FileUpload]]) = {
-    val method = request.getMethod
-    if (!method.equals(HttpMethod.POST) && !method.equals(HttpMethod.PUT) && !method.equals(HttpMethod.PATCH))
-      return (MMap.empty[String, Seq[String]], MMap.empty[String, Seq[FileUpload]])
+  private def handleHttpRequest(ctx: ChannelHandlerContext, request: HttpRequest) {
+    // See ChannelPipelineFactory
+    // This is the first Xitrum handler, log the request
+    if (log.isTraceEnabled) log.trace(request.toString)
 
-    val requestContentType = HttpHeaders.getHeader(request, HttpHeaders.Names.CONTENT_TYPE)
-    if (requestContentType == null)
-      return (MMap.empty[String, Seq[String]], MMap.empty[String, Seq[FileUpload]])
+    // Clean previous files if any
+    if (decoder != null) decoder.cleanFiles()
+    decoder = new HttpPostRequestDecoder(factory, request)
+
+    val channel        = ctx.getChannel
+    env                = new HandlerEnv
+    env.channel        = channel
+    env.request        = request
+    env.response       = {  // The default response is empty 200 OK
+      // http://en.wikipedia.org/wiki/HTTP_persistent_connection
+      // In HTTP 1.1 all connections are considered persistent unless declared otherwise
+      val ret = new DefaultHttpResponse(HttpVersion.HTTP_1_1, HttpResponseStatus.OK)
+      HttpHeaders.setContentLength(ret, 0)
+      ret
+    }
+    env.bodyTextParams = MMap.empty[String, Seq[String]]
+    env.bodyFileParams = MMap.empty[String, Seq[FileUpload]]
+
+    bytesReceived = 0
+    if (request.isChunked) {
+      readingChunks = true
+    } else if (readHttpDataAllReceive()) {
+      Channels.fireMessageReceived(ctx, env)
+    } else {
+      warnBigRequest(channel)
+    }
+  }
+
+  private def handleHttpChunk(ctx: ChannelHandlerContext, chunk: HttpChunk) {
+    val channel = ctx.getChannel
+
+    decoder.offer(chunk)
+    if (!readHttpDataChunkByChunk()) warnBigRequest(channel)
+
+    if (chunk.isLast) {
+      if (readHttpDataAllReceive()) {
+        Channels.fireMessageReceived(ctx, env)
+        readingChunks = false
+      } else {
+        warnBigRequest(channel)
+      }
+    }
+  }
+
+  private def readHttpDataChunkByChunk(): Boolean = {
+    try {
+      var sizeOk = true
+      while (sizeOk && decoder.hasNext()) {
+        val data = decoder.next()
+        if (data != null) {
+          sizeOk = checkSize(data)
+          if (sizeOk) putDataToEnv(data)
+        }
+      }
+      sizeOk
+    } catch {
+      case e: HttpPostRequestDecoder.EndOfDataDecoderException =>
+        // End
+        true
+    }
+  }
+
+  // May throw exception on decode error
+  private def readHttpDataAllReceive(): Boolean = {
+    val method = env.request.getMethod
+    if (!method.equals(HttpMethod.POST) &&
+        !method.equals(HttpMethod.PUT) &&
+        !method.equals(HttpMethod.PATCH))
+      return true
+
+    val requestContentType = HttpHeaders.getHeader(env.request, HttpHeaders.Names.CONTENT_TYPE)
+    if (requestContentType == null) return true
 
     val requestContentTypeLowerCase = requestContentType.toLowerCase
     if (!requestContentTypeLowerCase.startsWith(HttpHeaders.Values.APPLICATION_X_WWW_FORM_URLENCODED) &&
         !requestContentTypeLowerCase.startsWith(HttpHeaders.Values.MULTIPART_FORM_DATA))
-      return (MMap.empty[String, Seq[String]], MMap.empty[String, Seq[FileUpload]])
+      return true
 
-    val decoder = new HttpPostRequestDecoder(factory, request)
-    val datas   = decoder.getBodyHttpDatas
-
-    val bodyParams = MMap.empty[String, Seq[String]]
-    val fileParams = MMap.empty[String, Seq[FileUpload]]
-
-    val it = datas.iterator
-    while (it.hasNext()) {
-      val data     = it.next()
-      val dataType = data.getHttpDataType
-
-      if (dataType == HttpDataType.Attribute) {
-        val attribute = data.asInstanceOf[Attribute]
-        val name      = attribute.getName
-        val value     = attribute.getValue
-        putOrAppendString(bodyParams, name, value)
-      } else if (dataType == HttpDataType.FileUpload) {
-        val fileUpload = data.asInstanceOf[FileUpload]
-        if (fileUpload.isCompleted && fileUpload.length > 0) {  // Skip empty file
-          val name = fileUpload.getName
-          sanitizeFileUploadFilename(fileUpload)
-          putOrAppendFileUpload(fileParams, name, fileUpload)
-        }
-      }
+    val datas  = decoder.getBodyHttpDatas
+    val it     = datas.iterator
+    var sizeOk = true
+    while (sizeOk && it.hasNext()) {
+      val data = it.next()
+      sizeOk = checkSize(data)
+      if (sizeOk) putDataToEnv(data)
     }
-
-    (bodyParams, fileParams)
+    sizeOk
   }
 
   private def sanitizeFileUploadFilename(fileUpload: FileUpload) {
@@ -127,5 +183,37 @@ class BodyParser extends SimpleChannelUpstreamHandler with BadClientSilencer {
       val values = map(key)
       map(key) = values :+ value
     }
+  }
+
+  /** @return true if OK */
+  private def checkSize(data: InterfaceHttpData): Boolean = {
+    val hd = data.asInstanceOf[HttpData]
+    bytesReceived + hd.length <= Config.xitrum.request.maxSizeInBytes
+  }
+
+  private def putDataToEnv(data: InterfaceHttpData) {
+    val dataType = data.getHttpDataType
+    if (dataType == HttpDataType.Attribute) {
+      val attribute = data.asInstanceOf[Attribute]
+      val name      = attribute.getName
+      val value     = attribute.getValue
+      putOrAppendString(env.bodyTextParams, name, value)
+      bytesReceived += attribute.length
+    } else if (dataType == HttpDataType.FileUpload) {
+      val fileUpload = data.asInstanceOf[FileUpload]
+      val length     = fileUpload.length
+      if (fileUpload.isCompleted && length > 0) {  // Skip empty file
+        val name = fileUpload.getName
+        sanitizeFileUploadFilename(fileUpload)
+        putOrAppendFileUpload(env.bodyFileParams, name, fileUpload)
+        bytesReceived += length
+      }
+    }
+  }
+
+  private def warnBigRequest(channel: Channel) {
+    val msg = "Request content body is too big, see xitrum.request.maxSizeInMB in xitrum.conf"
+    log.warn(msg)
+    channel.close()
   }
 }

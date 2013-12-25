@@ -13,23 +13,23 @@ import xitrum.scope.request.{FileUploadParams, Params, PathInfo}
  * Env is basically a map for sharing data between handlers. But for more
  * typesafe, fixed data variables are put inside.
  */
-class HandlerEnv extends MHashMap[String, Any] {
-  var channel:          Channel          = null
+class HandlerEnv extends MHashMap[Any, Any] {
+  var channel: Channel = null
 
-  var request:          HttpRequest      = null  // Set by Request2Env
-  var response:         HttpResponse     = null  // Set before the response is sent to client
+  var request:  HttpRequest  = null  // Set by Request2Env
+  var response: HttpResponse = null  // Set before the response is sent to client
 
   // Set by UriParser
-  var pathInfo:         PathInfo         = null
-  var queryParams:      Params           = null
+  var pathInfo:    PathInfo = null
+  var queryParams: Params   = null
 
   // Set by BodyParser
-  var bodyParams:       Params           = null
-  var fileUploadParams: FileUploadParams = null  // The filename has been sanitized for insecure character
+  var bodyTextParams: Params           = null
+  var bodyFileParams: FileUploadParams = null  // The filename has been sanitized for insecure character
 
   // Set by Dispatcher
-  var route:            Route            = null  // The matched route
-  var pathParams:       Params           = null  // The above params are real from the request, this one is logical from the request URL
+  var route:      Route  = null  // The matched route
+  var pathParams: Params = null  // The above params are real from the request, this one is logical from the request URL
 
   /**
    * The merge of all text params (queryParams, bodyParams, and pathParams),
@@ -48,7 +48,7 @@ class HandlerEnv extends MHashMap[String, Any] {
 
     // The order is important because we want the later to overwrite the former
     ret ++= queryParams
-    ret ++= bodyParams
+    ret ++= bodyTextParams
     ret ++= pathParams
 
     ret

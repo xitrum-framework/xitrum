@@ -8,13 +8,13 @@ import HttpHeaders.Names._
 import HttpMethod._
 import HttpResponseStatus._
 
-import xitrum.Config
+import xitrum.{Config, Log}
 import xitrum.etag.Etag
 import xitrum.handler.HandlerEnv
 import xitrum.util.{ChannelBufferToBytes, Gzip, Mime}
 
 @Sharable
-class Env2Response extends SimpleChannelDownstreamHandler {
+class Env2Response extends SimpleChannelDownstreamHandler with Log {
   override def writeRequested(ctx: ChannelHandlerContext, e: MessageEvent) {
     val m = e.getMessage
     if (!m.isInstanceOf[HandlerEnv]) {
@@ -36,6 +36,10 @@ class Env2Response extends SimpleChannelDownstreamHandler {
     // Keep alive, channel reading resuming/closing etc. are handled
     // by the code that sends the response (Responder#respond)
     Channels.write(ctx, future, response)
+
+    // See ChannelPipelineFactory
+    // This is the last Xitrum handler, log the response
+    if (log.isTraceEnabled) log.trace(response.toString)
   }
 
   //----------------------------------------------------------------------------
@@ -71,7 +75,7 @@ class Env2Response extends SimpleChannelDownstreamHandler {
       compareAndSetETag(request, response, etag1)
     } else {
       // It's not useful to calculate ETag for big response
-      if (channelBuffer.readableBytes > Config.xitrum.staticFile.maxSizeInKBOfCachedFiles * 1024) return false
+      if (channelBuffer.readableBytes > Config.xitrum.staticFile.maxSizeInBytesOfCachedFiles) return false
 
       val etag2 = Etag.forBytes(ChannelBufferToBytes(channelBuffer))
       compareAndSetETag(request, response, etag2)

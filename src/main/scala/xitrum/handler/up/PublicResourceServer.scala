@@ -10,6 +10,7 @@ import HttpResponseStatus._
 import HttpVersion._
 
 import xitrum.Config
+import xitrum.handler.HandlerEnv
 import xitrum.handler.down.{XSendFile, XSendResource}
 import xitrum.etag.NotModified
 import xitrum.util.PathSanitizer
@@ -22,12 +23,13 @@ import xitrum.util.PathSanitizer
 class PublicResourceServer extends SimpleChannelUpstreamHandler with BadClientSilencer {
   override def messageReceived(ctx: ChannelHandlerContext, e: MessageEvent) {
     val m = e.getMessage
-    if (!m.isInstanceOf[HttpRequest]) {
+    if (!m.isInstanceOf[HandlerEnv]) {
       ctx.sendUpstream(e)
       return
     }
 
-    val request = m.asInstanceOf[HttpRequest]
+    val env     = m.asInstanceOf[HandlerEnv]
+    val request = env.request
     if (request.getMethod != GET && request.getMethod != HEAD && request.getMethod != OPTIONS) {
       ctx.sendUpstream(e)
       return
@@ -39,14 +41,16 @@ class PublicResourceServer extends SimpleChannelUpstreamHandler with BadClientSi
       return
     }
 
-    val response = new DefaultHttpResponse(HTTP_1_1, OK)
+    val response = env.response
+    response.setStatus(OK)
     PathSanitizer.sanitize(pathInfo) match {
-      case None => XSendFile.set404Page(response, false)
+      case None =>
+        XSendFile.set404Page(response, false)
 
       case Some(path) =>
         NotModified.setClientCacheAggressively(response)
         XSendResource.setHeader(response, pathInfo.substring("/resources/".length), false)
     }
-    ctx.getChannel.write(response)
+    ctx.getChannel.write(env)
   }
 }

@@ -96,8 +96,8 @@ class SessionConfig(config: TConfig) {
 class StaticFileConfig(config: TConfig) {
   val pathRegex = config.getString("pathRegex").r
 
-  val maxSizeInKBOfCachedFiles = config.getInt("maxSizeInKBOfCachedFiles")
-  val maxNumberOfCachedFiles   = config.getInt("maxNumberOfCachedFiles")
+  val maxSizeInBytesOfCachedFiles = config.getInt("maxSizeInKBOfCachedFiles") * 1024
+  val maxNumberOfCachedFiles      = config.getInt("maxNumberOfCachedFiles")
 
   val revalidate = config.getBoolean("revalidate")
 }
@@ -105,7 +105,7 @@ class StaticFileConfig(config: TConfig) {
 class RequestConfig(config: TConfig) {
   val charsetName          = config.getString("charset")
   val maxInitialLineLength = config.getInt("maxInitialLineLength")
-  val maxSizeInMB          = config.getInt("maxSizeInMB")
+  val maxSizeInBytes       = config.getLong("maxSizeInMB") * 1024 * 1024
   val filteredParams       = config.getStringList("filteredParams").asScala
 
   val charset = Charset.forName(charsetName)

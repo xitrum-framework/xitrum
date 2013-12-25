@@ -16,12 +16,12 @@ object Csrf {
 
   def isValidToken(action: Action): Boolean = {
     // The token must be in the request body for more security
-    val bodyParams     = action.handlerEnv.bodyParams
+    val bodyTextParams = action.handlerEnv.bodyTextParams
     val headers        = action.handlerEnv.request.headers
-    val tokenInRequest = Option(headers.get(X_CSRF_HEADER)).getOrElse(action.param(TOKEN, bodyParams))
+    val tokenInRequest = Option(headers.get(X_CSRF_HEADER)).getOrElse(action.param(TOKEN, bodyTextParams))
 
     // Cleaner for application developers when seeing access log
-    bodyParams.remove(TOKEN)
+    bodyTextParams.remove(TOKEN)
 
     val tokenInSession = action.antiCsrfToken
     tokenInRequest == tokenInSession

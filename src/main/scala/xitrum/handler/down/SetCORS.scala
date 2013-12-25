@@ -8,14 +8,13 @@ import HttpMethod._
 import HttpResponseStatus._
 
 import xitrum.Config
-import Config.xitrum.response.corsAllowOrigins
-import xitrum.Log
-import xitrum.handler.up.RequestAttacher
-import xitrum.handler.{Attachment, HandlerEnv}
+import xitrum.handler.HandlerEnv
 
 @Sharable
-class SetCORS extends ChannelDownstreamHandler with Log {
+class SetCORS extends ChannelDownstreamHandler {
   def handleDownstream(ctx: ChannelHandlerContext, e: ChannelEvent) {
+    import Config.xitrum.response.corsAllowOrigins
+
     if (corsAllowOrigins.isEmpty) {
       ctx.sendDownstream(e)
       return
@@ -27,59 +26,52 @@ class SetCORS extends ChannelDownstreamHandler with Log {
     }
 
     val m = e.asInstanceOf[DownstreamMessageEvent].getMessage
-    if (!m.isInstanceOf[HttpResponse]) {
+    if (!m.isInstanceOf[HandlerEnv]) {
       ctx.sendDownstream(e)
       return
     }
 
-    RequestAttacher.retrieveOrSendDownstream(ctx, e).foreach { request =>
-      val response = m.asInstanceOf[HttpResponse]
+    val env      = m.asInstanceOf[HandlerEnv]
+    val request  = env.request
+    val response = env.response
 
-      // This is the last Xitrum handler, log the response
-      if (log.isTraceEnabled) log.trace(response.toString)
+    val requestOrigin = HttpHeaders.getHeader(request, ORIGIN)
 
-      val requestOrigin = HttpHeaders.getHeader(request, ORIGIN)
-
-      // Access-Control-Allow-Origin
-      if (!response.headers.contains(ACCESS_CONTROL_ALLOW_ORIGIN)) {
-        if (corsAllowOrigins(0).equals("*")) {
-          if (requestOrigin == null || requestOrigin == "null")
-            HttpHeaders.setHeader(response, ACCESS_CONTROL_ALLOW_ORIGIN, "*")
-          else
-            HttpHeaders.setHeader(response, ACCESS_CONTROL_ALLOW_ORIGIN, requestOrigin)
-        } else {
-          if (corsAllowOrigins.contains(requestOrigin)) HttpHeaders.setHeader(response, ACCESS_CONTROL_ALLOW_ORIGIN, requestOrigin)
-        }
+    // Access-Control-Allow-Origin
+    if (!response.headers.contains(ACCESS_CONTROL_ALLOW_ORIGIN)) {
+      if (corsAllowOrigins(0).equals("*")) {
+        if (requestOrigin == null || requestOrigin == "null")
+          HttpHeaders.setHeader(response, ACCESS_CONTROL_ALLOW_ORIGIN, "*")
+        else
+          HttpHeaders.setHeader(response, ACCESS_CONTROL_ALLOW_ORIGIN, requestOrigin)
+      } else {
+        if (corsAllowOrigins.contains(requestOrigin)) HttpHeaders.setHeader(response, ACCESS_CONTROL_ALLOW_ORIGIN, requestOrigin)
       }
-
-      // Access-Control-Allow-Credentials
-      if (!response.headers.contains(ACCESS_CONTROL_ALLOW_CREDENTIALS))
-        HttpHeaders.setHeader(response, ACCESS_CONTROL_ALLOW_CREDENTIALS, true)
-
-      // Access-Control-Allow-Methods
-      if (!response.headers.contains(ACCESS_CONTROL_ALLOW_METHODS)) {
-        val attachment = ctx.getChannel.getAttachment.asInstanceOf[Attachment]
-        if (attachment != null) {
-          attachment.pathInfo match {
-            case Some(pathInfo) =>
-              val allowMethods = OPTIONS +: Config.routes.tryAllMethods(pathInfo)
-              HttpHeaders.setHeader(response, ACCESS_CONTROL_ALLOW_METHODS, allowMethods.mkString(", "))
-
-            case None =>
-              if (response.getStatus == NOT_FOUND)
-                HttpHeaders.setHeader(response, ACCESS_CONTROL_ALLOW_METHODS, OPTIONS.getName)
-              else
-                HttpHeaders.setHeader(response, ACCESS_CONTROL_ALLOW_METHODS, OPTIONS.getName + ", "+ GET.getName + ", " + HEAD.getName)
-          }
-        }
-      }
-
-      // Access-Control-Allow-Headers
-      val accessControlRequestHeaders = HttpHeaders.getHeader(request, ACCESS_CONTROL_REQUEST_HEADERS)
-      if (accessControlRequestHeaders != null && !response.headers.contains(ACCESS_CONTROL_ALLOW_HEADERS))
-        HttpHeaders.setHeader(response, ACCESS_CONTROL_ALLOW_HEADERS, accessControlRequestHeaders)
-
-      ctx.sendDownstream(e)
     }
+
+    // Access-Control-Allow-Credentials
+    if (!response.headers.contains(ACCESS_CONTROL_ALLOW_CREDENTIALS))
+      HttpHeaders.setHeader(response, ACCESS_CONTROL_ALLOW_CREDENTIALS, true)
+
+    // Access-Control-Allow-Methods
+    if (!response.headers.contains(ACCESS_CONTROL_ALLOW_METHODS)) {
+      val pathInfo = env.pathInfo
+      if (pathInfo == null) {
+        if (response.getStatus == NOT_FOUND)
+          HttpHeaders.setHeader(response, ACCESS_CONTROL_ALLOW_METHODS, OPTIONS.getName)
+        else
+          HttpHeaders.setHeader(response, ACCESS_CONTROL_ALLOW_METHODS, OPTIONS.getName + ", "+ GET.getName + ", " + HEAD.getName)
+      } else {
+        val allowMethods = OPTIONS +: Config.routes.tryAllMethods(pathInfo)
+        HttpHeaders.setHeader(response, ACCESS_CONTROL_ALLOW_METHODS, allowMethods.mkString(", "))
+      }
+    }
+
+    // Access-Control-Allow-Headers
+    val accessControlRequestHeaders = HttpHeaders.getHeader(request, ACCESS_CONTROL_REQUEST_HEADERS)
+    if (accessControlRequestHeaders != null && !response.headers.contains(ACCESS_CONTROL_ALLOW_HEADERS))
+      HttpHeaders.setHeader(response, ACCESS_CONTROL_ALLOW_HEADERS, accessControlRequestHeaders)
+
+    ctx.sendDownstream(e)
   }
 }

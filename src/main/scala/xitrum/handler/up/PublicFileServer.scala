@@ -11,6 +11,7 @@ import HttpResponseStatus._
 import HttpVersion._
 
 import xitrum.Config
+import xitrum.handler.HandlerEnv
 import xitrum.handler.down.XSendFile
 import xitrum.etag.NotModified
 import xitrum.util.PathSanitizer
@@ -23,12 +24,13 @@ import xitrum.util.PathSanitizer
 class PublicFileServer extends SimpleChannelUpstreamHandler with BadClientSilencer {
   override def messageReceived(ctx: ChannelHandlerContext, e: MessageEvent) {
     val m = e.getMessage
-    if (!m.isInstanceOf[HttpRequest]) {
+    if (!m.isInstanceOf[HandlerEnv]) {
       ctx.sendUpstream(e)
       return
     }
 
-    val request = m.asInstanceOf[HttpRequest]
+    val env     = m.asInstanceOf[HandlerEnv]
+    val request = env.request
     if (request.getMethod != GET && request.getMethod != HEAD && request.getMethod != OPTIONS) {
       ctx.sendUpstream(e)
       return
@@ -40,25 +42,27 @@ class PublicFileServer extends SimpleChannelUpstreamHandler with BadClientSilenc
       return
     }
 
+    val response = env.response
     sanitizedAbsStaticPath(pathInfo) match {
       case None =>
-        val response = new DefaultHttpResponse(HTTP_1_1, NOT_FOUND)
+        response.setStatus(NOT_FOUND)
         XSendFile.set404Page(response, false)
-        ctx.getChannel.write(response)
+        ctx.getChannel.write(env)
 
       case Some(abs) =>
         val file = new File(abs)
         if (file.isFile && file.exists) {
-          val response = new DefaultHttpResponse(HTTP_1_1, OK)
+          response.setStatus(OK)
           if (request.getMethod == OPTIONS) {
-            ctx.getChannel.write(response)
+            ctx.getChannel.write(env)
             return
           }
+
           if (!Config.xitrum.staticFile.revalidate)
             NotModified.setClientCacheAggressively(response)
 
           XSendFile.setHeader(response, abs, false)
-          ctx.getChannel.write(response)
+          ctx.getChannel.write(env)
         } else {
           ctx.sendUpstream(e)
         }

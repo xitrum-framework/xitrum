@@ -4,6 +4,8 @@ import org.jboss.netty.channel.{Channel, ChannelHandler, ChannelFuture, ChannelF
 import org.jboss.netty.handler.codec.http.{HttpHeaders, HttpRequest, HttpResponse, HttpVersion}
 import ChannelHandler.Sharable
 
+import xitrum.handler.HandlerEnv
+
 object NoPipelining {
   def pauseReading(channel: Channel) {
     channel.setReadable(false)
@@ -61,14 +63,10 @@ class NoPipelining extends SimpleChannelUpstreamHandler with BadClientSilencer {
     }
 
     val m = e.getMessage
-    if (!m.isInstanceOf[HttpRequest]) {
+    if (!m.isInstanceOf[HandlerEnv]) {
       ctx.sendUpstream(e)
       return
     }
-
-    // See ChannelPipelineFactory
-    // This is the first Xitrum handler, log the request
-    if (log.isTraceEnabled) log.trace(m.asInstanceOf[HttpRequest].toString)
 
     NoPipelining.pauseReading(channel)
     ctx.sendUpstream(e)

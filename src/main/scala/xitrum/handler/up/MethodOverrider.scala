@@ -26,10 +26,10 @@ class MethodOverrider extends SimpleChannelUpstreamHandler with BadClientSilence
       return
     }
 
-    val env        = m.asInstanceOf[HandlerEnv]
-    val request    = env.request
-    val method     = request.getMethod
-    val bodyParams = env.bodyParams
+    val env            = m.asInstanceOf[HandlerEnv]
+    val request        = env.request
+    val method         = request.getMethod
+    val bodyTextParams = env.bodyTextParams
 
     // WebSocket should be GET
     // "Connection" header must contain "Upgrade" (ex: "keep-alive, Upgrade")
@@ -43,11 +43,11 @@ class MethodOverrider extends SimpleChannelUpstreamHandler with BadClientSilence
         upgradeHeader    != null && upgradeHeader.toLowerCase == Values.WEBSOCKET.toLowerCase) {
       request.setMethod(HttpMethodWebSocket)
     } else if (method == POST) {
-      val _methods = bodyParams.get("_method")
+      val _methods = bodyTextParams.get("_method")
       if (_methods != null && _methods.nonEmpty) {
         val _method = new HttpMethod(_methods.get(0).toUpperCase)
         request.setMethod(_method)
-        bodyParams.remove("_method")  // Cleaner for application developers when seeing access log
+        bodyTextParams.remove("_method")  // Cleaner for application developers when seeing access log
       }
     }
 

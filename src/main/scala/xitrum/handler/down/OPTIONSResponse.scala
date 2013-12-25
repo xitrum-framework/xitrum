@@ -10,8 +10,7 @@ import HttpResponseStatus._
 
 import xitrum.Config
 import xitrum.etag.NotModified
-import xitrum.handler.up.RequestAttacher
-import xitrum.handler.{AccessLog, Attachment, HandlerEnv}
+import xitrum.handler.{AccessLog, HandlerEnv}
 
 @Sharable
 class OPTIONSResponse extends ChannelDownstreamHandler {
@@ -22,35 +21,35 @@ class OPTIONSResponse extends ChannelDownstreamHandler {
     }
 
     val m = e.asInstanceOf[DownstreamMessageEvent].getMessage
-    if (!m.isInstanceOf[HttpResponse]) {
+    if (!m.isInstanceOf[HandlerEnv]) {
       ctx.sendDownstream(e)
       return
     }
 
-    RequestAttacher.retrieveOrSendDownstream(ctx, e).foreach { request =>
-      if (request.getMethod == OPTIONS) {
-        AccessLog.logOPTIONS(request)
-        val response = m.asInstanceOf[HttpResponse]
-        val attachment = ctx.getChannel.getAttachment.asInstanceOf[Attachment]
-        if (attachment != null) {
-          attachment.pathInfo match {
-            // Case of dynamic resources.
-            case Some(pathInfo) =>
-              if (!Config.routes.tryAllMethods(pathInfo).isEmpty)
-                response.setStatus(NO_CONTENT)
-              else
-                response.setStatus(NOT_FOUND)
+    val env      = m.asInstanceOf[HandlerEnv]
+    val request  = env.request
+    val response = env.response
+    val pathInfo = env.pathInfo
 
-            // Case of static files/resources.
-            case None =>
-              if (response.getStatus != NOT_FOUND) response.setStatus(NO_CONTENT)
-          }
-        }
-        HttpHeaders.setContentLength(response, 0)
-        NotModified.setClientCacheAggressively(response)
-        response.setContent(ChannelBuffers.EMPTY_BUFFER)
+    if (request.getMethod == OPTIONS) {
+      AccessLog.logOPTIONS(request)
+
+      if (pathInfo == null) {
+        // Static files/resources
+        if (response.getStatus != NOT_FOUND) response.setStatus(NO_CONTENT)
+      } else {
+        // Dynamic resources
+        if (!Config.routes.tryAllMethods(pathInfo).isEmpty)
+          response.setStatus(NO_CONTENT)
+        else
+          response.setStatus(NOT_FOUND)
       }
-      ctx.sendDownstream(e)
+
+      HttpHeaders.setContentLength(response, 0)
+      NotModified.setClientCacheAggressively(response)
+      response.setContent(ChannelBuffers.EMPTY_BUFFER)
     }
+
+    ctx.sendDownstream(e)
   }
 }

@@ -66,11 +66,11 @@ object AccessLog extends Log {
     action.request.getMethod + " " +
     action.request.getUri + " -> " +
     className +
-    (if (env.queryParams.nonEmpty)      ", queryParams: "      + RequestEnv.inspectParamsWithFilter(env.queryParams)      else "") +
-    (if (env.bodyParams.nonEmpty)       ", bodyParams: "       + RequestEnv.inspectParamsWithFilter(env.bodyParams)       else "") +
-    (if (env.pathParams.nonEmpty)       ", pathParams: "       + RequestEnv.inspectParamsWithFilter(env.pathParams)       else "") +
-    (if (env.fileUploadParams.nonEmpty) ", fileUploadParams: " + RequestEnv.inspectParamsWithFilter(env.fileUploadParams) else "") +
-    (if (action.isDoneResponding)       " -> "                 + action.response.getStatus.getCode                        else "") +
+    (if (env.queryParams.nonEmpty)    ", queryParams: "    + RequestEnv.inspectParamsWithFilter(env.queryParams)    else "") +
+    (if (env.bodyTextParams.nonEmpty) ", bodyTextParams: " + RequestEnv.inspectParamsWithFilter(env.bodyTextParams) else "") +
+    (if (env.pathParams.nonEmpty)     ", pathParams: "     + RequestEnv.inspectParamsWithFilter(env.pathParams)     else "") +
+    (if (env.bodyFileParams.nonEmpty) ", bodyFileParams: " + RequestEnv.inspectParamsWithFilter(env.bodyFileParams) else "") +
+    (if (action.isDoneResponding)       " -> "             + action.response.getStatus.getCode                      else "") +
     ", " + dt + " [ms]"
   }
 

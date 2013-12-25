@@ -6,6 +6,7 @@ import org.jboss.netty.handler.codec.http.{DefaultHttpResponse, HttpHeaders, Htt
 import ChannelHandler.Sharable
 
 import xitrum.Config
+import xitrum.handler.HandlerEnv
 import xitrum.util.UrlSafeBase64
 
 object BasicAuth {
@@ -61,24 +62,22 @@ object BasicAuth {
 @Sharable
 class BasicAuth extends SimpleChannelUpstreamHandler with BadClientSilencer {
   override def messageReceived(ctx: ChannelHandlerContext, e: MessageEvent) {
-    val m = e.getMessage
-    if (!m.isInstanceOf[HttpRequest]) {
-      ctx.sendUpstream(e)
-      return
-    }
-
     val go = Config.xitrum.basicAuth
     if (go.isEmpty) {
       ctx.sendUpstream(e)
       return
     }
 
-    val channel  = ctx.getChannel
-    val request  = m.asInstanceOf[HttpRequest]
-    val response = new DefaultHttpResponse(HttpVersion.HTTP_1_1, HttpResponseStatus.UNAUTHORIZED)
-    val g        = go.get
+    val m = e.getMessage
+    if (!m.isInstanceOf[HandlerEnv]) {
+      ctx.sendUpstream(e)
+      return
+    }
 
-    val passed = BasicAuth.basicAuth(channel, request, response, g.realm) { (username, password) =>
+    val env = m.asInstanceOf[HandlerEnv]
+    val g   = go.get
+
+    val passed = BasicAuth.basicAuth(env.channel, env.request, env.response, g.realm) { (username, password) =>
       g.username == username && g.password == password
     }
     if (passed) ctx.sendUpstream(e)

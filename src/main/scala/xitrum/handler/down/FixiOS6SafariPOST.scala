@@ -5,8 +5,8 @@ import org.jboss.netty.handler.codec.http.{HttpHeaders, HttpMethod, HttpRequest,
 import ChannelHandler.Sharable
 
 import xitrum.Log
+import xitrum.handler.HandlerEnv
 import xitrum.etag.NotModified
-import xitrum.handler.up.RequestAttacher
 
 /**
  * This handler sets "no-cache" for POST response to fix the problem with
@@ -23,18 +23,18 @@ class FixiOS6SafariPOST extends ChannelDownstreamHandler with Log {
     }
 
     val m = e.asInstanceOf[DownstreamMessageEvent].getMessage
-    if (!m.isInstanceOf[HttpResponse]) {
+    if (!m.isInstanceOf[HandlerEnv]) {
       ctx.sendDownstream(e)
       return
     }
 
-    RequestAttacher.retrieveOrSendDownstream(ctx, e).foreach { request =>
-      val response = m.asInstanceOf[HttpResponse]
+    val env      = m.asInstanceOf[HandlerEnv]
+    val request  = env.request
+    val response = env.response
 
-      if (request.getMethod == HttpMethod.POST && !response.headers.contains(HttpHeaders.Names.CACHE_CONTROL))
-        NotModified.setNoClientCache(response)
+    if (request.getMethod == HttpMethod.POST && !response.headers.contains(HttpHeaders.Names.CACHE_CONTROL))
+      NotModified.setNoClientCache(response)
 
-      ctx.sendDownstream(e)
-    }
+    ctx.sendDownstream(e)
   }
 }

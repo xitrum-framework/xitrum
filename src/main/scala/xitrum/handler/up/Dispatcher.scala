@@ -13,7 +13,7 @@ import com.esotericsoftware.reflectasm.ConstructorAccess
 
 import xitrum.{Action, ActionActor, Config}
 import xitrum.etag.NotModified
-import xitrum.handler.{AccessLog, Attachment, HandlerEnv}
+import xitrum.handler.{AccessLog, HandlerEnv}
 import xitrum.handler.down.XSendFile
 import xitrum.scope.request.PathInfo
 import xitrum.sockjs.SockJsPrefix
@@ -59,16 +59,6 @@ class Dispatcher extends SimpleChannelUpstreamHandler with BadClientSilencer {
     val request  = env.request
     val pathInfo = env.pathInfo
 
-    val attached = ctx.getChannel.getAttachment.asInstanceOf[Attachment]
-    val attachment = {
-      if (attached != null) {
-        Attachment(attached.request, Some(pathInfo))
-      } else {
-        Attachment(request, Some(pathInfo))
-      }
-    }
-    // pathInfo will be checked in OPTIONSResponse
-    ctx.getChannel.setAttachment(attachment)
     if (request.getMethod == HttpMethod.OPTIONS) {
       ctx.getChannel.write(env)
       return

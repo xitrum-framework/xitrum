@@ -44,7 +44,7 @@ trait ParamAccess {
 
   def param[T](key: String, coll: Params = null)(implicit e: T DefaultsTo String, m: Manifest[T]): T = {
     if (m <:< manifestFileUpload) {
-      fileUploadParams.get(key) match {
+      bodyFileParams.get(key) match {
         case None         => throw new MissingParam(key)
         case Some(values) => values(0).asInstanceOf[T]
       }
@@ -57,7 +57,7 @@ trait ParamAccess {
 
   def paramo[T](key: String, coll: Params = null)(implicit e: T DefaultsTo String, m: Manifest[T]): Option[T] = {
     if (m <:< manifestFileUpload) {
-      fileUploadParams.get(key).map { values => values(0).asInstanceOf[T] }
+      bodyFileParams.get(key).map { values => values(0).asInstanceOf[T] }
     } else {
       val coll2  = if (coll == null) textParams else coll
       val values = coll2.get(key)
@@ -68,7 +68,7 @@ trait ParamAccess {
 
   def params[T](key: String, coll: Params = null)(implicit e: T DefaultsTo String, m: Manifest[T]): Seq[T] = {
     if (m <:< manifestFileUpload) {
-      fileUploadParams.get(key) match {
+      bodyFileParams.get(key) match {
         case None         => throw new MissingParam(key)
         case Some(values) => values.asInstanceOf[Seq[T]]
       }
@@ -81,7 +81,7 @@ trait ParamAccess {
 
   def paramso[T](key: String, coll: Params = null)(implicit e: T DefaultsTo String, m: Manifest[T]): Option[Seq[T]] = {
     if (m <:< manifestFileUpload) {
-      fileUploadParams.get(key).asInstanceOf[Option[Seq[T]]]
+      bodyFileParams.get(key).asInstanceOf[Option[Seq[T]]]
     } else {
       val coll2 = if (coll == null) textParams else coll
       coll2.get(key).map { values => values.map(convertText[T](_)) }
