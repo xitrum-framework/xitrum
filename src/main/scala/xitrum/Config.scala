@@ -10,6 +10,8 @@ import scala.util.control.NonFatal
 import com.typesafe.config.{Config => TConfig, ConfigFactory}
 import akka.actor.ActorSystem
 
+import org.jboss.netty.handler.codec.http.multipart.DefaultHttpDataFactory
+
 import xitrum.scope.session.SessionStore
 import xitrum.routing.{DiscoveredAcc, RouteCollection, RouteCollector, SerializableRouteCollection, SockJsClassAndOptions}
 import xitrum.view.TemplateEngine
@@ -103,12 +105,17 @@ class StaticFileConfig(config: TConfig) {
 }
 
 class RequestConfig(config: TConfig) {
-  val charsetName          = config.getString("charset")
-  val charset              = Charset.forName(charsetName)
-  val maxInitialLineLength = config.getInt("maxInitialLineLength")
-  val maxSizeInBytes       = config.getLong("maxSizeInMB") * 1024 * 1024
-  val tmpUploadDir         = getTmpUploadDir()
-  val filteredParams       = config.getStringList("filteredParams").asScala
+  val charsetName               = config.getString("charset")
+  val charset                   = Charset.forName(charsetName)
+  val maxInitialLineLength      = config.getInt("maxInitialLineLength")
+  val maxSizeInBytes            = config.getLong("maxSizeInMB") * 1024 * 1024
+  val maxSizeInBytesOfUploadMem =
+    if (config.hasPath("maxSizeInKBOfUploadMem"))
+      config.getLong("maxSizeInKBOfUploadMem") * 1024
+    else
+      DefaultHttpDataFactory.MINSIZE
+  val tmpUploadDir              = getTmpUploadDir()
+  val filteredParams            = config.getStringList("filteredParams").asScala
 
   private def getTmpUploadDir(): String = {
     // null means system tmp directory

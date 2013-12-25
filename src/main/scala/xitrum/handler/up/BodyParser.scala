@@ -23,8 +23,8 @@ object BodyParser {
   // Creating factory should be after the above for the factory to take effect of the settings
 
   // https://github.com/ngocdaothanh/xitrum/issues/77
-  // Save a field to disk if its size exceeds MINSIZE
-  val factory = new DefaultHttpDataFactory(DefaultHttpDataFactory.MINSIZE)
+  // Save a field to disk if its size exceeds maxSizeInBytesOfUploadMem
+  val factory = new DefaultHttpDataFactory(Config.xitrum.request.maxSizeInBytesOfUploadMem)
 
   // Limit each field, including file upload
   if (Config.xitrum.request.maxSizeInBytes > 0)
