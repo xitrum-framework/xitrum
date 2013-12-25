@@ -4,7 +4,7 @@ import java.io.File
 
 import xitrum.{Action, Config}
 
-trait Renderer {
+trait Renderer extends GetActionClassDefaultsToCurrentAction {
   this: Action =>
 
   var renderedView: Any = null
@@ -59,26 +59,17 @@ trait Renderer {
     }
   }
 
-  def renderView(location: Class[_ <: Action], options: Map[String, Any]): String =
-    renderView(layout _, location, options)
+  def renderView[T <: Action : Manifest](customLayout: () => Any, options: Map[String, Any]): String =
+    renderView(customLayout, getActionClass[T], options)
 
-  def renderView(customLayout: () => Any, options: Map[String, Any]): String =
-    renderView(customLayout, getClass, options)
+  def renderView[T <: Action : Manifest](customLayout: () => Any): String =
+    renderView(customLayout, getActionClass[T], Map.empty)
 
-  def renderView(customLayout: () => Any, location: Class[_ <: Action]): String =
-    renderView(customLayout, location, Map())
+  def renderView[T <: Action : Manifest](options: Map[String, Any]): String =
+    renderView(layout _, getActionClass[T], options)
 
-  def renderView(customLayout: () => Any): String =
-    renderView(customLayout, getClass, Map())
-
-  def renderView(location: Class[_ <: Action]): String =
-    renderView(layout _, location, Map())
-
-  def renderView(options: Map[String, Any]): String =
-    renderView(layout _, getClass, options)
-
-  def renderView(): String =
-    renderView(layout _, getClass, Map())
+  def renderView[T <: Action : Manifest](): String =
+    renderView(layout _, getActionClass[T], Map.empty)
 
   //----------------------------------------------------------------------------
 
@@ -94,14 +85,11 @@ trait Renderer {
         ""
     }
 
-  def renderViewNoLayout(location: Class[_ <: Action]): String =
-    renderViewNoLayout(location, Map())
+  def renderViewNoLayout[T <: Action : Manifest](options: Map[String, Any]): String =
+    renderViewNoLayout(getActionClass[T], options)
 
-  def renderViewNoLayout(options: Map[String, Any]): String =
-    renderViewNoLayout(getClass, options)
-
-  def renderViewNoLayout(): String =
-    renderViewNoLayout(getClass, Map())
+  def renderViewNoLayout[T <: Action : Manifest](): String =
+    renderViewNoLayout(getActionClass[T], Map.empty)
 
   //----------------------------------------------------------------------------
 
@@ -115,14 +103,11 @@ trait Renderer {
         ""
     }
 
-  def renderFragment(fragment: String, options: Map[String, Any]): String =
-    renderFragment(getClass, fragment, options)
+  def renderFragment[T <: Action : Manifest](fragment: String, options: Map[String, Any]): String =
+    renderFragment(getActionClass[T], fragment, options)
 
-  def renderFragment(location: Class[_ <: Action], fragment: String): String =
-    renderFragment(location, fragment, Map())
-
-  def renderFragment(fragment: String): String =
-    renderFragment(getClass, fragment, Map())
+  def renderFragment[T <: Action : Manifest](fragment: String): String =
+    renderFragment(getActionClass[T], fragment, Map.empty)
 
   //----------------------------------------------------------------------------
 

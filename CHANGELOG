@@ -2,6 +2,7 @@
 * #77  Remove HttpChunkAggregator to avoid memory problem with file upload
 * #258 Add config for saving upload files to memory or to disk temporarily
 * #257 Add config for directory path to save uploaded files temporarily
+* #256 Replace syntax respondView(classOf[OtherAction]) with respondView[OtherAction]()
 * #255 Update Netty from 3.8.0 to 3.9.0
 
 2.14:

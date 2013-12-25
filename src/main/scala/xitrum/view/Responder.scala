@@ -21,7 +21,7 @@ import xitrum.util.Json
  * When responding text, charset is automatically set, as advised by Google:
  * http://code.google.com/speed/page-speed/docs/rendering.html#SpecifyCharsetEarly
  */
-trait Responder extends Js with Flash {
+trait Responder extends Js with Flash with GetActionClassDefaultsToCurrentAction {
   this: Action =>
 
   //----------------------------------------------------------------------------
@@ -246,27 +246,21 @@ trait Responder extends Js with Flash {
     respondText(string, "text/html")
   }
 
-  def respondView(location: Class[_ <: Action], options: Map[String, Any]): ChannelFuture =
-    respondView(layout _, location, options)
+  def respondView[T <: Action : Manifest](customLayout: () => Any, options: Map[String, Any]): ChannelFuture = {
+    respondView(customLayout, getActionClass[T], options)
+  }
 
-  def respondView(customLayout: () => Any, options: Map[String, Any]): ChannelFuture =
-    respondView(customLayout, getClass, options)
+  def respondView[T <: Action : Manifest](customLayout: () => Any): ChannelFuture = {
+    respondView(customLayout, getActionClass[T], Map.empty)
+  }
 
-  def respondView(customLayout: () => Any, location: Class[_ <: Action]): ChannelFuture =
-    respondView(customLayout, location, Map())
+  def respondView[T <: Action : Manifest](options: Map[String, Any]): ChannelFuture = {
+    respondView(layout _, getActionClass[T], options)
+  }
 
-  def respondView(customLayout: () => Any): ChannelFuture =
-    respondView(customLayout, getClass, Map())
-
-  def respondView(location: Class[_ <: Action]): ChannelFuture =
-    respondView(layout _, location, Map())
-
-  def respondView(options: Map[String, Any]): ChannelFuture =
-    respondView(layout _, getClass, options)
-
-  def respondView(): ChannelFuture =
-    respondView(layout _, getClass, Map())
-
+  def respondView[T <: Action : Manifest](): ChannelFuture = {
+    respondView(layout _, getActionClass[T], Map.empty)
+  }
   //----------------------------------------------------------------------------
 
   /** Content-Type header is set to "text/html" */
@@ -275,14 +269,13 @@ trait Responder extends Js with Flash {
     respondText(string, "text/html")
   }
 
-  def respondViewNoLayout(location: Class[_ <: Action]): ChannelFuture =
-    respondViewNoLayout(location, Map())
+  def respondViewNoLayout[T <: Action : Manifest](options: Map[String, Any]): ChannelFuture = {
+    respondViewNoLayout(getActionClass[T], options)
+  }
 
-  def respondViewNoLayout(options: Map[String, Any]): ChannelFuture =
-    respondViewNoLayout(getClass, options)
-
-  def respondViewNoLayout(): ChannelFuture =
-    respondViewNoLayout(getClass, Map())
+  def respondViewNoLayout[T <: Action : Manifest](): ChannelFuture = {
+    respondViewNoLayout(getActionClass[T], Map.empty)
+  }
 
   //----------------------------------------------------------------------------
 
@@ -408,4 +401,5 @@ trait Responder extends Js with Flash {
     }
     null  // This may cause NPE on double response if the ChannelFuture result is used
   }
+
 }

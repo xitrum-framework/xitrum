@@ -27,7 +27,7 @@ object PoLoader {
       Parser.parsePo(string).foreach(buffer.append(_))
     }
 
-    val ret = buffer.foldLeft(new Po(Map())) { (acc, e) => acc ++ e }
+    val ret = buffer.foldLeft(new Po(Map.empty)) { (acc, e) => acc ++ e }
     cache(language) = ret
     ret
   }
