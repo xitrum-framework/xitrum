@@ -1,5 +1,6 @@
 2.15:
 * #77  Remove HttpChunkAggregator to avoid memory problem with file upload
+* #257 Add path config for temporary directory to save uploaded files
 * #255 Update Netty from 3.8.0 to 3.9.0
 
 2.14:

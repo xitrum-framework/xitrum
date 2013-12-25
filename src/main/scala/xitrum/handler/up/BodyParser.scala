@@ -15,10 +15,10 @@ import xitrum.scope.request.{FileUploadParams, Params, PathInfo}
 
 object BodyParser {
   DiskAttribute.deleteOnExitTemporaryFile  = true  // Should delete file on exit (in normal exit)
-  DiskAttribute.baseDirectory              = null  // System temp directory
+  DiskAttribute.baseDirectory              = Config.xitrum.request.tmpUploadDir
 
   DiskFileUpload.deleteOnExitTemporaryFile = true  // Should delete file on exit (in normal exit)
-  DiskFileUpload.baseDirectory             = null  // System temp directory
+  DiskFileUpload.baseDirectory             = Config.xitrum.request.tmpUploadDir
 
   // Creating factory should be after the above for the factory to take effect of the settings
 
@@ -35,14 +35,12 @@ object BodyParser {
 class BodyParser extends SimpleChannelUpstreamHandler with BadClientSilencer {
   import BodyParser._
 
-  private[this] var decoder: HttpPostRequestDecoder = _
-  private[this] var env:     HandlerEnv             = _
-
-  private[this] var readingChunks = false
-  private[this] var bytesReceived = 0L
+  private[this] var env: HandlerEnv = _
+  private[this] var readingChunks   = false
+  private[this] var bytesReceived   = 0L
 
   override def channelClosed(ctx: ChannelHandlerContext, e: ChannelStateEvent) {
-    if (decoder != null) decoder.cleanFiles()
+    if (env != null && env.bodyDecoder != null) env.bodyDecoder.cleanFiles()
   }
 
   override def messageReceived(ctx: ChannelHandlerContext, e: MessageEvent) {
@@ -72,12 +70,14 @@ class BodyParser extends SimpleChannelUpstreamHandler with BadClientSilencer {
     if (log.isTraceEnabled) log.trace(request.toString)
 
     // Clean previous files if any
-    if (decoder != null) decoder.cleanFiles()
-    decoder = new HttpPostRequestDecoder(factory, request)
+    if (env != null && env.bodyDecoder != null) env.bodyDecoder.cleanFiles()
 
     val channel        = ctx.getChannel
     env                = new HandlerEnv
     env.channel        = channel
+    env.bodyDecoder    = new HttpPostRequestDecoder(factory, request)
+    env.bodyTextParams = MMap.empty[String, Seq[String]]
+    env.bodyFileParams = MMap.empty[String, Seq[FileUpload]]
     env.request        = request
     env.response       = {  // The default response is empty 200 OK
       // http://en.wikipedia.org/wiki/HTTP_persistent_connection
@@ -86,8 +86,6 @@ class BodyParser extends SimpleChannelUpstreamHandler with BadClientSilencer {
       HttpHeaders.setContentLength(ret, 0)
       ret
     }
-    env.bodyTextParams = MMap.empty[String, Seq[String]]
-    env.bodyFileParams = MMap.empty[String, Seq[FileUpload]]
 
     bytesReceived = 0
     if (request.isChunked) {
@@ -102,7 +100,7 @@ class BodyParser extends SimpleChannelUpstreamHandler with BadClientSilencer {
   private def handleHttpChunk(ctx: ChannelHandlerContext, chunk: HttpChunk) {
     val channel = ctx.getChannel
 
-    decoder.offer(chunk)
+    env.bodyDecoder.offer(chunk)
     if (!readHttpDataChunkByChunk()) warnBigRequest(channel)
 
     if (chunk.isLast) {
@@ -118,8 +116,8 @@ class BodyParser extends SimpleChannelUpstreamHandler with BadClientSilencer {
   private def readHttpDataChunkByChunk(): Boolean = {
     try {
       var sizeOk = true
-      while (sizeOk && decoder.hasNext()) {
-        val data = decoder.next()
+      while (sizeOk && env.bodyDecoder.hasNext()) {
+        val data = env.bodyDecoder.next()
         if (data != null) {
           sizeOk = checkSize(data)
           if (sizeOk) putDataToEnv(data)
@@ -149,7 +147,7 @@ class BodyParser extends SimpleChannelUpstreamHandler with BadClientSilencer {
         !requestContentTypeLowerCase.startsWith(HttpHeaders.Values.MULTIPART_FORM_DATA))
       return true
 
-    val datas  = decoder.getBodyHttpDatas
+    val datas  = env.bodyDecoder.getBodyHttpDatas
     val it     = datas.iterator
     var sizeOk = true
     while (sizeOk && it.hasNext()) {

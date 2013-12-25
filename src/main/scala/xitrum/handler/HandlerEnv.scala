@@ -4,6 +4,7 @@ import scala.collection.mutable.{HashMap => MHashMap, Map => MMap}
 
 import org.jboss.netty.channel.Channel
 import org.jboss.netty.handler.codec.http.{HttpRequest, HttpResponse}
+import org.jboss.netty.handler.codec.http.multipart.HttpPostRequestDecoder
 
 import xitrum.Action
 import xitrum.routing.Route
@@ -14,22 +15,21 @@ import xitrum.scope.request.{FileUploadParams, Params, PathInfo}
  * typesafe, fixed data variables are put inside.
  */
 class HandlerEnv extends MHashMap[Any, Any] {
-  var channel: Channel = null
-
-  var request:  HttpRequest  = null  // Set by Request2Env
-  var response: HttpResponse = null  // Set before the response is sent to client
+  // Set by BodyParser
+  var channel:        Channel                = _
+  var bodyDecoder:    HttpPostRequestDecoder = _  // Used to clean upload files when connection is closed or response is sent
+  var bodyTextParams: Params                 = _
+  var bodyFileParams: FileUploadParams       = _  // The filename has been sanitized for insecure character
+  var request:        HttpRequest            = _
+  var response:       HttpResponse           = _
 
   // Set by UriParser
-  var pathInfo:    PathInfo = null
-  var queryParams: Params   = null
-
-  // Set by BodyParser
-  var bodyTextParams: Params           = null
-  var bodyFileParams: FileUploadParams = null  // The filename has been sanitized for insecure character
+  var pathInfo:    PathInfo = _
+  var queryParams: Params   = _
 
   // Set by Dispatcher
-  var route:      Route  = null  // The matched route
-  var pathParams: Params = null  // The above params are real from the request, this one is logical from the request URL
+  var route:      Route  = _  // The matched route
+  var pathParams: Params = _  // The above params are real from the request, this one is logical from the request URL
 
   /**
    * The merge of all text params (queryParams, bodyParams, and pathParams),

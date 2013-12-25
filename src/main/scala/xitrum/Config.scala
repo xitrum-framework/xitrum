@@ -104,11 +104,33 @@ class StaticFileConfig(config: TConfig) {
 
 class RequestConfig(config: TConfig) {
   val charsetName          = config.getString("charset")
+  val charset              = Charset.forName(charsetName)
   val maxInitialLineLength = config.getInt("maxInitialLineLength")
   val maxSizeInBytes       = config.getLong("maxSizeInMB") * 1024 * 1024
+  val tmpUploadDir         = getTmpUploadDir()
   val filteredParams       = config.getStringList("filteredParams").asScala
 
-  val charset = Charset.forName(charsetName)
+  private def getTmpUploadDir(): String = {
+    // null means system tmp directory
+    val ret = if (config.hasPath("tmpUploadDir")) config.getString("tmpUploadDir") else null
+
+    // Check
+    if (ret != null) {
+      val dir = new File(ret)
+      if (!dir.exists) {
+        if (dir.mkdirs()) {
+          Log.info("tmpUploadDir specified in xitrum.conf does not exist so Xitrum has created it")
+        } else {
+          throw new Exception("tmpUploadDir specified in xitrum.conf does not exist and Xitrum couldn't create it")
+        }
+      } else if (!dir.isDirectory) {
+        throw new Exception("tmpUploadDir specified in xitrum.conf is not a directory")
+      } else if (!dir.canWrite) {
+        throw new Exception("Xitrum cannot write to tmpUploadDir specified in xitrum.conf")
+      }
+    }
+    ret
+  }
 }
 
 class ResponseConfig(config: TConfig) {

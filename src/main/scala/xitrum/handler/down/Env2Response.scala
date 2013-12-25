@@ -37,6 +37,8 @@ class Env2Response extends SimpleChannelDownstreamHandler with Log {
     // by the code that sends the response (Responder#respond)
     Channels.write(ctx, future, response)
 
+    if (env.bodyDecoder != null) env.bodyDecoder.cleanFiles()
+
     // See ChannelPipelineFactory
     // This is the last Xitrum handler, log the response
     if (log.isTraceEnabled) log.trace(response.toString)
