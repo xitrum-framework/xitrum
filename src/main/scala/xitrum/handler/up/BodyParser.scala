@@ -40,7 +40,10 @@ class BodyParser extends SimpleChannelUpstreamHandler with BadClientSilencer {
   private[this] var bytesReceived   = 0L
 
   override def channelClosed(ctx: ChannelHandlerContext, e: ChannelStateEvent) {
-    if (env != null && env.bodyDecoder != null) env.bodyDecoder.cleanFiles()
+    if (env != null && env.bodyDecoder != null) {
+      env.bodyDecoder.cleanFiles()
+      env.bodyDecoder = null
+    }
   }
 
   override def messageReceived(ctx: ChannelHandlerContext, e: MessageEvent) {
