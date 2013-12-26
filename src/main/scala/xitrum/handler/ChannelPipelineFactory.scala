@@ -100,28 +100,28 @@ class DefaultHttpChannelPipelineFactory extends CPF {
     // Upstream
 
     ret.addLast("HttpRequestDecoder",   new HttpRequestDecoder(Config.xitrum.request.maxInitialLineLength, 8192, 8192))
-    ret.addLast("bodyParser",           new BodyParser)          // Request is converted to HandlerEnv here
-    ret.addLast("noPipelining",         noPipelining)
-    ret.addLast("baseUrlRemover",       baseUrlRemover)
+    ret.addLast("BodyParser",           new BodyParser)          // Request is converted to HandlerEnv here
+    ret.addLast("NoPipelining",         noPipelining)
+    ret.addLast("BaseUrlRemover",       baseUrlRemover)
     if (Config.xitrum.basicAuth.isDefined)
-    ret.addLast("basicAuth",            basicAuth)
-    ret.addLast("publicFileServer",     publicFileServer)
-    ret.addLast("publicResourceServer", publicResourceServer)
-    ret.addLast("uriParser",            uriParser)
-    ret.addLast("methodOverrider",      methodOverrider)
-    ret.addLast("dispatcher",           dispatcher)
+    ret.addLast("BasicAuth",            basicAuth)
+    ret.addLast("PublicFileServer",     publicFileServer)
+    ret.addLast("PublicResourceServer", publicResourceServer)
+    ret.addLast("UriParser",            uriParser)
+    ret.addLast("MethodOverrider",      methodOverrider)
+    ret.addLast("Dispatcher",           dispatcher)
 
     // Downstream
 
     ret.addLast("HttpResponseEncoder", new HttpResponseEncoder)
     ret.addLast("ChunkedWriteHandler", new ChunkedWriteHandler)  // For writing ChunkedFile, at XSendFile
-    ret.addLast("env2Response",        env2Response)
-    ret.addLast("setCORS",             setCORS)
+    ret.addLast("Env2Response",        env2Response)
+    ret.addLast("SetCORS",             setCORS)
     ret.addLast("OPTIONSResponse",     OPTIONSResponse)
-    ret.addLast("fixiOS6SafariPOST",   fixiOS6SafariPOST)
-    ret.addLast("xSendFile",           xSendFile)
-    ret.addLast("xSendResource",       xSendResource)
-    ret.addLast("responseCacher",      responseCacher)
+    ret.addLast("FixiOS6SafariPOST",   fixiOS6SafariPOST)
+    ret.addLast("XSendFile",           xSendFile)
+    ret.addLast("XSendResource",       xSendResource)
+    ret.addLast("ResponseCacher",      responseCacher)
 
     ret
   }
