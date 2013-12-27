@@ -58,20 +58,7 @@
 
         <div id="types" class="types members">
               <h3>Type Members</h3>
-              <ol><li name="xitrum.handler.Attachment" visbl="pub" data-isabs="false" fullComment="no" group="Ungrouped">
-      <a id="AttachmentextendsProductwithSerializable"></a>
-      <a id="Attachment:Attachment"></a>
-      <h4 class="signature">
-      <span class="modifier_kind">
-        <span class="modifier"></span>
-        <span class="kind">case class</span>
-      </span>
-      <span class="symbol">
-        <a href="Attachment.html"><span class="name">Attachment</span></a><span class="params">(<span name="request">request: <span class="extype" name="org.jboss.netty.handler.codec.http.HttpRequest">HttpRequest</span></span>, <span name="pathInfo">pathInfo: <span class="extype" name="scala.Option">Option</span>[<a href="../scope/request/PathInfo.html" class="extype" name="xitrum.scope.request.PathInfo">PathInfo</a>]</span>)</span><span class="result"> extends <span class="extype" name="scala.Product">Product</span> with <span class="extype" name="scala.Serializable">Serializable</span></span>
-      </span>
-      </h4>
-      <p class="comment cmt">Shared data among all handlers in pipeline.</p>
-    </li><li name="xitrum.handler.DefaultHttpChannelPipelineFactory" visbl="pub" data-isabs="false" fullComment="no" group="Ungrouped">
+              <ol><li name="xitrum.handler.DefaultHttpChannelPipelineFactory" visbl="pub" data-isabs="false" fullComment="no" group="Ungrouped">
       <a id="DefaultHttpChannelPipelineFactoryextendsChannelPipelineFactory"></a>
       <a id="DefaultHttpChannelPipelineFactory:DefaultHttpChannelPipelineFactory"></a>
       <h4 class="signature">
@@ -98,7 +85,7 @@
       </h4>
       
     </li><li name="xitrum.handler.HandlerEnv" visbl="pub" data-isabs="false" fullComment="no" group="Ungrouped">
-      <a id="HandlerEnvextendsHashMap[String,Any]"></a>
+      <a id="HandlerEnvextendsHashMap[Any,Any]"></a>
       <a id="HandlerEnv:HandlerEnv"></a>
       <h4 class="signature">
       <span class="modifier_kind">
@@ -106,7 +93,7 @@
         <span class="kind">class</span>
       </span>
       <span class="symbol">
-        <a href="HandlerEnv.html"><span class="name">HandlerEnv</span></a><span class="result"> extends <span class="extype" name="scala.collection.mutable.HashMap">HashMap</span>[<span class="extype" name="scala.Predef.String">String</span>, <span class="extype" name="scala.Any">Any</span>]</span>
+        <a href="HandlerEnv.html"><span class="name">HandlerEnv</span></a><span class="result"> extends <span class="extype" name="scala.collection.mutable.HashMap">HashMap</span>[<span class="extype" name="scala.Any">Any</span>, <span class="extype" name="scala.Any">Any</span>]</span>
       </span>
       </h4>
       <p class="comment cmt">Env is basically a map for sharing data between handlers.</p>
