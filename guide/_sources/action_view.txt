@@ -253,7 +253,7 @@ src/main/scala/mypackage/AppAction.scala
   import xitrum.Action
 
   trait AppAction extends Action {
-    override def layout = renderViewNoLayout(classOf[AppAction])
+    override def layout = renderViewNoLayout[AppAction]()
   }
 
 src/main/scalate/mypackage/AppAction.jade
@@ -375,7 +375,7 @@ scr/main/scalate/mypackage/MyAction/_myfragment.jade:
 
 ::
 
-  renderFragment(classOf[MyAction], "myfragment")
+  renderFragment[MyAction]("myfragment")
 
 If MyAction is the current action, you can skip it:
 
