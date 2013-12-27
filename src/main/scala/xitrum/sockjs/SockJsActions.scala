@@ -246,7 +246,7 @@ trait NonWebSocketSessionReceiverActionActor extends NonWebSocketSessionActionAc
         val action: Action = this
         val props          = Props(new NonWebSocketSession(Some(self), pathPrefix, action))
         val actorRef1      = context.system.actorOf(props)
-        SockJsAction.actorRegistry ! Registry.Register(sessionId, actorRef1)
+        SockJsAction.actorRegistry ! Registry.RegisterByRef(sessionId, actorRef1)
 
         context.become({
           case Registry.RegisterResultOk(`sessionId`, actorRef2) =>
