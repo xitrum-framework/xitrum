@@ -1,4 +1,4 @@
-package xitrum.handler.down
+package xitrum.handler.outbound
 
 import io.netty.buffer.Unpooled
 import io.netty.channel.{ChannelHandler, ChannelHandlerContext, ChannelOutboundHandlerAdapter, ChannelPromise}
@@ -41,7 +41,7 @@ class Env2Response extends ChannelOutboundHandlerAdapter with Log {
       env.bodyDecoder = null
     }
 
-    // See ChannelPipelineFactory
+    // See DefaultHttpChannelInitializer
     // This is the last Xitrum handler, log the response
     if (log.isTraceEnabled) log.trace(response.toString)
   }

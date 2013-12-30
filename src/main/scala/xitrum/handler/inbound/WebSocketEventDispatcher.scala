@@ -1,4 +1,4 @@
-package xitrum.handler.up
+package xitrum.handler.inbound
 
 import scala.runtime.ScalaRunTime
 import akka.actor.ActorRef

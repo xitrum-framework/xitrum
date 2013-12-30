@@ -1,4 +1,4 @@
-package xitrum.handler.up
+package xitrum.handler.inbound
 
 import java.io.File
 import scala.collection.mutable.{Map => MMap}
@@ -14,7 +14,7 @@ import com.esotericsoftware.reflectasm.ConstructorAccess
 import xitrum.{Action, ActionActor, Config}
 import xitrum.etag.NotModified
 import xitrum.handler.{AccessLog, HandlerEnv}
-import xitrum.handler.down.XSendFile
+import xitrum.handler.outbound.XSendFile
 import xitrum.scope.request.PathInfo
 import xitrum.sockjs.SockJsPrefix
 

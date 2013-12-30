@@ -4,7 +4,7 @@ import scala.util.Random
 
 import xitrum.{Config, Action, SockJsActor, WebSocketActor}
 import xitrum.etag.Etag
-import xitrum.handler.up.PublicFileServer
+import xitrum.handler.inbound.PublicFileServer
 
 trait Url {
   this: Action =>

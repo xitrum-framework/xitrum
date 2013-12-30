@@ -8,8 +8,8 @@ import io.netty.handler.codec.http.{HttpRequestDecoder, HttpResponseEncoder}
 import io.netty.handler.stream.ChunkedWriteHandler
 
 import xitrum.Config
-import xitrum.handler.up._
-import xitrum.handler.down._
+import xitrum.handler.inbound._
+import xitrum.handler.outbound._
 
 /**
  * Sharable handlers are put here so that they can be easily picked up by apps

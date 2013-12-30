@@ -1,4 +1,4 @@
-//package xitrum.handler.up
+//package xitrum.handler.inbound
 //
 //import io.netty.channel.{Channel, ChannelHandlerContext}
 //import io.netty.handler.codec.frame.FrameDecoder

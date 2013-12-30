@@ -1,4 +1,4 @@
-package xitrum.handler.down
+package xitrum.handler.outbound
 
 import scala.collection.immutable.SortedMap
 import scala.collection.mutable.{Map => MMap}

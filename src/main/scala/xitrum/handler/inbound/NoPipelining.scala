@@ -1,4 +1,4 @@
-package xitrum.handler.up
+package xitrum.handler.inbound
 
 import io.netty.channel.{Channel, ChannelHandler, ChannelFuture, ChannelFutureListener, ChannelHandlerContext, SimpleChannelInboundHandler}
 import io.netty.handler.codec.http.{HttpHeaders, HttpRequest, HttpResponse, HttpVersion}

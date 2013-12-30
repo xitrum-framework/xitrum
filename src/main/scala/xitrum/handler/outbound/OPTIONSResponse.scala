@@ -1,4 +1,4 @@
-package xitrum.handler.down
+package xitrum.handler.outbound
 
 import io.netty.buffer.Unpooled
 import io.netty.channel.{ChannelHandler, ChannelHandlerContext, ChannelOutboundHandlerAdapter, ChannelPromise}

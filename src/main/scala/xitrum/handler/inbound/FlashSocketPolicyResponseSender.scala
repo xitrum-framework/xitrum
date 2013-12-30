@@ -1,4 +1,4 @@
-//package xitrum.handler.up
+//package xitrum.handler.inbound
 //
 //import org.jboss.netty.buffer.ChannelBuffers
 //import org.jboss.netty.channel.{ChannelHandler, SimpleChannelUpstreamHandler, ChannelHandlerContext, MessageEvent}

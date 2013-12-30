@@ -1,4 +1,4 @@
-package xitrum.handler.down
+package xitrum.handler.outbound
 
 import java.io.{File, RandomAccessFile}
 import io.netty.channel.{ChannelHandler, ChannelHandlerContext, ChannelFuture, DefaultFileRegion, ChannelFutureListener, ChannelOutboundHandlerAdapter, ChannelPromise}
@@ -12,7 +12,7 @@ import HttpVersion._
 import xitrum.{Config, Log}
 import xitrum.etag.{Etag, NotModified}
 import xitrum.handler.{AccessLog, HandlerEnv}
-import xitrum.handler.up.NoPipelining
+import xitrum.handler.inbound.NoPipelining
 import xitrum.util.{Gzip, Mime}
 import io.netty.buffer.Unpooled
 

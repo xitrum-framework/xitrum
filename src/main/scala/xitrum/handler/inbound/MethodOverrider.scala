@@ -1,4 +1,4 @@
-package xitrum.handler.up
+package xitrum.handler.inbound
 
 import io.netty.channel.{ChannelHandler, SimpleChannelInboundHandler, ChannelHandlerContext}
 import ChannelHandler.Sharable

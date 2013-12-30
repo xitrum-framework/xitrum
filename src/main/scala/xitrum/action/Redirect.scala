@@ -8,7 +8,7 @@ import HttpHeaders.Names.LOCATION
 import HttpResponseStatus.FOUND
 
 import xitrum.{Action, Config}
-import xitrum.handler.up.Dispatcher
+import xitrum.handler.inbound.Dispatcher
 
 trait Redirect {
   this: Action =>

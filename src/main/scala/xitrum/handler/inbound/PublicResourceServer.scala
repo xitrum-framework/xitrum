@@ -1,4 +1,4 @@
-package xitrum.handler.up
+package xitrum.handler.inbound
 
 import java.io.File
 
@@ -10,13 +10,13 @@ import HttpResponseStatus._
 
 import xitrum.Config
 import xitrum.handler.HandlerEnv
-import xitrum.handler.down.{XSendFile, XSendResource}
+import xitrum.handler.outbound.{XSendFile, XSendResource}
 import xitrum.etag.NotModified
 import xitrum.util.PathSanitizer
 
 /**
  * Routes /resources/public/xxx URL to resources in classpath.
- * See ChannelPipelineFactory, this handler is put after XSendResource.
+ * See DefaultHttpChannelInitializer, this handler is put after XSendResource.
  */
 @Sharable
 class PublicResourceServer extends SimpleChannelInboundHandler[HandlerEnv] with BadClientSilencer {

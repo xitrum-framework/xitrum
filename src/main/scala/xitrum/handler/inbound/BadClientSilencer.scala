@@ -1,4 +1,4 @@
-package xitrum.handler.up
+package xitrum.handler.inbound
 
 import io.netty.channel.{ChannelHandlerContext, SimpleChannelInboundHandler}
 import xitrum.Log

@@ -1,4 +1,4 @@
-package xitrum.handler.up
+package xitrum.handler.inbound
 
 import java.io.File
 
@@ -11,13 +11,13 @@ import HttpResponseStatus._
 
 import xitrum.Config
 import xitrum.handler.HandlerEnv
-import xitrum.handler.down.XSendFile
+import xitrum.handler.outbound.XSendFile
 import xitrum.etag.NotModified
 import xitrum.util.PathSanitizer
 
 /**
  * Serves static files in "public" directory.
- * See ChannelPipelineFactory, this handler is put after XSendFile.
+ * See DefaultHttpChannelInitializer, this handler is put after XSendFile.
  */
 @Sharable
 class PublicFileServer extends SimpleChannelInboundHandler[HandlerEnv] with BadClientSilencer {

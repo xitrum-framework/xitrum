@@ -1,4 +1,4 @@
-package xitrum.handler.up
+package xitrum.handler.inbound
 
 import io.netty.channel.{ChannelHandler, SimpleChannelInboundHandler, ChannelHandlerContext}
 import io.netty.handler.codec.http.{DefaultHttpResponse, HttpResponseStatus, HttpRequest, HttpVersion}
@@ -6,7 +6,7 @@ import ChannelHandler.Sharable
 
 import xitrum.Config
 import xitrum.handler.HandlerEnv
-import xitrum.handler.down.XSendFile
+import xitrum.handler.outbound.XSendFile
 
 @Sharable
 class BaseUrlRemover extends SimpleChannelInboundHandler[HandlerEnv] with BadClientSilencer {

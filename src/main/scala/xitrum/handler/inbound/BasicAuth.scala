@@ -1,4 +1,4 @@
-package xitrum.handler.up
+package xitrum.handler.inbound
 
 import io.netty.buffer.Unpooled
 import io.netty.channel.{Channel, ChannelHandler, SimpleChannelInboundHandler, ChannelHandlerContext}

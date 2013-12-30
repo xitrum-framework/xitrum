@@ -16,7 +16,7 @@ import xitrum.sockjs.SockJsAction
 
 object Server extends Log {
   /**
-   * Starts with default ChannelPipelineFactory provided by Xitrum.
+   * Starts with default ChannelInitializer provided by Xitrum.
    */
   def start() {
     val default = new DefaultHttpChannelInitializer
@@ -24,11 +24,11 @@ object Server extends Log {
   }
 
   /**
-   * Starts with your custom ChannelPipelineFactory. For an example, see
-   * xitrum.handler.DefaultHttpChannelPipelineFactory.
+   * Starts with your custom ChannelInitializer. For an example, see
+   * xitrum.handler.DefaultHttpChannelInitializer.
    * SSL codec handler will be automatically prepended for HTTPS server.
    */
-  def start(httpChannelPipelineFactory: ChannelInitializer[SocketChannel]) {
+  def start(httpChannelInitializer: ChannelInitializer[SocketChannel]) {
     // Don't know why this doesn't work if put above Config.actorSystem
     //
     // Redirect Akka log to SLF4J
@@ -51,8 +51,8 @@ object Server extends Log {
 
     // Lastly, start the server(s) after necessary things have been prepared
     val portConfig = Config.xitrum.port
-    if (portConfig.http.isDefined)  doStart(false, httpChannelPipelineFactory)
-    if (portConfig.https.isDefined) doStart(true,  httpChannelPipelineFactory)
+    if (portConfig.http.isDefined)  doStart(false, httpChannelInitializer)
+    if (portConfig.https.isDefined) doStart(true,  httpChannelInitializer)
     if (portConfig.flashSocketPolicy.isDefined) FlashSocketPolicyServer.start()
 
     val mode = if (Config.productionMode) "production" else "development"

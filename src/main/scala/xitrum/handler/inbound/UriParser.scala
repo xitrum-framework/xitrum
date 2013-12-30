@@ -1,4 +1,4 @@
-package xitrum.handler.up
+package xitrum.handler.inbound
 
 import java.util.{Map => JMap, List => JList, LinkedHashMap => JLinkedHashMap}
 import scala.collection.mutable.{ArrayBuffer, Map => MMap}

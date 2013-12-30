@@ -1,11 +1,14 @@
-package xitrum.handler.up
+package xitrum.handler.inbound
 
 import java.nio.charset.Charset
 import scala.collection.mutable.{Map => MMap}
 import scala.util.control.NonFatal
 
 import io.netty.channel.{Channel, ChannelHandler, SimpleChannelInboundHandler, ChannelHandlerContext}
-import io.netty.handler.codec.http.{DefaultFullHttpResponse, HttpHeaders, HttpMethod, HttpContent, HttpObject, LastHttpContent, HttpRequest, HttpResponseStatus, HttpVersion}
+import io.netty.handler.codec.http.{
+  HttpRequest, FullHttpRequest, DefaultFullHttpRequest,
+  FullHttpResponse, DefaultFullHttpResponse,
+  HttpHeaders, HttpMethod, HttpContent, HttpObject, LastHttpContent, HttpResponseStatus, HttpVersion}
 import io.netty.handler.codec.http.multipart.{Attribute, DefaultHttpDataFactory, DiskAttribute, DiskFileUpload, FileUpload, HttpPostRequestDecoder, InterfaceHttpData, HttpData}
 import InterfaceHttpData.HttpDataType
 
@@ -45,12 +48,14 @@ class BodyParser extends SimpleChannelInboundHandler[HttpObject] with BadClientS
 
   override def channelRead0(ctx: ChannelHandlerContext, msg: HttpObject) {
     val channel = ctx.channel
+println("--------- msg:\n" + msg)
+println("----\n\n\n\n\n")
     try {
       if (msg.isInstanceOf[HttpRequest] && !readingChunks) {
         handleHttpRequest(ctx, msg.asInstanceOf[HttpRequest])
       } else if (msg.isInstanceOf[HttpContent] && readingChunks) {
         handleHttpChunk(ctx, msg.asInstanceOf[HttpContent])
-      } else {
+      } else if (!msg.isInstanceOf[LastHttpContent]) {
         ctx.fireChannelRead(msg)
       }
     } catch {
@@ -64,50 +69,56 @@ class BodyParser extends SimpleChannelInboundHandler[HttpObject] with BadClientS
   //----------------------------------------------------------------------------
 
   private def handleHttpRequest(ctx: ChannelHandlerContext, request: HttpRequest) {
-    // See ChannelPipelineFactory
+    // See DefaultHttpChannelInitializer
     // This is the first Xitrum handler, log the request
     if (log.isTraceEnabled) log.trace(request.toString)
 
     // Clean previous files if any
     if (env != null && env.bodyDecoder != null) env.bodyDecoder.cleanFiles()
 
-    val channel        = ctx.channel
     env                = new HandlerEnv
-    env.channel        = channel
-    env.bodyDecoder    = new HttpPostRequestDecoder(factory, request)
+    env.channel        = ctx.channel
     env.bodyTextParams = MMap.empty[String, Seq[String]]
     env.bodyFileParams = MMap.empty[String, Seq[FileUpload]]
-    //env.request        = request
-    env.response       = {  // The default response is empty 200 OK
-      // http://en.wikipedia.org/wiki/HTTP_persistent_connection
-      // In HTTP 1.1 all connections are considered persistent unless declared otherwise
-      val ret = new DefaultFullHttpResponse(HttpVersion.HTTP_1_1, HttpResponseStatus.OK)
-      HttpHeaders.setContentLength(ret, 0)
-      ret
-    }
+    env.request        = createEmptyFullHttpRequest(request)
+    env.response       = createEmptyFullResponse()
 
     bytesReceived = 0
     if (HttpHeaders.isTransferEncodingChunked(request)) {
-      readingChunks = true
+      env.bodyDecoder = new HttpPostRequestDecoder(factory, request)
+      readingChunks   = true
     } else if (readHttpDataAllReceive()) {
       ctx.fireChannelRead(env)
     } else {
-      warnBigRequest(channel)
+      closeOnBigRequest(ctx)
     }
   }
 
-  private def handleHttpChunk(ctx: ChannelHandlerContext, chunk: HttpContent) {
-    val channel = ctx.channel
+  private def createEmptyFullHttpRequest(request: HttpRequest): FullHttpRequest = {
+    val ret = new DefaultFullHttpRequest(request.getProtocolVersion, request.getMethod, request.getUri)
+    ret.headers.set(request.headers)
+    ret
+  }
 
+
+  private def createEmptyFullResponse(): FullHttpResponse = {
+    // http://en.wikipedia.org/wiki/HTTP_persistent_connection
+    // In HTTP 1.1 all connections are considered persistent unless declared otherwise
+    val ret = new DefaultFullHttpResponse(HttpVersion.HTTP_1_1, HttpResponseStatus.OK)
+    HttpHeaders.setContentLength(ret, 0)
+    ret
+  }
+
+  private def handleHttpChunk(ctx: ChannelHandlerContext, chunk: HttpContent) {
     env.bodyDecoder.offer(chunk)
-    if (!readHttpDataChunkByChunk()) warnBigRequest(channel)
+    if (!readHttpDataChunkByChunk()) closeOnBigRequest(ctx)
 
     if (chunk.isInstanceOf[LastHttpContent]) {
       if (readHttpDataAllReceive()) {
-        ctx.fireChannelRead(env)
         readingChunks = false
+        ctx.fireChannelRead(env)
       } else {
-        warnBigRequest(channel)
+        closeOnBigRequest(ctx)
       }
     }
   }
@@ -208,9 +219,9 @@ class BodyParser extends SimpleChannelInboundHandler[HttpObject] with BadClientS
     }
   }
 
-  private def warnBigRequest(channel: Channel) {
+  private def closeOnBigRequest(ctx: ChannelHandlerContext) {
     val msg = "Request content body is too big, see xitrum.request.maxSizeInMB in xitrum.conf"
     log.warn(msg)
-    channel.close()
+    ctx.close()
   }
 }
