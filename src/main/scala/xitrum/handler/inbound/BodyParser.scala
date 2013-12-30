@@ -4,12 +4,17 @@ import java.nio.charset.Charset
 import scala.collection.mutable.{Map => MMap}
 import scala.util.control.NonFatal
 
-import io.netty.channel.{Channel, ChannelHandler, SimpleChannelInboundHandler, ChannelHandlerContext}
+import io.netty.channel.{SimpleChannelInboundHandler, ChannelHandlerContext}
 import io.netty.handler.codec.http.{
   HttpRequest, FullHttpRequest, DefaultFullHttpRequest,
   FullHttpResponse, DefaultFullHttpResponse,
-  HttpHeaders, HttpMethod, HttpContent, HttpObject, LastHttpContent, HttpResponseStatus, HttpVersion}
-import io.netty.handler.codec.http.multipart.{Attribute, DefaultHttpDataFactory, DiskAttribute, DiskFileUpload, FileUpload, HttpPostRequestDecoder, InterfaceHttpData, HttpData}
+  HttpHeaders, HttpContent, HttpObject, LastHttpContent, HttpResponseStatus, HttpVersion
+}
+import io.netty.handler.codec.http.multipart.{
+  Attribute, DiskAttribute,
+  FileUpload, DiskFileUpload,
+  DefaultHttpDataFactory, HttpPostRequestDecoder, InterfaceHttpData, HttpData
+}
 import InterfaceHttpData.HttpDataType
 
 import xitrum.Config
@@ -35,7 +40,6 @@ class BodyParser extends SimpleChannelInboundHandler[HttpObject] with BadClientS
   import BodyParser._
 
   private[this] var env: HandlerEnv = _
-  private[this] var readingChunks   = false
   private[this] var bytesReceived   = 0L
 
   override def channelInactive(ctx: ChannelHandlerContext) {
@@ -47,22 +51,17 @@ class BodyParser extends SimpleChannelInboundHandler[HttpObject] with BadClientS
   }
 
   override def channelRead0(ctx: ChannelHandlerContext, msg: HttpObject) {
-    val channel = ctx.channel
-println("--------- msg:\n" + msg)
-println("----\n\n\n\n\n")
     try {
-      if (msg.isInstanceOf[HttpRequest] && !readingChunks) {
+      if (msg.isInstanceOf[HttpRequest])
         handleHttpRequest(ctx, msg.asInstanceOf[HttpRequest])
-      } else if (msg.isInstanceOf[HttpContent] && readingChunks) {
+
+      if (env.bodyDecoder != null && msg.isInstanceOf[HttpContent])
         handleHttpChunk(ctx, msg.asInstanceOf[HttpContent])
-      } else if (!msg.isInstanceOf[LastHttpContent]) {
-        ctx.fireChannelRead(msg)
-      }
     } catch {
       case NonFatal(e) =>
         val m = "Could not parse content body of request: " + msg
         log.warn(m, e)
-        channel.close()
+        ctx.close()
     }
   }
 
@@ -84,13 +83,14 @@ println("----\n\n\n\n\n")
     env.response       = createEmptyFullResponse()
 
     bytesReceived = 0
-    if (HttpHeaders.isTransferEncodingChunked(request)) {
+    try {
       env.bodyDecoder = new HttpPostRequestDecoder(factory, request)
-      readingChunks   = true
-    } else if (readHttpDataAllReceive()) {
-      ctx.fireChannelRead(env)
-    } else {
-      closeOnBigRequest(ctx)
+    } catch {
+      case e: HttpPostRequestDecoder.ErrorDataDecoderException =>
+        ctx.close()
+
+      case e: HttpPostRequestDecoder.IncompatibleDataDecoderException =>
+        ctx.fireChannelRead(env)
     }
   }
 
@@ -99,7 +99,6 @@ println("----\n\n\n\n\n")
     ret.headers.set(request.headers)
     ret
   }
-
 
   private def createEmptyFullResponse(): FullHttpResponse = {
     // http://en.wikipedia.org/wiki/HTTP_persistent_connection
@@ -114,12 +113,7 @@ println("----\n\n\n\n\n")
     if (!readHttpDataChunkByChunk()) closeOnBigRequest(ctx)
 
     if (chunk.isInstanceOf[LastHttpContent]) {
-      if (readHttpDataAllReceive()) {
-        readingChunks = false
-        ctx.fireChannelRead(env)
-      } else {
-        closeOnBigRequest(ctx)
-      }
+      ctx.fireChannelRead(env)
     }
   }
 
@@ -139,33 +133,6 @@ println("----\n\n\n\n\n")
         // End
         true
     }
-  }
-
-  // May throw exception on decode error
-  private def readHttpDataAllReceive(): Boolean = {
-    val method = env.request.getMethod
-    if (!method.equals(HttpMethod.POST) &&
-        !method.equals(HttpMethod.PUT) &&
-        !method.equals(HttpMethod.PATCH))
-      return true
-
-    val requestContentType = HttpHeaders.getHeader(env.request, HttpHeaders.Names.CONTENT_TYPE)
-    if (requestContentType == null) return true
-
-    val requestContentTypeLowerCase = requestContentType.toLowerCase
-    if (!requestContentTypeLowerCase.startsWith(HttpHeaders.Values.APPLICATION_X_WWW_FORM_URLENCODED) &&
-        !requestContentTypeLowerCase.startsWith(HttpHeaders.Values.MULTIPART_FORM_DATA))
-      return true
-
-    val datas  = env.bodyDecoder.getBodyHttpDatas
-    val it     = datas.iterator
-    var sizeOk = true
-    while (sizeOk && it.hasNext()) {
-      val data = it.next()
-      sizeOk = checkSize(data)
-      if (sizeOk) putDataToEnv(data)
-    }
-    sizeOk
   }
 
   private def sanitizeFileUploadFilename(fileUpload: FileUpload) {
