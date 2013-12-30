@@ -37,7 +37,7 @@ class WebSocketEventDispatcher(
     }
 
     if (frame.isInstanceOf[PingWebSocketFrame]) {
-      ctx.channel.writeAndFlush(new PongWebSocketFrame(frame.content))
+      ctx.channel.writeAndFlush(new PongWebSocketFrame(frame.content.retain()))
       actorRef ! WebSocketPing
       if (log.isTraceEnabled) {
         log.trace("[WS in] ping")
@@ -53,7 +53,7 @@ class WebSocketEventDispatcher(
     }
 
     if (frame.isInstanceOf[CloseWebSocketFrame]) {
-      handshaker.close(ctx.channel, frame.asInstanceOf[CloseWebSocketFrame]).addListener(ChannelFutureListener.CLOSE)
+      handshaker.close(ctx.channel, frame.retain().asInstanceOf[CloseWebSocketFrame]).addListener(ChannelFutureListener.CLOSE)
       if (log.isTraceEnabled) log.trace("[WS in] close")
       return
     }

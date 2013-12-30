@@ -68,27 +68,27 @@ trait WebSocketActor extends Actor with Action {
 
   def respondWebSocketText(text: Any): ChannelFuture = {
     if (log.isTraceEnabled) log.trace("[WS out] text: " + text)
-    channel.write(new TextWebSocketFrame(text.toString))
+    channel.writeAndFlush(new TextWebSocketFrame(text.toString))
   }
 
   def respondWebSocketBinary(bytes: Array[Byte]): ChannelFuture = {
     if (log.isTraceEnabled) log.trace("[WS out] binary: " + ScalaRunTime.stringOf(bytes))
-    channel.write(new BinaryWebSocketFrame(Unpooled.wrappedBuffer(bytes)))
+    channel.writeAndFlush(new BinaryWebSocketFrame(Unpooled.wrappedBuffer(bytes)))
   }
 
   def respondWebSocketBinary(byteBuf: ByteBuf): ChannelFuture = {
-    channel.write(new BinaryWebSocketFrame(byteBuf))
+    channel.writeAndFlush(new BinaryWebSocketFrame(byteBuf))
   }
 
   /** There's no respondWebSocketPong, because pong is automatically sent by Xitrum for you. */
   def respondWebSocketPing(): ChannelFuture = {
     if (log.isTraceEnabled) log.trace("[WS out] ping")
-    channel.write(new PingWebSocketFrame)
+    channel.writeAndFlush(new PingWebSocketFrame)
   }
 
   /** Connection is automatically closed. */
   def respondWebSocketClose(): ChannelFuture = {
-    val future = channel.write(new CloseWebSocketFrame)
+    val future = channel.writeAndFlush(new CloseWebSocketFrame)
     future.addListener(ChannelFutureListener.CLOSE)
     if (log.isTraceEnabled) log.trace("[WS out] close")
     future

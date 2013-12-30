@@ -150,7 +150,7 @@ class BodyParser extends SimpleChannelInboundHandler[HttpObject] with BadClientS
       while (sizeOk && env.bodyDecoder.hasNext()) {
         val data = env.bodyDecoder.next()
         if (data != null) {
-          sizeOk = checkSize(data)
+          sizeOk = checkHttpDataSize(data)
           if (sizeOk) putDataToEnv(data)
         }
       }
@@ -188,7 +188,7 @@ class BodyParser extends SimpleChannelInboundHandler[HttpObject] with BadClientS
   }
 
   /** @return true if OK */
-  private def checkSize(data: InterfaceHttpData): Boolean = {
+  private def checkHttpDataSize(data: InterfaceHttpData): Boolean = {
     val hd = data.asInstanceOf[HttpData]
     bytesReceived + hd.length <= Config.xitrum.request.maxSizeInBytes
   }
