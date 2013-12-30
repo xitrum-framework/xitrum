@@ -53,7 +53,7 @@ class Dispatcher extends SimpleChannelInboundHandler[HandlerEnv] with BadClientS
     val pathInfo = env.pathInfo
 
     if (request.getMethod == HttpMethod.OPTIONS) {
-      ctx.writeAndFlush(env)
+      ctx.channel.writeAndFlush(env)
       return
     }
 
@@ -82,7 +82,7 @@ class Dispatcher extends SimpleChannelInboundHandler[HandlerEnv] with BadClientS
         NotModified.setClientCacheAggressively(response)
 
       XSendFile.setHeader(response, staticPath, false)
-      ctx.writeAndFlush(env)
+      ctx.channel.writeAndFlush(env)
       true
     } else {
       false
@@ -95,7 +95,7 @@ class Dispatcher extends SimpleChannelInboundHandler[HandlerEnv] with BadClientS
         val response = env.response
         response.setStatus(NOT_FOUND)
         XSendFile.set404Page(response, false)
-        ctx.writeAndFlush(env)
+        ctx.channel.writeAndFlush(env)
 
       case Some(error404) =>
         env.pathParams = MMap.empty

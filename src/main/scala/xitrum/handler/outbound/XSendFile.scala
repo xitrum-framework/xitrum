@@ -145,7 +145,7 @@ object XSendFile extends Log {
 
             if (ctx.pipeline.get(classOf[SslHandler]) != null) {
               // Cannot use zero-copy with HTTPS
-              val future = ctx.writeAndFlush(new ChunkedFile(raf, offset, length, CHUNK_SIZE), promise)
+              val future = ctx.channel.writeAndFlush(new ChunkedFile(raf, offset, length, CHUNK_SIZE), promise)
               future.addListener(new ChannelFutureListener {
                 def operationComplete(f: ChannelFuture) { raf.close() }
               })
@@ -154,11 +154,7 @@ object XSendFile extends Log {
             } else {
               // No encryption - use zero-copy
               val region = new DefaultFileRegion(raf.getChannel, offset, length)
-
-              // This will cause ClosedChannelException:
-              // Channels.write(ctx, e.getFuture, region)
-
-              val future = ctx.writeAndFlush(region, promise)
+              val future = ctx.channel.writeAndFlush(region, promise)
               future.addListener(new ChannelFutureListener {
                 def operationComplete(f: ChannelFuture) {
                   region.release()
@@ -223,7 +219,7 @@ object XSendFile extends Log {
 class XSendFile extends ChannelOutboundHandlerAdapter {
   import XSendFile._
 
-  override def write(ctx: ChannelHandlerContext, msg: Any, promise: ChannelPromise) {
+  override def write(ctx: ChannelHandlerContext, msg: Object, promise: ChannelPromise) {
     if (!msg.isInstanceOf[HandlerEnv]) {
       ctx.write(msg, promise)
       return

@@ -18,7 +18,7 @@ class BaseUrlRemover extends SimpleChannelInboundHandler[HandlerEnv] with BadCli
         val response = env.response
         response.setStatus(HttpResponseStatus.NOT_FOUND)
         XSendFile.set404Page(response, false)
-        ctx.writeAndFlush(env)
+        ctx.channel.writeAndFlush(env)
 
       case Some(withoutBaseUri) =>
         request.setUri(withoutBaseUri)

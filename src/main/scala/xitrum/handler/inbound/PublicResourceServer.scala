@@ -43,6 +43,6 @@ class PublicResourceServer extends SimpleChannelInboundHandler[HandlerEnv] with 
         NotModified.setClientCacheAggressively(response)
         XSendResource.setHeader(response, pathInfo.substring("/resources/".length), false)
     }
-    ctx.writeAndFlush(env)
+    ctx.channel.writeAndFlush(env)
   }
 }

@@ -37,7 +37,7 @@ class WebSocketEventDispatcher(
     }
 
     if (frame.isInstanceOf[PingWebSocketFrame]) {
-      ctx.writeAndFlush(new PongWebSocketFrame(frame.content))
+      ctx.channel.writeAndFlush(new PongWebSocketFrame(frame.content))
       actorRef ! WebSocketPing
       if (log.isTraceEnabled) {
         log.trace("[WS in] ping")
