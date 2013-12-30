@@ -53,10 +53,16 @@ class BodyParser extends SimpleChannelInboundHandler[HttpObject] with BadClientS
   override def channelRead0(ctx: ChannelHandlerContext, msg: HttpObject) {
     try {
       if (msg.isInstanceOf[HttpRequest])
-        handleHttpRequest(ctx, msg.asInstanceOf[HttpRequest])
+        handleHttpRequestNoncontent(ctx, msg.asInstanceOf[HttpRequest])
 
-      if (env.bodyDecoder != null && msg.isInstanceOf[HttpContent])
-        handleHttpChunk(ctx, msg.asInstanceOf[HttpContent])
+      if (msg.isInstanceOf[HttpContent])
+        handleHttpRequestContent(ctx, msg.asInstanceOf[HttpContent])
+
+      if (msg.isInstanceOf[LastHttpContent]) {
+        ctx.fireChannelRead(env)
+        env           = null
+        bytesReceived = 0
+      }
     } catch {
       case NonFatal(e) =>
         val m = "Could not parse content body of request: " + msg
@@ -67,7 +73,7 @@ class BodyParser extends SimpleChannelInboundHandler[HttpObject] with BadClientS
 
   //----------------------------------------------------------------------------
 
-  private def handleHttpRequest(ctx: ChannelHandlerContext, request: HttpRequest) {
+  private def handleHttpRequestNoncontent(ctx: ChannelHandlerContext, request: HttpRequest) {
     // See DefaultHttpChannelInitializer
     // This is the first Xitrum handler, log the request
     if (log.isTraceEnabled) log.trace(request.toString)
@@ -84,7 +90,9 @@ class BodyParser extends SimpleChannelInboundHandler[HttpObject] with BadClientS
 
     bytesReceived = 0
     try {
-      env.bodyDecoder = new HttpPostRequestDecoder(factory, request)
+      // Otherwise env.bodyDecoder is null (see HandlerEnv's constructor)
+      if (isAPPLICATION_X_WWW_FORM_URLENCODED_or_MULTIPART_FORM_DATA(request))
+        env.bodyDecoder = new HttpPostRequestDecoder(factory, request)
     } catch {
       case e: HttpPostRequestDecoder.ErrorDataDecoderException =>
         ctx.close()
@@ -93,6 +101,25 @@ class BodyParser extends SimpleChannelInboundHandler[HttpObject] with BadClientS
         ctx.fireChannelRead(env)
     }
   }
+
+  private def handleHttpRequestContent(ctx: ChannelHandlerContext, content: HttpContent) {
+    // To save memory, only set env.request.content when env.bodyDecoder is not in action
+    if (env.bodyDecoder == null) {
+      val body   = content.content
+      val length = body.readableBytes
+      if (bytesReceived + length <= Config.xitrum.request.maxSizeInBytes) {
+        env.request.content.writeBytes(body)
+        bytesReceived += length
+      } else {
+        closeOnBigRequest(ctx)
+      }
+    } else {
+      env.bodyDecoder.offer(content)
+      if (!readHttpDataChunkByChunk()) closeOnBigRequest(ctx)
+    }
+  }
+
+  //----------------------------------------------------------------------------
 
   private def createEmptyFullHttpRequest(request: HttpRequest): FullHttpRequest = {
     val ret = new DefaultFullHttpRequest(request.getProtocolVersion, request.getMethod, request.getUri)
@@ -108,13 +135,13 @@ class BodyParser extends SimpleChannelInboundHandler[HttpObject] with BadClientS
     ret
   }
 
-  private def handleHttpChunk(ctx: ChannelHandlerContext, chunk: HttpContent) {
-    env.bodyDecoder.offer(chunk)
-    if (!readHttpDataChunkByChunk()) closeOnBigRequest(ctx)
+  private def isAPPLICATION_X_WWW_FORM_URLENCODED_or_MULTIPART_FORM_DATA(request: HttpRequest): Boolean = {
+    val requestContentType = HttpHeaders.getHeader(request, HttpHeaders.Names.CONTENT_TYPE)
+    if (requestContentType == null) return false
 
-    if (chunk.isInstanceOf[LastHttpContent]) {
-      ctx.fireChannelRead(env)
-    }
+    val requestContentTypeLowerCase = requestContentType.toLowerCase
+    requestContentTypeLowerCase.startsWith(HttpHeaders.Values.APPLICATION_X_WWW_FORM_URLENCODED) ||
+    requestContentTypeLowerCase.startsWith(HttpHeaders.Values.MULTIPART_FORM_DATA)
   }
 
   private def readHttpDataChunkByChunk(): Boolean = {
