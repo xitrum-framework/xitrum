@@ -5,7 +5,7 @@ import org.json4s.JsonDSL._
 import org.json4s.native._
 import org.json4s.native.JsonMethods._
 
-import org.jboss.netty.handler.codec.http.HttpResponseStatus
+import io.netty.handler.codec.http.HttpResponseStatus
 
 import xitrum.{Action, Config}
 import xitrum.annotation.{First, DELETE, GET, PATCH, POST, PUT, SOCKJS, WEBSOCKET}

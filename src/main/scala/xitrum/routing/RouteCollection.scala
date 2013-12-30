@@ -3,7 +3,7 @@ package xitrum.routing
 import scala.annotation.tailrec
 import scala.collection.mutable.{ArrayBuffer, Map => MMap}
 
-import org.jboss.netty.handler.codec.http.HttpMethod
+import io.netty.handler.codec.http.HttpMethod
 
 import xitrum.{Action, Log}
 import xitrum.annotation.Swagger
@@ -291,7 +291,7 @@ class RouteCollection(
 
   /** @return Option[(firsts, lasts, others)] */
   private def matchMethod(httpMethod: HttpMethod): Option[(Seq[Route], Seq[Route], Seq[Route])] = {
-    val methodName = httpMethod.getName
+    val methodName = httpMethod.name
     if (methodName == "GET")       return Some(firstGETs,       lastGETs,       otherGETs)
     if (methodName == "POST")      return Some(firstPOSTs,      lastPOSTs,      otherPOSTs)
     if (methodName == "PUT")       return Some(firstPUTs,       lastPUTs,       otherPUTs)

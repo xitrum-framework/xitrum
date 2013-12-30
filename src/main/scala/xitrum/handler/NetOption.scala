@@ -3,7 +3,8 @@ package xitrum.handler
 import java.net.InetSocketAddress
 import scala.util.control.NonFatal
 
-import org.jboss.netty.bootstrap.ServerBootstrap
+import io.netty.bootstrap.ServerBootstrap
+import io.netty.channel.ChannelOption
 import xitrum.Config
 
 object NetOption {
@@ -12,10 +13,10 @@ object NetOption {
     // But that's still not optimal.
     // See http://lionet.livejournal.com/42016.html and the
     // "Tune Linux for many connections" section in the Xitrum guide
-    bootstrap.setOption("backlog",          1024)
-    bootstrap.setOption("reuseAddress",     true)
-    bootstrap.setOption("child.tcpNoDelay", true)
-    bootstrap.setOption("child.keepAlive",  true)
+    bootstrap.option(ChannelOption.SO_BACKLOG,   Int.box(1024))
+    bootstrap.option(ChannelOption.SO_REUSEADDR, Boolean.box(true))
+    bootstrap.childOption(ChannelOption.TCP_NODELAY,  Boolean.box(true))
+    bootstrap.childOption(ChannelOption.SO_KEEPALIVE, Boolean.box(true))
   }
 
   /** Stops the JVM process if cannot bind to the port. */

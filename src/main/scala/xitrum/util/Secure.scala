@@ -9,7 +9,7 @@ import javax.crypto.spec.{SecretKeySpec, IvParameterSpec}
 
 import scala.util.control.NonFatal
 
-import org.jboss.netty.util.CharsetUtil.UTF_8
+import io.netty.util.CharsetUtil.UTF_8
 import xitrum.Config
 
 /**

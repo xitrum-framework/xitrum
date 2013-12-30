@@ -1,6 +1,6 @@
 package xitrum.handler.up
 
-import org.jboss.netty.channel.{ChannelHandlerContext, ExceptionEvent, SimpleChannelUpstreamHandler}
+import io.netty.channel.{ChannelHandlerContext, SimpleChannelInboundHandler}
 import xitrum.Log
 
 /**
@@ -14,10 +14,10 @@ import xitrum.Log
  * java.lang.IllegalArgumentException: empty text (Use https://... URL to connect to HTTP server)
  */
 trait BadClientSilencer extends Log {
-  this: SimpleChannelUpstreamHandler =>
+  this: SimpleChannelInboundHandler[_ <: AnyRef] =>
 
-  override def exceptionCaught(ctx: ChannelHandlerContext, e: ExceptionEvent) {
-    ctx.getChannel.close()
+  override def exceptionCaught(ctx: ChannelHandlerContext, e: Throwable) {
+    ctx.close()
 
     val throwable = e.getCause
     val s         = throwable.toString

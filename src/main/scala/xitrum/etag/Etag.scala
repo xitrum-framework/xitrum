@@ -3,8 +3,8 @@ package xitrum.etag
 import java.io.File
 import java.security.MessageDigest
 
-import org.jboss.netty.buffer.ChannelBuffers
-import org.jboss.netty.handler.codec.http.{HttpHeaders, HttpRequest, HttpResponse, HttpResponseStatus}
+import io.netty.buffer.Unpooled
+import io.netty.handler.codec.http.{HttpHeaders, HttpRequest, HttpResponse, HttpResponseStatus}
 import HttpHeaders.Names._
 import HttpHeaders.Values._
 import HttpResponseStatus._
@@ -92,7 +92,7 @@ object Etag extends Log {
     if (areEtagsIdentical(request, etag)) {
       response.setStatus(NOT_MODIFIED)
       HttpHeaders.setContentLength(response, 0)
-      response.setContent(ChannelBuffers.EMPTY_BUFFER)
+      response.content.clear()
       action.respond()
       true
     } else {

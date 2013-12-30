@@ -1,9 +1,11 @@
 package xitrum.handler
 
-import org.jboss.netty.channel.{Channels, ChannelPipeline, ChannelPipelineFactory => CPF}
-import org.jboss.netty.handler.codec.http.{HttpRequestDecoder, HttpResponseEncoder}
-import org.jboss.netty.handler.execution.{ExecutionHandler, OrderedMemoryAwareThreadPoolExecutor}
-import org.jboss.netty.handler.stream.ChunkedWriteHandler
+import io.netty.channel.{ChannelInitializer, ChannelPipeline}
+import io.netty.channel.ChannelHandler.Sharable
+import io.netty.channel.socket.SocketChannel;
+
+import io.netty.handler.codec.http.{HttpRequestDecoder, HttpResponseEncoder}
+import io.netty.handler.stream.ChunkedWriteHandler
 
 import xitrum.Config
 import xitrum.handler.up._
@@ -29,7 +31,7 @@ import xitrum.handler.down._
  *   ChunkedWriteHandler
  *   xSendFile
  */
-object DefaultHttpChannelPipelineFactory {
+object DefaultHttpChannelInitializer {
   // Upstream sharable handlers
 
   lazy val noPipelining         = new NoPipelining
@@ -83,8 +85,9 @@ object DefaultHttpChannelPipelineFactory {
   }
 }
 
-class DefaultHttpChannelPipelineFactory extends CPF {
-  import DefaultHttpChannelPipelineFactory._
+@Sharable
+class DefaultHttpChannelInitializer extends ChannelInitializer[SocketChannel] {
+  import DefaultHttpChannelInitializer._
 
   /**
    * You can override this method to customize the default pipeline.
@@ -92,46 +95,45 @@ class DefaultHttpChannelPipelineFactory extends CPF {
    * Upstream direction: first handler -> last handler
    * Downstream direction: last handler -> first handler
    */
-  def getPipeline(): ChannelPipeline = {
+  override def initChannel(ch: SocketChannel) {
     // This method is run for every request, thus should be fast
 
-    val ret = Channels.pipeline()
+    val p = ch.pipeline()
 
     // Upstream
 
-    ret.addLast("HttpRequestDecoder",   new HttpRequestDecoder(Config.xitrum.request.maxInitialLineLength, 8192, 8192))
-    ret.addLast("BodyParser",           new BodyParser)          // Request is converted to HandlerEnv here
-    ret.addLast("NoPipelining",         noPipelining)
-    ret.addLast("BaseUrlRemover",       baseUrlRemover)
+    p.addLast("HttpRequestDecoder",   new HttpRequestDecoder(Config.xitrum.request.maxInitialLineLength, 8192, 8192))
+    p.addLast("BodyParser",           new BodyParser)          // Request is converted to HandlerEnv here
+    p.addLast("NoPipelining",         noPipelining)
+    p.addLast("BaseUrlRemover",       baseUrlRemover)
     if (Config.xitrum.basicAuth.isDefined)
-    ret.addLast("BasicAuth",            basicAuth)
-    ret.addLast("PublicFileServer",     publicFileServer)
-    ret.addLast("PublicResourceServer", publicResourceServer)
-    ret.addLast("UriParser",            uriParser)
-    ret.addLast("MethodOverrider",      methodOverrider)
-    ret.addLast("Dispatcher",           dispatcher)
+    p.addLast("BasicAuth",            basicAuth)
+    p.addLast("PublicFileServer",     publicFileServer)
+    p.addLast("PublicResourceServer", publicResourceServer)
+    p.addLast("UriParser",            uriParser)
+    p.addLast("MethodOverrider",      methodOverrider)
+    p.addLast("Dispatcher",           dispatcher)
 
     // Downstream
 
-    ret.addLast("HttpResponseEncoder", new HttpResponseEncoder)
-    ret.addLast("ChunkedWriteHandler", new ChunkedWriteHandler)  // For writing ChunkedFile, at XSendFile
-    ret.addLast("Env2Response",        env2Response)
-    ret.addLast("SetCORS",             setCORS)
-    ret.addLast("OPTIONSResponse",     OPTIONSResponse)
-    ret.addLast("FixiOS6SafariPOST",   fixiOS6SafariPOST)
-    ret.addLast("XSendFile",           xSendFile)
-    ret.addLast("XSendResource",       xSendResource)
-    ret.addLast("ResponseCacher",      responseCacher)
-
-    ret
+    p.addLast("HttpResponseEncoder", new HttpResponseEncoder)
+    p.addLast("ChunkedWriteHandler", new ChunkedWriteHandler)  // For writing ChunkedFile, at XSendFile
+    p.addLast("Env2Response",        env2Response)
+    p.addLast("SetCORS",             setCORS)
+    p.addLast("OPTIONSResponse",     OPTIONSResponse)
+    p.addLast("FixiOS6SafariPOST",   fixiOS6SafariPOST)
+    p.addLast("XSendFile",           xSendFile)
+    p.addLast("XSendResource",       xSendResource)
+    p.addLast("ResponseCacher",      responseCacher)
   }
 }
 
 /** This is a wrapper. It prepends SSL handler to the non-SSL pipeline. */
-class SslChannelPipelineFactory(nonSsl: CPF) extends CPF {
-  def getPipeline(): ChannelPipeline = {
-    val ret = nonSsl.getPipeline()
-    ret.addFirst("SSL", ServerSsl.handler())
-    ret
+@Sharable
+class SslChannelInitializer(nonSslChannelInitializer: ChannelInitializer[SocketChannel]) extends ChannelInitializer[SocketChannel] {
+  override def initChannel(ch: SocketChannel) {
+    val p = ch.pipeline()
+    p.addLast("SSL",    ServerSsl.handler())
+    p.addLast("nonSsl", nonSslChannelInitializer)
   }
 }

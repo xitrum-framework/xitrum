@@ -2,25 +2,22 @@ package xitrum.handler.down
 
 import java.io.{File, RandomAccessFile}
 import scala.util.control.NonFatal
-
-import org.jboss.netty.channel.{ChannelEvent, ChannelDownstreamHandler, Channels, ChannelHandler, ChannelHandlerContext, DownstreamMessageEvent, UpstreamMessageEvent, ChannelFuture, DefaultFileRegion, ChannelFutureListener}
-import org.jboss.netty.handler.codec.http.{HttpHeaders, HttpMethod, HttpRequest, HttpResponse, HttpResponseStatus, HttpVersion}
-import org.jboss.netty.handler.ssl.SslHandler
-import org.jboss.netty.handler.stream.ChunkedFile
-import org.jboss.netty.buffer.ChannelBuffers
-
+import io.netty.channel.{ChannelOutboundHandlerAdapter, ChannelHandler, ChannelHandlerContext, ChannelFuture, ChannelPromise, DefaultFileRegion, ChannelFutureListener}
+import io.netty.handler.codec.http.{HttpHeaders, HttpMethod, FullHttpRequest, FullHttpResponse, HttpResponseStatus, HttpVersion}
+import io.netty.handler.ssl.SslHandler
+import io.netty.handler.stream.ChunkedFile
 import ChannelHandler.Sharable
 import HttpHeaders.Names._
 import HttpHeaders.Values._
 import HttpMethod._
 import HttpResponseStatus._
 import HttpVersion._
-
 import xitrum.{Config, Log}
 import xitrum.etag.{Etag, NotModified}
 import xitrum.handler.{AccessLog, HandlerEnv}
 import xitrum.handler.up.NoPipelining
 import xitrum.util.{Gzip, Mime}
+import io.netty.buffer.Unpooled
 
 object XSendFile extends Log {
   // setClientCacheAggressively should be called at PublicFileServer, not
@@ -39,28 +36,31 @@ object XSendFile extends Log {
   private[this] val abs500 = Config.root + "/public/500.html"
 
   /** @param path see Renderer#renderFile */
-  def setHeader(response: HttpResponse, path: String, fromAction: Boolean) {
+  def setHeader(response: FullHttpResponse, path: String, fromAction: Boolean) {
     HttpHeaders.setHeader(response, X_SENDFILE_HEADER, path)
     if (fromAction) HttpHeaders.setHeader(response, X_SENDFILE_HEADER_IS_FROM_ACTION, "true")
     HttpHeaders.setContentLength(response, 0)  // Env2Response checks Content-Length
   }
 
-  def isHeaderSet(response: HttpResponse) = response.headers.contains(X_SENDFILE_HEADER)
+  def isHeaderSet(response: FullHttpResponse) = response.headers.contains(X_SENDFILE_HEADER)
 
-  def set404Page(response: HttpResponse, fromController: Boolean) {
+  def set404Page(response: FullHttpResponse, fromController: Boolean) {
     response.setStatus(NOT_FOUND)
     setHeader(response, abs404, fromController)
   }
 
-  def set500Page(response: HttpResponse, fromController: Boolean) {
+  def set500Page(response: FullHttpResponse, fromController: Boolean) {
     response.setStatus(INTERNAL_SERVER_ERROR)
     setHeader(response, abs500, fromController)
   }
 
   /** @param path see Renderer#renderFile */
-  def sendFile(ctx: ChannelHandlerContext, e: ChannelEvent, request: HttpRequest, response: HttpResponse, path: String, noLog: Boolean) {
-    val channel       = ctx.getChannel
-    val remoteAddress = channel.getRemoteAddress
+  def sendFile(
+      ctx: ChannelHandlerContext, msg: Any, promise: ChannelPromise,
+      request: FullHttpRequest, response: FullHttpResponse, path: String, noLog: Boolean)
+  {
+    val channel       = ctx.channel
+    val remoteAddress = channel.remoteAddress
 
     // Try to serve from cache
     Etag.forFile(path, Gzip.isAccepted(request)) match {
@@ -70,32 +70,34 @@ object XSendFile extends Log {
 
         if (path.startsWith(abs404)) {  // Even 404.html is not found!
           HttpHeaders.setContentLength(response, 0)
-          NoPipelining.setResponseHeaderAndResumeReadingForKeepAliveRequestOrCloseOnComplete(request, response, channel, e.getFuture)
-          ctx.sendDownstream(e)
+          NoPipelining.setResponseHeaderAndResumeReadingForKeepAliveRequestOrCloseOnComplete(request, response, channel, promise)
+          ctx.write(msg, promise)
           if (!noLog) AccessLog.logStaticFileAccess(remoteAddress, request, response)
         } else {
-          sendFile(ctx, e, request, response, abs404, noLog)  // Recursive
+          sendFile(ctx, msg, promise, request, response, abs404, noLog)  // Recursive
         }
 
       case Etag.Small(bytes, etag, mimeo, gzipped) =>
         if (Etag.areEtagsIdentical(request, etag)) {
           response.setStatus(NOT_MODIFIED)
           HttpHeaders.setContentLength(response, 0)
-          response.setContent(ChannelBuffers.EMPTY_BUFFER)
+          response.content.clear()
         } else {
           Etag.set(response, etag)
           if (mimeo.isDefined) HttpHeaders.setHeader(response, CONTENT_TYPE,     mimeo.get)
           if (gzipped)         HttpHeaders.setHeader(response, CONTENT_ENCODING, "gzip")
 
           HttpHeaders.setContentLength(response, bytes.length)
-          if ((request.getMethod == HEAD || request.getMethod == OPTIONS) && response.getStatus == OK)
+          if ((request.getMethod == HEAD || request.getMethod == OPTIONS) && response.getStatus == OK) {
             // http://stackoverflow.com/questions/3854842/content-length-header-with-head-requests
-            response.setContent(ChannelBuffers.EMPTY_BUFFER)
-          else
-            response.setContent(ChannelBuffers.wrappedBuffer(bytes))
+            response.content.clear()
+          } else {
+            response.content.clear()
+            response.content.writeBytes(Unpooled.wrappedBuffer(bytes))
+          }
         }
-        NoPipelining.setResponseHeaderAndResumeReadingForKeepAliveRequestOrCloseOnComplete(request, response, channel, e.getFuture)
-        ctx.sendDownstream(e)
+        NoPipelining.setResponseHeaderAndResumeReadingForKeepAliveRequestOrCloseOnComplete(request, response, channel, promise)
+        ctx.write(msg, promise)
         if (!noLog) AccessLog.logStaticFileAccess(remoteAddress, request, response)
 
       case Etag.TooBig(file) =>
@@ -105,9 +107,9 @@ object XSendFile extends Log {
         if (HttpHeaders.getHeader(request, IF_MODIFIED_SINCE) == lastModifiedRfc2822) {
           response.setStatus(NOT_MODIFIED)
           HttpHeaders.setContentLength(response, 0)
-          NoPipelining.setResponseHeaderAndResumeReadingForKeepAliveRequestOrCloseOnComplete(request, response, channel, e.getFuture)
-          response.setContent(ChannelBuffers.EMPTY_BUFFER)
-          ctx.sendDownstream(e)
+          NoPipelining.setResponseHeaderAndResumeReadingForKeepAliveRequestOrCloseOnComplete(request, response, channel, promise)
+          response.content.clear()
+          ctx.write(msg, promise)
           if (!noLog) AccessLog.logStaticFileAccess(remoteAddress, request, response)
         } else {
           val mimeo = Mime.get(path)
@@ -134,16 +136,16 @@ object XSendFile extends Log {
 
           if (request.getMethod == HEAD && response.getStatus == OK) {
             // http://stackoverflow.com/questions/3854842/content-length-header-with-head-requests
-            response.setContent(ChannelBuffers.EMPTY_BUFFER)
-            ctx.sendDownstream(e)
-            NoPipelining.if_keepAliveRequest_then_resumeReading_else_closeOnComplete(request, channel, e.getFuture)
+            response.content.clear()
+            ctx.write(msg, promise)
+            NoPipelining.if_keepAliveRequest_then_resumeReading_else_closeOnComplete(request, channel, promise)
           } else {
             // Send the initial line and headers
-            ctx.sendDownstream(e)
+            ctx.write(msg, promise)
 
-            if (ctx.getPipeline.get(classOf[SslHandler]) != null) {
+            if (ctx.pipeline.get(classOf[SslHandler]) != null) {
               // Cannot use zero-copy with HTTPS
-              val future = Channels.write(channel, new ChunkedFile(raf, offset, length, CHUNK_SIZE))
+              val future = ctx.writeAndFlush(new ChunkedFile(raf, offset, length, CHUNK_SIZE), promise)
               future.addListener(new ChannelFutureListener {
                 def operationComplete(f: ChannelFuture) { raf.close() }
               })
@@ -156,10 +158,10 @@ object XSendFile extends Log {
               // This will cause ClosedChannelException:
               // Channels.write(ctx, e.getFuture, region)
 
-              val future = Channels.write(channel, region)
+              val future = ctx.writeAndFlush(region, promise)
               future.addListener(new ChannelFutureListener {
                 def operationComplete(f: ChannelFuture) {
-                  region.releaseExternalResources()
+                  region.release()
                   raf.close()
                 }
               })
@@ -179,7 +181,7 @@ object XSendFile extends Log {
    *
    * @return None or Some((start index, end index)), negative end index means file length - 1
    */
-  private def getRangeFromRequest(request: HttpRequest): Option[(Long, Long)] = {
+  private def getRangeFromRequest(request: FullHttpRequest): Option[(Long, Long)] = {
     val spec = HttpHeaders.getHeader(request, RANGE)
 
     try {
@@ -218,27 +220,20 @@ object XSendFile extends Log {
  * 2. If the file is small: cache in memory and use normal response
  */
 @Sharable
-class XSendFile extends ChannelDownstreamHandler {
+class XSendFile extends ChannelOutboundHandlerAdapter {
   import XSendFile._
 
-  def handleDownstream(ctx: ChannelHandlerContext, e: ChannelEvent) {
-    if (!e.isInstanceOf[DownstreamMessageEvent]) {
-      ctx.sendDownstream(e)
+  override def write(ctx: ChannelHandlerContext, msg: Any, promise: ChannelPromise) {
+    if (!msg.isInstanceOf[HandlerEnv]) {
+      ctx.write(msg, promise)
       return
     }
 
-    val m = e.asInstanceOf[DownstreamMessageEvent].getMessage
-    if (!m.isInstanceOf[HandlerEnv]) {
-      ctx.sendDownstream(e)
-      return
-    }
-
-    val env      = m.asInstanceOf[HandlerEnv]
-    val request  = env.request
+    val env      = msg.asInstanceOf[HandlerEnv]
     val response = env.response
     val path     = HttpHeaders.getHeader(response, X_SENDFILE_HEADER)
     if (path == null) {
-      ctx.sendDownstream(e)
+      ctx.write(msg, promise)
       return
     }
 
@@ -250,6 +245,7 @@ class XSendFile extends ChannelDownstreamHandler {
     val noLog = response.headers.contains(X_SENDFILE_HEADER_IS_FROM_ACTION)
     if (noLog) HttpHeaders.removeHeader(response, X_SENDFILE_HEADER_IS_FROM_ACTION)
 
-    sendFile(ctx, e, request, response, path, noLog)
+    val request = env.request
+    sendFile(ctx, msg: Any, promise, request, response, path, noLog)
   }
 }

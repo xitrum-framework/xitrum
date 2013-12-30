@@ -9,18 +9,13 @@ import javax.net.ssl.KeyManagerFactory
 import javax.net.ssl.SSLContext
 import javax.net.ssl.SSLEngine
 
-import org.jboss.netty.handler.ssl.SslHandler
+import io.netty.handler.ssl.SslHandler
 
 import xitrum.Config
 
 object ServerSsl {
-  // Handler cannot be shared
-  def handler() = {
-    val ret = new SslHandler(engine())
-    ret.setCloseOnSSLException(true)
-    ret.setIssueHandshake(true)
-    ret
-  }
+  /** SSL handler cannot be shared. */
+  def handler() = new SslHandler(engine())
 
   //----------------------------------------------------------------------------
 

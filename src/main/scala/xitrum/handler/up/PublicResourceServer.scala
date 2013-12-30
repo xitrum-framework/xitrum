@@ -2,12 +2,11 @@ package xitrum.handler.up
 
 import java.io.File
 
-import org.jboss.netty.channel.{ChannelHandler, SimpleChannelUpstreamHandler, ChannelHandlerContext, MessageEvent}
-import org.jboss.netty.handler.codec.http.{HttpMethod, HttpResponseStatus, HttpRequest, DefaultHttpResponse, HttpHeaders, HttpVersion}
+import io.netty.channel.{ChannelHandler, SimpleChannelInboundHandler, ChannelHandlerContext}
+import io.netty.handler.codec.http.{HttpMethod, HttpResponseStatus, HttpRequest, HttpHeaders}
 import ChannelHandler.Sharable
 import HttpMethod._
 import HttpResponseStatus._
-import HttpVersion._
 
 import xitrum.Config
 import xitrum.handler.HandlerEnv
@@ -20,24 +19,17 @@ import xitrum.util.PathSanitizer
  * See ChannelPipelineFactory, this handler is put after XSendResource.
  */
 @Sharable
-class PublicResourceServer extends SimpleChannelUpstreamHandler with BadClientSilencer {
-  override def messageReceived(ctx: ChannelHandlerContext, e: MessageEvent) {
-    val m = e.getMessage
-    if (!m.isInstanceOf[HandlerEnv]) {
-      ctx.sendUpstream(e)
-      return
-    }
-
-    val env     = m.asInstanceOf[HandlerEnv]
+class PublicResourceServer extends SimpleChannelInboundHandler[HandlerEnv] with BadClientSilencer {
+  override def channelRead0(ctx: ChannelHandlerContext, env: HandlerEnv) {
     val request = env.request
     if (request.getMethod != GET && request.getMethod != HEAD && request.getMethod != OPTIONS) {
-      ctx.sendUpstream(e)
+      ctx.fireChannelRead(env)
       return
     }
 
     val pathInfo = request.getUri.split('?')(0)
     if (!pathInfo.startsWith("/resources/public/")) {
-      ctx.sendUpstream(e)
+      ctx.fireChannelRead(env)
       return
     }
 
@@ -51,6 +43,6 @@ class PublicResourceServer extends SimpleChannelUpstreamHandler with BadClientSi
         NotModified.setClientCacheAggressively(response)
         XSendResource.setHeader(response, pathInfo.substring("/resources/".length), false)
     }
-    ctx.getChannel.write(env)
+    ctx.writeAndFlush(env)
   }
 }

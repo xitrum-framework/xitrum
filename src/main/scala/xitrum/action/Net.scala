@@ -2,8 +2,8 @@ package xitrum.action
 
 import java.net.{InetSocketAddress, SocketAddress}
 
-import org.jboss.netty.handler.codec.http.{HttpHeaders, HttpRequest}
-import org.jboss.netty.handler.ssl.SslHandler
+import io.netty.handler.codec.http.{HttpHeaders, HttpRequest}
+import io.netty.handler.ssl.SslHandler
 import HttpHeaders.Names.HOST
 
 import xitrum.{Action, Config}
@@ -74,13 +74,13 @@ trait Net {
    * See java.net.preferIPv6Addresses
    * @return IP of the direct HTTP client (may be the proxy)
    */
-  private lazy val clientIp = Net.clientIp(channel.getRemoteAddress)
+  private lazy val clientIp = Net.clientIp(channel.remoteAddress)
 
   /** @return IP of the original remote HTTP client (not the proxy), X-Forwarded-For is supported */
-  lazy val remoteIp = Net.remoteIp(channel.getRemoteAddress, request)
+  lazy val remoteIp = Net.remoteIp(channel.remoteAddress, request)
 
   lazy val isSsl = {
-    if (channel.getPipeline.get(classOf[SslHandler]) != null) {
+    if (channel.pipeline.get(classOf[SslHandler]) != null) {
       true
     } else {
       if (proxyNotAllowed) {

@@ -2,7 +2,7 @@ package xitrum.routing
 
 import scala.annotation.tailrec
 import scala.collection.mutable.{Map => MMap}
-import org.jboss.netty.handler.codec.http.{HttpMethod, QueryStringEncoder}
+import io.netty.handler.codec.http.{HttpMethod, QueryStringEncoder}
 
 import xitrum.{Config, Action}
 import xitrum.scope.request.Params

@@ -4,10 +4,10 @@ import java.io.File
 import scala.xml.{Node, NodeSeq, Xhtml}
 import scala.util.control.NonFatal
 
-import org.jboss.netty.buffer.{ChannelBuffer, ChannelBuffers}
-import org.jboss.netty.channel.{ChannelFuture, ChannelFutureListener}
-import org.jboss.netty.handler.codec.http.{DefaultHttpChunk, HttpChunk, HttpHeaders, HttpResponseStatus, HttpVersion}
-import org.jboss.netty.util.CharsetUtil
+import io.netty.buffer.{ByteBuf, Unpooled}
+import io.netty.channel.{ChannelFuture, ChannelFutureListener}
+import io.netty.handler.codec.http.{HttpHeaders, HttpResponseStatus, HttpVersion, LastHttpContent}
+import io.netty.util.CharsetUtil
 import HttpHeaders.Names.{CONTENT_TYPE, CONTENT_LENGTH, TRANSFER_ENCODING}
 import HttpHeaders.Values.{CHUNKED, NO_CACHE}
 
@@ -44,7 +44,7 @@ trait Responder extends Js with Flash with GetActionClassDefaultsToCurrentAction
     } else {
       NoPipelining.setResponseHeaderForKeepAliveRequest(request, response)
       setCookieAndSessionIfTouchedOnRespond()
-      val future = channel.write(handlerEnv)
+      val future = channel.writeAndFlush(handlerEnv)
 
       // Do not handle keep alive:
       // * If XSendFile or XSendResource is used because it is handled by them
@@ -52,12 +52,12 @@ trait Responder extends Js with Flash with GetActionClassDefaultsToCurrentAction
       // * If the response is chunked because it will be handled by respondLastChunk
       if (!XSendFile.isHeaderSet(response) &&
           !XSendResource.isHeaderSet(response) &&
-          !response.isChunked) {
+          !HttpHeaders.isTransferEncodingChunked(response)) {
         NoPipelining.if_keepAliveRequest_then_resumeReading_else_closeOnComplete(request, channel, future)
       }
 
       nonChunkedResponseOrFirstChunkSent = true
-      if (!response.isChunked && !chunkModeTemporarilyTurnedOff) {
+      if (!HttpHeaders.isTransferEncodingChunked(response) && !chunkModeTemporarilyTurnedOff) {
         doneResponding = true
         onDoneResponding()
       }
@@ -85,11 +85,11 @@ trait Responder extends Js with Flash with GetActionClassDefaultsToCurrentAction
     // However, this header is not allowed in HTTP/1.0:
     // http://sockjs.github.com/sockjs-protocol/sockjs-protocol-0.3.3.html#section-165
     if (request.getProtocolVersion.compareTo(HttpVersion.HTTP_1_0) == 0) {
-      response.setChunked(false)
+      HttpHeaders.removeTransferEncodingChunked(response)
       chunkModeTemporarilyTurnedOff = true
       respond()
       chunkModeTemporarilyTurnedOff = false
-      response.setChunked(true)
+      HttpHeaders.setTransferEncodingChunked(response)
     } else {
       respond()
     }
@@ -104,15 +104,15 @@ trait Responder extends Js with Flash with GetActionClassDefaultsToCurrentAction
    * Headers are only sent on the first respondXXX call.
    */
   def respondLastChunk(): ChannelFuture = {
-    if (!response.isChunked()) {
+    if (!HttpHeaders.isTransferEncodingChunked(response)) {
       printDoubleResponseErrorStackTrace()
     } else {
-      val future = channel.write(HttpChunk.LAST_CHUNK)
+      val future = channel.write(LastHttpContent.EMPTY_LAST_CONTENT)
       NoPipelining.if_keepAliveRequest_then_resumeReading_else_closeOnComplete(request, channel, future)
 
       // responded should be true here. Set chunk mode to false so that double
       // response error will be raised if the app try to respond more.
-      response.setChunked(false)
+      HttpHeaders.removeTransferEncodingChunked(response)
 
       doneResponding = true
       onDoneResponding()
@@ -166,14 +166,15 @@ trait Responder extends Js with Flash with GetActionClassDefaultsToCurrentAction
       }
     }
 
-    val cb = ChannelBuffers.copiedBuffer(respondedText, Config.xitrum.request.charset)
-    if (response.isChunked) {
+    val cb = Unpooled.copiedBuffer(respondedText, Config.xitrum.request.charset)
+    if (HttpHeaders.isTransferEncodingChunked(response)) {
       respondHeadersForFirstChunk()
-      channel.write(new DefaultHttpChunk(cb))
+      channel.writeAndFlush(cb)
     } else {
       // Content length is number of bytes, not characters!
       HttpHeaders.setContentLength(response, cb.readableBytes)
-      response.setContent(cb)
+      response.content.clear()
+      response.content.writeBytes(cb)
       respond()
     }
   }
@@ -289,19 +290,20 @@ trait Responder extends Js with Flash with GetActionClassDefaultsToCurrentAction
 
   /** If Content-Type header is not set, it is set to "application/octet-stream" */
   def respondBinary(bytes: Array[Byte]): ChannelFuture = {
-    respondBinary(ChannelBuffers.wrappedBuffer(bytes))
+    respondBinary(Unpooled.wrappedBuffer(bytes))
   }
 
   /** If Content-Type header is not set, it is set to "application/octet-stream" */
-  def respondBinary(channelBuffer: ChannelBuffer): ChannelFuture = {
-    if (response.isChunked) {
+  def respondBinary(byteBuf: ByteBuf): ChannelFuture = {
+    if (HttpHeaders.isTransferEncodingChunked(response)) {
       respondHeadersForFirstChunk()
-      channel.write(new DefaultHttpChunk(channelBuffer))
+      channel.writeAndFlush(byteBuf)
     } else {
       if (!response.headers.contains(CONTENT_TYPE))
         HttpHeaders.setHeader(response, CONTENT_TYPE, "application/octet-stream")
-      HttpHeaders.setContentLength(response, channelBuffer.readableBytes)
-      response.setContent(channelBuffer)
+      HttpHeaders.setContentLength(response, byteBuf.readableBytes)
+      response.content.clear()
+      response.content.writeBytes(byteBuf)
       respond()
     }
   }
@@ -348,7 +350,7 @@ trait Responder extends Js with Flash with GetActionClassDefaultsToCurrentAction
   def respondEventSource(data: Any, event: String = "message"): ChannelFuture = {
     if (!nonChunkedResponseOrFirstChunkSent) {
       HttpHeaders.setHeader(response, CONTENT_TYPE, "text/event-stream; charset=UTF-8")
-      response.setChunked(true)
+      HttpHeaders.setTransferEncodingChunked(response)
       respondText("\r\n")  // Send a new line prelude, due to a bug in Opera
     }
     respondText(renderEventSource(data, event))

@@ -1,8 +1,8 @@
 package xitrum.handler.up
 
-import org.jboss.netty.channel.{ChannelHandler, SimpleChannelUpstreamHandler, ChannelHandlerContext, MessageEvent, ExceptionEvent, Channels}
+import io.netty.channel.{ChannelHandler, SimpleChannelInboundHandler, ChannelHandlerContext}
 import ChannelHandler.Sharable
-import org.jboss.netty.handler.codec.http.{HttpHeaders, HttpMethod}
+import io.netty.handler.codec.http.{HttpHeaders, HttpMethod}
 
 import HttpHeaders.Names
 import HttpHeaders.Values
@@ -18,15 +18,8 @@ import xitrum.routing.HttpMethodWebSocket
  * This middleware should be put behind BodyParser.
  */
 @Sharable
-class MethodOverrider extends SimpleChannelUpstreamHandler with BadClientSilencer {
-  override def messageReceived(ctx: ChannelHandlerContext, e: MessageEvent) {
-    val m = e.getMessage
-    if (!m.isInstanceOf[HandlerEnv]) {
-      ctx.sendUpstream(e)
-      return
-    }
-
-    val env            = m.asInstanceOf[HandlerEnv]
+class MethodOverrider extends SimpleChannelInboundHandler[HandlerEnv] with BadClientSilencer {
+  override def channelRead0(ctx: ChannelHandlerContext, env: HandlerEnv) {
     val request        = env.request
     val method         = request.getMethod
     val bodyTextParams = env.bodyTextParams
@@ -51,6 +44,6 @@ class MethodOverrider extends SimpleChannelUpstreamHandler with BadClientSilence
       }
     }
 
-    ctx.sendUpstream(e)
+    ctx.fireChannelRead(env)
   }
 }

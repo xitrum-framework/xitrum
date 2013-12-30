@@ -4,7 +4,7 @@ import java.util.UUID
 import scala.collection.mutable.HashMap
 import scala.util.control.NonFatal
 
-import org.jboss.netty.handler.codec.http.DefaultCookie
+import io.netty.handler.codec.http.DefaultCookie
 
 import xitrum.Config
 import xitrum.scope.request.RequestEnv

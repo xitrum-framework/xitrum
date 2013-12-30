@@ -2,8 +2,8 @@ package xitrum.handler.up
 
 import java.io.File
 import scala.collection.mutable.{Map => MMap}
-import org.jboss.netty.channel._
-import org.jboss.netty.handler.codec.http._
+import io.netty.channel._
+import io.netty.handler.codec.http._
 import ChannelHandler.Sharable
 import HttpResponseStatus._
 import HttpVersion._
@@ -47,20 +47,13 @@ object Dispatcher {
 }
 
 @Sharable
-class Dispatcher extends SimpleChannelUpstreamHandler with BadClientSilencer {
-  override def messageReceived(ctx: ChannelHandlerContext, e: MessageEvent) {
-    val m = e.getMessage
-    if (!m.isInstanceOf[HandlerEnv]) {
-      ctx.sendUpstream(e)
-      return
-    }
-
-    val env      = m.asInstanceOf[HandlerEnv]
+class Dispatcher extends SimpleChannelInboundHandler[HandlerEnv] with BadClientSilencer {
+  override def channelRead0(ctx: ChannelHandlerContext, env: HandlerEnv) {
     val request  = env.request
     val pathInfo = env.pathInfo
 
     if (request.getMethod == HttpMethod.OPTIONS) {
-      ctx.getChannel.write(env)
+      ctx.writeAndFlush(env)
       return
     }
 
@@ -84,14 +77,12 @@ class Dispatcher extends SimpleChannelUpstreamHandler with BadClientSilencer {
     val staticPath = Config.root + "/public" + pathInfo.decodedWithIndexHtml
     val file       = new File(staticPath)
     if (file.isFile && file.exists) {
-      val response = new DefaultHttpResponse(HTTP_1_1, OK)
-
+      val response = env.response
       if (!Config.xitrum.staticFile.revalidate)
         NotModified.setClientCacheAggressively(response)
 
       XSendFile.setHeader(response, staticPath, false)
-      env.response = response
-      ctx.getChannel.write(env)
+      ctx.writeAndFlush(env)
       true
     } else {
       false
@@ -101,10 +92,10 @@ class Dispatcher extends SimpleChannelUpstreamHandler with BadClientSilencer {
   private def handle404(ctx: ChannelHandlerContext, env: HandlerEnv) {
     Config.routes.error404 match {
       case None =>
-        val response = new DefaultHttpResponse(HTTP_1_1, NOT_FOUND)
+        val response = env.response
+        response.setStatus(NOT_FOUND)
         XSendFile.set404Page(response, false)
-        env.response = response
-        ctx.getChannel.write(env)
+        ctx.writeAndFlush(env)
 
       case Some(error404) =>
         env.pathParams = MMap.empty

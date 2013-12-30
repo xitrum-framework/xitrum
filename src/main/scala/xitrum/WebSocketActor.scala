@@ -2,10 +2,9 @@ package xitrum
 
 import scala.runtime.ScalaRunTime
 import akka.actor.{Actor, PoisonPill}
-
-import org.jboss.netty.buffer.{ChannelBuffer, ChannelBuffers}
-import org.jboss.netty.channel.{Channel, ChannelFuture, ChannelFutureListener}
-import org.jboss.netty.handler.codec.http.websocketx.{
+import io.netty.buffer.{ByteBuf, Unpooled}
+import io.netty.channel.{Channel, ChannelFuture, ChannelFutureListener}
+import io.netty.handler.codec.http.websocketx.{
   BinaryWebSocketFrame,
   CloseWebSocketFrame,
   PingWebSocketFrame,
@@ -13,9 +12,9 @@ import org.jboss.netty.handler.codec.http.websocketx.{
   TextWebSocketFrame,
   WebSocketServerHandshakerFactory
 }
-
-import xitrum.handler.{AccessLog, DefaultHttpChannelPipelineFactory, HandlerEnv}
+import xitrum.handler.{AccessLog, DefaultHttpChannelInitializer, HandlerEnv}
 import xitrum.handler.up.WebSocketEventDispatcher
+import xitrum.handler.DefaultHttpChannelInitializer
 
 //------------------------------------------------------------------------------
 
@@ -74,11 +73,11 @@ trait WebSocketActor extends Actor with Action {
 
   def respondWebSocketBinary(bytes: Array[Byte]): ChannelFuture = {
     if (log.isTraceEnabled) log.trace("[WS out] binary: " + ScalaRunTime.stringOf(bytes))
-    channel.write(new BinaryWebSocketFrame(ChannelBuffers.wrappedBuffer(bytes)))
+    channel.write(new BinaryWebSocketFrame(Unpooled.wrappedBuffer(bytes)))
   }
 
-  def respondWebSocketBinary(channelBuffer: ChannelBuffer): ChannelFuture = {
-    channel.write(new BinaryWebSocketFrame(channelBuffer))
+  def respondWebSocketBinary(byteBuf: ByteBuf): ChannelFuture = {
+    channel.write(new BinaryWebSocketFrame(byteBuf))
   }
 
   /** There's no respondWebSocketPong, because pong is automatically sent by Xitrum for you. */
@@ -101,18 +100,18 @@ trait WebSocketActor extends Actor with Action {
     val factory    = new WebSocketServerHandshakerFactory(webSocketAbsRequestUrl, null, false)
     val handshaker = factory.newHandshaker(request)
     if (handshaker == null) {
-      val future = factory.sendUnsupportedWebSocketVersionResponse(channel)
-      future.addListener(ChannelFutureListener.CLOSE)
+      WebSocketServerHandshakerFactory.sendUnsupportedWebSocketVersionResponse(channel)
+      channel.flush().close()
       false
     } else {
       handshaker.handshake(channel, request)
 
-      val pipeline = channel.getPipeline
-      DefaultHttpChannelPipelineFactory.removeUnusedHandlersForWebSocket(pipeline)
+      val pipeline = channel.pipeline
+      DefaultHttpChannelInitializer.removeUnusedHandlersForWebSocket(pipeline)
       pipeline.addLast("webSocketEventDispatcher", new WebSocketEventDispatcher(handshaker, self))
 
       // Resume reading paused at NoPipelining
-      channel.setReadable(true)
+      channel.config.setAutoRead(true)
 
       true
     }

@@ -10,7 +10,7 @@ import scala.util.control.NonFatal
 import com.typesafe.config.{Config => TConfig, ConfigFactory}
 import akka.actor.ActorSystem
 
-import org.jboss.netty.handler.codec.http.multipart.DefaultHttpDataFactory
+import io.netty.handler.codec.http.multipart.DefaultHttpDataFactory
 
 import xitrum.scope.session.SessionStore
 import xitrum.routing.{DiscoveredAcc, RouteCollection, RouteCollector, SerializableRouteCollection, SockJsClassAndOptions}

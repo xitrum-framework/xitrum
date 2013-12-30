@@ -3,7 +3,7 @@ package xitrum.util
 import java.io.{FileInputStream, InputStream}
 import java.util.{Arrays, Properties}
 
-import org.jboss.netty.util.CharsetUtil.UTF_8
+import io.netty.util.CharsetUtil.UTF_8
 
 object Loader {
   private[this] val BUFFER_SIZE = 1024

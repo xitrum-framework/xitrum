@@ -2,13 +2,12 @@ package xitrum.handler.up
 
 import java.io.File
 
-import org.jboss.netty.channel.{ChannelHandler, SimpleChannelUpstreamHandler, ChannelHandlerContext, MessageEvent}
-import org.jboss.netty.handler.codec.http.{HttpMethod, HttpResponseStatus, HttpRequest, DefaultHttpResponse, HttpHeaders, HttpVersion}
+import io.netty.channel.{ChannelHandler, SimpleChannelInboundHandler, ChannelHandlerContext}
+import io.netty.handler.codec.http.{HttpMethod, HttpResponseStatus}
 
 import ChannelHandler.Sharable
 import HttpMethod._
 import HttpResponseStatus._
-import HttpVersion._
 
 import xitrum.Config
 import xitrum.handler.HandlerEnv
@@ -21,24 +20,17 @@ import xitrum.util.PathSanitizer
  * See ChannelPipelineFactory, this handler is put after XSendFile.
  */
 @Sharable
-class PublicFileServer extends SimpleChannelUpstreamHandler with BadClientSilencer {
-  override def messageReceived(ctx: ChannelHandlerContext, e: MessageEvent) {
-    val m = e.getMessage
-    if (!m.isInstanceOf[HandlerEnv]) {
-      ctx.sendUpstream(e)
-      return
-    }
-
-    val env     = m.asInstanceOf[HandlerEnv]
+class PublicFileServer extends SimpleChannelInboundHandler[HandlerEnv] with BadClientSilencer {
+  override def channelRead0(ctx: ChannelHandlerContext, env: HandlerEnv) {
     val request = env.request
     if (request.getMethod != GET && request.getMethod != HEAD && request.getMethod != OPTIONS) {
-      ctx.sendUpstream(e)
+      ctx.fireChannelRead(env)
       return
     }
 
     val pathInfo = request.getUri.split('?')(0)
     if (Config.xitrum.staticFile.pathRegex.findFirstIn(pathInfo).isEmpty) {
-      ctx.sendUpstream(e)
+      ctx.fireChannelRead(env)
       return
     }
 
@@ -47,14 +39,14 @@ class PublicFileServer extends SimpleChannelUpstreamHandler with BadClientSilenc
       case None =>
         response.setStatus(NOT_FOUND)
         XSendFile.set404Page(response, false)
-        ctx.getChannel.write(env)
+        ctx.writeAndFlush(env)
 
       case Some(abs) =>
         val file = new File(abs)
         if (file.isFile && file.exists) {
           response.setStatus(OK)
           if (request.getMethod == OPTIONS) {
-            ctx.getChannel.write(env)
+            ctx.writeAndFlush(env)
             return
           }
 
@@ -62,9 +54,9 @@ class PublicFileServer extends SimpleChannelUpstreamHandler with BadClientSilenc
             NotModified.setClientCacheAggressively(response)
 
           XSendFile.setHeader(response, abs, false)
-          ctx.getChannel.write(env)
+          ctx.writeAndFlush(env)
         } else {
-          ctx.sendUpstream(e)
+          ctx.fireChannelRead(env)
         }
     }
   }

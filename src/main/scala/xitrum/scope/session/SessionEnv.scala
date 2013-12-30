@@ -2,7 +2,7 @@ package xitrum.scope.session
 
 import scala.collection.mutable.{ArrayBuffer, HashMap => MHashMap}
 
-import org.jboss.netty.handler.codec.http.{HttpRequest, Cookie, CookieDecoder, CookieEncoder, HttpHeaders}
+import io.netty.handler.codec.http.{HttpRequest, Cookie, CookieDecoder, ServerCookieEncoder, HttpHeaders}
 import HttpHeaders.Names
 
 import xitrum.{Config, Action}
@@ -20,12 +20,11 @@ trait SessionEnv extends Csrf {
    * http://en.wikipedia.org/wiki/HTTP_cookie#Cookie_attributes
    */
   lazy val requestCookies: Map[String, String] = {
-    val decoder = new CookieDecoder
     val header  = HttpHeaders.getHeader(request, Names.COOKIE)
     if (header == null) {
       Map.empty[String, String]
     } else {
-      val cookies  = decoder.decode(header)
+      val cookies  = CookieDecoder.decode(header)
       val iterator = cookies.iterator
       val acc      = new MHashMap[String, String]
       while (iterator.hasNext()) {
@@ -63,10 +62,7 @@ trait SessionEnv extends Csrf {
       // Server needs to SET_COOKIE multiple times
       responseCookies.foreach { cookie =>
         if (cookie.getPath == null) cookie.setPath(rootPath)
-
-        val encoder = new CookieEncoder(true)
-        encoder.addCookie(cookie)
-        HttpHeaders.addHeader(response, Names.SET_COOKIE, encoder.encode())
+        HttpHeaders.addHeader(response, Names.SET_COOKIE, ServerCookieEncoder.encode(cookie))
       }
     }
   }

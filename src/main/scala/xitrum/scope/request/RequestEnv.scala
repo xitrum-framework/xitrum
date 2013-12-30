@@ -77,8 +77,8 @@ trait RequestEnv extends ParamAccess {
   def atJson(key: String) = at.toJson(key)
 
   lazy val requestContentString = {
-    val channelBuffer = request.getContent
-    channelBuffer.toString(Config.xitrum.request.charset)
+    val byteBuf = request.content
+    byteBuf.toString(Config.xitrum.request.charset)
   }
 
   /** Ex: val json = requestContentJson[Map[String, String]] */

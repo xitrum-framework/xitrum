@@ -3,8 +3,8 @@ package xitrum
 import scala.util.control.NonFatal
 import akka.actor.Actor
 
-import org.jboss.netty.channel.{ChannelFuture, ChannelFutureListener}
-import org.jboss.netty.handler.codec.http.{HttpMethod, HttpResponseStatus}
+import io.netty.channel.{ChannelFuture, ChannelFutureListener}
+import io.netty.handler.codec.http.{HttpMethod, HttpResponseStatus}
 
 import xitrum.action._
 import xitrum.exception.{InvalidAntiCsrfToken, InvalidInput, MissingParam, SessionExpired}
@@ -41,7 +41,7 @@ trait Action extends RequestEnv
   def execute()
 
   def addConnectionClosedListener(listener: => Unit) {
-    channel.getCloseFuture.addListener(new ChannelFutureListener {
+    channel.closeFuture.addListener(new ChannelFutureListener {
       def operationComplete(future: ChannelFuture) { listener }
     })
   }

@@ -3,9 +3,9 @@ package xitrum.sockjs
 import java.util.{Arrays, Random}
 import scala.util.control.NonFatal
 
-import org.jboss.netty.channel.{ChannelFuture, ChannelFutureListener}
-import org.jboss.netty.buffer.ChannelBuffers
-import org.jboss.netty.handler.codec.http.{DefaultCookie, HttpHeaders, HttpResponseStatus}
+import io.netty.buffer.Unpooled
+import io.netty.channel.{ChannelFuture, ChannelFutureListener}
+import io.netty.handler.codec.http.{DefaultCookie, HttpHeaders, HttpResponseStatus}
 
 import akka.actor.{Actor, ActorRef, PoisonPill, Props, Terminated}
 import glokka.Registry
@@ -43,7 +43,7 @@ object SockJsAction {
 
   /** 2KB of 'h' characters */
   val h2KB = {
-    val ret = ChannelBuffers.buffer(2048 + 1)
+    val ret = Unpooled.buffer(2048 + 1)
     for (i <- 1 to 2048) ret.writeByte('h')
     ret.writeByte('\n')
     ret
@@ -403,7 +403,7 @@ class XhrSend extends NonWebSocketSessionActionActor with SkipCsrfCheck {
   def nLastTokensToRemoveFromPathInfo = 3
 
   def execute() {
-    val body = request.getContent.toString(Config.xitrum.request.charset)
+    val body = request.content.toString(Config.xitrum.request.charset)
     if (body.isEmpty) {
       response.setStatus(HttpResponseStatus.INTERNAL_SERVER_ERROR)
       respondText("Payload expected.")
@@ -446,7 +446,7 @@ class XhrStreamingReceive extends NonWebSocketSessionReceiverActionActor with Sk
     setNoClientCache()
 
     // There's always 2KB prelude, even for immediate close frame
-    response.setChunked(true)
+    HttpHeaders.setTransferEncodingChunked(response)
     HttpHeaders.setHeader(response, HttpHeaders.Names.CONTENT_TYPE, "application/javascript; charset=" + Config.xitrum.request.charset)
     respondBinary(SockJsAction.h2KB)
 
@@ -526,7 +526,7 @@ class HtmlFileReceive extends NonWebSocketSessionReceiverActionActor {
 
   protected def onLookupOrRecreateResult(newlyCreated: Boolean) {
     if (newlyCreated) {
-      response.setChunked(true)
+      HttpHeaders.setTransferEncodingChunked(response)
       respondHtml(SockJsAction.htmlFile(callback, true))
       respondText("<script>\np(\"o\");\n</script>\r\n")
       context.become(receiveNotification)
@@ -558,13 +558,13 @@ class HtmlFileReceive extends NonWebSocketSessionReceiverActionActor {
       buffer.append("<script>\np(\"a")
       buffer.append(jsEscape(quoted))
       buffer.append("\");\n</script>\r\n")
-      response.setChunked(true)
+      HttpHeaders.setTransferEncodingChunked(response)
       respondHtml(SockJsAction.htmlFile(callback, true))
       if (respondStreamingWithLimit(buffer.toString))
         context.become(receiveNotification)
 
     case SubscribeResultToReceiverClientWaitForMessage =>
-      response.setChunked(true)
+      HttpHeaders.setTransferEncodingChunked(response)
       respondHtml(SockJsAction.htmlFile(callback, true))
       context.become(receiveNotification)
 
@@ -692,7 +692,7 @@ class JsonPPollingSend extends NonWebSocketSessionActionActor with SkipCsrfCheck
       if (contentType != null && contentType.toLowerCase.startsWith(HttpHeaders.Values.APPLICATION_X_WWW_FORM_URLENCODED)) {
         param("d")
       } else {
-        request.getContent.toString(Config.xitrum.request.charset)
+        request.content.toString(Config.xitrum.request.charset)
       }
     } catch {
       case NonFatal(e) =>

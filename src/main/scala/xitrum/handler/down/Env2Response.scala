@@ -1,8 +1,8 @@
 package xitrum.handler.down
 
-import org.jboss.netty.buffer.ChannelBuffers
-import org.jboss.netty.channel.{ChannelHandler, SimpleChannelDownstreamHandler, ChannelHandlerContext, MessageEvent, Channels}
-import org.jboss.netty.handler.codec.http.{HttpHeaders, HttpMethod, HttpRequest, HttpResponse, HttpResponseStatus}
+import io.netty.buffer.Unpooled
+import io.netty.channel.{ChannelHandler, ChannelHandlerContext, ChannelOutboundHandlerAdapter, ChannelPromise}
+import io.netty.handler.codec.http.{HttpHeaders, HttpMethod, HttpRequest, FullHttpResponse, HttpResponseStatus}
 import ChannelHandler.Sharable
 import HttpHeaders.Names._
 import HttpMethod._
@@ -11,34 +11,33 @@ import HttpResponseStatus._
 import xitrum.{Config, Log}
 import xitrum.etag.Etag
 import xitrum.handler.HandlerEnv
-import xitrum.util.{ChannelBufferToBytes, Gzip, Mime}
+import xitrum.util.{ByteBufToBytes, Gzip, Mime}
 
 @Sharable
-class Env2Response extends SimpleChannelDownstreamHandler with Log {
-  override def writeRequested(ctx: ChannelHandlerContext, e: MessageEvent) {
-    val m = e.getMessage
-    if (!m.isInstanceOf[HandlerEnv]) {
-      ctx.sendDownstream(e)
+class Env2Response extends ChannelOutboundHandlerAdapter with Log {
+  override def write(ctx: ChannelHandlerContext, msg: Object, promise: ChannelPromise) {
+    if (!msg.isInstanceOf[HandlerEnv]) {
+      ctx.write(msg, promise)
       return
     }
 
-    val env      = m.asInstanceOf[HandlerEnv]
+    val env      = msg.asInstanceOf[HandlerEnv]
     val request  = env.request
     val response = env.response
-    val future   = e.getFuture
 
     if ((request.getMethod == HEAD || request.getMethod == OPTIONS) && response.getStatus == OK)
       // http://stackoverflow.com/questions/3854842/content-length-header-with-head-requests
-      response.setContent(ChannelBuffers.EMPTY_BUFFER)
+      response.content.clear()
     else if (!tryEtag(request, response))
       Gzip.tryCompressBigTextualResponse(request, response)
 
     // Keep alive, channel reading resuming/closing etc. are handled
     // by the code that sends the response (Responder#respond)
-    Channels.write(ctx, future, response)
+    ctx.write(response, promise)
 
     if (env.bodyDecoder != null) {
       env.bodyDecoder.cleanFiles()
+      env.bodyDecoder.destroy()
       env.bodyDecoder = null
     }
 
@@ -62,7 +61,7 @@ class Env2Response extends SimpleChannelDownstreamHandler with Log {
    *
    * @return true if the NO_MODIFIED response is set by this method
    */
-  private def tryEtag(request: HttpRequest, response: HttpResponse): Boolean = {
+  private def tryEtag(request: HttpRequest, response: FullHttpResponse): Boolean = {
     if (response.headers.contains(CACHE_CONTROL) &&
         HttpHeaders.getHeader(response, CACHE_CONTROL).toLowerCase.contains("no-cache"))
       return false
@@ -71,8 +70,8 @@ class Env2Response extends SimpleChannelDownstreamHandler with Log {
       return false
 
     val contentLengthInHeader = HttpHeaders.getContentLength(response)
-    val channelBuffer         = response.getContent
-    if (contentLengthInHeader == 0 || contentLengthInHeader != channelBuffer.readableBytes) return false
+    val byteBuf               = response.content
+    if (contentLengthInHeader == 0 || contentLengthInHeader != byteBuf.readableBytes) return false
 
     // No need to calculate ETag if it has been set, e.g. by the controller
     val etag1 = HttpHeaders.getHeader(response, ETAG)
@@ -80,21 +79,21 @@ class Env2Response extends SimpleChannelDownstreamHandler with Log {
       compareAndSetETag(request, response, etag1)
     } else {
       // It's not useful to calculate ETag for big response
-      if (channelBuffer.readableBytes > Config.xitrum.staticFile.maxSizeInBytesOfCachedFiles) return false
+      if (byteBuf.readableBytes > Config.xitrum.staticFile.maxSizeInBytesOfCachedFiles) return false
 
-      val etag2 = Etag.forBytes(ChannelBufferToBytes(channelBuffer))
+      val etag2 = Etag.forBytes(ByteBufToBytes(byteBuf))
       compareAndSetETag(request, response, etag2)
     }
   }
 
-  private def compareAndSetETag(request: HttpRequest, response: HttpResponse, etag: String): Boolean = {
+  private def compareAndSetETag(request: HttpRequest, response: FullHttpResponse, etag: String): Boolean = {
     if (Etag.areEtagsIdentical(request, etag)) {
       // Only send headers, the response content is set to empty
       // (decrease response transmission time)
       response.setStatus(NOT_MODIFIED)
       HttpHeaders.removeHeader(response, CONTENT_TYPE) // http://sockjs.github.com/sockjs-protocol/sockjs-protocol-0.3.3.html#section-25
       HttpHeaders.setContentLength(response, 0)
-      response.setContent(ChannelBuffers.EMPTY_BUFFER)
+      response.content.clear()
       true
     } else {
       Etag.set(response, etag)

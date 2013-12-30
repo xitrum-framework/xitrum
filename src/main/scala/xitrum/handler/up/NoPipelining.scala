@@ -1,14 +1,14 @@
 package xitrum.handler.up
 
-import org.jboss.netty.channel.{Channel, ChannelHandler, ChannelFuture, ChannelFutureListener, ChannelHandlerContext, MessageEvent, SimpleChannelUpstreamHandler}
-import org.jboss.netty.handler.codec.http.{HttpHeaders, HttpRequest, HttpResponse, HttpVersion}
+import io.netty.channel.{Channel, ChannelHandler, ChannelFuture, ChannelFutureListener, ChannelHandlerContext, SimpleChannelInboundHandler}
+import io.netty.handler.codec.http.{HttpHeaders, HttpRequest, HttpResponse, HttpVersion}
 import ChannelHandler.Sharable
 
 import xitrum.handler.HandlerEnv
 
 object NoPipelining {
   def pauseReading(channel: Channel) {
-    channel.setReadable(false)
+    channel.config.setAutoRead(false)
   }
 
   // https://github.com/veebs/netty/commit/64f529945282e41eb475952fde382f234da8eec7
@@ -27,7 +27,7 @@ object NoPipelining {
       channel: Channel, channelFuture: ChannelFuture) {
     if (HttpHeaders.isKeepAlive(request)) {
       channelFuture.addListener(new ChannelFutureListener() {
-        def operationComplete(future: ChannelFuture) { channel.setReadable(true) }
+        def operationComplete(future: ChannelFuture) { channel.config.setAutoRead(true) }
       })
     } else {
       channelFuture.addListener(ChannelFutureListener.CLOSE)
@@ -41,7 +41,7 @@ object NoPipelining {
     if (HttpHeaders.isKeepAlive(request)) {
       HttpHeaders.setHeader(response, HttpHeaders.Names.CONNECTION, HttpHeaders.Values.KEEP_ALIVE)
       channelFuture.addListener(new ChannelFutureListener() {
-        def operationComplete(future: ChannelFuture) { channel.setReadable(true) }
+        def operationComplete(future: ChannelFuture) { channel.config.setAutoRead(true) }
       })
     } else {
       channelFuture.addListener(ChannelFutureListener.CLOSE)
@@ -51,24 +51,10 @@ object NoPipelining {
 
 @Sharable
 /** http://mongrel2.org/static/book-finalch6.html */
-class NoPipelining extends SimpleChannelUpstreamHandler with BadClientSilencer {
-  override def messageReceived(ctx: ChannelHandlerContext, e: MessageEvent) {
-    val channel = ctx.getChannel
-
-    // Just in case more than one request has been read in
-    // https://github.com/netty/netty/issues/214
-    if (!channel.isReadable) {
-      channel.close()
-      return
-    }
-
-    val m = e.getMessage
-    if (!m.isInstanceOf[HandlerEnv]) {
-      ctx.sendUpstream(e)
-      return
-    }
-
+class NoPipelining extends SimpleChannelInboundHandler[HandlerEnv] with BadClientSilencer {
+  override def channelRead0(ctx: ChannelHandlerContext, env: HandlerEnv) {
+    val channel = ctx.channel
     NoPipelining.pauseReading(channel)
-    ctx.sendUpstream(e)
+    ctx.fireChannelRead(env)
   }
 }

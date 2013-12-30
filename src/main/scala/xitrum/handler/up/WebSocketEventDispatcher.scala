@@ -3,49 +3,41 @@ package xitrum.handler.up
 import scala.runtime.ScalaRunTime
 import akka.actor.ActorRef
 
-import org.jboss.netty.channel.{
+import io.netty.channel.{
   Channel, ChannelHandler, ChannelHandlerContext, ChannelFuture,
-  ChannelFutureListener, SimpleChannelUpstreamHandler, MessageEvent
+  ChannelFutureListener, SimpleChannelInboundHandler
 }
-import org.jboss.netty.handler.codec.http.websocketx.{
+import io.netty.handler.codec.http.websocketx.{
   BinaryWebSocketFrame, CloseWebSocketFrame, PingWebSocketFrame, PongWebSocketFrame,
   TextWebSocketFrame, WebSocketFrame, WebSocketServerHandshaker
 }
 
 import xitrum.{Log, WebSocketBinary, WebSocketPing, WebSocketPong, WebSocketText}
-import xitrum.util.ChannelBufferToBytes
+import xitrum.util.ByteBufToBytes
 
 /** See https://github.com/netty/netty/blob/master/example/src/main/java/io/netty/example/http/websocketx/server/WebSocketServerHandler.java */
 class WebSocketEventDispatcher(
     handshaker: WebSocketServerHandshaker,
     actorRef:   ActorRef
-) extends SimpleChannelUpstreamHandler with BadClientSilencer with Log
+) extends SimpleChannelInboundHandler[WebSocketFrame] with BadClientSilencer with Log
 {
-  override def messageReceived(ctx: ChannelHandlerContext, e: MessageEvent) {
-    val m = e.getMessage
-    if (!m.isInstanceOf[WebSocketFrame]) {
-      ctx.sendUpstream(e)
-      return
-    }
-
-    val frame = m.asInstanceOf[WebSocketFrame]
-
+  override def channelRead0(ctx: ChannelHandlerContext, frame: WebSocketFrame) {
     if (frame.isInstanceOf[TextWebSocketFrame]) {
-      val text = frame.asInstanceOf[TextWebSocketFrame].getText
+      val text = frame.asInstanceOf[TextWebSocketFrame].text
       actorRef ! WebSocketText(text)
       if (log.isTraceEnabled) log.trace("[WS in] text: " + text)
       return
     }
 
     if (frame.isInstanceOf[BinaryWebSocketFrame]) {
-      val bytes = ChannelBufferToBytes(frame.asInstanceOf[BinaryWebSocketFrame].getBinaryData)
+      val bytes = ByteBufToBytes(frame.asInstanceOf[BinaryWebSocketFrame].content)
       actorRef ! WebSocketBinary(bytes)
       if (log.isTraceEnabled) log.trace("[WS in] binary: " + ScalaRunTime.stringOf(bytes))
       return
     }
 
     if (frame.isInstanceOf[PingWebSocketFrame]) {
-      ctx.getChannel.write(new PongWebSocketFrame(frame.getBinaryData))
+      ctx.writeAndFlush(new PongWebSocketFrame(frame.content))
       actorRef ! WebSocketPing
       if (log.isTraceEnabled) {
         log.trace("[WS in] ping")
@@ -61,7 +53,7 @@ class WebSocketEventDispatcher(
     }
 
     if (frame.isInstanceOf[CloseWebSocketFrame]) {
-      handshaker.close(ctx.getChannel, frame.asInstanceOf[CloseWebSocketFrame]).addListener(ChannelFutureListener.CLOSE)
+      handshaker.close(ctx.channel, frame.asInstanceOf[CloseWebSocketFrame]).addListener(ChannelFutureListener.CLOSE)
       if (log.isTraceEnabled) log.trace("[WS in] close")
       return
     }

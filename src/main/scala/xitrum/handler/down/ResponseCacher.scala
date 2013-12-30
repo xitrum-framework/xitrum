@@ -3,10 +3,10 @@ package xitrum.handler.down
 import scala.collection.immutable.SortedMap
 import scala.collection.mutable.{Map => MMap}
 
-import org.jboss.netty.channel.{ChannelHandler, SimpleChannelDownstreamHandler, ChannelHandlerContext, MessageEvent, Channels}
-import org.jboss.netty.buffer.ChannelBuffers
+import io.netty.buffer.Unpooled
+import io.netty.channel.{ChannelHandler, ChannelHandlerContext, ChannelOutboundHandlerAdapter, ChannelPromise}
 import ChannelHandler.Sharable
-import org.jboss.netty.handler.codec.http.{DefaultHttpResponse, HttpHeaders, HttpRequest, HttpResponse, HttpResponseStatus, HttpVersion}
+import io.netty.handler.codec.http.{DefaultFullHttpResponse, HttpHeaders, HttpRequest, FullHttpResponse, HttpResponseStatus, HttpVersion}
 import HttpResponseStatus.OK
 import HttpHeaders.Names.{CONTENT_ENCODING, CONTENT_TYPE}
 
@@ -35,7 +35,7 @@ object ResponseCacher extends Log {
     }
   }
 
-  def getCachedResponse(env: HandlerEnv): Option[HttpResponse] = {
+  def getCachedResponse(env: HandlerEnv): Option[FullHttpResponse] = {
     val actionClass = env.route.klass
     val urlParams   = env.urlParams
     val gzipped     = Gzip.isAccepted(env.request)
@@ -70,8 +70,8 @@ object ResponseCacher extends Log {
    *   content: Array[Byte]
    *   gzipped: Boolean, big textual content is gzipped to save memory
    */
-  private def serializeResponse(request: HttpRequest, response: HttpResponse): CachedResponse = {
-    val status = response.getStatus.getCode
+  private def serializeResponse(request: HttpRequest, response: FullHttpResponse): CachedResponse = {
+    val status = response.getStatus.code
 
     // Should be before extracting headers, because the CONTENT_LENGTH header
     // can be updated if the content if gzipped
@@ -91,11 +91,11 @@ object ResponseCacher extends Log {
     (status, headers, bytes)
   }
 
-  private def deserializeToResponse(cachedResponse: CachedResponse): HttpResponse = {
+  private def deserializeToResponse(cachedResponse: CachedResponse): FullHttpResponse = {
     val (status, headers, bytes) = cachedResponse
-    val response = new DefaultHttpResponse(HttpVersion.HTTP_1_1, HttpResponseStatus.valueOf(status))
+    val response = new DefaultFullHttpResponse(HttpVersion.HTTP_1_1, HttpResponseStatus.valueOf(status))
     for ((k, v) <- headers) HttpHeaders.addHeader(response, k, v)
-    response.setContent(ChannelBuffers.wrappedBuffer(bytes))
+    response.content.writeBytes(Unpooled.wrappedBuffer(bytes))
     response
   }
 
@@ -117,28 +117,27 @@ object ResponseCacher extends Log {
 }
 
 @Sharable
-class ResponseCacher extends SimpleChannelDownstreamHandler with Log {
-  override def writeRequested(ctx: ChannelHandlerContext, e: MessageEvent) {
-    val m = e.getMessage
-    if (!m.isInstanceOf[HandlerEnv]) {
-      ctx.sendDownstream(e)
+class ResponseCacher extends ChannelOutboundHandlerAdapter with Log {
+  override def write(ctx: ChannelHandlerContext, msg: Object, promise: ChannelPromise) {
+    if (!msg.isInstanceOf[HandlerEnv]) {
+      ctx.write(msg, promise)
       return
     }
 
-    val env   = m.asInstanceOf[HandlerEnv]
+    val env   = msg.asInstanceOf[HandlerEnv]
     val route = env.route
 
     // action may be null when the request could not go to Dispatcher, for
     // example when the response is served from PublicResourceServer
     if (route == null) {
-      ctx.sendDownstream(e)
+      ctx.write(msg, promise)
       return
     }
 
     val response = env.response
-    if (response.getStatus == OK && !response.isChunked && env.route.cacheSecs != 0)
+    if (response.getStatus == OK && !HttpHeaders.isTransferEncodingChunked(response) && env.route.cacheSecs != 0)
       ResponseCacher.cacheResponse(env)
 
-    ctx.sendDownstream(e)
+    ctx.write(msg, promise)
   }
 }

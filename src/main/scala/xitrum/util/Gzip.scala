@@ -3,9 +3,8 @@ package xitrum.util
 import java.io.{ByteArrayInputStream, ByteArrayOutputStream}
 import java.util.zip.{GZIPInputStream, GZIPOutputStream}
 
-import org.jboss.netty.handler.codec.http.{HttpHeaders, HttpRequest, HttpResponse}
+import io.netty.handler.codec.http.{HttpHeaders, HttpRequest, FullHttpResponse}
 import HttpHeaders.Names.{ACCEPT_ENCODING, CONTENT_ENCODING, CONTENT_TYPE}
-import org.jboss.netty.buffer.ChannelBuffers
 
 import xitrum.Config
 
@@ -69,9 +68,9 @@ object Gzip {
    *
    * @return Response body content as bytes
    */
-  def tryCompressBigTextualResponse(request: HttpRequest, response: HttpResponse): Array[Byte] = {
-    val channelBuffer = response.getContent
-    val bytes         = ChannelBufferToBytes(channelBuffer)
+  def tryCompressBigTextualResponse(request: HttpRequest, response: FullHttpResponse): Array[Byte] = {
+    val byteBuf = response.content
+    val bytes   = ByteBufToBytes(byteBuf)
 
     if (!isAccepted(request) ||
         response.headers.contains(CONTENT_ENCODING) ||
@@ -86,7 +85,8 @@ object Gzip {
     HttpHeaders.setContentLength(response, gzippedBytes.length)
     HttpHeaders.setHeader(response, CONTENT_ENCODING, "gzip")
 
-    response.setContent(ChannelBuffers.wrappedBuffer(gzippedBytes))
+    response.content.clear()
+    response.content.writeBytes(gzippedBytes)
     gzippedBytes
   }
 }

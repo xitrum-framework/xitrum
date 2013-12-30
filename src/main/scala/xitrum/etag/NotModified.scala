@@ -3,7 +3,7 @@ package xitrum.etag
 import java.text.SimpleDateFormat
 import java.util.{Locale, TimeZone}
 
-import org.jboss.netty.handler.codec.http.{HttpHeaders, HttpResponse, HttpResponseStatus}
+import io.netty.handler.codec.http.{HttpHeaders, FullHttpResponse, HttpResponseStatus}
 import HttpHeaders.Names._
 import HttpHeaders.Values._
 import HttpResponseStatus._
@@ -35,7 +35,7 @@ object NotModified {
    * Both Max-age and Expires header are set because IEs use Expires, not max-age:
    * http://mrcoles.com/blog/cookies-max-age-vs-expires/
    */
-  def setClientCacheAggressively(response: HttpResponse) {
+  def setClientCacheAggressively(response: FullHttpResponse) {
     if (!response.headers.contains(CACHE_CONTROL))
       HttpHeaders.setHeader(response, CACHE_CONTROL, "public, " + MAX_AGE + "=" + SECS_IN_A_YEAR)
 
@@ -55,7 +55,7 @@ object NotModified {
    * Note that "pragma: no-cache" is linked to requests, not responses:
    * http://palizine.plynt.com/issues/2008Jul/cache-control-attributes/
    */
-  def setNoClientCache(response: HttpResponse) {
+  def setNoClientCache(response: FullHttpResponse) {
     // http://sockjs.github.com/sockjs-protocol/sockjs-protocol-0.3.html#section-11
     HttpHeaders.removeHeader(response, EXPIRES)
     HttpHeaders.removeHeader(response, LAST_MODIFIED)

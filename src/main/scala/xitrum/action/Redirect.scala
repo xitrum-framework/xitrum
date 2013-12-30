@@ -2,9 +2,8 @@ package xitrum.action
 
 import java.lang.reflect.Method
 
-import org.jboss.netty.channel.ChannelFuture
-
-import org.jboss.netty.handler.codec.http.{ HttpHeaders, HttpResponseStatus }
+import io.netty.channel.ChannelFuture
+import io.netty.handler.codec.http.{HttpHeaders, HttpResponseStatus}
 import HttpHeaders.Names.LOCATION
 import HttpResponseStatus.FOUND
 

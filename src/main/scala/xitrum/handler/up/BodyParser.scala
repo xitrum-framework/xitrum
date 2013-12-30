@@ -4,9 +4,9 @@ import java.nio.charset.Charset
 import scala.collection.mutable.{Map => MMap}
 import scala.util.control.NonFatal
 
-import org.jboss.netty.channel.{Channel, ChannelHandler, SimpleChannelUpstreamHandler, ChannelHandlerContext, ChannelStateEvent, MessageEvent, ExceptionEvent, Channels}
-import org.jboss.netty.handler.codec.http.{DefaultHttpResponse, HttpHeaders, HttpMethod, HttpRequest, HttpChunk, HttpResponseStatus, HttpVersion}
-import org.jboss.netty.handler.codec.http.multipart.{Attribute, DefaultHttpDataFactory, DiskAttribute, DiskFileUpload, FileUpload, HttpPostRequestDecoder, InterfaceHttpData, HttpData}
+import io.netty.channel.{Channel, ChannelHandler, SimpleChannelInboundHandler, ChannelHandlerContext}
+import io.netty.handler.codec.http.{DefaultFullHttpResponse, HttpHeaders, HttpMethod, HttpContent, HttpObject, LastHttpContent, HttpRequest, HttpResponseStatus, HttpVersion}
+import io.netty.handler.codec.http.multipart.{Attribute, DefaultHttpDataFactory, DiskAttribute, DiskFileUpload, FileUpload, HttpPostRequestDecoder, InterfaceHttpData, HttpData}
 import InterfaceHttpData.HttpDataType
 
 import xitrum.Config
@@ -25,42 +25,38 @@ object BodyParser {
   // https://github.com/ngocdaothanh/xitrum/issues/77
   // Save a field to disk if its size exceeds maxSizeInBytesOfUploadMem
   val factory = new DefaultHttpDataFactory(Config.xitrum.request.maxSizeInBytesOfUploadMem)
-
-  // Limit each field, including file upload
-  if (Config.xitrum.request.maxSizeInBytes > 0)
-    factory.setMaxLimit(Config.xitrum.request.maxSizeInBytes)
 }
 
 // Based on the file upload example in Netty.
-class BodyParser extends SimpleChannelUpstreamHandler with BadClientSilencer {
+class BodyParser extends SimpleChannelInboundHandler[HttpObject] with BadClientSilencer {
   import BodyParser._
 
   private[this] var env: HandlerEnv = _
   private[this] var readingChunks   = false
   private[this] var bytesReceived   = 0L
 
-  override def channelClosed(ctx: ChannelHandlerContext, e: ChannelStateEvent) {
+  override def channelInactive(ctx: ChannelHandlerContext) {
     if (env != null && env.bodyDecoder != null) {
       env.bodyDecoder.cleanFiles()
+      env.bodyDecoder.destroy()
       env.bodyDecoder = null
     }
   }
 
-  override def messageReceived(ctx: ChannelHandlerContext, e: MessageEvent) {
-    val m       = e.getMessage
-    val channel = ctx.getChannel
+  override def channelRead0(ctx: ChannelHandlerContext, msg: HttpObject) {
+    val channel = ctx.channel
     try {
-      if (m.isInstanceOf[HttpRequest] && !readingChunks) {
-        handleHttpRequest(ctx, m.asInstanceOf[HttpRequest])
-      } else if (m.isInstanceOf[HttpChunk] && readingChunks) {
-        handleHttpChunk(ctx, m.asInstanceOf[HttpChunk])
+      if (msg.isInstanceOf[HttpRequest] && !readingChunks) {
+        handleHttpRequest(ctx, msg.asInstanceOf[HttpRequest])
+      } else if (msg.isInstanceOf[HttpContent] && readingChunks) {
+        handleHttpChunk(ctx, msg.asInstanceOf[HttpContent])
       } else {
-        ctx.sendUpstream(e)
+        ctx.fireChannelRead(msg)
       }
     } catch {
       case NonFatal(e) =>
-        val msg = "Could not parse content body of request: " + m
-        log.warn(msg, e)
+        val m = "Could not parse content body of request: " + msg
+        log.warn(m, e)
         channel.close()
     }
   }
@@ -75,40 +71,40 @@ class BodyParser extends SimpleChannelUpstreamHandler with BadClientSilencer {
     // Clean previous files if any
     if (env != null && env.bodyDecoder != null) env.bodyDecoder.cleanFiles()
 
-    val channel        = ctx.getChannel
+    val channel        = ctx.channel
     env                = new HandlerEnv
     env.channel        = channel
     env.bodyDecoder    = new HttpPostRequestDecoder(factory, request)
     env.bodyTextParams = MMap.empty[String, Seq[String]]
     env.bodyFileParams = MMap.empty[String, Seq[FileUpload]]
-    env.request        = request
+    //env.request        = request
     env.response       = {  // The default response is empty 200 OK
       // http://en.wikipedia.org/wiki/HTTP_persistent_connection
       // In HTTP 1.1 all connections are considered persistent unless declared otherwise
-      val ret = new DefaultHttpResponse(HttpVersion.HTTP_1_1, HttpResponseStatus.OK)
+      val ret = new DefaultFullHttpResponse(HttpVersion.HTTP_1_1, HttpResponseStatus.OK)
       HttpHeaders.setContentLength(ret, 0)
       ret
     }
 
     bytesReceived = 0
-    if (request.isChunked) {
+    if (HttpHeaders.isTransferEncodingChunked(request)) {
       readingChunks = true
     } else if (readHttpDataAllReceive()) {
-      Channels.fireMessageReceived(ctx, env)
+      ctx.fireChannelRead(env)
     } else {
       warnBigRequest(channel)
     }
   }
 
-  private def handleHttpChunk(ctx: ChannelHandlerContext, chunk: HttpChunk) {
-    val channel = ctx.getChannel
+  private def handleHttpChunk(ctx: ChannelHandlerContext, chunk: HttpContent) {
+    val channel = ctx.channel
 
     env.bodyDecoder.offer(chunk)
     if (!readHttpDataChunkByChunk()) warnBigRequest(channel)
 
-    if (chunk.isLast) {
+    if (chunk.isInstanceOf[LastHttpContent]) {
       if (readHttpDataAllReceive()) {
-        Channels.fireMessageReceived(ctx, env)
+        ctx.fireChannelRead(env)
         readingChunks = false
       } else {
         warnBigRequest(channel)

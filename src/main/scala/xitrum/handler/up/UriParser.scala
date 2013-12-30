@@ -4,29 +4,22 @@ import java.util.{Map => JMap, List => JList, LinkedHashMap => JLinkedHashMap}
 import scala.collection.mutable.{ArrayBuffer, Map => MMap}
 import scala.util.control.NonFatal
 
-import org.jboss.netty.channel.{ChannelHandler, SimpleChannelUpstreamHandler, ChannelHandlerContext, MessageEvent, Channels}
+import io.netty.channel.{ChannelHandler, ChannelHandlerContext, SimpleChannelInboundHandler}
 import ChannelHandler.Sharable
-import org.jboss.netty.handler.codec.http.QueryStringDecoder
+import io.netty.handler.codec.http.QueryStringDecoder
 
 import xitrum.Config
 import xitrum.handler.HandlerEnv
 import xitrum.scope.request.{Params, PathInfo}
 
 @Sharable
-class UriParser extends SimpleChannelUpstreamHandler with BadClientSilencer {
-  override def messageReceived(ctx: ChannelHandlerContext, e: MessageEvent) {
-    val m = e.getMessage
-    if (!m.isInstanceOf[HandlerEnv]) {
-      ctx.sendUpstream(e)
-      return
-    }
-
-    val env     = m.asInstanceOf[HandlerEnv]
+class UriParser extends SimpleChannelInboundHandler[HandlerEnv] with BadClientSilencer {
+  override def channelRead0(ctx: ChannelHandlerContext, env: HandlerEnv) {
     val request = env.request
 
     try {
       val decoder = new QueryStringDecoder(request.getUri, Config.xitrum.request.charset)
-      val path    = decoder.getPath
+      val path    = decoder.path
 
       // Treat "articles" and "articles/" the same
       val noSlashSuffix =
@@ -36,13 +29,13 @@ class UriParser extends SimpleChannelUpstreamHandler with BadClientSilencer {
           path
 
       env.pathInfo    = new PathInfo(noSlashSuffix)
-      env.queryParams = jParamsToParams(decoder.getParameters)
-      ctx.sendUpstream(e)
+      env.queryParams = jParamsToParams(decoder.parameters)
+      ctx.fireChannelRead(env)
     } catch {
       case NonFatal(e) =>
         val msg = "Could not parse query params URI: " + request.getUri
         log.warn(msg, e)
-        ctx.getChannel.close()
+        ctx.close()
     }
   }
 

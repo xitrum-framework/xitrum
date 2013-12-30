@@ -1,14 +1,16 @@
 package xitrum
 
-import org.jboss.netty.bootstrap.ServerBootstrap
-import org.jboss.netty.channel.socket.nio.NioServerSocketChannelFactory
-import org.jboss.netty.channel.ChannelPipelineFactory
+import io.netty.bootstrap.ServerBootstrap
+import io.netty.channel.{ChannelInitializer, ChannelPipeline}
+import io.netty.channel.nio.NioEventLoopGroup
+import io.netty.channel.socket.SocketChannel
+import io.netty.channel.socket.nio.NioServerSocketChannel
 
 import xitrum.handler.{
-  DefaultHttpChannelPipelineFactory,
+  DefaultHttpChannelInitializer,
   FlashSocketPolicyServer,
   NetOption,
-  SslChannelPipelineFactory
+  SslChannelInitializer
 }
 import xitrum.sockjs.SockJsAction
 
@@ -17,7 +19,7 @@ object Server extends Log {
    * Starts with default ChannelPipelineFactory provided by Xitrum.
    */
   def start() {
-    val default = new DefaultHttpChannelPipelineFactory
+    val default = new DefaultHttpChannelInitializer
     start(default)
   }
 
@@ -26,7 +28,7 @@ object Server extends Log {
    * xitrum.handler.DefaultHttpChannelPipelineFactory.
    * SSL codec handler will be automatically prepended for HTTPS server.
    */
-  def start(httpChannelPipelineFactory: ChannelPipelineFactory) {
+  def start(httpChannelPipelineFactory: ChannelInitializer[SocketChannel]) {
     // Don't know why this doesn't work if put above Config.actorSystem
     //
     // Redirect Akka log to SLF4J
@@ -60,18 +62,23 @@ object Server extends Log {
     Config.warnOnDefaultSecureKey()
   }
 
-  private def doStart(https: Boolean, httpChannelPipelineFactory: ChannelPipelineFactory) {
-    val channelPipelineFactory =
+  private def doStart(https: Boolean, nonSslChannelInitializer: ChannelInitializer[SocketChannel]) {
+    val channelInitializer =
       if (https)
-        new SslChannelPipelineFactory(httpChannelPipelineFactory)
+        new SslChannelInitializer(nonSslChannelInitializer)
       else
-        httpChannelPipelineFactory
+        nonSslChannelInitializer
 
-    val bootstrap       = new ServerBootstrap(new NioServerSocketChannelFactory)
+    val bossGroup   = new NioEventLoopGroup
+    val workerGroup = new NioEventLoopGroup
+    val bootstrap   = new ServerBootstrap
+    bootstrap.group(bossGroup, workerGroup)
+             .channel(classOf[NioServerSocketChannel])
+             .childHandler(channelInitializer)
+
     val portConfig      = Config.xitrum.port
     val (service, port) = if (https) ("HTTPS", portConfig.https.get) else ("HTTP", portConfig.http.get)
 
-    bootstrap.setPipelineFactory(channelPipelineFactory)
     NetOption.setOptions(bootstrap)
     NetOption.bind(service, bootstrap, port)
 

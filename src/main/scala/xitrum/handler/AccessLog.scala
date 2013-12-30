@@ -2,7 +2,7 @@ package xitrum.handler
 
 import java.net.SocketAddress
 import scala.collection.mutable.{Map => MMap}
-import org.jboss.netty.handler.codec.http.{HttpRequest, HttpResponse}
+import io.netty.handler.codec.http.{HttpRequest, HttpResponse}
 
 import xitrum.{Action, Log}
 import xitrum.scope.request.RequestEnv
@@ -21,7 +21,7 @@ object AccessLog extends Log {
         Net.remoteIp(remoteAddress, request) + " " +
         request.getMethod + " " +
         request.getUri + " -> " +
-        response.getStatus.getCode +
+        response.getStatus.code +
         " (static file)"
       )
     }
@@ -33,7 +33,7 @@ object AccessLog extends Log {
         Net.remoteIp(remoteAddress, request) + " " +
         request.getMethod + " " +
         request.getUri + " -> " +
-        response.getStatus.getCode +
+        response.getStatus.code +
         " (JAR resource)"
       )
     }
@@ -70,7 +70,7 @@ object AccessLog extends Log {
     (if (env.bodyTextParams.nonEmpty) ", bodyTextParams: " + RequestEnv.inspectParamsWithFilter(env.bodyTextParams) else "") +
     (if (env.pathParams.nonEmpty)     ", pathParams: "     + RequestEnv.inspectParamsWithFilter(env.pathParams)     else "") +
     (if (env.bodyFileParams.nonEmpty) ", bodyFileParams: " + RequestEnv.inspectParamsWithFilter(env.bodyFileParams) else "") +
-    (if (action.isDoneResponding)       " -> "             + action.response.getStatus.getCode                      else "") +
+    (if (action.isDoneResponding)       " -> "             + action.response.getStatus.code                         else "") +
     ", " + dt + " [ms]"
   }
 

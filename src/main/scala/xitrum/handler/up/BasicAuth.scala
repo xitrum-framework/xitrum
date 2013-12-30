@@ -1,8 +1,8 @@
 package xitrum.handler.up
 
-import org.jboss.netty.buffer.ChannelBuffers
-import org.jboss.netty.channel.{Channel, ChannelHandler, SimpleChannelUpstreamHandler, ChannelHandlerContext, MessageEvent}
-import org.jboss.netty.handler.codec.http.{DefaultHttpResponse, HttpHeaders, HttpResponseStatus, HttpRequest, HttpResponse, HttpVersion}
+import io.netty.buffer.Unpooled
+import io.netty.channel.{Channel, ChannelHandler, SimpleChannelInboundHandler, ChannelHandlerContext}
+import io.netty.handler.codec.http.{DefaultHttpResponse, HttpHeaders, HttpResponseStatus, FullHttpRequest, FullHttpResponse, HttpVersion}
 import ChannelHandler.Sharable
 
 import xitrum.Config
@@ -11,7 +11,7 @@ import xitrum.util.UrlSafeBase64
 
 object BasicAuth {
   /** f takes username and password, and returns true if it want to let the user in. */
-  def basicAuth(channel: Channel, request: HttpRequest, response: HttpResponse, realm: String)(f: (String, String) => Boolean): Boolean = {
+  def basicAuth(channel: Channel, request: FullHttpRequest, response: FullHttpResponse, realm: String)(f: (String, String) => Boolean): Boolean = {
     getUsernameAndPassword(request) match {
       case None =>
         respondBasic(channel, request, response, realm)
@@ -27,7 +27,7 @@ object BasicAuth {
     }
   }
 
-  private def getUsernameAndPassword(request: HttpRequest): Option[(String, String)] = {
+  private def getUsernameAndPassword(request: FullHttpRequest): Option[(String, String)] = {
     val authorization = HttpHeaders.getHeader(request, HttpHeaders.Names.AUTHORIZATION)
     if (authorization == null || !authorization.startsWith("Basic ")) {
       None
@@ -44,14 +44,14 @@ object BasicAuth {
     }
   }
 
-  private def respondBasic(channel: Channel, request: HttpRequest, response: HttpResponse, realm: String) {
+  private def respondBasic(channel: Channel, request: FullHttpRequest, response: FullHttpResponse, realm: String) {
     HttpHeaders.setHeader(response, HttpHeaders.Names.WWW_AUTHENTICATE, "Basic realm=\"" + realm + "\"")
     response.setStatus(HttpResponseStatus.UNAUTHORIZED)
 
-    val cb = ChannelBuffers.copiedBuffer("Wrong username or password", Config.xitrum.request.charset)
+    val cb = "Wrong username or password".getBytes(Config.xitrum.request.charset)
     HttpHeaders.setHeader(response, HttpHeaders.Names.CONTENT_TYPE, "text/plain; charset=" + Config.xitrum.request.charset)
-    HttpHeaders.setContentLength(response, cb.readableBytes)
-    response.setContent(cb)
+    HttpHeaders.setContentLength(response, cb.length)
+    response.content.writeBytes(cb)
 
     NoPipelining.setResponseHeaderForKeepAliveRequest(request, response)
     val future = channel.write(response)
@@ -60,26 +60,18 @@ object BasicAuth {
 }
 
 @Sharable
-class BasicAuth extends SimpleChannelUpstreamHandler with BadClientSilencer {
-  override def messageReceived(ctx: ChannelHandlerContext, e: MessageEvent) {
+class BasicAuth extends SimpleChannelInboundHandler[HandlerEnv] with BadClientSilencer {
+  override def channelRead0(ctx: ChannelHandlerContext, env: HandlerEnv) {
     val go = Config.xitrum.basicAuth
     if (go.isEmpty) {
-      ctx.sendUpstream(e)
+      ctx.fireChannelRead(env)
       return
     }
 
-    val m = e.getMessage
-    if (!m.isInstanceOf[HandlerEnv]) {
-      ctx.sendUpstream(e)
-      return
-    }
-
-    val env = m.asInstanceOf[HandlerEnv]
-    val g   = go.get
-
+    val g      = go.get
     val passed = BasicAuth.basicAuth(env.channel, env.request, env.response, g.realm) { (username, password) =>
       g.username == username && g.password == password
     }
-    if (passed) ctx.sendUpstream(e)
+    if (passed) ctx.fireChannelRead(env)
   }
 }

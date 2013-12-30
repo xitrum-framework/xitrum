@@ -2,7 +2,7 @@ package xitrum
 
 import akka.actor.{Actor, ActorRef}
 
-import xitrum.handler.{DefaultHttpChannelPipelineFactory, HandlerEnv}
+import xitrum.handler.{DefaultHttpChannelInitializer, HandlerEnv}
 import xitrum.sockjs.{CloseFromHandler, MessageFromHandler}
 
 //------------------------------------------------------------------------------

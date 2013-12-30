@@ -1,7 +1,7 @@
 package xitrum.handler.down
 
-import org.jboss.netty.channel.{ChannelEvent, ChannelDownstreamHandler, ChannelHandler, ChannelHandlerContext, DownstreamMessageEvent}
-import org.jboss.netty.handler.codec.http.{HttpHeaders, HttpMethod, HttpRequest, HttpResponse, HttpResponseStatus}
+import io.netty.channel.{ChannelHandler, ChannelHandlerContext, ChannelOutboundHandlerAdapter, ChannelPromise}
+import io.netty.handler.codec.http.{HttpHeaders, HttpMethod, HttpRequest, HttpResponse, HttpResponseStatus}
 import ChannelHandler.Sharable
 import HttpHeaders.Names._
 import HttpMethod._
@@ -11,27 +11,21 @@ import xitrum.Config
 import xitrum.handler.HandlerEnv
 
 @Sharable
-class SetCORS extends ChannelDownstreamHandler {
-  def handleDownstream(ctx: ChannelHandlerContext, e: ChannelEvent) {
+class SetCORS extends ChannelOutboundHandlerAdapter {
+  override def write(ctx: ChannelHandlerContext, msg: Object, promise: ChannelPromise) {
     import Config.xitrum.response.corsAllowOrigins
 
     if (corsAllowOrigins.isEmpty) {
-      ctx.sendDownstream(e)
+      ctx.write(msg, promise)
       return
     }
 
-    if (!e.isInstanceOf[DownstreamMessageEvent]) {
-      ctx.sendDownstream(e)
+    if (!msg.isInstanceOf[HandlerEnv]) {
+      ctx.write(msg, promise)
       return
     }
 
-    val m = e.asInstanceOf[DownstreamMessageEvent].getMessage
-    if (!m.isInstanceOf[HandlerEnv]) {
-      ctx.sendDownstream(e)
-      return
-    }
-
-    val env      = m.asInstanceOf[HandlerEnv]
+    val env      = msg.asInstanceOf[HandlerEnv]
     val request  = env.request
     val response = env.response
 
@@ -58,9 +52,9 @@ class SetCORS extends ChannelDownstreamHandler {
       val pathInfo = env.pathInfo
       if (pathInfo == null) {
         if (response.getStatus == NOT_FOUND)
-          HttpHeaders.setHeader(response, ACCESS_CONTROL_ALLOW_METHODS, OPTIONS.getName)
+          HttpHeaders.setHeader(response, ACCESS_CONTROL_ALLOW_METHODS, OPTIONS.name)
         else
-          HttpHeaders.setHeader(response, ACCESS_CONTROL_ALLOW_METHODS, OPTIONS.getName + ", "+ GET.getName + ", " + HEAD.getName)
+          HttpHeaders.setHeader(response, ACCESS_CONTROL_ALLOW_METHODS, OPTIONS.name + ", "+ GET.name + ", " + HEAD.name)
       } else {
         val allowMethods = OPTIONS +: Config.routes.tryAllMethods(pathInfo)
         HttpHeaders.setHeader(response, ACCESS_CONTROL_ALLOW_METHODS, allowMethods.mkString(", "))
@@ -72,6 +66,6 @@ class SetCORS extends ChannelDownstreamHandler {
     if (accessControlRequestHeaders != null && !response.headers.contains(ACCESS_CONTROL_ALLOW_HEADERS))
       HttpHeaders.setHeader(response, ACCESS_CONTROL_ALLOW_HEADERS, accessControlRequestHeaders)
 
-    ctx.sendDownstream(e)
+    ctx.write(msg, promise)
   }
 }

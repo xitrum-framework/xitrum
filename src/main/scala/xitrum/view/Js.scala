@@ -3,7 +3,7 @@ package xitrum.view
 import scala.xml.Unparsed
 
 import org.apache.commons.lang3.StringEscapeUtils
-import org.jboss.netty.channel.ChannelFuture
+import io.netty.channel.ChannelFuture
 
 import xitrum.{Config, Action}
 import xitrum.etag.{Etag, NotModified}

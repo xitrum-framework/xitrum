@@ -1,8 +1,8 @@
 package xitrum.handler.down
 
-import org.jboss.netty.buffer.ChannelBuffers
-import org.jboss.netty.channel.{ChannelEvent, ChannelDownstreamHandler, ChannelHandler, ChannelHandlerContext, DownstreamMessageEvent}
-import org.jboss.netty.handler.codec.http.{DefaultHttpResponse, HttpHeaders, HttpMethod, HttpRequest, HttpResponse, HttpResponseStatus}
+import io.netty.buffer.Unpooled
+import io.netty.channel.{ChannelHandler, ChannelHandlerContext, ChannelOutboundHandlerAdapter, ChannelPromise}
+import io.netty.handler.codec.http.{DefaultHttpResponse, HttpHeaders, HttpMethod, HttpRequest, HttpResponse, HttpResponseStatus}
 import ChannelHandler.Sharable
 import HttpHeaders.Names._
 import HttpMethod._
@@ -13,20 +13,14 @@ import xitrum.etag.NotModified
 import xitrum.handler.{AccessLog, HandlerEnv}
 
 @Sharable
-class OPTIONSResponse extends ChannelDownstreamHandler {
-  def handleDownstream(ctx: ChannelHandlerContext, e: ChannelEvent) {
-    if (!e.isInstanceOf[DownstreamMessageEvent]) {
-      ctx.sendDownstream(e)
+class OPTIONSResponse extends ChannelOutboundHandlerAdapter {
+  override def write(ctx: ChannelHandlerContext, msg: Object, promise: ChannelPromise) {
+    if (!msg.isInstanceOf[HandlerEnv]) {
+      ctx.write(msg, promise)
       return
     }
 
-    val m = e.asInstanceOf[DownstreamMessageEvent].getMessage
-    if (!m.isInstanceOf[HandlerEnv]) {
-      ctx.sendDownstream(e)
-      return
-    }
-
-    val env      = m.asInstanceOf[HandlerEnv]
+    val env      = msg.asInstanceOf[HandlerEnv]
     val request  = env.request
     val response = env.response
     val pathInfo = env.pathInfo
@@ -47,9 +41,9 @@ class OPTIONSResponse extends ChannelDownstreamHandler {
 
       HttpHeaders.setContentLength(response, 0)
       NotModified.setClientCacheAggressively(response)
-      response.setContent(ChannelBuffers.EMPTY_BUFFER)
+      response.content.clear()
     }
 
-    ctx.sendDownstream(e)
+    ctx.write(msg, promise)
   }
 }

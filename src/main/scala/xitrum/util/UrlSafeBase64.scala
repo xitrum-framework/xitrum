@@ -3,9 +3,9 @@ package xitrum.util
 import java.nio.charset.Charset
 import scala.util.control.NonFatal
 
-import org.jboss.netty.buffer.ChannelBuffers
-import org.jboss.netty.handler.codec.base64.{Base64 => B64, Base64Dialect}
-import org.jboss.netty.util.CharsetUtil.UTF_8
+import io.netty.buffer.Unpooled
+import io.netty.handler.codec.base64.{Base64 => B64, Base64Dialect}
+import io.netty.util.CharsetUtil.UTF_8
 
 import xitrum.Log
 
@@ -24,7 +24,7 @@ object UrlSafeBase64 extends Log {
    */
   def noPaddingEncode(bytes: Array[Byte]): String = {
     // No line break because the result may be used in HTTP response header (cookie)
-    val buffer = B64.encode(ChannelBuffers.wrappedBuffer(bytes), false, Base64Dialect.URL_SAFE)
+    val buffer       = B64.encode(Unpooled.wrappedBuffer(bytes), false, Base64Dialect.URL_SAFE)
     val base64String = buffer.toString(UTF_8)
     removePadding(base64String)
   }
@@ -33,8 +33,8 @@ object UrlSafeBase64 extends Log {
   def autoPaddingDecode(base64String: String): Option[Array[Byte]] = {
     try {
       val withPadding = addPadding(base64String)
-      val buffer      = B64.decode(ChannelBuffers.copiedBuffer(withPadding, UTF_8), Base64Dialect.URL_SAFE)
-      Some(ChannelBufferToBytes(buffer))
+      val buffer      = B64.decode(Unpooled.copiedBuffer(withPadding, UTF_8), Base64Dialect.URL_SAFE)
+      Some(ByteBufToBytes(buffer))
     } catch {
       case NonFatal(e) =>
         log.debug("Could not decode base64 in URL-safe dialect: " + base64String)

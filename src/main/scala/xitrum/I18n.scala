@@ -1,7 +1,7 @@
 package xitrum
 
 import scala.util.control.NonFatal
-import org.jboss.netty.handler.codec.http.HttpHeaders
+import io.netty.handler.codec.http.HttpHeaders
 import HttpHeaders.Names
 
 import xitrum.i18n.PoLoader
