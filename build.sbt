@@ -30,6 +30,9 @@ libraryDependencies += "ch.qos.logback" % "logback-classic" % "1.0.13" % "test"
 // Netty is the core of Xitrum's HTTP(S) feature
 libraryDependencies += "io.netty" % "netty-all" % "4.0.14.Final"
 
+// Javassist boosts Netty 4 speed
+libraryDependencies += "org.javassist" % "javassist" % "3.18.1-GA"
+
 // For clustering SockJS; Akka is included here
 libraryDependencies += "tv.cntt" %% "glokka" % "1.4"
 
