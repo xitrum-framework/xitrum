@@ -19,20 +19,20 @@ import xitrum.handler.outbound._
  * When an app uses its own dispatcher (not Xitrum's routing/dispatcher) and
  * only needs Xitrum's fast static file serving, it may use only these handlers:
  *
- * Upstream:
+ * Inbound:
  *   HttpRequestDecoder
- *   noPipelining
- *   requestAttacher
- *   publicFileServer
- *   its own dispatcher
+ *   BodyParser
+ *   NoPipelining
+ *   PublicFileServer
+ *   Its own dispatcher
  *
- * Downstream:
+ * Outbound:
  *   HttpResponseEncoder
  *   ChunkedWriteHandler
- *   xSendFile
+ *   XSendFile
  */
 object DefaultHttpChannelInitializer {
-  // Upstream sharable handlers
+  // Inbound sharable handlers
 
   lazy val noPipelining         = new NoPipelining
   lazy val baseUrlRemover       = new BaseUrlRemover
@@ -43,7 +43,7 @@ object DefaultHttpChannelInitializer {
   lazy val methodOverrider      = new MethodOverrider
   lazy val dispatcher           = new Dispatcher
 
-  // Downstream sharable handlers
+  // Outbound sharable handlers
 
   lazy val setCORS              = new SetCORS
   lazy val OPTIONSResponse      = new OPTIONSResponse
@@ -59,7 +59,7 @@ object DefaultHttpChannelInitializer {
     // pipeline.replace(classOf[HttpRequestDecoder],  "wsdecoder", new WebSocket08FrameDecoder(true, this.allowExtensions))
     // pipeline.replace(classOf[HttpResponseEncoder], "wsencoder", new WebSocket08FrameEncoder(false))
 
-    // Upstream
+    // Inbound
 
     pipeline.remove(classOf[BodyParser])
     pipeline.remove(classOf[NoPipelining])
@@ -72,15 +72,15 @@ object DefaultHttpChannelInitializer {
     pipeline.remove(classOf[MethodOverrider])
     pipeline.remove(classOf[Dispatcher])
 
-    // Downstream
+    // Outbound
 
     pipeline.remove(classOf[ChunkedWriteHandler])
+    pipeline.remove(classOf[Env2Response])
     pipeline.remove(classOf[SetCORS])
     pipeline.remove(classOf[OPTIONSResponse])
     pipeline.remove(classOf[FixiOS6SafariPOST])
     pipeline.remove(classOf[XSendFile])
     pipeline.remove(classOf[XSendResource])
-    pipeline.remove(classOf[Env2Response])
     pipeline.remove(classOf[ResponseCacher])
   }
 }
@@ -92,15 +92,15 @@ class DefaultHttpChannelInitializer extends ChannelInitializer[SocketChannel] {
   /**
    * You can override this method to customize the default pipeline.
    *
-   * Upstream direction: first handler -> last handler
-   * Downstream direction: last handler -> first handler
+   * Inbound direction: first handler -> last handler
+   * Outbound direction: last handler -> first handler
    */
   override def initChannel(ch: SocketChannel) {
     // This method is run for every request, thus should be fast
 
-    val p = ch.pipeline()
+    val p = ch.pipeline
 
-    // Upstream
+    // Inbound
 
     if (Config.xitrum.port.flashSocketPolicy)
     p.addLast("FlashSocketPolicyHandler", new FlashSocketPolicyHandler)
@@ -116,7 +116,7 @@ class DefaultHttpChannelInitializer extends ChannelInitializer[SocketChannel] {
     p.addLast("MethodOverrider",          methodOverrider)
     p.addLast("Dispatcher",               dispatcher)
 
-    // Downstream
+    // Outbound
 
     p.addLast("HttpResponseEncoder", new HttpResponseEncoder)
     p.addLast("ChunkedWriteHandler", new ChunkedWriteHandler)  // For writing ChunkedFile, at XSendFile
