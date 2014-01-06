@@ -54,7 +54,7 @@ object BasicAuth {
     response.content.writeBytes(cb)
 
     NoPipelining.setResponseHeaderForKeepAliveRequest(request, response)
-    val future = channel.write(response)
+    val future = channel.writeAndFlush(response)
     NoPipelining.if_keepAliveRequest_then_resumeReading_else_closeOnComplete(request, channel, future)
   }
 }
