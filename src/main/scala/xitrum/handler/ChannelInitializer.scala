@@ -1,8 +1,8 @@
 package xitrum.handler
 
-import io.netty.channel.{ChannelInitializer, ChannelPipeline}
+import io.netty.channel.{ChannelHandler, ChannelInitializer, ChannelPipeline}
 import io.netty.channel.ChannelHandler.Sharable
-import io.netty.channel.socket.SocketChannel;
+import io.netty.channel.socket.SocketChannel
 
 import io.netty.handler.codec.http.{HttpRequestDecoder, HttpResponseEncoder}
 import io.netty.handler.stream.ChunkedWriteHandler
@@ -32,7 +32,7 @@ import xitrum.handler.outbound._
  *   XSendFile
  */
 object DefaultHttpChannelInitializer {
-  // Inbound sharable handlers
+  // Sharable inbound handlers
 
   lazy val noPipelining         = new NoPipelining
   lazy val baseUrlRemover       = new BaseUrlRemover
@@ -43,7 +43,7 @@ object DefaultHttpChannelInitializer {
   lazy val methodOverrider      = new MethodOverrider
   lazy val dispatcher           = new Dispatcher
 
-  // Outbound sharable handlers
+  // Sharable outbound handlers
 
   lazy val setCORS              = new SetCORS
   lazy val OPTIONSResponse      = new OPTIONSResponse
@@ -61,27 +61,36 @@ object DefaultHttpChannelInitializer {
 
     // Inbound
 
-    pipeline.remove(classOf[BodyParser])
-    pipeline.remove(classOf[NoPipelining])
-    pipeline.remove(classOf[BaseUrlRemover])
+    removeHandlerIfExists(pipeline, classOf[BodyParser])
+    removeHandlerIfExists(pipeline, classOf[NoPipelining])
+    removeHandlerIfExists(pipeline, classOf[BaseUrlRemover])
     if (Config.xitrum.basicAuth.isDefined)
-    pipeline.remove(classOf[BasicAuth])
-    pipeline.remove(classOf[PublicFileServer])
-    pipeline.remove(classOf[PublicResourceServer])
-    pipeline.remove(classOf[UriParser])
-    pipeline.remove(classOf[MethodOverrider])
-    pipeline.remove(classOf[Dispatcher])
+    removeHandlerIfExists(pipeline, classOf[BasicAuth])
+    removeHandlerIfExists(pipeline, classOf[PublicFileServer])
+    removeHandlerIfExists(pipeline, classOf[PublicResourceServer])
+    removeHandlerIfExists(pipeline, classOf[UriParser])
+    removeHandlerIfExists(pipeline, classOf[MethodOverrider])
+    removeHandlerIfExists(pipeline, classOf[Dispatcher])
 
     // Outbound
 
-    pipeline.remove(classOf[ChunkedWriteHandler])
-    pipeline.remove(classOf[Env2Response])
-    pipeline.remove(classOf[SetCORS])
-    pipeline.remove(classOf[OPTIONSResponse])
-    pipeline.remove(classOf[FixiOS6SafariPOST])
-    pipeline.remove(classOf[XSendFile])
-    pipeline.remove(classOf[XSendResource])
-    pipeline.remove(classOf[ResponseCacher])
+    removeHandlerIfExists(pipeline, classOf[ChunkedWriteHandler])
+    removeHandlerIfExists(pipeline, classOf[Env2Response])
+    removeHandlerIfExists(pipeline, classOf[SetCORS])
+    removeHandlerIfExists(pipeline, classOf[OPTIONSResponse])
+    removeHandlerIfExists(pipeline, classOf[FixiOS6SafariPOST])
+    removeHandlerIfExists(pipeline, classOf[XSendFile])
+    removeHandlerIfExists(pipeline, classOf[XSendResource])
+    removeHandlerIfExists(pipeline, classOf[ResponseCacher])
+  }
+
+  /**
+   * ChannelPipeline#remove(handler) throws exception if the handler does not
+   * exist in the pipeline.
+   */
+  def removeHandlerIfExists(pipeline: ChannelPipeline, klass: Class[_ <: ChannelHandler]) {
+    val handler = pipeline.get(klass)
+    if (handler != null) pipeline.remove(handler)
   }
 }
 
@@ -137,5 +146,8 @@ class SslChannelInitializer(nonSslChannelInitializer: ChannelInitializer[SocketC
     val p = ch.pipeline()
     p.addLast("SSL",    ServerSsl.handler())
     p.addLast("nonSsl", nonSslChannelInitializer)
+
+    // FlashSocketPolicyHandler can't be used with SSL
+    DefaultHttpChannelInitializer.removeHandlerIfExists(p, classOf[FlashSocketPolicyHandler])
   }
 }
