@@ -16,11 +16,10 @@ import xitrum.sockjs.SockJsAction
 
 object Server extends Log {
   /**
-   * Starts with default ChannelInitializer provided by Xitrum.
+   * Starts with the default ChannelInitializer provided by Xitrum.
    */
   def start() {
-    val default = new DefaultHttpChannelInitializer
-    start(default)
+    start(new DefaultHttpChannelInitializer)
   }
 
   /**

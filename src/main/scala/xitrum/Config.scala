@@ -357,7 +357,8 @@ object Config extends Log {
 
   /**
    * Use lazy to avoid collecting routes if they are not used.
-   * Sometimes we want to work in sbt console mode and don't like this overhead.
+   * Sometimes we want to work in SBT console mode and don't like waste several
+   * seconds collecting routes that we don't use.
    */
   lazy val routes = loadRouteCacheFileOrRecollectWithRetry()
 
