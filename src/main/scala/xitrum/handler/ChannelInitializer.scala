@@ -102,17 +102,19 @@ class DefaultHttpChannelInitializer extends ChannelInitializer[SocketChannel] {
 
     // Upstream
 
-    p.addLast("HttpRequestDecoder",   new HttpRequestDecoder(Config.xitrum.request.maxInitialLineLength, 8192, 8192))
-    p.addLast("BodyParser",           new BodyParser)          // Request is converted to HandlerEnv here
-    p.addLast("NoPipelining",         noPipelining)
-    p.addLast("BaseUrlRemover",       baseUrlRemover)
+    if (Config.xitrum.port.flashSocketPolicy)
+    p.addLast("FlashSocketPolicyHandler", new FlashSocketPolicyHandler)
+    p.addLast("HttpRequestDecoder",       new HttpRequestDecoder(Config.xitrum.request.maxInitialLineLength, 8192, 8192))
+    p.addLast("BodyParser",               new BodyParser)      // Request is converted to HandlerEnv here
+    p.addLast("NoPipelining",             noPipelining)
+    p.addLast("BaseUrlRemover",           baseUrlRemover)
     if (Config.xitrum.basicAuth.isDefined)
-    p.addLast("BasicAuth",            basicAuth)
-    p.addLast("PublicFileServer",     publicFileServer)
-    p.addLast("PublicResourceServer", publicResourceServer)
-    p.addLast("UriParser",            uriParser)
-    p.addLast("MethodOverrider",      methodOverrider)
-    p.addLast("Dispatcher",           dispatcher)
+    p.addLast("BasicAuth",                basicAuth)
+    p.addLast("PublicFileServer",         publicFileServer)
+    p.addLast("PublicResourceServer",     publicResourceServer)
+    p.addLast("UriParser",                uriParser)
+    p.addLast("MethodOverrider",          methodOverrider)
+    p.addLast("Dispatcher",               dispatcher)
 
     // Downstream
 

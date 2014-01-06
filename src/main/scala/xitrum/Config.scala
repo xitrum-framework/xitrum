@@ -72,9 +72,9 @@ class PortConfig(config: TConfig) {
   val https = if (config.hasPath("https")) Some(config.getInt("https")) else None
   val flashSocketPolicy =
     if (config.hasPath("flashSocketPolicy"))
-      Some(config.getInt("flashSocketPolicy"))
+      config.getBoolean("flashSocketPolicy")
     else
-      None
+      false
 }
 
 class KeystoreConfig(config: TConfig) {
