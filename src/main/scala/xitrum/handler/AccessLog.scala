@@ -10,14 +10,14 @@ import xitrum.action.Net
 
 object AccessLog extends Log {
   def logFlashSocketPolicyFileAccess(remoteAddress: SocketAddress) {
-    if (log.isDebugEnabled) {
-      log.debug(Net.clientIp(remoteAddress) + " (flash socket policy file)")
+    if (log.isInfoEnabled) {
+      log.info(Net.clientIp(remoteAddress) + " (flash socket policy file)")
     }
   }
 
   def logStaticFileAccess(remoteAddress: SocketAddress, request: HttpRequest, response: HttpResponse) {
-    if (log.isDebugEnabled) {
-      log.debug(
+    if (log.isInfoEnabled) {
+      log.info(
         Net.remoteIp(remoteAddress, request) + " " +
         request.getMethod + " " +
         request.getUri + " -> " +
@@ -28,8 +28,8 @@ object AccessLog extends Log {
   }
 
   def logResourceInJarAccess(remoteAddress: SocketAddress, request: HttpRequest, response: HttpResponse) {
-    if (log.isDebugEnabled) {
-      log.debug(
+    if (log.isInfoEnabled) {
+      log.info(
         Net.remoteIp(remoteAddress, request) + " " +
         request.getMethod + " " +
         request.getUri + " -> " +
@@ -41,18 +41,18 @@ object AccessLog extends Log {
 
   def logActionAccess(action: Action, beginTimestamp: Long, cacheSecs: Int, hit: Boolean, e: Throwable = null) {
     if (e == null) {
-      if (log.isDebugEnabled) log.debug(msgWithTime(action.getClass.getName, action, beginTimestamp) + extraInfo(action, cacheSecs, hit))
+      if (log.isInfoEnabled) log.info(msgWithTime(action.getClass.getName, action, beginTimestamp) + extraInfo(action, cacheSecs, hit))
     } else {
       log.error("Dispatch error " + msgWithTime(action.getClass.getName, action, beginTimestamp) + extraInfo(action, cacheSecs, hit), e)
     }
   }
 
   def logWebSocketAccess(className: String, action: Action, beginTimestamp: Long) {
-    if (log.isDebugEnabled) log.debug(msgWithTime(className, action, beginTimestamp) + extraInfo(action, 0, false))
+    if (log.isInfoEnabled) log.info(msgWithTime(className, action, beginTimestamp) + extraInfo(action, 0, false))
   }
 
   def logOPTIONS(request: HttpRequest) {
-    log.debug("OPTIONS " + request.getUri)
+    log.info("OPTIONS " + request.getUri)
   }
 
   //----------------------------------------------------------------------------
