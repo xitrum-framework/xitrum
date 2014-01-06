@@ -1,6 +1,6 @@
 package xitrum.handler.inbound
 
-import io.netty.channel.{ChannelHandlerContext, SimpleChannelInboundHandler}
+import io.netty.channel.{ChannelHandlerContext, ChannelInboundHandlerAdapter}
 import xitrum.Log
 
 /**
@@ -14,7 +14,7 @@ import xitrum.Log
  * java.lang.IllegalArgumentException: empty text (Use https://... URL to connect to HTTP server)
  */
 trait BadClientSilencer extends Log {
-  this: SimpleChannelInboundHandler[_ <: AnyRef] =>
+  this: ChannelInboundHandlerAdapter =>
 
   override def exceptionCaught(ctx: ChannelHandlerContext, e: Throwable) {
     ctx.close()
