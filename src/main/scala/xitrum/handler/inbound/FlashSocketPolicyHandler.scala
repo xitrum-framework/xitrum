@@ -1,23 +1,22 @@
 package xitrum.handler.inbound
 
 import io.netty.buffer.{ByteBuf, Unpooled}
-import io.netty.channel.{Channel, ChannelHandlerContext, SimpleChannelInboundHandler}
+import io.netty.channel.{Channel, ChannelFutureListener, ChannelHandlerContext, SimpleChannelInboundHandler}
 
 import xitrum.handler.AccessLog
 import xitrum.util.Loader
 
+// http://www.adobe.com/devnet/flashplayer/articles/socket_policy_files.html
 object FlashSocketPolicyHandler {
-  // http://www.adobe.com/devnet/flashplayer/articles/socket_policy_files.html
   // The request must be exactly "<policy-file-request/>\0"
-  // python -c 'print "<policy-file-request/>%c" % 0' | nc 127.0.0.1 8000
-  // perl -e 'printf "<policy-file-request/>%c",0' | nc 127.0.0.1 8000
+  // To test:
+  // perl -e 'printf "<policy-file-request/>%c",0' | nc localhost 8000
   val REQUEST        = Unpooled.wrappedBuffer("<policy-file-request/>\0".getBytes)
   val REQUEST_LENGTH = REQUEST.readableBytes
 
   val RESPONSE = Unpooled.wrappedBuffer(Loader.bytesFromClasspath("flash_socket_policy.xml"))
 }
 
-// See the Netty Guide
 class FlashSocketPolicyHandler extends SimpleChannelInboundHandler[ByteBuf] with BadClientSilencer {
   import FlashSocketPolicyHandler._
 
@@ -35,11 +34,23 @@ class FlashSocketPolicyHandler extends SimpleChannelInboundHandler[ByteBuf] with
     }
 
     nextIdx += msg.readableBytes
-
     if (nextIdx != REQUEST_LENGTH) return
 
+    // Respond
+
+    // Some handlers may incorrectly intercept the response, remove all handlers
+    // to avoid problem
+    val pipeline = ctx.pipeline
+    val it       = pipeline.iterator()
+    while (it.hasNext()) {
+      val entry   = it.next()
+      val handler = entry.getValue
+      pipeline.remove(handler)
+    }
+
+    // Respond and close
     val channel = ctx.channel
-    channel.write(RESPONSE)
+    channel.writeAndFlush(RESPONSE.duplicate().retain()).addListener(ChannelFutureListener.CLOSE)
     AccessLog.logFlashSocketPolicyFileAccess(channel.remoteAddress)
   }
 
@@ -53,7 +64,7 @@ class FlashSocketPolicyHandler extends SimpleChannelInboundHandler[ByteBuf] with
   }
 
   private def contains(msg: ByteBuf, nextIdx: Int): Boolean = {
-    val tmpl = REQUEST.slice(nextIdx, msg.readableBytes).retain()
+    val tmpl = REQUEST.slice(nextIdx, msg.readableBytes)
     tmpl.equals(msg)
   }
 }
