@@ -51,6 +51,11 @@ class BodyParser extends SimpleChannelInboundHandler[HttpObject] with BadClientS
   }
 
   override def channelRead0(ctx: ChannelHandlerContext, msg: HttpObject) {
+    if (msg.getDecoderResult.isFailure) {
+      ctx.close()
+      return
+    }
+
     try {
       if (msg.isInstanceOf[HttpRequest])
         handleHttpRequestNoncontent(ctx, msg.asInstanceOf[HttpRequest])
