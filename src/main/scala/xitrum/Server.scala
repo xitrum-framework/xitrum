@@ -10,11 +10,12 @@ import xitrum.handler.{
   NetOption,
   SslChannelPipelineFactory
 }
+import xitrum.routing.RouteCollection
 import xitrum.sockjs.SockJsAction
 
 object Server extends Log {
   /**
-   * Starts with default ChannelPipelineFactory provided by Xitrum.
+   * Starts with default ChannelPipelineFactory and default routes provided by Xitrum.
    */
   def start() {
     val default = new DefaultHttpChannelPipelineFactory
@@ -22,11 +23,27 @@ object Server extends Log {
   }
 
   /**
-   * Starts with your custom ChannelPipelineFactory. For an example, see
-   * xitrum.handler.DefaultHttpChannelPipelineFactory.
+   * Starts with your custom ChannelPipelineFactory and default routes.
+   * For an example, see xitrum.handler.DefaultHttpChannelPipelineFactory.
    * SSL codec handler will be automatically prepended for HTTPS server.
    */
   def start(httpChannelPipelineFactory: ChannelPipelineFactory) {
+    return start(httpChannelPipelineFactory, Routes.collect)
+  }
+
+  /**
+   * Starts with default ChannelPipelineFactory and custom routes.
+   */
+  def start(routes: RouteCollection) {  
+    return start(new DefaultHttpChannelPipelineFactory, routes)
+  }
+
+  /**
+   * Starts with your custom ChannelPipelineFactory and custom routes.
+   * For an example, see xitrum.handler.DefaultHttpChannelPipelineFactory.
+   * SSL codec handler will be automatically prepended for HTTPS server.
+   */
+  def start(httpChannelPipelineFactory: ChannelPipelineFactory, routes: RouteCollection) {
     // Don't know why this doesn't work if put above Config.actorSystem
     //
     // Redirect Akka log to SLF4J
@@ -41,7 +58,6 @@ object Server extends Log {
     // Trick to start actorRegistry on startup
     SockJsAction.entropy()
 
-    val routes = Config.routes
     routes.logRoutes(false)
     routes.sockJsRouteMap.logRoutes()
     routes.logErrorRoutes()

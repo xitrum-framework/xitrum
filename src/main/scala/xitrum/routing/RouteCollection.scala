@@ -68,29 +68,29 @@ object RouteCollection {
 
 /** Direct listing is used, map is not used, so that route matching is faster. */
 class RouteCollection(
-  val firstGETs: Seq[Route],
-  val lastGETs:  Seq[Route],
-  val otherGETs: Seq[Route],
+  var firstGETs: Seq[Route],
+  var lastGETs:  Seq[Route],
+  var otherGETs: Seq[Route],
 
-  val firstPOSTs: Seq[Route],
-  val lastPOSTs:  Seq[Route],
-  val otherPOSTs: Seq[Route],
+  var firstPOSTs: Seq[Route],
+  var lastPOSTs:  Seq[Route],
+  var otherPOSTs: Seq[Route],
 
-  val firstPUTs: Seq[Route],
-  val lastPUTs:  Seq[Route],
-  val otherPUTs: Seq[Route],
+  var firstPUTs: Seq[Route],
+  var lastPUTs:  Seq[Route],
+  var otherPUTs: Seq[Route],
 
-  val firstPATCHs: Seq[Route],
-  val lastPATCHs:  Seq[Route],
-  val otherPATCHs: Seq[Route],
+  var firstPATCHs: Seq[Route],
+  var lastPATCHs:  Seq[Route],
+  var otherPATCHs: Seq[Route],
 
-  val firstDELETEs: Seq[Route],
-  val lastDELETEs:  Seq[Route],
-  val otherDELETEs: Seq[Route],
+  var firstDELETEs: Seq[Route],
+  var lastDELETEs:  Seq[Route],
+  var otherDELETEs: Seq[Route],
 
-  val firstWEBSOCKETs: Seq[Route],
-  val lastWEBSOCKETs:  Seq[Route],
-  val otherWEBSOCKETs: Seq[Route],
+  var firstWEBSOCKETs: Seq[Route],
+  var lastWEBSOCKETs:  Seq[Route],
+  var otherWEBSOCKETs: Seq[Route],
 
   val sockJsRouteMap: SockJsRouteMap,
   val swaggerMap:     Map[Class[_ <: Action], Swagger],
@@ -337,5 +337,27 @@ class RouteCollection(
       case None =>
     }
     methods
+  }
+
+  def remove[A <: Action]()(implicit action: reflect.Manifest[A]) {
+    val toRemove = action.toString
+    firstGETs       = firstGETs          .filter(_.klass.getName != toRemove)
+    lastGETs        = lastGETs           .filter(_.klass.getName != toRemove)
+    otherGETs       = otherGETs          .filter(_.klass.getName != toRemove)
+    firstPOSTs      = firstPOSTs         .filter(_.klass.getName != toRemove)
+    lastPOSTs       = lastPOSTs          .filter(_.klass.getName != toRemove)
+    otherPOSTs      = otherPOSTs         .filter(_.klass.getName != toRemove)
+    firstPUTs       = firstPUTs          .filter(_.klass.getName != toRemove)
+    lastPUTs        = lastPUTs           .filter(_.klass.getName != toRemove)
+    otherPUTs       = otherPUTs          .filter(_.klass.getName != toRemove)
+    firstPATCHs     = firstPATCHs        .filter(_.klass.getName != toRemove)
+    lastPATCHs      = lastPATCHs         .filter(_.klass.getName != toRemove)
+    otherPATCHs     = otherPATCHs        .filter(_.klass.getName != toRemove)
+    firstDELETEs    = firstDELETEs       .filter(_.klass.getName != toRemove)
+    lastDELETEs     = lastDELETEs        .filter(_.klass.getName != toRemove)
+    otherDELETEs    = otherDELETEs       .filter(_.klass.getName != toRemove)
+    firstWEBSOCKETs = firstWEBSOCKETs    .filter(_.klass.getName != toRemove)
+    lastWEBSOCKETs  = lastWEBSOCKETs     .filter(_.klass.getName != toRemove)
+    otherWEBSOCKETs = otherWEBSOCKETs    .filter(_.klass.getName != toRemove)    
   }
 }
