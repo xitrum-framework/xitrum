@@ -1,5 +1,7 @@
 3.0:
-* #74 Flash socket policy server can use the same port with HTTP server
+* #74  Flash socket policy server can use the same port with HTTP server
+* #261 Add convenient methods to manipulate routes after they are collected at startup
+* #263 Set access log from DEBUG level to INFO level
 
 2.16:
 * #259 Log WebSocket messages at TRACE level
