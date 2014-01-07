@@ -8,11 +8,11 @@ import scala.concurrent.duration._
 import xitrum.{Action, Config, SockJsText}
 
 // There are 2 kinds of non-WebSocket client: receiver and sender
-// receiver/sender client <-> NonWebSocketSessionActor <-> SockJsActor
+// receiver/sender client <-> NonWebSocketSessionActor <-> SockJsAction
 // (See SockJsActions.scala)
 //
 // For WebSocket:
-// receiver/sender client <-> SockJsActor
+// receiver/sender client <-> SockJsAction
 
 case object SubscribeFromReceiverClient
 case object AbortFromReceiverClient
@@ -72,7 +72,7 @@ class NonWebSocketSession(var receiverCliento: Option[ActorRef], pathPrefix: Str
   override def preStart() {
     // Attach sockJsActorRef to the current actor, so that sockJsActorRef is
     // automatically stopped when the current actor stops
-    sockJsActorRef = Config.routes.sockJsRouteMap.createSockJsActor(context, pathPrefix)
+    sockJsActorRef = Config.routes.sockJsRouteMap.createSockJsAction(context, pathPrefix)
     context.watch(sockJsActorRef)
     sockJsActorRef ! (self, action)
 

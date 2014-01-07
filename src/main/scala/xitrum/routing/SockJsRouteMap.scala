@@ -5,14 +5,14 @@ import scala.collection.mutable.{Map => MMap}
 import akka.actor.{Actor, ActorRef, ActorRefFactory, Props}
 import com.esotericsoftware.reflectasm.ConstructorAccess
 
-import xitrum.{Config, Log, SockJsActor}
+import xitrum.{Config, Log, SockJsAction}
 
 // "websocket" and "cookieNeeded" members are named after SockJS option:
 // {"websocket": true/false, "cookie_needed": true/false, "origins": ["*:*"], "entropy": integer}
 //
 // websocket: true means WebSocket is enabled
 // cookieNeeded: true means load balancers needs JSESSION cookie
-class SockJsClassAndOptions(val actorClass: Class[_ <: SockJsActor], val websocket: Boolean, val cookieNeeded: Boolean) extends Serializable
+class SockJsClassAndOptions(val actorClass: Class[_ <: SockJsAction], val websocket: Boolean, val cookieNeeded: Boolean) extends Serializable
 
 class SockJsRouteMap(map: Map[String, SockJsClassAndOptions]) extends Log {
   def logRoutes() {
@@ -44,19 +44,19 @@ class SockJsRouteMap(map: Map[String, SockJsClassAndOptions]) extends Log {
   }
 
   /** Creates actor attached to Config.actorSystem. */
-  def createSockJsActor(pathPrefix: String): ActorRef = {
-    createSockJsActor(Config.actorSystem, pathPrefix)
+  def createSockJsAction(pathPrefix: String): ActorRef = {
+    createSockJsAction(Config.actorSystem, pathPrefix)
   }
 
   /** Creates actor attached to the given context. */
-  def createSockJsActor(context: ActorRefFactory, pathPrefix: String): ActorRef = {
+  def createSockJsAction(context: ActorRefFactory, pathPrefix: String): ActorRef = {
     val sockJsClassAndOptions = map(pathPrefix)
     val actorClass            = sockJsClassAndOptions.actorClass
     context.actorOf(Props(ConstructorAccess.get(actorClass).newInstance()))
   }
 
   /** @param sockJsHandlerClass Normal SockJsHandler subclass or object class */
-  def findPathPrefix(sockJsActorClass: Class[_ <: SockJsActor]): String = {
+  def findPathPrefix(sockJsActorClass: Class[_ <: SockJsAction]): String = {
     val kv = map.find { case (k, v) => v.actorClass == sockJsActorClass }
     kv match {
       case Some((k, v)) => "/" + k

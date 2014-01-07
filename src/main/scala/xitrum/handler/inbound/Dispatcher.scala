@@ -11,7 +11,7 @@ import HttpVersion._
 import akka.actor.{Actor, Props}
 import com.esotericsoftware.reflectasm.ConstructorAccess
 
-import xitrum.{Action, ActionActor, Config}
+import xitrum.{Action, ActorAction, Config}
 import xitrum.etag.NotModified
 import xitrum.handler.{AccessLog, HandlerEnv}
 import xitrum.handler.outbound.XSendFile

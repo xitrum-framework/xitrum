@@ -10,8 +10,10 @@ import io.netty.handler.codec.http.{DefaultCookie, HttpHeaders, HttpResponseStat
 import akka.actor.{Actor, ActorRef, PoisonPill, Props, Terminated}
 import glokka.Registry
 
-import xitrum.{Action, ActionActor, Config, SkipCsrfCheck, SockJsText}
-import xitrum.{WebSocketActor, WebSocketBinary, WebSocketPing, WebSocketPong, WebSocketText}
+import xitrum.{
+  Action, ActorAction, Config, SkipCsrfCheck, SockJsText,
+  WebSocketAction, WebSocketBinary, WebSocketPing, WebSocketPong, WebSocketText
+}
 import xitrum.annotation._
 import xitrum.scope.request.PathInfo
 import xitrum.util.Json
@@ -215,13 +217,13 @@ trait SockJsAction extends ServerIdSessionIdValidator with SockJsPrefix {
   }
 }
 
-trait NonWebSocketSessionActionActor extends ActionActor with SockJsAction {
+trait NonWebSocketSessionActorAction extends ActorAction with SockJsAction {
   protected def lookupNonWebSocketSessionActor(sessionId: String) {
     SockJsAction.actorRegistry ! Registry.Lookup(sessionId)
   }
 }
 
-trait NonWebSocketSessionReceiverActionActor extends NonWebSocketSessionActionActor {
+trait NonWebSocketSessionReceiverActorAction extends NonWebSocketSessionActorAction {
   protected var nonWebSocketSession: ActorRef = _
 
   // Call lookupOrCreateNonWebSocketSessionActor and continue with this method.
@@ -336,7 +338,7 @@ class InfoGET extends SockJsAction {
 }
 
 @POST(":serverId/:sessionId/xhr")
-class XhrPollingReceive extends NonWebSocketSessionReceiverActionActor with SkipCsrfCheck {
+class XhrPollingReceive extends NonWebSocketSessionReceiverActorAction with SkipCsrfCheck {
   def nLastTokensToRemoveFromPathInfo = 3
 
   def execute() {
@@ -399,7 +401,7 @@ class XhrPollingReceive extends NonWebSocketSessionReceiverActionActor with Skip
 }
 
 @POST(":serverId/:sessionId/xhr_send")
-class XhrSend extends NonWebSocketSessionActionActor with SkipCsrfCheck {
+class XhrSend extends NonWebSocketSessionActorAction with SkipCsrfCheck {
   def nLastTokensToRemoveFromPathInfo = 3
 
   def execute() {
@@ -436,7 +438,7 @@ class XhrSend extends NonWebSocketSessionActionActor with SkipCsrfCheck {
 }
 
 @POST(":serverId/:sessionId/xhr_streaming")
-class XhrStreamingReceive extends NonWebSocketSessionReceiverActionActor with SkipCsrfCheck {
+class XhrStreamingReceive extends NonWebSocketSessionReceiverActorAction with SkipCsrfCheck {
   def nLastTokensToRemoveFromPathInfo = 3
 
   def execute() {
@@ -506,7 +508,7 @@ class XhrStreamingReceive extends NonWebSocketSessionReceiverActionActor with Sk
 }
 
 @GET(":serverId/:sessionId/htmlfile")
-class HtmlFileReceive extends NonWebSocketSessionReceiverActionActor {
+class HtmlFileReceive extends NonWebSocketSessionReceiverActorAction {
   def nLastTokensToRemoveFromPathInfo = 3
 
   var callback: String = null
@@ -606,7 +608,7 @@ class HtmlFileReceive extends NonWebSocketSessionReceiverActionActor {
 }
 
 @GET(":serverId/:sessionId/jsonp")
-class JsonPPollingReceive extends NonWebSocketSessionReceiverActionActor {
+class JsonPPollingReceive extends NonWebSocketSessionReceiverActorAction {
   def nLastTokensToRemoveFromPathInfo = 3
 
   var callback: String = null
@@ -683,7 +685,7 @@ class JsonPPollingReceive extends NonWebSocketSessionReceiverActionActor {
 }
 
 @POST(":serverId/:sessionId/jsonp_send")
-class JsonPPollingSend extends NonWebSocketSessionActionActor with SkipCsrfCheck {
+class JsonPPollingSend extends NonWebSocketSessionActorAction with SkipCsrfCheck {
   def nLastTokensToRemoveFromPathInfo = 3
 
   def execute() {
@@ -734,7 +736,7 @@ class JsonPPollingSend extends NonWebSocketSessionActionActor with SkipCsrfCheck
 }
 
 @GET(":serverId/:sessionId/eventsource")
-class EventSourceReceive extends NonWebSocketSessionReceiverActionActor {
+class EventSourceReceive extends NonWebSocketSessionReceiverActorAction {
   def nLastTokensToRemoveFromPathInfo = 3
 
   def execute() {
@@ -825,7 +827,7 @@ class WebsocketPOST extends SockJsAction with SkipCsrfCheck {
 }
 
 @WEBSOCKET(":serverId/:sessionId/websocket")
-class Websocket extends WebSocketActor with ServerIdSessionIdValidator with SockJsPrefix {
+class Websocket extends WebSocketAction with ServerIdSessionIdValidator with SockJsPrefix {
   def nLastTokensToRemoveFromPathInfo = 3
 
   private[this] var sockJsActorRef: ActorRef = _
@@ -834,7 +836,7 @@ class Websocket extends WebSocketActor with ServerIdSessionIdValidator with Sock
     // Ignored
     //val sessionId = param("sessionId")
 
-    sockJsActorRef = Config.routes.sockJsRouteMap.createSockJsActor(pathPrefix)
+    sockJsActorRef = Config.routes.sockJsRouteMap.createSockJsAction(pathPrefix)
     respondWebSocketText("o")
     sockJsActorRef ! (self, currentAction)
 
@@ -888,13 +890,13 @@ class Websocket extends WebSocketActor with ServerIdSessionIdValidator with Sock
 }
 
 @WEBSOCKET("websocket")
-class RawWebsocket extends WebSocketActor with ServerIdSessionIdValidator with SockJsPrefix {
+class RawWebsocket extends WebSocketAction with ServerIdSessionIdValidator with SockJsPrefix {
   def nLastTokensToRemoveFromPathInfo = 1
 
   private[this] var sockJsActorRef: ActorRef = _
 
   def execute() {
-    sockJsActorRef = Config.routes.sockJsRouteMap.createSockJsActor(pathPrefix)
+    sockJsActorRef = Config.routes.sockJsRouteMap.createSockJsAction(pathPrefix)
     sockJsActorRef ! (self, currentAction)
 
     context.become {

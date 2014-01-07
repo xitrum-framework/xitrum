@@ -13,7 +13,7 @@ case class SockJsText(text: String)
  * An actor will be created when there's new SockJS session. It will be stopped when
  * the session is closed.
  */
-trait SockJsActor extends Actor with Action {
+trait SockJsAction extends Actor with Action {
   // Ref of NonWebSocketSessionActor, SockJSWebsocket, or SockJSRawWebsocket
   private[this] var sessionActorRef: ActorRef = _
 

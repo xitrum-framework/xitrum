@@ -12,7 +12,7 @@ import xitrum.handler.{
   NetOption,
   SslChannelInitializer
 }
-import xitrum.sockjs.SockJsAction
+import xitrum.sockjs.{SockJsAction => SA}
 
 object Server extends Log {
   /**
@@ -40,7 +40,7 @@ object Server extends Log {
     Config.xitrum.session.store.start()
 
     // Trick to start actorRegistry on startup
-    SockJsAction.entropy()
+    SA.entropy()
 
     val routes = Config.routes
     routes.logRoutes(false)

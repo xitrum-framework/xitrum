@@ -32,7 +32,7 @@ case object WebSocketPong
  * - The connection is closed
  * - WebSocket close frame is received or sent
  */
-trait WebSocketActor extends Actor with Action {
+trait WebSocketAction extends Actor with Action {
   def receive = {
     case env: HandlerEnv =>
       val beginTimestamp = System.currentTimeMillis()

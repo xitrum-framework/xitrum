@@ -11,7 +11,7 @@ import xitrum.handler.HandlerEnv
  * For chunked response, it is not stopped right away. It is stopped when the
  * last chunk is sent.
  */
-trait ActionActor extends Actor with Action {
+trait ActorAction extends Actor with Action {
   def receive = {
     case env: HandlerEnv =>
       apply(env)

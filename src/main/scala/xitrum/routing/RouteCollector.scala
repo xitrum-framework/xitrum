@@ -7,7 +7,7 @@ import scala.util.control.NonFatal
 import org.objectweb.asm.{AnnotationVisitor, ClassReader, ClassVisitor, Opcodes, Type}
 import sclasner.{FileEntry, Scanner}
 
-import xitrum.{Action, Log, SockJsActor}
+import xitrum.{Action, Log, SockJsAction}
 import xitrum.annotation._
 import xitrum.sockjs.SockJsPrefix
 
@@ -149,7 +149,7 @@ class RouteCollector extends Log {
     if (pathPrefix == null) {
       sockJsMap
     } else {
-      val klass        = Class.forName(className).asInstanceOf[Class[SockJsActor]]
+      val klass        = Class.forName(className).asInstanceOf[Class[SockJsAction]]
       val noWebSocket  = annotations.sockJsNoWebSocket.isDefined
       val cookieNeeded = annotations.sockJsCookieNeeded.isDefined
       sockJsMap + (pathPrefix -> new SockJsClassAndOptions(klass, !noWebSocket, cookieNeeded))
