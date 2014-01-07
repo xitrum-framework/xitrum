@@ -1,3 +1,6 @@
+3.0:
+* #74 Flash socket policy server can use the same port with HTTP server
+
 2.16:
 * #259 Log WebSocket messages at TRACE level
 

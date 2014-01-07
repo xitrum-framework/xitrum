@@ -107,11 +107,12 @@ class DefaultHttpChannelInitializer extends ChannelInitializer[SocketChannel] {
   override def initChannel(ch: SocketChannel) {
     // This method is run for every request, thus should be fast
 
-    val p = ch.pipeline
+    val p          = ch.pipeline
+    val portConfig = Config.xitrum.port
 
     // Inbound
 
-    if (Config.xitrum.port.flashSocketPolicy)
+    if (portConfig.flashSocketPolicy.isDefined && portConfig.flashSocketPolicy == portConfig.http)
     p.addLast("FlashSocketPolicyHandler", new FlashSocketPolicyHandler)
     p.addLast("HttpRequestDecoder",       new HttpRequestDecoder(Config.xitrum.request.maxInitialLineLength, 8192, 8192))
     p.addLast("BodyParser",               new BodyParser)      // Request is converted to HandlerEnv here

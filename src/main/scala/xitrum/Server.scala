@@ -8,6 +8,7 @@ import io.netty.channel.socket.nio.NioServerSocketChannel
 
 import xitrum.handler.{
   DefaultHttpChannelInitializer,
+  FlashSocketPolicyServer,
   NetOption,
   SslChannelInitializer
 }
@@ -51,6 +52,15 @@ object Server extends Log {
     val portConfig = Config.xitrum.port
     if (portConfig.http.isDefined)  doStart(false, httpChannelInitializer)
     if (portConfig.https.isDefined) doStart(true,  httpChannelInitializer)
+
+    // Flash socket server may reuse HTTP port
+    if (portConfig.flashSocketPolicy.isDefined) {
+      if (portConfig.flashSocketPolicy != portConfig.http) {
+        FlashSocketPolicyServer.start()
+      } else {
+        log.info("Flash socket policy file will be served by the HTTP server")
+      }
+    }
 
     val mode = if (Config.productionMode) "production" else "development"
     log.info("Xitrum started in {} mode", mode)

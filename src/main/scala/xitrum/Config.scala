@@ -68,13 +68,9 @@ class BasicAuthConfig(config: TConfig) {
 }
 
 class PortConfig(config: TConfig) {
-  val http  = if (config.hasPath("http"))  Some(config.getInt("http"))  else None
-  val https = if (config.hasPath("https")) Some(config.getInt("https")) else None
-  val flashSocketPolicy =
-    if (config.hasPath("flashSocketPolicy"))
-      config.getBoolean("flashSocketPolicy")
-    else
-      false
+  val http              = if (config.hasPath("http"))              Some(config.getInt("http"))              else None
+  val https             = if (config.hasPath("https"))             Some(config.getInt("https"))             else None
+  val flashSocketPolicy = if (config.hasPath("flashSocketPolicy")) Some(config.getInt("flashSocketPolicy")) else None
 }
 
 class KeystoreConfig(config: TConfig) {
