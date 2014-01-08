@@ -12,7 +12,8 @@ object PoLoader {
 
   /**
    * @return Merge of all po files of the language, or an empty Po when there's
-   * no po file.
+   * no po file. Store Po in cache for further fast access. Use the {@link #clear() clear}
+   * method to clean cache.
    */
   def load(language: String): Po = synchronized {
     if (cache.isDefinedAt(language)) return cache(language)
@@ -30,5 +31,12 @@ object PoLoader {
     val ret = buffer.foldLeft(new Po(Map.empty)) { (acc, e) => acc ++ e }
     cache(language) = ret
     ret
+  }
+  
+  /**
+   * Clear the cache of the already loaded Po files
+   */
+  def clear() = synchronized {
+    cache.clear
   }
 }
