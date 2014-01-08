@@ -11,9 +11,16 @@ object PoLoader {
   private[this] val cache = MMap.empty[String, Po]
 
   /**
-   * @return Merge of all po files of the language, or an empty Po when there's
-   * no po file. Store Po in cache for further fast access. Use the {@link #clear() clear}
-   * method to clean cache.
+   * For the specified language, this method loads and merges all po files in
+   * classpath, at i18n/<language>.po. You can store the po files in JAR files,
+   * at src/main/resources/i18n/<language>.po (compile time), or at
+   * config/i18n/<language>.po ("config" directory is put to classpath by Xitrum
+   * at run time, this is convenient if you want to modify po files at run time).
+   *
+   * The result is stored in cache for further fast access. If you want to reload
+   * the po files, use clear() or remove(language) to clean the cache, then load again.
+   *
+   * @return Empty Po if there's no po file
    */
   def load(language: String): Po = synchronized {
     if (cache.isDefinedAt(language)) return cache(language)
@@ -32,11 +39,18 @@ object PoLoader {
     cache(language) = ret
     ret
   }
-  
+
   /**
-   * Clear the cache of the already loaded Po files
+   * Clears all loaded po files of all languages in the cache.
    */
   def clear() = synchronized {
-    cache.clear
+    cache.clear()
+  }
+
+  /**
+   * Clears all loaded po files of the specified language in the cache.
+   */
+  def remove(language: String) = synchronized {
+    cache.remove(language)
   }
 }
