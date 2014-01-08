@@ -7,7 +7,7 @@ import xitrum.Action
 class RequestEnvTest extends FlatSpec with Matchers {
   behavior of "RequestEnv"
 
-  it should "should have atJs method" in {
+  it should "should have atJson method" in {
     val action = new Action { def execute() {} }
 
     action.at("test_string") = "abc"
