@@ -6,7 +6,10 @@ import scala.util.control.NonFatal
 
 import io.netty.buffer.{ByteBuf, Unpooled}
 import io.netty.channel.{ChannelFuture, ChannelFutureListener}
-import io.netty.handler.codec.http.{HttpHeaders, HttpResponseStatus, HttpVersion, LastHttpContent}
+import io.netty.handler.codec.http.{
+  DefaultHttpContent, DefaultLastHttpContent,
+  HttpHeaders, HttpResponseStatus, HttpVersion, LastHttpContent
+}
 import io.netty.util.CharsetUtil
 import HttpHeaders.Names.{CONTENT_TYPE, CONTENT_LENGTH, TRANSFER_ENCODING}
 import HttpHeaders.Values.{CHUNKED, NO_CACHE}
@@ -27,7 +30,6 @@ trait Responder extends Js with Flash with GetActionClassDefaultsToCurrentAction
   //----------------------------------------------------------------------------
 
   private var nonChunkedResponseOrFirstChunkSent = false
-  private var chunkModeTemporarilyTurnedOff      = false
   private var doneResponding                     = false
 
   def isDoneResponding = doneResponding
@@ -57,7 +59,7 @@ trait Responder extends Js with Flash with GetActionClassDefaultsToCurrentAction
       }
 
       nonChunkedResponseOrFirstChunkSent = true
-      if (!HttpHeaders.isTransferEncodingChunked(response) && !chunkModeTemporarilyTurnedOff) {
+      if (!HttpHeaders.isTransferEncodingChunked(response)) {
         doneResponding = true
         onDoneResponding()
       }
@@ -79,35 +81,30 @@ trait Responder extends Js with Flash with GetActionClassDefaultsToCurrentAction
     HttpHeaders.removeHeader(response, CONTENT_LENGTH)
 
     setNoClientCache()
-
-    // TRANSFER_ENCODING header is automatically set by Netty when it send the
-    // real response. We don't need to manually set it here.
-    // However, this header is not allowed in HTTP/1.0:
-    // http://sockjs.github.com/sockjs-protocol/sockjs-protocol-0.3.3.html#section-165
-    if (request.getProtocolVersion.compareTo(HttpVersion.HTTP_1_0) == 0) {
-      HttpHeaders.removeTransferEncodingChunked(response)
-      chunkModeTemporarilyTurnedOff = true
-      respond()
-      chunkModeTemporarilyTurnedOff = false
-      HttpHeaders.setTransferEncodingChunked(response)
-    } else {
-      respond()
-    }
+    respond()
   }
 
   /**
    * To respond chunks (http://en.wikipedia.org/wiki/Chunked_transfer_encoding):
-   * 1. Call response.setChunked(true)
-   * 2. Call respondXXX as many times as you want
+   * 1. Call setChunked() to mark that the response will be chunked
+   * 2. Call respondXXX as normal, but as many times as you want
    * 3. Lastly, call respondLastChunk()
    *
    * Headers are only sent on the first respondXXX call.
    */
-  def respondLastChunk(): ChannelFuture = {
+  def respondLastChunk(trailingHeaders: HttpHeaders = HttpHeaders.EMPTY_HEADERS): ChannelFuture = {
     if (!HttpHeaders.isTransferEncodingChunked(response)) {
       printDoubleResponseErrorStackTrace()
     } else {
-      val future = channel.write(LastHttpContent.EMPTY_LAST_CONTENT)
+      val trailer =
+        if (trailingHeaders.isEmpty) {
+          LastHttpContent.EMPTY_LAST_CONTENT
+        } else {
+          val ret = new DefaultLastHttpContent
+          ret.trailingHeaders.set(trailingHeaders)
+          ret
+        }
+      val future = channel.writeAndFlush(trailer)
       NoPipelining.if_keepAliveRequest_then_resumeReading_else_closeOnComplete(request, channel, future)
 
       // responded should be true here. Set chunk mode to false so that double
@@ -169,7 +166,7 @@ trait Responder extends Js with Flash with GetActionClassDefaultsToCurrentAction
     val cb = Unpooled.copiedBuffer(respondedText, Config.xitrum.request.charset)
     if (HttpHeaders.isTransferEncodingChunked(response)) {
       respondHeadersForFirstChunk()
-      channel.writeAndFlush(cb)
+      channel.writeAndFlush(new DefaultHttpContent(cb))
     } else {
       // Content length is number of bytes, not characters!
       HttpHeaders.setContentLength(response, cb.readableBytes)
@@ -297,7 +294,7 @@ trait Responder extends Js with Flash with GetActionClassDefaultsToCurrentAction
   def respondBinary(byteBuf: ByteBuf): ChannelFuture = {
     if (HttpHeaders.isTransferEncodingChunked(response)) {
       respondHeadersForFirstChunk()
-      channel.writeAndFlush(byteBuf)
+      channel.writeAndFlush(new DefaultHttpContent(byteBuf))
     } else {
       if (!response.headers.contains(CONTENT_TYPE))
         HttpHeaders.setHeader(response, CONTENT_TYPE, "application/octet-stream")

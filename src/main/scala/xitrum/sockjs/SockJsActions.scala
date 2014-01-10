@@ -45,9 +45,9 @@ object SockJsAction {
 
   /** 2KB of 'h' characters */
   val h2KB = {
-    val ret = Unpooled.buffer(2048 + 1)
-    for (i <- 1 to 2048) ret.writeByte('h')
-    ret.writeByte('\n')
+    val ret = new Array[Byte](2048 + 1)
+    for (i <- 0 to 2047) ret(i) = 'h'
+    ret(2048) = '\n'
     ret
   }
 
@@ -450,7 +450,7 @@ class XhrStreamingReceive extends NonWebSocketSessionReceiverActorAction with Sk
     // There's always 2KB prelude, even for immediate close frame
     HttpHeaders.setTransferEncodingChunked(response)
     HttpHeaders.setHeader(response, HttpHeaders.Names.CONTENT_TYPE, "application/javascript; charset=" + Config.xitrum.request.charset)
-    respondBinary(SockJsAction.h2KB)
+    respondBinary(Unpooled.wrappedBuffer(SockJsAction.h2KB))
 
     lookupOrCreateNonWebSocketSessionActor(sessionId)
   }

@@ -2,7 +2,7 @@ package xitrum.handler.outbound
 
 import io.netty.buffer.Unpooled
 import io.netty.channel.{ChannelHandler, ChannelHandlerContext, ChannelOutboundHandlerAdapter, ChannelPromise}
-import io.netty.handler.codec.http.{HttpHeaders, HttpMethod, HttpRequest, FullHttpResponse, HttpResponseStatus}
+import io.netty.handler.codec.http.{DefaultHttpResponse, HttpHeaders, HttpMethod, HttpRequest, FullHttpResponse, HttpResponseStatus, HttpVersion}
 import ChannelHandler.Sharable
 import HttpHeaders.Names._
 import HttpMethod._
@@ -31,9 +31,21 @@ class Env2Response extends ChannelOutboundHandlerAdapter with Log {
     else if (!tryEtag(request, response))
       Gzip.tryCompressBigTextualResponse(request, response)
 
-    // Keep alive, channel reading resuming/closing etc. are handled
-    // by the code that sends the response (Responder#respond)
-    ctx.write(response, promise)
+    // For chunked response, we can't send "response" because it's a FullHttpResponse,
+    // we need to send HttpResponse.
+    if (HttpHeaders.isTransferEncodingChunked(response)) {
+      val onlyHeaders = new DefaultHttpResponse(response.getProtocolVersion, response.getStatus)
+      onlyHeaders.headers.set(response.headers)
+
+      // TRANSFER_ENCODING header is not allowed in HTTP/1.0:
+      // http://sockjs.github.com/sockjs-protocol/sockjs-protocol-0.3.3.html#section-165
+      if (request.getProtocolVersion.compareTo(HttpVersion.HTTP_1_0) == 0)
+        HttpHeaders.removeTransferEncodingChunked(onlyHeaders)
+
+      ctx.write(onlyHeaders, promise)
+    } else {
+      ctx.write(response, promise)
+    }
 
     if (env.bodyDecoder != null) {
       env.bodyDecoder.cleanFiles()
@@ -44,6 +56,9 @@ class Env2Response extends ChannelOutboundHandlerAdapter with Log {
     // See DefaultHttpChannelInitializer
     // This is the last Xitrum handler, log the response
     if (log.isTraceEnabled) log.trace(response.toString)
+
+    // Keep alive, channel reading resuming/closing etc. are handled
+    // by the code that sends the response (Responder#respond)
   }
 
   //----------------------------------------------------------------------------
