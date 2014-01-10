@@ -70,8 +70,23 @@ trait Responder extends Js with Flash with GetActionClassDefaultsToCurrentAction
 
   //----------------------------------------------------------------------------
 
+  /**
+   * To respond chunks (http://en.wikipedia.org/wiki/Chunked_transfer_encoding):
+   * 1. Call setChunked() to mark that the response will be chunked
+   * 2. Call respondXXX as normal, but as many times as you want
+   * 3. Lastly, call respondLastChunk()
+   *
+   * If Content-Type header is not set, it is set to "application/octet-stream".
+   */
+  def setChunked() {
+    HttpHeaders.setTransferEncodingChunked(response)
+
+    // From now on, the header is a mark telling the response is chunked.
+    // It should not be removed from the response.
+  }
+
   /** If Content-Type header is not set, it is set to "application/octet-stream" */
-  private def respondHeadersForFirstChunk() {
+  private def respondHeadersOnlyForFirstChunk() {
     if (nonChunkedResponseOrFirstChunkSent) return
 
     if (!response.headers.contains(CONTENT_TYPE))
@@ -81,17 +96,12 @@ trait Responder extends Js with Flash with GetActionClassDefaultsToCurrentAction
     HttpHeaders.removeHeader(response, CONTENT_LENGTH)
 
     setNoClientCache()
+
+    // Env2Response will respond only only headers
     respond()
   }
 
-  /**
-   * To respond chunks (http://en.wikipedia.org/wiki/Chunked_transfer_encoding):
-   * 1. Call setChunked() to mark that the response will be chunked
-   * 2. Call respondXXX as normal, but as many times as you want
-   * 3. Lastly, call respondLastChunk()
-   *
-   * Headers are only sent on the first respondXXX call.
-   */
+  /** See setChunked. */
   def respondLastChunk(trailingHeaders: HttpHeaders = HttpHeaders.EMPTY_HEADERS): ChannelFuture = {
     if (!HttpHeaders.isTransferEncodingChunked(response)) {
       printDoubleResponseErrorStackTrace()
@@ -165,7 +175,7 @@ trait Responder extends Js with Flash with GetActionClassDefaultsToCurrentAction
 
     val cb = Unpooled.copiedBuffer(respondedText, Config.xitrum.request.charset)
     if (HttpHeaders.isTransferEncodingChunked(response)) {
-      respondHeadersForFirstChunk()
+      respondHeadersOnlyForFirstChunk()
       channel.writeAndFlush(new DefaultHttpContent(cb))
     } else {
       // Content length is number of bytes, not characters!
@@ -293,7 +303,7 @@ trait Responder extends Js with Flash with GetActionClassDefaultsToCurrentAction
   /** If Content-Type header is not set, it is set to "application/octet-stream" */
   def respondBinary(byteBuf: ByteBuf): ChannelFuture = {
     if (HttpHeaders.isTransferEncodingChunked(response)) {
-      respondHeadersForFirstChunk()
+      respondHeadersOnlyForFirstChunk()
       channel.writeAndFlush(new DefaultHttpContent(byteBuf))
     } else {
       if (!response.headers.contains(CONTENT_TYPE))
@@ -343,11 +353,13 @@ trait Responder extends Js with Flash with GetActionClassDefaultsToCurrentAction
    * See:
    * - http://sockjs.github.com/sockjs-protocol/sockjs-protocol-0.3.3.html#section-94
    * - http://dev.w3.org/html5/eventsource/
+   *
+   * No need to call setChunked() before calling this method.
    */
   def respondEventSource(data: Any, event: String = "message"): ChannelFuture = {
     if (!nonChunkedResponseOrFirstChunkSent) {
-      HttpHeaders.setHeader(response, CONTENT_TYPE, "text/event-stream; charset=UTF-8")
       HttpHeaders.setTransferEncodingChunked(response)
+      HttpHeaders.setHeader(response, CONTENT_TYPE, "text/event-stream; charset=UTF-8")
       respondText("\r\n")  // Send a new line prelude, due to a bug in Opera
     }
     respondText(renderEventSource(data, event))

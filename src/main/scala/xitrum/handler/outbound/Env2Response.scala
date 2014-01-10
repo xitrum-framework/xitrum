@@ -37,8 +37,11 @@ class Env2Response extends ChannelOutboundHandlerAdapter with Log {
       val onlyHeaders = new DefaultHttpResponse(response.getProtocolVersion, response.getStatus)
       onlyHeaders.headers.set(response.headers)
 
-      // TRANSFER_ENCODING header is not allowed in HTTP/1.0:
+      // TRANSFER_ENCODING header is not allowed in HTTP/1.0 response:
       // http://sockjs.github.com/sockjs-protocol/sockjs-protocol-0.3.3.html#section-165
+      //
+      // The header in the original response is a mark telling the response is chunked.
+      // It should not be removed from the original response.
       if (request.getProtocolVersion.compareTo(HttpVersion.HTTP_1_0) == 0)
         HttpHeaders.removeTransferEncodingChunked(onlyHeaders)
 
