@@ -7,6 +7,7 @@
 * #259 Log WebSocket messages at TRACE level
 * #272 Replace SockJsCookieNeeded annotation with sockJsCookieNeeded in xitrum.conf
 * #273 Remove SockJsNoWebSocket annotation
+* #274 Update commons-lang3 from 3.1 to 3.2.1
 
 2.15:
 * #77  Remove HttpChunkAggregator to avoid memory problem with file upload

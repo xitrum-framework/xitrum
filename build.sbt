@@ -46,7 +46,7 @@ libraryDependencies += "tv.cntt" %% "sclasner" % "1.6"
 libraryDependencies += "com.twitter" %% "chill-bijection" % "0.3.5"
 
 // For jsEscape
-libraryDependencies += "org.apache.commons" % "commons-lang3" % "3.1"
+libraryDependencies += "org.apache.commons" % "commons-lang3" % "3.2.1"
 
 libraryDependencies += "org.json4s" %% "json4s-native" % "3.2.6"
 
