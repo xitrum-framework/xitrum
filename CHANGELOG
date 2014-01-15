@@ -1,13 +1,12 @@
 3.0:
+* #151 Update Netty from 3.9.0 to 4.0.14
 * #74  Flash socket policy server can use the same port with HTTP server
 * #261 Add convenient methods to manipulate routes after they are collected at startup
-* #263 Set access log from DEBUG level to INFO level
-* #269 Increase akka.logger-startup-timeout to avoid Akka's log initialization timeout error at Xitrum startup
+* #269 Increase akka.logger-startup-timeout from 5s to 30s to avoid Akka's log initialization timeout error at Xitrum startup
+* #263 Increase access log level from DEBUG to INFO
+* #259 Log WebSocket messages at TRACE level
 * #272 Replace SockJsCookieNeeded annotation with sockJsCookieNeeded in xitrum.conf
 * #273 Remove SockJsNoWebSocket annotation
-
-2.16:
-* #259 Log WebSocket messages at TRACE level
 
 2.15:
 * #77  Remove HttpChunkAggregator to avoid memory problem with file upload

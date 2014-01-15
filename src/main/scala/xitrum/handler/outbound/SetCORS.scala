@@ -15,7 +15,7 @@ class SetCORS extends ChannelOutboundHandlerAdapter {
   override def write(ctx: ChannelHandlerContext, msg: Object, promise: ChannelPromise) {
     import Config.xitrum.response.corsAllowOrigins
 
-    if (corsAllowOrigins.isEmpty || !msg.isInstanceOf[HandlerEnv]) {
+    if (!msg.isInstanceOf[HandlerEnv] || corsAllowOrigins.isEmpty) {
       ctx.write(msg, promise)
       return
     }

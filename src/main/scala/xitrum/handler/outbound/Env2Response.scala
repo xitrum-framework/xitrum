@@ -46,6 +46,7 @@ class Env2Response extends ChannelOutboundHandlerAdapter with Log {
         HttpHeaders.removeTransferEncodingChunked(onlyHeaders)
 
       ctx.write(onlyHeaders, promise)
+      response.release()
     } else {
       ctx.write(response, promise)
     }
