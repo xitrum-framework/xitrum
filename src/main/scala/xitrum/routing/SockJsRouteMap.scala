@@ -12,30 +12,28 @@ import xitrum.{Config, Log, SockJsAction}
 //
 // websocket: true means WebSocket is enabled
 // cookieNeeded: true means load balancers needs JSESSION cookie
-class SockJsClassAndOptions(val actorClass: Class[_ <: SockJsAction], val websocket: Boolean, val cookieNeeded: Boolean) extends Serializable
+class SockJsClassAndOptions(val actorClass: Class[_ <: SockJsAction], val cookieNeeded: Boolean) extends Serializable
 
 class SockJsRouteMap(map: Map[String, SockJsClassAndOptions]) extends Log {
   def logRoutes() {
     // This method is only run once on start, speed is not a problem
 
     if (!map.isEmpty) {
-      val (pathPrefixMaxLength, handlerClassNameMaxLength, websocketOptionMaxLength) =
-        map.toList.foldLeft((0, 0, "websocket: true,".length)) {
-            case ((pmax, hmax, wmax), (pathPrefix, sockJsClassAndOptions)) =>
+      val (pathPrefixMaxLength, handlerClassNameMaxLength) =
+        map.toList.foldLeft((0, 0)) {
+            case ((pmax, hmax), (pathPrefix, sockJsClassAndOptions)) =>
           val plen  = pathPrefix.length
           val hlen  = sockJsClassAndOptions.actorClass.getName.length
           val pmax2 = if (pmax < plen) plen else pmax
           val hmax2 = if (hmax < hlen) hlen else hmax
-          val wmax2 = if (sockJsClassAndOptions.websocket) wmax else "websocket: false,".length
-          (pmax2, hmax2, wmax2)
+          (pmax2, hmax2)
         }
-      val logFormat = "%-" + pathPrefixMaxLength + "s  %-" + handlerClassNameMaxLength + "s  %-" + websocketOptionMaxLength + "s %s"
+      val logFormat = "%-" + pathPrefixMaxLength + "s  %-" + handlerClassNameMaxLength + "s  %-" + "s %s"
 
       val strings = map.map { case (pathPrefix, sockJsClassAndOptions) =>
         logFormat.format(
           pathPrefix,
           sockJsClassAndOptions.actorClass.getName,
-          "websocket: " + sockJsClassAndOptions.websocket + ",",
           "cookie_needed: " + sockJsClassAndOptions.cookieNeeded
         )
       }

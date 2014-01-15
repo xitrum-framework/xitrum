@@ -9,7 +9,6 @@ object ActionAnnotations {
   val typeOfRoute              = universe.typeOf[Route]
   val typeOfRouteOrder         = universe.typeOf[RouteOrder]
   val typeOfSockJsCookieNeeded = universe.typeOf[SockJsCookieNeeded]
-  val typeOfSockJsNoWebSocket  = universe.typeOf[SockJsNoWebSocket]
   val typeOfError              = universe.typeOf[Error]
   val typeOfCache              = universe.typeOf[Cache]
 
@@ -54,9 +53,6 @@ object ActionAnnotations {
       else if (tpe <:< typeOfSockJsCookieNeeded)
         ret = ret.copy(sockJsCookieNeeded = Some(a))
 
-      else if (tpe <:< typeOfSockJsNoWebSocket)
-        ret = ret.copy(sockJsNoWebSocket = Some(a))
-
       else if (tpe <:< typeOfError)
         ret = ret.copy(error = Some(a))
 
@@ -76,7 +72,6 @@ case class ActionAnnotations(
   routeOrder: Option[universe.Annotation] = None,
 
   sockJsCookieNeeded: Option[universe.Annotation] = None,
-  sockJsNoWebSocket:  Option[universe.Annotation] = None,
 
   error: Option[universe.Annotation] = None,
 
@@ -95,7 +90,6 @@ case class ActionAnnotations(
     routes,
     routeOrder,
     sockJsCookieNeeded orElse ancestor.sockJsCookieNeeded,
-    sockJsNoWebSocket  orElse ancestor.sockJsNoWebSocket,
     error,
     cache              orElse ancestor.cache,
     ancestor.swaggers ++ swaggers
@@ -113,9 +107,6 @@ case class ActionAnnotations(
 
       if (sockJsCookieNeeded.isEmpty && tpe <:< typeOfSockJsCookieNeeded)
         ret = ret.copy(sockJsCookieNeeded = Some(a))
-
-      else if (sockJsNoWebSocket.isEmpty && tpe <:< typeOfSockJsNoWebSocket)
-        ret = ret.copy(sockJsNoWebSocket = Some(a))
 
       else if (cache.isEmpty && tpe <:< typeOfCache)
         ret = ret.copy(cache = Some(a))

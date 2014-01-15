@@ -330,7 +330,7 @@ class InfoGET extends SockJsAction {
 
     val sockJsClassAndOptions = Config.routes.sockJsRouteMap.lookup(pathPrefix)
     respondJsonText(
-      """{"websocket": """      + sockJsClassAndOptions.websocket +
+      """{"websocket": true""" +
       """, "cookie_needed": """ + sockJsClassAndOptions.cookieNeeded +
       """, "origins": ["*:*"], "entropy": """ + SockJsAction.entropy() + "}"
     )

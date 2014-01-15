@@ -19,7 +19,6 @@ class First extends RouteOrder
 class Last  extends RouteOrder
 
 class SockJsCookieNeeded extends StaticAnnotation
-class SockJsNoWebSocket  extends StaticAnnotation
 
 class Error404 extends Error
 class Error500 extends Error

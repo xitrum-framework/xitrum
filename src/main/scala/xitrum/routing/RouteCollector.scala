@@ -150,9 +150,8 @@ class RouteCollector extends Log {
       sockJsMap
     } else {
       val klass        = Class.forName(className).asInstanceOf[Class[SockJsAction]]
-      val noWebSocket  = annotations.sockJsNoWebSocket.isDefined
       val cookieNeeded = annotations.sockJsCookieNeeded.isDefined
-      sockJsMap + (pathPrefix -> new SockJsClassAndOptions(klass, !noWebSocket, cookieNeeded))
+      sockJsMap + (pathPrefix -> new SockJsClassAndOptions(klass, cookieNeeded))
     }
   }
 
