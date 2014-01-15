@@ -13,7 +13,7 @@ import akka.actor.ActorSystem
 import io.netty.handler.codec.http.multipart.DefaultHttpDataFactory
 
 import xitrum.scope.session.SessionStore
-import xitrum.routing.{DiscoveredAcc, RouteCollection, RouteCollector, SerializableRouteCollection, SockJsClassAndOptions}
+import xitrum.routing.{DiscoveredAcc, RouteCollection, RouteCollector, SerializableRouteCollection}
 import xitrum.view.TemplateEngine
 import xitrum.util.Loader
 
@@ -137,8 +137,9 @@ class RequestConfig(config: TConfig) {
 }
 
 class ResponseConfig(config: TConfig) {
-  val autoGzip         = config.getBoolean("autoGzip")
-  val corsAllowOrigins = if (config.hasPath("corsAllowOrigins")) config.getStringList("corsAllowOrigins").asScala else Seq.empty[String]
+  val autoGzip           = config.getBoolean("autoGzip")
+  val sockJsCookieNeeded = if (config.hasPath("sockJsCookieNeeded")) config.getBoolean("sockJsCookieNeeded") else false
+  val corsAllowOrigins   = if (config.hasPath("corsAllowOrigins")) config.getStringList("corsAllowOrigins").asScala else Seq.empty[String]
 }
 
 class Config(val config: TConfig) extends Log {

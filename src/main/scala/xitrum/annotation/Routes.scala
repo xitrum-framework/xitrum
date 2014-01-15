@@ -18,7 +18,5 @@ case class SOCKJS   (paths: String*) extends Route
 class First extends RouteOrder
 class Last  extends RouteOrder
 
-class SockJsCookieNeeded extends StaticAnnotation
-
 class Error404 extends Error
 class Error500 extends Error

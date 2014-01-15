@@ -3,6 +3,7 @@
 * #261 Add convenient methods to manipulate routes after they are collected at startup
 * #263 Set access log from DEBUG level to INFO level
 * #269 Increase akka.logger-startup-timeout to avoid Akka's log initialization timeout error at Xitrum startup
+* #272 Replace SockJsCookieNeeded annotation with sockJsCookieNeeded in xitrum.conf
 * #273 Remove SockJsNoWebSocket annotation
 
 2.16:

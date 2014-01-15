@@ -14,7 +14,7 @@ import xitrum.sockjs.SockJsPrefix
 case class DiscoveredAcc(
   normalRoutes:              SerializableRouteCollection,
   sockJsWithoutPrefixRoutes: SerializableRouteCollection,
-  sockJsMap:                 Map[String, SockJsClassAndOptions],
+  sockJsMap:                 Map[String, Class[_ <: SockJsAction]],
   swaggerMap:                Map[Class[_ <: Action], Swagger]
 )
 
@@ -26,7 +26,7 @@ class RouteCollector extends Log {
     var acc = DiscoveredAcc(
       new SerializableRouteCollection,
       new SerializableRouteCollection,
-      Map.empty[String, SockJsClassAndOptions],
+      Map.empty[String, Class[_ <: SockJsAction]],
       Map.empty[Class[_ <: Action], Swagger]
     )
 
@@ -135,10 +135,10 @@ class RouteCollector extends Log {
   }
 
   private def collectSockJsMap(
-      sockJsMap:   Map[String, SockJsClassAndOptions],
+      sockJsMap:   Map[String, Class[_ <: SockJsAction]],
       className:   String,
       annotations: ActionAnnotations
-  ): Map[String, SockJsClassAndOptions] =
+  ): Map[String, Class[_ <: SockJsAction]] =
   {
     var pathPrefix: String = null
     annotations.routes.foreach { case a =>
@@ -149,9 +149,8 @@ class RouteCollector extends Log {
     if (pathPrefix == null) {
       sockJsMap
     } else {
-      val klass        = Class.forName(className).asInstanceOf[Class[SockJsAction]]
-      val cookieNeeded = annotations.sockJsCookieNeeded.isDefined
-      sockJsMap + (pathPrefix -> new SockJsClassAndOptions(klass, cookieNeeded))
+      val sockJsActorClass = Class.forName(className).asInstanceOf[Class[SockJsAction]]
+      sockJsMap + (pathPrefix -> sockJsActorClass)
     }
   }
 

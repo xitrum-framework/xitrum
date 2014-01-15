@@ -7,35 +7,24 @@ import com.esotericsoftware.reflectasm.ConstructorAccess
 
 import xitrum.{Config, Log, SockJsAction}
 
-// "websocket" and "cookieNeeded" members are named after SockJS option:
-// {"websocket": true/false, "cookie_needed": true/false, "origins": ["*:*"], "entropy": integer}
-//
-// websocket: true means WebSocket is enabled
-// cookieNeeded: true means load balancers needs JSESSION cookie
-class SockJsClassAndOptions(val actorClass: Class[_ <: SockJsAction], val cookieNeeded: Boolean) extends Serializable
-
-class SockJsRouteMap(map: Map[String, SockJsClassAndOptions]) extends Log {
+class SockJsRouteMap(map: Map[String, Class[_ <: SockJsAction]]) extends Log {
   def logRoutes() {
     // This method is only run once on start, speed is not a problem
 
     if (!map.isEmpty) {
       val (pathPrefixMaxLength, handlerClassNameMaxLength) =
         map.toList.foldLeft((0, 0)) {
-            case ((pmax, hmax), (pathPrefix, sockJsClassAndOptions)) =>
+            case ((pmax, hmax), (pathPrefix, sockJsClass)) =>
           val plen  = pathPrefix.length
-          val hlen  = sockJsClassAndOptions.actorClass.getName.length
+          val hlen  = sockJsClass.getName.length
           val pmax2 = if (pmax < plen) plen else pmax
           val hmax2 = if (hmax < hlen) hlen else hmax
           (pmax2, hmax2)
         }
-      val logFormat = "%-" + pathPrefixMaxLength + "s  %-" + handlerClassNameMaxLength + "s  %-" + "s %s"
+      val logFormat = "%-" + pathPrefixMaxLength + "s  %-" + handlerClassNameMaxLength + "s"
 
-      val strings = map.map { case (pathPrefix, sockJsClassAndOptions) =>
-        logFormat.format(
-          pathPrefix,
-          sockJsClassAndOptions.actorClass.getName,
-          "cookie_needed: " + sockJsClassAndOptions.cookieNeeded
-        )
+      val strings = map.map { case (pathPrefix, sockJsClass) =>
+        logFormat.format(pathPrefix, sockJsClass.getName)
       }
       log.info("SockJS routes:\n" + strings.mkString("\n"))
     }
@@ -48,19 +37,16 @@ class SockJsRouteMap(map: Map[String, SockJsClassAndOptions]) extends Log {
 
   /** Creates actor attached to the given context. */
   def createSockJsAction(context: ActorRefFactory, pathPrefix: String): ActorRef = {
-    val sockJsClassAndOptions = map(pathPrefix)
-    val actorClass            = sockJsClassAndOptions.actorClass
-    context.actorOf(Props(ConstructorAccess.get(actorClass).newInstance()))
+    val sockJsActorClass = map(pathPrefix)
+    context.actorOf(Props(ConstructorAccess.get(sockJsActorClass).newInstance()))
   }
 
   /** @param sockJsHandlerClass Normal SockJsHandler subclass or object class */
   def findPathPrefix(sockJsActorClass: Class[_ <: SockJsAction]): String = {
-    val kv = map.find { case (k, v) => v.actorClass == sockJsActorClass }
+    val kv = map.find { case (k, v) => v == sockJsActorClass }
     kv match {
       case Some((k, v)) => "/" + k
       case None         => throw new Exception("Cannot lookup SockJS URL for class: " + sockJsActorClass)
     }
   }
-
-  def lookup(pathPrefix: String) = map(pathPrefix)
 }
