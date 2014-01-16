@@ -173,15 +173,16 @@ trait Responder extends Js with Flash with GetActionClassDefaultsToCurrentAction
       }
     }
 
-    val cb = Unpooled.copiedBuffer(respondedText, Config.xitrum.request.charset)
+    val bytes = respondedText.getBytes(Config.xitrum.request.charset)
     if (HttpHeaders.isTransferEncodingChunked(response)) {
       respondHeadersOnlyForFirstChunk()
+      val cb = Unpooled.wrappedBuffer(bytes)
       channel.writeAndFlush(new DefaultHttpContent(cb))
     } else {
       // Content length is number of bytes, not characters!
-      HttpHeaders.setContentLength(response, cb.readableBytes)
+      HttpHeaders.setContentLength(response, bytes.length)
       response.content.clear()
-      response.content.writeBytes(cb)
+      response.content.writeBytes(bytes)
       respond()
     }
   }
@@ -271,7 +272,7 @@ trait Responder extends Js with Flash with GetActionClassDefaultsToCurrentAction
   }
   //----------------------------------------------------------------------------
 
-  /** Content-Type header is set to "text/html" */
+  /** Content-Type header is set to "text/html". */
   def respondViewNoLayout(location: Class[_ <: Action], options: Map[String, Any]): ChannelFuture = {
     val string = renderViewNoLayout(location, options)
     respondText(string, "text/html")
@@ -287,7 +288,7 @@ trait Responder extends Js with Flash with GetActionClassDefaultsToCurrentAction
 
   //----------------------------------------------------------------------------
 
-  /** Content-Type header is set to "text/html" */
+  /** Content-Type header is set to "text/html". */
   def respondInlineView(inlineView: Any): ChannelFuture = {
     val string = renderInlineView(inlineView)
     respondText(string, "text/html")
@@ -295,12 +296,16 @@ trait Responder extends Js with Flash with GetActionClassDefaultsToCurrentAction
 
   //----------------------------------------------------------------------------
 
-  /** If Content-Type header is not set, it is set to "application/octet-stream" */
+  /** If Content-Type header is not set, it is set to "application/octet-stream". */
   def respondBinary(bytes: Array[Byte]): ChannelFuture = {
     respondBinary(Unpooled.wrappedBuffer(bytes))
   }
 
-  /** If Content-Type header is not set, it is set to "application/octet-stream" */
+  /**
+   * If Content-Type header is not set, it is set to "application/octet-stream".
+   *
+   * @param byteBuf Will be released
+   */
   def respondBinary(byteBuf: ByteBuf): ChannelFuture = {
     if (HttpHeaders.isTransferEncodingChunked(response)) {
       respondHeadersOnlyForFirstChunk()
@@ -311,6 +316,7 @@ trait Responder extends Js with Flash with GetActionClassDefaultsToCurrentAction
       HttpHeaders.setContentLength(response, byteBuf.readableBytes)
       response.content.clear()
       response.content.writeBytes(byteBuf)
+      byteBuf.release()
       respond()
     }
   }
