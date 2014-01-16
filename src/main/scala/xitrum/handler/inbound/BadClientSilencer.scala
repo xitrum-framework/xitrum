@@ -17,16 +17,14 @@ trait BadClientSilencer extends Log {
   this: ChannelInboundHandler =>
 
   override def exceptionCaught(ctx: ChannelHandlerContext, e: Throwable) {
-    ctx.close()
+    if (ctx.channel.isOpen) ctx.close()
 
-    val throwable = e.getCause
-    val s         = throwable.toString
-    if (!s.startsWith("java.io.IOException") &&
-        !s.startsWith("java.lang.IllegalArgumentException") &&
-        !s.startsWith("java.nio.channels.ClosedChannelException") &&
-        !s.startsWith("javax.net.ssl.SSLException") &&
-        !s.startsWith("scala.runtime.NonLocalReturnControl") &&
-        !s.startsWith("io.netty.handler.ssl.NotSslRecordException"))
-      log.debug(getClass.getName + " -> BadClientSilencer", throwable)
+    if (!e.isInstanceOf[java.io.IOException] &&
+        !e.isInstanceOf[java.lang.IllegalArgumentException] &&
+        !e.isInstanceOf[java.nio.channels.ClosedChannelException] &&
+        !e.isInstanceOf[javax.net.ssl.SSLException] &&
+        !e.isInstanceOf[scala.runtime.NonLocalReturnControl[_]] &&
+        !e.isInstanceOf[io.netty.handler.ssl.NotSslRecordException])
+      log.debug(getClass.getName + " -> BadClientSilencer", e)
   }
 }

@@ -114,7 +114,7 @@ class DefaultHttpChannelInitializer extends ChannelInitializer[SocketChannel] {
 
     if (portConfig.flashSocketPolicy.isDefined && portConfig.flashSocketPolicy == portConfig.http)
     p.addLast("FlashSocketPolicyHandler", new FlashSocketPolicyHandler)
-    p.addLast("HttpRequestDecoder",       new HttpRequestDecoder(Config.xitrum.request.maxInitialLineLength, 8192, 8192))
+    p.addLast("HttpRequestDecoder",       new HttpRequestDecoder(Config.xitrum.request.maxInitialLineLength, 8192, 8192) with BadClientSilencer)
     p.addLast("BodyParser",               new BodyParser)      // Request is converted to HandlerEnv here
     p.addLast("NoPipelining",             noPipelining)
     p.addLast("BaseUrlRemover",           baseUrlRemover)
