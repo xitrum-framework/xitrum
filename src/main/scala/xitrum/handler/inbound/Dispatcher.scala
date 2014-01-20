@@ -47,7 +47,7 @@ object Dispatcher {
 }
 
 @Sharable
-class Dispatcher extends SimpleChannelInboundHandler[HandlerEnv] with BadClientSilencer {
+class Dispatcher extends SimpleChannelInboundHandler[HandlerEnv] {
   override def channelRead0(ctx: ChannelHandlerContext, env: HandlerEnv) {
     val request  = env.request
     val pathInfo = env.pathInfo

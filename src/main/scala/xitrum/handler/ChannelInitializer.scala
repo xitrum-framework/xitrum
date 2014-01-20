@@ -42,6 +42,7 @@ object DefaultHttpChannelInitializer {
   lazy val uriParser            = new UriParser
   lazy val methodOverrider      = new MethodOverrider
   lazy val dispatcher           = new Dispatcher
+  lazy val badClientSilencer    = new BadClientSilencer
 
   // Sharable outbound handlers
 
@@ -71,6 +72,7 @@ object DefaultHttpChannelInitializer {
     removeHandlerIfExists(pipeline, classOf[UriParser])
     removeHandlerIfExists(pipeline, classOf[MethodOverrider])
     removeHandlerIfExists(pipeline, classOf[Dispatcher])
+    removeHandlerIfExists(pipeline, classOf[BadClientSilencer])
 
     // Outbound
 
@@ -114,7 +116,7 @@ class DefaultHttpChannelInitializer extends ChannelInitializer[SocketChannel] {
 
     if (portConfig.flashSocketPolicy.isDefined && portConfig.flashSocketPolicy == portConfig.http)
     p.addLast("FlashSocketPolicyHandler", new FlashSocketPolicyHandler)
-    p.addLast("HttpRequestDecoder",       new HttpRequestDecoder(Config.xitrum.request.maxInitialLineLength, 8192, 8192) with BadClientSilencer)
+    p.addLast("HttpRequestDecoder",       new HttpRequestDecoder(Config.xitrum.request.maxInitialLineLength, 8192, 8192))
     p.addLast("BodyParser",               new BodyParser)      // Request is converted to HandlerEnv here
     p.addLast("NoPipelining",             noPipelining)
     p.addLast("BaseUrlRemover",           baseUrlRemover)
@@ -125,6 +127,7 @@ class DefaultHttpChannelInitializer extends ChannelInitializer[SocketChannel] {
     p.addLast("UriParser",                uriParser)
     p.addLast("MethodOverrider",          methodOverrider)
     p.addLast("Dispatcher",               dispatcher)
+    p.addLast("BadClientSilencer",        badClientSilencer)
 
     // Outbound
 
@@ -145,8 +148,8 @@ class DefaultHttpChannelInitializer extends ChannelInitializer[SocketChannel] {
 class SslChannelInitializer(nonSslChannelInitializer: ChannelInitializer[SocketChannel]) extends ChannelInitializer[SocketChannel] {
   override def initChannel(ch: SocketChannel) {
     val p = ch.pipeline()
-    p.addLast("SSL",    ServerSsl.handler())
-    p.addLast("nonSsl", nonSslChannelInitializer)
+    p.addLast("Ssl",    ServerSsl.handler())
+    p.addLast("NonSsl", nonSslChannelInitializer)
 
     // FlashSocketPolicyHandler can't be used with SSL
     DefaultHttpChannelInitializer.removeHandlerIfExists(p, classOf[FlashSocketPolicyHandler])

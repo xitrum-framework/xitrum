@@ -18,7 +18,7 @@ import xitrum.routing.HttpMethodWebSocket
  * This middleware should be put behind BodyParser.
  */
 @Sharable
-class MethodOverrider extends SimpleChannelInboundHandler[HandlerEnv] with BadClientSilencer {
+class MethodOverrider extends SimpleChannelInboundHandler[HandlerEnv] {
   override def channelRead0(ctx: ChannelHandlerContext, env: HandlerEnv) {
     val request        = env.request
     val method         = request.getMethod

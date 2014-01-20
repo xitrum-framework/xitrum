@@ -19,7 +19,7 @@ import xitrum.util.PathSanitizer
  * See DefaultHttpChannelInitializer, this handler is put after XSendResource.
  */
 @Sharable
-class PublicResourceServer extends SimpleChannelInboundHandler[HandlerEnv] with BadClientSilencer {
+class PublicResourceServer extends SimpleChannelInboundHandler[HandlerEnv] {
   override def channelRead0(ctx: ChannelHandlerContext, env: HandlerEnv) {
     val request = env.request
     if (request.getMethod != GET && request.getMethod != HEAD && request.getMethod != OPTIONS) {

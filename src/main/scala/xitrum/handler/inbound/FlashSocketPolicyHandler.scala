@@ -17,7 +17,7 @@ object FlashSocketPolicyHandler {
   val RESPONSE = Unpooled.wrappedBuffer(Loader.bytesFromClasspath("flash_socket_policy.xml"))
 }
 
-class FlashSocketPolicyHandler extends SimpleChannelInboundHandler[ByteBuf] with BadClientSilencer {
+class FlashSocketPolicyHandler extends SimpleChannelInboundHandler[ByteBuf] {
   import FlashSocketPolicyHandler._
 
   private var nextIdx = 0

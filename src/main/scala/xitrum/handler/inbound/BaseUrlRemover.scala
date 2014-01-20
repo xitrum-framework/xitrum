@@ -9,7 +9,7 @@ import xitrum.handler.HandlerEnv
 import xitrum.handler.outbound.XSendFile
 
 @Sharable
-class BaseUrlRemover extends SimpleChannelInboundHandler[HandlerEnv] with BadClientSilencer {
+class BaseUrlRemover extends SimpleChannelInboundHandler[HandlerEnv] {
   override def channelRead0(ctx: ChannelHandlerContext, env: HandlerEnv) {
     val request = env.request
 

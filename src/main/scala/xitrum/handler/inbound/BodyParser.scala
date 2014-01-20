@@ -17,7 +17,7 @@ import io.netty.handler.codec.http.multipart.{
 }
 import InterfaceHttpData.HttpDataType
 
-import xitrum.Config
+import xitrum.{Config, Log}
 import xitrum.handler.HandlerEnv
 import xitrum.scope.request.{FileUploadParams, Params, PathInfo}
 
@@ -36,7 +36,7 @@ object BodyParser {
 }
 
 // Based on the file upload example in Netty.
-class BodyParser extends SimpleChannelInboundHandler[HttpObject] with BadClientSilencer {
+class BodyParser extends SimpleChannelInboundHandler[HttpObject] with Log {
   import BodyParser._
 
   private[this] var env: HandlerEnv = _

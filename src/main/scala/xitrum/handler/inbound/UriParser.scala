@@ -8,12 +8,12 @@ import io.netty.channel.{ChannelHandler, ChannelHandlerContext, SimpleChannelInb
 import ChannelHandler.Sharable
 import io.netty.handler.codec.http.QueryStringDecoder
 
-import xitrum.Config
+import xitrum.{Config, Log}
 import xitrum.handler.HandlerEnv
 import xitrum.scope.request.{Params, PathInfo}
 
 @Sharable
-class UriParser extends SimpleChannelInboundHandler[HandlerEnv] with BadClientSilencer {
+class UriParser extends SimpleChannelInboundHandler[HandlerEnv] with Log {
   override def channelRead0(ctx: ChannelHandlerContext, env: HandlerEnv) {
     val request = env.request
 

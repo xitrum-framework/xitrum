@@ -60,7 +60,7 @@ object BasicAuth {
 }
 
 @Sharable
-class BasicAuth extends SimpleChannelInboundHandler[HandlerEnv] with BadClientSilencer {
+class BasicAuth extends SimpleChannelInboundHandler[HandlerEnv] {
   override def channelRead0(ctx: ChannelHandlerContext, env: HandlerEnv) {
     val go = Config.xitrum.basicAuth
     if (go.isEmpty) {

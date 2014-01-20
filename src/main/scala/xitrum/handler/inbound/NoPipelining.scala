@@ -51,7 +51,7 @@ object NoPipelining {
 
 @Sharable
 /** http://mongrel2.org/static/book-finalch6.html */
-class NoPipelining extends SimpleChannelInboundHandler[HandlerEnv] with BadClientSilencer {
+class NoPipelining extends SimpleChannelInboundHandler[HandlerEnv] {
   override def channelRead0(ctx: ChannelHandlerContext, env: HandlerEnv) {
     val channel = ctx.channel
     NoPipelining.pauseReading(channel)

@@ -19,7 +19,7 @@ import xitrum.util.ByteBufToBytes
 class WebSocketEventDispatcher(
     handshaker: WebSocketServerHandshaker,
     actorRef:   ActorRef
-) extends SimpleChannelInboundHandler[WebSocketFrame] with BadClientSilencer with Log
+) extends SimpleChannelInboundHandler[WebSocketFrame] with Log
 {
   override def channelRead0(ctx: ChannelHandlerContext, frame: WebSocketFrame) {
     if (frame.isInstanceOf[TextWebSocketFrame]) {
