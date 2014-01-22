@@ -91,7 +91,6 @@ object Etag extends Log {
     val response = action.response
     if (areEtagsIdentical(request, etag)) {
       response.setStatus(NOT_MODIFIED)
-      HttpHeaders.setContentLength(response, 0)
       response.content.clear()
       action.respond()
       true

@@ -153,9 +153,7 @@ class Request2Env extends SimpleChannelInboundHandler[HttpObject] with Log {
   private def createEmptyFullResponse(): ResetableFullHttpResponse = {
     // http://en.wikipedia.org/wiki/HTTP_persistent_connection
     // In HTTP 1.1 all connections are considered persistent unless declared otherwise
-    val ret = new ResetableFullHttpResponse(HttpVersion.HTTP_1_1, HttpResponseStatus.OK)
-    HttpHeaders.setContentLength(ret, 0)
-    ret
+    new ResetableFullHttpResponse(HttpVersion.HTTP_1_1, HttpResponseStatus.OK)
   }
 
   private def isAPPLICATION_X_WWW_FORM_URLENCODED_or_MULTIPART_FORM_DATA(request: HttpRequest): Boolean = {
@@ -237,14 +235,11 @@ class Request2Env extends SimpleChannelInboundHandler[HttpObject] with Log {
 
   private def closeOnBigRequest(ctx: ChannelHandlerContext) {
     val response = env.response
-    val bytes    = "Request content body is too big".getBytes(Config.xitrum.request.charset)
-    response.content(Unpooled.wrappedBuffer(bytes))
     response.setStatus(HttpResponseStatus.BAD_REQUEST)
-    HttpHeaders.setContentLength(response, bytes.length)
+    response.content(Unpooled.copiedBuffer("Request content body is too big", Config.xitrum.request.charset))
     ctx.channel.writeAndFlush(env).addListener(ChannelFutureListener.CLOSE)
 
-    val msg = "Request content body is too big, see xitrum.request.maxSizeInMB in xitrum.conf"
-    log.warn(msg)
+    log.warn("Request content body is too big, see xitrum.request.maxSizeInMB in xitrum.conf")
 
     // Mark that closeOnBigRequest has been called.
     // See the check for LastHttpContent above.

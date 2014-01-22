@@ -49,11 +49,8 @@ object BasicAuth {
     HttpHeaders.setHeader(response, HttpHeaders.Names.WWW_AUTHENTICATE, "Basic realm=\"" + realm + "\"")
     response.setStatus(HttpResponseStatus.UNAUTHORIZED)
 
-    val bytes = "Wrong username or password".getBytes(Config.xitrum.request.charset)
-    val cb    = Unpooled.wrappedBuffer(bytes)
     HttpHeaders.setHeader(response, HttpHeaders.Names.CONTENT_TYPE, "text/plain; charset=" + Config.xitrum.request.charset)
-    HttpHeaders.setContentLength(response, bytes.length)
-    response.content(cb)
+    response.content(Unpooled.copiedBuffer("Wrong username or password", Config.xitrum.request.charset))
 
     NoPipelining.setResponseHeaderForKeepAliveRequest(request, response)
     val future = channel.writeAndFlush(response)

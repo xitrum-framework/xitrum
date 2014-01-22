@@ -39,11 +39,10 @@ class OPTIONSResponse extends ChannelOutboundHandlerAdapter {
           response.setStatus(NOT_FOUND)
       }
 
-      HttpHeaders.setContentLength(response, 0)
       NotModified.setClientCacheAggressively(response)
       response.content.clear()
     }
 
-    ctx.write(msg, promise)
+    ctx.write(env, promise)
   }
 }

@@ -42,7 +42,6 @@ object XSendFile extends Log {
   def setHeader(response: FullHttpResponse, path: String, fromAction: Boolean) {
     HttpHeaders.setHeader(response, X_SENDFILE_HEADER, path)
     if (fromAction) HttpHeaders.setHeader(response, X_SENDFILE_HEADER_IS_FROM_ACTION, "true")
-    HttpHeaders.setContentLength(response, 0)  // Env2Response checks Content-Length
   }
 
   def isHeaderSet(response: FullHttpResponse) = response.headers.contains(X_SENDFILE_HEADER)
@@ -59,7 +58,7 @@ object XSendFile extends Log {
 
   /** @param path see Renderer#renderFile */
   def sendFile(
-      ctx: ChannelHandlerContext, msg: Any, promise: ChannelPromise,
+      ctx: ChannelHandlerContext, env: HandlerEnv, promise: ChannelPromise,
       request: FullHttpRequest, response: ResetableFullHttpResponse, path: String, noLog: Boolean)
   {
     val channel       = ctx.channel
@@ -72,18 +71,16 @@ object XSendFile extends Log {
         NotModified.setNoClientCache(response)
 
         if (path.startsWith(abs404)) {  // Even 404.html is not found!
-          HttpHeaders.setContentLength(response, 0)
           NoPipelining.setResponseHeaderAndResumeReadingForKeepAliveRequestOrCloseOnComplete(request, response, channel, promise)
-          ctx.write(msg, promise)
+          ctx.write(env, promise)
           if (!noLog) AccessLog.logStaticFileAccess(remoteAddress, request, response)
         } else {
-          sendFile(ctx, msg, promise, request, response, abs404, noLog)  // Recursive
+          sendFile(ctx, env, promise, request, response, abs404, noLog)  // Recursive
         }
 
       case Etag.Small(bytes, etag, mimeo, gzipped) =>
         if (Etag.areEtagsIdentical(request, etag)) {
           response.setStatus(NOT_MODIFIED)
-          HttpHeaders.setContentLength(response, 0)
           response.content.clear()
         } else {
           Etag.set(response, etag)
@@ -99,7 +96,7 @@ object XSendFile extends Log {
           }
         }
         NoPipelining.setResponseHeaderAndResumeReadingForKeepAliveRequestOrCloseOnComplete(request, response, channel, promise)
-        ctx.write(msg, promise)
+        ctx.write(env, promise)
         if (!noLog) AccessLog.logStaticFileAccess(remoteAddress, request, response)
 
       case Etag.TooBig(file) =>
@@ -108,10 +105,9 @@ object XSendFile extends Log {
         val lastModifiedRfc2822 = NotModified.formatRfc2822(file.lastModified)
         if (HttpHeaders.getHeader(request, IF_MODIFIED_SINCE) == lastModifiedRfc2822) {
           response.setStatus(NOT_MODIFIED)
-          HttpHeaders.setContentLength(response, 0)
           NoPipelining.setResponseHeaderAndResumeReadingForKeepAliveRequestOrCloseOnComplete(request, response, channel, promise)
           response.content.clear()
-          ctx.write(msg, promise)
+          ctx.write(env, promise)
           if (!noLog) AccessLog.logStaticFileAccess(remoteAddress, request, response)
         } else {
           val mimeo = Mime.get(path)
@@ -139,11 +135,11 @@ object XSendFile extends Log {
           if (request.getMethod == HEAD && response.getStatus == OK) {
             // http://stackoverflow.com/questions/3854842/content-length-header-with-head-requests
             response.content.clear()
-            ctx.write(msg, promise)
+            ctx.write(env, promise)
             NoPipelining.if_keepAliveRequest_then_resumeReading_else_closeOnComplete(request, channel, promise)
           } else {
             // Send the initial line and headers
-            ctx.write(msg, promise)
+            ctx.write(env, promise)
 
             if (ctx.pipeline.get(classOf[SslHandler]) != null) {
               // Cannot use zero-copy with HTTPS
@@ -231,7 +227,7 @@ class XSendFile extends ChannelOutboundHandlerAdapter {
     val response = env.response
     val path     = HttpHeaders.getHeader(response, X_SENDFILE_HEADER)
     if (path == null) {
-      ctx.write(msg, promise)
+      ctx.write(env, promise)
       return
     }
 
@@ -244,6 +240,6 @@ class XSendFile extends ChannelOutboundHandlerAdapter {
     if (noLog) HttpHeaders.removeHeader(response, X_SENDFILE_HEADER_IS_FROM_ACTION)
 
     val request = env.request
-    sendFile(ctx, msg: Any, promise, request, response, path, noLog)
+    sendFile(ctx, env, promise, request, response, path, noLog)
   }
 }

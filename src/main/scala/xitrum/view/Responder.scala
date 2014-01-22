@@ -173,14 +173,11 @@ trait Responder extends Js with Flash with GetActionClassDefaultsToCurrentAction
       }
     }
 
-    val bytes = respondedText.getBytes(Config.xitrum.request.charset)
-    val cb    = Unpooled.wrappedBuffer(bytes)
+    val cb = Unpooled.copiedBuffer(respondedText, Config.xitrum.request.charset)
     if (HttpHeaders.isTransferEncodingChunked(response)) {
       respondHeadersOnlyForFirstChunk()
       channel.writeAndFlush(new DefaultHttpContent(cb))
     } else {
-      // Content length is number of bytes, not characters!
-      HttpHeaders.setContentLength(response, bytes.length)
       response.content(cb)
       respond()
     }
@@ -312,7 +309,6 @@ trait Responder extends Js with Flash with GetActionClassDefaultsToCurrentAction
     } else {
       if (!response.headers.contains(CONTENT_TYPE))
         HttpHeaders.setHeader(response, CONTENT_TYPE, "application/octet-stream")
-      HttpHeaders.setContentLength(response, byteBuf.readableBytes)
       response.content(byteBuf)
       respond()
     }

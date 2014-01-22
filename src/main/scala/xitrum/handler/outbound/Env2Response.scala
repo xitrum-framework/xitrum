@@ -25,6 +25,11 @@ class Env2Response extends ChannelOutboundHandlerAdapter with Log {
     val request  = env.request
     val response = env.response
 
+    // Content-Length header may be set to > 0 even when the content is empty,
+    // ex: HEAD or OPTIONS response
+    if (!HttpHeaders.isContentLengthSet(response))
+      HttpHeaders.setContentLength(response, response.content.readableBytes)
+
     if ((request.getMethod == HEAD || request.getMethod == OPTIONS) && response.getStatus == OK)
       // http://stackoverflow.com/questions/3854842/content-length-header-with-head-requests
       response.content.clear()
@@ -76,7 +81,7 @@ class Env2Response extends ChannelOutboundHandlerAdapter with Log {
    * e.g. not for static file (has alredy been handled and does not go through
    * this handler) or X-SendFile response (empty dynamic response).
    *
-   * If HttpHeaders.getContentLength(response) != response.getContent.readableBytes,
+   * If HttpHeaders.getContentLength(response) != response.content.readableBytes,
    * it is because the response is sent in async mode.
    *
    * @return true if the NO_MODIFIED response is set by this method
@@ -89,7 +94,7 @@ class Env2Response extends ChannelOutboundHandlerAdapter with Log {
     if (response.getStatus != OK)
       return false
 
-    val contentLengthInHeader = HttpHeaders.getContentLength(response)
+    val contentLengthInHeader = HttpHeaders.getContentLength(response, 0)
     val byteBuf               = response.content
     if (contentLengthInHeader == 0 || contentLengthInHeader != byteBuf.readableBytes) return false
 
@@ -112,7 +117,6 @@ class Env2Response extends ChannelOutboundHandlerAdapter with Log {
       // (decrease response transmission time)
       response.setStatus(NOT_MODIFIED)
       HttpHeaders.removeHeader(response, CONTENT_TYPE) // http://sockjs.github.com/sockjs-protocol/sockjs-protocol-0.3.3.html#section-25
-      HttpHeaders.setContentLength(response, 0)
       response.content.clear()
       true
     } else {

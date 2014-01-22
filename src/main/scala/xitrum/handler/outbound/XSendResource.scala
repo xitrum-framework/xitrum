@@ -39,7 +39,10 @@ object XSendResource extends Log {
   def isHeaderSet(response: FullHttpResponse) = response.headers.contains(X_SENDRESOURCE_HEADER)
 
   /** @return false if not found */
-  def sendResource(ctx: ChannelHandlerContext, msg: Object, promise: ChannelPromise, request: HttpRequest, response: ResetableFullHttpResponse, path: String, noLog: Boolean) {
+  def sendResource(
+      ctx: ChannelHandlerContext, env: HandlerEnv, promise: ChannelPromise,
+      request: HttpRequest, response: ResetableFullHttpResponse, path: String, noLog: Boolean)
+  {
     Etag.forResource(path, Gzip.isAccepted(request)) match {
       case Etag.NotFound =>
         // Keep alive is handled by XSendFile
@@ -48,16 +51,15 @@ object XSendResource extends Log {
       case Etag.Small(bytes, etag, mimeo, gzipped) =>
         if (Etag.areEtagsIdentical(request, etag)) {
           response.setStatus(NOT_MODIFIED)
-          HttpHeaders.setContentLength(response, 0)
           response.content.clear()
         } else {
           Etag.set(response, etag)
           if (mimeo.isDefined) HttpHeaders.setHeader(response, CONTENT_TYPE, mimeo.get)
           if (gzipped)         HttpHeaders.setHeader(response, CONTENT_ENCODING, "gzip")
 
-          HttpHeaders.setContentLength(response, bytes.length)
           if ((request.getMethod == HEAD || request.getMethod == OPTIONS) && response.getStatus == OK) {
             // http://stackoverflow.com/questions/3854842/content-length-header-with-head-requests
+            HttpHeaders.setContentLength(response, bytes.length)
             response.content.clear()
           } else {
             response.content(Unpooled.wrappedBuffer(bytes))
@@ -72,7 +74,7 @@ object XSendResource extends Log {
           AccessLog.logResourceInJarAccess(remoteAddress, request, response)
         }
     }
-    ctx.write(msg, promise)
+    ctx.write(env, promise)
   }
 }
 
@@ -94,7 +96,7 @@ class XSendResource extends ChannelOutboundHandlerAdapter {
     val response = env.response
     val path     = HttpHeaders.getHeader(response, X_SENDRESOURCE_HEADER)
     if (path == null) {
-      ctx.write(msg, promise)
+      ctx.write(env, promise)
       return
     }
 
@@ -106,6 +108,6 @@ class XSendResource extends ChannelOutboundHandlerAdapter {
     val noLog = response.headers.contains(X_SENDRESOURCE_HEADER_IS_FROM_CONTROLLER)
     if (noLog) HttpHeaders.removeHeader(response, X_SENDRESOURCE_HEADER_IS_FROM_CONTROLLER)
 
-    sendResource(ctx, msg, promise, request, response, path, noLog)
+    sendResource(ctx, env, promise, request, response, path, noLog)
   }
 }

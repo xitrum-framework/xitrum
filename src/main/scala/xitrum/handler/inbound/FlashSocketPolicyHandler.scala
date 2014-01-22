@@ -2,6 +2,7 @@ package xitrum.handler.inbound
 
 import io.netty.buffer.{ByteBuf, Unpooled}
 import io.netty.channel.{Channel, ChannelFutureListener, ChannelHandlerContext, SimpleChannelInboundHandler}
+import io.netty.util.CharsetUtil
 
 import xitrum.handler.AccessLog
 import xitrum.util.Loader
@@ -11,7 +12,7 @@ object FlashSocketPolicyHandler {
   // The request must be exactly "<policy-file-request/>\0"
   // To test:
   // perl -e 'printf "<policy-file-request/>%c",0' | nc localhost 8000
-  val REQUEST        = Unpooled.wrappedBuffer("<policy-file-request/>\0".getBytes)
+  val REQUEST        = Unpooled.copiedBuffer("<policy-file-request/>\0", CharsetUtil.UTF_8)
   val REQUEST_LENGTH = REQUEST.readableBytes
 
   val RESPONSE = Unpooled.wrappedBuffer(Loader.bytesFromClasspath("flash_socket_policy.xml"))
