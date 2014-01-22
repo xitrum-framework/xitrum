@@ -35,7 +35,7 @@ class UriParser extends SimpleChannelInboundHandler[HandlerEnv] with Log {
       case NonFatal(e) =>
         val msg = "Could not parse query params URI: " + request.getUri
         log.warn(msg, e)
-        ctx.close()
+        ctx.channel.close()
     }
   }
 

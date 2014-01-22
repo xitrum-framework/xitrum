@@ -18,7 +18,7 @@ import xitrum.Log
 @Sharable
 class BadClientSilencer extends SimpleChannelInboundHandler[Any] with Log {
   override def channelRead0(ctx: ChannelHandlerContext, env: Any) {
-    ctx.close()
+    ctx.channel.close()
   }
 
   override def exceptionCaught(ctx: ChannelHandlerContext, e: Throwable) {
@@ -28,6 +28,6 @@ class BadClientSilencer extends SimpleChannelInboundHandler[Any] with Log {
         !e.isInstanceOf[javax.net.ssl.SSLException] &&
         !e.isInstanceOf[scala.runtime.NonLocalReturnControl[_]] &&
         !e.isInstanceOf[io.netty.handler.ssl.NotSslRecordException])
-      log.debug(getClass.getName + " -> BadClientSilencer", e)
+      log.debug("exceptionCaught", e)
   }
 }

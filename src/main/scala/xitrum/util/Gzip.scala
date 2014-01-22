@@ -3,10 +3,12 @@ package xitrum.util
 import java.io.{ByteArrayInputStream, ByteArrayOutputStream}
 import java.util.zip.{GZIPInputStream, GZIPOutputStream}
 
+import io.netty.buffer.Unpooled
 import io.netty.handler.codec.http.{HttpHeaders, HttpRequest, FullHttpResponse}
 import HttpHeaders.Names.{ACCEPT_ENCODING, CONTENT_ENCODING, CONTENT_TYPE}
 
 import xitrum.Config
+import xitrum.scope.request.ResetableFullHttpResponse
 
 object Gzip {
   // http://stackoverflow.com/questions/4818468/how-to-check-if-inputstream-is-gzipped
@@ -68,7 +70,7 @@ object Gzip {
    *
    * @return Response body content as bytes
    */
-  def tryCompressBigTextualResponse(request: HttpRequest, response: FullHttpResponse): Array[Byte] = {
+  def tryCompressBigTextualResponse(request: HttpRequest, response: ResetableFullHttpResponse): Array[Byte] = {
     val byteBuf = response.content
     val bytes   = ByteBufToBytes(byteBuf)
 
@@ -85,8 +87,7 @@ object Gzip {
     HttpHeaders.setContentLength(response, gzippedBytes.length)
     HttpHeaders.setHeader(response, CONTENT_ENCODING, "gzip")
 
-    response.content.clear()
-    response.content.writeBytes(gzippedBytes)
+    response.content(Unpooled.wrappedBuffer(gzippedBytes))
     gzippedBytes
   }
 }

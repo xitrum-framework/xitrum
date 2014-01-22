@@ -46,15 +46,16 @@ class Env2Response extends ChannelOutboundHandlerAdapter with Log {
         HttpHeaders.removeTransferEncodingChunked(onlyHeaders)
 
       ctx.write(onlyHeaders, promise)
-      response.release()
+      env.request.release()
+      env.response.release()
     } else {
       ctx.write(response, promise)
+      env.request.release()
     }
 
     if (env.bodyDecoder != null) {
       env.bodyDecoder.cleanFiles()
       env.bodyDecoder.destroy()
-      env.bodyDecoder = null
     }
 
     // See DefaultHttpChannelInitializer

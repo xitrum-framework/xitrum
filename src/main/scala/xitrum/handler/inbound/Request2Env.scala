@@ -4,10 +4,10 @@ import java.nio.charset.Charset
 import scala.collection.mutable.{Map => MMap}
 import scala.util.control.NonFatal
 
-import io.netty.channel.{SimpleChannelInboundHandler, ChannelHandlerContext}
+import io.netty.buffer.Unpooled
+import io.netty.channel.{SimpleChannelInboundHandler, ChannelFutureListener, ChannelHandlerContext}
 import io.netty.handler.codec.http.{
   HttpRequest, FullHttpRequest, DefaultFullHttpRequest,
-  FullHttpResponse, DefaultFullHttpResponse,
   HttpHeaders, HttpContent, HttpObject, LastHttpContent, HttpResponseStatus, HttpVersion
 }
 import io.netty.handler.codec.http.multipart.{
@@ -19,9 +19,9 @@ import InterfaceHttpData.HttpDataType
 
 import xitrum.{Config, Log}
 import xitrum.handler.HandlerEnv
-import xitrum.scope.request.{FileUploadParams, Params, PathInfo}
+import xitrum.scope.request.{FileUploadParams, Params, PathInfo, ResetableFullHttpResponse}
 
-object BodyParser {
+object Request2Env {
   DiskAttribute.deleteOnExitTemporaryFile  = true  // Should delete file on exit (in normal exit)
   DiskAttribute.baseDirectory              = Config.xitrum.request.tmpUploadDir
 
@@ -35,56 +35,60 @@ object BodyParser {
   val factory = new DefaultHttpDataFactory(Config.xitrum.request.maxSizeInBytesOfUploadMem)
 }
 
-// Based on the file upload example in Netty.
-class BodyParser extends SimpleChannelInboundHandler[HttpObject] with Log {
-  import BodyParser._
+/**
+ * This handler converts request with its content body (if any, e.g. in case of
+ * file upload) to HandlerEnv, and send it upstream to the next handler.
+ */
+class Request2Env extends SimpleChannelInboundHandler[HttpObject] with Log {
+  // Based on the file upload example in Netty.
 
-  private[this] var env: HandlerEnv = _
-  private[this] var bytesReceived   = 0L
+  import Request2Env._
+
+  private[this] var env: HandlerEnv   = null   // Will be reset to null after being sent upstream to the next handler
+  private[this] var bodyBytesReceived = 0L     // For checking if the body is too big, bigger than Config.xitrum.request.maxSizeInBytes
 
   override def channelInactive(ctx: ChannelHandlerContext) {
-    if (env != null && env.bodyDecoder != null) {
-      env.bodyDecoder.cleanFiles()
-      env.bodyDecoder.destroy()
-      env.bodyDecoder = null
-    }
+    // In case the connection is closed when the request is not fully received,
+    // thus env is initialized but not sent upstream to the next handler
+    release()
   }
 
   override def channelRead0(ctx: ChannelHandlerContext, msg: HttpObject) {
     if (msg.getDecoderResult.isFailure) {
-      ctx.close()
+      ctx.channel.close()
       return
     }
 
     try {
-      if (msg.isInstanceOf[HttpRequest])
-        handleHttpRequestNoncontent(ctx, msg.asInstanceOf[HttpRequest])
+      if (msg.isInstanceOf[HttpRequest]) {
+        handleHttpRequestHead(ctx, msg.asInstanceOf[HttpRequest])
+      } else {
+        if (msg.isInstanceOf[HttpContent])
+          handleHttpRequestContent(ctx, msg.asInstanceOf[HttpContent])
 
-      if (msg.isInstanceOf[HttpContent])
-        handleHttpRequestContent(ctx, msg.asInstanceOf[HttpContent])
-
-      if (msg.isInstanceOf[LastHttpContent]) {
-        ctx.fireChannelRead(env)
-        env           = null
-        bytesReceived = 0
+        // LastHttpContent is a HttpContent.
+        // env may be set to null at handleHttpRequestContent above, when
+        // closeOnBigRequest is called.
+        if (env != null && msg.isInstanceOf[LastHttpContent])
+          sendUpstream(ctx)
       }
     } catch {
       case NonFatal(e) =>
         val m = "Could not parse content body of request: " + msg
         log.warn(m, e)
-        ctx.close()
+        ctx.channel.close()
     }
   }
 
   //----------------------------------------------------------------------------
 
-  private def handleHttpRequestNoncontent(ctx: ChannelHandlerContext, request: HttpRequest) {
+  private def handleHttpRequestHead(ctx: ChannelHandlerContext, request: HttpRequest) {
     // See DefaultHttpChannelInitializer
     // This is the first Xitrum handler, log the request
     if (log.isTraceEnabled) log.trace(request.toString)
 
     // Clean previous files if any
-    if (env != null && env.bodyDecoder != null) env.bodyDecoder.cleanFiles()
+    release()
 
     env                = new HandlerEnv
     env.channel        = ctx.channel
@@ -93,17 +97,17 @@ class BodyParser extends SimpleChannelInboundHandler[HttpObject] with Log {
     env.request        = createEmptyFullHttpRequest(request)
     env.response       = createEmptyFullResponse()
 
-    bytesReceived = 0
+    bodyBytesReceived = 0
     try {
       // Otherwise env.bodyDecoder is null (see HandlerEnv's constructor)
       if (isAPPLICATION_X_WWW_FORM_URLENCODED_or_MULTIPART_FORM_DATA(request))
         env.bodyDecoder = new HttpPostRequestDecoder(factory, request)
     } catch {
       case e: HttpPostRequestDecoder.ErrorDataDecoderException =>
-        ctx.close()
+        ctx.channel.close()
 
       case e: HttpPostRequestDecoder.IncompatibleDataDecoderException =>
-        ctx.fireChannelRead(env)
+        sendUpstream(ctx)
     }
   }
 
@@ -112,9 +116,9 @@ class BodyParser extends SimpleChannelInboundHandler[HttpObject] with Log {
     if (env.bodyDecoder == null) {
       val body   = content.content
       val length = body.readableBytes
-      if (bytesReceived + length <= Config.xitrum.request.maxSizeInBytes) {
+      if (bodyBytesReceived + length <= Config.xitrum.request.maxSizeInBytes) {
         env.request.content.writeBytes(body)
-        bytesReceived += length
+        bodyBytesReceived += length
       } else {
         closeOnBigRequest(ctx)
       }
@@ -126,16 +130,30 @@ class BodyParser extends SimpleChannelInboundHandler[HttpObject] with Log {
 
   //----------------------------------------------------------------------------
 
+  private def release() {
+    if (env != null) {
+      if (env.bodyDecoder != null) {
+        env.bodyDecoder.cleanFiles()
+        env.bodyDecoder.destroy()
+      }
+
+      env.request.release()
+      env.response.release()
+
+      env = null
+    }
+  }
+
   private def createEmptyFullHttpRequest(request: HttpRequest): FullHttpRequest = {
     val ret = new DefaultFullHttpRequest(request.getProtocolVersion, request.getMethod, request.getUri)
     ret.headers.set(request.headers)
     ret
   }
 
-  private def createEmptyFullResponse(): FullHttpResponse = {
+  private def createEmptyFullResponse(): ResetableFullHttpResponse = {
     // http://en.wikipedia.org/wiki/HTTP_persistent_connection
     // In HTTP 1.1 all connections are considered persistent unless declared otherwise
-    val ret = new DefaultFullHttpResponse(HttpVersion.HTTP_1_1, HttpResponseStatus.OK)
+    val ret = new ResetableFullHttpResponse(HttpVersion.HTTP_1_1, HttpResponseStatus.OK)
     HttpHeaders.setContentLength(ret, 0)
     ret
   }
@@ -162,7 +180,6 @@ class BodyParser extends SimpleChannelInboundHandler[HttpObject] with Log {
       sizeOk
     } catch {
       case e: HttpPostRequestDecoder.EndOfDataDecoderException =>
-        // End
         true
     }
   }
@@ -195,7 +212,7 @@ class BodyParser extends SimpleChannelInboundHandler[HttpObject] with Log {
   /** @return true if OK */
   private def checkHttpDataSize(data: InterfaceHttpData): Boolean = {
     val hd = data.asInstanceOf[HttpData]
-    bytesReceived + hd.length <= Config.xitrum.request.maxSizeInBytes
+    bodyBytesReceived + hd.length <= Config.xitrum.request.maxSizeInBytes
   }
 
   private def putDataToEnv(data: InterfaceHttpData) {
@@ -205,7 +222,7 @@ class BodyParser extends SimpleChannelInboundHandler[HttpObject] with Log {
       val name      = attribute.getName
       val value     = attribute.getValue
       putOrAppendString(env.bodyTextParams, name, value)
-      bytesReceived += attribute.length
+      bodyBytesReceived += attribute.length
     } else if (dataType == HttpDataType.FileUpload) {
       val fileUpload = data.asInstanceOf[FileUpload]
       val length     = fileUpload.length
@@ -213,14 +230,32 @@ class BodyParser extends SimpleChannelInboundHandler[HttpObject] with Log {
         val name = fileUpload.getName
         sanitizeFileUploadFilename(fileUpload)
         putOrAppendFileUpload(env.bodyFileParams, name, fileUpload)
-        bytesReceived += length
+        bodyBytesReceived += length
       }
     }
   }
 
   private def closeOnBigRequest(ctx: ChannelHandlerContext) {
+    val response = env.response
+    val bytes    = "Request content body is too big".getBytes(Config.xitrum.request.charset)
+    response.content(Unpooled.wrappedBuffer(bytes))
+    response.setStatus(HttpResponseStatus.BAD_REQUEST)
+    HttpHeaders.setContentLength(response, bytes.length)
+    ctx.channel.writeAndFlush(env).addListener(ChannelFutureListener.CLOSE)
+
     val msg = "Request content body is too big, see xitrum.request.maxSizeInMB in xitrum.conf"
     log.warn(msg)
-    ctx.close()
+
+    // Mark that closeOnBigRequest has been called.
+    // See the check for LastHttpContent above.
+    env = null
+  }
+
+  private def sendUpstream(ctx: ChannelHandlerContext) {
+    ctx.fireChannelRead(env)
+
+    // Reset for the next request on this same connection (e.g. keep alive)
+    env               = null
+    bodyBytesReceived = 0
   }
 }

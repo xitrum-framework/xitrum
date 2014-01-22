@@ -7,11 +7,12 @@ import ChannelHandler.Sharable
 
 import xitrum.Config
 import xitrum.handler.HandlerEnv
+import xitrum.scope.request.ResetableFullHttpResponse
 import xitrum.util.UrlSafeBase64
 
 object BasicAuth {
   /** f takes username and password, and returns true if it want to let the user in. */
-  def basicAuth(channel: Channel, request: FullHttpRequest, response: FullHttpResponse, realm: String)(f: (String, String) => Boolean): Boolean = {
+  def basicAuth(channel: Channel, request: FullHttpRequest, response: ResetableFullHttpResponse, realm: String)(f: (String, String) => Boolean): Boolean = {
     getUsernameAndPassword(request) match {
       case None =>
         respondBasic(channel, request, response, realm)
@@ -44,14 +45,15 @@ object BasicAuth {
     }
   }
 
-  private def respondBasic(channel: Channel, request: FullHttpRequest, response: FullHttpResponse, realm: String) {
+  private def respondBasic(channel: Channel, request: FullHttpRequest, response: ResetableFullHttpResponse, realm: String) {
     HttpHeaders.setHeader(response, HttpHeaders.Names.WWW_AUTHENTICATE, "Basic realm=\"" + realm + "\"")
     response.setStatus(HttpResponseStatus.UNAUTHORIZED)
 
-    val cb = "Wrong username or password".getBytes(Config.xitrum.request.charset)
+    val bytes = "Wrong username or password".getBytes(Config.xitrum.request.charset)
+    val cb    = Unpooled.wrappedBuffer(bytes)
     HttpHeaders.setHeader(response, HttpHeaders.Names.CONTENT_TYPE, "text/plain; charset=" + Config.xitrum.request.charset)
-    HttpHeaders.setContentLength(response, cb.length)
-    response.content.writeBytes(cb)
+    HttpHeaders.setContentLength(response, bytes.length)
+    response.content(cb)
 
     NoPipelining.setResponseHeaderForKeepAliveRequest(request, response)
     val future = channel.writeAndFlush(response)

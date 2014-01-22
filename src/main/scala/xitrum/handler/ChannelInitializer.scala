@@ -21,7 +21,7 @@ import xitrum.handler.outbound._
  *
  * Inbound:
  *   HttpRequestDecoder
- *   BodyParser
+ *   Request2Env
  *   NoPipelining
  *   PublicFileServer
  *   Its own dispatcher
@@ -62,7 +62,7 @@ object DefaultHttpChannelInitializer {
 
     // Inbound
 
-    removeHandlerIfExists(pipeline, classOf[BodyParser])
+    removeHandlerIfExists(pipeline, classOf[Request2Env])
     removeHandlerIfExists(pipeline, classOf[NoPipelining])
     removeHandlerIfExists(pipeline, classOf[BaseUrlRemover])
     if (Config.xitrum.basicAuth.isDefined)
@@ -117,7 +117,7 @@ class DefaultHttpChannelInitializer extends ChannelInitializer[SocketChannel] {
     if (portConfig.flashSocketPolicy.isDefined && portConfig.flashSocketPolicy == portConfig.http)
     p.addLast("FlashSocketPolicyHandler", new FlashSocketPolicyHandler)
     p.addLast("HttpRequestDecoder",       new HttpRequestDecoder(Config.xitrum.request.maxInitialLineLength, 8192, 8192))
-    p.addLast("BodyParser",               new BodyParser)      // Request is converted to HandlerEnv here
+    p.addLast("Request2Env",              new Request2Env)
     p.addLast("NoPipelining",             noPipelining)
     p.addLast("BaseUrlRemover",           baseUrlRemover)
     if (Config.xitrum.basicAuth.isDefined)

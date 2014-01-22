@@ -12,7 +12,7 @@ import HttpHeaders.Names.{CONTENT_ENCODING, CONTENT_TYPE}
 
 import xitrum.{Cache, Config, Log}
 import xitrum.Action
-import xitrum.scope.request.Params
+import xitrum.scope.request.{Params, ResetableFullHttpResponse}
 import xitrum.handler.HandlerEnv
 import xitrum.util.{Gzip, Mime}
 
@@ -70,7 +70,7 @@ object ResponseCacher extends Log {
    *   content: Array[Byte]
    *   gzipped: Boolean, big textual content is gzipped to save memory
    */
-  private def serializeResponse(request: HttpRequest, response: FullHttpResponse): CachedResponse = {
+  private def serializeResponse(request: HttpRequest, response: ResetableFullHttpResponse): CachedResponse = {
     val status = response.getStatus.code
 
     // Should be before extracting headers, because the CONTENT_LENGTH header
@@ -93,9 +93,8 @@ object ResponseCacher extends Log {
 
   private def deserializeToResponse(cachedResponse: CachedResponse): FullHttpResponse = {
     val (status, headers, bytes) = cachedResponse
-    val response = new DefaultFullHttpResponse(HttpVersion.HTTP_1_1, HttpResponseStatus.valueOf(status))
+    val response = new DefaultFullHttpResponse(HttpVersion.HTTP_1_1, HttpResponseStatus.valueOf(status), Unpooled.wrappedBuffer(bytes))
     for ((k, v) <- headers) HttpHeaders.addHeader(response, k, v)
-    response.content.writeBytes(Unpooled.wrappedBuffer(bytes))
     response
   }
 

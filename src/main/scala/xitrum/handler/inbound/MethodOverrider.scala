@@ -12,10 +12,8 @@ import xitrum.handler.HandlerEnv
 import xitrum.routing.HttpMethodWebSocket
 
 /**
- * If the real request method is POST and "_method" param exists (taken out by BodyParser),
- * the "_method" param will override the POST method.
- *
- * This middleware should be put behind BodyParser.
+ * If the real request method is POST and "_method" param exists, the "_method"
+ * param will override the POST method.
  */
 @Sharable
 class MethodOverrider extends SimpleChannelInboundHandler[HandlerEnv] {

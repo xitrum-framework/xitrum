@@ -2,6 +2,8 @@ package xitrum.handler.outbound
 
 import java.io.{File, RandomAccessFile}
 import scala.util.control.NonFatal
+
+import io.netty.buffer.Unpooled
 import io.netty.channel.{ChannelOutboundHandlerAdapter, ChannelHandler, ChannelHandlerContext, ChannelFuture, ChannelPromise, DefaultFileRegion, ChannelFutureListener}
 import io.netty.handler.codec.http.{HttpHeaders, HttpMethod, FullHttpRequest, FullHttpResponse, HttpResponseStatus, HttpVersion}
 import io.netty.handler.ssl.SslHandler
@@ -12,12 +14,13 @@ import HttpHeaders.Values._
 import HttpMethod._
 import HttpResponseStatus._
 import HttpVersion._
+
 import xitrum.{Config, Log}
 import xitrum.etag.{Etag, NotModified}
 import xitrum.handler.{AccessLog, HandlerEnv}
 import xitrum.handler.inbound.NoPipelining
+import xitrum.scope.request.ResetableFullHttpResponse
 import xitrum.util.{Gzip, Mime}
-import io.netty.buffer.Unpooled
 
 object XSendFile extends Log {
   // setClientCacheAggressively should be called at PublicFileServer, not
@@ -57,7 +60,7 @@ object XSendFile extends Log {
   /** @param path see Renderer#renderFile */
   def sendFile(
       ctx: ChannelHandlerContext, msg: Any, promise: ChannelPromise,
-      request: FullHttpRequest, response: FullHttpResponse, path: String, noLog: Boolean)
+      request: FullHttpRequest, response: ResetableFullHttpResponse, path: String, noLog: Boolean)
   {
     val channel       = ctx.channel
     val remoteAddress = channel.remoteAddress
@@ -92,8 +95,7 @@ object XSendFile extends Log {
             // http://stackoverflow.com/questions/3854842/content-length-header-with-head-requests
             response.content.clear()
           } else {
-            response.content.clear()
-            response.content.writeBytes(Unpooled.wrappedBuffer(bytes))
+            response.content(Unpooled.wrappedBuffer(bytes))
           }
         }
         NoPipelining.setResponseHeaderAndResumeReadingForKeepAliveRequestOrCloseOnComplete(request, response, channel, promise)

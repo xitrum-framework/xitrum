@@ -1,6 +1,8 @@
 package xitrum.handler.outbound
 
 import java.io.{File, RandomAccessFile}
+
+import io.netty.buffer.Unpooled
 import io.netty.channel.{ChannelHandler, ChannelHandlerContext, ChannelFuture, DefaultFileRegion, ChannelFutureListener, ChannelOutboundHandlerAdapter, ChannelPromise}
 import io.netty.handler.codec.http.{HttpHeaders, HttpMethod, HttpRequest, FullHttpResponse, HttpResponseStatus, HttpVersion}
 import ChannelHandler.Sharable
@@ -9,12 +11,14 @@ import HttpHeaders.Values._
 import HttpMethod._
 import HttpResponseStatus._
 import HttpVersion._
+
 import xitrum.{Config, Log}
 import xitrum.etag.{Etag, NotModified}
 import xitrum.handler.{AccessLog, HandlerEnv}
 import xitrum.handler.inbound.NoPipelining
+import xitrum.scope.request.ResetableFullHttpResponse
 import xitrum.util.{Gzip, Mime}
-import io.netty.buffer.Unpooled
+
 
 object XSendResource extends Log {
   // setClientCacheAggressively should be called at PublicResourceServer, not
@@ -35,7 +39,7 @@ object XSendResource extends Log {
   def isHeaderSet(response: FullHttpResponse) = response.headers.contains(X_SENDRESOURCE_HEADER)
 
   /** @return false if not found */
-  def sendResource(ctx: ChannelHandlerContext, msg: Object, promise: ChannelPromise, request: HttpRequest, response: FullHttpResponse, path: String, noLog: Boolean) {
+  def sendResource(ctx: ChannelHandlerContext, msg: Object, promise: ChannelPromise, request: HttpRequest, response: ResetableFullHttpResponse, path: String, noLog: Boolean) {
     Etag.forResource(path, Gzip.isAccepted(request)) match {
       case Etag.NotFound =>
         // Keep alive is handled by XSendFile
@@ -56,8 +60,7 @@ object XSendResource extends Log {
             // http://stackoverflow.com/questions/3854842/content-length-header-with-head-requests
             response.content.clear()
           } else {
-            response.content.clear()
-            response.content.writeBytes(Unpooled.wrappedBuffer(bytes))
+            response.content(Unpooled.wrappedBuffer(bytes))
           }
         }
 
