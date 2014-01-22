@@ -29,6 +29,6 @@ class FixiOS6SafariPOST extends ChannelOutboundHandlerAdapter with Log {
     if (request.getMethod == HttpMethod.POST && !response.headers.contains(HttpHeaders.Names.CACHE_CONTROL))
       NotModified.setNoClientCache(response)
 
-    ctx.write(msg, promise)
+    ctx.write(env, promise)
   }
 }

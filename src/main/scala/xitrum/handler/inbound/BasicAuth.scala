@@ -12,17 +12,17 @@ import xitrum.util.UrlSafeBase64
 
 object BasicAuth {
   /** f takes username and password, and returns true if it want to let the user in. */
-  def basicAuth(channel: Channel, request: FullHttpRequest, response: ResetableFullHttpResponse, realm: String)(f: (String, String) => Boolean): Boolean = {
-    getUsernameAndPassword(request) match {
+  def basicAuth(env: HandlerEnv, realm: String)(f: (String, String) => Boolean): Boolean = {
+    getUsernameAndPassword(env.request) match {
       case None =>
-        respondBasic(channel, request, response, realm)
+        respondBasic(env, realm)
         false
 
       case Some((username, password)) =>
         if (f(username, password)) {
           true
         } else {
-          respondBasic(channel, request, response, realm)
+          respondBasic(env, realm)
           false
         }
     }
@@ -45,7 +45,10 @@ object BasicAuth {
     }
   }
 
-  private def respondBasic(channel: Channel, request: FullHttpRequest, response: ResetableFullHttpResponse, realm: String) {
+  private def respondBasic(env: HandlerEnv, realm: String) {
+    val request  = env.request
+    val response = env.response
+
     HttpHeaders.setHeader(response, HttpHeaders.Names.WWW_AUTHENTICATE, "Basic realm=\"" + realm + "\"")
     response.setStatus(HttpResponseStatus.UNAUTHORIZED)
 
@@ -53,8 +56,8 @@ object BasicAuth {
     response.content(Unpooled.copiedBuffer("Wrong username or password", Config.xitrum.request.charset))
 
     NoPipelining.setResponseHeaderForKeepAliveRequest(request, response)
-    val future = channel.writeAndFlush(response)
-    NoPipelining.if_keepAliveRequest_then_resumeReading_else_closeOnComplete(request, channel, future)
+    val future = env.channel.writeAndFlush(env)
+    NoPipelining.if_keepAliveRequest_then_resumeReading_else_closeOnComplete(request, env.channel, future)
   }
 }
 
@@ -68,7 +71,7 @@ class BasicAuth extends SimpleChannelInboundHandler[HandlerEnv] {
     }
 
     val g      = go.get
-    val passed = BasicAuth.basicAuth(env.channel, env.request, env.response, g.realm) { (username, password) =>
+    val passed = BasicAuth.basicAuth(env, g.realm) { (username, password) =>
       g.username == username && g.password == password
     }
     if (passed) ctx.fireChannelRead(env)

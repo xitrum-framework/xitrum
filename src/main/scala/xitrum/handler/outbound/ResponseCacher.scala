@@ -126,10 +126,10 @@ class ResponseCacher extends ChannelOutboundHandlerAdapter with Log {
     val env   = msg.asInstanceOf[HandlerEnv]
     val route = env.route
 
-    // action may be null when the request could not go to Dispatcher, for
+    // route may be null when the request could not go to Dispatcher, for
     // example when the response is served from PublicResourceServer
     if (route == null) {
-      ctx.write(msg, promise)
+      ctx.write(env, promise)
       return
     }
 
@@ -137,6 +137,6 @@ class ResponseCacher extends ChannelOutboundHandlerAdapter with Log {
     if (response.getStatus == OK && !HttpHeaders.isTransferEncodingChunked(response) && env.route.cacheSecs != 0)
       ResponseCacher.cacheResponse(env)
 
-    ctx.write(msg, promise)
+    ctx.write(env, promise)
   }
 }

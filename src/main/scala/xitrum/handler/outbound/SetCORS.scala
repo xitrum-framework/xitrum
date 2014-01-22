@@ -61,6 +61,6 @@ class SetCORS extends ChannelOutboundHandlerAdapter {
     if (accessControlRequestHeaders != null && !response.headers.contains(ACCESS_CONTROL_ALLOW_HEADERS))
       HttpHeaders.setHeader(response, ACCESS_CONTROL_ALLOW_HEADERS, accessControlRequestHeaders)
 
-    ctx.write(msg, promise)
+    ctx.write(env, promise)
   }
 }

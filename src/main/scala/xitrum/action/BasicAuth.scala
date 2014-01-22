@@ -10,5 +10,5 @@ trait BasicAuth {
    * to let the user in.
    */
   def basicAuth(realm: String)(authenticator: (String, String) => Boolean): Boolean =
-    xitrum.handler.inbound.BasicAuth.basicAuth(channel, request, response, realm)(authenticator)
+    xitrum.handler.inbound.BasicAuth.basicAuth(handlerEnv, realm)(authenticator)
 }

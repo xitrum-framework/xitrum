@@ -150,7 +150,8 @@ trait Action extends RequestEnv
         false
 
       case Some(response) =>
-        val future = channel.write(response)
+        val future = channel.writeAndFlush(response)
+        handlerEnv.release()
         NoPipelining.if_keepAliveRequest_then_resumeReading_else_closeOnComplete(request, channel, future)
         true
     }

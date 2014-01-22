@@ -143,7 +143,7 @@ object XSendFile extends Log {
 
             if (ctx.pipeline.get(classOf[SslHandler]) != null) {
               // Cannot use zero-copy with HTTPS
-              val future = ctx.channel.writeAndFlush(new ChunkedFile(raf, offset, length, CHUNK_SIZE), promise)
+              val future = ctx.writeAndFlush(new ChunkedFile(raf, offset, length, CHUNK_SIZE), promise)
               future.addListener(new ChannelFutureListener {
                 def operationComplete(f: ChannelFuture) { raf.close() }
               })
@@ -152,7 +152,7 @@ object XSendFile extends Log {
             } else {
               // No encryption - use zero-copy
               val region = new DefaultFileRegion(raf.getChannel, offset, length)
-              val future = ctx.channel.writeAndFlush(region, promise)
+              val future = ctx.writeAndFlush(region, promise)
               future.addListener(new ChannelFutureListener {
                 def operationComplete(f: ChannelFuture) {
                   region.release()

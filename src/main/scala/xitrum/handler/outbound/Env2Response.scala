@@ -51,17 +51,12 @@ class Env2Response extends ChannelOutboundHandlerAdapter with Log {
         HttpHeaders.removeTransferEncodingChunked(onlyHeaders)
 
       ctx.write(onlyHeaders, promise)
-      env.request.release()
-      env.response.release()
     } else {
-      ctx.write(response, promise)
-      env.request.release()
+      // Need to retain because response will be released when env.release() is called below
+      ctx.write(response.retain(), promise)
     }
 
-    if (env.bodyDecoder != null) {
-      env.bodyDecoder.cleanFiles()
-      env.bodyDecoder.destroy()
-    }
+    env.release()
 
     // See DefaultHttpChannelInitializer
     // This is the last Xitrum handler, log the response
