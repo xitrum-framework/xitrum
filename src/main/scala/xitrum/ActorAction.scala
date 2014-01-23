@@ -10,6 +10,8 @@ import xitrum.handler.HandlerEnv
  *
  * For chunked response, it is not stopped right away. It is stopped when the
  * last chunk is sent.
+ *
+ * See also Action and FutureAction.
  */
 trait ActorAction extends Actor with Action {
   def receive = {

@@ -1,5 +1,7 @@
 package xitrum
 
+import java.util.concurrent.TimeUnit
+import scala.concurrent.duration.Duration
 import scala.util.control.NonFatal
 import akka.actor.Actor
 
@@ -15,10 +17,16 @@ import xitrum.scope.request.RequestEnv
 import xitrum.scope.session.{Csrf, SessionEnv}
 import xitrum.view.{Renderer, Responder}
 
+object Action {
+  val TIMEOUT = Duration(5, TimeUnit.SECONDS)
+}
+
 /**
- * Action is designed to be separated from ActorAction. ActorAction extends
- * Action. An ActorAction can pass its Action things outside without violating
- * the principle of Actor: Do not leak Actor internals to outside.
+ * When there's a request comes in, action extending Action will be run directly
+ * on the current Netty IO thread. This gives maximum speed when the action is
+ * simple and nonblocking.
+ *
+ * See also FutureAction and ActorAction.
  */
 trait Action extends RequestEnv
   with SessionEnv
@@ -33,6 +41,12 @@ trait Action extends RequestEnv
   with I18n
 {
   implicit val currentAction = Action.this
+
+  implicit val executionContext = Config.actorSystem.dispatcher
+
+  implicit val timeout = Action.TIMEOUT
+
+  //----------------------------------------------------------------------------
 
   /**
    * Called when the HTTP request comes in.

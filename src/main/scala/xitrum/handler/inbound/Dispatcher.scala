@@ -11,7 +11,7 @@ import HttpVersion._
 import akka.actor.{Actor, Props}
 import com.esotericsoftware.reflectasm.ConstructorAccess
 
-import xitrum.{Action, ActorAction, Config}
+import xitrum.{Action, ActorAction, FutureAction, Config}
 import xitrum.etag.NotModified
 import xitrum.handler.{AccessLog, HandlerEnv}
 import xitrum.handler.outbound.XSendFile
@@ -19,13 +19,14 @@ import xitrum.scope.request.PathInfo
 import xitrum.sockjs.SockJsPrefix
 
 object Dispatcher {
-  private val classOfActor = classOf[Actor]
+  private val KLASS_OF_ACTOR_ACTION  = classOf[ActorAction]
+  private val KLASS_OF_FUTURE_ACTION = classOf[FutureAction]
 
   def dispatch(klass: Class[_], handlerEnv: HandlerEnv) {
     // This method should be fast because it is run for every request
     // => Use ReflectASM instead of normal reflection to create action instance
 
-    if (classOfActor.isAssignableFrom(klass)) {
+    if (KLASS_OF_ACTOR_ACTION.isAssignableFrom(klass)) {
       val actorRef = Config.actorSystem.actorOf(Props {
         val actor = ConstructorAccess.get(klass).newInstance()
         setPathPrefixForSockJs(actor, handlerEnv)
@@ -36,7 +37,13 @@ object Dispatcher {
       val action = ConstructorAccess.get(klass).newInstance().asInstanceOf[Action]
       setPathPrefixForSockJs(action, handlerEnv)
       action.apply(handlerEnv)
-      action.dispatchWithFailsafe()
+      if (KLASS_OF_FUTURE_ACTION.isAssignableFrom(klass)) {
+        Config.actorSystem.dispatcher.execute(new Runnable {
+          def run() { action.dispatchWithFailsafe() }
+        })
+      } else {
+        action.dispatchWithFailsafe()
+      }
     }
   }
 
