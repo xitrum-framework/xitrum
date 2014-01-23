@@ -13,13 +13,13 @@ object NotModified {
 
   // SimpleDateFormat is locale dependent
   // Avoid the case when Xitrum is run on for example Japanese platform
-  private[this] val rfc2822 = {
+  private[this] val RFC_2822 = {
     val ret = new SimpleDateFormat("EEE, dd MMM yyyy HH:mm:ss zzz", Locale.US)
     ret.setTimeZone(TimeZone.getTimeZone("GMT"))
     ret
   }
 
-  def formatRfc2822(timestamp: Long) = rfc2822.format(timestamp)
+  def formatRfc2822(timestamp: Long) = RFC_2822.format(timestamp)
 
   /**
    * Tells the browser to cache static files for a long time.

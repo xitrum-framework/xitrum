@@ -44,14 +44,14 @@ object SockJsAction {
   //----------------------------------------------------------------------------
 
   /** 2KB of 'h' characters */
-  val h2KB = {
+  val H2KB = {
     val ret = new Array[Byte](2048 + 1)
     for (i <- 0 to 2047) ret(i) = 'h'
     ret(2048) = '\n'
     ret
   }
 
-  private[this] val htmlTemplateBefore = """<!doctype html>
+  private[this] val HTML_TEMPLATE_BEFORE = """<!doctype html>
 <html><head>
   <meta http-equiv="X-UA-Compatible" content="IE=edge" />
   <meta http-equiv="Content-Type" content="text/html; charset=UTF-8" />
@@ -60,7 +60,7 @@ object SockJsAction {
     document.domain = document.domain;
     var c = parent."""
 
-  private[this] val htmlTemplateAfter = """;
+  private[this] val HTML_TEMPLATE_AFTER = """;
     c.start();
     function p(d) {c.message(d);};
     window.onload = function() {c.stop();};
@@ -74,14 +74,14 @@ object SockJsAction {
   // https://github.com/sockjs/sockjs-node/blob/master/src/trans-htmlfile.coffee#L29
   // http://stackoverflow.com/questions/2804827/create-a-string-with-n-characters
   private[this] val s1KB = {
-    val spaces = new Array[Char](1024 - htmlTemplateBefore.length + htmlTemplateAfter.length)
+    val spaces = new Array[Char](1024 - HTML_TEMPLATE_BEFORE.length + HTML_TEMPLATE_AFTER.length)
     Arrays.fill(spaces, ' ')
     new String(spaces) + "\r\n\r\n"
   }
 
   /** Template for htmlfile transport */
   def htmlFile(callback: String, with1024Spaces: Boolean): String = {
-    val template = htmlTemplateBefore + callback + htmlTemplateAfter
+    val template = HTML_TEMPLATE_BEFORE + callback + HTML_TEMPLATE_AFTER
     if (with1024Spaces) template + s1KB else template
   }
 
@@ -448,7 +448,7 @@ class XhrStreamingReceive extends NonWebSocketSessionReceiverActorAction with Sk
     // There's always 2KB prelude, even for immediate close frame
     HttpHeaders.setTransferEncodingChunked(response)
     HttpHeaders.setHeader(response, HttpHeaders.Names.CONTENT_TYPE, "application/javascript; charset=" + Config.xitrum.request.charset)
-    respondBinary(Unpooled.wrappedBuffer(SockJsAction.h2KB))
+    respondBinary(Unpooled.wrappedBuffer(SockJsAction.H2KB))
 
     lookupOrCreateNonWebSocketSessionActor(sessionId)
   }

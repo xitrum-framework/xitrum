@@ -129,8 +129,8 @@ class RouteCollector extends Log {
   {
     annotations.error.foreach { case a =>
       val tpe = a.tpe
-      if (tpe == typeOfError404) routes.error404 = Some(className)
-      if (tpe == typeOfError500) routes.error500 = Some(className)
+      if (tpe == TYPE_OF_ERROR_404) routes.error404 = Some(className)
+      if (tpe == TYPE_OF_ERROR_500) routes.error500 = Some(className)
     }
   }
 
@@ -142,7 +142,7 @@ class RouteCollector extends Log {
   {
     var pathPrefix: String = null
     annotations.routes.foreach { case a =>
-      if (a.tpe == typeOfSOCKJS)
+      if (a.tpe == TYPE_OF_SOCKJS)
         pathPrefix = a.scalaArgs(0).productElement(0).asInstanceOf[universe.Constant].value.toString
     }
 
@@ -163,9 +163,9 @@ class RouteCollector extends Log {
 
       case Some(annotation) =>
         val tpe = annotation.tpe
-        if (tpe == typeOfFirst)
+        if (tpe == TYPE_OF_FIRST)
           -1
-        else if (tpe == typeOfLast)
+        else if (tpe == TYPE_OF_LAST)
           1
         else
           0
@@ -180,21 +180,21 @@ class RouteCollector extends Log {
       case Some(annotation) =>
         val tpe = annotation.tpe
 
-        if (tpe == typeOfCacheActionDay)
+        if (tpe == TYPE_OF_CACHE_ACTION_DAY)
           -annotation.scalaArgs(0).toString.toInt * 24 * 60 * 60
-        else if (tpe == typeOfCacheActionHour)
+        else if (tpe == TYPE_OF_CACHE_ACTION_HOUR)
           -annotation.scalaArgs(0).toString.toInt      * 60 * 60
-        else if (tpe == typeOfCacheActionMinute)
+        else if (tpe == TYPE_OF_CACHE_ACTION_MINUTE)
           -annotation.scalaArgs(0).toString.toInt           * 60
-        else if (tpe == typeOfCacheActionSecond)
+        else if (tpe == TYPE_OF_CACHE_ACTION_SECOND)
           -annotation.scalaArgs(0).toString.toInt
-        else if (tpe == typeOfCachePageDay)
+        else if (tpe == TYPE_OF_CACHE_PAGE_DAY)
           annotation.scalaArgs(0).toString.toInt * 24 * 60 * 60
-        else if (tpe == typeOfCachePageHour)
+        else if (tpe == TYPE_OF_CACHE_PAGE_HOUR)
           annotation.scalaArgs(0).toString.toInt      * 60 * 60
-        else if (tpe == typeOfCachePageMinute)
+        else if (tpe == TYPE_OF_CACHE_PAGE_MINUTE)
           annotation.scalaArgs(0).toString.toInt           * 60
-        else if (tpe == typeOfCachePageSecond)
+        else if (tpe == TYPE_OF_CACHE_PAGE_SECOND)
           annotation.scalaArgs(0).toString.toInt
         else
           0
@@ -205,17 +205,17 @@ class RouteCollector extends Log {
   private def listMethodAndPattern(annotation: universe.Annotation): Seq[(String, String)] = {
     val tpe = annotation.tpe
 
-    if (tpe == typeOfGET)
+    if (tpe == TYPE_OF_GET)
       getStrings(annotation).map(("GET", _))
-    else if (tpe == typeOfPOST)
+    else if (tpe == TYPE_OF_POST)
       getStrings(annotation).map(("POST", _))
-    else if (tpe == typeOfPUT)
+    else if (tpe == TYPE_OF_PUT)
       getStrings(annotation).map(("PUT", _))
-    else if (tpe == typeOfPATCH)
+    else if (tpe == TYPE_OF_PATCH)
       getStrings(annotation).map(("PATCH", _))
-    else if (tpe == typeOfDELETE)
+    else if (tpe == TYPE_OF_DELETE)
       getStrings(annotation).map(("DELETE", _))
-    else if (tpe == typeOfWEBSOCKET)
+    else if (tpe == TYPE_OF_WEBSOCKET)
       getStrings(annotation).map(("WEBSOCKET", _))
     else
       Seq()

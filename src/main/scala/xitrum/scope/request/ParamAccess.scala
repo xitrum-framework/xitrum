@@ -13,12 +13,12 @@ import xitrum.exception.MissingParam
  * http://groups.google.com/group/akka-user/browse_thread/thread/ee07764dfc1ac794
  */
 object ParamAccess {
-  val manifestFileUpload = manifest[FileUpload]
-  val manifestString     = manifest[String]
-  val manifestInt        = manifest[Int]
-  val manifestLong       = manifest[Long]
-  val manifestFloat      = manifest[Float]
-  val manifestDouble     = manifest[Double]
+  val MANIFEST_FILE_UPLOAD = manifest[FileUpload]
+  val MANIFEST_STRING      = manifest[String]
+  val MANIFEST_INT         = manifest[Int]
+  val MANIFEST_LONG        = manifest[Long]
+  val MANIFEST_FLOAT       = manifest[Float]
+  val MANIFEST_DOUBLE      = manifest[Double]
 }
 
 trait ParamAccess {
@@ -43,7 +43,7 @@ trait ParamAccess {
   //----------------------------------------------------------------------------
 
   def param[T](key: String, coll: Params = null)(implicit e: T DefaultsTo String, m: Manifest[T]): T = {
-    if (m <:< manifestFileUpload) {
+    if (m <:< MANIFEST_FILE_UPLOAD) {
       bodyFileParams.get(key) match {
         case None         => throw new MissingParam(key)
         case Some(values) => values(0).asInstanceOf[T]
@@ -56,7 +56,7 @@ trait ParamAccess {
   }
 
   def paramo[T](key: String, coll: Params = null)(implicit e: T DefaultsTo String, m: Manifest[T]): Option[T] = {
-    if (m <:< manifestFileUpload) {
+    if (m <:< MANIFEST_FILE_UPLOAD) {
       bodyFileParams.get(key).map { values => values(0).asInstanceOf[T] }
     } else {
       val coll2  = if (coll == null) textParams else coll
@@ -67,7 +67,7 @@ trait ParamAccess {
   }
 
   def params[T](key: String, coll: Params = null)(implicit e: T DefaultsTo String, m: Manifest[T]): Seq[T] = {
-    if (m <:< manifestFileUpload) {
+    if (m <:< MANIFEST_FILE_UPLOAD) {
       bodyFileParams.get(key) match {
         case None         => throw new MissingParam(key)
         case Some(values) => values.asInstanceOf[Seq[T]]
@@ -80,7 +80,7 @@ trait ParamAccess {
   }
 
   def paramso[T](key: String, coll: Params = null)(implicit e: T DefaultsTo String, m: Manifest[T]): Option[Seq[T]] = {
-    if (m <:< manifestFileUpload) {
+    if (m <:< MANIFEST_FILE_UPLOAD) {
       bodyFileParams.get(key).asInstanceOf[Option[Seq[T]]]
     } else {
       val coll2 = if (coll == null) textParams else coll
@@ -93,11 +93,11 @@ trait ParamAccess {
   /** Applications may override this method to convert to more types. */
   def convertText[T](value: String)(implicit m: Manifest[T]): T = {
     val any: Any =
-           if (m <:< manifestString) value
-      else if (m <:< manifestInt)    value.toInt
-      else if (m <:< manifestLong)   value.toLong
-      else if (m <:< manifestFloat)  value.toFloat
-      else if (m <:< manifestDouble) value.toDouble
+           if (m <:< MANIFEST_STRING) value
+      else if (m <:< MANIFEST_INT)    value.toInt
+      else if (m <:< MANIFEST_LONG)   value.toLong
+      else if (m <:< MANIFEST_FLOAT)  value.toFloat
+      else if (m <:< MANIFEST_DOUBLE) value.toDouble
       else throw new Exception("Cannot covert " + value + " to " + m)
 
     any.asInstanceOf[T]

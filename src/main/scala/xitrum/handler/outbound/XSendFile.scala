@@ -35,8 +35,8 @@ object XSendFile extends Log {
   // GET /echo/ -> xitrum.sockjs.SockJsController#iframe, pathParams: {iframe: } -> 404, 1 [ms]
   val X_SENDFILE_HEADER_IS_FROM_ACTION = "X-Sendfile-Is-From-Action"
 
-  private[this] val abs404 = Config.root + "/public/404.html"
-  private[this] val abs500 = Config.root + "/public/500.html"
+  private[this] val ABS_404 = Config.root + "/public/404.html"
+  private[this] val ABS_500 = Config.root + "/public/500.html"
 
   /** @param path see Renderer#renderFile */
   def setHeader(response: FullHttpResponse, path: String, fromAction: Boolean) {
@@ -48,12 +48,12 @@ object XSendFile extends Log {
 
   def set404Page(response: FullHttpResponse, fromController: Boolean) {
     response.setStatus(NOT_FOUND)
-    setHeader(response, abs404, fromController)
+    setHeader(response, ABS_404, fromController)
   }
 
   def set500Page(response: FullHttpResponse, fromController: Boolean) {
     response.setStatus(INTERNAL_SERVER_ERROR)
-    setHeader(response, abs500, fromController)
+    setHeader(response, ABS_500, fromController)
   }
 
   /** @param path see Renderer#renderFile */
@@ -70,12 +70,12 @@ object XSendFile extends Log {
         response.setStatus(NOT_FOUND)
         NotModified.setNoClientCache(response)
 
-        if (path.startsWith(abs404)) {  // Even 404.html is not found!
+        if (path.startsWith(ABS_404)) {  // Even 404.html is not found!
           val future = ctx.write(env, promise)
           NoPipelining.if_keepAliveRequest_then_resumeReading_else_closeOnComplete(request, channel, future)
           if (!noLog) AccessLog.logStaticFileAccess(remoteAddress, request, response)
         } else {
-          sendFile(ctx, env, promise, request, response, abs404, noLog)  // Recursive
+          sendFile(ctx, env, promise, request, response, ABS_404, noLog)  // Recursive
         }
 
       case Etag.Small(bytes, etag, mimeo, gzipped) =>
