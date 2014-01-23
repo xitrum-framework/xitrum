@@ -16,7 +16,7 @@ import xitrum.{Config, Log}
 import xitrum.etag.{Etag, NotModified}
 import xitrum.handler.{AccessLog, HandlerEnv}
 import xitrum.handler.inbound.NoPipelining
-import xitrum.scope.request.ResetableFullHttpResponse
+import xitrum.scope.request.ReplaceableFullHttpResponse
 import xitrum.util.{Gzip, Mime}
 
 
@@ -41,7 +41,7 @@ object XSendResource extends Log {
   /** @return false if not found */
   def sendResource(
       ctx: ChannelHandlerContext, env: HandlerEnv, promise: ChannelPromise,
-      request: HttpRequest, response: ResetableFullHttpResponse, path: String, noLog: Boolean)
+      request: HttpRequest, response: ReplaceableFullHttpResponse, path: String, noLog: Boolean)
   {
     Etag.forResource(path, Gzip.isAccepted(request)) match {
       case Etag.NotFound =>

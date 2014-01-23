@@ -8,7 +8,7 @@ import io.netty.handler.codec.http.{HttpHeaders, HttpRequest, FullHttpResponse}
 import HttpHeaders.Names.{ACCEPT_ENCODING, CONTENT_ENCODING, CONTENT_TYPE}
 
 import xitrum.Config
-import xitrum.scope.request.ResetableFullHttpResponse
+import xitrum.scope.request.ReplaceableFullHttpResponse
 
 object Gzip {
   // http://stackoverflow.com/questions/4818468/how-to-check-if-inputstream-is-gzipped
@@ -70,7 +70,7 @@ object Gzip {
    *
    * @return Response body content as bytes
    */
-  def tryCompressBigTextualResponse(request: HttpRequest, response: ResetableFullHttpResponse): Array[Byte] = {
+  def tryCompressBigTextualResponse(request: HttpRequest, response: ReplaceableFullHttpResponse): Array[Byte] = {
     val byteBuf = response.content
     val bytes   = ByteBufToBytes(byteBuf)
 

@@ -19,7 +19,7 @@ import xitrum.{Config, Log}
 import xitrum.etag.{Etag, NotModified}
 import xitrum.handler.{AccessLog, HandlerEnv}
 import xitrum.handler.inbound.NoPipelining
-import xitrum.scope.request.ResetableFullHttpResponse
+import xitrum.scope.request.ReplaceableFullHttpResponse
 import xitrum.util.{Gzip, Mime}
 
 object XSendFile extends Log {
@@ -59,7 +59,7 @@ object XSendFile extends Log {
   /** @param path see Renderer#renderFile */
   def sendFile(
       ctx: ChannelHandlerContext, env: HandlerEnv, promise: ChannelPromise,
-      request: FullHttpRequest, response: ResetableFullHttpResponse, path: String, noLog: Boolean)
+      request: FullHttpRequest, response: ReplaceableFullHttpResponse, path: String, noLog: Boolean)
   {
     val channel       = ctx.channel
     val remoteAddress = channel.remoteAddress

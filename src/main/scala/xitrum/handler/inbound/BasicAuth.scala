@@ -7,7 +7,7 @@ import ChannelHandler.Sharable
 
 import xitrum.Config
 import xitrum.handler.HandlerEnv
-import xitrum.scope.request.ResetableFullHttpResponse
+import xitrum.scope.request.ReplaceableFullHttpResponse
 import xitrum.util.UrlSafeBase64
 
 object BasicAuth {

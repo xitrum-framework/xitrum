@@ -19,7 +19,7 @@ import InterfaceHttpData.HttpDataType
 
 import xitrum.{Config, Log}
 import xitrum.handler.HandlerEnv
-import xitrum.scope.request.{FileUploadParams, Params, PathInfo, ResetableFullHttpResponse}
+import xitrum.scope.request.{FileUploadParams, Params, PathInfo, ReplaceableFullHttpResponse}
 
 object Request2Env {
   DiskAttribute.deleteOnExitTemporaryFile  = true  // Should delete file on exit (in normal exit)
@@ -150,10 +150,10 @@ class Request2Env extends SimpleChannelInboundHandler[HttpObject] with Log {
     ret
   }
 
-  private def createEmptyFullResponse(request: HttpRequest): ResetableFullHttpResponse = {
+  private def createEmptyFullResponse(request: HttpRequest): ReplaceableFullHttpResponse = {
     // In HTTP 1.1 all connections are considered persistent unless declared otherwise
     // http://en.wikipedia.org/wiki/HTTP_persistent_connection
-    val ret = new ResetableFullHttpResponse(HttpVersion.HTTP_1_1, HttpResponseStatus.OK)
+    val ret = new ReplaceableFullHttpResponse(HttpVersion.HTTP_1_1, HttpResponseStatus.OK)
 
     // Unless the Connection: keep-alive header is present in the HTTP response,
     // apache benchmark (ab) hangs on keep alive connections
