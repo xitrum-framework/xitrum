@@ -55,8 +55,7 @@ object BasicAuth {
     HttpHeaders.setHeader(response, HttpHeaders.Names.CONTENT_TYPE, "text/plain; charset=" + Config.xitrum.request.charset)
     response.content(Unpooled.copiedBuffer("Wrong username or password", Config.xitrum.request.charset))
 
-    NoPipelining.setResponseHeaderForKeepAliveRequest(request, response)
-    val future = env.channel.writeAndFlush(env)
+    val future = env.channel.write(env)
     NoPipelining.if_keepAliveRequest_then_resumeReading_else_closeOnComplete(request, env.channel, future)
   }
 }

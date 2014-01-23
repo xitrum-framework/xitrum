@@ -53,7 +53,8 @@ class Dispatcher extends SimpleChannelInboundHandler[HandlerEnv] {
     val pathInfo = env.pathInfo
 
     if (request.getMethod == HttpMethod.OPTIONS) {
-      ctx.channel.writeAndFlush(env)
+      val future = ctx.channel.write(env)
+      NoPipelining.if_keepAliveRequest_then_resumeReading_else_closeOnComplete(request, env.channel, future)
       return
     }
 
@@ -82,7 +83,7 @@ class Dispatcher extends SimpleChannelInboundHandler[HandlerEnv] {
         NotModified.setClientCacheAggressively(response)
 
       XSendFile.setHeader(response, staticPath, false)
-      ctx.channel.writeAndFlush(env)
+      ctx.channel.write(env)
       true
     } else {
       false
@@ -95,7 +96,7 @@ class Dispatcher extends SimpleChannelInboundHandler[HandlerEnv] {
         val response = env.response
         response.setStatus(NOT_FOUND)
         XSendFile.set404Page(response, false)
-        ctx.channel.writeAndFlush(env)
+        ctx.channel.write(env)
 
       case Some(error404) =>
         env.pathParams = MMap.empty

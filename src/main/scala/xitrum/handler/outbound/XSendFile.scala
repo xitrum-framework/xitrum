@@ -71,8 +71,8 @@ object XSendFile extends Log {
         NotModified.setNoClientCache(response)
 
         if (path.startsWith(abs404)) {  // Even 404.html is not found!
-          NoPipelining.setResponseHeaderAndResumeReadingForKeepAliveRequestOrCloseOnComplete(request, response, channel, promise)
-          ctx.write(env, promise)
+          val future = ctx.write(env, promise)
+          NoPipelining.if_keepAliveRequest_then_resumeReading_else_closeOnComplete(request, channel, future)
           if (!noLog) AccessLog.logStaticFileAccess(remoteAddress, request, response)
         } else {
           sendFile(ctx, env, promise, request, response, abs404, noLog)  // Recursive
@@ -95,8 +95,8 @@ object XSendFile extends Log {
             response.content(Unpooled.wrappedBuffer(bytes))
           }
         }
-        NoPipelining.setResponseHeaderAndResumeReadingForKeepAliveRequestOrCloseOnComplete(request, response, channel, promise)
-        ctx.write(env, promise)
+        val future = ctx.write(env, promise)
+        NoPipelining.if_keepAliveRequest_then_resumeReading_else_closeOnComplete(request, channel, future)
         if (!noLog) AccessLog.logStaticFileAccess(remoteAddress, request, response)
 
       case Etag.TooBig(file) =>
@@ -105,9 +105,9 @@ object XSendFile extends Log {
         val lastModifiedRfc2822 = NotModified.formatRfc2822(file.lastModified)
         if (HttpHeaders.getHeader(request, IF_MODIFIED_SINCE) == lastModifiedRfc2822) {
           response.setStatus(NOT_MODIFIED)
-          NoPipelining.setResponseHeaderAndResumeReadingForKeepAliveRequestOrCloseOnComplete(request, response, channel, promise)
           response.content.clear()
-          ctx.write(env, promise)
+          val future = ctx.write(env, promise)
+          NoPipelining.if_keepAliveRequest_then_resumeReading_else_closeOnComplete(request, channel, future)
           if (!noLog) AccessLog.logStaticFileAccess(remoteAddress, request, response)
         } else {
           val mimeo = Mime.get(path)
@@ -127,7 +127,6 @@ object XSendFile extends Log {
           HttpHeaders.setContentLength(response, length)
           HttpHeaders.setHeader(response, LAST_MODIFIED, lastModifiedRfc2822)
           if (mimeo.isDefined) HttpHeaders.setHeader(response, CONTENT_TYPE, mimeo.get)
-          NoPipelining.setResponseHeaderForKeepAliveRequest(request, response)
           if (!noLog) AccessLog.logStaticFileAccess(remoteAddress, request, response)
 
           // Write the content

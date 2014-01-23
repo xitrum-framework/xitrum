@@ -39,14 +39,14 @@ class PublicFileServer extends SimpleChannelInboundHandler[HandlerEnv] {
       case None =>
         response.setStatus(NOT_FOUND)
         XSendFile.set404Page(response, false)
-        ctx.channel.writeAndFlush(env)
+        ctx.channel.write(env)
 
       case Some(abs) =>
         val file = new File(abs)
         if (file.isFile && file.exists) {
           response.setStatus(OK)
           if (request.getMethod == OPTIONS) {
-            ctx.channel.writeAndFlush(env)
+            ctx.channel.write(env)
             return
           }
 
@@ -54,7 +54,7 @@ class PublicFileServer extends SimpleChannelInboundHandler[HandlerEnv] {
             NotModified.setClientCacheAggressively(response)
 
           XSendFile.setHeader(response, abs, false)
-          ctx.channel.writeAndFlush(env)
+          ctx.channel.write(env)
         } else {
           ctx.fireChannelRead(env)
         }

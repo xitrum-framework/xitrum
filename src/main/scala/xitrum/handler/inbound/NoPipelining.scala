@@ -11,10 +11,8 @@ object NoPipelining {
     channel.config.setAutoRead(false)
   }
 
-  // https://github.com/veebs/netty/commit/64f529945282e41eb475952fde382f234da8eec7
-  def setResponseHeaderForKeepAliveRequest(request: HttpRequest, response: HttpResponse) {
-    if (HttpHeaders.isKeepAlive(request))
-      HttpHeaders.setHeader(response, HttpHeaders.Names.CONNECTION, HttpHeaders.Values.KEEP_ALIVE)
+  def resumeReading(channel: Channel) {
+    channel.config.setAutoRead(true)
   }
 
   /**
@@ -33,28 +31,23 @@ object NoPipelining {
       channelFuture.addListener(ChannelFutureListener.CLOSE)
     }
   }
-
-  // Combo of the above 2 methods
-  def setResponseHeaderAndResumeReadingForKeepAliveRequestOrCloseOnComplete(
-      request: HttpRequest, response: HttpResponse,
-      channel: Channel, channelFuture: ChannelFuture) {
-    if (HttpHeaders.isKeepAlive(request)) {
-      HttpHeaders.setHeader(response, HttpHeaders.Names.CONNECTION, HttpHeaders.Values.KEEP_ALIVE)
-      channelFuture.addListener(new ChannelFutureListener() {
-        def operationComplete(future: ChannelFuture) { channel.config.setAutoRead(true) }
-      })
-    } else {
-      channelFuture.addListener(ChannelFutureListener.CLOSE)
-    }
-  }
 }
 
 @Sharable
-/** http://mongrel2.org/static/book-finalch6.html */
+/**
+ * Xitrum, like Mongrel2, does not support pipelining: http://mongrel2.org/manual/book-finalch6.html
+ *
+ * "Where problems come in is with pipe-lined requests, meaning a browser sends
+ * a bunch of requests in a big blast, then hangs out for all the responses.
+ * This was such a horrible stupid idea that pretty much everone gets it wrong
+ * and doesn't support it fully, if at all. The reason is it's much too easy to
+ * blast a server with a ton of request, wait a bit so they hit proxied backends,
+ * and then close the socket. The web server and the backends are now screwed
+ * having to handle these requests which will go nowhere."
+ */
 class NoPipelining extends SimpleChannelInboundHandler[HandlerEnv] {
   override def channelRead0(ctx: ChannelHandlerContext, env: HandlerEnv) {
-    val channel = ctx.channel
-    NoPipelining.pauseReading(channel)
+    NoPipelining.pauseReading(ctx.channel)
     ctx.fireChannelRead(env)
   }
 }

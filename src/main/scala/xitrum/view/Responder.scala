@@ -44,14 +44,12 @@ trait Responder extends Js with Flash with GetActionClassDefaultsToCurrentAction
     if (nonChunkedResponseOrFirstChunkSent) {
       printDoubleResponseErrorStackTrace()
     } else {
-      NoPipelining.setResponseHeaderForKeepAliveRequest(request, response)
       setCookieAndSessionIfTouchedOnRespond()
-      val future = channel.writeAndFlush(handlerEnv)
+      val future = channel.write(handlerEnv)
 
       // Do not handle keep alive:
-      // * If XSendFile or XSendResource is used because it is handled by them
-      //   in their own way
-      // * If the response is chunked because it will be handled by respondLastChunk
+      // * If XSendFile or XSendResource is used, because they will handle keep alive in their own way
+      // * If the response is chunked, because respondLastChunk will be handle keep alive
       if (!XSendFile.isHeaderSet(response) &&
           !XSendResource.isHeaderSet(response) &&
           !HttpHeaders.isTransferEncodingChunked(response)) {

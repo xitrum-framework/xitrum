@@ -13,7 +13,7 @@ import io.netty.handler.codec.http.websocketx.{
   WebSocketServerHandshakerFactory
 }
 import xitrum.handler.{AccessLog, DefaultHttpChannelInitializer, HandlerEnv}
-import xitrum.handler.inbound.WebSocketEventDispatcher
+import xitrum.handler.inbound.{NoPipelining, WebSocketEventDispatcher}
 import xitrum.handler.DefaultHttpChannelInitializer
 
 //------------------------------------------------------------------------------
@@ -111,7 +111,7 @@ trait WebSocketAction extends Actor with Action {
       pipeline.addLast("webSocketEventDispatcher", new WebSocketEventDispatcher(handshaker, self))
 
       // Resume reading paused at NoPipelining
-      channel.config.setAutoRead(true)
+      NoPipelining.resumeReading(channel)
 
       true
     }

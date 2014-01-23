@@ -95,7 +95,7 @@ class Request2Env extends SimpleChannelInboundHandler[HttpObject] with Log {
     env.bodyTextParams = MMap.empty[String, Seq[String]]
     env.bodyFileParams = MMap.empty[String, Seq[FileUpload]]
     env.request        = createEmptyFullHttpRequest(request)
-    env.response       = createEmptyFullResponse()
+    env.response       = createEmptyFullResponse(request)
 
     bodyBytesReceived = 0
     try {
@@ -150,10 +150,18 @@ class Request2Env extends SimpleChannelInboundHandler[HttpObject] with Log {
     ret
   }
 
-  private def createEmptyFullResponse(): ResetableFullHttpResponse = {
-    // http://en.wikipedia.org/wiki/HTTP_persistent_connection
+  private def createEmptyFullResponse(request: HttpRequest): ResetableFullHttpResponse = {
     // In HTTP 1.1 all connections are considered persistent unless declared otherwise
-    new ResetableFullHttpResponse(HttpVersion.HTTP_1_1, HttpResponseStatus.OK)
+    // http://en.wikipedia.org/wiki/HTTP_persistent_connection
+    val ret = new ResetableFullHttpResponse(HttpVersion.HTTP_1_1, HttpResponseStatus.OK)
+
+    // Unless the Connection: keep-alive header is present in the HTTP response,
+    // apache benchmark (ab) hangs on keep alive connections
+    // https://github.com/veebs/netty/commit/64f529945282e41eb475952fde382f234da8eec7
+    if (HttpHeaders.isKeepAlive(request))
+      HttpHeaders.setHeader(ret, HttpHeaders.Names.CONNECTION, HttpHeaders.Values.KEEP_ALIVE)
+
+    ret
   }
 
   private def isAPPLICATION_X_WWW_FORM_URLENCODED_or_MULTIPART_FORM_DATA(request: HttpRequest): Boolean = {
@@ -237,7 +245,7 @@ class Request2Env extends SimpleChannelInboundHandler[HttpObject] with Log {
     val response = env.response
     response.setStatus(HttpResponseStatus.BAD_REQUEST)
     response.content(Unpooled.copiedBuffer("Request content body is too big", Config.xitrum.request.charset))
-    ctx.channel.writeAndFlush(env).addListener(ChannelFutureListener.CLOSE)
+    ctx.channel.write(env).addListener(ChannelFutureListener.CLOSE)
 
     log.warn("Request content body is too big, see xitrum.request.maxSizeInMB in xitrum.conf")
 

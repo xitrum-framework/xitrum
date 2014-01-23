@@ -47,6 +47,7 @@ object XSendResource extends Log {
       case Etag.NotFound =>
         // Keep alive is handled by XSendFile
         XSendFile.set404Page(response, noLog)
+        ctx.write(env, promise)
 
       case Etag.Small(bytes, etag, mimeo, gzipped) =>
         if (Etag.areEtagsIdentical(request, etag)) {
@@ -67,14 +68,13 @@ object XSendResource extends Log {
         }
 
         val channel = ctx.channel
-        NoPipelining.setResponseHeaderAndResumeReadingForKeepAliveRequestOrCloseOnComplete(request, response, channel, promise)
-
+        val future  = ctx.write(env, promise)
+        NoPipelining.if_keepAliveRequest_then_resumeReading_else_closeOnComplete(request, channel, future)
         if (!noLog) {
           val remoteAddress = channel.remoteAddress
           AccessLog.logResourceInJarAccess(remoteAddress, request, response)
         }
     }
-    ctx.write(env, promise)
   }
 }
 
