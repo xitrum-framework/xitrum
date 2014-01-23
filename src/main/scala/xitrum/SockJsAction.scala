@@ -14,7 +14,7 @@ case class SockJsText(text: String)
  * the session is closed.
  */
 trait SockJsAction extends Actor with Action {
-  // Ref of NonWebSocketSessionActor, SockJSWebsocket, or SockJSRawWebsocket
+  // Ref of NonWebSocketSessionActor, SockJSWebSocket, or SockJSRawWebSocket
   private[this] var sessionActorRef: ActorRef = _
 
   def receive = {

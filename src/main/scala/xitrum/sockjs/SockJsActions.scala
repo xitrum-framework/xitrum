@@ -801,7 +801,7 @@ class EventSourceReceive extends NonWebSocketSessionReceiverActorAction {
 // http://sockjs.github.com/sockjs-protocol/sockjs-protocol-0.3.3.html#section-52
 @Last
 @GET(":serverId/:sessionId/websocket")
-class WebsocketGET extends SockJsAction {
+class WebSocketGET extends SockJsAction {
   def nLastTokensToRemoveFromPathInfo = 3
 
   def execute() {
@@ -814,7 +814,7 @@ class WebsocketGET extends SockJsAction {
 // http://sockjs.github.com/sockjs-protocol/sockjs-protocol-0.3.3.html#section-6
 @Last
 @POST(":serverId/:sessionId/websocket")
-class WebsocketPOST extends SockJsAction with SkipCsrfCheck {
+class WebSocketPOST extends SockJsAction with SkipCsrfCheck {
   def nLastTokensToRemoveFromPathInfo = 3
 
   def execute() {
@@ -825,7 +825,7 @@ class WebsocketPOST extends SockJsAction with SkipCsrfCheck {
 }
 
 @WEBSOCKET(":serverId/:sessionId/websocket")
-class Websocket extends WebSocketAction with ServerIdSessionIdValidator with SockJsPrefix {
+class WebSocket extends WebSocketAction with ServerIdSessionIdValidator with SockJsPrefix {
   def nLastTokensToRemoveFromPathInfo = 3
 
   private[this] var sockJsActorRef: ActorRef = _
@@ -888,7 +888,7 @@ class Websocket extends WebSocketAction with ServerIdSessionIdValidator with Soc
 }
 
 @WEBSOCKET("websocket")
-class RawWebsocket extends WebSocketAction with ServerIdSessionIdValidator with SockJsPrefix {
+class RawWebSocket extends WebSocketAction with ServerIdSessionIdValidator with SockJsPrefix {
   def nLastTokensToRemoveFromPathInfo = 1
 
   private[this] var sockJsActorRef: ActorRef = _
