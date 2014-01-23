@@ -19,14 +19,14 @@ import xitrum.scope.request.PathInfo
 import xitrum.sockjs.SockJsPrefix
 
 object Dispatcher {
-  private val KLASS_OF_ACTOR_ACTION  = classOf[ActorAction]
-  private val KLASS_OF_FUTURE_ACTION = classOf[FutureAction]
+  private val CLASS_OF_ACTOR         = classOf[Actor]  // Can't be ActorAction, to support WebSocketAction and SockJsAction
+  private val CLASS_OF_FUTURE_ACTION = classOf[FutureAction]
 
   def dispatch(klass: Class[_], handlerEnv: HandlerEnv) {
     // This method should be fast because it is run for every request
     // => Use ReflectASM instead of normal reflection to create action instance
 
-    if (KLASS_OF_ACTOR_ACTION.isAssignableFrom(klass)) {
+    if (CLASS_OF_ACTOR.isAssignableFrom(klass)) {
       val actorRef = Config.actorSystem.actorOf(Props {
         val actor = ConstructorAccess.get(klass).newInstance()
         setPathPrefixForSockJs(actor, handlerEnv)
@@ -37,7 +37,7 @@ object Dispatcher {
       val action = ConstructorAccess.get(klass).newInstance().asInstanceOf[Action]
       setPathPrefixForSockJs(action, handlerEnv)
       action.apply(handlerEnv)
-      if (KLASS_OF_FUTURE_ACTION.isAssignableFrom(klass)) {
+      if (CLASS_OF_FUTURE_ACTION.isAssignableFrom(klass)) {
         Config.actorSystem.dispatcher.execute(new Runnable {
           def run() { action.dispatchWithFailsafe() }
         })
