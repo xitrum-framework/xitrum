@@ -25,9 +25,11 @@ class Env2Response extends ChannelOutboundHandlerAdapter with Log {
     val request  = env.request
     val response = env.response
 
-    // Content-Length header may be set to > 0 even when the content is empty,
-    // ex: HEAD or OPTIONS response
-    if (!HttpHeaders.isContentLengthSet(response))
+    val chunked = HttpHeaders.isTransferEncodingChunked(response)
+
+    // For HEAD or OPTIONS response, Content-Length header may be > 0 even when
+    // the content is empty (see below)
+    if (!chunked && !HttpHeaders.isContentLengthSet(response))
       HttpHeaders.setContentLength(response, response.content.readableBytes)
 
     if ((request.getMethod == HEAD || request.getMethod == OPTIONS) && response.getStatus == OK)
@@ -36,17 +38,18 @@ class Env2Response extends ChannelOutboundHandlerAdapter with Log {
     else if (!tryEtag(request, response))
       Gzip.tryCompressBigTextualResponse(request, response)
 
+    // The status may be set to NOT_MODIFIED by tryEtag above
+    val notModified = response.getStatus == NOT_MODIFIED
+
     // 304 responses should not include Content-Type or Content-Length
     // http://sockjs.github.com/sockjs-protocol/sockjs-protocol-0.3.3.html#section-25
     // https://groups.google.com/forum/#!topic/python-tornado/-P_enYKAwrY
-    if (response.getStatus == NOT_MODIFIED) {
-      HttpHeaders.removeHeader(response, CONTENT_TYPE)
-      HttpHeaders.removeHeader(response, CONTENT_LENGTH)
-    }
+    if (notModified || chunked) HttpHeaders.removeHeader(response, CONTENT_LENGTH)
+    if (notModified)            HttpHeaders.removeHeader(response, CONTENT_TYPE)
 
     // For chunked response, we can't send "response" because it's a FullHttpResponse,
     // we need to send HttpResponse.
-    if (HttpHeaders.isTransferEncodingChunked(response)) {
+    if (chunked) {
       val onlyHeaders = new DefaultHttpResponse(response.getProtocolVersion, response.getStatus)
       onlyHeaders.headers.set(response.headers)
 

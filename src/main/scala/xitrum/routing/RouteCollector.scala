@@ -7,14 +7,14 @@ import scala.util.control.NonFatal
 import org.objectweb.asm.{AnnotationVisitor, ClassReader, ClassVisitor, Opcodes, Type}
 import sclasner.{FileEntry, Scanner}
 
-import xitrum.{Action, Log, SockJsAction}
+import xitrum.{Action, Config, Log, SockJsAction}
 import xitrum.annotation._
 import xitrum.sockjs.SockJsPrefix
 
 case class DiscoveredAcc(
   normalRoutes:              SerializableRouteCollection,
   sockJsWithoutPrefixRoutes: SerializableRouteCollection,
-  sockJsMap:                 Map[String, Class[_ <: SockJsAction]],
+  sockJsMap:                 Map[String, SockJsClassAndOptions],
   swaggerMap:                Map[Class[_ <: Action], Swagger]
 )
 
@@ -26,7 +26,7 @@ class RouteCollector extends Log {
     var acc = DiscoveredAcc(
       new SerializableRouteCollection,
       new SerializableRouteCollection,
-      Map.empty[String, Class[_ <: SockJsAction]],
+      Map.empty[String, SockJsClassAndOptions],
       Map.empty[Class[_ <: Action], Swagger]
     )
 
@@ -135,10 +135,10 @@ class RouteCollector extends Log {
   }
 
   private def collectSockJsMap(
-      sockJsMap:   Map[String, Class[_ <: SockJsAction]],
+      sockJsMap:   Map[String, SockJsClassAndOptions],
       className:   String,
       annotations: ActionAnnotations
-  ): Map[String, Class[_ <: SockJsAction]] =
+  ): Map[String, SockJsClassAndOptions] =
   {
     var pathPrefix: String = null
     annotations.routes.foreach { case a =>
@@ -150,7 +150,11 @@ class RouteCollector extends Log {
       sockJsMap
     } else {
       val sockJsActorClass = Class.forName(className).asInstanceOf[Class[SockJsAction]]
-      sockJsMap + (pathPrefix -> sockJsActorClass)
+      val noWebSocket      = annotations.sockJsNoWebSocket.isDefined
+      var cookieNeeded     = Config.xitrum.response.sockJsCookieNeeded
+      if (annotations.sockJsCookieNeeded  .isDefined) cookieNeeded = true
+      if (annotations.sockJsNoCookieNeeded.isDefined) cookieNeeded = false
+      sockJsMap + (pathPrefix -> new SockJsClassAndOptions(sockJsActorClass, !noWebSocket, cookieNeeded))
     }
   }
 

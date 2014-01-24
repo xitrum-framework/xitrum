@@ -164,7 +164,8 @@ trait SockJsAction extends ServerIdSessionIdValidator with SockJsPrefix {
   // http://groups.google.com/group/sockjs/browse_thread/thread/71dfdff6e8f1e5f7
   // Can't use beforeFilter, see comment of pathPrefix at the top of this controller.
   protected def handleCookie() {
-    if (Config.xitrum.response.sockJsCookieNeeded) {
+    val sockJsClassAndOptions = Config.routes.sockJsRouteMap.lookup(pathPrefix)
+    if (sockJsClassAndOptions.cookieNeeded) {
       val value  = requestCookies.get("JSESSIONID").getOrElse("dummy")
       val cookie = new DefaultCookie("JSESSIONID", value)
       responseCookies.append(cookie)
@@ -326,9 +327,11 @@ class InfoGET extends SockJsAction {
 
   def execute() {
     setNoClientCache()
+
+    val sockJsClassAndOptions = Config.routes.sockJsRouteMap.lookup(pathPrefix)
     respondJson(Map(
-      "websocket" -> true,
-      "cookie_needed" -> Config.xitrum.response.sockJsCookieNeeded,
+      "websocket"     -> sockJsClassAndOptions.websocket,
+      "cookie_needed" -> sockJsClassAndOptions.cookieNeeded,
       "origins"       -> Config.xitrum.response.corsAllowOrigins,
       "entropy"       -> SockJsAction.entropy()
     ))

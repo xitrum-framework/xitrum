@@ -6,8 +6,7 @@
 * #269 Increase akka.logger-startup-timeout from 5s to 30s to avoid Akka's log initialization timeout error at Xitrum startup
 * #263 Increase access log level from DEBUG to INFO
 * #259 Log WebSocket messages at TRACE level
-* #272 Replace SockJsCookieNeeded annotation with sockJsCookieNeeded in xitrum.conf
-* #273 Remove SockJsNoWebSocket annotation
+* #272 Add sockJsCookieNeeded in xitrum.conf so that this option can be set when deploying, depending on deployment environment
 * #74  Flash socket policy server can use the same port with HTTP server
 
 2.15:
