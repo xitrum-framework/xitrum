@@ -36,6 +36,14 @@ class Env2Response extends ChannelOutboundHandlerAdapter with Log {
     else if (!tryEtag(request, response))
       Gzip.tryCompressBigTextualResponse(request, response)
 
+    // 304 responses should not include Content-Type or Content-Length
+    // http://sockjs.github.com/sockjs-protocol/sockjs-protocol-0.3.3.html#section-25
+    // https://groups.google.com/forum/#!topic/python-tornado/-P_enYKAwrY
+    if (response.getStatus == NOT_MODIFIED) {
+      HttpHeaders.removeHeader(response, CONTENT_TYPE)
+      HttpHeaders.removeHeader(response, CONTENT_LENGTH)
+    }
+
     // For chunked response, we can't send "response" because it's a FullHttpResponse,
     // we need to send HttpResponse.
     if (HttpHeaders.isTransferEncodingChunked(response)) {
@@ -82,11 +90,14 @@ class Env2Response extends ChannelOutboundHandlerAdapter with Log {
    * @return true if the NO_MODIFIED response is set by this method
    */
   private def tryEtag(request: HttpRequest, response: FullHttpResponse): Boolean = {
-    if (response.headers.contains(CACHE_CONTROL) &&
-        HttpHeaders.getHeader(response, CACHE_CONTROL).toLowerCase.contains("no-cache"))
-      return false
+    if (response.getStatus == NOT_MODIFIED)
+      return true
 
     if (response.getStatus != OK)
+      return false
+
+    if (response.headers.contains(CACHE_CONTROL) &&
+        HttpHeaders.getHeader(response, CACHE_CONTROL).toLowerCase.contains("no-cache"))
       return false
 
     val contentLengthInHeader = HttpHeaders.getContentLength(response, 0)
@@ -108,10 +119,7 @@ class Env2Response extends ChannelOutboundHandlerAdapter with Log {
 
   private def compareAndSetETag(request: HttpRequest, response: FullHttpResponse, etag: String): Boolean = {
     if (Etag.areEtagsIdentical(request, etag)) {
-      // Only send headers, the response content is set to empty
-      // (decrease response transmission time)
       response.setStatus(NOT_MODIFIED)
-      HttpHeaders.removeHeader(response, CONTENT_TYPE) // http://sockjs.github.com/sockjs-protocol/sockjs-protocol-0.3.3.html#section-25
       response.content.clear()
       true
     } else {
