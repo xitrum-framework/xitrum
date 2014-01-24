@@ -1,6 +1,5 @@
 3.0:
 * #151 Update Netty from 3.9.0 to 4.0.15
-* #274 Update commons-lang3 from 3.1 to 3.2.1
 * #265 Add FutureAction, rename ActionActor to ActorAction, SockJsActor to SockJsAction, WebSocketActor to WebSocketAction
 * #261 Add convenient methods to manipulate routes after they are collected at startup
 * #269 Increase akka.logger-startup-timeout from 5s to 30s to avoid Akka's log initialization timeout error at Xitrum startup
@@ -8,6 +7,8 @@
 * #259 Log WebSocket messages at TRACE level
 * #272 Add sockJsCookieNeeded in xitrum.conf so that this option can be set when deploying, depending on deployment environment
 * #74  Flash socket policy server can use the same port with HTTP server
+* #274 Update commons-lang3 from 3.1 to 3.2.1
+* #282 Update Swagger UI from 2.0.3 to 2.0.4
 
 2.15:
 * #77  Remove HttpChunkAggregator to avoid memory problem with file upload
