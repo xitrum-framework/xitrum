@@ -1,6 +1,7 @@
 package xitrum.scope.request
 
 import scala.collection.mutable.{Map => MMap}
+import io.netty.handler.codec.http.multipart.FileUpload
 
 import xitrum.{Config, Action}
 import xitrum.handler.HandlerEnv
@@ -20,18 +21,28 @@ object RequestEnv {
       sb.append(key)
       sb.append(": ")
 
+      // Log is ouput after the response has been sent.
+      // For FileUpload, the file will be cleaned up so FileUpload#toString
+      // will throw null pointer exception.
       if (Config.xitrum.request.filteredParams.contains(key)) {
         sb.append("[FILTERED]")
       } else {
         val values = params(key)
-
         if (values.length == 0) {
           sb.append("[EMPTY]")
         } else if (values.length == 1) {
-          sb.append(values(0))
+          val value = values(0)
+          if (value.isInstanceOf[FileUpload])
+            sb.append("<file>")
+          else
+            sb.append(values(0))
         } else {
           sb.append("[")
-          sb.append(values.mkString(", "))
+          val value = values(0)
+          if (value.isInstanceOf[FileUpload])
+            sb.append("<files>")
+          else
+            sb.append(values.mkString(", "))
           sb.append("]")
         }
       }
