@@ -229,7 +229,7 @@ work.</pre>
 <div class="section" id="chunked-response">
 <h2>Chunked response<a class="headerlink" href="#chunked-response" title="Permalink to this headline">¶</a></h2>
 <ol class="arabic simple">
-<li>Call <tt class="docutils literal"><span class="pre">response.setChunked(true)</span></tt></li>
+<li>Call <tt class="docutils literal"><span class="pre">setChunked</span></tt></li>
 <li>Call respondXXX as many times as you want</li>
 <li>Lastly, call <tt class="docutils literal"><span class="pre">respondLastChunk</span></tt></li>
 </ol>
@@ -240,7 +240,7 @@ file that does may not fit memory.</p>
 // "no-store, no-cache, must-revalidate, max-age=0"
 // Note that "Pragma: no-cache" is linked to requests, not responses:
 // http://palizine.plynt.com/issues/2008Jul/cache-control-attributes/
-response.setChunked(true)
+setChunked()
 
 val generator = new MyCsvGenerator
 val header = generator.getHeader
@@ -274,7 +274,7 @@ for <a class="reference external" href="http://en.wikipedia.org/wiki/Comet_(prog
 ...</pre>
 </div>
 <p>The action that responds &lt;script&gt; snippets forever:</p>
-<div class="highlight-python"><pre>response.setChunked(true)
+<div class="highlight-python"><pre>setChunked()
 
 // Need something like "123" for Firefox to work
 respondText("&lt;html&gt;&lt;body&gt;123", "text/html")

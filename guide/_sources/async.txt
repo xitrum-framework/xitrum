@@ -209,7 +209,7 @@ To config SockJS clustering, see :doc:`Clustering with Akka </cluster>`.
 Chunked response
 ----------------
 
-1. Call ``response.setChunked(true)``
+1. Call ``setChunked``
 2. Call respondXXX as many times as you want
 3. Lastly, call ``respondLastChunk``
 
@@ -223,7 +223,7 @@ file that does may not fit memory.
   // "no-store, no-cache, must-revalidate, max-age=0"
   // Note that "Pragma: no-cache" is linked to requests, not responses:
   // http://palizine.plynt.com/issues/2008Jul/cache-control-attributes/
-  response.setChunked(true)
+  setChunked()
 
   val generator = new MyCsvGenerator
   val header = generator.getHeader
@@ -266,7 +266,7 @@ The action that responds <script> snippets forever:
 
 ::
 
-  response.setChunked(true)
+  setChunked()
 
   // Need something like "123" for Firefox to work
   respondText("<html><body>123", "text/html")
