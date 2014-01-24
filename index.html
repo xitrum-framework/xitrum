@@ -71,8 +71,9 @@ and HTTP(S) server fusion<span class="small"> on top of <a class="reference exte
             <pre><code>import xitrum.Action
 import xitrum.annotation.GET
 
-// This action runs on Netty's IO thread. If you want it to run
-// on another thread (pool), extend xitrum.FutureAction.
+// This action runs on Netty's IO thread.
+// If you want it to run on another thread
+// (thread pool), extend xitrum.FutureAction.
 @GET("url/to/HelloAction")
 class HelloAction extends Action {
   def execute() {
