@@ -29,7 +29,36 @@ class LruCache extends Cache {
 
   def isDefinedAt(key: Any) = cache.containsKey(key)
 
-  def get(key: Any) = {
+  def get(key: Any) = get(key, true)
+
+  def put(key: Any, value: Any) {
+    cache.put(key, (-1, value))
+  }
+
+  def putIfAbsent(key: Any, value: Any) {
+    if (get(key, false).isEmpty) cache.put(key, (-1, value))
+  }
+
+  def putSecond(key: Any, value: Any, seconds: Int) {
+    val expireAtSec = (System.currentTimeMillis() / 1000L + seconds).toInt
+    cache.put(key, (expireAtSec, value))
+  }
+
+  def putSecondIfAbsent(key: Any, value: Any, seconds: Int) {
+    if (get(key, false).isEmpty) putSecond(key, value, seconds)
+  }
+
+  def remove(key: Any) {
+    cache.remove(key)
+  }
+
+  def clear() {
+    cache.clear()
+  }
+
+  //----------------------------------------------------------------------------
+
+  private def get(key: Any, removeStale: Boolean): Option[Any] = {
     val tuple = cache.get(key)
     if (tuple == null) {
       None
@@ -43,33 +72,13 @@ class LruCache extends Cache {
         // when TTL is 1s and 1500ms has passed, the result will more likely be
         // None
         val nowMs = System.currentTimeMillis()
-        if (expireAtSec.toLong * 1000L < nowMs) None else Some(value)
+        if (expireAtSec.toLong * 1000L < nowMs) {
+          if (removeStale) remove(key)
+          None
+        } else {
+          Some(value)
+        }
       }
     }
-  }
-
-  def put(key: Any, value: Any) {
-    cache.put(key, (-1, value))
-  }
-
-  def putIfAbsent(key: Any, value: Any): Unit = synchronized {
-    if (!cache.containsKey(key)) cache.put(key, (-1, value))
-  }
-
-  def putSecond(key: Any, value: Any, seconds: Int) {
-    val expireAtSec = (System.currentTimeMillis() / 1000L + seconds).toInt
-    cache.put(key, (expireAtSec, value))
-  }
-
-  def putSecondIfAbsent(key: Any, value: Any, seconds: Int) {
-    if (!cache.containsKey(key)) putSecond(key, value, seconds)
-  }
-
-  def remove(key: Any) {
-    cache.remove(key)
-  }
-
-  def clear() {
-    cache.clear()
   }
 }
