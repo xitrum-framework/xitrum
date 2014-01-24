@@ -267,7 +267,7 @@
       </h4>
       <div class="fullcomment"><dl class="attributes block"> <dt>Definition Classes</dt><dd>AnyRef → Any</dd></dl></div>
     </li><li name="xitrum.util.Gzip#isAccepted" visbl="pub" data-isabs="false" fullComment="no" group="Ungrouped">
-      <a id="isAccepted(request:org.jboss.netty.handler.codec.http.HttpRequest):Boolean"></a>
+      <a id="isAccepted(request:io.netty.handler.codec.http.HttpRequest):Boolean"></a>
       <a id="isAccepted(HttpRequest):Boolean"></a>
       <h4 class="signature">
       <span class="modifier_kind">
@@ -275,7 +275,7 @@
         <span class="kind">def</span>
       </span>
       <span class="symbol">
-        <span class="name">isAccepted</span><span class="params">(<span name="request">request: <span class="extype" name="org.jboss.netty.handler.codec.http.HttpRequest">HttpRequest</span></span>)</span><span class="result">: <span class="extype" name="scala.Boolean">Boolean</span></span>
+        <span class="name">isAccepted</span><span class="params">(<span name="request">request: <span class="extype" name="io.netty.handler.codec.http.HttpRequest">HttpRequest</span></span>)</span><span class="result">: <span class="extype" name="scala.Boolean">Boolean</span></span>
       </span>
       </h4>
       
@@ -384,15 +384,15 @@
       </h4>
       <div class="fullcomment"><dl class="attributes block"> <dt>Definition Classes</dt><dd>AnyRef → Any</dd></dl></div>
     </li><li name="xitrum.util.Gzip#tryCompressBigTextualResponse" visbl="pub" data-isabs="false" fullComment="yes" group="Ungrouped">
-      <a id="tryCompressBigTextualResponse(request:org.jboss.netty.handler.codec.http.HttpRequest,response:org.jboss.netty.handler.codec.http.HttpResponse):Array[Byte]"></a>
-      <a id="tryCompressBigTextualResponse(HttpRequest,HttpResponse):Array[Byte]"></a>
+      <a id="tryCompressBigTextualResponse(request:io.netty.handler.codec.http.HttpRequest,response:xitrum.scope.request.ReplaceableFullHttpResponse):Array[Byte]"></a>
+      <a id="tryCompressBigTextualResponse(HttpRequest,ReplaceableFullHttpResponse):Array[Byte]"></a>
       <h4 class="signature">
       <span class="modifier_kind">
         <span class="modifier"></span>
         <span class="kind">def</span>
       </span>
       <span class="symbol">
-        <span class="name">tryCompressBigTextualResponse</span><span class="params">(<span name="request">request: <span class="extype" name="org.jboss.netty.handler.codec.http.HttpRequest">HttpRequest</span></span>, <span name="response">response: <span class="extype" name="org.jboss.netty.handler.codec.http.HttpResponse">HttpResponse</span></span>)</span><span class="result">: <span class="extype" name="scala.Array">Array</span>[<span class="extype" name="scala.Byte">Byte</span>]</span>
+        <span class="name">tryCompressBigTextualResponse</span><span class="params">(<span name="request">request: <span class="extype" name="io.netty.handler.codec.http.HttpRequest">HttpRequest</span></span>, <span name="response">response: <a href="../scope/request/ReplaceableFullHttpResponse.html" class="extype" name="xitrum.scope.request.ReplaceableFullHttpResponse">ReplaceableFullHttpResponse</a></span>)</span><span class="result">: <span class="extype" name="scala.Array">Array</span>[<span class="extype" name="scala.Byte">Byte</span>]</span>
       </span>
       </h4>
       <p class="shortcomment cmt">If compressed, CONTENT_LENGTH is updated and CONTENT_ENCODING is set to &quot;gzip&quot;.</p><div class="fullcomment"><div class="comment cmt"><p>If compressed, CONTENT_LENGTH is updated and CONTENT_ENCODING is set to &quot;gzip&quot;.

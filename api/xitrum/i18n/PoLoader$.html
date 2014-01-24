@@ -163,6 +163,19 @@
       </span>
       </h4>
       <div class="fullcomment"><dl class="attributes block"> <dt>Definition Classes</dt><dd>Any</dd></dl></div>
+    </li><li name="xitrum.i18n.PoLoader#clear" visbl="pub" data-isabs="false" fullComment="no" group="Ungrouped">
+      <a id="clear():Unit"></a>
+      <a id="clear():Unit"></a>
+      <h4 class="signature">
+      <span class="modifier_kind">
+        <span class="modifier"></span>
+        <span class="kind">def</span>
+      </span>
+      <span class="symbol">
+        <span class="name">clear</span><span class="params">()</span><span class="result">: <span class="extype" name="scala.Unit">Unit</span></span>
+      </span>
+      </h4>
+      <p class="shortcomment cmt">Clears all loaded po files of all languages in the cache.</p>
     </li><li name="scala.AnyRef#clone" visbl="prt" data-isabs="false" fullComment="yes" group="Ungrouped">
       <a id="clone():Object"></a>
       <a id="clone():AnyRef"></a>
@@ -278,8 +291,14 @@
         <span class="name">load</span><span class="params">(<span name="language">language: <span class="extype" name="scala.Predef.String">String</span></span>)</span><span class="result">: <span class="extype" name="scaposer.Po">Po</span></span>
       </span>
       </h4>
-      <p class="shortcomment cmt"></p><div class="fullcomment"><div class="comment cmt"></div><dl class="paramcmts block"><dt>returns</dt><dd class="cmt"><p>Merge of all po files of the language, or an empty Po when there's
-no po file.
+      <p class="shortcomment cmt">For the specified language, this method loads and merges all po files in
+classpath, at i18n/&lt;language&gt;.</p><div class="fullcomment"><div class="comment cmt"><p>For the specified language, this method loads and merges all po files in
+classpath, at i18n/&lt;language&gt;.po. You can store the po files in JAR files,
+at src/main/resources/i18n/&lt;language&gt;.po (compile time), or at
+config/i18n/&lt;language&gt;.po (&quot;config&quot; directory is put to classpath by Xitrum
+at run time, this is convenient if you want to modify po files at run time).</p><p>The result is stored in cache for further fast access. If you want to reload
+the po files, use clear() or remove(language) to clean the cache, then load again.
+</p></div><dl class="paramcmts block"><dt>returns</dt><dd class="cmt"><p>Empty Po if there's no po file
 </p></dd></dl></div>
     </li><li name="scala.AnyRef#ne" visbl="pub" data-isabs="false" fullComment="yes" group="Ungrouped">
       <a id="ne(x$1:AnyRef):Boolean"></a>
@@ -320,6 +339,19 @@ no po file.
       </span>
       </h4>
       <div class="fullcomment"><dl class="attributes block"> <dt>Definition Classes</dt><dd>AnyRef</dd></dl></div>
+    </li><li name="xitrum.i18n.PoLoader#remove" visbl="pub" data-isabs="false" fullComment="no" group="Ungrouped">
+      <a id="remove(language:String):Option[scaposer.Po]"></a>
+      <a id="remove(String):Option[Po]"></a>
+      <h4 class="signature">
+      <span class="modifier_kind">
+        <span class="modifier"></span>
+        <span class="kind">def</span>
+      </span>
+      <span class="symbol">
+        <span class="name">remove</span><span class="params">(<span name="language">language: <span class="extype" name="scala.Predef.String">String</span></span>)</span><span class="result">: <span class="extype" name="scala.Option">Option</span>[<span class="extype" name="scaposer.Po">Po</span>]</span>
+      </span>
+      </h4>
+      <p class="shortcomment cmt">Clears all loaded po files of the specified language in the cache.</p>
     </li><li name="scala.AnyRef#synchronized" visbl="pub" data-isabs="false" fullComment="yes" group="Ungrouped">
       <a id="synchronized[T0](x$1:=&gt;T0):T0"></a>
       <a id="synchronized[T0](⇒T0):T0"></a>

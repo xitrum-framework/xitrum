@@ -24,9 +24,9 @@
         </head>
         <body class="type">
       <div id="definition">
-        <img src="../lib/trait_big.png" />
+        <a href="Action$.html" title="Go to companion"><img src="../lib/trait_to_object_big.png" /></a>
         <p id="owner"><a href="package.html" class="extype" name="xitrum">xitrum</a></p>
-        <h1>Action</h1>
+        <h1><a href="Action$.html" title="Go to companion">Action</a></h1>
       </div>
 
       <h4 id="signature" class="signature">
@@ -39,19 +39,19 @@
       </span>
       </h4>
       
-          <div id="comment" class="fullcommenttop"><div class="comment cmt"><p>Action is designed to be separated from ActionActor. ActionActor extends
-Action. An ActionActor can pass its Action things outside without violating
-the principle of Actor: Do not leak Actor internals to outside.
+          <div id="comment" class="fullcommenttop"><div class="comment cmt"><p>When there's a request comes in, action extending Action will be run directly
+on the current Netty IO thread. This gives maximum speed when the action is
+simple and nonblocking.</p><p>See also FutureAction and ActorAction.
 </p></div><div class="toggleContainer block">
           <span class="toggle">Linear Supertypes</span>
           <div class="superTypes hiddenContent"><a href="I18n.html" class="extype" name="xitrum.I18n">I18n</a>, <a href="view/Responder.html" class="extype" name="xitrum.view.Responder">Responder</a>, <a href="view/Flash.html" class="extype" name="xitrum.view.Flash">Flash</a>, <a href="view/Js.html" class="extype" name="xitrum.view.Js">Js</a>, <a href="view/Renderer.html" class="extype" name="xitrum.view.Renderer">Renderer</a>, <a href="view/GetActionClassDefaultsToCurrentAction.html" class="extype" name="xitrum.view.GetActionClassDefaultsToCurrentAction">GetActionClassDefaultsToCurrentAction</a>, <a href="action/Url.html" class="extype" name="xitrum.action.Url">Url</a>, <a href="action/Redirect.html" class="extype" name="xitrum.action.Redirect">Redirect</a>, <a href="action/BasicAuth.html" class="extype" name="xitrum.action.BasicAuth">BasicAuth</a>, <a href="action/Filter.html" class="extype" name="xitrum.action.Filter">Filter</a>, <a href="action/Net.html" class="extype" name="xitrum.action.Net">Net</a>, <a href="Log.html" class="extype" name="xitrum.Log">Log</a>, <a href="scope/session/SessionEnv.html" class="extype" name="xitrum.scope.session.SessionEnv">SessionEnv</a>, <a href="scope/session/Csrf.html" class="extype" name="xitrum.scope.session.Csrf">Csrf</a>, <a href="scope/request/RequestEnv.html" class="extype" name="xitrum.scope.request.RequestEnv">RequestEnv</a>, <a href="scope/request/ParamAccess.html" class="extype" name="xitrum.scope.request.ParamAccess">ParamAccess</a>, <span class="extype" name="scala.AnyRef">AnyRef</span>, <span class="extype" name="scala.Any">Any</span></div>
         </div><div class="toggleContainer block">
           <span class="toggle">Known Subclasses</span>
-          <div class="subClasses hiddenContent"><a href="ActionActor.html" class="extype" name="xitrum.ActionActor">ActionActor</a>, <a href="sockjs/EventSourceReceive.html" class="extype" name="xitrum.sockjs.EventSourceReceive">EventSourceReceive</a>, <a href="sockjs/Greeting.html" class="extype" name="xitrum.sockjs.Greeting">Greeting</a>, <a href="sockjs/HtmlFileReceive.html" class="extype" name="xitrum.sockjs.HtmlFileReceive">HtmlFileReceive</a>, <a href="sockjs/Iframe.html" class="extype" name="xitrum.sockjs.Iframe">Iframe</a>, <a href="sockjs/InfoGET.html" class="extype" name="xitrum.sockjs.InfoGET">InfoGET</a>, <a href="sockjs/JsonPPollingReceive.html" class="extype" name="xitrum.sockjs.JsonPPollingReceive">JsonPPollingReceive</a>, <a href="sockjs/JsonPPollingSend.html" class="extype" name="xitrum.sockjs.JsonPPollingSend">JsonPPollingSend</a>, <a href="sockjs/NonWebSocketSessionActionActor.html" class="extype" name="xitrum.sockjs.NonWebSocketSessionActionActor">NonWebSocketSessionActionActor</a>, <a href="sockjs/NonWebSocketSessionReceiverActionActor.html" class="extype" name="xitrum.sockjs.NonWebSocketSessionReceiverActionActor">NonWebSocketSessionReceiverActionActor</a>, <a href="sockjs/RawWebsocket.html" class="extype" name="xitrum.sockjs.RawWebsocket">RawWebsocket</a>, <a href="sockjs/ServerIdSessionIdValidator.html" class="extype" name="xitrum.sockjs.ServerIdSessionIdValidator">ServerIdSessionIdValidator</a>, <a href="sockjs/SockJsAction.html" class="extype" name="xitrum.sockjs.SockJsAction">SockJsAction</a>, <a href="SockJsActor.html" class="extype" name="xitrum.SockJsActor">SockJsActor</a>, <a href="routing/SwaggerJson.html" class="extype" name="xitrum.routing.SwaggerJson">SwaggerJson</a>, <a href="routing/SwaggerUi.html" class="extype" name="xitrum.routing.SwaggerUi">SwaggerUi</a>, <a href="WebSocketActor.html" class="extype" name="xitrum.WebSocketActor">WebSocketActor</a>, <a href="sockjs/Websocket.html" class="extype" name="xitrum.sockjs.Websocket">Websocket</a>, <a href="sockjs/WebsocketGET.html" class="extype" name="xitrum.sockjs.WebsocketGET">WebsocketGET</a>, <a href="sockjs/WebsocketPOST.html" class="extype" name="xitrum.sockjs.WebsocketPOST">WebsocketPOST</a>, <a href="sockjs/XhrPollingReceive.html" class="extype" name="xitrum.sockjs.XhrPollingReceive">XhrPollingReceive</a>, <a href="sockjs/XhrSend.html" class="extype" name="xitrum.sockjs.XhrSend">XhrSend</a>, <a href="sockjs/XhrStreamingReceive.html" class="extype" name="xitrum.sockjs.XhrStreamingReceive">XhrStreamingReceive</a>, <a href="js.html" class="extype" name="xitrum.js">js</a></div>
+          <div class="subClasses hiddenContent"><a href="ActorAction.html" class="extype" name="xitrum.ActorAction">ActorAction</a>, <a href="sockjs/EventSourceReceive.html" class="extype" name="xitrum.sockjs.EventSourceReceive">EventSourceReceive</a>, <a href="FutureAction.html" class="extype" name="xitrum.FutureAction">FutureAction</a>, <a href="sockjs/Greeting.html" class="extype" name="xitrum.sockjs.Greeting">Greeting</a>, <a href="sockjs/HtmlFileReceive.html" class="extype" name="xitrum.sockjs.HtmlFileReceive">HtmlFileReceive</a>, <a href="sockjs/Iframe.html" class="extype" name="xitrum.sockjs.Iframe">Iframe</a>, <a href="sockjs/InfoGET.html" class="extype" name="xitrum.sockjs.InfoGET">InfoGET</a>, <a href="sockjs/JsonPPollingReceive.html" class="extype" name="xitrum.sockjs.JsonPPollingReceive">JsonPPollingReceive</a>, <a href="sockjs/JsonPPollingSend.html" class="extype" name="xitrum.sockjs.JsonPPollingSend">JsonPPollingSend</a>, <a href="sockjs/NonWebSocketSessionActorAction.html" class="extype" name="xitrum.sockjs.NonWebSocketSessionActorAction">NonWebSocketSessionActorAction</a>, <a href="sockjs/NonWebSocketSessionReceiverActorAction.html" class="extype" name="xitrum.sockjs.NonWebSocketSessionReceiverActorAction">NonWebSocketSessionReceiverActorAction</a>, <a href="sockjs/RawWebSocket.html" class="extype" name="xitrum.sockjs.RawWebSocket">RawWebSocket</a>, <a href="sockjs/ServerIdSessionIdValidator.html" class="extype" name="xitrum.sockjs.ServerIdSessionIdValidator">ServerIdSessionIdValidator</a>, <a href="sockjs/SockJsAction.html" class="extype" name="xitrum.sockjs.SockJsAction">SockJsAction</a>, <a href="SockJsAction.html" class="extype" name="xitrum.SockJsAction">SockJsAction</a>, <a href="routing/SwaggerJson.html" class="extype" name="xitrum.routing.SwaggerJson">SwaggerJson</a>, <a href="routing/SwaggerUi.html" class="extype" name="xitrum.routing.SwaggerUi">SwaggerUi</a>, <a href="sockjs/WebSocket.html" class="extype" name="xitrum.sockjs.WebSocket">WebSocket</a>, <a href="WebSocketAction.html" class="extype" name="xitrum.WebSocketAction">WebSocketAction</a>, <a href="sockjs/WebSocketGET.html" class="extype" name="xitrum.sockjs.WebSocketGET">WebSocketGET</a>, <a href="sockjs/WebSocketPOST.html" class="extype" name="xitrum.sockjs.WebSocketPOST">WebSocketPOST</a>, <a href="sockjs/XhrPollingReceive.html" class="extype" name="xitrum.sockjs.XhrPollingReceive">XhrPollingReceive</a>, <a href="sockjs/XhrSend.html" class="extype" name="xitrum.sockjs.XhrSend">XhrSend</a>, <a href="sockjs/XhrStreamingReceive.html" class="extype" name="xitrum.sockjs.XhrStreamingReceive">XhrStreamingReceive</a>, <a href="js.html" class="extype" name="xitrum.js">js</a></div>
         </div><div class="toggleContainer block diagram-container" id="inheritance-diagram-container">
                 <span class="toggle diagram-link">Type Hierarchy</span>
                 <a href="http://docs.scala-lang.org/overviews/scaladoc/usage.html#diagrams" target="_blank" class="diagram-help">Learn more about scaladoc diagrams</a>
-                <div class="diagram" id="inheritance-diagram"><svg class="class-diagram" id="graph290" viewBox="0.00 0.00 1036.00 158.00" height="158pt" width="1036pt" xmlns:xlink="http://www.w3.org/1999/xlink" xmlns="http://www.w3.org/2000/svg"><g transform="scale(1 1) rotate(0) translate(4 154)" class="graph" id="graph1"><polygon points="-4,5 -4,-154 1033,-154 1033,5 -4,5" stroke="white" fill="white"></polygon><g class="cluster" id="graph2"></g><g class="cluster" id="graph3"></g><!-- node0 --><g class="node this trait" id="graph290_0"><a xlink:title="xitrum.Action (this trait)" xlink:href="#inheritance-diagram"><polygon points="549,-88 477,-88 477,-62 549,-62 549,-88" stroke="#37657d" fill="#498aad"></polygon><image xlink:href="../lib/trait_diagram.png" y="-83" x="487" preserveAspectRatio="xMinYMin meet" height="16px" width="16px"></image><text fill="#ffffff" font-size="10.00" font-family="Arial" y="-72.6667" x="509" text-anchor="start">Action</text></a></g><!-- node1 --><g class="node trait" id="graph290_1"><a xlink:title="xitrum.ActionActor" xlink:href="ActionActor.html#inheritance-diagram"><polygon points="148,-26 52,-26 52,-1.24345e-14 148,-3.55271e-15 148,-26" stroke="#37657d" fill="#498aad"></polygon><image xlink:href="../lib/trait_diagram.png" y="-21" x="62" preserveAspectRatio="xMinYMin meet" height="16px" width="16px"></image><text fill="#ffffff" font-size="10.00" font-family="Arial" y="-10.6667" x="84" text-anchor="start">ActionActor</text></a></g><!-- node0&#45;&gt;node1 --><g class="edge inheritance" id="graph290_0_1"><a xlink:title="ActionActor is a subtype of Action"><path d="M471.904,-70.5271C405.44,-63.0279 270.352,-46.6861 157,-26 154.104,-25.4716 151.133,-24.896 148.141,-24.2908" stroke="#d4d4d4" fill="none"></path><polygon points="471.794,-72.2756 476.958,-71.0952 472.185,-68.7975 471.794,-72.2756" stroke="#d4d4d4" fill="none"></polygon></a></g><!-- node2 --><g class="node trait" id="graph290_2"><a xlink:title="xitrum.sockjs.ServerIdSessionIdValidator" xlink:href="sockjs/ServerIdSessionIdValidator.html#inheritance-diagram"><polygon points="326,-26 166,-26 166,-1.24345e-14 326,-3.55271e-15 326,-26" stroke="#37657d" fill="#498aad"></polygon><image xlink:href="../lib/trait_diagram.png" y="-21" x="176" preserveAspectRatio="xMinYMin meet" height="16px" width="16px"></image><text fill="#ffffff" font-size="10.00" font-family="Arial" y="-10.6667" x="198" text-anchor="start">ServerIdSessionIdValidator</text></a></g><!-- node0&#45;&gt;node2 --><g class="edge inheritance" id="graph290_0_2"><a xlink:title="ServerIdSessionIdValidator is a subtype of Action"><path d="M471.861,-65.4471C426.381,-54.8862 352.853,-37.8124 302.111,-26.0294" stroke="#d4d4d4" fill="none"></path><polygon points="471.725,-67.212 476.991,-66.6384 472.517,-63.8027 471.725,-67.212" stroke="#d4d4d4" fill="none"></polygon></a></g><!-- node3 --><g class="node trait" id="graph290_3"><a xlink:title="xitrum.SockJsActor" xlink:href="SockJsActor.html#inheritance-diagram"><polygon points="444,-26 344,-26 344,-1.24345e-14 444,-3.55271e-15 444,-26" stroke="#37657d" fill="#498aad"></polygon><image xlink:href="../lib/trait_diagram.png" y="-21" x="354" preserveAspectRatio="xMinYMin meet" height="16px" width="16px"></image><text fill="#ffffff" font-size="10.00" font-family="Arial" y="-10.6667" x="376" text-anchor="start">SockJsActor</text></a></g><!-- node0&#45;&gt;node3 --><g class="edge inheritance" id="graph290_0_3"><a xlink:title="SockJsActor is a subtype of Action"><path d="M482.891,-59.3132C463.214,-49.0609 437.809,-35.8246 419.2,-26.1297" stroke="#d4d4d4" fill="none"></path><polygon points="482.52,-61.0931 487.763,-61.8514 484.138,-57.9891 482.52,-61.0931" stroke="#d4d4d4" fill="none"></polygon></a></g><!-- node4 --><g class="node class" id="graph290_4"><a xlink:title="xitrum.routing.SwaggerJson" xlink:href="routing/SwaggerJson.html#inheritance-diagram"><polygon points="564,-26 462,-26 462,-1.24345e-14 564,-3.55271e-15 564,-26" stroke="#115f3b" fill="#0a955b"></polygon><image xlink:href="../lib/class_diagram.png" y="-21" x="472" preserveAspectRatio="xMinYMin meet" height="16px" width="16px"></image><text fill="#ffffff" font-size="10.00" font-family="Arial" y="-10.6667" x="494" text-anchor="start">SwaggerJson</text></a></g><!-- node0&#45;&gt;node4 --><g class="edge inheritance" id="graph290_0_4"><a xlink:title="SwaggerJson is a subtype of Action"><path d="M513,-56.6463C513,-46.8429 513,-35.003 513,-26.1297" stroke="#d4d4d4" fill="none"></path><polygon points="511.25,-56.8514 513,-61.8514 514.75,-56.8514 511.25,-56.8514" stroke="#d4d4d4" fill="none"></polygon></a></g><!-- node5 --><g class="node class" id="graph290_5"><a xlink:title="xitrum.routing.SwaggerUi" xlink:href="routing/SwaggerUi.html#inheritance-diagram"><polygon points="674,-26 582,-26 582,-1.24345e-14 674,-3.55271e-15 674,-26" stroke="#115f3b" fill="#0a955b"></polygon><image xlink:href="../lib/class_diagram.png" y="-21" x="592" preserveAspectRatio="xMinYMin meet" height="16px" width="16px"></image><text fill="#ffffff" font-size="10.00" font-family="Arial" y="-10.6667" x="614" text-anchor="start">SwaggerUi</text></a></g><!-- node0&#45;&gt;node5 --><g class="edge inheritance" id="graph290_0_5"><a xlink:title="SwaggerUi is a subtype of Action"><path d="M542.097,-59.3132C561.113,-49.0609 585.664,-35.8246 603.647,-26.1297" stroke="#d4d4d4" fill="none"></path><polygon points="540.959,-57.9382 537.389,-61.8514 542.62,-61.019 540.959,-57.9382" stroke="#d4d4d4" fill="none"></polygon></a></g><!-- node6 --><g class="node trait" id="graph290_6"><a xlink:title="xitrum.WebSocketActor" xlink:href="WebSocketActor.html#inheritance-diagram"><polygon points="812,-26 692,-26 692,-1.24345e-14 812,-3.55271e-15 812,-26" stroke="#37657d" fill="#498aad"></polygon><image xlink:href="../lib/trait_diagram.png" y="-21" x="702" preserveAspectRatio="xMinYMin meet" height="16px" width="16px"></image><text fill="#ffffff" font-size="10.00" font-family="Arial" y="-10.6667" x="724" text-anchor="start">WebSocketActor</text></a></g><!-- node0&#45;&gt;node6 --><g class="edge inheritance" id="graph290_0_6"><a xlink:title="WebSocketActor is a subtype of Action"><path d="M553.907,-64.3882C594.734,-53.7972 657.552,-37.5012 701.471,-26.1079" stroke="#d4d4d4" fill="none"></path><polygon points="553.44,-62.7013 549.039,-65.6508 554.319,-66.0892 553.44,-62.7013" stroke="#d4d4d4" fill="none"></polygon></a></g><!-- node7 --><g class="node class" id="graph290_7"><a xlink:title="xitrum.js" xlink:href="js.html#inheritance-diagram"><polygon points="882,-26 830,-26 830,-1.24345e-14 882,-3.55271e-15 882,-26" stroke="#115f3b" fill="#0a955b"></polygon><image xlink:href="../lib/class_diagram.png" y="-21" x="840" preserveAspectRatio="xMinYMin meet" height="16px" width="16px"></image><text fill="#ffffff" font-size="10.00" font-family="Arial" y="-10.6667" x="862" text-anchor="start">js</text></a></g><!-- node0&#45;&gt;node7 --><g class="edge inheritance" id="graph290_0_7"><a xlink:title="js is a subtype of Action"><path d="M554.294,-71.0562C613.904,-64.7741 727.207,-50.62 821,-26 823.884,-25.243 826.862,-24.3382 829.806,-23.3634" stroke="#d4d4d4" fill="none"></path><polygon points="553.837,-69.3443 549.046,-71.6036 554.2,-72.8255 553.837,-69.3443" stroke="#d4d4d4" fill="none"></polygon></a></g><!-- node8 --><g class="node trait" id="graph290_8"><a xlink:title="xitrum.scope.request.RequestEnv" xlink:href="scope/request/RequestEnv.html#inheritance-diagram"><polygon points="96,-150 2.84217e-14,-150 0,-124 96,-124 96,-150" stroke="#37657d" fill="#498aad"></polygon><image xlink:href="../lib/trait_diagram.png" y="-145" x="10" preserveAspectRatio="xMinYMin meet" height="16px" width="16px"></image><text fill="#ffffff" font-size="10.00" font-family="Arial" y="-134.667" x="32" text-anchor="start">RequestEnv</text></a></g><!-- node8&#45;&gt;node0 --><g class="edge inheritance" id="graph290_8_0"><a xlink:title="Action is a subtype of RequestEnv"><path d="M101.155,-124.69C102.448,-124.451 103.731,-124.22 105,-124 241.365,-100.328 405.358,-84.3942 476.794,-78.0647" stroke="#d4d4d4" fill="none"></path><polygon points="100.713,-122.992 96.1305,-125.65 101.37,-126.43 100.713,-122.992" stroke="#d4d4d4" fill="none"></polygon></a></g><!-- node9 --><g class="node trait" id="graph290_9"><a xlink:title="xitrum.scope.session.SessionEnv" xlink:href="scope/session/SessionEnv.html#inheritance-diagram"><polygon points="210,-150 114,-150 114,-124 210,-124 210,-150" stroke="#37657d" fill="#498aad"></polygon><image xlink:href="../lib/trait_diagram.png" y="-145" x="124" preserveAspectRatio="xMinYMin meet" height="16px" width="16px"></image><text fill="#ffffff" font-size="10.00" font-family="Arial" y="-134.667" x="146" text-anchor="start">SessionEnv</text></a></g><!-- node9&#45;&gt;node0 --><g class="edge inheritance" id="graph290_9_0"><a xlink:title="Action is a subtype of SessionEnv"><path d="M215.17,-124.768C216.458,-124.506 217.737,-124.249 219,-124 311.398,-105.78 421.015,-88.7004 476.666,-80.3487" stroke="#d4d4d4" fill="none"></path><polygon points="214.7,-123.078 210.159,-125.806 215.41,-126.505 214.7,-123.078" stroke="#d4d4d4" fill="none"></polygon></a></g><!-- node10 --><g class="node trait" id="graph290_10"><a xlink:title="xitrum.Log" xlink:href="Log.html#inheritance-diagram"><polygon points="288,-150 228,-150 228,-124 288,-124 288,-150" stroke="#37657d" fill="#498aad"></polygon><image xlink:href="../lib/trait_diagram.png" y="-145" x="238" preserveAspectRatio="xMinYMin meet" height="16px" width="16px"></image><text fill="#ffffff" font-size="10.00" font-family="Arial" y="-134.667" x="260" text-anchor="start">Log</text></a></g><!-- node10&#45;&gt;node0 --><g class="edge inheritance" id="graph290_10_0"><a xlink:title="Action is a subtype of Log"><path d="M293.161,-125.103C294.454,-124.722 295.737,-124.353 297,-124 359.589,-106.515 433.675,-90.7614 476.802,-82.073" stroke="#d4d4d4" fill="none"></path><polygon points="292.42,-123.5 288.143,-126.626 293.436,-126.849 292.42,-123.5" stroke="#d4d4d4" fill="none"></polygon></a></g><!-- node11 --><g class="node trait" id="graph290_11"><a xlink:title="xitrum.action.Net" xlink:href="action/Net.html#inheritance-diagram"><polygon points="366,-150 306,-150 306,-124 366,-124 366,-150" stroke="#37657d" fill="#498aad"></polygon><image xlink:href="../lib/trait_diagram.png" y="-145" x="316" preserveAspectRatio="xMinYMin meet" height="16px" width="16px"></image><text fill="#ffffff" font-size="10.00" font-family="Arial" y="-134.667" x="338" text-anchor="start">Net</text></a></g><!-- node11&#45;&gt;node0 --><g class="edge inheritance" id="graph290_11_0"><a xlink:title="Action is a subtype of Net"><path d="M370.81,-124.807C401.38,-114.098 445.69,-98.5775 476.697,-87.7162" stroke="#d4d4d4" fill="none"></path><polygon points="370.166,-123.178 366.026,-126.483 371.323,-126.481 370.166,-123.178" stroke="#d4d4d4" fill="none"></polygon></a></g><!-- node12 --><g class="node trait" id="graph290_12"><a xlink:title="xitrum.action.Filter" xlink:href="action/Filter.html#inheritance-diagram"><polygon points="450,-150 384,-150 384,-124 450,-124 450,-150" stroke="#37657d" fill="#498aad"></polygon><image xlink:href="../lib/trait_diagram.png" y="-145" x="394" preserveAspectRatio="xMinYMin meet" height="16px" width="16px"></image><text fill="#ffffff" font-size="10.00" font-family="Arial" y="-134.667" x="416" text-anchor="start">Filter</text></a></g><!-- node12&#45;&gt;node0 --><g class="edge inheritance" id="graph290_12_0"><a xlink:title="Action is a subtype of Filter"><path d="M441.694,-121.052C457.511,-110.837 477.786,-97.7425 492.67,-88.1297" stroke="#d4d4d4" fill="none"></path><polygon points="440.61,-119.669 437.359,-123.851 442.509,-122.609 440.61,-119.669" stroke="#d4d4d4" fill="none"></polygon></a></g><!-- node13 --><g class="node trait" id="graph290_13"><a xlink:title="xitrum.action.BasicAuth" xlink:href="action/BasicAuth.html#inheritance-diagram"><polygon points="558,-150 468,-150 468,-124 558,-124 558,-150" stroke="#37657d" fill="#498aad"></polygon><image xlink:href="../lib/trait_diagram.png" y="-145" x="478" preserveAspectRatio="xMinYMin meet" height="16px" width="16px"></image><text fill="#ffffff" font-size="10.00" font-family="Arial" y="-134.667" x="500" text-anchor="start">BasicAuth</text></a></g><!-- node13&#45;&gt;node0 --><g class="edge inheritance" id="graph290_13_0"><a xlink:title="Action is a subtype of BasicAuth"><path d="M513,-118.646C513,-108.843 513,-97.003 513,-88.1297" stroke="#d4d4d4" fill="none"></path><polygon points="511.25,-118.851 513,-123.851 514.75,-118.851 511.25,-118.851" stroke="#d4d4d4" fill="none"></polygon></a></g><!-- node14 --><g class="node trait" id="graph290_14"><a xlink:title="xitrum.action.Redirect" xlink:href="action/Redirect.html#inheritance-diagram"><polygon points="658,-150 576,-150 576,-124 658,-124 658,-150" stroke="#37657d" fill="#498aad"></polygon><image xlink:href="../lib/trait_diagram.png" y="-145" x="586" preserveAspectRatio="xMinYMin meet" height="16px" width="16px"></image><text fill="#ffffff" font-size="10.00" font-family="Arial" y="-134.667" x="608" text-anchor="start">Redirect</text></a></g><!-- node14&#45;&gt;node0 --><g class="edge inheritance" id="graph290_14_0"><a xlink:title="Action is a subtype of Redirect"><path d="M590.248,-121.052C573.113,-110.837 551.149,-97.7425 535.024,-88.1297" stroke="#d4d4d4" fill="none"></path><polygon points="589.753,-122.794 594.944,-123.851 591.546,-119.788 589.753,-122.794" stroke="#d4d4d4" fill="none"></polygon></a></g><!-- node15 --><g class="node trait" id="graph290_15"><a xlink:title="xitrum.action.Url" xlink:href="action/Url.html#inheritance-diagram"><polygon points="734,-150 676,-150 676,-124 734,-124 734,-150" stroke="#37657d" fill="#498aad"></polygon><image xlink:href="../lib/trait_diagram.png" y="-145" x="686" preserveAspectRatio="xMinYMin meet" height="16px" width="16px"></image><text fill="#ffffff" font-size="10.00" font-family="Arial" y="-134.667" x="708" text-anchor="start">Url</text></a></g><!-- node15&#45;&gt;node0 --><g class="edge inheritance" id="graph290_15_0"><a xlink:title="Action is a subtype of Url"><path d="M671.164,-125.383C669.758,-124.913 668.366,-124.451 667,-124 626.769,-110.72 580.419,-96.0582 549.166,-86.2653" stroke="#d4d4d4" fill="none"></path><polygon points="670.679,-127.066 675.976,-126.999 671.793,-123.748 670.679,-127.066" stroke="#d4d4d4" fill="none"></polygon></a></g><!-- node16 --><g class="node trait" id="graph290_16"><a xlink:title="xitrum.view.Renderer" xlink:href="view/Renderer.html#inheritance-diagram"><polygon points="836,-150 752,-150 752,-124 836,-124 836,-150" stroke="#37657d" fill="#498aad"></polygon><image xlink:href="../lib/trait_diagram.png" y="-145" x="762" preserveAspectRatio="xMinYMin meet" height="16px" width="16px"></image><text fill="#ffffff" font-size="10.00" font-family="Arial" y="-134.667" x="784" text-anchor="start">Renderer</text></a></g><!-- node16&#45;&gt;node0 --><g class="edge inheritance" id="graph290_16_0"><a xlink:title="Action is a subtype of Renderer"><path d="M746.78,-124.893C745.508,-124.59 744.246,-124.291 743,-124 674.822,-108.055 594.769,-91.4827 549.35,-82.2798" stroke="#d4d4d4" fill="none"></path><polygon points="746.46,-126.616 751.731,-126.088 747.281,-123.214 746.46,-126.616" stroke="#d4d4d4" fill="none"></polygon></a></g><!-- node17 --><g class="node trait" id="graph290_17"><a xlink:title="xitrum.view.Responder" xlink:href="view/Responder.html#inheritance-diagram"><polygon points="946,-150 854,-150 854,-124 946,-124 946,-150" stroke="#37657d" fill="#498aad"></polygon><image xlink:href="../lib/trait_diagram.png" y="-145" x="864" preserveAspectRatio="xMinYMin meet" height="16px" width="16px"></image><text fill="#ffffff" font-size="10.00" font-family="Arial" y="-134.667" x="886" text-anchor="start">Responder</text></a></g><!-- node17&#45;&gt;node0 --><g class="edge inheritance" id="graph290_17_0"><a xlink:title="Action is a subtype of Responder"><path d="M848.834,-124.753C847.544,-124.494 846.265,-124.242 845,-124 737.994,-103.496 610.167,-86.8016 549.034,-79.2916" stroke="#d4d4d4" fill="none"></path><polygon points="848.597,-126.491 853.848,-125.789 849.305,-123.064 848.597,-126.491" stroke="#d4d4d4" fill="none"></polygon></a></g><!-- node18 --><g class="node trait" id="graph290_18"><a xlink:title="xitrum.I18n" xlink:href="I18n.html#inheritance-diagram"><polygon points="1028,-150 964,-150 964,-124 1028,-124 1028,-150" stroke="#37657d" fill="#498aad"></polygon><image xlink:href="../lib/trait_diagram.png" y="-145" x="974" preserveAspectRatio="xMinYMin meet" height="16px" width="16px"></image><text fill="#ffffff" font-size="10.00" font-family="Arial" y="-134.667" x="996" text-anchor="start">I18n</text></a></g><!-- node18&#45;&gt;node0 --><g class="edge inheritance" id="graph290_18_0"><a xlink:title="Action is a subtype of I18n"><path d="M958.877,-124.879C957.574,-124.565 956.278,-124.271 955,-124 806.394,-92.5234 625.133,-80.4866 549.189,-76.601" stroke="#d4d4d4" fill="none"></path><polygon points="958.653,-126.628 963.931,-126.175 959.522,-123.238 958.653,-126.628" stroke="#d4d4d4" fill="none"></polygon></a></g></g></svg></div>
+                <div class="diagram" id="inheritance-diagram"><svg class="class-diagram" id="graph277" viewBox="0.00 0.00 1047.00 158.00" height="158pt" width="1047pt" xmlns:xlink="http://www.w3.org/1999/xlink" xmlns="http://www.w3.org/2000/svg"><g transform="scale(1 1) rotate(0) translate(4 154)" class="graph" id="graph1"><polygon points="-4,5 -4,-154 1044,-154 1044,5 -4,5" stroke="white" fill="white"></polygon><g class="cluster" id="graph2"></g><g class="cluster" id="graph3"></g><!-- node0 --><g class="node this trait" id="graph277_0"><a xlink:title="xitrum.Action (this trait)" xlink:href="#inheritance-diagram"><polygon points="560,-88 488,-88 488,-62 560,-62 560,-88" stroke="#37657d" fill="#498aad"></polygon><image xlink:href="../lib/trait_diagram.png" y="-83" x="498" preserveAspectRatio="xMinYMin meet" height="16px" width="16px"></image><text fill="#ffffff" font-size="10.00" font-family="Arial" y="-72.6667" x="520" text-anchor="start">Action</text></a></g><!-- node1 --><g class="node trait" id="graph277_1"><a xlink:title="xitrum.ActorAction" xlink:href="ActorAction.html#inheritance-diagram"><polygon points="96,-26 2.84217e-14,-26 0,-1.24345e-14 96,-3.55271e-15 96,-26" stroke="#37657d" fill="#498aad"></polygon><image xlink:href="../lib/trait_diagram.png" y="-21" x="10" preserveAspectRatio="xMinYMin meet" height="16px" width="16px"></image><text fill="#ffffff" font-size="10.00" font-family="Arial" y="-10.6667" x="32" text-anchor="start">ActorAction</text></a></g><!-- node0&#45;&gt;node1 --><g class="edge inheritance" id="graph277_0_1"><a xlink:title="ActorAction is a subtype of Action"><path d="M482.668,-71.6556C407.259,-65.2237 242.45,-49.6403 105,-26 102.099,-25.5011 99.124,-24.9484 96.1287,-24.3604" stroke="#d4d4d4" fill="none"></path><polygon points="482.812,-73.424 487.942,-72.1029 483.108,-69.9365 482.812,-73.424" stroke="#d4d4d4" fill="none"></polygon></a></g><!-- node2 --><g class="node trait" id="graph277_2"><a xlink:title="xitrum.FutureAction" xlink:href="FutureAction.html#inheritance-diagram"><polygon points="214,-26 114,-26 114,-1.24345e-14 214,-3.55271e-15 214,-26" stroke="#37657d" fill="#498aad"></polygon><image xlink:href="../lib/trait_diagram.png" y="-21" x="124" preserveAspectRatio="xMinYMin meet" height="16px" width="16px"></image><text fill="#ffffff" font-size="10.00" font-family="Arial" y="-10.6667" x="146" text-anchor="start">FutureAction</text></a></g><!-- node0&#45;&gt;node2 --><g class="edge inheritance" id="graph277_0_2"><a xlink:title="FutureAction is a subtype of Action"><path d="M482.623,-69.0073C424.482,-60.4179 315.374,-43.6814 223,-26 220.116,-25.4479 217.156,-24.861 214.173,-24.2536" stroke="#d4d4d4" fill="none"></path><polygon points="482.544,-70.7646 487.746,-69.7626 483.055,-67.302 482.544,-70.7646" stroke="#d4d4d4" fill="none"></polygon></a></g><!-- node3 --><g class="node trait" id="graph277_3"><a xlink:title="xitrum.sockjs.ServerIdSessionIdValidator" xlink:href="sockjs/ServerIdSessionIdValidator.html#inheritance-diagram"><polygon points="392,-26 232,-26 232,-1.24345e-14 392,-3.55271e-15 392,-26" stroke="#37657d" fill="#498aad"></polygon><image xlink:href="../lib/trait_diagram.png" y="-21" x="242" preserveAspectRatio="xMinYMin meet" height="16px" width="16px"></image><text fill="#ffffff" font-size="10.00" font-family="Arial" y="-10.6667" x="264" text-anchor="start">ServerIdSessionIdValidator</text></a></g><!-- node0&#45;&gt;node3 --><g class="edge inheritance" id="graph277_0_3"><a xlink:title="ServerIdSessionIdValidator is a subtype of Action"><path d="M482.337,-62.8156C446.151,-52.2328 393.874,-36.9443 356.796,-26.1006" stroke="#d4d4d4" fill="none"></path><polygon points="482.266,-64.6179 487.556,-64.3418 483.248,-61.2586 482.266,-64.6179" stroke="#d4d4d4" fill="none"></polygon></a></g><!-- node4 --><g class="node trait" id="graph277_4"><a xlink:title="xitrum.SockJsAction" xlink:href="SockJsAction.html#inheritance-diagram"><polygon points="516,-26 410,-26 410,-1.24345e-14 516,-3.55271e-15 516,-26" stroke="#37657d" fill="#498aad"></polygon><image xlink:href="../lib/trait_diagram.png" y="-21" x="420" preserveAspectRatio="xMinYMin meet" height="16px" width="16px"></image><text fill="#ffffff" font-size="10.00" font-family="Arial" y="-10.6667" x="442" text-anchor="start">SockJsAction</text></a></g><!-- node0&#45;&gt;node4 --><g class="edge inheritance" id="graph277_0_4"><a xlink:title="SockJsAction is a subtype of Action"><path d="M507.531,-58.2605C497.6,-48.1676 485.133,-35.496 475.918,-26.1297" stroke="#d4d4d4" fill="none"></path><polygon points="506.309,-59.5146 511.063,-61.8514 508.804,-57.0599 506.309,-59.5146" stroke="#d4d4d4" fill="none"></polygon></a></g><!-- node5 --><g class="node class" id="graph277_5"><a xlink:title="xitrum.routing.SwaggerJson" xlink:href="routing/SwaggerJson.html#inheritance-diagram"><polygon points="636,-26 534,-26 534,-1.24345e-14 636,-3.55271e-15 636,-26" stroke="#115f3b" fill="#0a955b"></polygon><image xlink:href="../lib/class_diagram.png" y="-21" x="544" preserveAspectRatio="xMinYMin meet" height="16px" width="16px"></image><text fill="#ffffff" font-size="10.00" font-family="Arial" y="-10.6667" x="566" text-anchor="start">SwaggerJson</text></a></g><!-- node0&#45;&gt;node5 --><g class="edge inheritance" id="graph277_0_5"><a xlink:title="SwaggerJson is a subtype of Action"><path d="M540.469,-58.2605C550.4,-48.1676 562.867,-35.496 572.082,-26.1297" stroke="#d4d4d4" fill="none"></path><polygon points="539.196,-57.0599 536.937,-61.8514 541.691,-59.5146 539.196,-57.0599" stroke="#d4d4d4" fill="none"></polygon></a></g><!-- node6 --><g class="node class" id="graph277_6"><a xlink:title="xitrum.routing.SwaggerUi" xlink:href="routing/SwaggerUi.html#inheritance-diagram"><polygon points="746,-26 654,-26 654,-1.24345e-14 746,-3.55271e-15 746,-26" stroke="#115f3b" fill="#0a955b"></polygon><image xlink:href="../lib/class_diagram.png" y="-21" x="664" preserveAspectRatio="xMinYMin meet" height="16px" width="16px"></image><text fill="#ffffff" font-size="10.00" font-family="Arial" y="-10.6667" x="686" text-anchor="start">SwaggerUi</text></a></g><!-- node0&#45;&gt;node6 --><g class="edge inheritance" id="graph277_0_6"><a xlink:title="SwaggerUi is a subtype of Action"><path d="M565.066,-60.5335C594.622,-50.1219 634.162,-36.1928 662.794,-26.1066" stroke="#d4d4d4" fill="none"></path><polygon points="564.175,-58.9918 560.041,-62.3038 565.338,-62.293 564.175,-58.9918" stroke="#d4d4d4" fill="none"></polygon></a></g><!-- node7 --><g class="node trait" id="graph277_7"><a xlink:title="xitrum.WebSocketAction" xlink:href="WebSocketAction.html#inheritance-diagram"><polygon points="888,-26 764,-26 764,-1.24345e-14 888,-3.55271e-15 888,-26" stroke="#37657d" fill="#498aad"></polygon><image xlink:href="../lib/trait_diagram.png" y="-21" x="774" preserveAspectRatio="xMinYMin meet" height="16px" width="16px"></image><text fill="#ffffff" font-size="10.00" font-family="Arial" y="-10.6667" x="796" text-anchor="start">WebSocketAction</text></a></g><!-- node0&#45;&gt;node7 --><g class="edge inheritance" id="graph277_0_7"><a xlink:title="WebSocketAction is a subtype of Action"><path d="M565.277,-66.5259C616.536,-56.0025 704.457,-37.9525 763.875,-25.7542" stroke="#d4d4d4" fill="none"></path><polygon points="564.674,-64.8631 560.128,-67.5829 565.378,-68.2916 564.674,-64.8631" stroke="#d4d4d4" fill="none"></polygon></a></g><!-- node8 --><g class="node class" id="graph277_8"><a xlink:title="xitrum.js" xlink:href="js.html#inheritance-diagram"><polygon points="958,-26 906,-26 906,-1.24345e-14 958,-3.55271e-15 958,-26" stroke="#115f3b" fill="#0a955b"></polygon><image xlink:href="../lib/class_diagram.png" y="-21" x="916" preserveAspectRatio="xMinYMin meet" height="16px" width="16px"></image><text fill="#ffffff" font-size="10.00" font-family="Arial" y="-10.6667" x="938" text-anchor="start">js</text></a></g><!-- node0&#45;&gt;node8 --><g class="edge inheritance" id="graph277_0_8"><a xlink:title="js is a subtype of Action"><path d="M565.525,-72.6024C635.006,-67.9139 778.84,-55.3077 897,-26 899.894,-25.2822 902.878,-24.4026 905.826,-23.4425" stroke="#d4d4d4" fill="none"></path><polygon points="565.12,-70.8753 560.247,-72.9529 565.352,-74.3676 565.12,-70.8753" stroke="#d4d4d4" fill="none"></polygon></a></g><!-- node9 --><g class="node trait" id="graph277_9"><a xlink:title="xitrum.scope.request.RequestEnv" xlink:href="scope/request/RequestEnv.html#inheritance-diagram"><polygon points="107,-150 11,-150 11,-124 107,-124 107,-150" stroke="#37657d" fill="#498aad"></polygon><image xlink:href="../lib/trait_diagram.png" y="-145" x="21" preserveAspectRatio="xMinYMin meet" height="16px" width="16px"></image><text fill="#ffffff" font-size="10.00" font-family="Arial" y="-134.667" x="43" text-anchor="start">RequestEnv</text></a></g><!-- node9&#45;&gt;node0 --><g class="edge inheritance" id="graph277_9_0"><a xlink:title="Action is a subtype of RequestEnv"><path d="M112.155,-124.69C113.448,-124.451 114.731,-124.22 116,-124 252.365,-100.328 416.358,-84.3942 487.794,-78.0647" stroke="#d4d4d4" fill="none"></path><polygon points="111.713,-122.992 107.131,-125.65 112.37,-126.43 111.713,-122.992" stroke="#d4d4d4" fill="none"></polygon></a></g><!-- node10 --><g class="node trait" id="graph277_10"><a xlink:title="xitrum.scope.session.SessionEnv" xlink:href="scope/session/SessionEnv.html#inheritance-diagram"><polygon points="221,-150 125,-150 125,-124 221,-124 221,-150" stroke="#37657d" fill="#498aad"></polygon><image xlink:href="../lib/trait_diagram.png" y="-145" x="135" preserveAspectRatio="xMinYMin meet" height="16px" width="16px"></image><text fill="#ffffff" font-size="10.00" font-family="Arial" y="-134.667" x="157" text-anchor="start">SessionEnv</text></a></g><!-- node10&#45;&gt;node0 --><g class="edge inheritance" id="graph277_10_0"><a xlink:title="Action is a subtype of SessionEnv"><path d="M226.17,-124.768C227.458,-124.506 228.737,-124.249 230,-124 322.398,-105.78 432.015,-88.7004 487.666,-80.3487" stroke="#d4d4d4" fill="none"></path><polygon points="225.7,-123.078 221.159,-125.806 226.41,-126.505 225.7,-123.078" stroke="#d4d4d4" fill="none"></polygon></a></g><!-- node11 --><g class="node trait" id="graph277_11"><a xlink:title="xitrum.Log" xlink:href="Log.html#inheritance-diagram"><polygon points="299,-150 239,-150 239,-124 299,-124 299,-150" stroke="#37657d" fill="#498aad"></polygon><image xlink:href="../lib/trait_diagram.png" y="-145" x="249" preserveAspectRatio="xMinYMin meet" height="16px" width="16px"></image><text fill="#ffffff" font-size="10.00" font-family="Arial" y="-134.667" x="271" text-anchor="start">Log</text></a></g><!-- node11&#45;&gt;node0 --><g class="edge inheritance" id="graph277_11_0"><a xlink:title="Action is a subtype of Log"><path d="M304.161,-125.103C305.454,-124.722 306.737,-124.353 308,-124 370.589,-106.515 444.675,-90.7614 487.802,-82.073" stroke="#d4d4d4" fill="none"></path><polygon points="303.42,-123.5 299.143,-126.626 304.436,-126.849 303.42,-123.5" stroke="#d4d4d4" fill="none"></polygon></a></g><!-- node12 --><g class="node trait" id="graph277_12"><a xlink:title="xitrum.action.Net" xlink:href="action/Net.html#inheritance-diagram"><polygon points="377,-150 317,-150 317,-124 377,-124 377,-150" stroke="#37657d" fill="#498aad"></polygon><image xlink:href="../lib/trait_diagram.png" y="-145" x="327" preserveAspectRatio="xMinYMin meet" height="16px" width="16px"></image><text fill="#ffffff" font-size="10.00" font-family="Arial" y="-134.667" x="349" text-anchor="start">Net</text></a></g><!-- node12&#45;&gt;node0 --><g class="edge inheritance" id="graph277_12_0"><a xlink:title="Action is a subtype of Net"><path d="M381.81,-124.807C412.38,-114.098 456.69,-98.5775 487.697,-87.7162" stroke="#d4d4d4" fill="none"></path><polygon points="381.166,-123.178 377.026,-126.483 382.323,-126.481 381.166,-123.178" stroke="#d4d4d4" fill="none"></polygon></a></g><!-- node13 --><g class="node trait" id="graph277_13"><a xlink:title="xitrum.action.Filter" xlink:href="action/Filter.html#inheritance-diagram"><polygon points="461,-150 395,-150 395,-124 461,-124 461,-150" stroke="#37657d" fill="#498aad"></polygon><image xlink:href="../lib/trait_diagram.png" y="-145" x="405" preserveAspectRatio="xMinYMin meet" height="16px" width="16px"></image><text fill="#ffffff" font-size="10.00" font-family="Arial" y="-134.667" x="427" text-anchor="start">Filter</text></a></g><!-- node13&#45;&gt;node0 --><g class="edge inheritance" id="graph277_13_0"><a xlink:title="Action is a subtype of Filter"><path d="M452.694,-121.052C468.511,-110.837 488.786,-97.7425 503.67,-88.1297" stroke="#d4d4d4" fill="none"></path><polygon points="451.61,-119.669 448.359,-123.851 453.509,-122.609 451.61,-119.669" stroke="#d4d4d4" fill="none"></polygon></a></g><!-- node14 --><g class="node trait" id="graph277_14"><a xlink:title="xitrum.action.BasicAuth" xlink:href="action/BasicAuth.html#inheritance-diagram"><polygon points="569,-150 479,-150 479,-124 569,-124 569,-150" stroke="#37657d" fill="#498aad"></polygon><image xlink:href="../lib/trait_diagram.png" y="-145" x="489" preserveAspectRatio="xMinYMin meet" height="16px" width="16px"></image><text fill="#ffffff" font-size="10.00" font-family="Arial" y="-134.667" x="511" text-anchor="start">BasicAuth</text></a></g><!-- node14&#45;&gt;node0 --><g class="edge inheritance" id="graph277_14_0"><a xlink:title="Action is a subtype of BasicAuth"><path d="M524,-118.646C524,-108.843 524,-97.003 524,-88.1297" stroke="#d4d4d4" fill="none"></path><polygon points="522.25,-118.851 524,-123.851 525.75,-118.851 522.25,-118.851" stroke="#d4d4d4" fill="none"></polygon></a></g><!-- node15 --><g class="node trait" id="graph277_15"><a xlink:title="xitrum.action.Redirect" xlink:href="action/Redirect.html#inheritance-diagram"><polygon points="669,-150 587,-150 587,-124 669,-124 669,-150" stroke="#37657d" fill="#498aad"></polygon><image xlink:href="../lib/trait_diagram.png" y="-145" x="597" preserveAspectRatio="xMinYMin meet" height="16px" width="16px"></image><text fill="#ffffff" font-size="10.00" font-family="Arial" y="-134.667" x="619" text-anchor="start">Redirect</text></a></g><!-- node15&#45;&gt;node0 --><g class="edge inheritance" id="graph277_15_0"><a xlink:title="Action is a subtype of Redirect"><path d="M601.248,-121.052C584.113,-110.837 562.149,-97.7425 546.024,-88.1297" stroke="#d4d4d4" fill="none"></path><polygon points="600.753,-122.794 605.944,-123.851 602.546,-119.788 600.753,-122.794" stroke="#d4d4d4" fill="none"></polygon></a></g><!-- node16 --><g class="node trait" id="graph277_16"><a xlink:title="xitrum.action.Url" xlink:href="action/Url.html#inheritance-diagram"><polygon points="745,-150 687,-150 687,-124 745,-124 745,-150" stroke="#37657d" fill="#498aad"></polygon><image xlink:href="../lib/trait_diagram.png" y="-145" x="697" preserveAspectRatio="xMinYMin meet" height="16px" width="16px"></image><text fill="#ffffff" font-size="10.00" font-family="Arial" y="-134.667" x="719" text-anchor="start">Url</text></a></g><!-- node16&#45;&gt;node0 --><g class="edge inheritance" id="graph277_16_0"><a xlink:title="Action is a subtype of Url"><path d="M682.164,-125.383C680.758,-124.913 679.366,-124.451 678,-124 637.769,-110.72 591.419,-96.0582 560.166,-86.2653" stroke="#d4d4d4" fill="none"></path><polygon points="681.679,-127.066 686.976,-126.999 682.793,-123.748 681.679,-127.066" stroke="#d4d4d4" fill="none"></polygon></a></g><!-- node17 --><g class="node trait" id="graph277_17"><a xlink:title="xitrum.view.Renderer" xlink:href="view/Renderer.html#inheritance-diagram"><polygon points="847,-150 763,-150 763,-124 847,-124 847,-150" stroke="#37657d" fill="#498aad"></polygon><image xlink:href="../lib/trait_diagram.png" y="-145" x="773" preserveAspectRatio="xMinYMin meet" height="16px" width="16px"></image><text fill="#ffffff" font-size="10.00" font-family="Arial" y="-134.667" x="795" text-anchor="start">Renderer</text></a></g><!-- node17&#45;&gt;node0 --><g class="edge inheritance" id="graph277_17_0"><a xlink:title="Action is a subtype of Renderer"><path d="M757.78,-124.893C756.508,-124.59 755.246,-124.291 754,-124 685.822,-108.055 605.769,-91.4827 560.35,-82.2798" stroke="#d4d4d4" fill="none"></path><polygon points="757.46,-126.616 762.731,-126.088 758.281,-123.214 757.46,-126.616" stroke="#d4d4d4" fill="none"></polygon></a></g><!-- node18 --><g class="node trait" id="graph277_18"><a xlink:title="xitrum.view.Responder" xlink:href="view/Responder.html#inheritance-diagram"><polygon points="957,-150 865,-150 865,-124 957,-124 957,-150" stroke="#37657d" fill="#498aad"></polygon><image xlink:href="../lib/trait_diagram.png" y="-145" x="875" preserveAspectRatio="xMinYMin meet" height="16px" width="16px"></image><text fill="#ffffff" font-size="10.00" font-family="Arial" y="-134.667" x="897" text-anchor="start">Responder</text></a></g><!-- node18&#45;&gt;node0 --><g class="edge inheritance" id="graph277_18_0"><a xlink:title="Action is a subtype of Responder"><path d="M859.834,-124.753C858.544,-124.494 857.265,-124.242 856,-124 748.994,-103.496 621.167,-86.8016 560.034,-79.2916" stroke="#d4d4d4" fill="none"></path><polygon points="859.597,-126.491 864.848,-125.789 860.305,-123.064 859.597,-126.491" stroke="#d4d4d4" fill="none"></polygon></a></g><!-- node19 --><g class="node trait" id="graph277_19"><a xlink:title="xitrum.I18n" xlink:href="I18n.html#inheritance-diagram"><polygon points="1039,-150 975,-150 975,-124 1039,-124 1039,-150" stroke="#37657d" fill="#498aad"></polygon><image xlink:href="../lib/trait_diagram.png" y="-145" x="985" preserveAspectRatio="xMinYMin meet" height="16px" width="16px"></image><text fill="#ffffff" font-size="10.00" font-family="Arial" y="-134.667" x="1007" text-anchor="start">I18n</text></a></g><!-- node19&#45;&gt;node0 --><g class="edge inheritance" id="graph277_19_0"><a xlink:title="Action is a subtype of I18n"><path d="M969.877,-124.879C968.574,-124.565 967.278,-124.271 966,-124 817.394,-92.5234 636.133,-80.4866 560.189,-76.601" stroke="#d4d4d4" fill="none"></path><polygon points="969.653,-126.628 974.931,-126.175 970.522,-123.238 969.653,-126.628" stroke="#d4d4d4" fill="none"></polygon></a></g></g></svg></div>
               </div></div>
         
 
@@ -478,7 +478,7 @@ to let the user in.
         <span class="kind">lazy val</span>
       </span>
       <span class="symbol">
-        <span class="name">bodyFileParams</span><span class="result">: <a href="scope/request/package.html#FileUploadParams=scala.collection.mutable.Map[String,Seq[org.jboss.netty.handler.codec.http.multipart.FileUpload]]" class="extmbr" name="xitrum.scope.request.FileUploadParams">FileUploadParams</a></span>
+        <span class="name">bodyFileParams</span><span class="result">: <a href="scope/request/package.html#FileUploadParams=scala.collection.mutable.Map[String,Seq[io.netty.handler.codec.http.multipart.FileUpload]]" class="extmbr" name="xitrum.scope.request.FileUploadParams">FileUploadParams</a></span>
       </span>
       </h4>
       <div class="fullcomment"><dl class="attributes block"> <dt>Definition Classes</dt><dd><a href="scope/request/RequestEnv.html" class="extype" name="xitrum.scope.request.RequestEnv">RequestEnv</a></dd></dl></div>
@@ -548,7 +548,7 @@ to let the user in.
       </h4>
       <p class="shortcomment cmt">Called by Dispatcher</p><div class="fullcomment"><div class="comment cmt"><p>Called by Dispatcher</p></div><dl class="attributes block"> <dt>Definition Classes</dt><dd><a href="action/Filter.html" class="extype" name="xitrum.action.Filter">Filter</a></dd></dl></div>
     </li><li name="xitrum.scope.request.RequestEnv#channel" visbl="pub" data-isabs="false" fullComment="yes" group="Ungrouped">
-      <a id="channel:org.jboss.netty.channel.Channel"></a>
+      <a id="channel:io.netty.channel.Channel"></a>
       <a id="channel:Channel"></a>
       <h4 class="signature">
       <span class="modifier_kind">
@@ -556,7 +556,7 @@ to let the user in.
         <span class="kind">lazy val</span>
       </span>
       <span class="symbol">
-        <span class="name">channel</span><span class="result">: <span class="extype" name="org.jboss.netty.channel.Channel">Channel</span></span>
+        <span class="name">channel</span><span class="result">: <span class="extype" name="io.netty.channel.Channel">Channel</span></span>
       </span>
       </h4>
       <div class="fullcomment"><dl class="attributes block"> <dt>Definition Classes</dt><dd><a href="scope/request/RequestEnv.html" class="extype" name="xitrum.scope.request.RequestEnv">RequestEnv</a></dd></dl></div>
@@ -644,6 +644,19 @@ to let the user in.
       </span>
       </h4>
       <div class="fullcomment"><dl class="attributes block"> <dt>Definition Classes</dt><dd>AnyRef → Any</dd></dl></div>
+    </li><li name="xitrum.Action#executionContext" visbl="pub" data-isabs="false" fullComment="no" group="Ungrouped">
+      <a id="executionContext:scala.concurrent.ExecutionContext"></a>
+      <a id="executionContext:ExecutionContext"></a>
+      <h4 class="signature">
+      <span class="modifier_kind">
+        <span class="modifier">implicit </span>
+        <span class="kind">val</span>
+      </span>
+      <span class="symbol">
+        <span class="name">executionContext</span><span class="result">: <span class="extype" name="scala.concurrent.ExecutionContext">ExecutionContext</span></span>
+      </span>
+      </h4>
+      
     </li><li name="scala.AnyRef#finalize" visbl="prt" data-isabs="false" fullComment="yes" group="Ungrouped">
       <a id="finalize():Unit"></a>
       <a id="finalize():Unit"></a>
@@ -931,7 +944,7 @@ use JSON4S or xitrum.util.Json, e.g xitrum.util.Json.generate(Seq(string)).</p><
       </h4>
       <div class="fullcomment"><dl class="attributes block"> <dt>Definition Classes</dt><dd><a href="view/Js.html" class="extype" name="xitrum.view.Js">Js</a></dd></dl></div>
     </li><li name="xitrum.view.Js#jsRedirectTo" visbl="pub" data-isabs="false" fullComment="yes" group="Ungrouped">
-      <a id="jsRedirectTo[T&lt;:xitrum.Action](params:(String,Any)*)(implicitevidence$1:Manifest[T]):org.jboss.netty.channel.ChannelFuture"></a>
+      <a id="jsRedirectTo[T&lt;:xitrum.Action](params:(String,Any)*)(implicitevidence$1:Manifest[T]):io.netty.channel.ChannelFuture"></a>
       <a id="jsRedirectTo[T&lt;:Action]((String,Any)*)(Manifest[T]):ChannelFuture"></a>
       <h4 class="signature">
       <span class="modifier_kind">
@@ -939,12 +952,12 @@ use JSON4S or xitrum.util.Json, e.g xitrum.util.Json.generate(Seq(string)).</p><
         <span class="kind">def</span>
       </span>
       <span class="symbol">
-        <span class="name">jsRedirectTo</span><span class="tparams">[<span name="T">T &lt;: <a href="" class="extype" name="xitrum.Action">Action</a></span>]</span><span class="params">(<span name="params">params: (<span class="extype" name="scala.Predef.String">String</span>, <span class="extype" name="scala.Any">Any</span>)*</span>)</span><span class="params">(<span class="implicit">implicit </span><span name="arg0">arg0: <span class="extype" name="scala.Predef.Manifest">Manifest</span>[<span class="extype" name="xitrum.view.Js.jsRedirectTo.T">T</span>]</span>)</span><span class="result">: <span class="extype" name="org.jboss.netty.channel.ChannelFuture">ChannelFuture</span></span>
+        <span class="name">jsRedirectTo</span><span class="tparams">[<span name="T">T &lt;: <a href="" class="extype" name="xitrum.Action">Action</a></span>]</span><span class="params">(<span name="params">params: (<span class="extype" name="scala.Predef.String">String</span>, <span class="extype" name="scala.Any">Any</span>)*</span>)</span><span class="params">(<span class="implicit">implicit </span><span name="arg0">arg0: <span class="extype" name="scala.Predef.Manifest">Manifest</span>[<span class="extype" name="xitrum.view.Js.jsRedirectTo.T">T</span>]</span>)</span><span class="result">: <span class="extype" name="io.netty.channel.ChannelFuture">ChannelFuture</span></span>
       </span>
       </h4>
       <div class="fullcomment"><dl class="attributes block"> <dt>Definition Classes</dt><dd><a href="view/Js.html" class="extype" name="xitrum.view.Js">Js</a></dd></dl></div>
     </li><li name="xitrum.view.Js#jsRedirectTo" visbl="pub" data-isabs="false" fullComment="yes" group="Ungrouped">
-      <a id="jsRedirectTo(location:Any):org.jboss.netty.channel.ChannelFuture"></a>
+      <a id="jsRedirectTo(location:Any):io.netty.channel.ChannelFuture"></a>
       <a id="jsRedirectTo(Any):ChannelFuture"></a>
       <h4 class="signature">
       <span class="modifier_kind">
@@ -952,7 +965,7 @@ use JSON4S or xitrum.util.Json, e.g xitrum.util.Json.generate(Seq(string)).</p><
         <span class="kind">def</span>
       </span>
       <span class="symbol">
-        <span class="name">jsRedirectTo</span><span class="params">(<span name="location">location: <span class="extype" name="scala.Any">Any</span></span>)</span><span class="result">: <span class="extype" name="org.jboss.netty.channel.ChannelFuture">ChannelFuture</span></span>
+        <span class="name">jsRedirectTo</span><span class="params">(<span name="location">location: <span class="extype" name="scala.Any">Any</span></span>)</span><span class="result">: <span class="extype" name="io.netty.channel.ChannelFuture">ChannelFuture</span></span>
       </span>
       </h4>
       <p class="shortcomment cmt">See http://stackoverflow.</p><div class="fullcomment"><div class="comment cmt"><p>See http://stackoverflow.com/questions/503093/how-can-i-make-a-redirect-page-in-jquery</p></div><dl class="attributes block"> <dt>Definition Classes</dt><dd><a href="view/Js.html" class="extype" name="xitrum.view.Js">Js</a></dd></dl></div>
@@ -986,7 +999,7 @@ use JSON4S or xitrum.util.Json, e.g xitrum.util.Json.generate(Seq(string)).</p><
 Used in application layout to display the flash message right after a view is loaded.
 </p></div><dl class="attributes block"> <dt>Definition Classes</dt><dd><a href="view/Flash.html" class="extype" name="xitrum.view.Flash">Flash</a></dd></dl></div>
     </li><li name="xitrum.view.Js#jsRespond" visbl="pub" data-isabs="false" fullComment="yes" group="Ungrouped">
-      <a id="jsRespond(fragments:Any*):org.jboss.netty.channel.ChannelFuture"></a>
+      <a id="jsRespond(fragments:Any*):io.netty.channel.ChannelFuture"></a>
       <a id="jsRespond(Any*):ChannelFuture"></a>
       <h4 class="signature">
       <span class="modifier_kind">
@@ -994,7 +1007,7 @@ Used in application layout to display the flash message right after a view is lo
         <span class="kind">def</span>
       </span>
       <span class="symbol">
-        <span class="name">jsRespond</span><span class="params">(<span name="fragments">fragments: <span class="extype" name="scala.Any">Any</span>*</span>)</span><span class="result">: <span class="extype" name="org.jboss.netty.channel.ChannelFuture">ChannelFuture</span></span>
+        <span class="name">jsRespond</span><span class="params">(<span name="fragments">fragments: <span class="extype" name="scala.Any">Any</span>*</span>)</span><span class="result">: <span class="extype" name="io.netty.channel.ChannelFuture">ChannelFuture</span></span>
       </span>
       </h4>
       <div class="fullcomment"><dl class="attributes block"> <dt>Definition Classes</dt><dd><a href="view/Js.html" class="extype" name="xitrum.view.Js">Js</a></dd></dl></div>
@@ -1187,7 +1200,7 @@ has been sent to the client.
       </h4>
       <div class="fullcomment"><dl class="attributes block"> <dt>Definition Classes</dt><dd><a href="scope/request/RequestEnv.html" class="extype" name="xitrum.scope.request.RequestEnv">RequestEnv</a></dd></dl></div>
     </li><li name="xitrum.action.Redirect#redirectTo" visbl="pub" data-isabs="false" fullComment="yes" group="Ungrouped">
-      <a id="redirectTo[T&lt;:xitrum.Action](params:(String,Any)*)(implicitevidence$1:Manifest[T]):org.jboss.netty.channel.ChannelFuture"></a>
+      <a id="redirectTo[T&lt;:xitrum.Action](params:(String,Any)*)(implicitevidence$1:Manifest[T]):io.netty.channel.ChannelFuture"></a>
       <a id="redirectTo[T&lt;:Action]((String,Any)*)(Manifest[T]):ChannelFuture"></a>
       <h4 class="signature">
       <span class="modifier_kind">
@@ -1195,12 +1208,12 @@ has been sent to the client.
         <span class="kind">def</span>
       </span>
       <span class="symbol">
-        <span class="name">redirectTo</span><span class="tparams">[<span name="T">T &lt;: <a href="" class="extype" name="xitrum.Action">Action</a></span>]</span><span class="params">(<span name="params">params: (<span class="extype" name="scala.Predef.String">String</span>, <span class="extype" name="scala.Any">Any</span>)*</span>)</span><span class="params">(<span class="implicit">implicit </span><span name="arg0">arg0: <span class="extype" name="scala.Predef.Manifest">Manifest</span>[<span class="extype" name="xitrum.action.Redirect.redirectTo.T">T</span>]</span>)</span><span class="result">: <span class="extype" name="org.jboss.netty.channel.ChannelFuture">ChannelFuture</span></span>
+        <span class="name">redirectTo</span><span class="tparams">[<span name="T">T &lt;: <a href="" class="extype" name="xitrum.Action">Action</a></span>]</span><span class="params">(<span name="params">params: (<span class="extype" name="scala.Predef.String">String</span>, <span class="extype" name="scala.Any">Any</span>)*</span>)</span><span class="params">(<span class="implicit">implicit </span><span name="arg0">arg0: <span class="extype" name="scala.Predef.Manifest">Manifest</span>[<span class="extype" name="xitrum.action.Redirect.redirectTo.T">T</span>]</span>)</span><span class="result">: <span class="extype" name="io.netty.channel.ChannelFuture">ChannelFuture</span></span>
       </span>
       </h4>
       <p class="shortcomment cmt">See also forwardTo.</p><div class="fullcomment"><div class="comment cmt"><p>See also forwardTo.</p></div><dl class="attributes block"> <dt>Definition Classes</dt><dd><a href="action/Redirect.html" class="extype" name="xitrum.action.Redirect">Redirect</a></dd></dl></div>
     </li><li name="xitrum.action.Redirect#redirectTo" visbl="pub" data-isabs="false" fullComment="yes" group="Ungrouped">
-      <a id="redirectTo(location:String,status:org.jboss.netty.handler.codec.http.HttpResponseStatus):org.jboss.netty.channel.ChannelFuture"></a>
+      <a id="redirectTo(location:String,status:io.netty.handler.codec.http.HttpResponseStatus):io.netty.channel.ChannelFuture"></a>
       <a id="redirectTo(String,HttpResponseStatus):ChannelFuture"></a>
       <h4 class="signature">
       <span class="modifier_kind">
@@ -1208,12 +1221,12 @@ has been sent to the client.
         <span class="kind">def</span>
       </span>
       <span class="symbol">
-        <span class="name">redirectTo</span><span class="params">(<span name="location">location: <span class="extype" name="scala.Predef.String">String</span></span>, <span name="status">status: <span class="extype" name="org.jboss.netty.handler.codec.http.HttpResponseStatus">HttpResponseStatus</span> = <span class="symbol">FOUND</span></span>)</span><span class="result">: <span class="extype" name="org.jboss.netty.channel.ChannelFuture">ChannelFuture</span></span>
+        <span class="name">redirectTo</span><span class="params">(<span name="location">location: <span class="extype" name="scala.Predef.String">String</span></span>, <span name="status">status: <span class="extype" name="io.netty.handler.codec.http.HttpResponseStatus">HttpResponseStatus</span> = <span class="symbol">FOUND</span></span>)</span><span class="result">: <span class="extype" name="io.netty.channel.ChannelFuture">ChannelFuture</span></span>
       </span>
       </h4>
       <p class="shortcomment cmt">See also forwardTo.</p><div class="fullcomment"><div class="comment cmt"><p>See also forwardTo.</p></div><dl class="attributes block"> <dt>Definition Classes</dt><dd><a href="action/Redirect.html" class="extype" name="xitrum.action.Redirect">Redirect</a></dd></dl></div>
     </li><li name="xitrum.action.Redirect#redirectToThis" visbl="pub" data-isabs="false" fullComment="yes" group="Ungrouped">
-      <a id="redirectToThis(params:(String,Any)*):org.jboss.netty.channel.ChannelFuture"></a>
+      <a id="redirectToThis(params:(String,Any)*):io.netty.channel.ChannelFuture"></a>
       <a id="redirectToThis((String,Any)*):ChannelFuture"></a>
       <h4 class="signature">
       <span class="modifier_kind">
@@ -1221,7 +1234,7 @@ has been sent to the client.
         <span class="kind">def</span>
       </span>
       <span class="symbol">
-        <span class="name">redirectToThis</span><span class="params">(<span name="params">params: (<span class="extype" name="scala.Predef.String">String</span>, <span class="extype" name="scala.Any">Any</span>)*</span>)</span><span class="result">: <span class="extype" name="org.jboss.netty.channel.ChannelFuture">ChannelFuture</span></span>
+        <span class="name">redirectToThis</span><span class="params">(<span name="params">params: (<span class="extype" name="scala.Predef.String">String</span>, <span class="extype" name="scala.Any">Any</span>)*</span>)</span><span class="result">: <span class="extype" name="io.netty.channel.ChannelFuture">ChannelFuture</span></span>
       </span>
       </h4>
       <div class="fullcomment"><dl class="attributes block"> <dt>Definition Classes</dt><dd><a href="action/Redirect.html" class="extype" name="xitrum.action.Redirect">Redirect</a></dd></dl></div>
@@ -1425,15 +1438,15 @@ then calls the layout function.
       </h4>
       <div class="fullcomment"><dl class="attributes block"> <dt>Definition Classes</dt><dd><a href="view/Renderer.html" class="extype" name="xitrum.view.Renderer">Renderer</a></dd></dl></div>
     </li><li name="xitrum.scope.request.RequestEnv#request" visbl="pub" data-isabs="false" fullComment="yes" group="Ungrouped">
-      <a id="request:org.jboss.netty.handler.codec.http.HttpRequest"></a>
-      <a id="request:HttpRequest"></a>
+      <a id="request:io.netty.handler.codec.http.FullHttpRequest"></a>
+      <a id="request:FullHttpRequest"></a>
       <h4 class="signature">
       <span class="modifier_kind">
         <span class="modifier"></span>
         <span class="kind">lazy val</span>
       </span>
       <span class="symbol">
-        <span class="name">request</span><span class="result">: <span class="extype" name="org.jboss.netty.handler.codec.http.HttpRequest">HttpRequest</span></span>
+        <span class="name">request</span><span class="result">: <span class="extype" name="io.netty.handler.codec.http.FullHttpRequest">FullHttpRequest</span></span>
       </span>
       </h4>
       <div class="fullcomment"><dl class="attributes block"> <dt>Definition Classes</dt><dd><a href="scope/request/RequestEnv.html" class="extype" name="xitrum.scope.request.RequestEnv">RequestEnv</a></dd></dl></div>
@@ -1493,7 +1506,7 @@ http://en.wikipedia.org/wiki/HTTP_cookie#Cookie_attributes
       </h4>
       <p class="shortcomment cmt"></p><div class="fullcomment"><div class="comment cmt"></div><dl class="paramcmts block"><dt class="param">path</dt><dd class="cmt"><p>Relative to an entry in classpath, without leading &quot;/&quot;</p></dd></dl><dl class="attributes block"> <dt>Definition Classes</dt><dd><a href="action/Url.html" class="extype" name="xitrum.action.Url">Url</a></dd></dl></div>
     </li><li name="xitrum.view.Responder#respond" visbl="pub" data-isabs="false" fullComment="yes" group="Ungrouped">
-      <a id="respond():org.jboss.netty.channel.ChannelFuture"></a>
+      <a id="respond():io.netty.channel.ChannelFuture"></a>
       <a id="respond():ChannelFuture"></a>
       <h4 class="signature">
       <span class="modifier_kind">
@@ -1501,25 +1514,27 @@ http://en.wikipedia.org/wiki/HTTP_cookie#Cookie_attributes
         <span class="kind">def</span>
       </span>
       <span class="symbol">
-        <span class="name">respond</span><span class="params">()</span><span class="result">: <span class="extype" name="org.jboss.netty.channel.ChannelFuture">ChannelFuture</span></span>
+        <span class="name">respond</span><span class="params">()</span><span class="result">: <span class="extype" name="io.netty.channel.ChannelFuture">ChannelFuture</span></span>
       </span>
       </h4>
       <div class="fullcomment"><dl class="attributes block"> <dt>Definition Classes</dt><dd><a href="view/Responder.html" class="extype" name="xitrum.view.Responder">Responder</a></dd></dl></div>
     </li><li name="xitrum.view.Responder#respondBinary" visbl="pub" data-isabs="false" fullComment="yes" group="Ungrouped">
-      <a id="respondBinary(channelBuffer:org.jboss.netty.buffer.ChannelBuffer):org.jboss.netty.channel.ChannelFuture"></a>
-      <a id="respondBinary(ChannelBuffer):ChannelFuture"></a>
+      <a id="respondBinary(byteBuf:io.netty.buffer.ByteBuf):io.netty.channel.ChannelFuture"></a>
+      <a id="respondBinary(ByteBuf):ChannelFuture"></a>
       <h4 class="signature">
       <span class="modifier_kind">
         <span class="modifier"></span>
         <span class="kind">def</span>
       </span>
       <span class="symbol">
-        <span class="name">respondBinary</span><span class="params">(<span name="channelBuffer">channelBuffer: <span class="extype" name="org.jboss.netty.buffer.ChannelBuffer">ChannelBuffer</span></span>)</span><span class="result">: <span class="extype" name="org.jboss.netty.channel.ChannelFuture">ChannelFuture</span></span>
+        <span class="name">respondBinary</span><span class="params">(<span name="byteBuf">byteBuf: <span class="extype" name="io.netty.buffer.ByteBuf">ByteBuf</span></span>)</span><span class="result">: <span class="extype" name="io.netty.channel.ChannelFuture">ChannelFuture</span></span>
       </span>
       </h4>
-      <p class="shortcomment cmt">If Content-Type header is not set, it is set to &quot;application/octet-stream&quot;</p><div class="fullcomment"><div class="comment cmt"><p>If Content-Type header is not set, it is set to &quot;application/octet-stream&quot;</p></div><dl class="attributes block"> <dt>Definition Classes</dt><dd><a href="view/Responder.html" class="extype" name="xitrum.view.Responder">Responder</a></dd></dl></div>
+      <p class="shortcomment cmt">If Content-Type header is not set, it is set to &quot;application/octet-stream&quot;.</p><div class="fullcomment"><div class="comment cmt"><p>If Content-Type header is not set, it is set to &quot;application/octet-stream&quot;.
+</p></div><dl class="paramcmts block"><dt class="param">byteBuf</dt><dd class="cmt"><p>Will be released
+</p></dd></dl><dl class="attributes block"> <dt>Definition Classes</dt><dd><a href="view/Responder.html" class="extype" name="xitrum.view.Responder">Responder</a></dd></dl></div>
     </li><li name="xitrum.view.Responder#respondBinary" visbl="pub" data-isabs="false" fullComment="yes" group="Ungrouped">
-      <a id="respondBinary(bytes:Array[Byte]):org.jboss.netty.channel.ChannelFuture"></a>
+      <a id="respondBinary(bytes:Array[Byte]):io.netty.channel.ChannelFuture"></a>
       <a id="respondBinary(Array[Byte]):ChannelFuture"></a>
       <h4 class="signature">
       <span class="modifier_kind">
@@ -1527,12 +1542,12 @@ http://en.wikipedia.org/wiki/HTTP_cookie#Cookie_attributes
         <span class="kind">def</span>
       </span>
       <span class="symbol">
-        <span class="name">respondBinary</span><span class="params">(<span name="bytes">bytes: <span class="extype" name="scala.Array">Array</span>[<span class="extype" name="scala.Byte">Byte</span>]</span>)</span><span class="result">: <span class="extype" name="org.jboss.netty.channel.ChannelFuture">ChannelFuture</span></span>
+        <span class="name">respondBinary</span><span class="params">(<span name="bytes">bytes: <span class="extype" name="scala.Array">Array</span>[<span class="extype" name="scala.Byte">Byte</span>]</span>)</span><span class="result">: <span class="extype" name="io.netty.channel.ChannelFuture">ChannelFuture</span></span>
       </span>
       </h4>
-      <p class="shortcomment cmt">If Content-Type header is not set, it is set to &quot;application/octet-stream&quot;</p><div class="fullcomment"><div class="comment cmt"><p>If Content-Type header is not set, it is set to &quot;application/octet-stream&quot;</p></div><dl class="attributes block"> <dt>Definition Classes</dt><dd><a href="view/Responder.html" class="extype" name="xitrum.view.Responder">Responder</a></dd></dl></div>
+      <p class="shortcomment cmt">If Content-Type header is not set, it is set to &quot;application/octet-stream&quot;.</p><div class="fullcomment"><div class="comment cmt"><p>If Content-Type header is not set, it is set to &quot;application/octet-stream&quot;.</p></div><dl class="attributes block"> <dt>Definition Classes</dt><dd><a href="view/Responder.html" class="extype" name="xitrum.view.Responder">Responder</a></dd></dl></div>
     </li><li name="xitrum.view.Responder#respondDefault404Page" visbl="pub" data-isabs="false" fullComment="yes" group="Ungrouped">
-      <a id="respondDefault404Page():org.jboss.netty.channel.ChannelFuture"></a>
+      <a id="respondDefault404Page():io.netty.channel.ChannelFuture"></a>
       <a id="respondDefault404Page():ChannelFuture"></a>
       <h4 class="signature">
       <span class="modifier_kind">
@@ -1540,12 +1555,12 @@ http://en.wikipedia.org/wiki/HTTP_cookie#Cookie_attributes
         <span class="kind">def</span>
       </span>
       <span class="symbol">
-        <span class="name">respondDefault404Page</span><span class="params">()</span><span class="result">: <span class="extype" name="org.jboss.netty.channel.ChannelFuture">ChannelFuture</span></span>
+        <span class="name">respondDefault404Page</span><span class="params">()</span><span class="result">: <span class="extype" name="io.netty.channel.ChannelFuture">ChannelFuture</span></span>
       </span>
       </h4>
       <div class="fullcomment"><dl class="attributes block"> <dt>Definition Classes</dt><dd><a href="view/Responder.html" class="extype" name="xitrum.view.Responder">Responder</a></dd></dl></div>
     </li><li name="xitrum.view.Responder#respondDefault500Page" visbl="pub" data-isabs="false" fullComment="yes" group="Ungrouped">
-      <a id="respondDefault500Page():org.jboss.netty.channel.ChannelFuture"></a>
+      <a id="respondDefault500Page():io.netty.channel.ChannelFuture"></a>
       <a id="respondDefault500Page():ChannelFuture"></a>
       <h4 class="signature">
       <span class="modifier_kind">
@@ -1553,12 +1568,12 @@ http://en.wikipedia.org/wiki/HTTP_cookie#Cookie_attributes
         <span class="kind">def</span>
       </span>
       <span class="symbol">
-        <span class="name">respondDefault500Page</span><span class="params">()</span><span class="result">: <span class="extype" name="org.jboss.netty.channel.ChannelFuture">ChannelFuture</span></span>
+        <span class="name">respondDefault500Page</span><span class="params">()</span><span class="result">: <span class="extype" name="io.netty.channel.ChannelFuture">ChannelFuture</span></span>
       </span>
       </h4>
       <div class="fullcomment"><dl class="attributes block"> <dt>Definition Classes</dt><dd><a href="view/Responder.html" class="extype" name="xitrum.view.Responder">Responder</a></dd></dl></div>
     </li><li name="xitrum.view.Responder#respondEventSource" visbl="pub" data-isabs="false" fullComment="yes" group="Ungrouped">
-      <a id="respondEventSource(data:Any,event:String):org.jboss.netty.channel.ChannelFuture"></a>
+      <a id="respondEventSource(data:Any,event:String):io.netty.channel.ChannelFuture"></a>
       <a id="respondEventSource(Any,String):ChannelFuture"></a>
       <h4 class="signature">
       <span class="modifier_kind">
@@ -1566,17 +1581,17 @@ http://en.wikipedia.org/wiki/HTTP_cookie#Cookie_attributes
         <span class="kind">def</span>
       </span>
       <span class="symbol">
-        <span class="name">respondEventSource</span><span class="params">(<span name="data">data: <span class="extype" name="scala.Any">Any</span></span>, <span name="event">event: <span class="extype" name="scala.Predef.String">String</span> = <span class="symbol">&quot;message&quot;</span></span>)</span><span class="result">: <span class="extype" name="org.jboss.netty.channel.ChannelFuture">ChannelFuture</span></span>
+        <span class="name">respondEventSource</span><span class="params">(<span name="data">data: <span class="extype" name="scala.Any">Any</span></span>, <span name="event">event: <span class="extype" name="scala.Predef.String">String</span> = <span class="symbol">&quot;message&quot;</span></span>)</span><span class="result">: <span class="extype" name="io.netty.channel.ChannelFuture">ChannelFuture</span></span>
       </span>
       </h4>
       <p class="shortcomment cmt">To respond event source, call this method as many time as you want.</p><div class="fullcomment"><div class="comment cmt"><p>To respond event source, call this method as many time as you want.
 Event Source response is a special kind of chunked response, data must be UTF-8.
 See:
 - http://sockjs.github.com/sockjs-protocol/sockjs-protocol-0.3.3.html#section-94
-- http://dev.w3.org/html5/eventsource/
+- http://dev.w3.org/html5/eventsource/</p><p>No need to call setChunked() before calling this method.
 </p></div><dl class="attributes block"> <dt>Definition Classes</dt><dd><a href="view/Responder.html" class="extype" name="xitrum.view.Responder">Responder</a></dd></dl></div>
     </li><li name="xitrum.view.Responder#respondFile" visbl="pub" data-isabs="false" fullComment="yes" group="Ungrouped">
-      <a id="respondFile(path:String):org.jboss.netty.channel.ChannelFuture"></a>
+      <a id="respondFile(path:String):io.netty.channel.ChannelFuture"></a>
       <a id="respondFile(String):ChannelFuture"></a>
       <h4 class="signature">
       <span class="modifier_kind">
@@ -1584,7 +1599,7 @@ See:
         <span class="kind">def</span>
       </span>
       <span class="symbol">
-        <span class="name">respondFile</span><span class="params">(<span name="path">path: <span class="extype" name="scala.Predef.String">String</span></span>)</span><span class="result">: <span class="extype" name="org.jboss.netty.channel.ChannelFuture">ChannelFuture</span></span>
+        <span class="name">respondFile</span><span class="params">(<span name="path">path: <span class="extype" name="scala.Predef.String">String</span></span>)</span><span class="result">: <span class="extype" name="io.netty.channel.ChannelFuture">ChannelFuture</span></span>
       </span>
       </h4>
       <p class="shortcomment cmt">Sends a file using X-SendFile.</p><div class="fullcomment"><div class="comment cmt"><p>Sends a file using X-SendFile.
@@ -1595,7 +1610,7 @@ need to use xitrum.Config.root to calculate the correct absolute path from
 a relative path.</p><p>To sanitize the path, use xitrum.util.PathSanitizer.
 </p></dd></dl><dl class="attributes block"> <dt>Definition Classes</dt><dd><a href="view/Responder.html" class="extype" name="xitrum.view.Responder">Responder</a></dd></dl></div>
     </li><li name="xitrum.view.Responder#respondHtml" visbl="pub" data-isabs="false" fullComment="yes" group="Ungrouped">
-      <a id="respondHtml(any:Any):org.jboss.netty.channel.ChannelFuture"></a>
+      <a id="respondHtml(any:Any):io.netty.channel.ChannelFuture"></a>
       <a id="respondHtml(Any):ChannelFuture"></a>
       <h4 class="signature">
       <span class="modifier_kind">
@@ -1603,12 +1618,12 @@ a relative path.</p><p>To sanitize the path, use xitrum.util.PathSanitizer.
         <span class="kind">def</span>
       </span>
       <span class="symbol">
-        <span class="name">respondHtml</span><span class="params">(<span name="any">any: <span class="extype" name="scala.Any">Any</span></span>)</span><span class="result">: <span class="extype" name="org.jboss.netty.channel.ChannelFuture">ChannelFuture</span></span>
+        <span class="name">respondHtml</span><span class="params">(<span name="any">any: <span class="extype" name="scala.Any">Any</span></span>)</span><span class="result">: <span class="extype" name="io.netty.channel.ChannelFuture">ChannelFuture</span></span>
       </span>
       </h4>
       <p class="shortcomment cmt">Content-Type header is set to &quot;text/html&quot;.</p><div class="fullcomment"><div class="comment cmt"><p>Content-Type header is set to &quot;text/html&quot;.</p></div><dl class="attributes block"> <dt>Definition Classes</dt><dd><a href="view/Responder.html" class="extype" name="xitrum.view.Responder">Responder</a></dd></dl></div>
     </li><li name="xitrum.view.Responder#respondInlineView" visbl="pub" data-isabs="false" fullComment="yes" group="Ungrouped">
-      <a id="respondInlineView(inlineView:Any):org.jboss.netty.channel.ChannelFuture"></a>
+      <a id="respondInlineView(inlineView:Any):io.netty.channel.ChannelFuture"></a>
       <a id="respondInlineView(Any):ChannelFuture"></a>
       <h4 class="signature">
       <span class="modifier_kind">
@@ -1616,12 +1631,12 @@ a relative path.</p><p>To sanitize the path, use xitrum.util.PathSanitizer.
         <span class="kind">def</span>
       </span>
       <span class="symbol">
-        <span class="name">respondInlineView</span><span class="params">(<span name="inlineView">inlineView: <span class="extype" name="scala.Any">Any</span></span>)</span><span class="result">: <span class="extype" name="org.jboss.netty.channel.ChannelFuture">ChannelFuture</span></span>
+        <span class="name">respondInlineView</span><span class="params">(<span name="inlineView">inlineView: <span class="extype" name="scala.Any">Any</span></span>)</span><span class="result">: <span class="extype" name="io.netty.channel.ChannelFuture">ChannelFuture</span></span>
       </span>
       </h4>
-      <p class="shortcomment cmt">Content-Type header is set to &quot;text/html&quot;</p><div class="fullcomment"><div class="comment cmt"><p>Content-Type header is set to &quot;text/html&quot;</p></div><dl class="attributes block"> <dt>Definition Classes</dt><dd><a href="view/Responder.html" class="extype" name="xitrum.view.Responder">Responder</a></dd></dl></div>
+      <p class="shortcomment cmt">Content-Type header is set to &quot;text/html&quot;.</p><div class="fullcomment"><div class="comment cmt"><p>Content-Type header is set to &quot;text/html&quot;.</p></div><dl class="attributes block"> <dt>Definition Classes</dt><dd><a href="view/Responder.html" class="extype" name="xitrum.view.Responder">Responder</a></dd></dl></div>
     </li><li name="xitrum.view.Responder#respondJs" visbl="pub" data-isabs="false" fullComment="yes" group="Ungrouped">
-      <a id="respondJs(any:Any):org.jboss.netty.channel.ChannelFuture"></a>
+      <a id="respondJs(any:Any):io.netty.channel.ChannelFuture"></a>
       <a id="respondJs(Any):ChannelFuture"></a>
       <h4 class="signature">
       <span class="modifier_kind">
@@ -1629,12 +1644,12 @@ a relative path.</p><p>To sanitize the path, use xitrum.util.PathSanitizer.
         <span class="kind">def</span>
       </span>
       <span class="symbol">
-        <span class="name">respondJs</span><span class="params">(<span name="any">any: <span class="extype" name="scala.Any">Any</span></span>)</span><span class="result">: <span class="extype" name="org.jboss.netty.channel.ChannelFuture">ChannelFuture</span></span>
+        <span class="name">respondJs</span><span class="params">(<span name="any">any: <span class="extype" name="scala.Any">Any</span></span>)</span><span class="result">: <span class="extype" name="io.netty.channel.ChannelFuture">ChannelFuture</span></span>
       </span>
       </h4>
       <p class="shortcomment cmt">Content-Type header is set to &quot;application/javascript&quot;.</p><div class="fullcomment"><div class="comment cmt"><p>Content-Type header is set to &quot;application/javascript&quot;.</p></div><dl class="attributes block"> <dt>Definition Classes</dt><dd><a href="view/Responder.html" class="extype" name="xitrum.view.Responder">Responder</a></dd></dl></div>
     </li><li name="xitrum.view.Responder#respondJson" visbl="pub" data-isabs="false" fullComment="yes" group="Ungrouped">
-      <a id="respondJson(ref:AnyRef):org.jboss.netty.channel.ChannelFuture"></a>
+      <a id="respondJson(ref:AnyRef):io.netty.channel.ChannelFuture"></a>
       <a id="respondJson(AnyRef):ChannelFuture"></a>
       <h4 class="signature">
       <span class="modifier_kind">
@@ -1642,7 +1657,7 @@ a relative path.</p><p>To sanitize the path, use xitrum.util.PathSanitizer.
         <span class="kind">def</span>
       </span>
       <span class="symbol">
-        <span class="name">respondJson</span><span class="params">(<span name="ref">ref: <span class="extype" name="scala.AnyRef">AnyRef</span></span>)</span><span class="result">: <span class="extype" name="org.jboss.netty.channel.ChannelFuture">ChannelFuture</span></span>
+        <span class="name">respondJson</span><span class="params">(<span name="ref">ref: <span class="extype" name="scala.AnyRef">AnyRef</span></span>)</span><span class="result">: <span class="extype" name="io.netty.channel.ChannelFuture">ChannelFuture</span></span>
       </span>
       </h4>
       <p class="shortcomment cmt">Converts the given Scala object to JSON object, and responds it.</p><div class="fullcomment"><div class="comment cmt"><p>Converts the given Scala object to JSON object, and responds it.
@@ -1652,7 +1667,7 @@ use respondJsonText(text).</p><p>Content-Type header is set to &quot;application
 It makes debugging a pain.
 </p></div><dl class="attributes block"> <dt>Definition Classes</dt><dd><a href="view/Responder.html" class="extype" name="xitrum.view.Responder">Responder</a></dd></dl></div>
     </li><li name="xitrum.view.Responder#respondJsonP" visbl="pub" data-isabs="false" fullComment="yes" group="Ungrouped">
-      <a id="respondJsonP(ref:AnyRef,function:String):org.jboss.netty.channel.ChannelFuture"></a>
+      <a id="respondJsonP(ref:AnyRef,function:String):io.netty.channel.ChannelFuture"></a>
       <a id="respondJsonP(AnyRef,String):ChannelFuture"></a>
       <h4 class="signature">
       <span class="modifier_kind">
@@ -1660,7 +1675,7 @@ It makes debugging a pain.
         <span class="kind">def</span>
       </span>
       <span class="symbol">
-        <span class="name">respondJsonP</span><span class="params">(<span name="ref">ref: <span class="extype" name="scala.AnyRef">AnyRef</span></span>, <span name="function">function: <span class="extype" name="scala.Predef.String">String</span></span>)</span><span class="result">: <span class="extype" name="org.jboss.netty.channel.ChannelFuture">ChannelFuture</span></span>
+        <span class="name">respondJsonP</span><span class="params">(<span name="ref">ref: <span class="extype" name="scala.AnyRef">AnyRef</span></span>, <span name="function">function: <span class="extype" name="scala.Predef.String">String</span></span>)</span><span class="result">: <span class="extype" name="io.netty.channel.ChannelFuture">ChannelFuture</span></span>
       </span>
       </h4>
       <p class="shortcomment cmt">Converts the given Scala object to JSON object, wraps it with the given
@@ -1669,7 +1684,7 @@ JavaScript function name, and responds. If you already have a JSON text,
 thus no conversion is needed, use respondJsonPText.</p><p>Content-Type header is set to &quot;application/javascript&quot;.
 </p></div><dl class="attributes block"> <dt>Definition Classes</dt><dd><a href="view/Responder.html" class="extype" name="xitrum.view.Responder">Responder</a></dd></dl></div>
     </li><li name="xitrum.view.Responder#respondJsonPText" visbl="pub" data-isabs="false" fullComment="yes" group="Ungrouped">
-      <a id="respondJsonPText(text:Any,function:String):org.jboss.netty.channel.ChannelFuture"></a>
+      <a id="respondJsonPText(text:Any,function:String):io.netty.channel.ChannelFuture"></a>
       <a id="respondJsonPText(Any,String):ChannelFuture"></a>
       <h4 class="signature">
       <span class="modifier_kind">
@@ -1677,13 +1692,13 @@ thus no conversion is needed, use respondJsonPText.</p><p>Content-Type header is
         <span class="kind">def</span>
       </span>
       <span class="symbol">
-        <span class="name">respondJsonPText</span><span class="params">(<span name="text">text: <span class="extype" name="scala.Any">Any</span></span>, <span name="function">function: <span class="extype" name="scala.Predef.String">String</span></span>)</span><span class="result">: <span class="extype" name="org.jboss.netty.channel.ChannelFuture">ChannelFuture</span></span>
+        <span class="name">respondJsonPText</span><span class="params">(<span name="text">text: <span class="extype" name="scala.Any">Any</span></span>, <span name="function">function: <span class="extype" name="scala.Predef.String">String</span></span>)</span><span class="result">: <span class="extype" name="io.netty.channel.ChannelFuture">ChannelFuture</span></span>
       </span>
       </h4>
       <p class="shortcomment cmt">Wraps the text with the given JavaScript function name, and responds.</p><div class="fullcomment"><div class="comment cmt"><p>Wraps the text with the given JavaScript function name, and responds.</p><p>Content-Type header is set to &quot;application/javascript&quot;.
 </p></div><dl class="attributes block"> <dt>Definition Classes</dt><dd><a href="view/Responder.html" class="extype" name="xitrum.view.Responder">Responder</a></dd></dl></div>
     </li><li name="xitrum.view.Responder#respondJsonText" visbl="pub" data-isabs="false" fullComment="yes" group="Ungrouped">
-      <a id="respondJsonText(any:Any):org.jboss.netty.channel.ChannelFuture"></a>
+      <a id="respondJsonText(any:Any):io.netty.channel.ChannelFuture"></a>
       <a id="respondJsonText(Any):ChannelFuture"></a>
       <h4 class="signature">
       <span class="modifier_kind">
@@ -1691,29 +1706,25 @@ thus no conversion is needed, use respondJsonPText.</p><p>Content-Type header is
         <span class="kind">def</span>
       </span>
       <span class="symbol">
-        <span class="name">respondJsonText</span><span class="params">(<span name="any">any: <span class="extype" name="scala.Any">Any</span></span>)</span><span class="result">: <span class="extype" name="org.jboss.netty.channel.ChannelFuture">ChannelFuture</span></span>
+        <span class="name">respondJsonText</span><span class="params">(<span name="any">any: <span class="extype" name="scala.Any">Any</span></span>)</span><span class="result">: <span class="extype" name="io.netty.channel.ChannelFuture">ChannelFuture</span></span>
       </span>
       </h4>
       <p class="shortcomment cmt">Content-Type header is set to &quot;application/json&quot;.</p><div class="fullcomment"><div class="comment cmt"><p>Content-Type header is set to &quot;application/json&quot;.</p></div><dl class="attributes block"> <dt>Definition Classes</dt><dd><a href="view/Responder.html" class="extype" name="xitrum.view.Responder">Responder</a></dd></dl></div>
     </li><li name="xitrum.view.Responder#respondLastChunk" visbl="pub" data-isabs="false" fullComment="yes" group="Ungrouped">
-      <a id="respondLastChunk():org.jboss.netty.channel.ChannelFuture"></a>
-      <a id="respondLastChunk():ChannelFuture"></a>
+      <a id="respondLastChunk(trailingHeaders:io.netty.handler.codec.http.HttpHeaders):io.netty.channel.ChannelFuture"></a>
+      <a id="respondLastChunk(HttpHeaders):ChannelFuture"></a>
       <h4 class="signature">
       <span class="modifier_kind">
         <span class="modifier"></span>
         <span class="kind">def</span>
       </span>
       <span class="symbol">
-        <span class="name">respondLastChunk</span><span class="params">()</span><span class="result">: <span class="extype" name="org.jboss.netty.channel.ChannelFuture">ChannelFuture</span></span>
+        <span class="name">respondLastChunk</span><span class="params">(<span name="trailingHeaders">trailingHeaders: <span class="extype" name="io.netty.handler.codec.http.HttpHeaders">HttpHeaders</span> = <span class="symbol">HttpHeaders.EMPTY_HEADERS</span></span>)</span><span class="result">: <span class="extype" name="io.netty.channel.ChannelFuture">ChannelFuture</span></span>
       </span>
       </h4>
-      <p class="shortcomment cmt">To respond chunks (http://en.</p><div class="fullcomment"><div class="comment cmt"><p>To respond chunks (http://en.wikipedia.org/wiki/Chunked_transfer_encoding):
-1. Call response.setChunked(true)
-2. Call respondXXX as many times as you want
-3. Lastly, call respondLastChunk()</p><p>Headers are only sent on the first respondXXX call.
-</p></div><dl class="attributes block"> <dt>Definition Classes</dt><dd><a href="view/Responder.html" class="extype" name="xitrum.view.Responder">Responder</a></dd></dl></div>
+      <p class="shortcomment cmt">See setChunked.</p><div class="fullcomment"><div class="comment cmt"><p>See setChunked.</p></div><dl class="attributes block"> <dt>Definition Classes</dt><dd><a href="view/Responder.html" class="extype" name="xitrum.view.Responder">Responder</a></dd></dl></div>
     </li><li name="xitrum.view.Responder#respondResource" visbl="pub" data-isabs="false" fullComment="yes" group="Ungrouped">
-      <a id="respondResource(path:String):org.jboss.netty.channel.ChannelFuture"></a>
+      <a id="respondResource(path:String):io.netty.channel.ChannelFuture"></a>
       <a id="respondResource(String):ChannelFuture"></a>
       <h4 class="signature">
       <span class="modifier_kind">
@@ -1721,7 +1732,7 @@ thus no conversion is needed, use respondJsonPText.</p><p>Content-Type header is
         <span class="kind">def</span>
       </span>
       <span class="symbol">
-        <span class="name">respondResource</span><span class="params">(<span name="path">path: <span class="extype" name="scala.Predef.String">String</span></span>)</span><span class="result">: <span class="extype" name="org.jboss.netty.channel.ChannelFuture">ChannelFuture</span></span>
+        <span class="name">respondResource</span><span class="params">(<span name="path">path: <span class="extype" name="scala.Predef.String">String</span></span>)</span><span class="result">: <span class="extype" name="io.netty.channel.ChannelFuture">ChannelFuture</span></span>
       </span>
       </h4>
       <p class="shortcomment cmt">Sends a file from public directory in one of the entry (may be a JAR file)
@@ -1731,7 +1742,7 @@ If Content-Type header is not set, it is guessed from the file name.
 </p></div><dl class="paramcmts block"><dt class="param">path</dt><dd class="cmt"><p>Relative to an entry in classpath, without leading &quot;/&quot;
 </p></dd></dl><dl class="attributes block"> <dt>Definition Classes</dt><dd><a href="view/Responder.html" class="extype" name="xitrum.view.Responder">Responder</a></dd></dl></div>
     </li><li name="xitrum.view.Responder#respondText" visbl="pub" data-isabs="false" fullComment="yes" group="Ungrouped">
-      <a id="respondText(text:Any,fallbackContentType:String,convertXmlToXhtml:Boolean):org.jboss.netty.channel.ChannelFuture"></a>
+      <a id="respondText(text:Any,fallbackContentType:String,convertXmlToXhtml:Boolean):io.netty.channel.ChannelFuture"></a>
       <a id="respondText(Any,String,Boolean):ChannelFuture"></a>
       <h4 class="signature">
       <span class="modifier_kind">
@@ -1739,7 +1750,7 @@ If Content-Type header is not set, it is guessed from the file name.
         <span class="kind">def</span>
       </span>
       <span class="symbol">
-        <span class="name">respondText</span><span class="params">(<span name="text">text: <span class="extype" name="scala.Any">Any</span></span>, <span name="fallbackContentType">fallbackContentType: <span class="extype" name="scala.Predef.String">String</span> = <span class="symbol">null</span></span>, <span name="convertXmlToXhtml">convertXmlToXhtml: <span class="extype" name="scala.Boolean">Boolean</span> = <span class="symbol">true</span></span>)</span><span class="result">: <span class="extype" name="org.jboss.netty.channel.ChannelFuture">ChannelFuture</span></span>
+        <span class="name">respondText</span><span class="params">(<span name="text">text: <span class="extype" name="scala.Any">Any</span></span>, <span name="fallbackContentType">fallbackContentType: <span class="extype" name="scala.Predef.String">String</span> = <span class="symbol">null</span></span>, <span name="convertXmlToXhtml">convertXmlToXhtml: <span class="extype" name="scala.Boolean">Boolean</span> = <span class="symbol">true</span></span>)</span><span class="result">: <span class="extype" name="io.netty.channel.ChannelFuture">ChannelFuture</span></span>
       </span>
       </h4>
       <p class="shortcomment cmt"></p><div class="fullcomment"><div class="comment cmt"></div><dl class="paramcmts block"><dt class="param">fallbackContentType</dt><dd class="cmt"><p>Only used if Content-Type header has not been set.
@@ -1752,7 +1763,7 @@ want XML, not XHTML. See http://www.scala-lang.org/node/492 and
 http://www.ne.jp/asahi/hishidama/home/tech/scala/xml.html
 </p></dd></dl><dl class="attributes block"> <dt>Definition Classes</dt><dd><a href="view/Responder.html" class="extype" name="xitrum.view.Responder">Responder</a></dd></dl></div>
     </li><li name="xitrum.view.Responder#respondView" visbl="pub" data-isabs="false" fullComment="yes" group="Ungrouped">
-      <a id="respondView[T&lt;:xitrum.Action]()(implicitevidence$4:Manifest[T]):org.jboss.netty.channel.ChannelFuture"></a>
+      <a id="respondView[T&lt;:xitrum.Action]()(implicitevidence$4:Manifest[T]):io.netty.channel.ChannelFuture"></a>
       <a id="respondView[T&lt;:Action]()(Manifest[T]):ChannelFuture"></a>
       <h4 class="signature">
       <span class="modifier_kind">
@@ -1760,12 +1771,12 @@ http://www.ne.jp/asahi/hishidama/home/tech/scala/xml.html
         <span class="kind">def</span>
       </span>
       <span class="symbol">
-        <span class="name">respondView</span><span class="tparams">[<span name="T">T &lt;: <a href="" class="extype" name="xitrum.Action">Action</a></span>]</span><span class="params">()</span><span class="params">(<span class="implicit">implicit </span><span name="arg0">arg0: <span class="extype" name="scala.Predef.Manifest">Manifest</span>[<span class="extype" name="xitrum.view.Responder.respondView.T">T</span>]</span>)</span><span class="result">: <span class="extype" name="org.jboss.netty.channel.ChannelFuture">ChannelFuture</span></span>
+        <span class="name">respondView</span><span class="tparams">[<span name="T">T &lt;: <a href="" class="extype" name="xitrum.Action">Action</a></span>]</span><span class="params">()</span><span class="params">(<span class="implicit">implicit </span><span name="arg0">arg0: <span class="extype" name="scala.Predef.Manifest">Manifest</span>[<span class="extype" name="xitrum.view.Responder.respondView.T">T</span>]</span>)</span><span class="result">: <span class="extype" name="io.netty.channel.ChannelFuture">ChannelFuture</span></span>
       </span>
       </h4>
       <div class="fullcomment"><dl class="attributes block"> <dt>Definition Classes</dt><dd><a href="view/Responder.html" class="extype" name="xitrum.view.Responder">Responder</a></dd></dl></div>
     </li><li name="xitrum.view.Responder#respondView" visbl="pub" data-isabs="false" fullComment="yes" group="Ungrouped">
-      <a id="respondView[T&lt;:xitrum.Action](options:Map[String,Any])(implicitevidence$3:Manifest[T]):org.jboss.netty.channel.ChannelFuture"></a>
+      <a id="respondView[T&lt;:xitrum.Action](options:Map[String,Any])(implicitevidence$3:Manifest[T]):io.netty.channel.ChannelFuture"></a>
       <a id="respondView[T&lt;:Action](Map[String,Any])(Manifest[T]):ChannelFuture"></a>
       <h4 class="signature">
       <span class="modifier_kind">
@@ -1773,12 +1784,12 @@ http://www.ne.jp/asahi/hishidama/home/tech/scala/xml.html
         <span class="kind">def</span>
       </span>
       <span class="symbol">
-        <span class="name">respondView</span><span class="tparams">[<span name="T">T &lt;: <a href="" class="extype" name="xitrum.Action">Action</a></span>]</span><span class="params">(<span name="options">options: <span class="extype" name="scala.Predef.Map">Map</span>[<span class="extype" name="scala.Predef.String">String</span>, <span class="extype" name="scala.Any">Any</span>]</span>)</span><span class="params">(<span class="implicit">implicit </span><span name="arg0">arg0: <span class="extype" name="scala.Predef.Manifest">Manifest</span>[<span class="extype" name="xitrum.view.Responder.respondView.T">T</span>]</span>)</span><span class="result">: <span class="extype" name="org.jboss.netty.channel.ChannelFuture">ChannelFuture</span></span>
+        <span class="name">respondView</span><span class="tparams">[<span name="T">T &lt;: <a href="" class="extype" name="xitrum.Action">Action</a></span>]</span><span class="params">(<span name="options">options: <span class="extype" name="scala.Predef.Map">Map</span>[<span class="extype" name="scala.Predef.String">String</span>, <span class="extype" name="scala.Any">Any</span>]</span>)</span><span class="params">(<span class="implicit">implicit </span><span name="arg0">arg0: <span class="extype" name="scala.Predef.Manifest">Manifest</span>[<span class="extype" name="xitrum.view.Responder.respondView.T">T</span>]</span>)</span><span class="result">: <span class="extype" name="io.netty.channel.ChannelFuture">ChannelFuture</span></span>
       </span>
       </h4>
       <div class="fullcomment"><dl class="attributes block"> <dt>Definition Classes</dt><dd><a href="view/Responder.html" class="extype" name="xitrum.view.Responder">Responder</a></dd></dl></div>
     </li><li name="xitrum.view.Responder#respondView" visbl="pub" data-isabs="false" fullComment="yes" group="Ungrouped">
-      <a id="respondView[T&lt;:xitrum.Action](customLayout:()=&gt;Any)(implicitevidence$2:Manifest[T]):org.jboss.netty.channel.ChannelFuture"></a>
+      <a id="respondView[T&lt;:xitrum.Action](customLayout:()=&gt;Any)(implicitevidence$2:Manifest[T]):io.netty.channel.ChannelFuture"></a>
       <a id="respondView[T&lt;:Action](()⇒Any)(Manifest[T]):ChannelFuture"></a>
       <h4 class="signature">
       <span class="modifier_kind">
@@ -1786,12 +1797,12 @@ http://www.ne.jp/asahi/hishidama/home/tech/scala/xml.html
         <span class="kind">def</span>
       </span>
       <span class="symbol">
-        <span class="name">respondView</span><span class="tparams">[<span name="T">T &lt;: <a href="" class="extype" name="xitrum.Action">Action</a></span>]</span><span class="params">(<span name="customLayout">customLayout: () ⇒ <span class="extype" name="scala.Any">Any</span></span>)</span><span class="params">(<span class="implicit">implicit </span><span name="arg0">arg0: <span class="extype" name="scala.Predef.Manifest">Manifest</span>[<span class="extype" name="xitrum.view.Responder.respondView.T">T</span>]</span>)</span><span class="result">: <span class="extype" name="org.jboss.netty.channel.ChannelFuture">ChannelFuture</span></span>
+        <span class="name">respondView</span><span class="tparams">[<span name="T">T &lt;: <a href="" class="extype" name="xitrum.Action">Action</a></span>]</span><span class="params">(<span name="customLayout">customLayout: () ⇒ <span class="extype" name="scala.Any">Any</span></span>)</span><span class="params">(<span class="implicit">implicit </span><span name="arg0">arg0: <span class="extype" name="scala.Predef.Manifest">Manifest</span>[<span class="extype" name="xitrum.view.Responder.respondView.T">T</span>]</span>)</span><span class="result">: <span class="extype" name="io.netty.channel.ChannelFuture">ChannelFuture</span></span>
       </span>
       </h4>
       <div class="fullcomment"><dl class="attributes block"> <dt>Definition Classes</dt><dd><a href="view/Responder.html" class="extype" name="xitrum.view.Responder">Responder</a></dd></dl></div>
     </li><li name="xitrum.view.Responder#respondView" visbl="pub" data-isabs="false" fullComment="yes" group="Ungrouped">
-      <a id="respondView[T&lt;:xitrum.Action](customLayout:()=&gt;Any,options:Map[String,Any])(implicitevidence$1:Manifest[T]):org.jboss.netty.channel.ChannelFuture"></a>
+      <a id="respondView[T&lt;:xitrum.Action](customLayout:()=&gt;Any,options:Map[String,Any])(implicitevidence$1:Manifest[T]):io.netty.channel.ChannelFuture"></a>
       <a id="respondView[T&lt;:Action](()⇒Any,Map[String,Any])(Manifest[T]):ChannelFuture"></a>
       <h4 class="signature">
       <span class="modifier_kind">
@@ -1799,12 +1810,12 @@ http://www.ne.jp/asahi/hishidama/home/tech/scala/xml.html
         <span class="kind">def</span>
       </span>
       <span class="symbol">
-        <span class="name">respondView</span><span class="tparams">[<span name="T">T &lt;: <a href="" class="extype" name="xitrum.Action">Action</a></span>]</span><span class="params">(<span name="customLayout">customLayout: () ⇒ <span class="extype" name="scala.Any">Any</span></span>, <span name="options">options: <span class="extype" name="scala.Predef.Map">Map</span>[<span class="extype" name="scala.Predef.String">String</span>, <span class="extype" name="scala.Any">Any</span>]</span>)</span><span class="params">(<span class="implicit">implicit </span><span name="arg0">arg0: <span class="extype" name="scala.Predef.Manifest">Manifest</span>[<span class="extype" name="xitrum.view.Responder.respondView.T">T</span>]</span>)</span><span class="result">: <span class="extype" name="org.jboss.netty.channel.ChannelFuture">ChannelFuture</span></span>
+        <span class="name">respondView</span><span class="tparams">[<span name="T">T &lt;: <a href="" class="extype" name="xitrum.Action">Action</a></span>]</span><span class="params">(<span name="customLayout">customLayout: () ⇒ <span class="extype" name="scala.Any">Any</span></span>, <span name="options">options: <span class="extype" name="scala.Predef.Map">Map</span>[<span class="extype" name="scala.Predef.String">String</span>, <span class="extype" name="scala.Any">Any</span>]</span>)</span><span class="params">(<span class="implicit">implicit </span><span name="arg0">arg0: <span class="extype" name="scala.Predef.Manifest">Manifest</span>[<span class="extype" name="xitrum.view.Responder.respondView.T">T</span>]</span>)</span><span class="result">: <span class="extype" name="io.netty.channel.ChannelFuture">ChannelFuture</span></span>
       </span>
       </h4>
       <div class="fullcomment"><dl class="attributes block"> <dt>Definition Classes</dt><dd><a href="view/Responder.html" class="extype" name="xitrum.view.Responder">Responder</a></dd></dl></div>
     </li><li name="xitrum.view.Responder#respondView" visbl="pub" data-isabs="false" fullComment="yes" group="Ungrouped">
-      <a id="respondView(customLayout:()=&gt;Any,location:Class[_&lt;:xitrum.Action],options:Map[String,Any]):org.jboss.netty.channel.ChannelFuture"></a>
+      <a id="respondView(customLayout:()=&gt;Any,location:Class[_&lt;:xitrum.Action],options:Map[String,Any]):io.netty.channel.ChannelFuture"></a>
       <a id="respondView(()⇒Any,Class[_&lt;:Action],Map[String,Any]):ChannelFuture"></a>
       <h4 class="signature">
       <span class="modifier_kind">
@@ -1812,13 +1823,13 @@ http://www.ne.jp/asahi/hishidama/home/tech/scala/xml.html
         <span class="kind">def</span>
       </span>
       <span class="symbol">
-        <span class="name">respondView</span><span class="params">(<span name="customLayout">customLayout: () ⇒ <span class="extype" name="scala.Any">Any</span></span>, <span name="location">location: <span class="extype" name="scala.Predef.Class">Class</span>[_ &lt;: <a href="" class="extype" name="xitrum.Action">Action</a>]</span>, <span name="options">options: <span class="extype" name="scala.Predef.Map">Map</span>[<span class="extype" name="scala.Predef.String">String</span>, <span class="extype" name="scala.Any">Any</span>]</span>)</span><span class="result">: <span class="extype" name="org.jboss.netty.channel.ChannelFuture">ChannelFuture</span></span>
+        <span class="name">respondView</span><span class="params">(<span name="customLayout">customLayout: () ⇒ <span class="extype" name="scala.Any">Any</span></span>, <span name="location">location: <span class="extype" name="scala.Predef.Class">Class</span>[_ &lt;: <a href="" class="extype" name="xitrum.Action">Action</a>]</span>, <span name="options">options: <span class="extype" name="scala.Predef.Map">Map</span>[<span class="extype" name="scala.Predef.String">String</span>, <span class="extype" name="scala.Any">Any</span>]</span>)</span><span class="result">: <span class="extype" name="io.netty.channel.ChannelFuture">ChannelFuture</span></span>
       </span>
       </h4>
       <p class="shortcomment cmt"></p><div class="fullcomment"><div class="comment cmt"></div><dl class="paramcmts block"><dt class="param">options</dt><dd class="cmt"><p>specific to the configured template engine
 </p></dd></dl><dl class="attributes block"> <dt>Definition Classes</dt><dd><a href="view/Responder.html" class="extype" name="xitrum.view.Responder">Responder</a></dd></dl></div>
     </li><li name="xitrum.view.Responder#respondViewNoLayout" visbl="pub" data-isabs="false" fullComment="yes" group="Ungrouped">
-      <a id="respondViewNoLayout[T&lt;:xitrum.Action]()(implicitevidence$6:Manifest[T]):org.jboss.netty.channel.ChannelFuture"></a>
+      <a id="respondViewNoLayout[T&lt;:xitrum.Action]()(implicitevidence$6:Manifest[T]):io.netty.channel.ChannelFuture"></a>
       <a id="respondViewNoLayout[T&lt;:Action]()(Manifest[T]):ChannelFuture"></a>
       <h4 class="signature">
       <span class="modifier_kind">
@@ -1826,12 +1837,12 @@ http://www.ne.jp/asahi/hishidama/home/tech/scala/xml.html
         <span class="kind">def</span>
       </span>
       <span class="symbol">
-        <span class="name">respondViewNoLayout</span><span class="tparams">[<span name="T">T &lt;: <a href="" class="extype" name="xitrum.Action">Action</a></span>]</span><span class="params">()</span><span class="params">(<span class="implicit">implicit </span><span name="arg0">arg0: <span class="extype" name="scala.Predef.Manifest">Manifest</span>[<span class="extype" name="xitrum.view.Responder.respondViewNoLayout.T">T</span>]</span>)</span><span class="result">: <span class="extype" name="org.jboss.netty.channel.ChannelFuture">ChannelFuture</span></span>
+        <span class="name">respondViewNoLayout</span><span class="tparams">[<span name="T">T &lt;: <a href="" class="extype" name="xitrum.Action">Action</a></span>]</span><span class="params">()</span><span class="params">(<span class="implicit">implicit </span><span name="arg0">arg0: <span class="extype" name="scala.Predef.Manifest">Manifest</span>[<span class="extype" name="xitrum.view.Responder.respondViewNoLayout.T">T</span>]</span>)</span><span class="result">: <span class="extype" name="io.netty.channel.ChannelFuture">ChannelFuture</span></span>
       </span>
       </h4>
       <div class="fullcomment"><dl class="attributes block"> <dt>Definition Classes</dt><dd><a href="view/Responder.html" class="extype" name="xitrum.view.Responder">Responder</a></dd></dl></div>
     </li><li name="xitrum.view.Responder#respondViewNoLayout" visbl="pub" data-isabs="false" fullComment="yes" group="Ungrouped">
-      <a id="respondViewNoLayout[T&lt;:xitrum.Action](options:Map[String,Any])(implicitevidence$5:Manifest[T]):org.jboss.netty.channel.ChannelFuture"></a>
+      <a id="respondViewNoLayout[T&lt;:xitrum.Action](options:Map[String,Any])(implicitevidence$5:Manifest[T]):io.netty.channel.ChannelFuture"></a>
       <a id="respondViewNoLayout[T&lt;:Action](Map[String,Any])(Manifest[T]):ChannelFuture"></a>
       <h4 class="signature">
       <span class="modifier_kind">
@@ -1839,12 +1850,12 @@ http://www.ne.jp/asahi/hishidama/home/tech/scala/xml.html
         <span class="kind">def</span>
       </span>
       <span class="symbol">
-        <span class="name">respondViewNoLayout</span><span class="tparams">[<span name="T">T &lt;: <a href="" class="extype" name="xitrum.Action">Action</a></span>]</span><span class="params">(<span name="options">options: <span class="extype" name="scala.Predef.Map">Map</span>[<span class="extype" name="scala.Predef.String">String</span>, <span class="extype" name="scala.Any">Any</span>]</span>)</span><span class="params">(<span class="implicit">implicit </span><span name="arg0">arg0: <span class="extype" name="scala.Predef.Manifest">Manifest</span>[<span class="extype" name="xitrum.view.Responder.respondViewNoLayout.T">T</span>]</span>)</span><span class="result">: <span class="extype" name="org.jboss.netty.channel.ChannelFuture">ChannelFuture</span></span>
+        <span class="name">respondViewNoLayout</span><span class="tparams">[<span name="T">T &lt;: <a href="" class="extype" name="xitrum.Action">Action</a></span>]</span><span class="params">(<span name="options">options: <span class="extype" name="scala.Predef.Map">Map</span>[<span class="extype" name="scala.Predef.String">String</span>, <span class="extype" name="scala.Any">Any</span>]</span>)</span><span class="params">(<span class="implicit">implicit </span><span name="arg0">arg0: <span class="extype" name="scala.Predef.Manifest">Manifest</span>[<span class="extype" name="xitrum.view.Responder.respondViewNoLayout.T">T</span>]</span>)</span><span class="result">: <span class="extype" name="io.netty.channel.ChannelFuture">ChannelFuture</span></span>
       </span>
       </h4>
       <div class="fullcomment"><dl class="attributes block"> <dt>Definition Classes</dt><dd><a href="view/Responder.html" class="extype" name="xitrum.view.Responder">Responder</a></dd></dl></div>
     </li><li name="xitrum.view.Responder#respondViewNoLayout" visbl="pub" data-isabs="false" fullComment="yes" group="Ungrouped">
-      <a id="respondViewNoLayout(location:Class[_&lt;:xitrum.Action],options:Map[String,Any]):org.jboss.netty.channel.ChannelFuture"></a>
+      <a id="respondViewNoLayout(location:Class[_&lt;:xitrum.Action],options:Map[String,Any]):io.netty.channel.ChannelFuture"></a>
       <a id="respondViewNoLayout(Class[_&lt;:Action],Map[String,Any]):ChannelFuture"></a>
       <h4 class="signature">
       <span class="modifier_kind">
@@ -1852,12 +1863,12 @@ http://www.ne.jp/asahi/hishidama/home/tech/scala/xml.html
         <span class="kind">def</span>
       </span>
       <span class="symbol">
-        <span class="name">respondViewNoLayout</span><span class="params">(<span name="location">location: <span class="extype" name="scala.Predef.Class">Class</span>[_ &lt;: <a href="" class="extype" name="xitrum.Action">Action</a>]</span>, <span name="options">options: <span class="extype" name="scala.Predef.Map">Map</span>[<span class="extype" name="scala.Predef.String">String</span>, <span class="extype" name="scala.Any">Any</span>]</span>)</span><span class="result">: <span class="extype" name="org.jboss.netty.channel.ChannelFuture">ChannelFuture</span></span>
+        <span class="name">respondViewNoLayout</span><span class="params">(<span name="location">location: <span class="extype" name="scala.Predef.Class">Class</span>[_ &lt;: <a href="" class="extype" name="xitrum.Action">Action</a>]</span>, <span name="options">options: <span class="extype" name="scala.Predef.Map">Map</span>[<span class="extype" name="scala.Predef.String">String</span>, <span class="extype" name="scala.Any">Any</span>]</span>)</span><span class="result">: <span class="extype" name="io.netty.channel.ChannelFuture">ChannelFuture</span></span>
       </span>
       </h4>
-      <p class="shortcomment cmt">Content-Type header is set to &quot;text/html&quot;</p><div class="fullcomment"><div class="comment cmt"><p>Content-Type header is set to &quot;text/html&quot;</p></div><dl class="attributes block"> <dt>Definition Classes</dt><dd><a href="view/Responder.html" class="extype" name="xitrum.view.Responder">Responder</a></dd></dl></div>
+      <p class="shortcomment cmt">Content-Type header is set to &quot;text/html&quot;.</p><div class="fullcomment"><div class="comment cmt"><p>Content-Type header is set to &quot;text/html&quot;.</p></div><dl class="attributes block"> <dt>Definition Classes</dt><dd><a href="view/Responder.html" class="extype" name="xitrum.view.Responder">Responder</a></dd></dl></div>
     </li><li name="xitrum.view.Responder#respondXml" visbl="pub" data-isabs="false" fullComment="yes" group="Ungrouped">
-      <a id="respondXml(any:Any):org.jboss.netty.channel.ChannelFuture"></a>
+      <a id="respondXml(any:Any):io.netty.channel.ChannelFuture"></a>
       <a id="respondXml(Any):ChannelFuture"></a>
       <h4 class="signature">
       <span class="modifier_kind">
@@ -1865,25 +1876,25 @@ http://www.ne.jp/asahi/hishidama/home/tech/scala/xml.html
         <span class="kind">def</span>
       </span>
       <span class="symbol">
-        <span class="name">respondXml</span><span class="params">(<span name="any">any: <span class="extype" name="scala.Any">Any</span></span>)</span><span class="result">: <span class="extype" name="org.jboss.netty.channel.ChannelFuture">ChannelFuture</span></span>
+        <span class="name">respondXml</span><span class="params">(<span name="any">any: <span class="extype" name="scala.Any">Any</span></span>)</span><span class="result">: <span class="extype" name="io.netty.channel.ChannelFuture">ChannelFuture</span></span>
       </span>
       </h4>
       <p class="shortcomment cmt">Content-Type header is set to &quot;application/xml&quot;.</p><div class="fullcomment"><div class="comment cmt"><p>Content-Type header is set to &quot;application/xml&quot;.</p></div><dl class="attributes block"> <dt>Definition Classes</dt><dd><a href="view/Responder.html" class="extype" name="xitrum.view.Responder">Responder</a></dd></dl></div>
     </li><li name="xitrum.scope.request.RequestEnv#response" visbl="pub" data-isabs="false" fullComment="yes" group="Ungrouped">
-      <a id="response:org.jboss.netty.handler.codec.http.HttpResponse"></a>
-      <a id="response:HttpResponse"></a>
+      <a id="response:xitrum.scope.request.ReplaceableFullHttpResponse"></a>
+      <a id="response:ReplaceableFullHttpResponse"></a>
       <h4 class="signature">
       <span class="modifier_kind">
         <span class="modifier"></span>
         <span class="kind">lazy val</span>
       </span>
       <span class="symbol">
-        <span class="name">response</span><span class="result">: <span class="extype" name="org.jboss.netty.handler.codec.http.HttpResponse">HttpResponse</span></span>
+        <span class="name">response</span><span class="result">: <a href="scope/request/ReplaceableFullHttpResponse.html" class="extype" name="xitrum.scope.request.ReplaceableFullHttpResponse">ReplaceableFullHttpResponse</a></span>
       </span>
       </h4>
       <div class="fullcomment"><dl class="attributes block"> <dt>Definition Classes</dt><dd><a href="scope/request/RequestEnv.html" class="extype" name="xitrum.scope.request.RequestEnv">RequestEnv</a></dd></dl></div>
     </li><li name="xitrum.scope.session.SessionEnv#responseCookies" visbl="pub" data-isabs="false" fullComment="yes" group="Ungrouped">
-      <a id="responseCookies:scala.collection.mutable.ArrayBuffer[org.jboss.netty.handler.codec.http.Cookie]"></a>
+      <a id="responseCookies:scala.collection.mutable.ArrayBuffer[io.netty.handler.codec.http.Cookie]"></a>
       <a id="responseCookies:ArrayBuffer[Cookie]"></a>
       <h4 class="signature">
       <span class="modifier_kind">
@@ -1891,7 +1902,7 @@ http://www.ne.jp/asahi/hishidama/home/tech/scala/xml.html
         <span class="kind">val</span>
       </span>
       <span class="symbol">
-        <span class="name">responseCookies</span><span class="result">: <span class="extype" name="scala.collection.mutable.ArrayBuffer">ArrayBuffer</span>[<span class="extype" name="org.jboss.netty.handler.codec.http.Cookie">Cookie</span>]</span>
+        <span class="name">responseCookies</span><span class="result">: <span class="extype" name="scala.collection.mutable.ArrayBuffer">ArrayBuffer</span>[<span class="extype" name="io.netty.handler.codec.http.Cookie">Cookie</span>]</span>
       </span>
       </h4>
       <div class="fullcomment"><dl class="attributes block"> <dt>Definition Classes</dt><dd><a href="scope/session/SessionEnv.html" class="extype" name="xitrum.scope.session.SessionEnv">SessionEnv</a></dd></dl></div>
@@ -1960,6 +1971,23 @@ http://www.ne.jp/asahi/hishidama/home/tech/scala/xml.html
       </span>
       </h4>
       <div class="fullcomment"><dl class="attributes block"> <dt>Definition Classes</dt><dd><a href="scope/session/SessionEnv.html" class="extype" name="xitrum.scope.session.SessionEnv">SessionEnv</a></dd></dl></div>
+    </li><li name="xitrum.view.Responder#setChunked" visbl="pub" data-isabs="false" fullComment="yes" group="Ungrouped">
+      <a id="setChunked():Unit"></a>
+      <a id="setChunked():Unit"></a>
+      <h4 class="signature">
+      <span class="modifier_kind">
+        <span class="modifier"></span>
+        <span class="kind">def</span>
+      </span>
+      <span class="symbol">
+        <span class="name">setChunked</span><span class="params">()</span><span class="result">: <span class="extype" name="scala.Unit">Unit</span></span>
+      </span>
+      </h4>
+      <p class="shortcomment cmt">To respond chunks (http://en.</p><div class="fullcomment"><div class="comment cmt"><p>To respond chunks (http://en.wikipedia.org/wiki/Chunked_transfer_encoding):
+1. Call setChunked() to mark that the response will be chunked
+2. Call respondXXX as normal, but as many times as you want
+3. Lastly, call respondLastChunk()</p><p>If Content-Type header is not set, it is set to &quot;application/octet-stream&quot;.
+</p></div><dl class="attributes block"> <dt>Definition Classes</dt><dd><a href="view/Responder.html" class="extype" name="xitrum.view.Responder">Responder</a></dd></dl></div>
     </li><li name="xitrum.view.Responder#setClientCacheAggressively" visbl="pub" data-isabs="false" fullComment="yes" group="Ungrouped">
       <a id="setClientCacheAggressively():Unit"></a>
       <a id="setClientCacheAggressively():Unit"></a>
@@ -2013,28 +2041,28 @@ http://www.ne.jp/asahi/hishidama/home/tech/scala/xml.html
       </h4>
       <div class="fullcomment"><dl class="attributes block"> <dt>Definition Classes</dt><dd><a href="view/Responder.html" class="extype" name="xitrum.view.Responder">Responder</a></dd></dl></div>
     </li><li name="xitrum.action.Url#sockJsAbsUrl" visbl="pub" data-isabs="false" fullComment="yes" group="Ungrouped">
-      <a id="sockJsAbsUrl[T&lt;:xitrum.SockJsActor](implicitevidence$8:Manifest[T]):String"></a>
-      <a id="sockJsAbsUrl[T&lt;:SockJsActor](Manifest[T]):String"></a>
+      <a id="sockJsAbsUrl[T&lt;:xitrum.SockJsAction](implicitevidence$8:Manifest[T]):String"></a>
+      <a id="sockJsAbsUrl[T&lt;:SockJsAction](Manifest[T]):String"></a>
       <h4 class="signature">
       <span class="modifier_kind">
         <span class="modifier"></span>
         <span class="kind">def</span>
       </span>
       <span class="symbol">
-        <span class="name">sockJsAbsUrl</span><span class="tparams">[<span name="T">T &lt;: <a href="SockJsActor.html" class="extype" name="xitrum.SockJsActor">SockJsActor</a></span>]</span><span class="params">(<span class="implicit">implicit </span><span name="arg0">arg0: <span class="extype" name="scala.Predef.Manifest">Manifest</span>[<span class="extype" name="xitrum.action.Url.sockJsAbsUrl.T">T</span>]</span>)</span><span class="result">: <span class="extype" name="java.lang.String">String</span></span>
+        <span class="name">sockJsAbsUrl</span><span class="tparams">[<span name="T">T &lt;: <a href="SockJsAction.html" class="extype" name="xitrum.SockJsAction">SockJsAction</a></span>]</span><span class="params">(<span class="implicit">implicit </span><span name="arg0">arg0: <span class="extype" name="scala.Predef.Manifest">Manifest</span>[<span class="extype" name="xitrum.action.Url.sockJsAbsUrl.T">T</span>]</span>)</span><span class="result">: <span class="extype" name="java.lang.String">String</span></span>
       </span>
       </h4>
       <div class="fullcomment"><dl class="attributes block"> <dt>Definition Classes</dt><dd><a href="action/Url.html" class="extype" name="xitrum.action.Url">Url</a></dd></dl></div>
     </li><li name="xitrum.action.Url#sockJsUrl" visbl="pub" data-isabs="false" fullComment="yes" group="Ungrouped">
-      <a id="sockJsUrl[T&lt;:xitrum.SockJsActor](implicitevidence$7:Manifest[T]):String"></a>
-      <a id="sockJsUrl[T&lt;:SockJsActor](Manifest[T]):String"></a>
+      <a id="sockJsUrl[T&lt;:xitrum.SockJsAction](implicitevidence$7:Manifest[T]):String"></a>
+      <a id="sockJsUrl[T&lt;:SockJsAction](Manifest[T]):String"></a>
       <h4 class="signature">
       <span class="modifier_kind">
         <span class="modifier"></span>
         <span class="kind">def</span>
       </span>
       <span class="symbol">
-        <span class="name">sockJsUrl</span><span class="tparams">[<span name="T">T &lt;: <a href="SockJsActor.html" class="extype" name="xitrum.SockJsActor">SockJsActor</a></span>]</span><span class="params">(<span class="implicit">implicit </span><span name="arg0">arg0: <span class="extype" name="scala.Predef.Manifest">Manifest</span>[<span class="extype" name="xitrum.action.Url.sockJsUrl.T">T</span>]</span>)</span><span class="result">: <span class="extype" name="scala.Predef.String">String</span></span>
+        <span class="name">sockJsUrl</span><span class="tparams">[<span name="T">T &lt;: <a href="SockJsAction.html" class="extype" name="xitrum.SockJsAction">SockJsAction</a></span>]</span><span class="params">(<span class="implicit">implicit </span><span name="arg0">arg0: <span class="extype" name="scala.Predef.Manifest">Manifest</span>[<span class="extype" name="xitrum.action.Url.sockJsUrl.T">T</span>]</span>)</span><span class="result">: <span class="extype" name="scala.Predef.String">String</span></span>
       </span>
       </h4>
       <div class="fullcomment"><dl class="attributes block"> <dt>Definition Classes</dt><dd><a href="action/Url.html" class="extype" name="xitrum.action.Url">Url</a></dd></dl></div>
@@ -2142,6 +2170,19 @@ http://www.ne.jp/asahi/hishidama/home/tech/scala/xml.html
       </span>
       </h4>
       <div class="fullcomment"><dl class="attributes block"> <dt>Definition Classes</dt><dd><a href="I18n.html" class="extype" name="xitrum.I18n">I18n</a></dd></dl></div>
+    </li><li name="xitrum.Action#timeout" visbl="pub" data-isabs="false" fullComment="no" group="Ungrouped">
+      <a id="timeout:scala.concurrent.duration.FiniteDuration"></a>
+      <a id="timeout:FiniteDuration"></a>
+      <h4 class="signature">
+      <span class="modifier_kind">
+        <span class="modifier">implicit </span>
+        <span class="kind">val</span>
+      </span>
+      <span class="symbol">
+        <span class="name">timeout</span><span class="result">: <span class="extype" name="scala.concurrent.duration.FiniteDuration">FiniteDuration</span></span>
+      </span>
+      </h4>
+      
     </li><li name="xitrum.I18n#tn" visbl="pub" data-isabs="false" fullComment="yes" group="Ungrouped">
       <a id="tn(singular:String,plural:String,n:Long):String"></a>
       <a id="tn(String,String,Long):String"></a>
@@ -2317,28 +2358,28 @@ http://www.ne.jp/asahi/hishidama/home/tech/scala/xml.html
       </h4>
       <div class="fullcomment"><dl class="attributes block"> <dt>Definition Classes</dt><dd><a href="action/Url.html" class="extype" name="xitrum.action.Url">Url</a></dd></dl></div>
     </li><li name="xitrum.action.Url#webSocketAbsUrl" visbl="pub" data-isabs="false" fullComment="yes" group="Ungrouped">
-      <a id="webSocketAbsUrl[T&lt;:xitrum.WebSocketActor](implicitevidence$6:Manifest[T]):String"></a>
-      <a id="webSocketAbsUrl[T&lt;:WebSocketActor](Manifest[T]):String"></a>
+      <a id="webSocketAbsUrl[T&lt;:xitrum.WebSocketAction](implicitevidence$6:Manifest[T]):String"></a>
+      <a id="webSocketAbsUrl[T&lt;:WebSocketAction](Manifest[T]):String"></a>
       <h4 class="signature">
       <span class="modifier_kind">
         <span class="modifier"></span>
         <span class="kind">def</span>
       </span>
       <span class="symbol">
-        <span class="name">webSocketAbsUrl</span><span class="tparams">[<span name="T">T &lt;: <a href="WebSocketActor.html" class="extype" name="xitrum.WebSocketActor">WebSocketActor</a></span>]</span><span class="params">(<span class="implicit">implicit </span><span name="arg0">arg0: <span class="extype" name="scala.Predef.Manifest">Manifest</span>[<span class="extype" name="xitrum.action.Url.webSocketAbsUrl.T">T</span>]</span>)</span><span class="result">: <span class="extype" name="scala.Predef.String">String</span></span>
+        <span class="name">webSocketAbsUrl</span><span class="tparams">[<span name="T">T &lt;: <a href="WebSocketAction.html" class="extype" name="xitrum.WebSocketAction">WebSocketAction</a></span>]</span><span class="params">(<span class="implicit">implicit </span><span name="arg0">arg0: <span class="extype" name="scala.Predef.Manifest">Manifest</span>[<span class="extype" name="xitrum.action.Url.webSocketAbsUrl.T">T</span>]</span>)</span><span class="result">: <span class="extype" name="scala.Predef.String">String</span></span>
       </span>
       </h4>
       <div class="fullcomment"><dl class="attributes block"> <dt>Definition Classes</dt><dd><a href="action/Url.html" class="extype" name="xitrum.action.Url">Url</a></dd></dl></div>
     </li><li name="xitrum.action.Url#webSocketAbsUrl" visbl="pub" data-isabs="false" fullComment="yes" group="Ungrouped">
-      <a id="webSocketAbsUrl[T&lt;:xitrum.WebSocketActor](params:(String,Any)*)(implicitevidence$5:Manifest[T]):String"></a>
-      <a id="webSocketAbsUrl[T&lt;:WebSocketActor]((String,Any)*)(Manifest[T]):String"></a>
+      <a id="webSocketAbsUrl[T&lt;:xitrum.WebSocketAction](params:(String,Any)*)(implicitevidence$5:Manifest[T]):String"></a>
+      <a id="webSocketAbsUrl[T&lt;:WebSocketAction]((String,Any)*)(Manifest[T]):String"></a>
       <h4 class="signature">
       <span class="modifier_kind">
         <span class="modifier"></span>
         <span class="kind">def</span>
       </span>
       <span class="symbol">
-        <span class="name">webSocketAbsUrl</span><span class="tparams">[<span name="T">T &lt;: <a href="WebSocketActor.html" class="extype" name="xitrum.WebSocketActor">WebSocketActor</a></span>]</span><span class="params">(<span name="params">params: (<span class="extype" name="scala.Predef.String">String</span>, <span class="extype" name="scala.Any">Any</span>)*</span>)</span><span class="params">(<span class="implicit">implicit </span><span name="arg0">arg0: <span class="extype" name="scala.Predef.Manifest">Manifest</span>[<span class="extype" name="xitrum.action.Url.webSocketAbsUrl.T">T</span>]</span>)</span><span class="result">: <span class="extype" name="java.lang.String">String</span></span>
+        <span class="name">webSocketAbsUrl</span><span class="tparams">[<span name="T">T &lt;: <a href="WebSocketAction.html" class="extype" name="xitrum.WebSocketAction">WebSocketAction</a></span>]</span><span class="params">(<span name="params">params: (<span class="extype" name="scala.Predef.String">String</span>, <span class="extype" name="scala.Any">Any</span>)*</span>)</span><span class="params">(<span class="implicit">implicit </span><span name="arg0">arg0: <span class="extype" name="scala.Predef.Manifest">Manifest</span>[<span class="extype" name="xitrum.action.Url.webSocketAbsUrl.T">T</span>]</span>)</span><span class="result">: <span class="extype" name="java.lang.String">String</span></span>
       </span>
       </h4>
       <div class="fullcomment"><dl class="attributes block"> <dt>Definition Classes</dt><dd><a href="action/Url.html" class="extype" name="xitrum.action.Url">Url</a></dd></dl></div>

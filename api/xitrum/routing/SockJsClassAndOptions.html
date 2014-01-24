@@ -39,13 +39,16 @@
       </span>
       </h4>
       
-          <div id="comment" class="fullcommenttop"><div class="toggleContainer block">
+          <div id="comment" class="fullcommenttop"><div class="comment cmt"><p>&quot;websocket&quot; and &quot;cookieNeeded&quot; members are named after SockJS options, ex:
+{&quot;websocket&quot;: true, &quot;cookie_needed&quot;: false, &quot;origins&quot;: [&quot;*:*&quot;], &quot;entropy&quot;: 123}</p><p>- websocket: true means WebSocket is enabled
+- cookieNeeded: true means load balancers needs JSESSION cookie
+</p></div><div class="toggleContainer block">
           <span class="toggle">Linear Supertypes</span>
           <div class="superTypes hiddenContent"><span class="extype" name="scala.Serializable">Serializable</span>, <span class="extype" name="java.io.Serializable">Serializable</span>, <span class="extype" name="scala.AnyRef">AnyRef</span>, <span class="extype" name="scala.Any">Any</span></div>
         </div><div class="toggleContainer block diagram-container" id="inheritance-diagram-container">
                 <span class="toggle diagram-link">Type Hierarchy</span>
                 <a href="http://docs.scala-lang.org/overviews/scaladoc/usage.html#diagrams" target="_blank" class="diagram-help">Learn more about scaladoc diagrams</a>
-                <div class="diagram" id="inheritance-diagram"><svg class="class-diagram" id="graph62" viewBox="0.00 0.00 210.00 120.00" height="120pt" width="210pt" xmlns:xlink="http://www.w3.org/1999/xlink" xmlns="http://www.w3.org/2000/svg"><g transform="scale(1 1) rotate(0) translate(4 116)" class="graph" id="graph1"><polygon points="-4,5 -4,-116 207,-116 207,5 -4,5" stroke="white" fill="white"></polygon><g class="cluster" id="graph2"></g><g class="cluster" id="graph3"></g><!-- node0 --><g class="node this class" id="graph62_0"><a xlink:title="xitrum.routing.SockJsClassAndOptions (this class)" xlink:href="#inheritance-diagram"><polygon points="178,-50 24,-50 24,-24 178,-24 178,-50" stroke="#115f3b" fill="#0a955b"></polygon><image xlink:href="../../lib/class_diagram.png" y="-45" x="34" preserveAspectRatio="xMinYMin meet" height="16px" width="16px"></image><text fill="#ffffff" font-size="10.00" font-family="Arial" y="-34.6667" x="56" text-anchor="start">SockJsClassAndOptions</text></a></g><!-- node1 --><g class="node trait" id="graph62_1"><a xlink:title="scala.Serializable"><polygon points="149,-112 53,-112 53,-86 149,-86 149,-112" stroke="#37657d" fill="#498aad"></polygon><image xlink:href="../../lib/trait_diagram.png" y="-107" x="63" preserveAspectRatio="xMinYMin meet" height="16px" width="16px"></image><text fill="#ffffff" font-size="10.00" font-family="Arial" y="-96.6667" x="85" text-anchor="start">Serializable</text></a></g><!-- node1&#45;&gt;node0 --><g class="edge inheritance" id="graph62_1_0"><a xlink:title="SockJsClassAndOptions is a subtype of Serializable"><path d="M101,-80.6463C101,-70.8429 101,-59.003 101,-50.1297" stroke="#d4d4d4" fill="none"></path><polygon points="99.2501,-80.8514 101,-85.8514 102.75,-80.8514 99.2501,-80.8514" stroke="#d4d4d4" fill="none"></polygon></a></g></g></svg></div>
+                <div class="diagram" id="inheritance-diagram"><svg class="class-diagram" id="graph50" viewBox="0.00 0.00 210.00 120.00" height="120pt" width="210pt" xmlns:xlink="http://www.w3.org/1999/xlink" xmlns="http://www.w3.org/2000/svg"><g transform="scale(1 1) rotate(0) translate(4 116)" class="graph" id="graph1"><polygon points="-4,5 -4,-116 207,-116 207,5 -4,5" stroke="white" fill="white"></polygon><g class="cluster" id="graph2"></g><g class="cluster" id="graph3"></g><!-- node0 --><g class="node this class" id="graph50_0"><a xlink:title="xitrum.routing.SockJsClassAndOptions (this class)" xlink:href="#inheritance-diagram"><polygon points="178,-50 24,-50 24,-24 178,-24 178,-50" stroke="#115f3b" fill="#0a955b"></polygon><image xlink:href="../../lib/class_diagram.png" y="-45" x="34" preserveAspectRatio="xMinYMin meet" height="16px" width="16px"></image><text fill="#ffffff" font-size="10.00" font-family="Arial" y="-34.6667" x="56" text-anchor="start">SockJsClassAndOptions</text></a></g><!-- node1 --><g class="node trait" id="graph50_1"><a xlink:title="scala.Serializable"><polygon points="149,-112 53,-112 53,-86 149,-86 149,-112" stroke="#37657d" fill="#498aad"></polygon><image xlink:href="../../lib/trait_diagram.png" y="-107" x="63" preserveAspectRatio="xMinYMin meet" height="16px" width="16px"></image><text fill="#ffffff" font-size="10.00" font-family="Arial" y="-96.6667" x="85" text-anchor="start">Serializable</text></a></g><!-- node1&#45;&gt;node0 --><g class="edge inheritance" id="graph50_1_0"><a xlink:title="SockJsClassAndOptions is a subtype of Serializable"><path d="M101,-80.6463C101,-70.8429 101,-59.003 101,-50.1297" stroke="#d4d4d4" fill="none"></path><polygon points="99.2501,-80.8514 101,-85.8514 102.75,-80.8514 99.2501,-80.8514" stroke="#d4d4d4" fill="none"></polygon></a></g></g></svg></div>
               </div></div>
         
 
@@ -84,7 +87,7 @@
         <div id="constructors" class="members">
               <h3>Instance Constructors</h3>
               <ol><li name="xitrum.routing.SockJsClassAndOptions#&lt;init&gt;" visbl="pub" data-isabs="false" fullComment="no" group="Ungrouped">
-      <a id="&lt;init&gt;(actorClass:Class[_&lt;:xitrum.SockJsActor],websocket:Boolean,cookieNeeded:Boolean):xitrum.routing.SockJsClassAndOptions"></a>
+      <a id="&lt;init&gt;(actorClass:Class[_&lt;:xitrum.SockJsAction],websocket:Boolean,cookieNeeded:Boolean):xitrum.routing.SockJsClassAndOptions"></a>
       <a id="&lt;init&gt;:SockJsClassAndOptions"></a>
       <h4 class="signature">
       <span class="modifier_kind">
@@ -92,7 +95,7 @@
         <span class="kind">new</span>
       </span>
       <span class="symbol">
-        <span class="name">SockJsClassAndOptions</span><span class="params">(<span name="actorClass">actorClass: <span class="extype" name="scala.Predef.Class">Class</span>[_ &lt;: <a href="../SockJsActor.html" class="extype" name="xitrum.SockJsActor">SockJsActor</a>]</span>, <span name="websocket">websocket: <span class="extype" name="scala.Boolean">Boolean</span></span>, <span name="cookieNeeded">cookieNeeded: <span class="extype" name="scala.Boolean">Boolean</span></span>)</span>
+        <span class="name">SockJsClassAndOptions</span><span class="params">(<span name="actorClass">actorClass: <span class="extype" name="scala.Predef.Class">Class</span>[_ &lt;: <a href="../SockJsAction.html" class="extype" name="xitrum.SockJsAction">SockJsAction</a>]</span>, <span name="websocket">websocket: <span class="extype" name="scala.Boolean">Boolean</span></span>, <span name="cookieNeeded">cookieNeeded: <span class="extype" name="scala.Boolean">Boolean</span></span>)</span>
       </span>
       </h4>
       
@@ -171,15 +174,15 @@
       </h4>
       <div class="fullcomment"><dl class="attributes block"> <dt>Definition Classes</dt><dd>Any</dd></dl></div>
     </li><li name="xitrum.routing.SockJsClassAndOptions#actorClass" visbl="pub" data-isabs="false" fullComment="no" group="Ungrouped">
-      <a id="actorClass:Class[_&lt;:xitrum.SockJsActor]"></a>
-      <a id="actorClass:Class[_&lt;:SockJsActor]"></a>
+      <a id="actorClass:Class[_&lt;:xitrum.SockJsAction]"></a>
+      <a id="actorClass:Class[_&lt;:SockJsAction]"></a>
       <h4 class="signature">
       <span class="modifier_kind">
         <span class="modifier"></span>
         <span class="kind">val</span>
       </span>
       <span class="symbol">
-        <span class="name">actorClass</span><span class="result">: <span class="extype" name="scala.Predef.Class">Class</span>[_ &lt;: <a href="../SockJsActor.html" class="extype" name="xitrum.SockJsActor">SockJsActor</a>]</span>
+        <span class="name">actorClass</span><span class="result">: <span class="extype" name="scala.Predef.Class">Class</span>[_ &lt;: <a href="../SockJsAction.html" class="extype" name="xitrum.SockJsAction">SockJsAction</a>]</span>
       </span>
       </h4>
       

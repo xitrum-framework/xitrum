@@ -58,32 +58,22 @@
 
         <div id="types" class="types members">
               <h3>Type Members</h3>
-              <ol><li name="xitrum.handler.DefaultHttpChannelPipelineFactory" visbl="pub" data-isabs="false" fullComment="no" group="Ungrouped">
-      <a id="DefaultHttpChannelPipelineFactoryextendsChannelPipelineFactory"></a>
-      <a id="DefaultHttpChannelPipelineFactory:DefaultHttpChannelPipelineFactory"></a>
+              <ol><li name="xitrum.handler.DefaultHttpChannelInitializer" visbl="pub" data-isabs="false" fullComment="yes" group="Ungrouped">
+      <a id="DefaultHttpChannelInitializerextendsChannelInitializer[io.netty.channel.socket.SocketChannel]"></a>
+      <a id="DefaultHttpChannelInitializer:DefaultHttpChannelInitializer"></a>
       <h4 class="signature">
       <span class="modifier_kind">
         <span class="modifier"></span>
         <span class="kind">class</span>
       </span>
       <span class="symbol">
-        <a href="DefaultHttpChannelPipelineFactory.html"><span class="name">DefaultHttpChannelPipelineFactory</span></a><span class="result"> extends <span class="extype" name="org.jboss.netty.channel.ChannelPipelineFactory">ChannelPipelineFactory</span></span>
+        <a href="DefaultHttpChannelInitializer.html"><span class="name">DefaultHttpChannelInitializer</span></a><span class="result"> extends <span class="extype" name="io.netty.channel.ChannelInitializer">ChannelInitializer</span>[<span class="extype" name="io.netty.channel.socket.SocketChannel">SocketChannel</span>]</span>
       </span>
       </h4>
-      
-    </li><li name="xitrum.handler.FlashSocketChannelPipelineFactory" visbl="pub" data-isabs="false" fullComment="no" group="Ungrouped">
-      <a id="FlashSocketChannelPipelineFactoryextendsChannelPipelineFactory"></a>
-      <a id="FlashSocketChannelPipelineFactory:FlashSocketChannelPipelineFactory"></a>
-      <h4 class="signature">
-      <span class="modifier_kind">
-        <span class="modifier"></span>
-        <span class="kind">class</span>
-      </span>
-      <span class="symbol">
-        <a href="FlashSocketChannelPipelineFactory.html"><span class="name">FlashSocketChannelPipelineFactory</span></a><span class="result"> extends <span class="extype" name="org.jboss.netty.channel.ChannelPipelineFactory">ChannelPipelineFactory</span></span>
-      </span>
-      </h4>
-      
+      <div class="fullcomment"><dl class="attributes block"> <dt>Annotations</dt><dd>
+                <span class="name">@Sharable</span><span class="args">()</span>
+              
+        </dd></dl></div>
     </li><li name="xitrum.handler.HandlerEnv" visbl="pub" data-isabs="false" fullComment="no" group="Ungrouped">
       <a id="HandlerEnvextendsHashMap[Any,Any]"></a>
       <a id="HandlerEnv:HandlerEnv"></a>
@@ -97,16 +87,16 @@
       </span>
       </h4>
       <p class="comment cmt">Env is basically a map for sharing data between handlers.</p>
-    </li><li name="xitrum.handler.SslChannelPipelineFactory" visbl="pub" data-isabs="false" fullComment="no" group="Ungrouped">
-      <a id="SslChannelPipelineFactoryextendsChannelPipelineFactory"></a>
-      <a id="SslChannelPipelineFactory:SslChannelPipelineFactory"></a>
+    </li><li name="xitrum.handler.SslChannelInitializer" visbl="pub" data-isabs="false" fullComment="no" group="Ungrouped">
+      <a id="SslChannelInitializerextendsChannelInitializer[io.netty.channel.socket.SocketChannel]"></a>
+      <a id="SslChannelInitializer:SslChannelInitializer"></a>
       <h4 class="signature">
       <span class="modifier_kind">
         <span class="modifier"></span>
         <span class="kind">class</span>
       </span>
       <span class="symbol">
-        <a href="SslChannelPipelineFactory.html"><span class="name">SslChannelPipelineFactory</span></a><span class="result"> extends <span class="extype" name="org.jboss.netty.channel.ChannelPipelineFactory">ChannelPipelineFactory</span></span>
+        <a href="SslChannelInitializer.html"><span class="name">SslChannelInitializer</span></a><span class="result"> extends <span class="extype" name="io.netty.channel.ChannelInitializer">ChannelInitializer</span>[<span class="extype" name="io.netty.channel.socket.SocketChannel">SocketChannel</span>]</span>
       </span>
       </h4>
       <p class="comment cmt">This is a wrapper.</p>
@@ -130,16 +120,16 @@
       </span>
       </h4>
       
-    </li><li name="xitrum.handler.DefaultHttpChannelPipelineFactory" visbl="pub" data-isabs="false" fullComment="no" group="Ungrouped">
-      <a id="DefaultHttpChannelPipelineFactory"></a>
-      <a id="DefaultHttpChannelPipelineFactory:DefaultHttpChannelPipelineFactory"></a>
+    </li><li name="xitrum.handler.DefaultHttpChannelInitializer" visbl="pub" data-isabs="false" fullComment="no" group="Ungrouped">
+      <a id="DefaultHttpChannelInitializer"></a>
+      <a id="DefaultHttpChannelInitializer:DefaultHttpChannelInitializer"></a>
       <h4 class="signature">
       <span class="modifier_kind">
         <span class="modifier"></span>
         <span class="kind">object</span>
       </span>
       <span class="symbol">
-        <a href="DefaultHttpChannelPipelineFactory$.html"><span class="name">DefaultHttpChannelPipelineFactory</span></a>
+        <a href="DefaultHttpChannelInitializer$.html"><span class="name">DefaultHttpChannelInitializer</span></a>
       </span>
       </h4>
       <p class="comment cmt">Sharable handlers are put here so that they can be easily picked up by apps
@@ -183,29 +173,29 @@ that want to use custom pipeline.</p>
       </span>
       </h4>
       
-    </li><li name="xitrum.handler.down" visbl="pub" data-isabs="false" fullComment="no" group="Ungrouped">
-      <a id="down"></a>
-      <a id="down:down"></a>
+    </li><li name="xitrum.handler.inbound" visbl="pub" data-isabs="false" fullComment="no" group="Ungrouped">
+      <a id="inbound"></a>
+      <a id="inbound:inbound"></a>
       <h4 class="signature">
       <span class="modifier_kind">
         <span class="modifier"></span>
         <span class="kind">package</span>
       </span>
       <span class="symbol">
-        <a href="down/package.html"><span class="name">down</span></a>
+        <a href="inbound/package.html"><span class="name">inbound</span></a>
       </span>
       </h4>
       
-    </li><li name="xitrum.handler.up" visbl="pub" data-isabs="false" fullComment="no" group="Ungrouped">
-      <a id="up"></a>
-      <a id="up:up"></a>
+    </li><li name="xitrum.handler.outbound" visbl="pub" data-isabs="false" fullComment="no" group="Ungrouped">
+      <a id="outbound"></a>
+      <a id="outbound:outbound"></a>
       <h4 class="signature">
       <span class="modifier_kind">
         <span class="modifier"></span>
         <span class="kind">package</span>
       </span>
       <span class="symbol">
-        <a href="up/package.html"><span class="name">up</span></a>
+        <a href="outbound/package.html"><span class="name">outbound</span></a>
       </span>
       </h4>
       

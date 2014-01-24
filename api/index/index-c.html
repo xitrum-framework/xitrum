@@ -16,7 +16,7 @@
       <div class="occurrences"><a href="../xitrum/sockjs/SockJsAction$.html" class="extype" name="xitrum.sockjs.SockJsAction">SockJsAction</a> </div>
     </div><div class="entry">
       <div class="name">CHUNK_SIZE</div>
-      <div class="occurrences"><a href="../xitrum/handler/down/XSendFile$.html" class="extype" name="xitrum.handler.down.XSendFile">XSendFile</a> <a href="../xitrum/handler/down/XSendResource$.html" class="extype" name="xitrum.handler.down.XSendResource">XSendResource</a> </div>
+      <div class="occurrences"><a href="../xitrum/handler/outbound/XSendFile$.html" class="extype" name="xitrum.handler.outbound.XSendFile">XSendFile</a> <a href="../xitrum/handler/outbound/XSendResource$.html" class="extype" name="xitrum.handler.outbound.XSendResource">XSendResource</a> </div>
     </div><div class="entry">
       <div class="name">Cache</div>
       <div class="occurrences"><a href="../xitrum/package.html" class="extype" name="xitrum">xitrum</a> <a href="../xitrum/annotation/package.html" class="extype" name="xitrum.annotation">annotation</a> </div>
@@ -45,9 +45,6 @@
       <div class="name">CachePageSecond</div>
       <div class="occurrences"><a href="../xitrum/annotation/package.html" class="extype" name="xitrum.annotation">annotation</a> </div>
     </div><div class="entry">
-      <div class="name">ChannelBufferToBytes</div>
-      <div class="occurrences"><a href="../xitrum/util/package.html" class="extype" name="xitrum.util">util</a> </div>
-    </div><div class="entry">
       <div class="name">CloseFromHandler</div>
       <div class="occurrences"><a href="../xitrum/sockjs/package.html" class="extype" name="xitrum.sockjs">sockjs</a> </div>
     </div><div class="entry">
@@ -67,7 +64,7 @@
       <div class="occurrences"><a href="../xitrum/Config.html" class="extype" name="xitrum.Config">Config</a> <a href="../xitrum/annotation/ActionAnnotations.html" class="extype" name="xitrum.annotation.ActionAnnotations">ActionAnnotations</a> </div>
     </div><div class="entry">
       <div class="name">cacheResponse</div>
-      <div class="occurrences"><a href="../xitrum/handler/down/ResponseCacher$.html" class="extype" name="xitrum.handler.down.ResponseCacher">ResponseCacher</a> </div>
+      <div class="occurrences"><a href="../xitrum/handler/outbound/ResponseCacher$.html" class="extype" name="xitrum.handler.outbound.ResponseCacher">ResponseCacher</a> </div>
     </div><div class="entry">
       <div class="name">cacheSecs</div>
       <div class="occurrences"><a href="../xitrum/routing/Route.html" class="extype" name="xitrum.routing.Route">Route</a> <a href="../xitrum/routing/SerializableRoute.html" class="extype" name="xitrum.routing.SerializableRoute">SerializableRoute</a> </div>
@@ -93,8 +90,11 @@
       <div class="name">channel</div>
       <div class="occurrences"><a href="../xitrum/handler/HandlerEnv.html" class="extype" name="xitrum.handler.HandlerEnv">HandlerEnv</a> <a href="../xitrum/scope/request/RequestEnv.html" class="extype" name="xitrum.scope.request.RequestEnv">RequestEnv</a> </div>
     </div><div class="entry">
-      <div class="name">channelClosed</div>
-      <div class="occurrences"><a href="../xitrum/handler/up/BodyParser.html" class="extype" name="xitrum.handler.up.BodyParser">BodyParser</a> </div>
+      <div class="name">channelInactive</div>
+      <div class="occurrences"><a href="../xitrum/handler/inbound/Request2Env.html" class="extype" name="xitrum.handler.inbound.Request2Env">Request2Env</a> </div>
+    </div><div class="entry">
+      <div class="name">channelRead0</div>
+      <div class="occurrences"><a href="../xitrum/handler/inbound/BadClientSilencer.html" class="extype" name="xitrum.handler.inbound.BadClientSilencer">BadClientSilencer</a> <a href="../xitrum/handler/inbound/BaseUrlRemover.html" class="extype" name="xitrum.handler.inbound.BaseUrlRemover">BaseUrlRemover</a> <a href="../xitrum/handler/inbound/BasicAuth.html" class="extype" name="xitrum.handler.inbound.BasicAuth">BasicAuth</a> <a href="../xitrum/handler/inbound/Dispatcher.html" class="extype" name="xitrum.handler.inbound.Dispatcher">Dispatcher</a> <a href="../xitrum/handler/inbound/FlashSocketPolicyHandler.html" class="extype" name="xitrum.handler.inbound.FlashSocketPolicyHandler">FlashSocketPolicyHandler</a> <a href="../xitrum/handler/inbound/MethodOverrider.html" class="extype" name="xitrum.handler.inbound.MethodOverrider">MethodOverrider</a> <a href="../xitrum/handler/inbound/NoPipelining.html" class="extype" name="xitrum.handler.inbound.NoPipelining">NoPipelining</a> <a href="../xitrum/handler/inbound/PublicFileServer.html" class="extype" name="xitrum.handler.inbound.PublicFileServer">PublicFileServer</a> <a href="../xitrum/handler/inbound/PublicResourceServer.html" class="extype" name="xitrum.handler.inbound.PublicResourceServer">PublicResourceServer</a> <a href="../xitrum/handler/inbound/Request2Env.html" class="extype" name="xitrum.handler.inbound.Request2Env">Request2Env</a> <a href="../xitrum/handler/inbound/UriParser.html" class="extype" name="xitrum.handler.inbound.UriParser">UriParser</a> <a href="../xitrum/handler/inbound/WebSocketEventDispatcher.html" class="extype" name="xitrum.handler.inbound.WebSocketEventDispatcher">WebSocketEventDispatcher</a> </div>
     </div><div class="entry">
       <div class="name">charset</div>
       <div class="occurrences"><a href="../xitrum/RequestConfig.html" class="extype" name="xitrum.RequestConfig">RequestConfig</a> </div>
@@ -103,7 +103,7 @@
       <div class="occurrences"><a href="../xitrum/RequestConfig.html" class="extype" name="xitrum.RequestConfig">RequestConfig</a> </div>
     </div><div class="entry">
       <div class="name">clear</div>
-      <div class="occurrences"><a href="../xitrum/Cache.html" class="extype" name="xitrum.Cache">Cache</a> <a href="../xitrum/local/LruCache.html" class="extype" name="xitrum.local.LruCache">LruCache</a> </div>
+      <div class="occurrences"><a href="../xitrum/Cache.html" class="extype" name="xitrum.Cache">Cache</a> <a href="../xitrum/i18n/PoLoader$.html" class="extype" name="xitrum.i18n.PoLoader">PoLoader</a> <a href="../xitrum/local/LruCache.html" class="extype" name="xitrum.local.LruCache">LruCache</a> </div>
     </div><div class="entry">
       <div class="name">clientIp</div>
       <div class="occurrences"><a href="../xitrum/action/Net$.html" class="extype" name="xitrum.action.Net">Net</a> </div>
@@ -129,6 +129,9 @@
       <div class="name">config</div>
       <div class="occurrences"><a href="../xitrum/Config.html" class="extype" name="xitrum.Config">Config</a> </div>
     </div><div class="entry">
+      <div class="name">content</div>
+      <div class="occurrences"><a href="../xitrum/scope/request/ReplaceableFullHttpResponse.html" class="extype" name="xitrum.scope.request.ReplaceableFullHttpResponse">ReplaceableFullHttpResponse</a> </div>
+    </div><div class="entry">
       <div class="name">convertText</div>
       <div class="occurrences"><a href="../xitrum/scope/request/ParamAccess.html" class="extype" name="xitrum.scope.request.ParamAccess">ParamAccess</a> </div>
     </div><div class="entry">
@@ -138,10 +141,13 @@
       <div class="name">cookieNeeded</div>
       <div class="occurrences"><a href="../xitrum/routing/SockJsClassAndOptions.html" class="extype" name="xitrum.routing.SockJsClassAndOptions">SockJsClassAndOptions</a> </div>
     </div><div class="entry">
+      <div class="name">copy</div>
+      <div class="occurrences"><a href="../xitrum/scope/request/ReplaceableFullHttpResponse.html" class="extype" name="xitrum.scope.request.ReplaceableFullHttpResponse">ReplaceableFullHttpResponse</a> </div>
+    </div><div class="entry">
       <div class="name">corsAllowOrigins</div>
       <div class="occurrences"><a href="../xitrum/ResponseConfig.html" class="extype" name="xitrum.ResponseConfig">ResponseConfig</a> </div>
     </div><div class="entry">
-      <div class="name">createSockJsActor</div>
+      <div class="name">createSockJsAction</div>
       <div class="occurrences"><a href="../xitrum/routing/SockJsRouteMap.html" class="extype" name="xitrum.routing.SockJsRouteMap">SockJsRouteMap</a> </div>
     </div><div class="entry">
       <div class="name">currentAction</div>
