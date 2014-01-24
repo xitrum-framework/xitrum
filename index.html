@@ -71,6 +71,8 @@ and HTTP(S) server fusion<span class="small"> on top of <a class="reference exte
             <pre><code>import xitrum.Action
 import xitrum.annotation.GET
 
+// This action runs on Netty's IO thread. If you want it to run
+// on another thread (pool), extend xitrum.FutureAction.
 @GET("url/to/HelloAction")
 class HelloAction extends Action {
   def execute() {
@@ -91,11 +93,11 @@ class HelloAction extends Action {
             <p>Just annotate your actors and they will be accessible from web!</p>
             <pre><code>import scala.concurrent.duration._
 import akka.actor.ReceiveTimeout
-import xitrum.{ActionActor, Config}
+import xitrum.{ActorAction, Config}
 import xitrum.annotation.GET
 
 @GET("url/to/HelloActor")
-class HelloActor extends ActionActor {
+class HelloActor extends ActorAction {
   def execute() {
     log.info("Actor started, remoteIp: " + remoteIp)
 
@@ -126,14 +128,14 @@ class HelloActor extends ActionActor {
           <div class="span-11">
             <h2 class="title">WebSocket sample</h2>
             <pre><code>import xitrum.{
-  Action, WebSocketActor,
+  Action, WebSocketAction,
   WebSocketText, WebSocketBinary,
   WebSocketPing, WebSocketPong
 }
 import xitrum.annotation.WEBSOCKET
 
 @WEBSOCKET("url/to/EchoWebSocketActor")
-class EchoWebSocketActor extends WebSocketActor {
+class EchoWebSocketActor extends WebSocketAction {
   def execute() {
     log.info("onOpen, remoteIp: " + remoteIp)
 
@@ -163,11 +165,11 @@ class EchoWebSocketActor extends WebSocketActor {
 
           <div class="span-10">
             <h2 class="title">SockJS sample</h2>
-            <pre><code>import xitrum.{Action, SockJsActor, SockJsText}
+            <pre><code>import xitrum.{Action, SockJsAction, SockJsText}
 import xitrum.annotation.SOCKJS
 
 @SOCKJS("url/to/EchoSockJsActor")
-class EchoSockJsActor extends SockJsActor {
+class EchoSockJsActor extends SockJsAction {
   def execute() {
     log.info("onOpen, remoteIp: " + remoteIp)
 
@@ -269,6 +271,7 @@ Most people are familliar with controller-first style.</li>
           <p><a href=https://github.com/ngocdaothanh/xitrum/blob/master/CHANGELOG>CHANGELOG</a></p>
 
           <ul>
+            <li><a href="https://groups.google.com/forum/#!topic/xitrum-framework/aWJIZKk4Ww4">Xitrum 3.0</a> <em>Jan 24 2013</em></li>
             <li><a href="https://groups.google.com/forum/#!topic/xitrum-framework/zW0ZlaTUf3o">Xitrum 2.15</a> <em>Dec 25 2013</em></li>
             <li><a href="https://groups.google.com/forum/#!topic/xitrum-framework/do1uI0cFyZ4">Xitrum 2.14</a> <em>Dec 20 2013</em></li>
             <li><a href="https://groups.google.com/forum/#!topic/xitrum-framework/qvvkmmOHEeM">Xitrum 2.13</a> <em>Nov 28 2013</em></li>
