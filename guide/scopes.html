@@ -1,3 +1,4 @@
+
 <!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
   "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
 
@@ -6,15 +7,15 @@
   <head>
     <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
     
-    <title>Scopes &mdash; Xitrum 2.15 documentation</title>
+    <title>Scopes &mdash; Xitrum 3.0 documentation</title>
     
     <link rel="stylesheet" href="_static/nature.css" type="text/css" />
     <link rel="stylesheet" href="_static/pygments.css" type="text/css" />
     
     <script type="text/javascript">
       var DOCUMENTATION_OPTIONS = {
-        URL_ROOT:    './',
-        VERSION:     '2.15',
+        URL_ROOT:    '',
+        VERSION:     '3.0',
         COLLAPSE_INDEX: false,
         FILE_SUFFIX: '.html',
         HAS_SOURCE:  true
@@ -23,7 +24,7 @@
     <script type="text/javascript" src="_static/jquery.js"></script>
     <script type="text/javascript" src="_static/underscore.js"></script>
     <script type="text/javascript" src="_static/doctools.js"></script>
-    <link rel="top" title="Xitrum 2.15 documentation" href="index.html" />
+    <link rel="top" title="Xitrum 3.0 documentation" href="index.html" />
     <link rel="next" title="Validation" href="validation.html" />
     <link rel="prev" title="Serve flash socket policy file" href="flash.html" /> 
   </head>
@@ -40,7 +41,7 @@
         <li class="right" >
           <a href="flash.html" title="Serve flash socket policy file"
              accesskey="P">previous</a> |</li>
-        <li><a href="index.html">Xitrum 2.15 documentation</a> &raquo;</li> 
+        <li><a href="index.html">Xitrum 3.0 documentation</a> &raquo;</li> 
       </ul>
     </div>  
 
@@ -64,7 +65,7 @@
 </ol>
 <p>These params are merged in the above order as <tt class="docutils literal"><span class="pre">textParams</span></tt>
 (from 1 to 3, the latter will override the former).</p>
-<p><tt class="docutils literal"><span class="pre">fileUploadParams</span></tt> is of type scala.collection.mutable.Map[String, List[<a class="reference external" href="http://netty.io/3.9/api/org/jboss/netty/handler/codec/http/multipart/FileUpload.html">FileUpload</a>]].</p>
+<p><tt class="docutils literal"><span class="pre">fileUploadParams</span></tt> is of type scala.collection.mutable.Map[String, List[<a class="reference external" href="http://netty.io/4.0/api/io/netty/handler/codec/http/multipart/FileUpload.html">FileUpload</a>]].</p>
 </div>
 <div class="section" id="accesing-params">
 <h3>Accesing params<a class="headerlink" href="#accesing-params" title="Permalink to this headline">¶</a></h3>
@@ -197,8 +198,8 @@ trait AppAction extends Action {
   case Some(string) =&gt; ...
 }</pre>
 </div>
-<p>To send cookie to browser, create an instance of <a class="reference external" href="http://netty.io/3.9/api/org/jboss/netty/handler/codec/http/DefaultCookie.html">DefaultCookie</a>
-and append it to <tt class="docutils literal"><span class="pre">responseCookies</span></tt>, an <tt class="docutils literal"><span class="pre">ArrayBuffer</span></tt> that contains <a class="reference external" href="http://netty.io/3.9/api/org/jboss/netty/handler/codec/http/Cookie.html">Cookie</a>.</p>
+<p>To send cookie to browser, create an instance of <a class="reference external" href="http://netty.io/4.0/api/io/netty/handler/codec/http/DefaultCookie.html">DefaultCookie</a>
+and append it to <tt class="docutils literal"><span class="pre">responseCookies</span></tt>, an <tt class="docutils literal"><span class="pre">ArrayBuffer</span></tt> that contains <a class="reference external" href="http://netty.io/4.0/api/io/netty/handler/codec/http/Cookie.html">Cookie</a>.</p>
 <div class="highlight-python"><pre>val cookie = new DefaultCookie("name", "value")
 cookie.setHttpOnly(true)  // true: JavaScript cannot access this cookie
 responseCookies.append(cookie)</pre>
@@ -225,7 +226,7 @@ For more information, see <a class="reference internal" href="howto.html"><em>Ho
 For example, if you need to use UTF-8 characters, you need to encode them.
 You can use <tt class="docutils literal"><span class="pre">xitrum.utill.UrlSafeBase64</span></tt> or <tt class="docutils literal"><span class="pre">xitrum.util.SecureUrlSafeBase64</span></tt>.</p>
 <p>Write cookie example:</p>
-<div class="highlight-python"><pre>import org.jboss.netty.util.CharsetUtil
+<div class="highlight-python"><pre>import io.netty.util.CharsetUtil
 import xitrum.util.UrlSafeBase64
 
 val value   = """{"identity":"example@gmail.com","first_name":"Alexander"}"""
@@ -448,12 +449,12 @@ and <tt class="docutils literal"><span class="pre">isAdmin</span></tt>.</p>
         <li class="right" >
           <a href="flash.html" title="Serve flash socket policy file"
              >previous</a> |</li>
-        <li><a href="index.html">Xitrum 2.15 documentation</a> &raquo;</li> 
+        <li><a href="index.html">Xitrum 3.0 documentation</a> &raquo;</li> 
       </ul>
     </div>
     <div class="footer">
         &copy; Copyright 2010, Ngoc Dao.
-      Created using <a href="http://sphinx-doc.org/">Sphinx</a> 1.2b3.
+      Created using <a href="http://sphinx.pocoo.org/">Sphinx</a> 1.1.3.
     </div>
   </body>
 </html>

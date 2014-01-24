@@ -29,7 +29,7 @@ In Netty, there are 2 types of handlers:
 * upstream: the request direction client -> server
 * downstream: the response direction server -> client
 
-Please see the doc of `ChannelPipeline <http://netty.io/3.9/api/org/jboss/netty/channel/ChannelPipeline.html>`_
+Please see the doc of `ChannelPipeline <http://netty.io/4.0/api/io/netty/channel/ChannelPipeline.html>`_
 for more information.
 
 ::

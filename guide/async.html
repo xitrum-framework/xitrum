@@ -1,3 +1,4 @@
+
 <!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
   "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
 
@@ -6,15 +7,15 @@
   <head>
     <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
     
-    <title>Async response &mdash; Xitrum 2.15 documentation</title>
+    <title>Async response &mdash; Xitrum 3.0 documentation</title>
     
     <link rel="stylesheet" href="_static/nature.css" type="text/css" />
     <link rel="stylesheet" href="_static/pygments.css" type="text/css" />
     
     <script type="text/javascript">
       var DOCUMENTATION_OPTIONS = {
-        URL_ROOT:    './',
-        VERSION:     '2.15',
+        URL_ROOT:    '',
+        VERSION:     '3.0',
         COLLAPSE_INDEX: false,
         FILE_SUFFIX: '.html',
         HAS_SOURCE:  true
@@ -23,7 +24,7 @@
     <script type="text/javascript" src="_static/jquery.js"></script>
     <script type="text/javascript" src="_static/underscore.js"></script>
     <script type="text/javascript" src="_static/doctools.js"></script>
-    <link rel="top" title="Xitrum 2.15 documentation" href="index.html" />
+    <link rel="top" title="Xitrum 3.0 documentation" href="index.html" />
     <link rel="next" title="Static files" href="static.html" />
     <link rel="prev" title="JavaScript and JSON" href="js.html" /> 
   </head>
@@ -40,7 +41,7 @@
         <li class="right" >
           <a href="js.html" title="JavaScript and JSON"
              accesskey="P">previous</a> |</li>
-        <li><a href="index.html">Xitrum 2.15 documentation</a> &raquo;</li> 
+        <li><a href="index.html">Xitrum 3.0 documentation</a> &raquo;</li> 
       </ul>
     </div>  
 
@@ -81,10 +82,10 @@ You can also use <tt class="docutils literal"><span class="pre">addConnectionClo
 </div>
 <p>Because of the async nature, the response is not sent right away.
 respondXXX returns
-<a class="reference external" href="http://netty.io/3.9/api/org/jboss/netty/channel/ChannelFuture.html">ChannelFuture</a>.
+<a class="reference external" href="http://netty.io/4.0/api/io/netty/channel/ChannelFuture.html">ChannelFuture</a>.
 You can use it to perform actions when the response has actually been sent.</p>
 <p>For example, if you want to close the connection after the response has been sent:</p>
-<div class="highlight-python"><pre>import org.jboss.netty.channel.{ChannelFuture, ChannelFutureListener}
+<div class="highlight-python"><pre>import io.netty.channel.{ChannelFuture, ChannelFutureListener}
 
 val future = respondText("Hello")
 future.addListener(new ChannelFutureListener {
@@ -99,11 +100,11 @@ future.addListener(new ChannelFutureListener {
 </div>
 <div class="section" id="websocket">
 <h2>WebSocket<a class="headerlink" href="#websocket" title="Permalink to this headline">¶</a></h2>
-<div class="highlight-python"><pre>import xitrum.WebSocketActor
+<div class="highlight-python"><pre>import xitrum.WebSocketAction
 import xitrum.annotation.WEBSOCKET
 
 @WEBSOCKET("echo")
-class EchoWebSocketActor extends WebSocketActor {
+class EchoWebSocketActor extends WebSocketAction {
   /**
    * The current action is the one just before switching to this WebSocket actor.
    * You can extract session data, request headers etc. from it, but do not use
@@ -184,11 +185,11 @@ html
 </div>
 <p>SockJS does require a <a class="reference external" href="https://github.com/sockjs/sockjs-protocol">server counterpart</a>.
 Xitrum automatically does it for you.</p>
-<div class="highlight-python"><pre>import xitrum.{Action, SockJsActor, SockJsText}
+<div class="highlight-python"><pre>import xitrum.{Action, SockJsAction, SockJsText}
 import xitrum.annotation.SOCKJS
 
 @SOCKJS("echo")
-class EchoSockJsActor extends SockJsActor {
+class EchoSockJsActor extends SockJsAction {
   /**
    * The current action is the one just before switching to this SockJS actor.
    * You can extract session data, request headers etc. from it, but do not use
@@ -257,7 +258,7 @@ respondLastChunk()</pre>
 <li>Headers are only sent on the first respondXXX call.</li>
 <li><a class="reference internal" href="cache.html"><em>Page and action cache</em></a> cannot be used with chunked response.</li>
 </ul>
-<p>Using chunked response together with ActionActor, you can easily implement
+<p>Using chunked response together with ActorAction, you can easily implement
 <a class="reference external" href="http://www.cubrid.org/blog/dev-platform/faster-web-page-loading-with-facebook-bigpipe/">Facebook BigPipe</a>.</p>
 <div class="section" id="forever-iframe">
 <h3>Forever iframe<a class="headerlink" href="#forever-iframe" title="Permalink to this headline">¶</a></h3>
@@ -363,12 +364,12 @@ respondEventSource("data2")  // Event name defaults to "message"</pre>
         <li class="right" >
           <a href="js.html" title="JavaScript and JSON"
              >previous</a> |</li>
-        <li><a href="index.html">Xitrum 2.15 documentation</a> &raquo;</li> 
+        <li><a href="index.html">Xitrum 3.0 documentation</a> &raquo;</li> 
       </ul>
     </div>
     <div class="footer">
         &copy; Copyright 2010, Ngoc Dao.
-      Created using <a href="http://sphinx-doc.org/">Sphinx</a> 1.2b3.
+      Created using <a href="http://sphinx.pocoo.org/">Sphinx</a> 1.1.3.
     </div>
   </body>
 </html>

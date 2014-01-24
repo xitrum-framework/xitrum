@@ -232,8 +232,8 @@ To get it as a string and parse it as JSON:
 
   val myMap = requestContentJson[Map[String, Int]]
 
-If you want to full control, use `request.getContent <http://netty.io/3.9/api/org/jboss/netty/handler/codec/http/HttpRequest.html>`_.
-It returns a `ChannelBuffer <http://netty.io/3.9/api/org/jboss/netty/buffer/ChannelBuffer.html>`_.
+If you want to full control, use `request.getContent <http://netty.io/4.0/api/io/netty/handler/codec/http/FullHttpRequest.html>`_.
+It returns a `ByteBuf <http://netty.io/4.0/api/io/netty/buffer/ByteBuf.html>`_.
 
 Documenting API
 ---------------

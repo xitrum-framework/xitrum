@@ -21,11 +21,11 @@ MyUpload:
 
 ::
 
-  import org.jboss.netty.handler.codec.http.multipart.FileUpload
+  import io.netty.handler.codec.http.multipart.FileUpload
 
   val myFile = param[FileUpload]("myFile")
 
-myFile is an instance of `FileUpload <http://netty.io/3.9/api/org/jboss/netty/handler/codec/http/multipart/FileUpload.html>`_.
+myFile is an instance of `FileUpload <http://netty.io/4.0/api/io/netty/handler/codec/http/multipart/FileUpload.html>`_.
 Use its methods to get file name, move file to a directory etc.
 
 Small files (less than 16 KB) will be saved in memory. Big files will be saved

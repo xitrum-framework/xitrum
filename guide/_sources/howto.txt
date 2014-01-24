@@ -68,6 +68,27 @@ Use ``isAjax``.
   else
     respondText(msg)
 
+Manipulate collected routes
+---------------------------
+
+Xitrum automatically collect routes on startup.
+If you want to manipulate the routes, you can do like this:
+
+::
+
+  import xitrum.{Config, Server}
+
+  object Boot {
+    def main(args: Array[String]) {
+      // You can modify routes before starting the server
+      val routes = Config.routes
+      routes.remove[xitrum.js]()
+      ...
+
+      Server.start()
+    }
+  }
+
 Basic authentication
 --------------------
 

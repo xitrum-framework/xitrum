@@ -25,12 +25,31 @@ With Action, the request is handled right away, but the number of concurrent
 connections can't be too high. There should not be any blocking processing
 along the way request -> response.
 
+FutureAction
+------------
+
+If you extend xitrum.Action, your action will run on Netty's IO thread. This is
+only suitable if your action is lightweight and nonblocking (e.g. it returns
+immediately). Otherwise, you can extend xitrum.FutureAction to easily run on
+another thread (thread pool).
+
+::
+
+  import xitrum.FutureAction
+
+  @GET("hi")
+  class MyAction extends FutureAction {
+    def execute() {
+      respondText("hi")
+    }
+  }
+
 Actor action
 ------------
 
 Use when you want to do async call to outside from your action.
 If you want your action to be an actor, instead of extending xitrum.Action,
-extend xitrum.ActionActor. With ActionActor, your system can handle massive
+extend xitrum.ActorAction. With ActorAction, your system can handle massive
 number of concurrent connections, but the request is not handled right away.
 This is async oriented.
 
@@ -43,11 +62,11 @@ It is stopped when the last chunk is sent.
 
   import scala.concurrent.duration._
 
-  import xitrum.ActionActor
+  import xitrum.ActorAction
   import xitrum.annotation.GET
 
   @GET("actor")
-  class ActionActorDemo extends ActionActor with AppAction {
+  class ActorDemo extends ActorAction with AppAction {
     // This is just a normal Akka actor
 
     def execute() {

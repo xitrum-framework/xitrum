@@ -1,3 +1,4 @@
+
 <!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
   "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
 
@@ -6,15 +7,15 @@
   <head>
     <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
     
-    <title>RESTful APIs &mdash; Xitrum 2.15 documentation</title>
+    <title>RESTful APIs &mdash; Xitrum 3.0 documentation</title>
     
     <link rel="stylesheet" href="_static/nature.css" type="text/css" />
     <link rel="stylesheet" href="_static/pygments.css" type="text/css" />
     
     <script type="text/javascript">
       var DOCUMENTATION_OPTIONS = {
-        URL_ROOT:    './',
-        VERSION:     '2.15',
+        URL_ROOT:    '',
+        VERSION:     '3.0',
         COLLAPSE_INDEX: false,
         FILE_SUFFIX: '.html',
         HAS_SOURCE:  true
@@ -23,7 +24,7 @@
     <script type="text/javascript" src="_static/jquery.js"></script>
     <script type="text/javascript" src="_static/underscore.js"></script>
     <script type="text/javascript" src="_static/doctools.js"></script>
-    <link rel="top" title="Xitrum 2.15 documentation" href="index.html" />
+    <link rel="top" title="Xitrum 3.0 documentation" href="index.html" />
     <link rel="next" title="Template engines" href="template_engines.html" />
     <link rel="prev" title="Action and view" href="action_view.html" /> 
   </head>
@@ -40,7 +41,7 @@
         <li class="right" >
           <a href="action_view.html" title="Action and view"
              accesskey="P">previous</a> |</li>
-        <li><a href="index.html">Xitrum 2.15 documentation</a> &raquo;</li> 
+        <li><a href="index.html">Xitrum 3.0 documentation</a> &raquo;</li> 
       </ul>
     </div>  
 
@@ -231,8 +232,8 @@ you may need to get the entire request content (and parse it manually etc.).</p>
 <p>To get it as a string and parse it as JSON:</p>
 <div class="highlight-python"><pre>val myMap = requestContentJson[Map[String, Int]]</pre>
 </div>
-<p>If you want to full control, use <a class="reference external" href="http://netty.io/3.9/api/org/jboss/netty/handler/codec/http/HttpRequest.html">request.getContent</a>.
-It returns a <a class="reference external" href="http://netty.io/3.9/api/org/jboss/netty/buffer/ChannelBuffer.html">ChannelBuffer</a>.</p>
+<p>If you want to full control, use <a class="reference external" href="http://netty.io/4.0/api/io/netty/handler/codec/http/FullHttpRequest.html">request.getContent</a>.
+It returns a <a class="reference external" href="http://netty.io/4.0/api/io/netty/buffer/ByteBuf.html">ByteBuf</a>.</p>
 </div>
 <div class="section" id="documenting-api">
 <h2>Documenting API<a class="headerlink" href="#documenting-api" title="Permalink to this headline">¶</a></h2>
@@ -439,12 +440,12 @@ and <a class="reference external" href="https://github.com/wordnik/swagger-core/
         <li class="right" >
           <a href="action_view.html" title="Action and view"
              >previous</a> |</li>
-        <li><a href="index.html">Xitrum 2.15 documentation</a> &raquo;</li> 
+        <li><a href="index.html">Xitrum 3.0 documentation</a> &raquo;</li> 
       </ul>
     </div>
     <div class="footer">
         &copy; Copyright 2010, Ngoc Dao.
-      Created using <a href="http://sphinx-doc.org/">Sphinx</a> 1.2b3.
+      Created using <a href="http://sphinx.pocoo.org/">Sphinx</a> 1.1.3.
     </div>
   </body>
 </html>

@@ -58,4 +58,4 @@ console you will see request information:
 
 ::
 
-  [DEBUG] GET quickstart.action.SiteIndex, 1 [ms]
+  [INFO] GET quickstart.action.SiteIndex, 1 [ms]
