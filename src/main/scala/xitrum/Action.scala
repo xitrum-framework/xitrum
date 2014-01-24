@@ -74,7 +74,7 @@ trait Action extends RequestEnv
            request.getMethod == HttpMethod.PUT ||
            request.getMethod == HttpMethod.DELETE) &&
           !isInstanceOf[SkipCsrfCheck] &&
-          !Csrf.isValidToken(Action.this)) throw new InvalidAntiCsrfToken
+          !Csrf.isValidToken(this)) throw new InvalidAntiCsrfToken
 
       // Before filters:
       // When not passed, the before filters must explicitly respond to client,
@@ -127,7 +127,7 @@ trait Action extends RequestEnv
           else
             respondText(msg)
 
-          AccessLog.logActionAccess(Action.this, beginTimestamp, 0, false)
+          AccessLog.logActionAccess(this, beginTimestamp, 0, false)
         } else {
           response.setStatus(HttpResponseStatus.INTERNAL_SERVER_ERROR)
           if (Config.productionMode) {
@@ -151,7 +151,7 @@ trait Action extends RequestEnv
               respondText(errorMsg)
           }
 
-          AccessLog.logActionAccess(Action.this, beginTimestamp, 0, false, e)
+          AccessLog.logActionAccess(this, beginTimestamp, 0, false, e)
         }
     }
   }
