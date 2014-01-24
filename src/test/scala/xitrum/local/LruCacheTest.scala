@@ -83,11 +83,30 @@ class LruCacheTest extends FlatSpec with Matchers {
     try {
       // Should not sleep 1500ms because the cache TTL precision is second,
       // not millisecond
-    	Thread.sleep(2000)
+      Thread.sleep(2000)
     } catch {
       case e: InterruptedException => fail()
     }
 
     cache.get("second") should equal (None)
+  }
+
+  it should "putIfAbsent can overwrite stale cache" in {
+    System.setProperty("xitrum.mode", "production")
+    val cache = new LruCache
+
+    cache.putSecond("key", "abc", 1)
+    cache.get("key") should equal (Some("abc"))
+
+    try {
+      // Should not sleep 1500ms because the cache TTL precision is second,
+      // not millisecond
+      Thread.sleep(2000)
+    } catch {
+      case e: InterruptedException => fail()
+    }
+
+    cache.putIfAbsent("key", "xyz")
+    cache.get("key") should equal (Some("xyz"))
   }
 }
