@@ -7,7 +7,7 @@ import scala.util.control.NonFatal
 import io.netty.buffer.Unpooled
 import io.netty.channel.{SimpleChannelInboundHandler, ChannelFutureListener, ChannelHandlerContext}
 import io.netty.handler.codec.http.{
-  HttpRequest, FullHttpRequest, DefaultFullHttpRequest,
+  HttpRequest, FullHttpRequest, FullHttpResponse, DefaultFullHttpRequest, DefaultFullHttpResponse,
   HttpHeaders, HttpContent, HttpObject, LastHttpContent, HttpResponseStatus, HttpVersion
 }
 import io.netty.handler.codec.http.multipart.{
@@ -19,7 +19,8 @@ import InterfaceHttpData.HttpDataType
 
 import xitrum.{Config, Log}
 import xitrum.handler.HandlerEnv
-import xitrum.scope.request.{FileUploadParams, Params, PathInfo, ReplaceableFullHttpResponse}
+import xitrum.scope.request.{FileUploadParams, Params, PathInfo}
+import xitrum.util.ByteBufUtil
 
 object Request2Env {
   DiskAttribute.deleteOnExitTemporaryFile  = true  // Should delete file on exit (in normal exit)
@@ -150,10 +151,13 @@ class Request2Env extends SimpleChannelInboundHandler[HttpObject] with Log {
     ret
   }
 
-  private def createEmptyFullResponse(request: HttpRequest): ReplaceableFullHttpResponse = {
+  private def createEmptyFullResponse(request: HttpRequest): FullHttpResponse = {
+    // https://github.com/netty/netty/issues/2137
+    val compositeBuf = Unpooled.compositeBuffer(1)
+
     // In HTTP 1.1 all connections are considered persistent unless declared otherwise
     // http://en.wikipedia.org/wiki/HTTP_persistent_connection
-    val ret = new ReplaceableFullHttpResponse(HttpVersion.HTTP_1_1, HttpResponseStatus.OK)
+    val ret = new DefaultFullHttpResponse(HttpVersion.HTTP_1_1, HttpResponseStatus.OK, compositeBuf)
 
     // Unless the Connection: keep-alive header is present in the HTTP response,
     // apache benchmark (ab) hangs on keep alive connections
@@ -244,7 +248,10 @@ class Request2Env extends SimpleChannelInboundHandler[HttpObject] with Log {
   private def closeOnBigRequest(ctx: ChannelHandlerContext) {
     val response = env.response
     response.setStatus(HttpResponseStatus.BAD_REQUEST)
-    response.content(Unpooled.copiedBuffer("Request content body is too big", Config.xitrum.request.charset))
+    ByteBufUtil.writeComposite(
+      response.content,
+      Unpooled.copiedBuffer("Request content body is too big", Config.xitrum.request.charset)
+    )
     ctx.channel.write(env).addListener(ChannelFutureListener.CLOSE)
 
     log.warn("Request content body is too big, see xitrum.request.maxSizeInMB in xitrum.conf")

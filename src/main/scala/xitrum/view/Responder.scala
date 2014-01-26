@@ -18,7 +18,7 @@ import xitrum.{Action, Config}
 import xitrum.etag.NotModified
 import xitrum.handler.inbound.NoPipelining
 import xitrum.handler.outbound.{XSendFile, XSendResource}
-import xitrum.util.Json
+import xitrum.util.{ByteBufUtil, Json}
 
 /**
  * When responding text, charset is automatically set, as advised by Google:
@@ -171,12 +171,12 @@ trait Responder extends Js with Flash with GetActionClassDefaultsToCurrentAction
       }
     }
 
-    val cb = Unpooled.copiedBuffer(respondedText, Config.xitrum.request.charset)
+    val buf = Unpooled.copiedBuffer(respondedText, Config.xitrum.request.charset)
     if (HttpHeaders.isTransferEncodingChunked(response)) {
       respondHeadersOnlyForFirstChunk()
-      channel.writeAndFlush(new DefaultHttpContent(cb))
+      channel.writeAndFlush(new DefaultHttpContent(buf))
     } else {
-      response.content(cb)
+      ByteBufUtil.writeComposite(response.content, buf)
       respond()
     }
   }
@@ -307,7 +307,7 @@ trait Responder extends Js with Flash with GetActionClassDefaultsToCurrentAction
     } else {
       if (!response.headers.contains(CONTENT_TYPE))
         HttpHeaders.setHeader(response, CONTENT_TYPE, "application/octet-stream")
-      response.content(byteBuf)
+      ByteBufUtil.writeComposite(response.content, byteBuf)
       respond()
     }
   }

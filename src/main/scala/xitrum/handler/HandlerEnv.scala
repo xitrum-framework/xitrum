@@ -8,7 +8,7 @@ import io.netty.handler.codec.http.multipart.HttpPostRequestDecoder
 
 import xitrum.Action
 import xitrum.routing.Route
-import xitrum.scope.request.{FileUploadParams, Params, PathInfo, ReplaceableFullHttpResponse}
+import xitrum.scope.request.{FileUploadParams, Params, PathInfo}
 
 /**
  * Env is basically a map for sharing data between handlers. But for more
@@ -16,12 +16,12 @@ import xitrum.scope.request.{FileUploadParams, Params, PathInfo, ReplaceableFull
  */
 class HandlerEnv extends MHashMap[Any, Any] {
   // Set by Request2Env
-  var channel:        Channel                   = _
-  var bodyDecoder:    HttpPostRequestDecoder    = _  // Used to clean upload files when connection is closed or response is sent
-  var bodyTextParams: Params                    = _
-  var bodyFileParams: FileUploadParams          = _  // The filename has been sanitized for insecure character
-  var request:        FullHttpRequest           = _
-  var response:       ReplaceableFullHttpResponse = _
+  var channel:        Channel                = _
+  var bodyDecoder:    HttpPostRequestDecoder = _  // Used to clean upload files when connection is closed or response is sent
+  var bodyTextParams: Params                 = _
+  var bodyFileParams: FileUploadParams       = _  // The filename has been sanitized for insecure character
+  var request:        FullHttpRequest        = _
+  var response:       FullHttpResponse       = _
 
   // Set by UriParser
   var pathInfo:    PathInfo = _

@@ -11,7 +11,7 @@ import HttpResponseStatus._
 import xitrum.{Config, Log}
 import xitrum.etag.Etag
 import xitrum.handler.HandlerEnv
-import xitrum.util.{ByteBufToBytes, Gzip, Mime}
+import xitrum.util.{ByteBufUtil, Gzip, Mime}
 
 @Sharable
 class Env2Response extends ChannelOutboundHandlerAdapter with Log {
@@ -36,7 +36,7 @@ class Env2Response extends ChannelOutboundHandlerAdapter with Log {
       // http://stackoverflow.com/questions/3854842/content-length-header-with-head-requests
       response.content.clear()
     else if (!tryEtag(request, response))
-      Gzip.tryCompressBigTextualResponse(request, response)
+      Gzip.tryCompressBigTextualResponse(request, response, false)
 
     // The status may be set to NOT_MODIFIED by tryEtag above
     val notModified = response.getStatus == NOT_MODIFIED
@@ -115,7 +115,7 @@ class Env2Response extends ChannelOutboundHandlerAdapter with Log {
       // It's not useful to calculate ETag for big response
       if (byteBuf.readableBytes > Config.xitrum.staticFile.maxSizeInBytesOfCachedFiles) return false
 
-      val etag2 = Etag.forBytes(ByteBufToBytes(byteBuf))
+      val etag2 = Etag.forBytes(ByteBufUtil.toBytes(byteBuf))
       compareAndSetETag(request, response, etag2)
     }
   }

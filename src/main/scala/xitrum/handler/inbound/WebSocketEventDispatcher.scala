@@ -13,7 +13,7 @@ import io.netty.handler.codec.http.websocketx.{
 }
 
 import xitrum.{Log, WebSocketBinary, WebSocketPing, WebSocketPong, WebSocketText}
-import xitrum.util.ByteBufToBytes
+import xitrum.util.ByteBufUtil
 
 /** See https://github.com/netty/netty/blob/master/example/src/main/java/io/netty/example/http/websocketx/server/WebSocketServerHandler.java */
 class WebSocketEventDispatcher(
@@ -30,7 +30,7 @@ class WebSocketEventDispatcher(
     }
 
     if (frame.isInstanceOf[BinaryWebSocketFrame]) {
-      val bytes = ByteBufToBytes(frame.asInstanceOf[BinaryWebSocketFrame].content)
+      val bytes = ByteBufUtil.toBytes(frame.asInstanceOf[BinaryWebSocketFrame].content)
       actorRef ! WebSocketBinary(bytes)
       if (log.isTraceEnabled) log.trace("[WS in] binary: " + ScalaRunTime.stringOf(bytes))
       return

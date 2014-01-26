@@ -16,9 +16,7 @@ import xitrum.{Config, Log}
 import xitrum.etag.{Etag, NotModified}
 import xitrum.handler.{AccessLog, HandlerEnv}
 import xitrum.handler.inbound.NoPipelining
-import xitrum.scope.request.ReplaceableFullHttpResponse
-import xitrum.util.{Gzip, Mime}
-
+import xitrum.util.{ByteBufUtil, Gzip, Mime}
 
 object XSendResource extends Log {
   // setClientCacheAggressively should be called at PublicResourceServer, not
@@ -41,7 +39,7 @@ object XSendResource extends Log {
   /** @return false if not found */
   def sendResource(
       ctx: ChannelHandlerContext, env: HandlerEnv, promise: ChannelPromise,
-      request: HttpRequest, response: ReplaceableFullHttpResponse, path: String, noLog: Boolean)
+      request: HttpRequest, response: FullHttpResponse, path: String, noLog: Boolean)
   {
     Etag.forResource(path, Gzip.isAccepted(request)) match {
       case Etag.NotFound =>
@@ -63,7 +61,7 @@ object XSendResource extends Log {
             HttpHeaders.setContentLength(response, bytes.length)
             response.content.clear()
           } else {
-            response.content(Unpooled.wrappedBuffer(bytes))
+            ByteBufUtil.writeComposite(response.content, Unpooled.wrappedBuffer(bytes))
           }
         }
 

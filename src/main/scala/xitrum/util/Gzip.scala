@@ -3,12 +3,11 @@ package xitrum.util
 import java.io.{ByteArrayInputStream, ByteArrayOutputStream}
 import java.util.zip.{GZIPInputStream, GZIPOutputStream}
 
-import io.netty.buffer.Unpooled
+import io.netty.buffer.{CompositeByteBuf, Unpooled}
 import io.netty.handler.codec.http.{HttpHeaders, HttpRequest, FullHttpResponse}
 import HttpHeaders.Names.{ACCEPT_ENCODING, CONTENT_ENCODING, CONTENT_TYPE}
 
 import xitrum.Config
-import xitrum.scope.request.ReplaceableFullHttpResponse
 
 object Gzip {
   // http://stackoverflow.com/questions/4818468/how-to-check-if-inputstream-is-gzipped
@@ -70,24 +69,33 @@ object Gzip {
    *
    * @return Response body content as bytes
    */
-  def tryCompressBigTextualResponse(request: HttpRequest, response: ReplaceableFullHttpResponse): Array[Byte] = {
-    val byteBuf = response.content
-    val bytes   = ByteBufToBytes(byteBuf)
+  def tryCompressBigTextualResponse(
+      request:   HttpRequest,
+      response:  FullHttpResponse,
+      needBytes: Boolean
+  ): Array[Byte] =
+  {
+    // See Request2Env
+    val cb = response.content.asInstanceOf[CompositeByteBuf]
 
     if (!isAccepted(request) ||
         response.headers.contains(CONTENT_ENCODING) ||
         !Mime.isTextual(HttpHeaders.getHeader(response, CONTENT_TYPE)) ||
-        bytes.length < Config.BIG_TEXTUAL_RESPONSE_SIZE_IN_KB * 1024) {
-      return bytes
+        cb.readableBytes < Config.BIG_TEXTUAL_RESPONSE_SIZE_IN_KB * 1024
+    ) {
+      return if (needBytes) ByteBufUtil.toBytes(cb) else null
     }
 
+    val bytes        = ByteBufUtil.toBytes(cb)
     val gzippedBytes = compress(bytes)
 
     // Update CONTENT_LENGTH and set CONTENT_ENCODING
     HttpHeaders.setContentLength(response, gzippedBytes.length)
     HttpHeaders.setHeader(response, CONTENT_ENCODING, "gzip")
 
-    response.content(Unpooled.wrappedBuffer(gzippedBytes))
-    gzippedBytes
+    cb.removeComponents(0, cb.numComponents)
+    cb.clear()
+    ByteBufUtil.writeComposite(cb, Unpooled.wrappedBuffer(gzippedBytes))
+    if (needBytes) gzippedBytes else null
   }
 }

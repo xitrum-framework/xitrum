@@ -19,8 +19,7 @@ import xitrum.{Config, Log}
 import xitrum.etag.{Etag, NotModified}
 import xitrum.handler.{AccessLog, HandlerEnv}
 import xitrum.handler.inbound.NoPipelining
-import xitrum.scope.request.ReplaceableFullHttpResponse
-import xitrum.util.{Gzip, Mime}
+import xitrum.util.{ByteBufUtil, Gzip, Mime}
 
 object XSendFile extends Log {
   // setClientCacheAggressively should be called at PublicFileServer, not
@@ -59,7 +58,7 @@ object XSendFile extends Log {
   /** @param path see Renderer#renderFile */
   def sendFile(
       ctx: ChannelHandlerContext, env: HandlerEnv, promise: ChannelPromise,
-      request: FullHttpRequest, response: ReplaceableFullHttpResponse, path: String, noLog: Boolean)
+      request: FullHttpRequest, response: FullHttpResponse, path: String, noLog: Boolean)
   {
     val channel       = ctx.channel
     val remoteAddress = channel.remoteAddress
@@ -92,7 +91,7 @@ object XSendFile extends Log {
             // http://stackoverflow.com/questions/3854842/content-length-header-with-head-requests
             response.content.clear()
           } else {
-            response.content(Unpooled.wrappedBuffer(bytes))
+            ByteBufUtil.writeComposite(response.content, Unpooled.wrappedBuffer(bytes))
           }
         }
         val future = ctx.write(env, promise)

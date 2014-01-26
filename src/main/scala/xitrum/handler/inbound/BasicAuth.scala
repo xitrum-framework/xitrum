@@ -7,8 +7,7 @@ import ChannelHandler.Sharable
 
 import xitrum.Config
 import xitrum.handler.HandlerEnv
-import xitrum.scope.request.ReplaceableFullHttpResponse
-import xitrum.util.UrlSafeBase64
+import xitrum.util.{ByteBufUtil, UrlSafeBase64}
 
 object BasicAuth {
   /** f takes username and password, and returns true if it want to let the user in. */
@@ -53,7 +52,10 @@ object BasicAuth {
     response.setStatus(HttpResponseStatus.UNAUTHORIZED)
 
     HttpHeaders.setHeader(response, HttpHeaders.Names.CONTENT_TYPE, "text/plain; charset=" + Config.xitrum.request.charset)
-    response.content(Unpooled.copiedBuffer("Wrong username or password", Config.xitrum.request.charset))
+    ByteBufUtil.writeComposite(
+      response.content,
+      Unpooled.copiedBuffer("Wrong username or password", Config.xitrum.request.charset)
+    )
 
     val future = env.channel.write(env)
     NoPipelining.if_keepAliveRequest_then_resumeReading_else_closeOnComplete(request, env.channel, future)
