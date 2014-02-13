@@ -13,11 +13,13 @@ import io.netty.util.CharsetUtil.UTF_8
 import xitrum.Config
 
 /**
- * Note that Secure is for preventing a user to mess with his own data to cheat the server.
- * CSRF is for preventing a user to fake other user's data.
+ * Note that Secure is for preventing a user to mess with his own data to cheat
+ * the server. CSRF is for preventing a user to fake other user's data.
  */
 object Secure {
-  // See https://github.com/mmcgrana/ring/blob/master/ring-core/src/ring/middleware/session/cookie.clj
+  // See:
+  // http://java.dzone.com/articles/aes-256-encryption-java-and
+  // https://github.com/mmcgrana/ring/blob/master/ring-core/src/ring/middleware/session/cookie.clj
 
   /** Encrypts using the key in config/xitrum.conf. */
   def encrypt(data: Array[Byte]): Array[Byte] =
