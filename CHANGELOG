@@ -1,3 +1,7 @@
+3.1:
+* #292: Fix chunked response bug
+* #288: Add Scalive
+
 3.0:
 * #151 Update Netty from 3.9.0 to 4.0.15
 * #284 Fix: xitrum.local.LruCache#putIfAbsent can't overwrite stale cache

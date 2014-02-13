@@ -41,29 +41,30 @@ trait Responder extends Js with Flash with GetActionClassDefaultsToCurrentAction
   def onDoneResponding() {}
 
   def respond(): ChannelFuture = {
-    if (nonChunkedResponseOrFirstChunkSent) {
-      printDoubleResponseErrorStackTrace()
-    } else {
-      setCookieAndSessionIfTouchedOnRespond()
-      val future = channel.write(handlerEnv)
+    // For chunked response, this method is only called to respond the 1st chunk,
+    // next chunks are responded directly by respondXXX
 
-      // Do not handle keep alive:
-      // * If XSendFile or XSendResource is used, because they will handle keep alive in their own way
-      // * If the response is chunked, because respondLastChunk will be handle keep alive
-      if (!XSendFile.isHeaderSet(response) &&
-          !XSendResource.isHeaderSet(response) &&
-          !HttpHeaders.isTransferEncodingChunked(response)) {
-        NoPipelining.if_keepAliveRequest_then_resumeReading_else_closeOnComplete(request, channel, future)
-      }
+    if (nonChunkedResponseOrFirstChunkSent) throwDoubleResponseError()
 
-      nonChunkedResponseOrFirstChunkSent = true
-      if (!HttpHeaders.isTransferEncodingChunked(response)) {
-        doneResponding = true
-        onDoneResponding()
-      }
+    setCookieAndSessionIfTouchedOnRespond()
+    val future = channel.write(handlerEnv)
 
-      future
+    // Do not handle keep alive:
+    // * If XSendFile or XSendResource is used, because they will handle keep alive in their own way
+    // * If the response is chunked, because respondLastChunk will be handle keep alive
+    if (!XSendFile.isHeaderSet(response) &&
+        !XSendResource.isHeaderSet(response) &&
+        !HttpHeaders.isTransferEncodingChunked(response)) {
+      NoPipelining.if_keepAliveRequest_then_resumeReading_else_closeOnComplete(request, channel, future)
     }
+
+    nonChunkedResponseOrFirstChunkSent = true
+    if (!HttpHeaders.isTransferEncodingChunked(response)) {
+      doneResponding = true
+      onDoneResponding()
+    }
+
+    future
   }
 
   //----------------------------------------------------------------------------
@@ -83,47 +84,24 @@ trait Responder extends Js with Flash with GetActionClassDefaultsToCurrentAction
     // It should not be removed from the response.
   }
 
-  /** If Content-Type header is not set, it is set to "application/octet-stream" */
-  private def respondHeadersOnlyForFirstChunk() {
-    if (nonChunkedResponseOrFirstChunkSent) return
-
-    if (!response.headers.contains(CONTENT_TYPE))
-      HttpHeaders.setHeader(response, CONTENT_TYPE, "application/octet-stream")
-
-    // There should be no CONTENT_LENGTH header
-    HttpHeaders.removeHeader(response, CONTENT_LENGTH)
-
-    setNoClientCache()
-
-    // Env2Response will respond only only headers
-    respond()
-  }
-
   /** See setChunked. */
   def respondLastChunk(trailingHeaders: HttpHeaders = HttpHeaders.EMPTY_HEADERS): ChannelFuture = {
-    if (!HttpHeaders.isTransferEncodingChunked(response)) {
-      printDoubleResponseErrorStackTrace()
+    if (doneResponding) throwDoubleResponseError()
+
+    val trailer = if (trailingHeaders.isEmpty) {
+      LastHttpContent.EMPTY_LAST_CONTENT
     } else {
-      val trailer =
-        if (trailingHeaders.isEmpty) {
-          LastHttpContent.EMPTY_LAST_CONTENT
-        } else {
-          val ret = new DefaultLastHttpContent
-          ret.trailingHeaders.set(trailingHeaders)
-          ret
-        }
-      val future = channel.writeAndFlush(trailer)
-      NoPipelining.if_keepAliveRequest_then_resumeReading_else_closeOnComplete(request, channel, future)
-
-      // responded should be true here. Set chunk mode to false so that double
-      // response error will be raised if the app try to respond more.
-      HttpHeaders.removeTransferEncodingChunked(response)
-
-      doneResponding = true
-      onDoneResponding()
-
-      future
+      val ret = new DefaultLastHttpContent
+      ret.trailingHeaders.set(trailingHeaders)
+      ret
     }
+    val future = channel.writeAndFlush(trailer)
+    NoPipelining.if_keepAliveRequest_then_resumeReading_else_closeOnComplete(request, channel, future)
+
+    doneResponding = true
+    onDoneResponding()
+
+    future
   }
 
   //----------------------------------------------------------------------------
@@ -396,18 +374,26 @@ trait Responder extends Js with Flash with GetActionClassDefaultsToCurrentAction
 
   //----------------------------------------------------------------------------
 
-  /**
-   * Prints the stack trace so that application developers know where to fix
-   * the double response error.
-   */
-  private def printDoubleResponseErrorStackTrace(): ChannelFuture = {
-    try {
-      throw new IllegalStateException("Double response")
-    } catch {
-      case NonFatal(e) =>
-        log.warn("Double response! This double response is ignored.", e)
-    }
-    null  // This may cause NPE on double response if the ChannelFuture result is used
+  private def throwDoubleResponseError() {
+    throw new IllegalStateException("Double response; See stack trace to know where to fix the error")
   }
 
+  /** If Content-Type header is not set, it is set to "application/octet-stream" */
+  private def respondHeadersOnlyForFirstChunk() {
+    // doneResponding is set to true by respondLastChunk
+    if (doneResponding) throwDoubleResponseError()
+
+    if (nonChunkedResponseOrFirstChunkSent) return
+
+    if (!response.headers.contains(CONTENT_TYPE))
+      HttpHeaders.setHeader(response, CONTENT_TYPE, "application/octet-stream")
+
+    // There should be no CONTENT_LENGTH header
+    HttpHeaders.removeHeader(response, CONTENT_LENGTH)
+
+    setNoClientCache()
+
+    // Env2Response will respond only only headers
+    respond()
+  }
 }
