@@ -6,15 +6,21 @@ import com.typesafe.config.ConfigObject
 import xitrum.{Cache, Config}
 import xitrum.util.LocalLruCache
 
+/**
+ * Config in xitrum.conf:
+ *
+ * {{{
+ * xitrum {
+ *   cache {
+ *     "xitrum.local.LruCache" {
+ *       maxElems = 10000
+ *     }
+ *   }
+ * }
+ * }}}
+ */
 class LruCache extends Cache {
   private[this] val cache = {
-    // xitrum {
-    //   cache {
-    //     "xitrum.local.LruCache" {
-    //       maxElems = 10000
-    //     }
-    //   }
-    // }
     val className = getClass.getName
     val maxElems  = Config.xitrum.config.getInt("cache.\"" + className + "\".maxElems")
 
