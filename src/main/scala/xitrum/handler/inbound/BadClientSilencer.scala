@@ -22,12 +22,16 @@ class BadClientSilencer extends SimpleChannelInboundHandler[Any] with Log {
   }
 
   override def exceptionCaught(ctx: ChannelHandlerContext, e: Throwable) {
-    if (!e.isInstanceOf[java.io.IOException] &&
-        !e.isInstanceOf[java.lang.IllegalArgumentException] &&
-        !e.isInstanceOf[java.nio.channels.ClosedChannelException] &&
-        !e.isInstanceOf[javax.net.ssl.SSLException] &&
-        !e.isInstanceOf[scala.runtime.NonLocalReturnControl[_]] &&
-        !e.isInstanceOf[io.netty.handler.ssl.NotSslRecordException])
-      log.debug("exceptionCaught", e)
+    if (e.isInstanceOf[java.io.IOException] ||
+        e.isInstanceOf[java.lang.IllegalArgumentException] ||
+        e.isInstanceOf[java.nio.channels.ClosedChannelException] ||
+        e.isInstanceOf[javax.net.ssl.SSLException] ||
+        e.isInstanceOf[io.netty.handler.codec.DecoderException] ||
+        e.isInstanceOf[io.netty.handler.ssl.NotSslRecordException])
+    {
+      if (log.isTraceEnabled) log.trace("exceptionCaught", e)
+    } else {
+      log.warn("exceptionCaught", e)
+    }
   }
 }
