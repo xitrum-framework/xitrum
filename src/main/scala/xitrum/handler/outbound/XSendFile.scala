@@ -123,63 +123,69 @@ object XSendFile extends Log {
         // but it's still good to give it a try
         val lastModifiedRfc2822 = NotModified.formatRfc2822(file.lastModified)
         if (HttpHeaders.getHeader(request, IF_MODIFIED_SINCE) == lastModifiedRfc2822) {
+          XSendFile.removeHeaders(response)
+
           response.setStatus(NOT_MODIFIED)
           response.content.clear()
           val future = ctx.write(env, promise)
           NoPipelining.if_keepAliveRequest_then_resumeReading_else_closeOnComplete(request, channel, future)
           if (!noLog) AccessLog.logStaticFileAccess(remoteAddress, request, response)
-        } else {
-          val mimeo = Mime.get(path)
-          val raf   = new RandomAccessFile(path, "r")
-
-          val (offset, length) = getRangeFromRequest(request) match {
-            case None =>
-              (0L, raf.length)  // 0L is for avoiding "type mismatch" compile error
-            case Some((startIndex, endIndex)) =>
-              val endIndex2 = if (endIndex >= 0) endIndex else raf.length - 1
-              response.setStatus(PARTIAL_CONTENT)
-              HttpHeaders.setHeader(response, ACCEPT_RANGES, BYTES)
-              HttpHeaders.setHeader(response, CONTENT_RANGE, "bytes " + startIndex + "-" + endIndex2 + "/" + raf.length)
-              (startIndex, endIndex2 - startIndex + 1)
-          }
-
-          HttpHeaders.setContentLength(response, length)
-          HttpHeaders.setHeader(response, LAST_MODIFIED, lastModifiedRfc2822)
-          if (mimeo.isDefined) HttpHeaders.setHeader(response, CONTENT_TYPE, mimeo.get)
-          if (!noLog) AccessLog.logStaticFileAccess(remoteAddress, request, response)
-
-          if (request.getMethod == HEAD && response.getStatus == OK) {
-            // http://stackoverflow.com/questions/3854842/content-length-header-with-head-requests
-            response.content.clear()
-            ctx.write(env, promise)
-            NoPipelining.if_keepAliveRequest_then_resumeReading_else_closeOnComplete(request, channel, promise)
-          } else {
-            // Send the initial line and headers.
-            // Do not pass promise here; it'll be completed below.
-            ctx.write(env)
-
-            if (ctx.pipeline.get(classOf[SslHandler]) != null) {
-              // Cannot use zero-copy with HTTPS
-              ctx
-                .write(new ChunkedFile(raf, offset, length, CHUNK_SIZE))
-                .addListener(new ChannelFutureListener {
-                  def operationComplete(f: ChannelFuture) { raf.close() }
-                })
-            } else {
-              // No encryption - use zero-copy
-              val region = new DefaultFileRegion(raf.getChannel, offset, length)
-              ctx
-                .write(region)  // region will automatically be released
-                .addListener(new ChannelFutureListener {
-                  def operationComplete(f: ChannelFuture) { raf.close() }
-                })
-            }
-
-            // Write the end marker
-            val future = ctx.writeAndFlush(LastHttpContent.EMPTY_LAST_CONTENT, promise)
-            NoPipelining.if_keepAliveRequest_then_resumeReading_else_closeOnComplete(request, channel, future)
-          }
+          return
         }
+
+        val mimeo = Mime.get(path)
+        val raf   = new RandomAccessFile(path, "r")
+
+        val (offset, length) = getRangeFromRequest(request) match {
+          case None =>
+            (0L, raf.length)  // 0L is for avoiding "type mismatch" compile error
+          case Some((startIndex, endIndex)) =>
+            val endIndex2 = if (endIndex >= 0) endIndex else raf.length - 1
+            response.setStatus(PARTIAL_CONTENT)
+            HttpHeaders.setHeader(response, ACCEPT_RANGES, BYTES)
+            HttpHeaders.setHeader(response, CONTENT_RANGE, "bytes " + startIndex + "-" + endIndex2 + "/" + raf.length)
+            (startIndex, endIndex2 - startIndex + 1)
+        }
+
+        HttpHeaders.setContentLength(response, length)
+        HttpHeaders.setHeader(response, LAST_MODIFIED, lastModifiedRfc2822)
+        if (mimeo.isDefined) HttpHeaders.setHeader(response, CONTENT_TYPE, mimeo.get)
+        if (!noLog) AccessLog.logStaticFileAccess(remoteAddress, request, response)
+
+        if (request.getMethod == HEAD && response.getStatus == OK) {
+          XSendFile.removeHeaders(response)
+
+          // http://stackoverflow.com/questions/3854842/content-length-header-with-head-requests
+          response.content.clear()
+          ctx.write(env, promise)
+          NoPipelining.if_keepAliveRequest_then_resumeReading_else_closeOnComplete(request, channel, promise)
+          return
+        }
+
+        // Send the initial line and headers.
+        // Do not pass promise here; it'll be completed below.
+        ctx.write(env)
+
+        if (ctx.pipeline.get(classOf[SslHandler]) != null) {
+          // Cannot use zero-copy with HTTPS
+          ctx
+            .write(new ChunkedFile(raf, offset, length, CHUNK_SIZE))
+            .addListener(new ChannelFutureListener {
+              def operationComplete(f: ChannelFuture) { raf.close() }
+            })
+        } else {
+          // No encryption - use zero-copy
+          val region = new DefaultFileRegion(raf.getChannel, offset, length)
+          ctx
+            .write(region)  // region will automatically be released
+            .addListener(new ChannelFutureListener {
+              def operationComplete(f: ChannelFuture) { raf.close() }
+            })
+        }
+
+        // Write the end marker
+        val future = ctx.writeAndFlush(LastHttpContent.EMPTY_LAST_CONTENT, promise)
+        NoPipelining.if_keepAliveRequest_then_resumeReading_else_closeOnComplete(request, channel, future)
     }
   }
 

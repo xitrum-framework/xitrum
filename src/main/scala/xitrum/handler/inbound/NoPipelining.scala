@@ -21,11 +21,11 @@ object NoPipelining {
    * http://sockjs.github.com/sockjs-protocol/sockjs-protocol-0.3.3.html#section-157
    */
   def if_keepAliveRequest_then_resumeReading_else_closeOnComplete(
-      request: HttpRequest,
-      channel: Channel, channelFuture: ChannelFuture) {
+    request: HttpRequest, channel: Channel, channelFuture: ChannelFuture
+  ) {
     if (HttpHeaders.isKeepAlive(request)) {
       channelFuture.addListener(new ChannelFutureListener() {
-        def operationComplete(future: ChannelFuture) { channel.config.setAutoRead(true) }
+        def operationComplete(future: ChannelFuture) { resumeReading(channel) }
       })
     } else {
       channelFuture.addListener(ChannelFutureListener.CLOSE)
