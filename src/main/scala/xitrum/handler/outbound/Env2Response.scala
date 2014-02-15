@@ -25,7 +25,10 @@ class Env2Response extends ChannelOutboundHandlerAdapter with Log {
     val request  = env.request
     val response = env.response
 
-    val chunked = HttpHeaders.isTransferEncodingChunked(response)
+    val xsendfile = XSendFile.isHeaderSet(response)
+    val chunked   = HttpHeaders.isTransferEncodingChunked(response)
+
+    if (xsendfile) XSendFile.removeHeaders(response)
 
     // For HEAD or OPTIONS response, Content-Length header may be > 0 even when
     // the content is empty (see below)
@@ -47,9 +50,12 @@ class Env2Response extends ChannelOutboundHandlerAdapter with Log {
     if (notModified || chunked) HttpHeaders.removeHeader(response, CONTENT_LENGTH)
     if (notModified)            HttpHeaders.removeHeader(response, CONTENT_TYPE)
 
-    // For chunked response, we can't send "response" because it's a FullHttpResponse,
-    // we need to send HttpResponse.
-    if (chunked) {
+    // For the following cases, we can't just send "response" because it's a
+    // FullHttpResponse, we need to send HttpResponse:
+    // * xsendfile, this is "Write the initial line and the header"; the file
+    //   body will be sent by XSendFile handler
+    // * chunked response
+    if (xsendfile || chunked) {
       val onlyHeaders = new DefaultHttpResponse(response.getProtocolVersion, response.getStatus)
       onlyHeaders.headers.set(response.headers)
 

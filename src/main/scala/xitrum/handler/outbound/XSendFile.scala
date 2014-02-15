@@ -5,7 +5,7 @@ import scala.util.control.NonFatal
 
 import io.netty.buffer.Unpooled
 import io.netty.channel.{ChannelOutboundHandlerAdapter, ChannelHandler, ChannelHandlerContext, ChannelFuture, ChannelPromise, DefaultFileRegion, ChannelFutureListener}
-import io.netty.handler.codec.http.{HttpHeaders, HttpMethod, FullHttpRequest, FullHttpResponse, HttpResponseStatus, HttpVersion}
+import io.netty.handler.codec.http.{HttpHeaders, HttpMethod, FullHttpRequest, FullHttpResponse, HttpResponseStatus, HttpVersion, LastHttpContent}
 import io.netty.handler.ssl.SslHandler
 import io.netty.handler.stream.ChunkedFile
 import ChannelHandler.Sharable
@@ -21,6 +21,7 @@ import xitrum.handler.{AccessLog, HandlerEnv}
 import xitrum.handler.inbound.NoPipelining
 import xitrum.util.{ByteBufUtil, Gzip, Mime}
 
+// Based on https://github.com/netty/netty/tree/master/example/src/main/java/io/netty/example/http/file
 object XSendFile extends Log {
   // setClientCacheAggressively should be called at PublicFileServer, not
   // here because XSendFile may be used by applications which does not want
@@ -45,6 +46,15 @@ object XSendFile extends Log {
 
   def isHeaderSet(response: FullHttpResponse) = response.headers.contains(X_SENDFILE_HEADER)
 
+  /**
+   * Removes non-standard headers, specific to this handler, to avoid leaking
+   * information to the remote client.
+   */
+  def removeHeaders(response: FullHttpResponse) {
+    HttpHeaders.removeHeader(response, X_SENDFILE_HEADER)
+    HttpHeaders.removeHeader(response, X_SENDFILE_HEADER_IS_FROM_ACTION)
+  }
+
   def set404Page(response: FullHttpResponse, fromController: Boolean) {
     response.setStatus(NOT_FOUND)
     setHeader(response, ABS_404, fromController)
@@ -56,16 +66,23 @@ object XSendFile extends Log {
   }
 
   /** @param path see Renderer#renderFile */
-  def sendFile(
-      ctx: ChannelHandlerContext, env: HandlerEnv, promise: ChannelPromise,
-      request: FullHttpRequest, response: FullHttpResponse, path: String, noLog: Boolean)
-  {
+  def sendFile(ctx: ChannelHandlerContext, env: HandlerEnv, promise: ChannelPromise) {
     val channel       = ctx.channel
     val remoteAddress = channel.remoteAddress
+    val request       = env.request
+    val response      = env.response
+    val path          = HttpHeaders.getHeader(response, X_SENDFILE_HEADER)
+    val noLog         = response.headers.contains(X_SENDFILE_HEADER_IS_FROM_ACTION)
 
-    // Try to serve from cache
+    // Try to serve from cache.
+    //
+    // For big file, "the initial line and headers" will be sent by Env2Response
+    // handler. The X_SENDFILE_HEADER is used to tell Env2Response to only send
+    // headers, not a FullHttpResponse.
     Etag.forFile(path, Gzip.isAccepted(request)) match {
       case Etag.NotFound =>
+        XSendFile.removeHeaders(response)
+
         response.setStatus(NOT_FOUND)
         NotModified.setNoClientCache(response)
 
@@ -74,10 +91,13 @@ object XSendFile extends Log {
           NoPipelining.if_keepAliveRequest_then_resumeReading_else_closeOnComplete(request, channel, future)
           if (!noLog) AccessLog.logStaticFileAccess(remoteAddress, request, response)
         } else {
-          sendFile(ctx, env, promise, request, response, ABS_404, noLog)  // Recursive
+          setHeader(response, ABS_404, false)
+          sendFile(ctx, env, promise)  // Recursive
         }
 
       case Etag.Small(bytes, etag, mimeo, gzipped) =>
+        XSendFile.removeHeaders(response)
+
         if (Etag.areEtagsIdentical(request, etag)) {
           response.setStatus(NOT_MODIFIED)
           response.content.clear()
@@ -128,38 +148,36 @@ object XSendFile extends Log {
           if (mimeo.isDefined) HttpHeaders.setHeader(response, CONTENT_TYPE, mimeo.get)
           if (!noLog) AccessLog.logStaticFileAccess(remoteAddress, request, response)
 
-          // Write the content
-
           if (request.getMethod == HEAD && response.getStatus == OK) {
             // http://stackoverflow.com/questions/3854842/content-length-header-with-head-requests
             response.content.clear()
             ctx.write(env, promise)
             NoPipelining.if_keepAliveRequest_then_resumeReading_else_closeOnComplete(request, channel, promise)
           } else {
-            // Send the initial line and headers
-            ctx.write(env, promise)
+            // Send the initial line and headers.
+            // Do not pass promise here; it'll be completed below.
+            ctx.write(env)
 
             if (ctx.pipeline.get(classOf[SslHandler]) != null) {
               // Cannot use zero-copy with HTTPS
-              val future = ctx.writeAndFlush(new ChunkedFile(raf, offset, length, CHUNK_SIZE), promise)
-              future.addListener(new ChannelFutureListener {
-                def operationComplete(f: ChannelFuture) { raf.close() }
-              })
-
-              NoPipelining.if_keepAliveRequest_then_resumeReading_else_closeOnComplete(request, channel, future)
+              ctx
+                .write(new ChunkedFile(raf, offset, length, CHUNK_SIZE))
+                .addListener(new ChannelFutureListener {
+                  def operationComplete(f: ChannelFuture) { raf.close() }
+                })
             } else {
               // No encryption - use zero-copy
               val region = new DefaultFileRegion(raf.getChannel, offset, length)
-              val future = ctx.writeAndFlush(region, promise)
-              future.addListener(new ChannelFutureListener {
-                def operationComplete(f: ChannelFuture) {
-                  region.release()
-                  raf.close()
-                }
-              })
-
-              NoPipelining.if_keepAliveRequest_then_resumeReading_else_closeOnComplete(request, channel, future)
+              ctx
+                .write(region)  // region will automatically be released
+                .addListener(new ChannelFutureListener {
+                  def operationComplete(f: ChannelFuture) { raf.close() }
+                })
             }
+
+            // Write the end marker
+            val future = ctx.writeAndFlush(LastHttpContent.EMPTY_LAST_CONTENT, promise)
+            NoPipelining.if_keepAliveRequest_then_resumeReading_else_closeOnComplete(request, channel, future)
           }
         }
     }
@@ -213,8 +231,6 @@ object XSendFile extends Log {
  */
 @Sharable
 class XSendFile extends ChannelOutboundHandlerAdapter {
-  import XSendFile._
-
   override def write(ctx: ChannelHandlerContext, msg: Object, promise: ChannelPromise) {
     if (!msg.isInstanceOf[HandlerEnv]) {
       ctx.write(msg, promise)
@@ -223,21 +239,11 @@ class XSendFile extends ChannelOutboundHandlerAdapter {
 
     val env      = msg.asInstanceOf[HandlerEnv]
     val response = env.response
-    val path     = HttpHeaders.getHeader(response, X_SENDFILE_HEADER)
-    if (path == null) {
+    if (!XSendFile.isHeaderSet(response)) {
       ctx.write(env, promise)
       return
     }
 
-    // Remove non-standard header to avoid leaking information
-    HttpHeaders.removeHeader(response, X_SENDFILE_HEADER)
-
-    // See comment of X_SENDFILE_HEADER_IS_FROM_CONTROLLER
-    // Remove non-standard header to avoid leaking information
-    val noLog = response.headers.contains(X_SENDFILE_HEADER_IS_FROM_ACTION)
-    if (noLog) HttpHeaders.removeHeader(response, X_SENDFILE_HEADER_IS_FROM_ACTION)
-
-    val request = env.request
-    sendFile(ctx, env, promise, request, response, path, noLog)
+    XSendFile.sendFile(ctx, env, promise)
   }
 }
