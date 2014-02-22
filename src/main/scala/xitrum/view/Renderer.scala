@@ -48,7 +48,7 @@ trait Renderer extends GetActionClassDefaultsToCurrentAction {
    * @param options specific to the configured template engine
    */
   def renderView(customLayout: () => Any, location: Class[_ <: Action], options: Map[String, Any]): String = {
-    Config.xitrum.templateEngine match {
+    Config.xitrum.template match {
       case Some(engine) =>
         renderedView = engine.renderView(location, this, options)
         customLayout.apply().toString
@@ -74,7 +74,7 @@ trait Renderer extends GetActionClassDefaultsToCurrentAction {
   //----------------------------------------------------------------------------
 
   def renderViewNoLayout(location: Class[_ <: Action], options: Map[String, Any]): String =
-    Config.xitrum.templateEngine match {
+    Config.xitrum.template match {
       case Some(engine) =>
         val ret = engine.renderView(location, this, options)
         renderedView = ret
@@ -94,7 +94,7 @@ trait Renderer extends GetActionClassDefaultsToCurrentAction {
   //----------------------------------------------------------------------------
 
   def renderFragment(location: Class[_ <: Action], fragment: String, options: Map[String, Any]): String =
-    Config.xitrum.templateEngine match {
+    Config.xitrum.template match {
       case Some(engine) =>
         engine.renderFragment(location, fragment, this, options)
 

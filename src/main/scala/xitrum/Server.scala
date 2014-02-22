@@ -38,7 +38,7 @@ object Server extends Log {
     // https://www.assembla.com/spaces/ddEDvgVAKr3QrUeJe5aVNr/tickets/3747
     System.setProperty("akka.logger-startup-timeout", "30s")
 
-    Config.xitrum.templateEngine.foreach(_.start())
+    Config.xitrum.template.foreach(_.start())
     Config.xitrum.cache.start()
     Config.xitrum.session.store.start()
 

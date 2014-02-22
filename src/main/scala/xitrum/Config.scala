@@ -166,7 +166,7 @@ class Config(val config: TConfig) extends Log {
       None
 
   /**
-   * lazy: templateEngine is initialized after xitrum.Config, so that inside
+   * lazy: initialized after xitrum.Config, so that inside
    * the template engine class, xitrum.Config can be used.
    *
    * Template config in xitrum.conf can be in 2 forms:
@@ -182,7 +182,7 @@ class Config(val config: TConfig) extends Log {
    *   }
    * }
    */
-  lazy val templateEngine: Option[TemplateEngine] = {
+  lazy val template: Option[TemplateEngine] = {
     if (config.hasPath("template")) {
       try {
         val engine = DualConfig.getClassInstance[TemplateEngine](config, "template")
@@ -199,7 +199,7 @@ class Config(val config: TConfig) extends Log {
   }
 
   /**
-   * lazy: cache is initialized after xitrum.Config, so that inside
+   * lazy: initialized after xitrum.Config, so that inside
    * the cache class, xitrum.Config can be used.
    *
    * Cache config in xitrum.conf can be in 2 forms:
