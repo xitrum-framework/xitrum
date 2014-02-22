@@ -10,6 +10,8 @@
   Update SLF4J from 1.7.5 to 1.7.6, Logback from 1.0.13 to 1.1.1
 * `#300 <https://github.com/ngocdaothanh/xitrum/issues/300>`_
   Update Netty from 4.0.15 to 4.0.16
+* `#301 <https://github.com/ngocdaothanh/xitrum/issues/301>`_
+  Update JSON4S from 3.2.6 to 3.2.7
 
 3.0:
 
