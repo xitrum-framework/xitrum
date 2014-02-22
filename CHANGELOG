@@ -2,6 +2,7 @@
 * #292 Fix chunked response bug
 * #295 Fix bug at responding static file in the zero copy style
 * #288 Add Scalive
+* #289 Update SLF4J from 1.7.5 to 1.7.6, Logback from 1.0.13 to 1.1.1
 * #300 Update Netty from 4.0.15 to 4.0.16
 
 3.0:
