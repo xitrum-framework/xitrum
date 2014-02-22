@@ -54,7 +54,7 @@ libraryDependencies += "org.json4s" %% "json4s-native" % "3.2.7"
 libraryDependencies += "tv.cntt" %% "scaposer" % "1.3"
 
 // For compiling CoffeeScript to JavaScript
-libraryDependencies += "tv.cntt" % "rhinocoffeescript" % "1.6.3"
+libraryDependencies += "tv.cntt" % "rhinocoffeescript" % "1.7.1"
 
 // For test
 libraryDependencies += "org.scalatest" %% "scalatest" % "2.0" % "test"

@@ -12,6 +12,8 @@
   Update Netty from 4.0.15 to 4.0.16
 * `#301 <https://github.com/ngocdaothanh/xitrum/issues/301>`_
   Update JSON4S from 3.2.6 to 3.2.7
+* `#302 <https://github.com/ngocdaothanh/xitrum/issues/302>`_
+  Update RhinoCoffeeScript from 1.6.3 to 1.7.1
 
 3.0:
 
