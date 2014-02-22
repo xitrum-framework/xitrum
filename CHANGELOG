@@ -2,6 +2,7 @@
 * #292 Fix chunked response bug
 * #295 Fix bug at responding static file in the zero copy style
 * #288 Add Scalive
+* #300 Update Netty from 4.0.15 to 4.0.16
 
 3.0:
 * #151 Update Netty from 3.9.0 to 4.0.15
