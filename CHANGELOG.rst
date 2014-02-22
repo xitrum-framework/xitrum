@@ -16,6 +16,8 @@
   Update RhinoCoffeeScript from 1.6.3 to 1.7.1
 * `#303 <https://github.com/ngocdaothanh/xitrum/issues/303>`_
   Update jQuery from 1.10.2 to 1.11.0
+* `#304 <https://github.com/ngocdaothanh/xitrum/issues/304>`_
+  Update Swagger UI from 2.0.4 to 2.0.12
 
 3.0:
 
