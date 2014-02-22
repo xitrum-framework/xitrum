@@ -14,6 +14,8 @@
   Update JSON4S from 3.2.6 to 3.2.7
 * `#302 <https://github.com/ngocdaothanh/xitrum/issues/302>`_
   Update RhinoCoffeeScript from 1.6.3 to 1.7.1
+* `#303 <https://github.com/ngocdaothanh/xitrum/issues/303>`_
+  Update jQuery from 1.10.2 to 1.11.0
 
 3.0:
 
