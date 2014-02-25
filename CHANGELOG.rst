@@ -1,3 +1,8 @@
+3.2:
+
+* `#306 <https://github.com/ngocdaothanh/xitrum/issues/306>`_
+  Update Netty from 4.0.16 to 4.0.17
+
 3.1:
 
 * `#292 <https://github.com/ngocdaothanh/xitrum/issues/292>`_
