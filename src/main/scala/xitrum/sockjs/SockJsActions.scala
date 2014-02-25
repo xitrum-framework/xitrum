@@ -1,6 +1,6 @@
 package xitrum.sockjs
 
-import java.util.{Arrays, Random}
+import java.util.Random
 import scala.util.control.NonFatal
 
 import io.netty.buffer.Unpooled
@@ -43,12 +43,11 @@ object SockJsAction {
 
   //----------------------------------------------------------------------------
 
-  /** 2KB of 'h' characters */
-  val H2KB = {
-    val ret = new Array[Byte](2048 + 1)
-    for (i <- 0 to 2047) ret(i) = 'h'
-    ret(2048) = '\n'
-    ret
+  /** 2K 'h' characters */
+  val H2K = {
+    val bytes   = Array.fill[Byte](2048 + 1)('h')
+    bytes(2048) = '\n'
+    bytes
   }
 
   private[this] val HTML_TEMPLATE_BEFORE = """<!doctype html>
@@ -66,23 +65,23 @@ object SockJsAction {
     window.onload = function() {c.stop();};
   </script>"""
 
-  // Nearly 1KB of spaces
+  // Nearly 1K spaces.
   //
   // Safari needs at least 1024 bytes to parse the website:
   // http://code.google.com/p/browsersec/wiki/Part2#Survey_of_content_sniffing_behaviors
   //
   // https://github.com/sockjs/sockjs-node/blob/master/src/trans-htmlfile.coffee#L29
   // http://stackoverflow.com/questions/2804827/create-a-string-with-n-characters
-  private[this] val s1KB = {
-    val spaces = new Array[Char](1024 - HTML_TEMPLATE_BEFORE.length + HTML_TEMPLATE_AFTER.length)
-    Arrays.fill(spaces, ' ')
-    new String(spaces) + "\r\n\r\n"
+  private[this] val S1K = {
+    val numSpaces = 1024 - HTML_TEMPLATE_BEFORE.length + HTML_TEMPLATE_AFTER.length
+    val bytes     = Array.fill[Byte](numSpaces)(' ')
+    new String(bytes) + "\r\n\r\n"
   }
 
   /** Template for htmlfile transport */
-  def htmlFile(callback: String, with1024Spaces: Boolean): String = {
+  def htmlFile(callback: String, with1KSpaces: Boolean): String = {
     val template = HTML_TEMPLATE_BEFORE + callback + HTML_TEMPLATE_AFTER
-    if (with1024Spaces) template + s1KB else template
+    if (with1KSpaces) template + S1K else template
   }
 
   //----------------------------------------------------------------------------
@@ -451,7 +450,7 @@ class XhrStreamingReceive extends NonWebSocketSessionReceiverActorAction with Sk
     // There's always 2KB prelude, even for immediate close frame
     HttpHeaders.setTransferEncodingChunked(response)
     HttpHeaders.setHeader(response, HttpHeaders.Names.CONTENT_TYPE, "application/javascript; charset=" + Config.xitrum.request.charset)
-    respondBinary(Unpooled.wrappedBuffer(SockJsAction.H2KB))
+    respondBinary(Unpooled.wrappedBuffer(SockJsAction.H2K))
 
     lookupOrCreateNonWebSocketSessionActor(sessionId)
   }
