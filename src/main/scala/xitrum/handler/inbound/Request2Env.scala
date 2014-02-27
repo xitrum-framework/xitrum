@@ -51,7 +51,10 @@ class Request2Env extends SimpleChannelInboundHandler[HttpObject] with Log {
   override def channelInactive(ctx: ChannelHandlerContext) {
     // In case the connection is closed when the request is not fully received,
     // thus env is initialized but not sent upstream to the next handler
-    release()
+    if (env != null) {
+      if (env != null) env.release()
+      env = null
+    }
   }
 
   override def channelRead0(ctx: ChannelHandlerContext, msg: HttpObject) {
@@ -89,7 +92,7 @@ class Request2Env extends SimpleChannelInboundHandler[HttpObject] with Log {
     if (log.isTraceEnabled) log.trace(request.toString)
 
     // Clean previous files if any
-    release()
+    if (env != null) env.release()
 
     env                = new HandlerEnv
     env.channel        = ctx.channel
@@ -130,20 +133,6 @@ class Request2Env extends SimpleChannelInboundHandler[HttpObject] with Log {
   }
 
   //----------------------------------------------------------------------------
-
-  private def release() {
-    if (env != null) {
-      if (env.bodyDecoder != null) {
-        env.bodyDecoder.cleanFiles()
-        env.bodyDecoder.destroy()
-      }
-
-      env.request.release()
-      env.response.release()
-
-      env = null
-    }
-  }
 
   private def createEmptyFullHttpRequest(request: HttpRequest): FullHttpRequest = {
     val ret = new DefaultFullHttpRequest(request.getProtocolVersion, request.getMethod, request.getUri)
