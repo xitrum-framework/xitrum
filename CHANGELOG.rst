@@ -1,5 +1,9 @@
 3.2:
 
+* `#268 <https://github.com/ngocdaothanh/xitrum/issues/268>`_
+  Add xitrum.util.FileMonitor (requires Java 7)
+* `#308 <https://github.com/ngocdaothanh/xitrum/issues/308>`_
+  Reload .po files updated at runtime
 * `#310 <https://github.com/ngocdaothanh/xitrum/issues/310>`_
   Rename Json.generate to Json.serialize, Json.parse to Json.deserialize
 * `#306 <https://github.com/ngocdaothanh/xitrum/issues/306>`_
