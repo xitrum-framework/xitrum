@@ -100,11 +100,11 @@ object Loader {
   //----------------------------------------------------------------------------
 
   def jsonFromFile[T](path: String)(implicit m: Manifest[T]): T =
-    Json.parse[T](stringFromFile(path))
+    Json.deserialize[T](stringFromFile(path))
 
   /**
    * @param path Relative to one of the elements in classpath, without leading "/"
    */
   def jsonFromClasspath[T](path: String)(implicit m: Manifest[T]): T =
-    Json.parse[T](stringFromClasspath(path))
+    Json.deserialize[T](stringFromClasspath(path))
 }

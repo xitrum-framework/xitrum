@@ -94,5 +94,5 @@ trait RequestEnv extends ParamAccess {
 
   /** Ex: val json = requestContentJson[Map[String, String]] */
   def requestContentJson[T](implicit m: Manifest[T]): T =
-    Json.parse[T](requestContentString)(m)
+    Json.deserialize[T](requestContentString)(m)
 }

@@ -369,7 +369,7 @@ class XhrPollingReceive extends NonWebSocketSessionReceiverActorAction with Skip
       .addListener(ChannelFutureListener.CLOSE)
 
     case SubscribeResultToReceiverClientMessages(messages) =>
-      val json   = Json.generate(messages)
+      val json   = Json.serialize(messages)
       val quoted = SockJsAction.quoteUnicode(json)
       respondJs("a" + quoted + "\n")
 
@@ -383,7 +383,7 @@ class XhrPollingReceive extends NonWebSocketSessionReceiverActorAction with Skip
 
   protected override def receiveNotification: Receive = {
     case NotificationToReceiverClientMessage(message) =>
-      val json   = Json.generate(Seq(message))
+      val json   = Json.serialize(Seq(message))
       val quoted = SockJsAction.quoteUnicode(json)
       respondJs("a" + quoted + "\n")
 
@@ -414,7 +414,7 @@ class XhrSend extends NonWebSocketSessionActorAction with SkipCsrfCheck {
 
     val messages: Seq[String] = try {
       // body: ["m1", "m2"]
-      Json.parse[Seq[String]](body)
+      Json.deserialize[Seq[String]](body)
     } catch {
       case NonFatal(e) =>
         response.setStatus(HttpResponseStatus.INTERNAL_SERVER_ERROR)
@@ -475,7 +475,7 @@ class XhrStreamingReceive extends NonWebSocketSessionReceiverActorAction with Sk
       closeWithLastChunk()
 
     case SubscribeResultToReceiverClientMessages(messages) =>
-      val json   = Json.generate(messages)
+      val json   = Json.serialize(messages)
       val quoted = SockJsAction.quoteUnicode(json)
       if (respondStreamingWithLimit("a" + quoted + "\n"))
         context.become(receiveNotification)
@@ -490,7 +490,7 @@ class XhrStreamingReceive extends NonWebSocketSessionReceiverActorAction with Sk
 
   protected override def receiveNotification: Receive = {
     case NotificationToReceiverClientMessage(message) =>
-      val json   = Json.generate(Seq(message))
+      val json   = Json.serialize(Seq(message))
       val quoted = SockJsAction.quoteUnicode(json)
       respondStreamingWithLimit("a" + quoted + "\n")
 
@@ -555,7 +555,7 @@ class HtmlFileReceive extends NonWebSocketSessionReceiverActorAction {
 
     case SubscribeResultToReceiverClientMessages(messages) =>
       val buffer = new StringBuilder
-      val json   = Json.generate(messages)
+      val json   = Json.serialize(messages)
       val quoted = SockJsAction.quoteUnicode(json)
       buffer.append("<script>\np(\"a")
       buffer.append(jsEscape(quoted))
@@ -581,7 +581,7 @@ class HtmlFileReceive extends NonWebSocketSessionReceiverActorAction {
   protected override def receiveNotification: Receive = {
     case NotificationToReceiverClientMessage(message) =>
       val buffer = new StringBuilder
-      val json   = Json.generate(Seq(message))
+      val json   = Json.serialize(Seq(message))
       val quoted = SockJsAction.quoteUnicode(json)
       buffer.append("<script>\np(\"a")
       buffer.append(jsEscape(quoted))
@@ -646,7 +646,7 @@ class JsonPPollingReceive extends NonWebSocketSessionReceiverActorAction {
 
     case SubscribeResultToReceiverClientMessages(messages) =>
       val buffer = new StringBuilder
-      val json   = Json.generate(messages)
+      val json   = Json.serialize(messages)
       val quoted = SockJsAction.quoteUnicode(json)
       buffer.append(callback + "(\"a")
       buffer.append(jsEscape(quoted))
@@ -664,7 +664,7 @@ class JsonPPollingReceive extends NonWebSocketSessionReceiverActorAction {
   protected override def receiveNotification: Receive = {
     case NotificationToReceiverClientMessage(message) =>
       val buffer = new StringBuilder
-      val json   = Json.generate(Seq(message))
+      val json   = Json.serialize(Seq(message))
       val quoted = SockJsAction.quoteUnicode(json)
       buffer.append(callback + "(\"a")
       buffer.append(jsEscape(quoted))
@@ -712,7 +712,7 @@ class JsonPPollingSend extends NonWebSocketSessionActorAction with SkipCsrfCheck
 
     val messages: Seq[String] = try {
       // body: ["m1", "m2"]
-      Json.parse[Seq[String]](body)
+      Json.deserialize[Seq[String]](body)
     } catch {
       case NonFatal(e) =>
         response.setStatus(HttpResponseStatus.INTERNAL_SERVER_ERROR)
@@ -768,7 +768,7 @@ class EventSourceReceive extends NonWebSocketSessionReceiverActorAction {
       .addListener(ChannelFutureListener.CLOSE)
 
     case SubscribeResultToReceiverClientMessages(messages) =>
-      val json   = "a" + Json.generate(messages)
+      val json   = "a" + Json.serialize(messages)
       val quoted = SockJsAction.quoteUnicode(json)
       if (respondStreamingWithLimit(quoted, true))
         context.become(receiveNotification)
@@ -783,7 +783,7 @@ class EventSourceReceive extends NonWebSocketSessionReceiverActorAction {
 
   protected override def receiveNotification: Receive = {
     case NotificationToReceiverClientMessage(message) =>
-      val json   = "a" + Json.generate(Seq(message))
+      val json   = "a" + Json.serialize(Seq(message))
       val quoted = SockJsAction.quoteUnicode(json)
       respondStreamingWithLimit(quoted, true)
 
@@ -849,7 +849,7 @@ class WebSocket extends WebSocketAction with ServerIdSessionIdValidator with Soc
             // body: can be ["m1", "m2"] or "m1"
             // http://sockjs.github.com/sockjs-protocol/sockjs-protocol-0.3.3.html#section-61
             val normalizedBody = if (body.startsWith("[")) body else "[" + body + "]"
-            val messages       = Json.parse[Seq[String]](normalizedBody)
+            val messages       = Json.deserialize[Seq[String]](normalizedBody)
             messages.foreach { msg => sockJsActorRef ! SockJsText(msg) }
           } catch {
             case NonFatal(e) =>
@@ -865,7 +865,7 @@ class WebSocket extends WebSocketAction with ServerIdSessionIdValidator with Soc
         }
 
       case MessageFromHandler(text) =>
-        val json = Json.generate(Seq(text))
+        val json = Json.serialize(Seq(text))
         respondWebSocketText("a" + json)
 
       case CloseFromHandler =>

@@ -1,5 +1,7 @@
 3.2:
 
+* `#310 <https://github.com/ngocdaothanh/xitrum/issues/310>`_
+  Rename Json.generate to Json.serialize, Json.parse to Json.deserialize
 * `#306 <https://github.com/ngocdaothanh/xitrum/issues/306>`_
   Update Netty from 4.0.16 to 4.0.17
 
