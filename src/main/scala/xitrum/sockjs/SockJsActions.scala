@@ -16,7 +16,7 @@ import xitrum.{
 }
 import xitrum.annotation._
 import xitrum.scope.request.PathInfo
-import xitrum.util.Json
+import xitrum.util.SeriDeseri
 import xitrum.view.DocType
 
 // General info:
@@ -369,7 +369,7 @@ class XhrPollingReceive extends NonWebSocketSessionReceiverActorAction with Skip
       .addListener(ChannelFutureListener.CLOSE)
 
     case SubscribeResultToReceiverClientMessages(messages) =>
-      val json   = Json.serialize(messages)
+      val json   = SeriDeseri.toJson(messages)
       val quoted = SockJsAction.quoteUnicode(json)
       respondJs("a" + quoted + "\n")
 
@@ -383,7 +383,7 @@ class XhrPollingReceive extends NonWebSocketSessionReceiverActorAction with Skip
 
   protected override def receiveNotification: Receive = {
     case NotificationToReceiverClientMessage(message) =>
-      val json   = Json.serialize(Seq(message))
+      val json   = SeriDeseri.toJson(Seq(message))
       val quoted = SockJsAction.quoteUnicode(json)
       respondJs("a" + quoted + "\n")
 
@@ -412,27 +412,24 @@ class XhrSend extends NonWebSocketSessionActorAction with SkipCsrfCheck {
       return
     }
 
-    val messages: Seq[String] = try {
-      // body: ["m1", "m2"]
-      Json.deserialize[Seq[String]](body)
-    } catch {
-      case NonFatal(e) =>
+    SeriDeseri.fromJson[Seq[String]](body) match {
+      case None =>
         response.setStatus(HttpResponseStatus.INTERNAL_SERVER_ERROR)
         respondText("Broken JSON encoding.")
-        return
-    }
 
-    val sessionId = param("sessionId")
-    lookupNonWebSocketSessionActor(sessionId)
-    context.become {
-      case Registry.LookupResultNone(`sessionId`) =>
-        respondDefault404Page()
+      case Some(messages) =>  // body: ["m1", "m2"]
+        val sessionId = param("sessionId")
+        lookupNonWebSocketSessionActor(sessionId)
+        context.become {
+          case Registry.LookupResultNone(`sessionId`) =>
+            respondDefault404Page()
 
-      case Registry.LookupResultOk(`sessionId`, nonWebSocketSession) =>
-        nonWebSocketSession ! MessagesFromSenderClient(messages)
-        response.setStatus(HttpResponseStatus.NO_CONTENT)
-        HttpHeaders.setHeader(response, HttpHeaders.Names.CONTENT_TYPE, "text/plain; charset=UTF-8")
-        respond()
+          case Registry.LookupResultOk(`sessionId`, nonWebSocketSession) =>
+            nonWebSocketSession ! MessagesFromSenderClient(messages)
+            response.setStatus(HttpResponseStatus.NO_CONTENT)
+            HttpHeaders.setHeader(response, HttpHeaders.Names.CONTENT_TYPE, "text/plain; charset=UTF-8")
+            respond()
+        }
     }
   }
 }
@@ -475,7 +472,7 @@ class XhrStreamingReceive extends NonWebSocketSessionReceiverActorAction with Sk
       closeWithLastChunk()
 
     case SubscribeResultToReceiverClientMessages(messages) =>
-      val json   = Json.serialize(messages)
+      val json   = SeriDeseri.toJson(messages)
       val quoted = SockJsAction.quoteUnicode(json)
       if (respondStreamingWithLimit("a" + quoted + "\n"))
         context.become(receiveNotification)
@@ -490,7 +487,7 @@ class XhrStreamingReceive extends NonWebSocketSessionReceiverActorAction with Sk
 
   protected override def receiveNotification: Receive = {
     case NotificationToReceiverClientMessage(message) =>
-      val json   = Json.serialize(Seq(message))
+      val json   = SeriDeseri.toJson(Seq(message))
       val quoted = SockJsAction.quoteUnicode(json)
       respondStreamingWithLimit("a" + quoted + "\n")
 
@@ -555,7 +552,7 @@ class HtmlFileReceive extends NonWebSocketSessionReceiverActorAction {
 
     case SubscribeResultToReceiverClientMessages(messages) =>
       val buffer = new StringBuilder
-      val json   = Json.serialize(messages)
+      val json   = SeriDeseri.toJson(messages)
       val quoted = SockJsAction.quoteUnicode(json)
       buffer.append("<script>\np(\"a")
       buffer.append(jsEscape(quoted))
@@ -581,7 +578,7 @@ class HtmlFileReceive extends NonWebSocketSessionReceiverActorAction {
   protected override def receiveNotification: Receive = {
     case NotificationToReceiverClientMessage(message) =>
       val buffer = new StringBuilder
-      val json   = Json.serialize(Seq(message))
+      val json   = SeriDeseri.toJson(Seq(message))
       val quoted = SockJsAction.quoteUnicode(json)
       buffer.append("<script>\np(\"a")
       buffer.append(jsEscape(quoted))
@@ -646,7 +643,7 @@ class JsonPPollingReceive extends NonWebSocketSessionReceiverActorAction {
 
     case SubscribeResultToReceiverClientMessages(messages) =>
       val buffer = new StringBuilder
-      val json   = Json.serialize(messages)
+      val json   = SeriDeseri.toJson(messages)
       val quoted = SockJsAction.quoteUnicode(json)
       buffer.append(callback + "(\"a")
       buffer.append(jsEscape(quoted))
@@ -664,7 +661,7 @@ class JsonPPollingReceive extends NonWebSocketSessionReceiverActorAction {
   protected override def receiveNotification: Receive = {
     case NotificationToReceiverClientMessage(message) =>
       val buffer = new StringBuilder
-      val json   = Json.serialize(Seq(message))
+      val json   = SeriDeseri.toJson(Seq(message))
       val quoted = SockJsAction.quoteUnicode(json)
       buffer.append(callback + "(\"a")
       buffer.append(jsEscape(quoted))
@@ -708,29 +705,25 @@ class JsonPPollingSend extends NonWebSocketSessionActorAction with SkipCsrfCheck
       return
     }
 
-    val sessionId = param("sessionId")
-
-    val messages: Seq[String] = try {
-      // body: ["m1", "m2"]
-      Json.deserialize[Seq[String]](body)
-    } catch {
-      case NonFatal(e) =>
+    SeriDeseri.fromJson[Seq[String]](body) match {
+      case None =>
         response.setStatus(HttpResponseStatus.INTERNAL_SERVER_ERROR)
         respondText("Broken JSON encoding.")
-        return
-    }
 
-    lookupNonWebSocketSessionActor(sessionId)
-    context.become {
-      case Registry.LookupResultNone(`sessionId`) =>
-        respondDefault404Page()
+      case Some(messages) =>  // body: ["m1", "m2"]
+        val sessionId = param("sessionId")
+        lookupNonWebSocketSessionActor(sessionId)
+        context.become {
+          case Registry.LookupResultNone(`sessionId`) =>
+            respondDefault404Page()
 
-      case Registry.LookupResultOk(`sessionId`, nonWebSocketSession) =>
-        nonWebSocketSession ! MessagesFromSenderClient(messages)
-        // Konqueror does weird things on 204.
-        // As a workaround we need to respond with something - let it be the string "ok".
-        setNoClientCache()
-        respondText("ok")
+          case Registry.LookupResultOk(`sessionId`, nonWebSocketSession) =>
+            nonWebSocketSession ! MessagesFromSenderClient(messages)
+            // Konqueror does weird things on 204.
+            // As a workaround we need to respond with something - let it be the string "ok".
+            setNoClientCache()
+            respondText("ok")
+        }
     }
   }
 }
@@ -768,7 +761,7 @@ class EventSourceReceive extends NonWebSocketSessionReceiverActorAction {
       .addListener(ChannelFutureListener.CLOSE)
 
     case SubscribeResultToReceiverClientMessages(messages) =>
-      val json   = "a" + Json.serialize(messages)
+      val json   = "a" + SeriDeseri.toJson(messages)
       val quoted = SockJsAction.quoteUnicode(json)
       if (respondStreamingWithLimit(quoted, true))
         context.become(receiveNotification)
@@ -783,7 +776,7 @@ class EventSourceReceive extends NonWebSocketSessionReceiverActorAction {
 
   protected override def receiveNotification: Receive = {
     case NotificationToReceiverClientMessage(message) =>
-      val json   = "a" + Json.serialize(Seq(message))
+      val json   = "a" + SeriDeseri.toJson(Seq(message))
       val quoted = SockJsAction.quoteUnicode(json)
       respondStreamingWithLimit(quoted, true)
 
@@ -845,14 +838,11 @@ class WebSocket extends WebSocketAction with ServerIdSessionIdValidator with Soc
         // Server must ignore empty messages
         // http://sockjs.github.com/sockjs-protocol/sockjs-protocol-0.3.3.html#section-69
         if (!body.isEmpty) {
-          try {
-            // body: can be ["m1", "m2"] or "m1"
-            // http://sockjs.github.com/sockjs-protocol/sockjs-protocol-0.3.3.html#section-61
-            val normalizedBody = if (body.startsWith("[")) body else "[" + body + "]"
-            val messages       = Json.deserialize[Seq[String]](normalizedBody)
-            messages.foreach { msg => sockJsActorRef ! SockJsText(msg) }
-          } catch {
-            case NonFatal(e) =>
+          // body: can be ["m1", "m2"] or "m1"
+          // http://sockjs.github.com/sockjs-protocol/sockjs-protocol-0.3.3.html#section-61
+          val normalizedBody = if (body.startsWith("[")) body else "[" + body + "]"
+          SeriDeseri.fromJson[Seq[String]](normalizedBody) match {
+            case None =>
               // No c frame is sent!
               // http://sockjs.github.com/sockjs-protocol/sockjs-protocol-0.3.3.html#section-72
               //respondWebSocketText("c[2011,\"Broken JSON encoding.\"]")
@@ -860,23 +850,19 @@ class WebSocket extends WebSocketAction with ServerIdSessionIdValidator with Soc
 
               respondWebSocketClose()
 
-//            action.channel.close()
+            case Some(messages) =>
+              messages.foreach { msg => sockJsActorRef ! SockJsText(msg) }
           }
         }
 
       case MessageFromHandler(text) =>
-        val json = Json.serialize(Seq(text))
+        val json = SeriDeseri.toJson(Seq(text))
         respondWebSocketText("a" + json)
 
       case CloseFromHandler =>
         respondWebSocketText("c[3000,\"Go away!\"]").addListener(new ChannelFutureListener {
           def operationComplete(f: ChannelFuture) { respondWebSocketClose() }
         })
-
-//        respondWebSocketClose()
-
-//        respondWebSocketText("c[3000,\"Go away!\"]")
-//        .addListener(ChannelFutureListener.CLOSE)
 
       case _ =>
         // Ignore all others

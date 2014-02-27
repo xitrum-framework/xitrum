@@ -18,7 +18,7 @@ import xitrum.{Action, Config}
 import xitrum.etag.NotModified
 import xitrum.handler.NoPipelining
 import xitrum.handler.outbound.{XSendFile, XSendResource}
-import xitrum.util.{ByteBufUtil, Json}
+import xitrum.util.{ByteBufUtil, SeriDeseri}
 
 /**
  * When responding text, charset is automatically set, as advised by Google:
@@ -191,7 +191,7 @@ trait Responder extends Js with Flash with GetActionClassDefaultsToCurrentAction
    * It makes debugging a pain.
    */
   def respondJson(ref: AnyRef): ChannelFuture = {
-    val json = Json.serialize(ref)
+    val json = SeriDeseri.toJson(ref)
     respondText(json, "application/json")
   }
 
@@ -203,7 +203,7 @@ trait Responder extends Js with Flash with GetActionClassDefaultsToCurrentAction
    * Content-Type header is set to "application/javascript".
    */
   def respondJsonP(ref: AnyRef, function: String): ChannelFuture = {
-    val json = Json.serialize(ref)
+    val json = SeriDeseri.toJson(ref)
     val text = function + "(" + json + ");\r\n"
     respondJs(text)
   }
