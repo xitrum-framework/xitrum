@@ -6,7 +6,7 @@ import io.netty.handler.codec.http.{DefaultHttpResponse, HttpHeaders, HttpRespon
 import ChannelHandler.Sharable
 
 import xitrum.Config
-import xitrum.handler.HandlerEnv
+import xitrum.handler.{HandlerEnv, NoPipelining}
 import xitrum.util.{ByteBufUtil, UrlSafeBase64}
 
 object BasicAuth {

@@ -13,7 +13,7 @@ import com.esotericsoftware.reflectasm.ConstructorAccess
 
 import xitrum.{Action, ActorAction, FutureAction, Config}
 import xitrum.etag.NotModified
-import xitrum.handler.{AccessLog, HandlerEnv}
+import xitrum.handler.{AccessLog, HandlerEnv, NoPipelining}
 import xitrum.handler.outbound.XSendFile
 import xitrum.scope.request.PathInfo
 import xitrum.sockjs.SockJsPrefix

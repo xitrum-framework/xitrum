@@ -10,8 +10,8 @@ import io.netty.handler.codec.http.{HttpMethod, HttpResponseStatus}
 
 import xitrum.action._
 import xitrum.exception.{InvalidAntiCsrfToken, InvalidInput, MissingParam, SessionExpired}
-import xitrum.handler.{AccessLog, HandlerEnv}
-import xitrum.handler.inbound.{Dispatcher, NoPipelining}
+import xitrum.handler.{AccessLog, HandlerEnv, NoPipelining}
+import xitrum.handler.inbound.Dispatcher
 import xitrum.handler.outbound.ResponseCacher
 import xitrum.scope.request.RequestEnv
 import xitrum.scope.session.{Csrf, SessionEnv}

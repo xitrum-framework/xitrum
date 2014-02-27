@@ -12,8 +12,8 @@ import io.netty.handler.codec.http.websocketx.{
   TextWebSocketFrame,
   WebSocketServerHandshakerFactory
 }
-import xitrum.handler.{AccessLog, DefaultHttpChannelInitializer, HandlerEnv}
-import xitrum.handler.inbound.{NoPipelining, WebSocketEventDispatcher}
+import xitrum.handler.{AccessLog, DefaultHttpChannelInitializer, HandlerEnv, NoPipelining}
+import xitrum.handler.inbound.WebSocketEventDispatcher
 import xitrum.handler.DefaultHttpChannelInitializer
 
 //------------------------------------------------------------------------------

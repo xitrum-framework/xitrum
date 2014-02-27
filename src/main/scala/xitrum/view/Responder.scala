@@ -16,7 +16,7 @@ import HttpHeaders.Values.{CHUNKED, NO_CACHE}
 
 import xitrum.{Action, Config}
 import xitrum.etag.NotModified
-import xitrum.handler.inbound.NoPipelining
+import xitrum.handler.NoPipelining
 import xitrum.handler.outbound.{XSendFile, XSendResource}
 import xitrum.util.{ByteBufUtil, Json}
 

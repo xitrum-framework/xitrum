@@ -34,7 +34,6 @@ import xitrum.handler.outbound._
 object DefaultHttpChannelInitializer {
   // Sharable inbound handlers
 
-  lazy val noPipelining         = new NoPipelining
   lazy val baseUrlRemover       = new BaseUrlRemover
   lazy val basicAuth            = new BasicAuth
   lazy val publicFileServer     = new PublicFileServer
@@ -63,7 +62,6 @@ object DefaultHttpChannelInitializer {
     // Inbound
 
     removeHandlerIfExists(pipeline, classOf[Request2Env])
-    removeHandlerIfExists(pipeline, classOf[NoPipelining])
     removeHandlerIfExists(pipeline, classOf[BaseUrlRemover])
     if (Config.xitrum.basicAuth.isDefined)
     removeHandlerIfExists(pipeline, classOf[BasicAuth])
@@ -118,7 +116,6 @@ class DefaultHttpChannelInitializer extends ChannelInitializer[SocketChannel] {
     p.addLast("FlashSocketPolicyHandler", new FlashSocketPolicyHandler)
     p.addLast("HttpRequestDecoder",       new HttpRequestDecoder(Config.xitrum.request.maxInitialLineLength, 8192, 8192))
     p.addLast("Request2Env",              new Request2Env)
-    p.addLast("NoPipelining",             noPipelining)
     p.addLast("BaseUrlRemover",           baseUrlRemover)
     if (Config.xitrum.basicAuth.isDefined)
     p.addLast("BasicAuth",                basicAuth)

@@ -17,8 +17,7 @@ import HttpVersion._
 
 import xitrum.{Config, Log}
 import xitrum.etag.{Etag, NotModified}
-import xitrum.handler.{AccessLog, HandlerEnv}
-import xitrum.handler.inbound.NoPipelining
+import xitrum.handler.{AccessLog, HandlerEnv, NoPipelining}
 import xitrum.util.{ByteBufUtil, Gzip, Mime}
 
 // Based on https://github.com/netty/netty/tree/master/example/src/main/java/io/netty/example/http/file
