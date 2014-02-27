@@ -1,14 +1,18 @@
 package xitrum.i18n
 
+import java.net.URLClassLoader
+import java.nio.file.{Files, Path}
 import scala.collection.mutable.{ListBuffer, Map => MMap}
 
 import io.netty.util.CharsetUtil.UTF_8
 import scaposer.{Po, Parser}
 
-import xitrum.util.Loader
+import xitrum.Log
+import xitrum.util.{FileMonitor, Loader}
 
-object PoLoader {
-  private[this] val cache = MMap.empty[String, Po]
+object PoLoader extends Log {
+  private val cache    = MMap.empty[String, Po]
+  private val watching = MMap.empty[Path, Boolean]
 
   /**
    * For the specified language, this method loads and merges all po files in
@@ -37,6 +41,7 @@ object PoLoader {
 
     val ret = buffer.foldLeft(new Po(Map.empty)) { (acc, e) => acc ++ e }
     cache(language) = ret
+    watch
     ret
   }
 
@@ -52,5 +57,36 @@ object PoLoader {
    */
   def remove(language: String) = synchronized {
     cache.remove(language)
+  }
+
+  /**
+   * Reloads all loaded po files of the specified language in the cache.
+   */
+  def reload(language: String) {
+    log.info("Reload po file of language: " + language)
+    remove(language)
+    load(language)
+  }
+
+  /**
+   * Watches po files to reload.
+   */
+  private def watch() {
+    val classPath = getClass.getClassLoader.asInstanceOf[URLClassLoader].getURLs
+    classPath.foreach { cp =>
+      val path   = cp.toString.replaceAll("^file:", "")
+      val target = FileMonitor.pathFromString(path + "/i18n")
+      if (!watching.isDefinedAt(target) && Files.isDirectory(target)) {
+        watching(target) = true
+        log.info("Monitor po files in: " + target.toString)
+        FileMonitor.monitor(FileMonitor.MODIFY, target, { path =>
+          val fileName = path.getFileName.toString
+          if (fileName.endsWith(".po")) {
+            val lang = fileName.substring(0, fileName.length - ".po".length)
+            reload(lang)
+          }
+        })
+      }
+    }
   }
 }
