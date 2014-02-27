@@ -3,10 +3,10 @@ package xitrum.util
 import xitrum.Config
 
 /** Combination of Secure and UrlSafeBase64. */
-object SecureUrlSafeBase64 {
+object SecureUrlSafeBase64SeriDeseri {
   /** Encrypts using the key in config/xitrum.conf. */
-  def encrypt(any: Any, forCookie: Boolean = false): String =
-    encrypt(any, Config.xitrum.session.secureKey, forCookie)
+  def toString(any: Any, forCookie: Boolean = false): String =
+    toString(any, Config.xitrum.session.secureKey, forCookie)
 
   /**
    * The result contains no padding ("=" characters) so that it can be used as
@@ -16,7 +16,7 @@ object SecureUrlSafeBase64 {
    *
    * @param forCookie If true, tries to GZIP compress if > 4KB; the result may > 4KB
    */
-  def encrypt(any: Any, key: String, forCookie: Boolean): String = {
+  def toString(any: Any, key: String, forCookie: Boolean): String = {
     val bytes           = SeriDeseri.toBytes(any)
     val bytesCompressed = (forCookie && bytes.length > 4 * 1024)
 
@@ -44,14 +44,14 @@ object SecureUrlSafeBase64 {
   }
 
   /** Decrypts using the key in config/xitrum.conf. */
-  def decrypt[T](base64String: String, forCookie: Boolean = false)(implicit m: Manifest[T]): Option[T] =
-    decrypt[T](base64String, Config.xitrum.session.secureKey, forCookie)(m)
+  def fromString[T](base64String: String, forCookie: Boolean = false)(implicit m: Manifest[T]): Option[T] =
+    fromString[T](base64String, Config.xitrum.session.secureKey, forCookie)(m)
 
   /**
    * @param base64String may contain optional padding ("=" characters)
    * @param forCookie If true, tries to GZIP uncompress if the input is compressed
    */
-  def decrypt[T](base64String: String, key: String, forCookie: Boolean)(implicit m: Manifest[T]): Option[T] = {
+  def fromString[T](base64String: String, key: String, forCookie: Boolean)(implicit m: Manifest[T]): Option[T] = {
     UrlSafeBase64.autoPaddingDecode(base64String).flatMap { encrypted =>
       Secure.decrypt(encrypted, key).flatMap { maybeCompressed =>
         val bytes = if (forCookie) Gzip.mayUncompress(maybeCompressed) else maybeCompressed
