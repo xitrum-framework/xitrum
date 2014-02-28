@@ -159,11 +159,10 @@ class NonWebSocketSession(var receiverCliento: Option[ActorRef], pathPrefix: Str
           case None =>
             // Stop to avoid out of memory if there's no subscriber for a long time
             val now = System.currentTimeMillis()
-            if (now - lastSubscribedAt > TIMEOUT_CONNECTION_MILLIS) {
+            if (now - lastSubscribedAt > TIMEOUT_CONNECTION_MILLIS)
               unwatchAndStop()
-            } else {
+            else
               bufferForClientSubscriber += message
-            }
 
           case Some(receiverClient) =>
             // buffer is empty at this moment

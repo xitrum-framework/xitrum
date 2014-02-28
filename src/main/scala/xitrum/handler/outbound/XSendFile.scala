@@ -138,6 +138,7 @@ object XSendFile extends Log {
         val (offset, length) = getRangeFromRequest(request) match {
           case None =>
             (0L, raf.length)  // 0L is for avoiding "type mismatch" compile error
+
           case Some((startIndex, endIndex)) =>
             val endIndex2 = if (endIndex >= 0) endIndex else raf.length - 1
             response.setStatus(PARTIAL_CONTENT)

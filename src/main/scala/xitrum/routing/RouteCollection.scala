@@ -274,7 +274,6 @@ class RouteCollection(
 
       case Some((firsts, lasts, others)) =>
         val tokens = pathInfo.tokens
-
         matchAndExtractPathParams(tokens, firsts) match {
           case None =>
             matchAndExtractPathParams(tokens, others) match {
@@ -316,26 +315,22 @@ class RouteCollection(
   /** Used at SetCORS & OPTIONSResponse. */
   def tryAllMethods(pathInfo: PathInfo): Seq[HttpMethod] = {
     var methods = Seq.empty[HttpMethod]
-    route(HttpMethod.GET, pathInfo) match {
-      case Some(_) => methods = methods :+ HttpMethod.GET :+ HttpMethod.HEAD
-      case None =>
-    }
-    route(HttpMethod.POST, pathInfo) match {
-      case Some(_) => methods = methods :+ HttpMethod.POST
-      case None =>
-    }
-    route(HttpMethod.PUT, pathInfo) match {
-      case Some(_) => methods = methods :+ HttpMethod.PUT
-      case None =>
-    }
-    route(HttpMethod.PATCH, pathInfo) match {
-      case Some(_) => methods = methods :+ HttpMethod.PATCH
-      case None =>
-    }
-    route(HttpMethod.DELETE, pathInfo) match {
-      case Some(_) => methods = methods :+ HttpMethod.DELETE
-      case None =>
-    }
+
+    if (route(HttpMethod.GET, pathInfo).nonEmpty)
+      methods = methods :+ HttpMethod.GET :+ HttpMethod.HEAD
+
+    if (route(HttpMethod.POST, pathInfo).nonEmpty)
+      methods = methods :+ HttpMethod.POST
+
+    if (route(HttpMethod.PUT, pathInfo).nonEmpty)
+      methods = methods :+ HttpMethod.PUT
+
+    if (route(HttpMethod.PATCH, pathInfo).nonEmpty)
+      methods = methods :+ HttpMethod.PATCH
+
+    if (route(HttpMethod.DELETE, pathInfo).nonEmpty)
+      methods = methods :+ HttpMethod.DELETE
+
     methods
   }
 

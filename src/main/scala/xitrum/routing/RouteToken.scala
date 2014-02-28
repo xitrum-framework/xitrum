@@ -108,7 +108,8 @@ case class NonDotRouteToken(value: String, isPlaceholder: Boolean, regex: Option
 
       case Some(r) =>
         r.findFirstIn(value) match {
-          case None => false
+          case None =>
+            false
 
           case _ =>
             pathParams(this.value) = Seq(value)
