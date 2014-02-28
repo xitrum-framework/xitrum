@@ -20,12 +20,10 @@ object SeriDeseri {
         None
 
       case Success(any) =>
-        try {
+        if (m.runtimeClass.isAssignableFrom(any.getClass))
           Some(any.asInstanceOf[T])
-        } catch {
-          case NonFatal(e) =>
-            None
-        }
+        else
+          None
     }
   }
 
@@ -54,7 +52,11 @@ object SeriDeseri {
     // JsonMethods.parse works for the above.
     if (m.runtimeClass.getName.startsWith("scala")) {
       try {
-        Some(JsonMethods.parse(jsonString).values.asInstanceOf[T])
+        val any = JsonMethods.parse(jsonString).values
+        if (m.runtimeClass.isAssignableFrom(any.getClass))
+          Some(any.asInstanceOf[T])
+        else
+          None
       } catch {
         case NonFatal(e) =>
           try {
@@ -70,7 +72,11 @@ object SeriDeseri {
       } catch {
         case NonFatal(e) =>
           try {
-            Some(JsonMethods.parse(jsonString).values.asInstanceOf[T])
+            val any = JsonMethods.parse(jsonString).values
+            if (m.runtimeClass.isAssignableFrom(any.getClass))
+              Some(any.asInstanceOf[T])
+            else
+              None
           } catch {
             case NonFatal(e) =>
               None
