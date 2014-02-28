@@ -58,7 +58,7 @@ class CookieSessionStore extends SessionStore with Log {
       case Some(encryptedImmutableMap) =>
         val immutableMap = SeriDeseri
           .fromSecureUrlSafeBase64[Map[String, Any]](encryptedImmutableMap, true)
-          .getOrElse(MMap.empty[String, Any])
+          .getOrElse(Map.empty[String, Any])
 
         // Convert to mutable map
         val ret = MMap.empty[String, Any]
