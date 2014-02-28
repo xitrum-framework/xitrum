@@ -21,8 +21,13 @@ import xitrum.util.LocalLruCache
  */
 class LruCache extends Cache {
   private[this] val cache = {
-    val className = getClass.getName
-    val maxElems  = Config.xitrum.config.getInt("cache.\"" + className + "\".maxElems")
+    val maxElems  =
+      if (Config.productionMode) {
+        val className = getClass.getName
+        Config.xitrum.config.getInt("cache.\"" + className + "\".maxElems")
+      } else {
+        0
+      }
 
     // Use Int for expireAtSec, not Long, because we only need second precision,
     // not millisenod precision:

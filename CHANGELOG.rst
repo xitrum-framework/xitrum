@@ -6,6 +6,8 @@
   Reload .po files updated at runtime
 * `#311 <https://github.com/ngocdaothanh/xitrum/issues/311>`_
   xitrum.util: Merge Json and SecureUrlSafeBase64 to SeriDeseri
+* `#297 <https://github.com/ngocdaothanh/xitrum/issues/297>`_
+  Disable xitrum.local.LruCache in development mode
 * `#306 <https://github.com/ngocdaothanh/xitrum/issues/306>`_
   Update Netty from 4.0.16 to 4.0.17
 
