@@ -47,14 +47,13 @@ class PublicFileServer extends SimpleChannelInboundHandler[HandlerEnv] {
           response.setStatus(OK)
           if (request.getMethod == OPTIONS) {
             ctx.channel.write(env)
-            return
+          } else {
+            if (!Config.xitrum.staticFile.revalidate)
+              NotModified.setClientCacheAggressively(response)
+
+            XSendFile.setHeader(response, abs, false)
+            ctx.channel.write(env)
           }
-
-          if (!Config.xitrum.staticFile.revalidate)
-            NotModified.setClientCacheAggressively(response)
-
-          XSendFile.setHeader(response, abs, false)
-          ctx.channel.write(env)
         } else {
           ctx.fireChannelRead(env)
         }
