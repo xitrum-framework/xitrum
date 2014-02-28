@@ -79,36 +79,20 @@ trait ServerSessionStore extends SessionStore {
         new ServerSession(sessionId, true)
 
       case Some(encryptedSessionId) =>
-        SeriDeseri.fromSecureUrlSafeBase64(encryptedSessionId) match {
+        SeriDeseri.fromSecureUrlSafeBase64[String](encryptedSessionId) match {
           case None =>
-            // sessionId sent by browser is invalid, recreate
+            // sessionId sent by browser is invalid (probably due to the switch
+            // from CookieSessionStore to CleakkaSessionStore etc.), recreate
             val sessionId = UUID.randomUUID().toString
             new ServerSession(sessionId, true)
 
-          case Some(any) =>
-            val sessionIdo =
-              try {
-                Option(any.asInstanceOf[String])
-              } catch {
-                case NonFatal(e) => None
-              }
+          case Some(sessionId) =>
+            // See "store" method to know why this map is immutable
+            val immutableMapo = get(sessionId)
 
-            sessionIdo match {
-              case None =>
-                // sessionId sent by browser is not a String
-                // (due to the switch from CookieSessionStore to CleakkaSessionStore etc.),
-                // recreate
-                val sessionId = UUID.randomUUID().toString
-                new ServerSession(sessionId, true)
-
-              case Some(sessionId) =>
-                // See "store" method to know why this map is immutable
-                val immutableMapo = get(sessionId)
-
-                val ret = new ServerSession(sessionId, false)
-                immutableMapo.foreach { ret ++= _ }
-                ret
-            }
+            val ret = new ServerSession(sessionId, false)
+            immutableMapo.foreach { ret ++= _ }
+            ret
         }
     }
   }
