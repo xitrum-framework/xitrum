@@ -28,7 +28,7 @@ trait Js {
   /**
    * Do not use this to escape JSON, because they are different! For example
    * JSON does not escape ' character, while JavaScript does. To escape JSON,
-   * use JSON4S or xitrum.util.Json, e.g xitrum.util.Json.generate(Seq(string)).
+   * use xitrum.util.SeriDeseri.toJson(Seq(string)).
    *
    * org.apache.commons.lang3.StringEscapeUtils is used internally.
    */

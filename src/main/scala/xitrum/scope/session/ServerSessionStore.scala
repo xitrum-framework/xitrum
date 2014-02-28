@@ -8,7 +8,7 @@ import io.netty.handler.codec.http.DefaultCookie
 
 import xitrum.Config
 import xitrum.scope.request.RequestEnv
-import xitrum.util.SecureUrlSafeBase64
+import xitrum.util.SeriDeseri
 
 /**
  * @param sessionId needed to save the session to Cleakka
@@ -59,7 +59,7 @@ trait ServerSessionStore extends SessionStore {
       if (hSession.newlyCreated) {
         // DefaultCookie has max age of Integer.MIN_VALUE by default,
         // which means the cookie will be removed when user terminates browser
-        val cookie = new DefaultCookie(sessionCookieName, SecureUrlSafeBase64.encrypt(hSession.sessionId))
+        val cookie = new DefaultCookie(sessionCookieName, SeriDeseri.toSecureUrlSafeBase64(hSession.sessionId))
         cookie.setHttpOnly(true)
         env.responseCookies.append(cookie)
       }
@@ -79,7 +79,7 @@ trait ServerSessionStore extends SessionStore {
         new ServerSession(sessionId, true)
 
       case Some(encryptedSessionId) =>
-        SecureUrlSafeBase64.decrypt(encryptedSessionId) match {
+        SeriDeseri.fromSecureUrlSafeBase64(encryptedSessionId) match {
           case None =>
             // sessionId sent by browser is invalid, recreate
             val sessionId = UUID.randomUUID().toString

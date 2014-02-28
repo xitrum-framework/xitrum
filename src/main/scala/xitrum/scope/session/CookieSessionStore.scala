@@ -6,7 +6,7 @@ import scala.util.control.NonFatal
 import io.netty.handler.codec.http.DefaultCookie
 
 import xitrum.{Config, Log}
-import xitrum.util.SecureUrlSafeBase64
+import xitrum.util.SeriDeseri
 
 /** Compress big session cookie to try to avoid the 4KB limit. */
 class CookieSessionStore extends SessionStore with Log {
@@ -30,7 +30,7 @@ class CookieSessionStore extends SessionStore with Log {
       val immutableMap = session.toMap
 
       // Most browsers do not support cookie > 4KB
-      val serialized = SecureUrlSafeBase64.encrypt(immutableMap, true)
+      val serialized = SeriDeseri.toSecureUrlSafeBase64(immutableMap, true)
       val cookieSize = serialized.length
       if (cookieSize > 4 * 1024) {
         log.error("Cookie size = " + cookieSize + " > 4KB limit: " + immutableMap)
@@ -56,23 +56,14 @@ class CookieSessionStore extends SessionStore with Log {
 
       // See "store" method to know why this map needs to be immutable
       case Some(encryptedImmutableMap) =>
-        SecureUrlSafeBase64.decrypt(encryptedImmutableMap, true) match {
-          case None =>
-            MMap.empty[String, Any]
+        val immutableMap = SeriDeseri
+          .fromSecureUrlSafeBase64[Map[String, Any]](encryptedImmutableMap, true)
+          .getOrElse(MMap.empty[String, Any])
 
-          case Some(any) =>
-            val immutableMap = try {
-              any.asInstanceOf[Map[String, Any]]
-            } catch {
-              case NonFatal(e) =>
-                MMap.empty[String, Any]
-            }
-
-            // Convert to mutable map
-            val ret = MMap.empty[String, Any]
-            ret ++= immutableMap
-            ret
-       }
+        // Convert to mutable map
+        val ret = MMap.empty[String, Any]
+        ret ++= immutableMap
+        ret
     }
   }
 }

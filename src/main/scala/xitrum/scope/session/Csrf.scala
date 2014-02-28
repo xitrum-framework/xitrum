@@ -4,11 +4,12 @@ import java.util.UUID
 
 import xitrum.Action
 import xitrum.exception.InvalidAntiCsrfToken
-import xitrum.util.SecureUrlSafeBase64
+import xitrum.util.SeriDeseri
 
 /**
- * SecureBase64 is for preventing a user to mess with his own data to cheat the server.
- * CSRF is for preventing a user to fake other user data.
+ * SeriDeseri's to/fromSecureUrlSafeBase64 is for preventing a user to mess with
+ * his own data to cheat the server. CSRF is for preventing a user to fake other
+ * user's data.
  */
 object Csrf {
   val TOKEN         = "csrf-token"
@@ -30,18 +31,19 @@ object Csrf {
   /**
    * For encrypting things that need to embed the anti-CSRF token for more security.
    * (For example when using with GET requests, which does not include the token.)
-   * Otherwise you should use SecureBase64.encrypt for shorter result.
+   * Otherwise you should use SeriDeseri's to/fromSecureUrlSafeBase64 for shorter
+   * result.
    */
-  def encrypt(action: Action, any: Any): String = action.antiCsrfToken + SecureUrlSafeBase64.encrypt(any)
+  def encrypt(action: Action, any: Any): String =
+    action.antiCsrfToken + SeriDeseri.toSecureUrlSafeBase64(any)
 
-  def decrypt(action: Action, string: String): Any = {
+  def decrypt[T](action: Action, string: String)(implicit m: Manifest[T]): Option[T] = {
     val prefix = action.antiCsrfToken
-    if (!string.startsWith(prefix)) throw new InvalidAntiCsrfToken
-
-    val base64String = string.substring(prefix.length)
-    SecureUrlSafeBase64.decrypt(base64String) match {
-      case None       => throw new InvalidAntiCsrfToken
-      case Some(data) => data
+    if (!string.startsWith(prefix)) {
+      None
+    } else {
+      val base64String = string.substring(prefix.length)
+      SeriDeseri.fromSecureUrlSafeBase64[T](base64String)(m)
     }
   }
 }
@@ -54,7 +56,7 @@ trait Csrf {
   def antiCsrfToken: String = {
     sessiono(TOKEN) match {
       case Some(x) =>
-        x.toString
+        x
 
       case None =>
         val y = UUID.randomUUID().toString
