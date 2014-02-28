@@ -34,7 +34,9 @@ object UrlSafeBase64 extends Log {
     try {
       val withPadding = addPadding(base64String)
       val buffer      = B64.decode(Unpooled.copiedBuffer(withPadding, UTF_8), Base64Dialect.URL_SAFE)
-      Some(ByteBufUtil.toBytes(buffer))
+      val bytes       = ByteBufUtil.toBytes(buffer)
+      buffer.release()
+      Some(bytes)
     } catch {
       case NonFatal(e) =>
         log.debug("Could not decode base64 in URL-safe dialect: " + base64String)
