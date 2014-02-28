@@ -80,7 +80,9 @@ object js {
       },
       complete: function() {
         target1.show();
-        target1.next().remove();
+
+        if (this.ajaxLoadingImg != null)
+          target1.next().remove();
       }
     });
 

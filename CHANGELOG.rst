@@ -1,5 +1,7 @@
 3.2:
 
+* `#312 <https://github.com/ngocdaothanh/xitrum/issues/312>`_
+  Fix bug at xitrum.js: when ajaxLoadingImg is not specified, the next element of the submit element is removed
 * `#268 <https://github.com/ngocdaothanh/xitrum/issues/268>`_
   Add xitrum.util.FileMonitor (requires Java 7)
 * `#308 <https://github.com/ngocdaothanh/xitrum/issues/308>`_
