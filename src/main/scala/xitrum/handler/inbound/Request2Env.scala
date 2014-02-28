@@ -18,7 +18,7 @@ import io.netty.handler.codec.http.multipart.{
 import InterfaceHttpData.HttpDataType
 
 import xitrum.{Config, Log}
-import xitrum.handler.{HandlerEnv, NoPipelining}
+import xitrum.handler.{HandlerEnv, NoRealPipelining}
 import xitrum.scope.request.{FileUploadParams, Params, PathInfo}
 import xitrum.util.ByteBufUtil
 
@@ -253,8 +253,8 @@ class Request2Env extends SimpleChannelInboundHandler[HttpObject] with Log {
   private def sendUpstream(ctx: ChannelHandlerContext) {
     ctx.fireChannelRead(env)
 
-    // NoPipelining.resumeReading should be called when the response has been sent
-    NoPipelining.pauseReading(ctx.channel)
+    // NoRealPipelining.resumeReading should be called when the response has been sent
+    NoRealPipelining.pauseReading(ctx.channel)
 
     // Reset for the next request on this same connection (e.g. keep alive)
     env               = null

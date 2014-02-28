@@ -6,7 +6,7 @@ import io.netty.handler.codec.http.{DefaultHttpResponse, HttpHeaders, HttpRespon
 import ChannelHandler.Sharable
 
 import xitrum.Config
-import xitrum.handler.{HandlerEnv, NoPipelining}
+import xitrum.handler.{HandlerEnv, NoRealPipelining}
 import xitrum.util.{ByteBufUtil, UrlSafeBase64}
 
 object BasicAuth {
@@ -58,7 +58,7 @@ object BasicAuth {
     )
 
     val future = env.channel.write(env)
-    NoPipelining.if_keepAliveRequest_then_resumeReading_else_closeOnComplete(request, env.channel, future)
+    NoRealPipelining.if_keepAliveRequest_then_resumeReading_else_closeOnComplete(request, env.channel, future)
   }
 }
 

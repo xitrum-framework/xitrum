@@ -14,7 +14,7 @@ import HttpVersion._
 
 import xitrum.{Config, Log}
 import xitrum.etag.{Etag, NotModified}
-import xitrum.handler.{AccessLog, HandlerEnv, NoPipelining}
+import xitrum.handler.{AccessLog, HandlerEnv, NoRealPipelining}
 import xitrum.util.{ByteBufUtil, Gzip, Mime}
 
 object XSendResource extends Log {
@@ -66,7 +66,7 @@ object XSendResource extends Log {
 
         val channel = ctx.channel
         val future  = ctx.write(env, promise)
-        NoPipelining.if_keepAliveRequest_then_resumeReading_else_closeOnComplete(request, channel, future)
+        NoRealPipelining.if_keepAliveRequest_then_resumeReading_else_closeOnComplete(request, channel, future)
         if (!noLog) {
           val remoteAddress = channel.remoteAddress
           AccessLog.logResourceInJarAccess(remoteAddress, request, response)

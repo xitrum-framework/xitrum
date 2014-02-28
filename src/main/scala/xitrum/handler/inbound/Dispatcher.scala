@@ -13,7 +13,7 @@ import com.esotericsoftware.reflectasm.ConstructorAccess
 
 import xitrum.{Action, ActorAction, FutureAction, Config}
 import xitrum.etag.NotModified
-import xitrum.handler.{AccessLog, HandlerEnv, NoPipelining}
+import xitrum.handler.{AccessLog, HandlerEnv, NoRealPipelining}
 import xitrum.handler.outbound.XSendFile
 import xitrum.scope.request.PathInfo
 import xitrum.sockjs.SockJsPrefix
@@ -61,7 +61,7 @@ class Dispatcher extends SimpleChannelInboundHandler[HandlerEnv] {
 
     if (request.getMethod == HttpMethod.OPTIONS) {
       val future = ctx.channel.write(env)
-      NoPipelining.if_keepAliveRequest_then_resumeReading_else_closeOnComplete(request, env.channel, future)
+      NoRealPipelining.if_keepAliveRequest_then_resumeReading_else_closeOnComplete(request, env.channel, future)
       return
     }
 

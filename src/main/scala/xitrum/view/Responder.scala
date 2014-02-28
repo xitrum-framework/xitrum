@@ -16,7 +16,7 @@ import HttpHeaders.Values.{CHUNKED, NO_CACHE}
 
 import xitrum.{Action, Config}
 import xitrum.etag.NotModified
-import xitrum.handler.NoPipelining
+import xitrum.handler.NoRealPipelining
 import xitrum.handler.outbound.{XSendFile, XSendResource}
 import xitrum.util.{ByteBufUtil, SeriDeseri}
 
@@ -55,7 +55,7 @@ trait Responder extends Js with Flash with GetActionClassDefaultsToCurrentAction
     if (!XSendFile.isHeaderSet(response) &&
         !XSendResource.isHeaderSet(response) &&
         !HttpHeaders.isTransferEncodingChunked(response)) {
-      NoPipelining.if_keepAliveRequest_then_resumeReading_else_closeOnComplete(request, channel, future)
+      NoRealPipelining.if_keepAliveRequest_then_resumeReading_else_closeOnComplete(request, channel, future)
     }
 
     nonChunkedResponseOrFirstChunkSent = true
@@ -96,7 +96,7 @@ trait Responder extends Js with Flash with GetActionClassDefaultsToCurrentAction
       ret
     }
     val future = channel.writeAndFlush(trailer)
-    NoPipelining.if_keepAliveRequest_then_resumeReading_else_closeOnComplete(request, channel, future)
+    NoRealPipelining.if_keepAliveRequest_then_resumeReading_else_closeOnComplete(request, channel, future)
 
     doneResponding = true
     onDoneResponding()

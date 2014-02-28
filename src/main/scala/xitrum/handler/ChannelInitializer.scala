@@ -22,7 +22,6 @@ import xitrum.handler.outbound._
  * Inbound:
  *   HttpRequestDecoder
  *   Request2Env
- *   NoPipelining
  *   PublicFileServer
  *   Its own dispatcher
  *

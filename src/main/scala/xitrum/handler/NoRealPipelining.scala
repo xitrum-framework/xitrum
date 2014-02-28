@@ -4,7 +4,13 @@ import io.netty.channel.{Channel, ChannelFuture, ChannelFutureListener}
 import io.netty.handler.codec.http.{HttpHeaders, HttpRequest, HttpResponse}
 
 /**
- * Xitrum, like Mongrel2, does not support pipelining: http://mongrel2.org/manual/book-finalch6.html
+ * http://en.wikipedia.org/wiki/HTTP_pipelining
+ *
+ * Xitrum does not support real pipelining. A client may send multiple requests,
+ * but Xitrum will not process them at concurrently. Xitrum will process one
+ * by one.
+ *
+ * From Mongrel2 doc: http://mongrel2.org/manual/book-finalch6.html
  *
  * "Where problems come in is with pipe-lined requests, meaning a browser sends
  * a bunch of requests in a big blast, then hangs out for all the responses.
@@ -14,7 +20,7 @@ import io.netty.handler.codec.http.{HttpHeaders, HttpRequest, HttpResponse}
  * and then close the socket. The web server and the backends are now screwed
  * having to handle these requests which will go nowhere."
  */
-object NoPipelining {
+object NoRealPipelining {
   def pauseReading(channel: Channel) {
     channel.config.setAutoRead(false)
   }

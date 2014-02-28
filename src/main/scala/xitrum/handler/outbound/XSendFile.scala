@@ -17,7 +17,7 @@ import HttpVersion._
 
 import xitrum.{Config, Log}
 import xitrum.etag.{Etag, NotModified}
-import xitrum.handler.{AccessLog, HandlerEnv, NoPipelining}
+import xitrum.handler.{AccessLog, HandlerEnv, NoRealPipelining}
 import xitrum.util.{ByteBufUtil, Gzip, Mime}
 
 // Based on https://github.com/netty/netty/tree/master/example/src/main/java/io/netty/example/http/file
@@ -87,7 +87,7 @@ object XSendFile extends Log {
 
         if (path.startsWith(ABS_404)) {  // Even 404.html is not found!
           val future = ctx.write(env, promise)
-          NoPipelining.if_keepAliveRequest_then_resumeReading_else_closeOnComplete(request, channel, future)
+          NoRealPipelining.if_keepAliveRequest_then_resumeReading_else_closeOnComplete(request, channel, future)
           if (!noLog) AccessLog.logStaticFileAccess(remoteAddress, request, response)
         } else {
           setHeader(response, ABS_404, false)
@@ -114,7 +114,7 @@ object XSendFile extends Log {
           }
         }
         val future = ctx.write(env, promise)
-        NoPipelining.if_keepAliveRequest_then_resumeReading_else_closeOnComplete(request, channel, future)
+        NoRealPipelining.if_keepAliveRequest_then_resumeReading_else_closeOnComplete(request, channel, future)
         if (!noLog) AccessLog.logStaticFileAccess(remoteAddress, request, response)
 
       case Etag.TooBig(file) =>
@@ -127,7 +127,7 @@ object XSendFile extends Log {
           response.setStatus(NOT_MODIFIED)
           response.content.clear()
           val future = ctx.write(env, promise)
-          NoPipelining.if_keepAliveRequest_then_resumeReading_else_closeOnComplete(request, channel, future)
+          NoRealPipelining.if_keepAliveRequest_then_resumeReading_else_closeOnComplete(request, channel, future)
           if (!noLog) AccessLog.logStaticFileAccess(remoteAddress, request, response)
           return
         }
@@ -157,7 +157,7 @@ object XSendFile extends Log {
           // http://stackoverflow.com/questions/3854842/content-length-header-with-head-requests
           response.content.clear()
           ctx.write(env, promise)
-          NoPipelining.if_keepAliveRequest_then_resumeReading_else_closeOnComplete(request, channel, promise)
+          NoRealPipelining.if_keepAliveRequest_then_resumeReading_else_closeOnComplete(request, channel, promise)
           return
         }
 
@@ -184,7 +184,7 @@ object XSendFile extends Log {
 
         // Write the end marker
         val future = ctx.writeAndFlush(LastHttpContent.EMPTY_LAST_CONTENT, promise)
-        NoPipelining.if_keepAliveRequest_then_resumeReading_else_closeOnComplete(request, channel, future)
+        NoRealPipelining.if_keepAliveRequest_then_resumeReading_else_closeOnComplete(request, channel, future)
     }
   }
 

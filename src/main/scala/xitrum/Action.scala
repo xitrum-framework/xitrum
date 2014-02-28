@@ -10,7 +10,7 @@ import io.netty.handler.codec.http.{HttpMethod, HttpResponseStatus}
 
 import xitrum.action._
 import xitrum.exception.{InvalidAntiCsrfToken, InvalidInput, MissingParam, SessionExpired}
-import xitrum.handler.{AccessLog, HandlerEnv, NoPipelining}
+import xitrum.handler.{AccessLog, HandlerEnv, NoRealPipelining}
 import xitrum.handler.inbound.Dispatcher
 import xitrum.handler.outbound.ResponseCacher
 import xitrum.scope.request.RequestEnv
@@ -165,7 +165,7 @@ trait Action extends RequestEnv
 
       case Some(response) =>
         val future = channel.writeAndFlush(response)
-        NoPipelining.if_keepAliveRequest_then_resumeReading_else_closeOnComplete(request, channel, future)
+        NoRealPipelining.if_keepAliveRequest_then_resumeReading_else_closeOnComplete(request, channel, future)
         handlerEnv.release()
         true
     }
