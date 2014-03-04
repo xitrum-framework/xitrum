@@ -57,7 +57,7 @@ libraryDependencies += "tv.cntt" % "rhinocoffeescript" % "1.7.1"
 libraryDependencies += "com.beachape.filemanagement" % "schwatcher_2.10" % "0.0.7"
 
 // For test
-libraryDependencies += "org.scalatest" %% "scalatest" % "2.0" % "test"
+libraryDependencies += "org.scalatest" %% "scalatest" % "2.1.0" % "test"
 
 //------------------------------------------------------------------------------
 // JSON4S uses scalap 2.10.0, which in turn uses scala-compiler 2.10.0, which in
