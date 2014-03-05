@@ -74,13 +74,14 @@ class NonWebSocketSession(var receiverCliento: Option[ActorRef], pathPrefix: Str
 
     lastSubscribedAt = System.currentTimeMillis()
 
-    // Unsubscribed when stopped
-    context.watch(receiverCliento.get)
+    // At start (see constructor), there must be a receiver client
+    val receiverClient = receiverCliento.get
 
-    // Once set, the receive timeout stays in effect (i.e. continues firing
-    // repeatedly after inactivity periods). Duration.Undefined must be set
-    // to switch off this feature.
-    context.setReceiveTimeout(TIMEOUT_CONNECTION)
+    // Unsubscribed when stopped
+    context.watch(receiverClient)
+
+    // Will be set to TIMEOUT_CONNECTION when the receiver client stops
+    context.setReceiveTimeout(SockJsAction.TIMEOUT_HEARTBEAT)
   }
 
   private def unwatchAndStop() {
@@ -98,18 +99,13 @@ class NonWebSocketSession(var receiverCliento: Option[ActorRef], pathPrefix: Str
     //
     // See also AbortFromReceiverClient below.
     case Terminated(monitored) =>
-      if (monitored == sockJsActorRef) {
+      if (monitored == sockJsActorRef && !closed) {
         // See CloseFromHandler
-        if (!closed) unwatchAndStop()
-      } else {
-        receiverCliento.foreach { receiverClient =>
-          if (monitored == receiverClient) {
-            context.unwatch(receiverClient)
-            receiverCliento = None
-
-            context.setReceiveTimeout(TIMEOUT_CONNECTION)
-          }
-        }
+        unwatchAndStop()
+      } else if (receiverCliento == Some(monitored)){
+        context.unwatch(monitored)
+        receiverCliento = None
+        context.setReceiveTimeout(TIMEOUT_CONNECTION)
       }
 
     // Similar to Terminated but no TIMEOUT_CONNECTION is needed
@@ -124,10 +120,10 @@ class NonWebSocketSession(var receiverCliento: Option[ActorRef], pathPrefix: Str
         if (receiverCliento.isEmpty) {
           receiverCliento = Some(sender)
           context.watch(sender)
+          context.setReceiveTimeout(SockJsAction.TIMEOUT_HEARTBEAT)
 
           if (bufferForClientSubscriber.isEmpty) {
             sender ! SubscribeResultToReceiverClientWaitForMessage
-            context.setReceiveTimeout(SockJsAction.TIMEOUT_HEARTBEAT)
           } else {
             sender ! SubscribeResultToReceiverClientMessages(bufferForClientSubscriber.toList)
             bufferForClientSubscriber.clear()
@@ -144,6 +140,7 @@ class NonWebSocketSession(var receiverCliento: Option[ActorRef], pathPrefix: Str
         receiverClient ! NotificationToReceiverClientClosed
         context.unwatch(receiverClient)
         receiverCliento = None
+        context.setReceiveTimeout(TIMEOUT_CONNECTION)
       }
 
     case MessagesFromSenderClient(messages) =>
@@ -153,17 +150,16 @@ class NonWebSocketSession(var receiverCliento: Option[ActorRef], pathPrefix: Str
       if (!closed) {
         receiverCliento match {
           case None =>
-            // Stop to avoid out of memory if there's no subscriber for a long time
+            // Stop if there's no subscriber for a long time
             val now = System.currentTimeMillis()
             if (now - lastSubscribedAt > TIMEOUT_CONNECTION_MILLIS)
               unwatchAndStop()
             else
-              bufferForClientSubscriber += message
+              bufferForClientSubscriber.append(message)
 
           case Some(receiverClient) =>
-            // buffer is empty at this moment
+            // buffer is empty at this moment, because receiverCliento is not empty
             receiverClient ! NotificationToReceiverClientMessage(message)
-            context.setReceiveTimeout(TIMEOUT_CONNECTION)
         }
       }
 
@@ -174,7 +170,6 @@ class NonWebSocketSession(var receiverCliento: Option[ActorRef], pathPrefix: Str
       } else {
         // No message for subscriber for a long time
         receiverCliento.get ! NotificationToReceiverClientHeartbeat
-        context.setReceiveTimeout(TIMEOUT_CONNECTION)
       }
   }
 }

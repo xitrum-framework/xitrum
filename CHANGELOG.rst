@@ -1,7 +1,11 @@
 3.3:
 
+* `#316 <https://github.com/ngocdaothanh/xitrum/issues/316>`_
+  SockJS: Change heartbeat from 5s to 25s
 * `#317 <https://github.com/ngocdaothanh/xitrum/issues/317>`_
   SockJS: Add heartbeat for WebSocket transport
+* `#318 <https://github.com/ngocdaothanh/xitrum/issues/318>`_
+  Fix Netty memory leak at xitrum.util.UrlSafeBase64
 * `#315 <https://github.com/ngocdaothanh/xitrum/issues/315>`_
   Update Glokka from 1.4 to 1.5
 
