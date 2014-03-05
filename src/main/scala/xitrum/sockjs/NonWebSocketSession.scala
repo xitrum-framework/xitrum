@@ -37,10 +37,6 @@ object NonWebSocketSession {
   private val TIMEOUT_CONNECTION = 5.seconds
 
   private val TIMEOUT_CONNECTION_MILLIS = TIMEOUT_CONNECTION.toMillis
-
-  // The server must send a heartbeat frame every 25 seconds
-  // http://sockjs.github.com/sockjs-protocol/sockjs-protocol-0.3.3.html#section-46
-  private val TIMEOUT_HEARTBEAT = 25.seconds
 }
 
 /**
@@ -131,7 +127,7 @@ class NonWebSocketSession(var receiverCliento: Option[ActorRef], pathPrefix: Str
 
           if (bufferForClientSubscriber.isEmpty) {
             sender ! SubscribeResultToReceiverClientWaitForMessage
-            context.setReceiveTimeout(TIMEOUT_HEARTBEAT)
+            context.setReceiveTimeout(SockJsAction.TIMEOUT_HEARTBEAT)
           } else {
             sender ! SubscribeResultToReceiverClientMessages(bufferForClientSubscriber.toList)
             bufferForClientSubscriber.clear()

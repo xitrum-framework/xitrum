@@ -1,5 +1,7 @@
 3.3:
 
+* `#317 <https://github.com/ngocdaothanh/xitrum/issues/317>`_
+  SockJS: Add heartbeat for WebSocket transport
 * `#315 <https://github.com/ngocdaothanh/xitrum/issues/315>`_
   Update Glokka from 1.4 to 1.5
 

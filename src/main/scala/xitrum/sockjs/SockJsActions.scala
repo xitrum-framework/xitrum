@@ -1,13 +1,14 @@
 package xitrum.sockjs
 
 import java.util.Random
+import scala.concurrent.duration._
 import scala.util.control.NonFatal
 
 import io.netty.buffer.Unpooled
 import io.netty.channel.{ChannelFuture, ChannelFutureListener}
 import io.netty.handler.codec.http.{DefaultCookie, HttpHeaders, HttpResponseStatus}
 
-import akka.actor.{Actor, ActorRef, PoisonPill, Props, Terminated}
+import akka.actor.{Actor, ActorRef, PoisonPill, Props, ReceiveTimeout, Terminated}
 import glokka.Registry
 
 import xitrum.{
@@ -27,6 +28,10 @@ import xitrum.view.DocType
 // Reference implementation (need to read when in doubt):
 // https://github.com/sockjs/sockjs-node/tree/master/src
 object SockJsAction {
+  // The server must send a heartbeat frame every 25 seconds
+  // http://sockjs.github.com/sockjs-protocol/sockjs-protocol-0.3.3.html#section-46
+  val TIMEOUT_HEARTBEAT = 25.seconds
+
   // All the chunking transports are closed by the server after 128K (production mode)
   // or 4K (development mode) was sent, in order to force client to GC and reconnect.
   // Last chunk is forcefully sent when limit is reached.
@@ -819,6 +824,7 @@ class WebSocketPOST extends SockJsAction with SkipCsrfCheck {
   }
 }
 
+// sessionId is ignored
 @WEBSOCKET(":serverId/:sessionId/websocket")
 class WebSocket extends WebSocketAction with ServerIdSessionIdValidator with SockJsPrefix {
   def nLastTokensToRemoveFromPathInfo = 3
@@ -826,14 +832,15 @@ class WebSocket extends WebSocketAction with ServerIdSessionIdValidator with Soc
   private[this] var sockJsActorRef: ActorRef = _
 
   def execute() {
-    // Ignored
-    //val sessionId = param("sessionId")
-
     sockJsActorRef = Config.routes.sockJsRouteMap.createSockJsAction(pathPrefix)
     respondWebSocketText("o")
     sockJsActorRef ! (self, currentAction)
 
+    context.setReceiveTimeout(SockJsAction.TIMEOUT_HEARTBEAT)
     context.become {
+      case ReceiveTimeout =>
+        respondWebSocketText("h")
+
       case WebSocketText(body) =>
         // Server must ignore empty messages
         // http://sockjs.github.com/sockjs-protocol/sockjs-protocol-0.3.3.html#section-69
