@@ -1,3 +1,8 @@
+3.3:
+
+* `#315 <https://github.com/ngocdaothanh/xitrum/issues/315>`_
+  Update Glokka from 1.4 to 1.5
+
 3.2:
 
 * `#312 <https://github.com/ngocdaothanh/xitrum/issues/312>`_
