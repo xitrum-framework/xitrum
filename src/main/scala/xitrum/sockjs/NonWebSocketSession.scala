@@ -113,23 +113,24 @@ class NonWebSocketSession(var receiverCliento: Option[ActorRef], pathPrefix: Str
       unwatchAndStop()
 
     case SubscribeFromReceiverClient =>
+      val s = sender()
       if (closed) {
-        sender ! SubscribeResultToReceiverClientClosed
+        s ! SubscribeResultToReceiverClientClosed
       } else {
         lastSubscribedAt = System.currentTimeMillis()
         if (receiverCliento.isEmpty) {
-          receiverCliento = Some(sender)
-          context.watch(sender)
+          receiverCliento = Some(s)
+          context.watch(s)
           context.setReceiveTimeout(SockJsAction.TIMEOUT_HEARTBEAT)
 
           if (bufferForClientSubscriber.isEmpty) {
-            sender ! SubscribeResultToReceiverClientWaitForMessage
+            s ! SubscribeResultToReceiverClientWaitForMessage
           } else {
-            sender ! SubscribeResultToReceiverClientMessages(bufferForClientSubscriber.toList)
+            s ! SubscribeResultToReceiverClientMessages(bufferForClientSubscriber.toList)
             bufferForClientSubscriber.clear()
           }
         } else {
-          sender ! SubscribeResultToReceiverClientAnotherConnectionStillOpen
+          s ! SubscribeResultToReceiverClientAnotherConnectionStillOpen
         }
       }
 
