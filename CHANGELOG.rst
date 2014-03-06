@@ -7,7 +7,7 @@
 * `#318 <https://github.com/ngocdaothanh/xitrum/issues/318>`_
   Fix Netty memory leak at xitrum.util.UrlSafeBase64
 * `#315 <https://github.com/ngocdaothanh/xitrum/issues/315>`_
-  Update Glokka from 1.4 to 1.6
+  Update Akka from 2.2.3 to 2.3.0
 
 3.2:
 
