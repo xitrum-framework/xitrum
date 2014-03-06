@@ -8,6 +8,8 @@
   Fix Netty memory leak at xitrum.util.UrlSafeBase64
 * `#315 <https://github.com/ngocdaothanh/xitrum/issues/315>`_
   Update Akka from 2.2.3 to 2.3.0
+* `#319 <https://github.com/ngocdaothanh/xitrum/issues/319>`_
+  Update Twitter Chill from 0.3.5 to 0.3.6
 
 3.2:
 
