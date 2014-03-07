@@ -1,24 +1,26 @@
 package xitrum.util
 
 import java.nio.file.{Path, Paths, StandardWatchEventKinds, WatchEvent}
+import java.nio.file.WatchEvent.Modifier
+import scala.util.control.NonFatal
 
 import com.beachape.filemanagement.Messages.{RegisterCallback, UnRegisterCallback}
 import com.beachape.filemanagement.MonitorActor
 import com.beachape.filemanagement.RegistryTypes.Callback
-
 import xitrum.{Config, Log}
 
 object FileMonitor extends Log {
   val CREATE = StandardWatchEventKinds.ENTRY_CREATE
   val DELETE = StandardWatchEventKinds.ENTRY_DELETE
   val MODIFY = StandardWatchEventKinds.ENTRY_MODIFY
+  val HIGH   = get_com_sun_nio_file_SensitivityWatchEventModifier_HIGH
 
   private val FILE_MONITOR_CONCURRENCY = 5
   private val fileMonitorActor = Config.actorSystem.actorOf(MonitorActor(FILE_MONITOR_CONCURRENCY))
 
   def monitor(event: WatchEvent.Kind[Path], path: Path, callback: Callback*) {
     callback.foreach { cb =>
-      fileMonitorActor ! RegisterCallback(event, false, path, cb)
+      fileMonitorActor ! RegisterCallback(event, HIGH, false, path, cb)
     }
   }
 
@@ -28,7 +30,7 @@ object FileMonitor extends Log {
 
   def monitorRecursive(event: WatchEvent.Kind[Path], path: Path, callback: Callback*) {
     callback.foreach { cb =>
-      fileMonitorActor ! RegisterCallback(event, true, path, cb)
+      fileMonitorActor ! RegisterCallback(event, HIGH, true, path, cb)
     }
   }
 
@@ -37,4 +39,18 @@ object FileMonitor extends Log {
   }
 
   def pathFromString(str: String): Path = Paths.get(str).toAbsolutePath
+
+  // http://stackoverflow.com/questions/9588737/is-java-7-watchservice-slow-for-anyone-else
+  // http://grepcode.com/file/repository.grepcode.com/java/root/jdk/openjdk/7-b147/com/sun/nio/file/SensitivityWatchEventModifier.java
+  private def get_com_sun_nio_file_SensitivityWatchEventModifier_HIGH: Option[Modifier] = {
+    try {
+      val c = Class.forName("com.sun.nio.file.SensitivityWatchEventModifier")
+      val f = c.getField("HIGH")
+      val e = f.get(c).asInstanceOf[Modifier]
+      Some(e)
+    } catch {
+      case NonFatal(e) =>
+        None
+    }
+  }
 }
