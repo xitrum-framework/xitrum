@@ -10,6 +10,8 @@
   Update Akka from 2.2.3 to 2.3.0
 * `#319 <https://github.com/ngocdaothanh/xitrum/issues/319>`_
   Update Twitter Chill from 0.3.5 to 0.3.6
+* `#320 <https://github.com/ngocdaothanh/xitrum/issues/320>`_
+  Update Schwatcher from 0.0.9 to 0.1.0
 
 3.2:
 
