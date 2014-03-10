@@ -65,7 +65,15 @@ class Request2Env extends SimpleChannelInboundHandler[HttpObject] with Log {
 
     try {
       if (msg.isInstanceOf[HttpRequest]) {
-        handleHttpRequestHead(ctx, msg.asInstanceOf[HttpRequest])
+        val request = msg.asInstanceOf[HttpRequest]
+
+        // http://www.w3.org/Protocols/rfc2616/rfc2616-sec8.html
+        if (HttpHeaders.is100ContinueExpected(request)) {
+          val response = new DefaultFullHttpResponse(HttpVersion.HTTP_1_1, HttpResponseStatus.CONTINUE)
+          ctx.write(response)
+        }
+
+        handleHttpRequestHead(ctx, request)
       } else {
         if (msg.isInstanceOf[HttpContent])
           handleHttpRequestContent(ctx, msg.asInstanceOf[HttpContent])
