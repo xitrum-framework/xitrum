@@ -26,6 +26,7 @@ class ServerSession(val sessionId: String, val newlyCreated: Boolean) extends Ha
  * this trait. It handles storing and restoring session ID in cookie for you.
  */
 trait ServerSessionStore extends SessionStore {
+
   /** To be implemented by server side session store implementations */
   def get(sessionId: String): Option[Map[String, Any]]
 
@@ -38,7 +39,8 @@ trait ServerSessionStore extends SessionStore {
   //----------------------------------------------------------------------------
 
   def store(session: Session, env: SessionEnv) {
-    val sessionCookieName = Config.xitrum.session.cookieName
+    val sessionCookieName   = Config.xitrum.session.cookieName
+    val sessionCookieMaxAge = Config.xitrum.session.cookieMaxAge
     if (session.isEmpty) {
       // If session cookie has been sent by browser, send back session cookie
       // with max age = 0 so that browser will delete it immediately
@@ -56,11 +58,10 @@ trait ServerSessionStore extends SessionStore {
       val hSession = session.asInstanceOf[ServerSession]
       // newlyCreated: true means browser did not send session cookie or did send
       // but the cookie value is not a valid encrypted session ID
-      if (hSession.newlyCreated) {
-        // DefaultCookie has max age of Integer.MIN_VALUE by default,
-        // which means the cookie will be removed when user terminates browser
+      if (hSession.newlyCreated || sessionCookieMaxAge > 0) {
         val cookie = new DefaultCookie(sessionCookieName, SeriDeseri.toSecureUrlSafeBase64(hSession.sessionId))
         cookie.setHttpOnly(true)
+        cookie.setMaxAge(sessionCookieMaxAge)
         env.responseCookies.append(cookie)
       }
 
@@ -72,8 +73,7 @@ trait ServerSessionStore extends SessionStore {
   }
 
   def restore(env: SessionEnv): Session = {
-    val sessionCookieName = Config.xitrum.session.cookieName
-    env.requestCookies.get(sessionCookieName) match {
+    env.requestCookies.get(Config.xitrum.session.cookieName) match {
       case None =>
         val sessionId = UUID.randomUUID().toString
         new ServerSession(sessionId, true)

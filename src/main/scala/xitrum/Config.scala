@@ -85,8 +85,10 @@ class ReverseProxyConfig(config: TConfig) {
 }
 
 class SessionConfig(config: TConfig) {
-  val cookieName = config.getString("cookieName")
-  val secureKey  = config.getString("secureKey")
+  val cookieName   = config.getString("cookieName")
+  // DefaultCookie has max age of Long.MIN_VALUE by default
+  val cookieMaxAge = if (config.hasPath("cookieMaxAge")) config.getLong("cookieMaxAge") else Long.MinValue
+  val secureKey    = config.getString("secureKey")
 
   lazy val store = DualConfig.getClassInstance[SessionStore](config, "store")
 }

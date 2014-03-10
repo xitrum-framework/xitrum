@@ -1,5 +1,7 @@
 3.3:
 
+* `#275 <https://github.com/ngocdaothanh/xitrum/issues/275>`_
+  Add a way to change session cookie max age
 * `#316 <https://github.com/ngocdaothanh/xitrum/issues/316>`_
   SockJS: Change heartbeat from 5s to 25s
 * `#317 <https://github.com/ngocdaothanh/xitrum/issues/317>`_

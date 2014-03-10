@@ -10,11 +10,14 @@ import xitrum.util.SeriDeseri
 
 /** Compress big session cookie to try to avoid the 4KB limit. */
 class CookieSessionStore extends SessionStore with Log {
+
+
   def start() {}
   def stop() {}
 
   def store(session: Session, env: SessionEnv) {
-    val sessionCookieName = Config.xitrum.session.cookieName
+    val sessionCookieName   = Config.xitrum.session.cookieName
+    val sessionCookieMaxAge = Config.xitrum.session.cookieMaxAge
     if (session.isEmpty) {
       // If session cookie has been sent by browser, send back session cookie
       // with max age = 0 so that browser will delete it immediately
@@ -38,11 +41,15 @@ class CookieSessionStore extends SessionStore with Log {
       }
 
       val previousSessionCookieValueo = env.requestCookies.get(sessionCookieName)
-      if (previousSessionCookieValueo.isEmpty || previousSessionCookieValueo.get != serialized) {
+      if (previousSessionCookieValueo.isEmpty ||
+          previousSessionCookieValueo.get != serialized ||
+          sessionCookieMaxAge > 0)  // Slide maxAge
+      {
         // DefaultCookie has max age of Integer.MIN_VALUE by default,
         // which means the cookie will be removed when user terminates browser
         val cookie = new DefaultCookie(sessionCookieName, serialized)
         cookie.setHttpOnly(true)
+        cookie.setMaxAge(sessionCookieMaxAge)
         env.responseCookies.append(cookie)
       }
     }
@@ -66,4 +73,5 @@ class CookieSessionStore extends SessionStore with Log {
         ret
     }
   }
+
 }

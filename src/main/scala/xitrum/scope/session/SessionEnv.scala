@@ -50,7 +50,7 @@ trait SessionEnv extends Csrf {
     session.get(key).map(_.asInstanceOf[T])
 
   def setCookieAndSessionIfTouchedOnRespond() {
-    if (sessionTouched) Config.xitrum.session.store.store(session, this)
+    if (sessionTouched || Config.xitrum.session.cookieMaxAge > 0) Config.xitrum.session.store.store(session, this)
 
     if (responseCookies.nonEmpty) {
       // To avoid accidental duplicate cookies, if cookie path is not set,
