@@ -24,7 +24,7 @@ object FlashSocketPolicyServer extends Log {
              })
 
     NetOption.setOptions(bootstrap)
-    NetOption.bind("flash socket", bootstrap, port)
+    NetOption.bind("flash socket", bootstrap, port, bossGroup, workerGroup)
 
     log.info("Flash socket policy server started on port {}", port)
   }

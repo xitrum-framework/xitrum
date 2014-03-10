@@ -90,7 +90,7 @@ object Server extends Log {
     val (service, port) = if (https) ("HTTPS", portConfig.https.get) else ("HTTP", portConfig.http.get)
 
     NetOption.setOptions(bootstrap)
-    NetOption.bind(service, bootstrap, port)
+    NetOption.bind(service, bootstrap, port, bossGroup, workerGroup)
 
     Config.xitrum.interface match {
       case None =>

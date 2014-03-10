@@ -6,6 +6,8 @@
   SockJS: Add heartbeat for WebSocket transport
 * `#318 <https://github.com/ngocdaothanh/xitrum/issues/318>`_
   Fix Netty memory leak at xitrum.util.UrlSafeBase64
+* `#323 <https://github.com/ngocdaothanh/xitrum/issues/323>`_
+  Stop Xitrum at startup on port bind exception
 * `#315 <https://github.com/ngocdaothanh/xitrum/issues/315>`_
   Update Akka from 2.2.3 to 2.3.0
 * `#319 <https://github.com/ngocdaothanh/xitrum/issues/319>`_
