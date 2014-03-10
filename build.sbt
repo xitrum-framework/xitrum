@@ -54,7 +54,7 @@ libraryDependencies += "tv.cntt" %% "scaposer" % "1.3"
 libraryDependencies += "tv.cntt" % "rhinocoffeescript" % "1.7.1"
 
 // For file watch
-libraryDependencies += "com.beachape.filemanagement" % "schwatcher_2.10" % "0.1.0"
+libraryDependencies += "com.beachape.filemanagement" %% "schwatcher" % "0.1.0"
 
 // For test
 libraryDependencies += "org.scalatest" %% "scalatest" % "2.1.0" % "test"
