@@ -16,6 +16,8 @@
   Update Twitter Chill from 0.3.5 to 0.3.6
 * `#320 <https://github.com/ngocdaothanh/xitrum/issues/320>`_
   Update Schwatcher from 0.0.9 to 0.1.0
+* `#325 <https://github.com/ngocdaothanh/xitrum/issues/325>`_
+  Update commons-lang3 from 3.2.1 to 3.3
 
 3.2:
 
