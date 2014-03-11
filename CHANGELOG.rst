@@ -1,12 +1,11 @@
 3.4:
 
-* `#328 <https://github.com/ngocdaothanh/xitrum/issues/328>`_
-  Load language lazily
-
-3.3.1:
-
+* `#322 <https://github.com/ngocdaothanh/xitrum/issues/322>`_
+  Handle "Expect: 100-continue" requests
 * `#327 <https://github.com/ngocdaothanh/xitrum/issues/327>`_
   Fix path exception when autoreloading i18n files on Windows
+* `#328 <https://github.com/ngocdaothanh/xitrum/issues/328>`_
+  Load language lazily
 
 3.3:
 

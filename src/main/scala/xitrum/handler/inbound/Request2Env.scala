@@ -70,7 +70,7 @@ class Request2Env extends SimpleChannelInboundHandler[HttpObject] with Log {
         // http://www.w3.org/Protocols/rfc2616/rfc2616-sec8.html
         if (HttpHeaders.is100ContinueExpected(request)) {
           val response = new DefaultFullHttpResponse(HttpVersion.HTTP_1_1, HttpResponseStatus.CONTINUE)
-          ctx.write(response)
+          ctx.channel.write(response)
         }
 
         handleHttpRequestHead(ctx, request)
