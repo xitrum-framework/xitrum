@@ -5,24 +5,21 @@ import scala.util.control.NonFatal
 
 import io.netty.handler.codec.http.DefaultCookie
 
-import xitrum.{Config, Log}
+import xitrum.Log
+import xitrum.Config.xitrum.session.{cookieMaxAge, cookieName}
 import xitrum.util.SeriDeseri
 
 /** Compress big session cookie to try to avoid the 4KB limit. */
 class CookieSessionStore extends SessionStore with Log {
-
-
   def start() {}
   def stop() {}
 
   def store(session: Session, env: SessionEnv) {
-    val sessionCookieName   = Config.xitrum.session.cookieName
-    val sessionCookieMaxAge = Config.xitrum.session.cookieMaxAge
     if (session.isEmpty) {
       // If session cookie has been sent by browser, send back session cookie
       // with max age = 0 so that browser will delete it immediately
-      if (env.requestCookies.isDefinedAt(sessionCookieName)) {
-        val cookie = new DefaultCookie(sessionCookieName, "0")
+      if (env.requestCookies.isDefinedAt(cookieName)) {
+        val cookie = new DefaultCookie(cookieName, "0")
         cookie.setHttpOnly(true)
         cookie.setMaxAge(0)
         env.responseCookies.append(cookie)
@@ -40,16 +37,16 @@ class CookieSessionStore extends SessionStore with Log {
         return
       }
 
-      val previousSessionCookieValueo = env.requestCookies.get(sessionCookieName)
+      val previousSessionCookieValueo = env.requestCookies.get(cookieName)
       if (previousSessionCookieValueo.isEmpty ||
           previousSessionCookieValueo.get != serialized ||
-          sessionCookieMaxAge > 0)  // Slide maxAge
+          cookieMaxAge > 0)  // Slide maxAge
       {
         // DefaultCookie has max age of Integer.MIN_VALUE by default,
         // which means the cookie will be removed when user terminates browser
-        val cookie = new DefaultCookie(sessionCookieName, serialized)
+        val cookie = new DefaultCookie(cookieName, serialized)
         cookie.setHttpOnly(true)
-        cookie.setMaxAge(sessionCookieMaxAge)
+        cookie.setMaxAge(cookieMaxAge)
         env.responseCookies.append(cookie)
       }
     }
@@ -57,7 +54,7 @@ class CookieSessionStore extends SessionStore with Log {
 
   def restore(env: SessionEnv): Session = {
     // Cannot always get cookie, decrypt, deserialize, and type casting due to program changes etc.
-    env.requestCookies.get(Config.xitrum.session.cookieName) match {
+    env.requestCookies.get(cookieName) match {
       case None =>
         MMap.empty[String, Any]
 

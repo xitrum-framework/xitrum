@@ -6,7 +6,7 @@ import scala.util.control.NonFatal
 
 import io.netty.handler.codec.http.DefaultCookie
 
-import xitrum.Config
+import xitrum.Config.xitrum.session.{cookieMaxAge, cookieName}
 import xitrum.scope.request.RequestEnv
 import xitrum.util.SeriDeseri
 
@@ -26,7 +26,6 @@ class ServerSession(val sessionId: String, val newlyCreated: Boolean) extends Ha
  * this trait. It handles storing and restoring session ID in cookie for you.
  */
 trait ServerSessionStore extends SessionStore {
-
   /** To be implemented by server side session store implementations */
   def get(sessionId: String): Option[Map[String, Any]]
 
@@ -39,13 +38,11 @@ trait ServerSessionStore extends SessionStore {
   //----------------------------------------------------------------------------
 
   def store(session: Session, env: SessionEnv) {
-    val sessionCookieName   = Config.xitrum.session.cookieName
-    val sessionCookieMaxAge = Config.xitrum.session.cookieMaxAge
     if (session.isEmpty) {
       // If session cookie has been sent by browser, send back session cookie
       // with max age = 0 so that browser will delete it immediately
-      if (env.requestCookies.isDefinedAt(sessionCookieName)) {
-        val cookie = new DefaultCookie(sessionCookieName, "0")
+      if (env.requestCookies.isDefinedAt(cookieName)) {
+        val cookie = new DefaultCookie(cookieName, "0")
         cookie.setHttpOnly(true)
         cookie.setMaxAge(0)
         env.responseCookies.append(cookie)
@@ -58,10 +55,10 @@ trait ServerSessionStore extends SessionStore {
       val hSession = session.asInstanceOf[ServerSession]
       // newlyCreated: true means browser did not send session cookie or did send
       // but the cookie value is not a valid encrypted session ID
-      if (hSession.newlyCreated || sessionCookieMaxAge > 0) {
-        val cookie = new DefaultCookie(sessionCookieName, SeriDeseri.toSecureUrlSafeBase64(hSession.sessionId))
+      if (hSession.newlyCreated || cookieMaxAge > 0) {
+        val cookie = new DefaultCookie(cookieName, SeriDeseri.toSecureUrlSafeBase64(hSession.sessionId))
         cookie.setHttpOnly(true)
-        cookie.setMaxAge(sessionCookieMaxAge)
+        cookie.setMaxAge(cookieMaxAge)
         env.responseCookies.append(cookie)
       }
 
@@ -73,7 +70,7 @@ trait ServerSessionStore extends SessionStore {
   }
 
   def restore(env: SessionEnv): Session = {
-    env.requestCookies.get(Config.xitrum.session.cookieName) match {
+    env.requestCookies.get(cookieName) match {
       case None =>
         val sessionId = UUID.randomUUID().toString
         new ServerSession(sessionId, true)
