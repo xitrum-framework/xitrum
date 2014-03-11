@@ -9,11 +9,8 @@ import xitrum.i18n.PoLoader
 trait I18n {
   this: Action =>
 
-  private var language = "en"
-  private var po       = PoLoader.load("en")
-
   /** Default language is "en". */
-  def getLanguage = language
+  var language = "en"
 
   /** @return List of languages sorted by priority from high to low */
   def browserLanguages: Array[String] = {
@@ -36,25 +33,20 @@ trait I18n {
     highFirst.map { case (lang, _) => lang }
   }
 
-  def setLanguage(language: String) {
-    this.language = language
-    po = PoLoader.load(language)
-  }
-
   /** If there's no suitable language, language is still the default "en". */
   def autosetLanguage(resourceLanguages: String*) {
     for (lang <- browserLanguages) {
       if (resourceLanguages.contains(lang)) {
-        setLanguage(lang)
+        language = lang
         return
       }
     }
   }
 
-  def t(singular: String) = po.t(singular)
-  def tc(ctx: String, singular: String) = po.t(ctx, singular)
-  def tn(singular: String, plural: String, n: Long) = po.t(singular, plural, n)
-  def tcn(ctx: String, singular: String, plural: String, n: Long) = po.t(ctx, singular, plural, n)
+  def t(singular: String) = PoLoader.get(language).t(singular)
+  def tc(ctx: String, singular: String) = PoLoader.get(language).t(ctx, singular)
+  def tn(singular: String, plural: String, n: Long) = PoLoader.get(language).t(singular, plural, n)
+  def tcn(ctx: String, singular: String, plural: String, n: Long) = PoLoader.get(language).t(ctx, singular, plural, n)
 
   def tf(singular: String, args: Any*) = t(singular).format(args:_*)
   def tcf(ctx: String, singular: String, args: Any*) = tc(ctx, singular).format(args:_*)

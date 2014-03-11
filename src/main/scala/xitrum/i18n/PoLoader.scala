@@ -13,6 +13,7 @@ import xitrum.util.{FileMonitor, Loader}
 object PoLoader extends Log {
   private val cache    = MMap.empty[String, Po]
   private val watching = MMap.empty[Path, Boolean]
+  watch()
 
   /**
    * For the specified language, this method loads and merges all po files in
@@ -26,23 +27,24 @@ object PoLoader extends Log {
    *
    * @return Empty Po if there's no po file
    */
-  def load(language: String): Po = synchronized {
+  def get(language: String): Po = {
     if (cache.isDefinedAt(language)) return cache(language)
 
-    val urlEnum = getClass.getClassLoader.getResources("i18n/" + language + ".po")
-    val buffer  = ListBuffer.empty[Po]
-    while (urlEnum.hasMoreElements) {
-      val url    = urlEnum.nextElement
-      val is     = url.openStream
-      val bytes  = Loader.bytesFromInputStream(is)
-      val string = new String(bytes, UTF_8)
-      Parser.parsePo(string).foreach(buffer.append(_))
-    }
+    synchronized {
+      val urlEnum = getClass.getClassLoader.getResources("i18n/" + language + ".po")
+      val buffer  = ListBuffer.empty[Po]
+      while (urlEnum.hasMoreElements) {
+        val url    = urlEnum.nextElement
+        val is     = url.openStream
+        val bytes  = Loader.bytesFromInputStream(is)
+        val string = new String(bytes, UTF_8)
+        Parser.parsePo(string).foreach(buffer.append(_))
+      }
 
-    val ret = buffer.foldLeft(new Po(Map.empty)) { (acc, e) => acc ++ e }
-    cache(language) = ret
-    watch()
-    ret
+      val ret = buffer.foldLeft(new Po(Map.empty)) { (acc, e) => acc ++ e }
+      cache(language) = ret
+      ret
+    }
   }
 
   /**
@@ -65,11 +67,11 @@ object PoLoader extends Log {
   def reload(language: String) {
     log.info("Reload po file of language: " + language)
     remove(language)
-    load(language)
+    get(language)
   }
 
   /**
-   * Watches po files to reload.
+   * Watches i18n directories in classpath to reload po files automatically.
    */
   private def watch() {
     val classPath = getClass.getClassLoader.asInstanceOf[URLClassLoader].getURLs

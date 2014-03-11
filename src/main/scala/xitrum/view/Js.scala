@@ -57,7 +57,7 @@ trait Js {
   //----------------------------------------------------------------------------
 
   lazy val jsDefaults = {
-    val validatei18n = if (getLanguage == "en") "" else <script type="text/javascript" src={resourceUrl("xitrum/jquery.validate-1.11.1/localization/messages_"+ getLanguage +".js")}></script>
+    val validatei18n = if (language == "en") "" else <script type="text/javascript" src={resourceUrl("xitrum/jquery.validate-1.11.1/localization/messages_"+ language +".js")}></script>
 
     if (Config.productionMode)
       <xml:group>
