@@ -1,3 +1,7 @@
+3.3.1:
+* `#327 <https://github.com/ngocdaothanh/xitrum/issues/327>`_
+  Fix path exception when autoreloading i18n files on Windows
+
 3.3:
 
 * `#275 <https://github.com/ngocdaothanh/xitrum/issues/275>`_

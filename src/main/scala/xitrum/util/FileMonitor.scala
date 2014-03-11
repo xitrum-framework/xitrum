@@ -38,8 +38,6 @@ object FileMonitor extends Log {
     fileMonitorActor ! UnRegisterCallback(event, true, path)
   }
 
-  def pathFromString(str: String): Path = Paths.get(str).toAbsolutePath
-
   // http://stackoverflow.com/questions/9588737/is-java-7-watchservice-slow-for-anyone-else
   // http://grepcode.com/file/repository.grepcode.com/java/root/jdk/openjdk/7-b147/com/sun/nio/file/SensitivityWatchEventModifier.java
   private def get_com_sun_nio_file_SensitivityWatchEventModifier_HIGH: Option[Modifier] = {

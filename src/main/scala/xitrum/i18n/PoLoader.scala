@@ -1,7 +1,7 @@
 package xitrum.i18n
 
-import java.net.URLClassLoader
-import java.nio.file.{Files, Path}
+import java.net.{URL, URLClassLoader}
+import java.nio.file.{Files, Path, Paths}
 import scala.collection.mutable.{ListBuffer, Map => MMap}
 
 import io.netty.util.CharsetUtil.UTF_8
@@ -41,7 +41,7 @@ object PoLoader extends Log {
 
     val ret = buffer.foldLeft(new Po(Map.empty)) { (acc, e) => acc ++ e }
     cache(language) = ret
-    watch
+    watch()
     ret
   }
 
@@ -74,12 +74,12 @@ object PoLoader extends Log {
   private def watch() {
     val classPath = getClass.getClassLoader.asInstanceOf[URLClassLoader].getURLs
     classPath.foreach { cp =>
-      val path   = cp.toString.replaceAll("^file:", "")
-      val target = FileMonitor.pathFromString(path + "/i18n")
-      if (!watching.isDefinedAt(target) && Files.isDirectory(target)) {
-        watching(target) = true
-        log.info("Monitor po files in: " + target.toString)
-        FileMonitor.monitor(FileMonitor.MODIFY, target, { path =>
+      val withI18n = new URL(cp, "i18n")
+      val i18nPath = Paths.get(withI18n.toURI)
+      if (!watching.isDefinedAt(i18nPath) && Files.isDirectory(i18nPath)) {
+        watching(i18nPath) = true
+        log.info("Monitor po files in: " + i18nPath)
+        FileMonitor.monitor(FileMonitor.MODIFY, i18nPath, { path =>
           val fileName = path.getFileName.toString
           if (fileName.endsWith(".po")) {
             val lang = fileName.substring(0, fileName.length - ".po".length)
