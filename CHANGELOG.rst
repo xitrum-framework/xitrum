@@ -17,8 +17,6 @@
   SockJS: Add heartbeat for WebSocket transport
 * `#318 <https://github.com/ngocdaothanh/xitrum/issues/318>`_
   Fix Netty memory leak at xitrum.util.UrlSafeBase64
-* `#322 <https://github.com/ngocdaothanh/xitrum/issues/322>`_
-  Handle "Expect: 100-continue" requests
 * `#323 <https://github.com/ngocdaothanh/xitrum/issues/323>`_
   Stop Xitrum at startup on port bind exception
 * `#315 <https://github.com/ngocdaothanh/xitrum/issues/315>`_
