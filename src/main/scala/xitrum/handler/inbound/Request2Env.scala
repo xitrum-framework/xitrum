@@ -68,9 +68,14 @@ class Request2Env extends SimpleChannelInboundHandler[HttpObject] with Log {
         val request = msg.asInstanceOf[HttpRequest]
 
         // http://www.w3.org/Protocols/rfc2616/rfc2616-sec8.html
+        // curl can send "100-continue" header:
+        // curl -v -X POST -F "a=b" http://server/
         if (HttpHeaders.is100ContinueExpected(request)) {
+          // This request only contains headers, write response and flush
+          // immediately so that the client sends the rest of the request as
+          // soon as possible
           val response = new DefaultFullHttpResponse(HttpVersion.HTTP_1_1, HttpResponseStatus.CONTINUE)
-          ctx.channel.write(response)
+          ctx.channel.writeAndFlush(response)
         }
 
         handleHttpRequestHead(ctx, request)
