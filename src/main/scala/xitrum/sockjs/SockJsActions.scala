@@ -238,34 +238,18 @@ trait NonWebSocketSessionReceiverActorAction extends NonWebSocketSessionActorAct
 
   protected def lookupOrCreateNonWebSocketSessionActor(sessionId: String) {
     // Try to lookup first, then create later
-    SockJsAction.actorRegistry ! Registry.LookupOrCreate(sessionId)
+    val props = Props(new NonWebSocketSession(Some(self), pathPrefix, this))
+    SockJsAction.actorRegistry ! Registry.Register(sessionId, props)
     context.become({
-      case Registry.LookupResultOk(`sessionId`, actorRef) =>
+      case Registry.Found(`sessionId`, actorRef) =>
         nonWebSocketSession = actorRef
         context.watch(nonWebSocketSession)
         onLookupOrRecreateResult(false)
 
-      case Registry.LookupResultNone(`sessionId`) =>
-        // Must use context.system.actorOf instead of context.actorOf, so that
-        // actorRef1 is not attached as a child to the current actor; otherwise
-        // when the current actor dies, actorRef1 will be forcefully killed
-        val action: Action = this
-        val props          = Props(new NonWebSocketSession(Some(self), pathPrefix, action))
-        val actorRef1      = context.system.actorOf(props)
-        SockJsAction.actorRegistry ! Registry.RegisterByRef(sessionId, actorRef1)
-
-        context.become({
-          case Registry.RegisterResultOk(`sessionId`, actorRef2) =>
-            nonWebSocketSession = actorRef2
-            context.watch(nonWebSocketSession)
-            onLookupOrRecreateResult(true)
-
-          case Registry.RegisterResultConflict(`sessionId`, actorRef2) =>
-            context.system.stop(actorRef1)
-            nonWebSocketSession = actorRef2
-            context.watch(nonWebSocketSession)
-            onLookupOrRecreateResult(false)
-        })
+      case Registry.Created(`sessionId`, actorRef) =>
+        nonWebSocketSession = actorRef
+        context.watch(nonWebSocketSession)
+        onLookupOrRecreateResult(true)
     })
   }
 
@@ -426,10 +410,10 @@ class XhrSend extends NonWebSocketSessionActorAction with SkipCsrfCheck {
         val sessionId = param("sessionId")
         lookupNonWebSocketSessionActor(sessionId)
         context.become {
-          case Registry.LookupResultNone(`sessionId`) =>
+          case Registry.NotFound(`sessionId`) =>
             respondDefault404Page()
 
-          case Registry.LookupResultOk(`sessionId`, nonWebSocketSession) =>
+          case Registry.Found(`sessionId`, nonWebSocketSession) =>
             nonWebSocketSession ! MessagesFromSenderClient(messages)
             response.setStatus(HttpResponseStatus.NO_CONTENT)
             HttpHeaders.setHeader(response, HttpHeaders.Names.CONTENT_TYPE, "text/plain; charset=UTF-8")
@@ -719,10 +703,10 @@ class JsonPPollingSend extends NonWebSocketSessionActorAction with SkipCsrfCheck
         val sessionId = param("sessionId")
         lookupNonWebSocketSessionActor(sessionId)
         context.become {
-          case Registry.LookupResultNone(`sessionId`) =>
+          case Registry.NotFound(`sessionId`) =>
             respondDefault404Page()
 
-          case Registry.LookupResultOk(`sessionId`, nonWebSocketSession) =>
+          case Registry.Found(`sessionId`, nonWebSocketSession) =>
             nonWebSocketSession ! MessagesFromSenderClient(messages)
             // Konqueror does weird things on 204.
             // As a workaround we need to respond with something - let it be the string "ok".
