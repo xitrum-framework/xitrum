@@ -1,3 +1,10 @@
+3.5:
+
+* `#329 <https://github.com/ngocdaothanh/xitrum/issues/329>`_
+  Netty's HttpRequestDecoder unable to parse request
+* `#333 <https://github.com/ngocdaothanh/xitrum/issues/333>`_
+  Update Glokka from 1.6 to 1.7
+
 3.4:
 
 * `#322 <https://github.com/ngocdaothanh/xitrum/issues/322>`_
@@ -6,8 +13,6 @@
   Fix path exception when autoreloading i18n files on Windows
 * `#328 <https://github.com/ngocdaothanh/xitrum/issues/328>`_
   Load language lazily
-* `#333 <https://github.com/ngocdaothanh/xitrum/issues/333>`_
-  Update Glokka from 1.6 to 1.7
 
 3.3:
 

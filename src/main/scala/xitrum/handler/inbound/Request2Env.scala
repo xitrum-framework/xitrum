@@ -13,7 +13,7 @@ import io.netty.handler.codec.http.{
 import io.netty.handler.codec.http.multipart.{
   Attribute, DiskAttribute,
   FileUpload, DiskFileUpload,
-  DefaultHttpDataFactory, HttpPostRequestDecoder, InterfaceHttpData, HttpData
+  DefaultHttpDataFactory, HttpPostRequestDecoderWithFix2305 => HttpPostRequestDecoder, InterfaceHttpData, HttpData
 }
 import InterfaceHttpData.HttpDataType
 
