@@ -1,3 +1,8 @@
+3.6:
+
+* `#80 <https://github.com/ngocdaothanh/xitrum/issues/80>`_
+  Integrate Metrics (for SockJS stats etc.)
+
 3.5:
 
 * `#329 <https://github.com/ngocdaothanh/xitrum/issues/329>`_

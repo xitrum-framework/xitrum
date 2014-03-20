@@ -18,3 +18,78 @@
 .error {
   color: orange;
 }
+
+.metricsViewer {
+  font-family: Helvetica;
+  font-size: 80%;
+}
+
+.bar ,
+.dot {
+  fill: steelblue;
+}
+
+.bar:hover,
+.dot:hover {
+  fill: brown;
+}
+
+.axis {
+  font: 10px sans-serif;
+}
+
+.axis path,
+.axis line {
+  fill: none;
+  stroke: #000;
+  shape-rendering: crispEdges;
+}
+
+.line {
+  fill: none;
+  stroke-width: 1.5px;
+}
+
+.metricsContent {
+  margin-top: 50px;
+  margin-bottom: 50px;
+}
+
+.metricsTableWrapper {
+  margin-top: 10px;
+  height: 300px;
+  overflow-y: scroll;
+  float: left;
+}
+
+.metricsTableHeader {
+  position:absolute;
+  margin-top: -2.5em
+}
+
+.metricsTableHeader th {
+  height: 1em;
+  border-collapse: collapse;
+}
+
+.metricsTable {
+  border: 2px #000000 solid;
+  border-collapse: collapse;
+  background-color: #FFFFFF;
+}
+
+.metricsTable td {
+  height: 1em;
+  border: 1px #000000 solid;
+}
+
+.metricsGraph {
+  float: right;
+  margin-right: 15px;
+  height: 300px;
+  width: 50%;
+}
+
+.clearFroat{
+  clear: both
+}

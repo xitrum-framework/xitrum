@@ -2,9 +2,12 @@ package xitrum.handler
 
 import java.net.SocketAddress
 import scala.collection.mutable.{Map => MMap}
+import scala.collection.JavaConverters._
+
+import nl.grons.metrics.scala.Histogram
 import io.netty.handler.codec.http.{HttpRequest, HttpResponse}
 
-import xitrum.{Action, Log}
+import xitrum.{Action, Config, Log}
 import xitrum.scope.request.RequestEnv
 import xitrum.action.Net
 
@@ -57,10 +60,27 @@ object AccessLog extends Log {
 
   //----------------------------------------------------------------------------
 
+  // Save last executeTime of each access
+  // Map('actionName': [timestamp, execTime])
+  private lazy val lastExecTimeMap = MMap[String, Array[Long]]()
+  private val gauge = xitrum.Metrics.gauge("lastExecutionTime") {
+    lastExecTimeMap.toArray
+  }
+
   private def msgWithTime(className: String, action: Action, beginTimestamp: Long) = {
     val endTimestamp = System.currentTimeMillis()
     val dt           = endTimestamp - beginTimestamp
     val env          = action.handlerEnv
+    if (Config.xitrum.metrics.actionCounter) {
+      val histograms = xitrum.Metrics.registry.getHistograms()
+      val histogram =
+        if (histograms.containsKey(action.getClass.getName))
+          histograms.get(action.getClass.getName)
+        else
+          xitrum.Metrics.histogram(action.getClass.getName)
+      histogram.asInstanceOf[Histogram] += dt
+      lastExecTimeMap(action.getClass.getName) = Array(System.currentTimeMillis, dt)
+    }
 
     action.remoteIp + " " +
     action.request.getMethod + " " +

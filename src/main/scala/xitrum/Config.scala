@@ -144,6 +144,24 @@ class ResponseConfig(config: TConfig) {
   val corsAllowOrigins   = if (config.hasPath("corsAllowOrigins")) config.getStringList("corsAllowOrigins").asScala else Seq.empty[String]
 }
 
+class MetricsConfig(config: TConfig) {
+  val publish = if (config.hasPath("publish")) config.getBoolean("publish") else false
+  val APIKEY  = if (config.hasPath("apikey"))  config.getString("apikey")   else ""
+
+  // Xitrum Default Metrics
+  val jmx           = if (config.hasPath("jmx"))           config.getBoolean("jmx")           else false
+  val actionCounter = if (config.hasPath("actionCounter")) config.getBoolean("actionCounter") else false
+
+  // For jmx metrics collecting config
+  // http://doc.akka.io/docs/akka/snapshot/scala/cluster-usage.html
+  val jmxGossipInterval        = if (config.hasPath("jmxGossipInterval"))        config.getLong("jmxGossipInterval")        else 3
+  val jmxMovingAverageHalfLife = if (config.hasPath("jmxMovingAverageHalfLife")) config.getLong("jmxMovingAverageHalfLife") else 12
+
+  // For metrics collecte actor shedule
+  val collectActorInitialDelay = if (config.hasPath("collectActorInitialDelay")) config.getLong("collectActorInitialDelay") else 1
+  val collectActorInterval     = if (config.hasPath("collectActorInterval"))     config.getLong("collectActorInterval")     else 30
+}
+
 class Config(val config: TConfig) extends Log {
   val basicAuth =
     if (config.hasPath("basicAuth"))
@@ -236,6 +254,8 @@ class Config(val config: TConfig) extends Log {
   val response = new ResponseConfig(config.getConfig("response"))
 
   val swaggerApiVersion = if (config.hasPath("swaggerApiVersion")) Some(config.getString("swaggerApiVersion")) else None
+
+  val metrics = new MetricsConfig(config.getConfig("metrics"))
 }
 
 //------------------------------------------------------------------------------

@@ -56,6 +56,12 @@ libraryDependencies += "tv.cntt" % "rhinocoffeescript" % "1.7.1"
 // For file watch
 libraryDependencies += "com.beachape.filemanagement" %% "schwatcher" % "0.1.0"
 
+// For metrics
+libraryDependencies += "nl.grons" %% "metrics-scala" % "3.0.5_a2.3"
+
+// For metrics
+libraryDependencies += "com.codahale.metrics" % "metrics-json" % "3.0.2"
+
 // For test
 libraryDependencies += "org.scalatest" %% "scalatest" % "2.1.0" % "test"
 
