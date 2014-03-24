@@ -14,7 +14,7 @@ case class SockJsText(text: String)
  * the session is closed.
  */
 trait SockJsAction extends Actor with Action {
-  // Ref of NonWebSocketSessionActor, SockJSWebSocket, or SockJSRawWebSocket
+  // Ref of xitrum.sockjs.{NonWebSocketSessionActor, WebSocket, or RawWebSocket}
   private[this] var sessionActorRef: ActorRef = _
 
   def receive = {
@@ -39,7 +39,10 @@ trait SockJsAction extends Actor with Action {
   }
 
   def respondSockJsClose() {
-    // For non-WebSocket session, until the timeout occurs, the server must serve the close message
+    // sessionActorRef will stop this actor when it stops.
+    //
+    // For non-WebSocket session, until the timeout occurs, the server must serve
+    // the close message.
     sessionActorRef ! CloseFromHandler
   }
 }

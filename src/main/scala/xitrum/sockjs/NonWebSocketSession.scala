@@ -85,8 +85,9 @@ class NonWebSocketSession(var receiverCliento: Option[ActorRef], pathPrefix: Str
   }
 
   private def unwatchAndStop() {
+    receiverCliento.foreach(context.unwatch)
     context.unwatch(sockJsActorRef)
-    receiverCliento.foreach(context.unwatch(_))
+    context.stop(sockJsActorRef)
     context.stop(self)
   }
 
