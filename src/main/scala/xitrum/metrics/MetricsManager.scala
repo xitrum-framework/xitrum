@@ -137,7 +137,9 @@ object MetricsManager extends Log {
    * Relay messages to MetricsPublisher.
    */
   private class LocalPublisher extends Actor with PublisherLookUp {
-    lookUpPublisher()
+    override def preStart() {
+      lookUpPublisher()
+    }
 
     def receive = {
       case _ =>
