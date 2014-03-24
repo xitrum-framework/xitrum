@@ -34,13 +34,13 @@ object SwaggerJson {
 
     val summary   = doc.varargs.find(_.isInstanceOf[Swagger.Summary]).asInstanceOf[Option[Swagger.Summary]].map(_.summary).getOrElse("")
     val notes     = doc.varargs.filter(_.isInstanceOf[Swagger.Note]).asInstanceOf[Seq[Swagger.Note]].map(_.note).mkString(" ")
-    val responses = doc.varargs.filter(_.isInstanceOf[Swagger.Response]).asInstanceOf[Seq[Swagger.Response]].map(response2json(_))
+    val responses = doc.varargs.filter(_.isInstanceOf[Swagger.Response]).asInstanceOf[Seq[Swagger.Response]].map(response2json)
     val params    = doc.varargs.filterNot { arg =>
       arg.isInstanceOf[Swagger.Summary] || arg.isInstanceOf[Swagger.Note] || arg.isInstanceOf[Swagger.Response]
     }.sortBy(
       _.toString.indexOf("Opt")  // Required params first, optional params later
     ).map(
-      param2json(_)
+      param2json
     )
 
     val cacheNote  = cache(route)

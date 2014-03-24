@@ -62,7 +62,7 @@ trait ParamAccess {
       val coll2  = if (coll == null) textParams else coll
       val values = coll2.get(key)
       val valueo = values.map(_(0))
-      valueo.map(convertText[T](_))
+      valueo.map(convertText[T])
     }
   }
 
@@ -75,7 +75,7 @@ trait ParamAccess {
     } else {
       val coll2  = if (coll == null) textParams else coll
       val values = if (coll2.contains(key)) coll2.apply(key) else throw new MissingParam(key)
-      values.map(convertText[T](_))
+      values.map(convertText[T])
     }
   }
 
@@ -84,7 +84,7 @@ trait ParamAccess {
       bodyFileParams.get(key).asInstanceOf[Option[Seq[T]]]
     } else {
       val coll2 = if (coll == null) textParams else coll
-      coll2.get(key).map { values => values.map(convertText[T](_)) }
+      coll2.get(key).map(_.map(convertText[T]))
     }
   }
 
