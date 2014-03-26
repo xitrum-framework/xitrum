@@ -2,13 +2,15 @@
 
 * `#80 <https://github.com/ngocdaothanh/xitrum/issues/80>`_
   Integrate Metrics (for SockJS stats etc.)
+* `#336 <https://github.com/ngocdaothanh/xitrum/issues/336>`_
+  Update Glokka from 1.6 to 1.7 (update Akka from 2.3.0 to 2.3.1)
 
 3.5:
 
 * `#329 <https://github.com/ngocdaothanh/xitrum/issues/329>`_
   Netty's HttpRequestDecoder unable to parse request
 * `#333 <https://github.com/ngocdaothanh/xitrum/issues/333>`_
-  Update Glokka from 1.6 to 1.7
+  Update Glokka from 1.6 to 1.7 (update Akka from 2.2.3 to 2.3.0)
 
 3.4:
 
