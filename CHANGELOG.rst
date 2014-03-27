@@ -2,6 +2,8 @@
 
 * `#80 <https://github.com/ngocdaothanh/xitrum/issues/80>`_
   Integrate Metrics (for SockJS stats etc.)
+* `#337 <https://github.com/ngocdaothanh/xitrum/issues/337>`_
+  Update Scala from 2.10.3 to 2.10.4 (you need to update your own projects to use Scala 2.10.4)
 * `#336 <https://github.com/ngocdaothanh/xitrum/issues/336>`_
   Update Glokka from 1.6 to 1.7 (update Akka from 2.3.0 to 2.3.1)
 
