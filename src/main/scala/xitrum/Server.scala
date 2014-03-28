@@ -83,7 +83,7 @@ object Server extends Log {
       else
         nonSslChannelInitializer
 
-    val bossGroup   = new NioEventLoopGroup
+    val bossGroup   = new NioEventLoopGroup(1)
     val workerGroup = new NioEventLoopGroup
     val bootstrap   = new ServerBootstrap
     bootstrap.group(bossGroup, workerGroup)

@@ -12,7 +12,7 @@ import xitrum.handler.inbound.FlashSocketPolicyHandler
 object FlashSocketPolicyServer extends Log {
   def start() {
     val port        = Config.xitrum.port.flashSocketPolicy.get
-    val bossGroup   = new NioEventLoopGroup
+    val bossGroup   = new NioEventLoopGroup(1)
     val workerGroup = new NioEventLoopGroup
     val bootstrap   = new ServerBootstrap
     bootstrap.group(bossGroup, workerGroup)
