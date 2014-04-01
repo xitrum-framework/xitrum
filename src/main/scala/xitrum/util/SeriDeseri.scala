@@ -5,7 +5,7 @@ import scala.util.control.NonFatal
 
 import com.twitter.chill.KryoInjection
 import org.json4s.{DefaultFormats, NoTypeHints}
-import org.json4s.native.{JsonMethods, Serialization}
+import org.json4s.jackson.{JsonMethods, Serialization}
 
 import xitrum.Config
 

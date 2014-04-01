@@ -2,8 +2,8 @@ package xitrum.routing
 
 import org.json4s.JsonAST.{JObject, JValue}
 import org.json4s.JsonDSL._
-import org.json4s.native._
-import org.json4s.native.JsonMethods._
+import org.json4s.jackson._
+import org.json4s.jackson.JsonMethods._
 
 import io.netty.handler.codec.http.HttpResponseStatus
 
