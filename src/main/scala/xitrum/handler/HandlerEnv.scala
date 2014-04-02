@@ -4,7 +4,7 @@ import scala.collection.mutable.{HashMap => MHashMap, Map => MMap}
 
 import io.netty.channel.Channel
 import io.netty.handler.codec.http.{FullHttpRequest, FullHttpResponse}
-import io.netty.handler.codec.http.multipart.{HttpPostRequestDecoderWithFix2305 => HttpPostRequestDecoder}
+import io.netty.handler.codec.http.multipart.HttpPostRequestDecoder
 
 import xitrum.Action
 import xitrum.routing.Route
