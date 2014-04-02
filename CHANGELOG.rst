@@ -7,7 +7,9 @@
 * `#336 <https://github.com/ngocdaothanh/xitrum/issues/336>`_
   Update Glokka from 1.6 to 1.7 (update Akka from 2.3.0 to 2.3.1)
 * `#332 <https://github.com/ngocdaothanh/xitrum/issues/332>`_
-  Replace json4s-native with json4s-jackson
+  Update JSON4S from 3.2.7 to 3.2.8 and replace json4s-native with json4s-jackson
+* `#339 <https://github.com/ngocdaothanh/xitrum/issues/339>`_
+  Update Netty from 4.0.17 to 4.0.18
 
 3.5:
 
