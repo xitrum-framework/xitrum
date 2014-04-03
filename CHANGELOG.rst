@@ -8,6 +8,8 @@
   Update JSON4S from 3.2.7 to 3.2.8 and replace json4s-native with json4s-jackson
 * `#339 <https://github.com/ngocdaothanh/xitrum/issues/339>`_
   Update Netty from 4.0.17 to 4.0.18
+* `#341 <https://github.com/ngocdaothanh/xitrum/issues/341>`_
+  Update Logback from 1.1.1 to 1.1.2
 
 3.5:
 

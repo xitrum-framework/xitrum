@@ -22,7 +22,7 @@ resolvers += "SonatypeReleases" at "http://oss.sonatype.org/content/repositories
 libraryDependencies += "org.slf4j" % "slf4j-api" % "1.7.6" % "provided"
 
 // An implementation of SLF4J is needed for log in tests to be output
-libraryDependencies += "ch.qos.logback" % "logback-classic" % "1.1.1" % "test"
+libraryDependencies += "ch.qos.logback" % "logback-classic" % "1.1.2" % "test"
 
 // Netty is the core of Xitrum's HTTP(S) feature
 libraryDependencies += "io.netty" % "netty-all" % "4.0.18.Final"
