@@ -4,10 +4,12 @@
   Integrate Metrics (for SockJS stats etc.)
 * `#337 <https://github.com/ngocdaothanh/xitrum/issues/337>`_
   Update Scala from 2.10.3 to 2.10.4 (you need to update your own projects to use Scala 2.10.4)
-* `#332 <https://github.com/ngocdaothanh/xitrum/issues/332>`_
-  Update JSON4S from 3.2.7 to 3.2.8 and replace json4s-native with json4s-jackson
 * `#339 <https://github.com/ngocdaothanh/xitrum/issues/339>`_
   Update Netty from 4.0.17 to 4.0.18
+* `#342 <https://github.com/ngocdaothanh/xitrum/issues/342>`_
+  Update Glokka from 1.7 to 1.8 (update Akka from 2.3.0 to 2.3.2)
+* `#332 <https://github.com/ngocdaothanh/xitrum/issues/332>`_
+  Update JSON4S from 3.2.7 to 3.2.8 and replace json4s-native with json4s-jackson
 * `#341 <https://github.com/ngocdaothanh/xitrum/issues/341>`_
   Update SLF4J from 1.7.6 to 1.7.7, Logback from 1.1.1 to 1.1.2
 * `#343 <https://github.com/ngocdaothanh/xitrum/issues/343>`_
