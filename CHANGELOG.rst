@@ -9,7 +9,7 @@
 * `#339 <https://github.com/ngocdaothanh/xitrum/issues/339>`_
   Update Netty from 4.0.17 to 4.0.18
 * `#341 <https://github.com/ngocdaothanh/xitrum/issues/341>`_
-  Update Logback from 1.1.1 to 1.1.2
+  Update SLF4J from 1.7.6 to 1.7.7, Logback from 1.1.1 to 1.1.2
 
 3.5:
 

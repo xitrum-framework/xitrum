@@ -19,7 +19,7 @@ unmanagedBase in Runtime <<= baseDirectory { base => base / "config" }
 resolvers += "SonatypeReleases" at "http://oss.sonatype.org/content/repositories/releases/"
 
 // Projects using Xitrum must provide a concrete implentation of SLF4J (Logback etc.)
-libraryDependencies += "org.slf4j" % "slf4j-api" % "1.7.6" % "provided"
+libraryDependencies += "org.slf4j" % "slf4j-api" % "1.7.7" % "provided"
 
 // An implementation of SLF4J is needed for log in tests to be output
 libraryDependencies += "ch.qos.logback" % "logback-classic" % "1.1.2" % "test"
