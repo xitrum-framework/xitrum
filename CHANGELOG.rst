@@ -10,6 +10,8 @@
   Update Netty from 4.0.17 to 4.0.18
 * `#341 <https://github.com/ngocdaothanh/xitrum/issues/341>`_
   Update SLF4J from 1.7.6 to 1.7.7, Logback from 1.1.1 to 1.1.2
+* `#343 <https://github.com/ngocdaothanh/xitrum/issues/343>`_
+  Update commons-lang3 from 3.3 to 3.3.2
 
 3.5:
 
