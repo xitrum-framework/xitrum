@@ -63,7 +63,7 @@ class MetricsPublisher extends Actor with Log {
         client ! Publish(registryAsJson)
         if (cachedNodeMetrics != null) client ! cachedNodeMetrics
         // Ignore if clusterd metricsManager sent duplicated requests
-        if (System.currentTimeMillis - lastPublished > Config.xitrum.metrics.collectActorInterval * 1000) {
+        if (System.currentTimeMillis - lastPublished > Config.xitrum.metrics.get.collectActorInterval.toMillis) {
           if (cachedClusterMetrics != null) client ! cachedClusterMetrics.toList
           lastPublished = System.currentTimeMillis
         }
@@ -101,7 +101,7 @@ trait MetricsViewer extends Action {
     var socket;
     socket = new SockJS(url);
     socket.onopen = function(event) {
-      socket.send('${MetricsManager.APIKEY}');
+      socket.send('${MetricsManager.metrics.apiKey}');
       pullTimer = setInterval(function(){ socket.send('pull')}, 5000);
     };
     socket.onclose   = function(e){clearInterval(pullTimer); onCloseFunc(e);};
@@ -123,7 +123,7 @@ trait MetricsViewer extends Action {
 class XitrumMetricsViewer extends Action with MetricsViewer {
   beforeFilter {
     val apiKey  = param("api_key")
-    val correct = apiKey == MetricsManager.APIKEY
+    val correct = apiKey == MetricsManager.metrics.apiKey
     if (!correct) {
       response.setStatus(HttpResponseStatus.UNAUTHORIZED)
       respondHtml(<p>Unauthorized</p>)
@@ -235,7 +235,7 @@ class XitrumMetricsChannel extends SockJsAction with PublisherLookUp {
 
   private def checkAPIKey() {
     context.become {
-      case SockJsText(text) if (text == MetricsManager.APIKEY) =>
+      case SockJsText(text) if (text == MetricsManager.metrics.apiKey) =>
         lookUpPublisher()
 
       case SockJsText(key) =>

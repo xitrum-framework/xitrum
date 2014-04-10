@@ -1,7 +1,7 @@
 3.6:
 
 * `#80 <https://github.com/ngocdaothanh/xitrum/issues/80>`_
-  Integrate Metrics (for SockJS stats etc.)
+  Integrate Metrics (for actions statistics etc.)
 * `#337 <https://github.com/ngocdaothanh/xitrum/issues/337>`_
   Update Scala from 2.10.3 to 2.10.4 (you need to update your own projects to use Scala 2.10.4)
 * `#339 <https://github.com/ngocdaothanh/xitrum/issues/339>`_

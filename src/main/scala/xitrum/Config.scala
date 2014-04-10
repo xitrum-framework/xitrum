@@ -145,21 +145,22 @@ class ResponseConfig(config: TConfig) {
 }
 
 class MetricsConfig(config: TConfig) {
-  val publish = if (config.hasPath("publish")) config.getBoolean("publish") else false
-  val APIKEY  = if (config.hasPath("apikey"))  config.getString("apikey")   else ""
+  import scala.concurrent.duration._
 
-  // Xitrum Default Metrics
-  val jmx           = if (config.hasPath("jmx"))           config.getBoolean("jmx")           else false
-  val actionCounter = if (config.hasPath("actionCounter")) config.getBoolean("actionCounter") else false
+  val apiKey = if (config.hasPath("apiKey")) config.getString("apiKey") else ""
 
-  // For jmx metrics collecting config
+  // Xitrum default Metrics
+  val jmx     = if (config.hasPath("jmx"))     config.getBoolean("jmx")     else false
+  val actions = if (config.hasPath("actions")) config.getBoolean("actions") else false
+
+  // For JMX metrics collecting
   // http://doc.akka.io/docs/akka/snapshot/scala/cluster-usage.html
-  val jmxGossipInterval        = if (config.hasPath("jmxGossipInterval"))        config.getLong("jmxGossipInterval")        else 3
-  val jmxMovingAverageHalfLife = if (config.hasPath("jmxMovingAverageHalfLife")) config.getLong("jmxMovingAverageHalfLife") else 12
+  val jmxGossipInterval        = (if (config.hasPath("jmxGossipInterval"))        config.getInt("jmxGossipInterval")        else 3).seconds
+  val jmxMovingAverageHalfLife = (if (config.hasPath("jmxMovingAverageHalfLife")) config.getInt("jmxMovingAverageHalfLife") else 12).seconds
 
-  // For metrics collecte actor shedule
-  val collectActorInitialDelay = if (config.hasPath("collectActorInitialDelay")) config.getLong("collectActorInitialDelay") else 1
-  val collectActorInterval     = if (config.hasPath("collectActorInterval"))     config.getLong("collectActorInterval")     else 30
+  // For metrics collect actor schedule
+  val collectActorInitialDelay = (if (config.hasPath("collectActorInitialDelay")) config.getLong("collectActorInitialDelay") else 1).seconds
+  val collectActorInterval     = (if (config.hasPath("collectActorInterval"))     config.getLong("collectActorInterval")     else 30).seconds
 }
 
 class Config(val config: TConfig) extends Log {
@@ -255,7 +256,7 @@ class Config(val config: TConfig) extends Log {
 
   val swaggerApiVersion = if (config.hasPath("swaggerApiVersion")) Some(config.getString("swaggerApiVersion")) else None
 
-  val metrics = new MetricsConfig(config.getConfig("metrics"))
+  val metrics = if (config.hasPath("metrics")) Some(new MetricsConfig(config.getConfig("metrics"))) else None
 }
 
 //------------------------------------------------------------------------------
@@ -379,7 +380,11 @@ object Config extends Log {
    * Sometimes we want to work in SBT console mode and don't like waste several
    * seconds collecting routes that we don't use.
    */
-  lazy val routes = loadRouteCacheFileOrRecollectWithRetry()
+  lazy val routes = {
+    val ret = loadRouteCacheFileOrRecollectWithRetry()
+    if (xitrum.metrics.isEmpty) ret.removeByPrefix("xitrum/metrics")
+    ret
+  }
 
   /** routes.reverseMappings is used heavily in URL generation, cache it here */
   lazy val routesReverseMappings = routes.reverseMappings

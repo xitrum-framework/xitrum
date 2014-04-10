@@ -68,29 +68,29 @@ object RouteCollection {
 
 /** Direct listing is used, map is not used, so that route matching is faster. */
 class RouteCollection(
-  var firstGETs: Seq[Route],
-  var lastGETs:  Seq[Route],
-  var otherGETs: Seq[Route],
+  val firstGETs: ArrayBuffer[Route],
+  val lastGETs:  ArrayBuffer[Route],
+  val otherGETs: ArrayBuffer[Route],
 
-  var firstPOSTs: Seq[Route],
-  var lastPOSTs:  Seq[Route],
-  var otherPOSTs: Seq[Route],
+  val firstPOSTs: ArrayBuffer[Route],
+  val lastPOSTs:  ArrayBuffer[Route],
+  val otherPOSTs: ArrayBuffer[Route],
 
-  var firstPUTs: Seq[Route],
-  var lastPUTs:  Seq[Route],
-  var otherPUTs: Seq[Route],
+  val firstPUTs: ArrayBuffer[Route],
+  val lastPUTs:  ArrayBuffer[Route],
+  val otherPUTs: ArrayBuffer[Route],
 
-  var firstPATCHs: Seq[Route],
-  var lastPATCHs:  Seq[Route],
-  var otherPATCHs: Seq[Route],
+  val firstPATCHs: ArrayBuffer[Route],
+  val lastPATCHs:  ArrayBuffer[Route],
+  val otherPATCHs: ArrayBuffer[Route],
 
-  var firstDELETEs: Seq[Route],
-  var lastDELETEs:  Seq[Route],
-  var otherDELETEs: Seq[Route],
+  val firstDELETEs: ArrayBuffer[Route],
+  val lastDELETEs:  ArrayBuffer[Route],
+  val otherDELETEs: ArrayBuffer[Route],
 
-  var firstWEBSOCKETs: Seq[Route],
-  var lastWEBSOCKETs:  Seq[Route],
-  var otherWEBSOCKETs: Seq[Route],
+  val firstWEBSOCKETs: ArrayBuffer[Route],
+  val lastWEBSOCKETs:  ArrayBuffer[Route],
+  val otherWEBSOCKETs: ArrayBuffer[Route],
 
   val sockJsRouteMap: SockJsRouteMap,
   val swaggerMap:     Map[Class[_ <: Action], Swagger],
@@ -108,6 +108,93 @@ class RouteCollection(
     allLasts (None).foreach { r => mmap.getOrElseUpdate(r.klass, ArrayBuffer()).append(r) }
 
     mmap.mapValues { routes => ReverseRoute(routes) }.toMap
+  }
+
+  //----------------------------------------------------------------------------
+
+  def all = Seq(
+    firstGETs,       lastGETs,       otherGETs,
+    firstPOSTs,      lastPOSTs,      otherPOSTs,
+    firstPUTs,       lastPUTs,       otherPUTs,
+    firstPATCHs,     lastPATCHs,     otherPATCHs,
+    firstDELETEs,    lastDELETEs,    otherDELETEs,
+    firstWEBSOCKETs, lastWEBSOCKETs, otherWEBSOCKETs
+  )
+
+  /**
+   * @param xitrumRoutes
+   * - None: No filter, return all routes
+   * - Some(true): Only return Xitrum internal routes
+   * - Some(false): Only return non Xitrum internal routes
+   */
+  def allFirsts(xitrumRoutes: Option[Boolean]): ArrayBuffer[Route] = {
+    xitrumRoutes match {
+      case None =>
+        val ret = ArrayBuffer.empty[Route]
+        ret.appendAll(firstGETs)
+        ret.appendAll(firstPOSTs)
+        ret.appendAll(firstPUTs)
+        ret.appendAll(firstDELETEs)
+        ret.appendAll(firstWEBSOCKETs)
+        ret
+
+      case Some(x) =>
+        val ret = ArrayBuffer.empty[Route]
+        ret.appendAll(firstGETs      .filter(_.klass.getName.startsWith("xitrum") == x))
+        ret.appendAll(firstPOSTs     .filter(_.klass.getName.startsWith("xitrum") == x))
+        ret.appendAll(firstPUTs      .filter(_.klass.getName.startsWith("xitrum") == x))
+        ret.appendAll(firstDELETEs   .filter(_.klass.getName.startsWith("xitrum") == x))
+        ret.appendAll(firstWEBSOCKETs.filter(_.klass.getName.startsWith("xitrum") == x))
+        ret
+    }
+  }
+
+  /** See allFirsts */
+  def allLasts(xitrumRoutes: Option[Boolean]): ArrayBuffer[Route] = {
+    xitrumRoutes match {
+      case None =>
+        val ret = ArrayBuffer.empty[Route]
+        ret.appendAll(lastGETs)
+        ret.appendAll(lastPOSTs)
+        ret.appendAll(lastPUTs)
+        ret.appendAll(lastDELETEs)
+        ret.appendAll(lastWEBSOCKETs)
+        ret
+
+      case Some(x) =>
+        val ret = ArrayBuffer.empty[Route]
+        ret.appendAll(lastGETs      .filter(_.klass.getName.startsWith("xitrum") == x))
+        ret.appendAll(lastPOSTs     .filter(_.klass.getName.startsWith("xitrum") == x))
+        ret.appendAll(lastPUTs      .filter(_.klass.getName.startsWith("xitrum") == x))
+        ret.appendAll(lastDELETEs   .filter(_.klass.getName.startsWith("xitrum") == x))
+        ret.appendAll(lastWEBSOCKETs.filter(_.klass.getName.startsWith("xitrum") == x))
+        ret
+    }
+  }
+
+  /** See allFirsts */
+  def allOthers(xitrumRoutes: Option[Boolean]): ArrayBuffer[Route] = {
+    xitrumRoutes match {
+      case None =>
+        val ret = ArrayBuffer.empty[Route]
+        ret.appendAll(otherGETs)
+        ret.appendAll(otherPOSTs)
+        ret.appendAll(otherPUTs)
+        ret.appendAll(otherPATCHs)
+        ret.appendAll(otherDELETEs)
+        ret.appendAll(otherWEBSOCKETs)
+        ret
+
+      case Some(x) =>
+        val ret = ArrayBuffer.empty[Route]
+        ret.appendAll(otherGETs      .filter(_.klass.getName.startsWith("xitrum") == x))
+        ret.appendAll(otherPOSTs     .filter(_.klass.getName.startsWith("xitrum") == x))
+        ret.appendAll(otherPUTs      .filter(_.klass.getName.startsWith("xitrum") == x))
+        ret.appendAll(otherPATCHs    .filter(_.klass.getName.startsWith("xitrum") == x))
+        ret.appendAll(otherDELETEs   .filter(_.klass.getName.startsWith("xitrum") == x))
+        ret.appendAll(otherWEBSOCKETs.filter(_.klass.getName.startsWith("xitrum") == x))
+        ret
+    }
   }
 
   //----------------------------------------------------------------------------
@@ -145,6 +232,13 @@ class RouteCollection(
       log.info("Normal routes:\n" + strings.mkString("\n"))
   }
 
+  def logErrorRoutes() {
+    val strings = ArrayBuffer.empty[String]
+    error404.foreach { klass => strings.append("404  " + klass.getName) }
+    error500.foreach { klass => strings.append("500  " + klass.getName) }
+    if (!strings.isEmpty) log.info("Error routes:\n" + strings.mkString("\n"))
+  }
+
   private def targetWithCache(route: Route): String = {
     val target = route.klass.getName
     val secs   = route.cacheSecs
@@ -154,89 +248,6 @@ class RouteCollection(
       s"$target (action cache: ${formatTime(-secs)})"
     else
       s"$target (page cache: ${formatTime(secs)})"
-  }
-
-  def logErrorRoutes() {
-    val strings = ArrayBuffer.empty[String]
-    error404.foreach { klass => strings.append("404  " + klass.getName) }
-    error500.foreach { klass => strings.append("500  " + klass.getName) }
-    if (!strings.isEmpty) log.info("Error routes:\n" + strings.mkString("\n"))
-  }
-
-  /**
-   * @param xitrumRoutes
-   * - None: No filter, return all routes
-   * - Some(true): Only return Xitrum internal routes
-   * - Some(false): Only return non Xitrum internal routes
-   */
-  private def allFirsts(xitrumRoutes: Option[Boolean]): Seq[Route] = {
-    xitrumRoutes match {
-      case None =>
-        val ret = ArrayBuffer.empty[Route]
-        ret.appendAll(firstGETs)
-        ret.appendAll(firstPOSTs)
-        ret.appendAll(firstPUTs)
-        ret.appendAll(firstDELETEs)
-        ret.appendAll(firstWEBSOCKETs)
-        ret
-
-      case Some(x) =>
-        val ret = ArrayBuffer.empty[Route]
-        ret.appendAll(firstGETs      .filter(_.klass.getName.startsWith("xitrum") == x))
-        ret.appendAll(firstPOSTs     .filter(_.klass.getName.startsWith("xitrum") == x))
-        ret.appendAll(firstPUTs      .filter(_.klass.getName.startsWith("xitrum") == x))
-        ret.appendAll(firstDELETEs   .filter(_.klass.getName.startsWith("xitrum") == x))
-        ret.appendAll(firstWEBSOCKETs.filter(_.klass.getName.startsWith("xitrum") == x))
-        ret
-    }
-  }
-
-  /** See allFirsts */
-  private def allLasts(xitrumRoutes: Option[Boolean]): Seq[Route] = {
-    xitrumRoutes match {
-      case None =>
-        val ret = ArrayBuffer.empty[Route]
-        ret.appendAll(lastGETs)
-        ret.appendAll(lastPOSTs)
-        ret.appendAll(lastPUTs)
-        ret.appendAll(lastDELETEs)
-        ret.appendAll(lastWEBSOCKETs)
-        ret
-
-      case Some(x) =>
-        val ret = ArrayBuffer.empty[Route]
-        ret.appendAll(lastGETs      .filter(_.klass.getName.startsWith("xitrum") == x))
-        ret.appendAll(lastPOSTs     .filter(_.klass.getName.startsWith("xitrum") == x))
-        ret.appendAll(lastPUTs      .filter(_.klass.getName.startsWith("xitrum") == x))
-        ret.appendAll(lastDELETEs   .filter(_.klass.getName.startsWith("xitrum") == x))
-        ret.appendAll(lastWEBSOCKETs.filter(_.klass.getName.startsWith("xitrum") == x))
-        ret
-    }
-  }
-
-  /** See allFirsts */
-  private def allOthers(xitrumRoutes: Option[Boolean]): Seq[Route] = {
-    xitrumRoutes match {
-      case None =>
-        val ret = ArrayBuffer.empty[Route]
-        ret.appendAll(otherGETs)
-        ret.appendAll(otherPOSTs)
-        ret.appendAll(otherPUTs)
-        ret.appendAll(otherPATCHs)
-        ret.appendAll(otherDELETEs)
-        ret.appendAll(otherWEBSOCKETs)
-        ret
-
-      case Some(x) =>
-        val ret = ArrayBuffer.empty[Route]
-        ret.appendAll(otherGETs      .filter(_.klass.getName.startsWith("xitrum") == x))
-        ret.appendAll(otherPOSTs     .filter(_.klass.getName.startsWith("xitrum") == x))
-        ret.appendAll(otherPUTs      .filter(_.klass.getName.startsWith("xitrum") == x))
-        ret.appendAll(otherPATCHs    .filter(_.klass.getName.startsWith("xitrum") == x))
-        ret.appendAll(otherDELETEs   .filter(_.klass.getName.startsWith("xitrum") == x))
-        ret.appendAll(otherWEBSOCKETs.filter(_.klass.getName.startsWith("xitrum") == x))
-        ret
-    }
   }
 
   private def formatTime(seconds: Int): String = {
@@ -334,25 +345,41 @@ class RouteCollection(
     methods
   }
 
-  def remove[A <: Action]()(implicit action: reflect.Manifest[A]) {
-    val toRemove = action.toString
-    firstGETs       = firstGETs      .filter(_.klass.getName != toRemove)
-    lastGETs        = lastGETs       .filter(_.klass.getName != toRemove)
-    otherGETs       = otherGETs      .filter(_.klass.getName != toRemove)
-    firstPOSTs      = firstPOSTs     .filter(_.klass.getName != toRemove)
-    lastPOSTs       = lastPOSTs      .filter(_.klass.getName != toRemove)
-    otherPOSTs      = otherPOSTs     .filter(_.klass.getName != toRemove)
-    firstPUTs       = firstPUTs      .filter(_.klass.getName != toRemove)
-    lastPUTs        = lastPUTs       .filter(_.klass.getName != toRemove)
-    otherPUTs       = otherPUTs      .filter(_.klass.getName != toRemove)
-    firstPATCHs     = firstPATCHs    .filter(_.klass.getName != toRemove)
-    lastPATCHs      = lastPATCHs     .filter(_.klass.getName != toRemove)
-    otherPATCHs     = otherPATCHs    .filter(_.klass.getName != toRemove)
-    firstDELETEs    = firstDELETEs   .filter(_.klass.getName != toRemove)
-    lastDELETEs     = lastDELETEs    .filter(_.klass.getName != toRemove)
-    otherDELETEs    = otherDELETEs   .filter(_.klass.getName != toRemove)
-    firstWEBSOCKETs = firstWEBSOCKETs.filter(_.klass.getName != toRemove)
-    lastWEBSOCKETs  = lastWEBSOCKETs .filter(_.klass.getName != toRemove)
-    otherWEBSOCKETs = otherWEBSOCKETs.filter(_.klass.getName != toRemove)
+  //----------------------------------------------------------------------------
+
+  /** removeByClass[ActionClassToRemove]()  */
+  def removeByClass[A <: Action]()(implicit action: reflect.Manifest[A]) {
+    val className = action.toString
+    all.foreach { routes =>
+      val tobeRemoved = routes.filter(_.klass.getName == className)
+      routes --= tobeRemoved
+    }
+  }
+
+  /** removeByPrefix("/path/prefix") or removeByPrefix("path/prefix") */
+  def removeByPrefix(prefix: String) {
+    val withoutSlashPrefix = if (prefix.startsWith("/")) prefix.substring(1) else prefix
+
+    all.foreach { routes =>
+      val tobeRemoved = routes.filter { r =>
+        val nonDotRouteTokens = r.compiledPattern.takeWhile { t =>
+          if (!t.isInstanceOf[NonDotRouteToken]) {
+            false
+          } else {
+            val nd = t.asInstanceOf[NonDotRouteToken]
+            !nd.isPlaceholder
+          }
+        }
+
+        if (nonDotRouteTokens.isEmpty) {
+          false
+        } else {
+          val values = nonDotRouteTokens.map(_.asInstanceOf[NonDotRouteToken].value)
+          values.mkString("/").startsWith(withoutSlashPrefix)
+        }
+      }
+
+      routes --= tobeRemoved
+    }
   }
 }

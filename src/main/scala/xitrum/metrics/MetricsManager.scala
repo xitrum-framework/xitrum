@@ -29,25 +29,23 @@ object MetricsManager extends Log {
   // implicit executer for scheduled message
   import Config.actorSystem.dispatcher
 
-  val APIKEY    = Config.xitrum.metrics.APIKEY
   val PUBLISHER = "XitrumMetricsPublisher"
 
-  // glokka registory
-  val actorRegistry  = Registry.start(Config.actorSystem, "metrics")
+  lazy val metrics = Config.xitrum.metrics.get
 
-  // For jmx collectiong interval
-  // See http://doc.akka.io/docs/akka/2.3.0/scala/cluster-usage.html
-  private val jmxMovingAverageHalfLife = Config.xitrum.metrics.jmxMovingAverageHalfLife.asInstanceOf[Long].seconds
-  private val jmxGossipInterval        = Config.xitrum.metrics.jmxGossipInterval.asInstanceOf[Long].seconds
+  // Glokka registry
+  val actorRegistry = Registry.start(Config.actorSystem, "metrics")
 
   // For non-clusterd actor system
   // http://grokbase.com/t/gg/akka-user/136m8mmyed/get-address-of-the-actorsystem-in-akka-2-2
   private val provider = Config.actorSystem.asInstanceOf[ExtendedActorSystem].provider
   private val address  = provider.getDefaultAddress
-  lazy val jmx         = new JmxMetricsCollector(address, EWMA.alpha(jmxMovingAverageHalfLife, jmxGossipInterval))
+
+  // See http://doc.akka.io/docs/akka/2.3.0/scala/cluster-usage.html
+  lazy val jmx = new JmxMetricsCollector(address, EWMA.alpha(metrics.jmxMovingAverageHalfLife, metrics.jmxGossipInterval))
 
   // For metrics of application
-  val metricRegistry  = new MetricRegistry
+  val metricRegistry = new MetricRegistry
 
   // For json metrics reporting
   private val module  = new MetricsModule(TimeUnit.SECONDS, TimeUnit.MILLISECONDS, true)
@@ -57,10 +55,6 @@ object MetricsManager extends Log {
     // TODO: Make this better!
     mapper.writeValueAsString(metricRegistry).patch(0, s"""{"TYPE": "metrics", "address": "$address", """, 1)
   }
-
-  // For Jvm metrics collector
-  private val collectActorInitialDelay = Config.xitrum.metrics.collectActorInitialDelay.seconds
-  private val collectActorInterval     = Config.xitrum.metrics.collectActorInterval.seconds
 
   var collector:      ActorRef    = _
   var publisher:      ActorRef    = _
@@ -74,15 +68,15 @@ object MetricsManager extends Log {
 
     provider.getClass.getName match {
       case "akka.cluster.ClusterActorRefProvider" =>
-        if (Config.xitrum.metrics.jmx)
+        if (metrics.jmx)
           Config.actorSystem.actorOf(Props(classOf[ClusterMetricsCollector], localPublisher))
 
       case _ =>
-        if (Config.xitrum.metrics.jmx) {
+        if (metrics.jmx) {
           collector  = Config.actorSystem.actorOf(Props(classOf[MetricsCollector], localPublisher))
           collecting = Config.actorSystem.scheduler.schedule(
-            collectActorInitialDelay,
-            collectActorInterval,
+            metrics.collectActorInitialDelay,
+            metrics.collectActorInterval,
             collector,
             Collect
           )
@@ -102,8 +96,8 @@ object MetricsManager extends Log {
   def tickPublisher(publisher: ActorRef) = {
     // Send newest registry as JSON
     publishing = Config.actorSystem.scheduler.schedule(
-      collectActorInterval + 1.seconds,  // Publish after first collect execution
-      collectActorInterval
+      metrics.collectActorInterval + 1.seconds,  // Publish after first collect execution
+      metrics.collectActorInterval
     )({
       publisher ! Publish(registryAsJson)
     })

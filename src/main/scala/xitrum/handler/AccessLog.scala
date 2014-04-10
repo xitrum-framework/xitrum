@@ -71,7 +71,7 @@ object AccessLog extends Log {
     val endTimestamp = System.currentTimeMillis()
     val dt           = endTimestamp - beginTimestamp
     val env          = action.handlerEnv
-    if (Config.xitrum.metrics.actionCounter) {
+    if (Config.xitrum.metrics.isDefined && Config.xitrum.metrics.get.actions) {
       val histograms = xitrum.Metrics.registry.getHistograms()
       val histogram =
         if (histograms.containsKey(action.getClass.getName))
