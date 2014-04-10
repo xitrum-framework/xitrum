@@ -136,7 +136,7 @@ class XitrumMetricsViewer extends Action with MetricsViewer {
       <head>
         {xitrumCss}
         {jsDefaults}
-        <script type="text/javascript" src={resourceUrl("xitrum/d3-3.4.3/d3.min.js")}></script>
+        <script type="text/javascript" src={resourceUrl(if (Config.productionMode) "xitrum/d3-3.4.5/d3.min.js" else "xitrum/d3-3.4.5/d3.js")}></script>
         <script type="text/javascript" src={resourceUrl("xitrum/metrics.js")}></script>
         <title>Xitrum Default Metrics Viewer</title>
       </head>
@@ -198,7 +198,7 @@ class XitrumMetricsViewer extends Action with MetricsViewer {
       <head>
         {xitrumCss}
         {jsDefaults}
-        <script type="text/javascript" src={resourceUrl("xitrum/d3-3.4.3/d3.min.js")}></script>
+        <script type="text/javascript" src={resourceUrl(if (Config.productionMode) "xitrum/d3-3.4.5/d3.min.js" else "xitrum/d3-3.4.5/d3.js")}></script>
         <script type="text/javascript" src={resourceUrl("xitrum/metrics.js")}></script>
         <title>Xitrum Default Metrics Viewer</title>
       </head>
