@@ -6,5 +6,4 @@ package xitrum
  *
  * See also Action and ActorAction.
  */
-trait FutureAction extends Action {
-}
+trait FutureAction extends Action
