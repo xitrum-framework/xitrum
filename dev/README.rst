@@ -104,7 +104,7 @@ To delete the local publish:
 
 ::
 
-  $ find ~/.ivy2 -name *xitrum* -delete
+  $ find ~/.ivy2 -name *xitrum* -exec rm -rf {} \;
 
 Publish to Sonatype
 -------------------
