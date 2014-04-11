@@ -41,7 +41,7 @@ object MetricsManager extends Log {
   private val provider = Config.actorSystem.asInstanceOf[ExtendedActorSystem].provider
   private val address  = provider.getDefaultAddress
 
-  // See http://doc.akka.io/docs/akka/2.3.0/scala/cluster-usage.html
+  // See http://doc.akka.io/docs/akka/2.3.2/scala/cluster-usage.html
   lazy val jmx = new JmxMetricsCollector(address, EWMA.alpha(metrics.jmxMovingAverageHalfLife, metrics.jmxGossipInterval))
 
   // For metrics of application
