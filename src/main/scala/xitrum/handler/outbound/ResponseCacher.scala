@@ -8,7 +8,6 @@ import io.netty.channel.{ChannelHandler, ChannelHandlerContext, ChannelOutboundH
 import ChannelHandler.Sharable
 import io.netty.handler.codec.http.{DefaultFullHttpResponse, HttpHeaders, HttpRequest, FullHttpResponse, HttpResponseStatus, HttpVersion}
 import HttpResponseStatus.OK
-import HttpHeaders.Names.{CONTENT_ENCODING, CONTENT_TYPE}
 
 import xitrum.{Cache, Config, Log}
 import xitrum.Action
