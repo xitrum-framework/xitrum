@@ -67,10 +67,10 @@ class Env2Response extends ChannelOutboundHandlerAdapter with Log {
       if (request.getProtocolVersion.compareTo(HttpVersion.HTTP_1_0) == 0)
         HttpHeaders.removeTransferEncodingChunked(onlyHeaders)
 
-      ctx.writeAndFlush(onlyHeaders, promise)
+      ctx.write(onlyHeaders, promise)
     } else {
       // Need to retain because response will be released when env.release() is called below
-      ctx.writeAndFlush(response.retain(), promise)
+      ctx.write(response.retain(), promise)
     }
 
     env.release()

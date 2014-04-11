@@ -254,7 +254,7 @@ class Request2Env extends SimpleChannelInboundHandler[HttpObject] with Log {
       response.content,
       Unpooled.copiedBuffer("Request content body is too big", Config.xitrum.request.charset)
     )
-    ctx.channel.write(env).addListener(ChannelFutureListener.CLOSE)
+    ctx.channel.writeAndFlush(env).addListener(ChannelFutureListener.CLOSE)
 
     log.warn("Request content body is too big, see xitrum.request.maxSizeInMB in xitrum.conf")
 

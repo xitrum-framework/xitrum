@@ -39,20 +39,20 @@ class PublicFileServer extends SimpleChannelInboundHandler[HandlerEnv] {
       case None =>
         response.setStatus(NOT_FOUND)
         XSendFile.set404Page(response, false)
-        ctx.channel.write(env)
+        ctx.channel.writeAndFlush(env)
 
       case Some(abs) =>
         val file = new File(abs)
         if (file.isFile && file.exists) {
           response.setStatus(OK)
           if (request.getMethod == OPTIONS) {
-            ctx.channel.write(env)
+            ctx.channel.writeAndFlush(env)
           } else {
             if (!Config.xitrum.staticFile.revalidate)
               NotModified.setClientCacheAggressively(response)
 
             XSendFile.setHeader(response, abs, false)
-            ctx.channel.write(env)
+            ctx.channel.writeAndFlush(env)
           }
         } else {
           ctx.fireChannelRead(env)

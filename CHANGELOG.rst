@@ -1,5 +1,7 @@
 3.6:
 
+* `#347 <https://github.com/ngocdaothanh/xitrum/issues/347>`_
+  Fix Terrible performance of FutureAction and ActorAction
 * `#348 <https://github.com/ngocdaothanh/xitrum/issues/348>`_
   Fix bug: Unable to change Content-Type for respondFile and respondResource
 * `#80 <https://github.com/ngocdaothanh/xitrum/issues/80>`_

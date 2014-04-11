@@ -47,7 +47,7 @@ trait Responder extends Js with Flash with GetActionClassDefaultsToCurrentAction
     if (nonChunkedResponseOrFirstChunkSent) throwDoubleResponseError()
 
     setCookieAndSessionIfTouchedOnRespond()
-    val future = channel.write(handlerEnv)
+    val future = channel.writeAndFlush(handlerEnv)
 
     // Do not handle keep alive:
     // * If XSendFile or XSendResource is used, because they will handle keep alive in their own way

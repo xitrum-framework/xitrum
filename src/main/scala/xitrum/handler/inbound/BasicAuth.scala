@@ -57,7 +57,7 @@ object BasicAuth {
       Unpooled.copiedBuffer("Wrong username or password", Config.xitrum.request.charset)
     )
 
-    val future = env.channel.write(env)
+    val future = env.channel.writeAndFlush(env)
     NoRealPipelining.if_keepAliveRequest_then_resumeReading_else_closeOnComplete(request, env.channel, future)
   }
 }
