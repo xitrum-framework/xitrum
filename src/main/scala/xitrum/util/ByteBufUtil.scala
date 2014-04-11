@@ -5,6 +5,8 @@ import io.netty.buffer.{ByteBuf, CompositeByteBuf}
 object ByteBufUtil {
   def toBytes(byteBuf: ByteBuf): Array[Byte] = {
     val len = byteBuf.readableBytes
+    if (len == 0) return Array[Byte]()
+
     val ret = new Array[Byte](len)
     if (byteBuf.hasArray) {
       // https://github.com/netty/netty/issues/83
