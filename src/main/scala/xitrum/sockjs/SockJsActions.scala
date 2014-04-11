@@ -185,6 +185,12 @@ trait SockJsAction extends ServerIdSessionIdValidator with SockJsPrefix {
     }
     ret
   }
+}
+
+trait NonWebSocketSessionActorAction extends ActorAction with SockJsAction {
+  protected def lookupNonWebSocketSessionActor(sessionId: String) {
+    SockJsAction.actorRegistry ! Registry.Lookup(sessionId)
+  }
 
   //----------------------------------------------------------------------------
 
@@ -210,6 +216,8 @@ trait SockJsAction extends ServerIdSessionIdValidator with SockJsPrefix {
       if (isEventSource) respondEventSource(text) else respondText(text)
       true
     } else {
+      context.stop(self)
+
       if (isEventSource) respondEventSource(text) else respondText(text)
       closeWithLastChunk()
       false
@@ -218,12 +226,6 @@ trait SockJsAction extends ServerIdSessionIdValidator with SockJsPrefix {
 
   protected def closeWithLastChunk() {
     respondLastChunk().addListener(ChannelFutureListener.CLOSE)
-  }
-}
-
-trait NonWebSocketSessionActorAction extends ActorAction with SockJsAction {
-  protected def lookupNonWebSocketSessionActor(sessionId: String) {
-    SockJsAction.actorRegistry ! Registry.Lookup(sessionId)
   }
 }
 
