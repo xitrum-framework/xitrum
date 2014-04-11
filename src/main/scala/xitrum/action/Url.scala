@@ -32,9 +32,9 @@ trait Url {
   /** @param path Relative to the "public" directory, without leading "/" */
   def publicUrl(path: String) = {
     val absPath     = Config.root + "/public/" + path
-    val forceReload = Etag.forFile(absPath, true) match {
+    val forceReload = Etag.forFile(absPath, None, true) match {
       case Etag.NotFound                           => Random.nextLong.toString
-      case Etag.TooBig(file)                       => file.lastModified
+      case Etag.TooBig(file, mimeo)                => file.lastModified
       case Etag.Small(bytes, etag, mimeo, gzipped) => etag
     }
 
@@ -45,7 +45,7 @@ trait Url {
   /** @param path Relative to an entry in classpath, without leading "/" */
   def resourceUrl(path: String) = {
     val classPathPath = "public/" + path
-    val forceReload = Etag.forResource(classPathPath, true) match {
+    val forceReload = Etag.forResource(classPathPath, None, true) match {
       case Etag.NotFound                           => Random.nextLong.toString
       case Etag.Small(bytes, etag, mimeo, gzipped) => etag
     }

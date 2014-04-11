@@ -40,7 +40,8 @@ object XSendResource extends Log {
       ctx: ChannelHandlerContext, env: HandlerEnv, promise: ChannelPromise,
       request: HttpRequest, response: FullHttpResponse, path: String, noLog: Boolean)
   {
-    Etag.forResource(path, Gzip.isAccepted(request)) match {
+    val mimeo = Option(HttpHeaders.getHeader(response, CONTENT_TYPE))
+    Etag.forResource(path, mimeo, Gzip.isAccepted(request)) match {
       case Etag.NotFound =>
         // Keep alive is handled by XSendFile
         XSendFile.set404Page(response, noLog)

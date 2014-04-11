@@ -1,5 +1,7 @@
 3.6:
 
+* `#348 <https://github.com/ngocdaothanh/xitrum/issues/348>`_
+  Fix bug: Unable to change Content-Type for respondFile and respondResource
 * `#80 <https://github.com/ngocdaothanh/xitrum/issues/80>`_
   Integrate Metrics (for actions statistics etc.)
 * `#337 <https://github.com/ngocdaothanh/xitrum/issues/337>`_

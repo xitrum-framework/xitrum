@@ -71,6 +71,7 @@ object XSendFile extends Log {
     val request       = env.request
     val response      = env.response
     val path          = HttpHeaders.getHeader(response, X_SENDFILE_HEADER)
+    val mimeo         = Option(HttpHeaders.getHeader(response, CONTENT_TYPE))
     val noLog         = response.headers.contains(X_SENDFILE_HEADER_IS_FROM_ACTION)
 
     // Try to serve from cache.
@@ -78,7 +79,7 @@ object XSendFile extends Log {
     // For big file, "the initial line and headers" will be sent by Env2Response
     // handler. The X_SENDFILE_HEADER is used to tell Env2Response to only send
     // headers, not a FullHttpResponse.
-    Etag.forFile(path, Gzip.isAccepted(request)) match {
+    Etag.forFile(path, mimeo, Gzip.isAccepted(request)) match {
       case Etag.NotFound =>
         XSendFile.removeHeaders(response)
 
@@ -117,7 +118,7 @@ object XSendFile extends Log {
         NoRealPipelining.if_keepAliveRequest_then_resumeReading_else_closeOnComplete(request, channel, future)
         if (!noLog) AccessLog.logStaticFileAccess(remoteAddress, request, response)
 
-      case Etag.TooBig(file) =>
+      case Etag.TooBig(file, mimeo) =>
         // LAST_MODIFIED is not reliable as ETAG when this is a cluster of web servers,
         // but it's still good to give it a try
         val lastModifiedRfc2822 = NotModified.formatRfc2822(file.lastModified)
@@ -132,8 +133,7 @@ object XSendFile extends Log {
           return
         }
 
-        val mimeo = Mime.get(path)
-        val raf   = new RandomAccessFile(path, "r")
+        val raf = new RandomAccessFile(path, "r")
 
         val (offset, length) = getRangeFromRequest(request) match {
           case None =>

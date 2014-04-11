@@ -14,9 +14,9 @@ import xitrum.util.{UrlSafeBase64, Gzip, Loader, LocalLruCache, Mime}
 
 object Etag extends Log {
   class Result
-  case object NotFound                                                                                         extends Result
-  case class  TooBig(file: File)                                                                               extends Result
-  case class  Small(val bytes: Array[Byte], val etag: String, val mimeo: Option[String], val gzipped: Boolean) extends Result
+  case object NotFound                                                                         extends Result
+  case class  TooBig(file: File, mimeo: Option[String])                                        extends Result
+  case class  Small(bytes: Array[Byte], etag: String, mimeo: Option[String], gzipped: Boolean) extends Result
 
   //                                                       path    mtime
   private[this] val smallFileCache        = LocalLruCache[(String, Long), Small](Config.xitrum.staticFile.maxNumberOfCachedFiles)
@@ -38,11 +38,11 @@ object Etag extends Log {
 
   def forString(string: String) = forBytes(string.getBytes(Config.xitrum.request.charset))
 
-  def forFile(path: String, gzipped: Boolean): Result = {
+  def forFile(path: String, mimeo: Option[String], gzipped: Boolean): Result = {
     val file = new File(path)
     if (!file.exists) return NotFound
 
-    if (file.length > Config.xitrum.staticFile.maxSizeInBytesOfCachedFiles) return TooBig(file)
+    if (file.length > Config.xitrum.staticFile.maxSizeInBytesOfCachedFiles) return TooBig(file, mimeo orElse Mime.get(path))
 
     val mtime = file.lastModified
     val key   = (path, mtime)
@@ -54,7 +54,7 @@ object Etag extends Log {
     if (bytes == null) return NotFound
 
     val etag    = forBytes(bytes)
-    val small   = Small(bytes, etag, Mime.get(path), false)
+    val small   = Small(bytes, etag, mimeo orElse Mime.get(path), false)
     val smaller = if (gzipped) compressBigTextualFile(small) else small
     cache.synchronized { cache.put(key, smaller) }
     smaller
@@ -64,7 +64,7 @@ object Etag extends Log {
    * Read whole file to memory. It's OK because the files are normally small.
    * No one is stupid enough to store large files in resources.
    */
-  def forResource(path: String, gzipped: Boolean): Result = {
+  def forResource(path: String, mimeo: Option[String], gzipped: Boolean): Result = {
     val key   = ("[resource]" + path, 0l)
     val cache = if (gzipped) gzippedSmallFileCache else smallFileCache
     val value = cache.get(key)
@@ -74,7 +74,7 @@ object Etag extends Log {
     if (bytes == null) return NotFound
 
     val etag    = forBytes(bytes)
-    val small   = Small(bytes, etag, Mime.get(path), false)
+    val small   = Small(bytes, etag, mimeo orElse Mime.get(path), false)
     val smaller = if (gzipped) compressBigTextualFile(small) else small
     cache.synchronized { cache.put(key, smaller) }
     smaller
