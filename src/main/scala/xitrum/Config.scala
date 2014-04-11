@@ -122,12 +122,8 @@ class RequestConfig(config: TConfig) {
     // Check
     if (ret != null) {
       val dir = new File(ret)
-      if (!dir.exists) {
-        if (dir.mkdirs()) {
-          Log.info("tmpUploadDir specified in xitrum.conf does not exist so Xitrum has created it")
-        } else {
-          throw new Exception("tmpUploadDir specified in xitrum.conf does not exist and Xitrum couldn't create it")
-        }
+      if (!dir.exists && !dir.mkdirs()) {
+        throw new Exception("tmpUploadDir specified in xitrum.conf does not exist and Xitrum couldn't create it")
       } else if (!dir.isDirectory) {
         throw new Exception("tmpUploadDir specified in xitrum.conf is not a directory")
       } else if (!dir.canWrite) {
