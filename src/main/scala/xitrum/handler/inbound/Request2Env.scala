@@ -155,7 +155,7 @@ class Request2Env extends SimpleChannelInboundHandler[HttpObject] with Log {
 
   private def createEmptyFullResponse(request: HttpRequest): FullHttpResponse = {
     // https://github.com/netty/netty/issues/2137
-    val compositeBuf = Unpooled.compositeBuffer(1)
+    val compositeBuf = Unpooled.compositeBuffer()
 
     // In HTTP 1.1 all connections are considered persistent unless declared otherwise
     // http://en.wikipedia.org/wiki/HTTP_persistent_connection

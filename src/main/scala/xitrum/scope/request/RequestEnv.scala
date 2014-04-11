@@ -66,6 +66,13 @@ trait RequestEnv extends ParamAccess {
 
   def apply(handlerEnv: HandlerEnv) {
     this.handlerEnv = handlerEnv
+
+    // Javadoc of Netty says channel.remoteAddress may be
+    // "null if this channel is not connected".
+    //
+    // remoteAddress is used to calculate remoteIp. Force remoteIp here while
+    // remoteAddress is not null.
+    remoteIp
   }
 
   // Below are lazy because they are not always accessed by framwork/application

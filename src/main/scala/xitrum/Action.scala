@@ -98,37 +98,33 @@ trait Action extends RequestEnv
 
       if (!forwarding) AccessLog.logActionAccess(this, beginTimestamp, cacheSecs, hit)
     } catch {
-      case NonFatal(e) =>
-        if (forwarding) {
-          log.warn("Error", e)
-          return
-        }
+      case NonFatal(e) if forwarding =>
+        log.warn("Error", e)
 
-        // End timestamp
-        val t2 = System.currentTimeMillis()
-
+      case NonFatal(e) if (e.isInstanceOf[SessionExpired] || e.isInstanceOf[InvalidAntiCsrfToken] || e.isInstanceOf[MissingParam] || e.isInstanceOf[InvalidInput]) =>
         // These exceptions are special cases:
         // We know that the exception is caused by the client (bad request)
-        if (e.isInstanceOf[SessionExpired] || e.isInstanceOf[InvalidAntiCsrfToken] || e.isInstanceOf[MissingParam] || e.isInstanceOf[InvalidInput]) {
-          response.setStatus(HttpResponseStatus.BAD_REQUEST)
-          val msg = if (e.isInstanceOf[SessionExpired] || e.isInstanceOf[InvalidAntiCsrfToken]) {
-            session.clear()
-            "Session expired. Please refresh your browser."
-          } else if (e.isInstanceOf[MissingParam]) {
-            val mp  = e.asInstanceOf[MissingParam]
-            "Missing param: " + mp.key
-          } else {
-            val ve = e.asInstanceOf[InvalidInput]
-            "Validation error: " + ve.message
-          }
-
-          if (isAjax)
-            jsRespond("alert(\"" + jsEscape(msg) + "\")")
-          else
-            respondText(msg)
-
-          AccessLog.logActionAccess(this, beginTimestamp, 0, false)
+        val msg = if (e.isInstanceOf[SessionExpired] || e.isInstanceOf[InvalidAntiCsrfToken]) {
+          session.clear()
+          "Session expired. Please refresh your browser."
+        } else if (e.isInstanceOf[MissingParam]) {
+          val mp  = e.asInstanceOf[MissingParam]
+          "Missing param: " + mp.key
         } else {
+          val ve = e.asInstanceOf[InvalidInput]
+          "Validation error: " + ve.message
+        }
+
+        response.setStatus(HttpResponseStatus.BAD_REQUEST)
+        if (isAjax)
+          jsRespond("alert(\"" + jsEscape(msg) + "\")")
+        else
+          respondText(msg)
+
+        AccessLog.logActionAccess(this, beginTimestamp, 0, false)
+
+      case NonFatal(e) =>
+        if (!isDoneResponding) {
           response.setStatus(HttpResponseStatus.INTERNAL_SERVER_ERROR)
           if (Config.productionMode) {
             Config.routes.error500 match {
@@ -150,9 +146,8 @@ trait Action extends RequestEnv
             else
               respondText(errorMsg)
           }
-
-          AccessLog.logActionAccess(this, beginTimestamp, 0, false, e)
         }
+        AccessLog.logActionAccess(this, beginTimestamp, 0, false, e)
     }
   }
 

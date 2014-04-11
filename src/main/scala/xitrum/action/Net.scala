@@ -34,14 +34,13 @@ object Net {
     }
   }
 
-  /**
-   * TODO: inetSocketAddress can be Inet4Address or Inet6Address
-   * See java.net.preferIPv6Addresses
-   * @return IP of the direct HTTP client (may be the proxy)
-   */
+  /** @return IP of the direct HTTP client (may be the proxy) */
   def clientIp(remoteAddress: SocketAddress): String = {
+    // TODO: inetSocketAddress can be Inet4Address or Inet6Address
+    // See java.net.preferIPv6Addresses
     val inetSocketAddress = remoteAddress.asInstanceOf[InetSocketAddress]
-    inetSocketAddress.getAddress.getHostAddress
+    val addr              = inetSocketAddress.getAddress
+    addr.getHostAddress
   }
 
   /** @return IP of the HTTP client, X-Forwarded-For is supported */
