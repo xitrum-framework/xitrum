@@ -118,6 +118,8 @@ trait Responder extends Js with Flash with GetActionClassDefaultsToCurrentAction
    * http://www.ne.jp/asahi/hishidama/home/tech/scala/xml.html
    */
   def respondText(text: Any, fallbackContentType: String = null, convertXmlToXhtml: Boolean = true): ChannelFuture = {
+    if (doneResponding) throwDoubleResponseError(Some(text))
+
     val textIsXml = text.isInstanceOf[Node] || text.isInstanceOf[NodeSeq]
 
     val respondedText =
@@ -374,8 +376,14 @@ trait Responder extends Js with Flash with GetActionClassDefaultsToCurrentAction
 
   //----------------------------------------------------------------------------
 
-  private def throwDoubleResponseError() {
-    throw new IllegalStateException("Double response; See stack trace to know where to fix the error")
+  private def throwDoubleResponseError(texto: Option[Any] = None) {
+    texto match {
+      case None =>
+        throw new IllegalStateException("Double response; See stack trace to know where to fix the error.")
+
+      case Some(text) =>
+        throw new IllegalStateException(s"Double response; You're trying to respond: $text\nSee stack trace to know where to fix the error.")
+    }
   }
 
   /** If Content-Type header is not set, it is set to "application/octet-stream" */
