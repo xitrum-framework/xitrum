@@ -109,6 +109,10 @@ To delete the local publish:
 Publish to Sonatype
 -------------------
 
+Before releasing a new Xitrum version, run ``sbt xitrum-package`` on project
+xitrum-new and xitrum-demos, then see directory ``target/xitrum/lib`` to see
+if there's any wrong with the versions of .jar files.
+
 See:
 https://github.com/sbt/sbt.github.com/blob/gen-master/src/jekyll/using_sonatype.md
 
