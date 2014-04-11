@@ -2,7 +2,7 @@ package xitrum.handler.inbound
 
 import io.netty.buffer.Unpooled
 import io.netty.channel.{Channel, ChannelHandler, SimpleChannelInboundHandler, ChannelHandlerContext}
-import io.netty.handler.codec.http.{DefaultHttpResponse, HttpHeaders, HttpResponseStatus, FullHttpRequest, FullHttpResponse, HttpVersion}
+import io.netty.handler.codec.http.{HttpHeaders, HttpResponseStatus, FullHttpRequest}
 import ChannelHandler.Sharable
 
 import xitrum.Config
