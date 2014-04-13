@@ -56,11 +56,7 @@ libraryDependencies += "tv.cntt" %% "scaposer" % "1.3"
 libraryDependencies += "tv.cntt" % "rhinocoffeescript" % "1.7.1"
 
 // For file watch
-libraryDependencies += "com.beachape.filemanagement" %% "schwatcher" % "0.1.0"
-
-// schwatcher 0.1.0 above uses akka-agent 2.3.0
-// Force the same Akka version used by Glokka above
-libraryDependencies += "com.typesafe.akka" %% "akka-agent" % "2.3.2"
+libraryDependencies += "com.beachape.filemanagement" %% "schwatcher" % "0.1.1"
 
 // For metrics
 libraryDependencies += "nl.grons" %% "metrics-scala" % "3.0.5_a2.3"
