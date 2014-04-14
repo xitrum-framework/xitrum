@@ -26,8 +26,9 @@ object NoRealPipelining {
   }
 
   def resumeReading(channel: Channel) {
+    // We don't have to call channel.read() because setAutoRead also calls
+    // channel.read() if not reading
     channel.config.setAutoRead(true)
-    channel.read()
   }
 
   /**
