@@ -55,7 +55,7 @@ libraryDependencies += "tv.cntt" %% "scaposer" % "1.3"
 // For compiling CoffeeScript to JavaScript
 libraryDependencies += "tv.cntt" % "rhinocoffeescript" % "1.7.1"
 
-// For file watch
+// For file watch; akka-agent is added here, should ensure same Akka version as above
 libraryDependencies += "com.beachape.filemanagement" %% "schwatcher" % "0.1.1"
 
 // For metrics
