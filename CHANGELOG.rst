@@ -1,7 +1,7 @@
 3.7:
 
 * `#354 <https://github.com/ngocdaothanh/xitrum/issues/354>`_
-  Fix HTTP keep alive and pipelining does not work
+  Fix HTTP keep alive and pipelining do not work
 
 3.6:
 
