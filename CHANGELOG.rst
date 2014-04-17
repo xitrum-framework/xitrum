@@ -1,7 +1,7 @@
 3.7:
 
 * `#354 <https://github.com/ngocdaothanh/xitrum/issues/354>`_
-  Fix File upload does not work
+  Fix HTTP pipelining does not work
 
 3.6:
 
