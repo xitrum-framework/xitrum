@@ -40,7 +40,7 @@ object NoRealPipelining {
     request: HttpRequest, channel: Channel, channelFuture: ChannelFuture
   ) {
     if (HttpHeaders.isKeepAlive(request)) {
-      channelFuture.addListener(new ChannelFutureListener() {
+      channelFuture.addListener(new ChannelFutureListener {
         def operationComplete(future: ChannelFuture) { resumeReading(channel) }
       })
     } else {

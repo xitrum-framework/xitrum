@@ -52,7 +52,7 @@ class Request2Env extends SimpleChannelInboundHandler[HttpObject] with Log {
     // In case the connection is closed when the request is not fully received,
     // thus env is initialized but not sent upstream to the next handler
     if (env != null) {
-      if (env != null) env.release()
+      env.release()
       env = null
     }
   }
@@ -264,10 +264,16 @@ class Request2Env extends SimpleChannelInboundHandler[HttpObject] with Log {
   }
 
   private def sendUpstream(ctx: ChannelHandlerContext) {
-    ctx.fireChannelRead(env)
-
     // NoRealPipelining.resumeReading should be called when the response has been sent
+    //
+    // PITFALL:
+    // If this line is after the line "ctx.fireChannelRead(env)" (right below),
+    // this order may happen: resumeReading -> pauseReading
+    //
+    // We want: pauseReading -> resumeReading
     NoRealPipelining.pauseReading(ctx.channel)
+
+    ctx.fireChannelRead(env)
 
     // Reset for the next request on this same connection (e.g. keep alive)
     env               = null

@@ -1,3 +1,8 @@
+3.7:
+
+* `#354 <https://github.com/ngocdaothanh/xitrum/issues/354>`_
+  Fix File upload does not work
+
 3.6:
 
 * `#347 <https://github.com/ngocdaothanh/xitrum/issues/347>`_
