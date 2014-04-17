@@ -20,7 +20,7 @@ class SockJsClassAndOptions(
     val cookieNeeded: Boolean
 ) extends Serializable
 
-class SockJsRouteMap(map: Map[String, SockJsClassAndOptions]) extends Log {
+class SockJsRouteMap(map: MMap[String, SockJsClassAndOptions]) extends Log {
   def logRoutes() {
     // This method is only run once on start, speed is not a problem
 
@@ -71,4 +71,10 @@ class SockJsRouteMap(map: Map[String, SockJsClassAndOptions]) extends Log {
   }
 
   def lookup(pathPrefix: String) = map(pathPrefix)
+
+  def removeByPrefix(withoutSlashPrefix: String) ={
+    map.map { case (pathPrefixOfAction, sockJsClassAndOptions) =>
+      if(pathPrefixOfAction.startsWith(withoutSlashPrefix)) map.remove(pathPrefixOfAction)
+    }
+  }
 }

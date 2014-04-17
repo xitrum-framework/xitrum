@@ -58,7 +58,7 @@ object RouteCollection {
       normal.firstPATCHs    .map(_.toRoute), normal.lastPATCHs    .map(_.toRoute), normal.otherPATCHs    .map(_.toRoute),
       normal.firstDELETEs   .map(_.toRoute), normal.lastDELETEs   .map(_.toRoute), normal.otherDELETEs   .map(_.toRoute),
       normal.firstWEBSOCKETs.map(_.toRoute), normal.lastWEBSOCKETs.map(_.toRoute), normal.otherWEBSOCKETs.map(_.toRoute),
-      new SockJsRouteMap(sockJsMap),
+      new SockJsRouteMap(MMap(sockJsMap.toSeq: _*)),
       swaggerMap,
       normal.error404.map(Class.forName(_).asInstanceOf[Class[Action]]),
       normal.error500.map(Class.forName(_).asInstanceOf[Class[Action]])
@@ -381,5 +381,6 @@ class RouteCollection(
 
       routes --= tobeRemoved
     }
+    sockJsRouteMap.removeByPrefix(withoutSlashPrefix)
   }
 }
