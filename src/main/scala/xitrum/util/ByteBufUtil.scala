@@ -12,8 +12,8 @@ object ByteBufUtil {
       // https://github.com/netty/netty/issues/83
       System.arraycopy(byteBuf.array, 0, ret, 0, len)
     } else {
-       byteBuf.readBytes(ret)
-       byteBuf.resetReaderIndex()  // The buffer may be reread later
+      // The buffer may be reread later
+      byteBuf.markReaderIndex().readBytes(ret).resetReaderIndex()
     }
     ret
   }
