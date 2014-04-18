@@ -72,9 +72,9 @@ class SockJsRouteMap(map: MMap[String, SockJsClassAndOptions]) extends Log {
 
   def lookup(pathPrefix: String) = map(pathPrefix)
 
-  def removeByPrefix(withoutSlashPrefix: String) ={
+  def removeByPrefix(withoutSlashPrefix: String) = {
     map.map { case (pathPrefixOfAction, sockJsClassAndOptions) =>
-      if(pathPrefixOfAction.startsWith(withoutSlashPrefix)) map.remove(pathPrefixOfAction)
+      if (pathPrefixOfAction.startsWith(withoutSlashPrefix)) map.remove(pathPrefixOfAction)
     }
   }
 }
