@@ -16,11 +16,11 @@ It also has a fast built-in HTTP(S) server.
   +--------------------+
   |       Netty        |
   +--------------------+
-  |        Xitrum      |
+  |       Xitrum       |
   | +----------------+ |
-  | | Web framework  | |  <-- Akka, Hazelcast --> Other instances
-  | |----------------| |
   | | HTTP(S) Server | |
+  | |----------------| |
+  | | Web framework  | |  ← Akka, Hazelcast → Other instances
   | +----------------+ |
   +--------------------+
   |      Your app      |
