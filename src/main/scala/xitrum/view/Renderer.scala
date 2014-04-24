@@ -114,6 +114,6 @@ trait Renderer extends GetActionClassDefaultsToCurrentAction {
   def renderInlineView(inlineView: Any): String = {
     renderedView = inlineView
     val any = layout  // Call layout
-    any.toString()
+    any.toString
   }
 }

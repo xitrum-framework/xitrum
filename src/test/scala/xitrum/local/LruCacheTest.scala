@@ -2,9 +2,9 @@ package xitrum.local
 
 import org.scalatest.Matchers
 import org.scalatest.FlatSpec
-import xitrum.Config
+
 import org.slf4j.LoggerFactory
-import com.typesafe.config.ConfigFactory
+import xitrum.Config
 
 class LruCacheTest extends FlatSpec with Matchers {
   behavior of "LruCache"

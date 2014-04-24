@@ -126,7 +126,7 @@ object Secure {
       if (data.length <= 4) return None
 
       val b = ByteBuffer.wrap(data)
-      val l = b.getInt()
+      val l = b.getInt
       if (l <= 0 || l >= data.length - 4) return None
 
       val d = new Array[Byte](l)

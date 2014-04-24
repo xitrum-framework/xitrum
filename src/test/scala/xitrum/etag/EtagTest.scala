@@ -1,17 +1,17 @@
 package xitrum.etag
 
-import org.scalatest.Matchers
-import org.scalatest.FlatSpec
 import java.io.File
 import java.io.FileOutputStream
 
-class EtagTest extends FlatSpec with Matchers {
+import org.scalatest.Matchers
+import org.scalatest.FlatSpec
 
+class EtagTest extends FlatSpec with Matchers {
   behavior of "ETag"
 
   it should "stay same while file is not modified" in {
     val file     = File.createTempFile("etag", "test")
-    val filePath = file.getAbsoluteFile().toString()
+    val filePath = file.getAbsoluteFile.toString
     file.deleteOnExit()
 
     val result = Etag.forFile(filePath, None, false)
@@ -31,5 +31,4 @@ class EtagTest extends FlatSpec with Matchers {
 
     etag should not equal (Etag.forFile(filePath, None, false).asInstanceOf[Etag.Small].etag)
   }
-
 }
