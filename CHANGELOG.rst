@@ -1,7 +1,9 @@
 3.8:
 
 * `#356 <https://github.com/ngocdaothanh/xitrum/issues/356>`_
-  Fix Remove metrics route when metrics is disabled
+  Fix: Remove metrics route when metrics is disabled
+* `#360 <https://github.com/ngocdaothanh/xitrum/issues/360>`_
+  Split "Imperatively" feature (using Scla continuations) to a separate project
 
 3.7:
 

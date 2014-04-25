@@ -78,17 +78,6 @@ libraryDependencies += "org.scalatest" %% "scalatest" % "2.1.3" % "test"
 
 libraryDependencies <+= scalaVersion { sv => "org.scala-lang" % "scalap" % sv }
 
-// xitrum.imperatively uses Scala continuation, a compiler plugin --------------
-
-autoCompilerPlugins := true
-
-// https://groups.google.com/forum/?fromgroups#!topic/simple-build-tool/ReZvT14noxU
-libraryDependencies <+= scalaVersion { sv =>
-  compilerPlugin("org.scala-lang.plugins" % "continuations" % sv)
-}
-
-scalacOptions += "-P:continuations:enable"
-
 //------------------------------------------------------------------------------
 
 // Skip API doc generation to speedup "publish-local" while developing.
