@@ -19,12 +19,13 @@ object ServerSsl {
 
   //----------------------------------------------------------------------------
 
-  private[this] val PROTOCOL  = "TLS"
-  private[this] val ALGORITHM = "SunX509"
+  private val PROTOCOL      = "TLS"
+  private val KEYSTORE_TYPE = "JKS"
+  private val ALGORITHM     = "SunX509"
 
   // Context can be created only once
   private lazy val context: SSLContext = {
-    val ks = KeyStore.getInstance("JKS")
+    val ks = KeyStore.getInstance(KEYSTORE_TYPE)
     val is = new FileInputStream(Config.xitrum.keystore.path)
     ks.load(is, Config.xitrum.keystore.password.toCharArray)
     is.close()
