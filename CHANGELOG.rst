@@ -4,6 +4,8 @@
   Fix: Remove metrics route when metrics is disabled
 * `#360 <https://github.com/ngocdaothanh/xitrum/issues/360>`_
   Split "Imperatively" feature (using Scla continuations) to a separate project
+* `#361 <https://github.com/ngocdaothanh/xitrum/issues/361>`_
+  Update Netty from 4.0.18 to 4.0.19
 
 3.7:
 
