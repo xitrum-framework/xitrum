@@ -37,26 +37,27 @@ libraryDependencies += "tv.cntt" %% "glokka" % "1.8"
 // (akka-slf4j version should be the same as the Akka version used by Glokka above)
 libraryDependencies += "com.typesafe.akka" %% "akka-slf4j" % "2.3.2"
 
+// For file watch
+// (akka-agent is added here, should ensure same Akka version as above)
+libraryDependencies += "com.beachape.filemanagement" %% "schwatcher" % "0.1.1"
+
 // For scanning routes
 libraryDependencies += "tv.cntt" %% "sclasner" % "1.6"
 
-// For (de)serializing
+// For binary (de)serializing
 libraryDependencies += "com.twitter" %% "chill-bijection" % "0.3.6"
 
-// For jsEscape
-libraryDependencies += "org.apache.commons" % "commons-lang3" % "3.3.2"
-
-// For JSON
+// For JSON (de)serializing
 libraryDependencies += "org.json4s" %% "json4s-jackson" % "3.2.8"
 
 // For i18n
 libraryDependencies += "tv.cntt" %% "scaposer" % "1.3"
 
+// For jsEscape
+libraryDependencies += "org.apache.commons" % "commons-lang3" % "3.3.2"
+
 // For compiling CoffeeScript to JavaScript
 libraryDependencies += "tv.cntt" % "rhinocoffeescript" % "1.7.1"
-
-// For file watch; akka-agent is added here, should ensure same Akka version as above
-libraryDependencies += "com.beachape.filemanagement" %% "schwatcher" % "0.1.1"
 
 // For metrics
 libraryDependencies += "nl.grons" %% "metrics-scala" % "3.0.5_a2.3"
