@@ -1,15 +1,9 @@
 3.11:
 
-* `#356 <https://github.com/ngocdaothanh/xitrum/issues/356>`_
-  Fix: Remove metrics route when metrics is disabled
-* `#360 <https://github.com/ngocdaothanh/xitrum/issues/360>`_
-  Split "Imperatively" feature (using Scla continuations) to a separate project
 * `#357 <https://github.com/ngocdaothanh/xitrum/issues/357>`_
   Update Scala from 2.10.4 to 2.11.0
-* `#143 <https://github.com/ngocdaothanh/xitrum/issues/143>`_
-  Replace Manifest with TypeTag when Scala 2.11 is released
-* `#364 <https://github.com/ngocdaothanh/xitrum/issues/364>`_
-  Replace Twitter Chill with chill-scala-2.11
+* `#361 <https://github.com/ngocdaothanh/xitrum/issues/361>`_
+  Update Netty from 4.0.18 to 4.0.19
 * `#358 <https://github.com/ngocdaothanh/xitrum/issues/358>`_
   Update JSON4S from 3.2.8 to 3.2.9
 * `#359 <https://github.com/ngocdaothanh/xitrum/issues/359>`_
@@ -18,8 +12,16 @@
   Update Schwatcher from 0.1.1 to 0.1.4
 * `#368 <https://github.com/ngocdaothanh/xitrum/issues/368>`_
   Update jQuery from 1.11.0 to 1.11.1
-* `#361 <https://github.com/ngocdaothanh/xitrum/issues/361>`_
-  Update Netty from 4.0.18 to 4.0.19
+* `#369 <https://github.com/ngocdaothanh/xitrum/issues/369>`_
+  jQuery Validate from 1.11.1 to 1.12.0
+* `#356 <https://github.com/ngocdaothanh/xitrum/issues/356>`_
+  Fix: Remove metrics route when metrics is disabled
+* `#360 <https://github.com/ngocdaothanh/xitrum/issues/360>`_
+  Split "Imperatively" feature (using Scla continuations) to a separate project
+* `#143 <https://github.com/ngocdaothanh/xitrum/issues/143>`_
+  Replace Manifest with TypeTag when Scala 2.11 is released
+* `#364 <https://github.com/ngocdaothanh/xitrum/issues/364>`_
+  Replace Twitter Chill with chill-scala-2.11
 
 3.7:
 

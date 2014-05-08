@@ -57,13 +57,13 @@ trait Js {
   //----------------------------------------------------------------------------
 
   lazy val jsDefaults = {
-    val validatei18n = if (language == "en") "" else <script type="text/javascript" src={resourceUrl("xitrum/jquery.validate-1.11.1/localization/messages_"+ language +".js")}></script>
+    val validatei18n = if (language == "en") "" else <script type="text/javascript" src={resourceUrl("xitrum/jquery.validate-1.12.0/localization/messages_"+ language +".js")}></script>
 
     if (Config.productionMode)
       <xml:group>
         <script type="text/javascript" src={resourceUrl("xitrum/jquery-1.11.1.min.js")}></script>
-        <script type="text/javascript" src={resourceUrl("xitrum/jquery.validate-1.11.1/jquery.validate.min.js")}></script>
-        <script type="text/javascript" src={resourceUrl("xitrum/jquery.validate-1.11.1/additional-methods.min.js")}></script>
+        <script type="text/javascript" src={resourceUrl("xitrum/jquery.validate-1.12.0/jquery.validate.min.js")}></script>
+        <script type="text/javascript" src={resourceUrl("xitrum/jquery.validate-1.12.0/additional-methods.min.js")}></script>
         {validatei18n}
         <script type="text/javascript" src={resourceUrl("xitrum/sockjs-0.3.4.min.js")}></script>
         <script type="text/javascript" src={url[xitrum.js]}></script>
@@ -71,8 +71,8 @@ trait Js {
     else
       <xml:group>
         <script type="text/javascript" src={resourceUrl("xitrum/jquery-1.11.1.js")}></script>
-        <script type="text/javascript" src={resourceUrl("xitrum/jquery.validate-1.11.1/jquery.validate.js")}></script>
-        <script type="text/javascript" src={resourceUrl("xitrum/jquery.validate-1.11.1/additional-methods.js")}></script>
+        <script type="text/javascript" src={resourceUrl("xitrum/jquery.validate-1.12.0/jquery.validate.js")}></script>
+        <script type="text/javascript" src={resourceUrl("xitrum/jquery.validate-1.12.0/additional-methods.js")}></script>
         {validatei18n}
         <script type="text/javascript" src={resourceUrl("xitrum/sockjs-0.3.4.js")}></script>
         <script type="text/javascript" src={url[xitrum.js]}></script>
