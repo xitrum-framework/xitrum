@@ -1,46 +1,32 @@
 package xitrum.util
 
-import java.io.{ByteArrayInputStream, ByteArrayOutputStream}
-
-import scala.util.{Success, Failure}
 import scala.util.control.NonFatal
 
-import com.esotericsoftware.kryo.Kryo
-import com.esotericsoftware.kryo.io.{Input, Output}
-import com.twitter.chill.KryoSerializer
-
+import com.twitter.chill.{KryoInstantiator, KryoPool, KryoSerializer}
 import org.json4s.{DefaultFormats, NoTypeHints}
 import org.json4s.jackson.{JsonMethods, Serialization}
 
 import xitrum.Config
 
 object SeriDeseri {
-  private val kryo = {
-    val a = KryoSerializer.registerAll
-    val k = new Kryo
-    a(k)
-    k
+  // Use this utility instead of using Kryo directly because Kryo is not threadsafe!
+  // https://github.com/EsotericSoftware/kryo#threading
+  private val kryoPool = {
+    val r  = KryoSerializer.registerAll
+    val ki = (new KryoInstantiator).withRegistrar(r)
+    KryoPool.withByteArrayOutputStream(Runtime.getRuntime.availableProcessors * 2, ki)
   }
 
   private implicit val noTypeHints = Serialization.formats(NoTypeHints)
 
-  def toBytes(any: Any): Array[Byte] = {
-    val b = new ByteArrayOutputStream
-    val o = new Output(b)
-    kryo.writeObject(o, any)
-    o.close()
-    b.toByteArray
-  }
+  def toBytes(any: Any): Array[Byte] = kryoPool.toBytesWithoutClass(any)
 
   def fromBytes[T](bytes: Array[Byte])(implicit m: Manifest[T]): Option[T] = {
-    val i = new Input(bytes)
     try {
-      val t = kryo.readObject(i, m.runtimeClass.asInstanceOf[Class[T]])
+      val t = kryoPool.fromBytes(bytes, m.runtimeClass.asInstanceOf[Class[T]])
       Option(t)
     } catch {
       case NonFatal(e) => None
-    } finally {
-      i.close()
     }
   }
 
