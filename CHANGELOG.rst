@@ -14,6 +14,8 @@
   Update jQuery from 1.11.0 to 1.11.1
 * `#369 <https://github.com/ngocdaothanh/xitrum/issues/369>`_
   jQuery Validate from 1.11.1 to 1.12.0
+* `#370 <https://github.com/ngocdaothanh/xitrum/issues/370>`_
+  Update Swagger-UI from 2.0.14 to 2.0.16
 * `#356 <https://github.com/ngocdaothanh/xitrum/issues/356>`_
   Fix: Remove metrics route when metrics is disabled
 * `#360 <https://github.com/ngocdaothanh/xitrum/issues/360>`_
