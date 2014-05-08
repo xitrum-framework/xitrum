@@ -1,24 +1,18 @@
 package xitrum.scope.request
 
+import scala.reflect.runtime.universe._
 import io.netty.handler.codec.http.multipart.FileUpload
 
 import xitrum.Action
 import xitrum.exception.MissingParam
 
-// See https://github.com/ngocdaothanh/xitrum/issues/155
-
-/**
- * Cache manifests because manifest[T] is a rather expensive operation
- * (several nested objects are created), the same caveat applies at the sender:
- * http://groups.google.com/group/akka-user/browse_thread/thread/ee07764dfc1ac794
- */
 object ParamAccess {
-  val MANIFEST_FILE_UPLOAD = manifest[FileUpload]
-  val MANIFEST_STRING      = manifest[String]
-  val MANIFEST_INT         = manifest[Int]
-  val MANIFEST_LONG        = manifest[Long]
-  val MANIFEST_FLOAT       = manifest[Float]
-  val MANIFEST_DOUBLE      = manifest[Double]
+  val TYPE_FILE_UPLOAD = typeOf[FileUpload]
+  val TYPE_STRING      = typeOf[String]
+  val TYPE_INT         = typeOf[Int]
+  val TYPE_LONG        = typeOf[Long]
+  val TYPE_FLOAT       = typeOf[Float]
+  val TYPE_DOUBLE      = typeOf[Double]
 }
 
 trait ParamAccess {
@@ -42,8 +36,8 @@ trait ParamAccess {
 
   //----------------------------------------------------------------------------
 
-  def param[T](key: String, coll: Params = null)(implicit e: T DefaultsTo String, m: Manifest[T]): T = {
-    if (m <:< MANIFEST_FILE_UPLOAD) {
+  def param[T: TypeTag](key: String, coll: Params = null)(implicit d: T DefaultsTo String): T = {
+    if (typeOf[T] <:< TYPE_FILE_UPLOAD) {
       bodyFileParams.get(key) match {
         case None         => throw new MissingParam(key)
         case Some(values) => values(0).asInstanceOf[T]
@@ -55,8 +49,8 @@ trait ParamAccess {
     }
   }
 
-  def paramo[T](key: String, coll: Params = null)(implicit e: T DefaultsTo String, m: Manifest[T]): Option[T] = {
-    if (m <:< MANIFEST_FILE_UPLOAD) {
+  def paramo[T: TypeTag](key: String, coll: Params = null)(implicit d: T DefaultsTo String): Option[T] = {
+    if (typeOf[T] <:< TYPE_FILE_UPLOAD) {
       bodyFileParams.get(key).map { values => values(0).asInstanceOf[T] }
     } else {
       val coll2  = if (coll == null) textParams else coll
@@ -66,8 +60,8 @@ trait ParamAccess {
     }
   }
 
-  def params[T](key: String, coll: Params = null)(implicit e: T DefaultsTo String, m: Manifest[T]): Seq[T] = {
-    if (m <:< MANIFEST_FILE_UPLOAD) {
+  def params[T: TypeTag](key: String, coll: Params = null)(implicit d: T DefaultsTo String): Seq[T] = {
+    if (typeOf[T] <:< TYPE_FILE_UPLOAD) {
       bodyFileParams.get(key) match {
         case None         => throw new MissingParam(key)
         case Some(values) => values.asInstanceOf[Seq[T]]
@@ -79,8 +73,8 @@ trait ParamAccess {
     }
   }
 
-  def paramso[T](key: String, coll: Params = null)(implicit e: T DefaultsTo String, m: Manifest[T]): Option[Seq[T]] = {
-    if (m <:< MANIFEST_FILE_UPLOAD) {
+  def paramso[T: TypeTag](key: String, coll: Params = null)(implicit d: T DefaultsTo String): Option[Seq[T]] = {
+    if (typeOf[T] <:< TYPE_FILE_UPLOAD) {
       bodyFileParams.get(key).asInstanceOf[Option[Seq[T]]]
     } else {
       val coll2 = if (coll == null) textParams else coll
@@ -91,15 +85,15 @@ trait ParamAccess {
   //----------------------------------------------------------------------------
 
   /** Applications may override this method to convert to more types. */
-  def convertText[T](value: String)(implicit m: Manifest[T]): T = {
+  def convertText[T: TypeTag](value: String): T = {
+    val t = typeOf[T]
     val any: Any =
-           if (m <:< MANIFEST_STRING) value
-      else if (m <:< MANIFEST_INT)    value.toInt
-      else if (m <:< MANIFEST_LONG)   value.toLong
-      else if (m <:< MANIFEST_FLOAT)  value.toFloat
-      else if (m <:< MANIFEST_DOUBLE) value.toDouble
-      else throw new Exception("Cannot covert " + value + " to " + m)
-
+           if (t <:< TYPE_STRING) value
+      else if (t <:< TYPE_INT)    value.toInt
+      else if (t <:< TYPE_LONG)   value.toLong
+      else if (t <:< TYPE_FLOAT)  value.toFloat
+      else if (t <:< TYPE_DOUBLE) value.toDouble
+      else throw new Exception("Cannot covert " + value + " to " + t)
     any.asInstanceOf[T]
   }
 }

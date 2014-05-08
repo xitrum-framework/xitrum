@@ -6,6 +6,8 @@
   Split "Imperatively" feature (using Scla continuations) to a separate project
 * `#357 <https://github.com/ngocdaothanh/xitrum/issues/357>`_
   Update Scala from 2.10.4 to 2.11.0
+* `#143 <https://github.com/ngocdaothanh/xitrum/issues/143>`_
+  Replace Manifest with TypeTag when Scala 2.11 is released
 * `#358 <https://github.com/ngocdaothanh/xitrum/issues/358>`_
   Update JSON4S from 3.2.8 to 3.2.9
 * `#359 <https://github.com/ngocdaothanh/xitrum/issues/359>`_
