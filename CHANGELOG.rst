@@ -16,6 +16,8 @@
   Update metrics-scala from 3.0.5_a2.3 to 3.1.1.1_a2.3
 * `#365 <https://github.com/ngocdaothanh/xitrum/issues/365>`_
   Update Schwatcher from 0.1.1 to 0.1.4
+* `#368 <https://github.com/ngocdaothanh/xitrum/issues/368>`_
+  Update jQuery from 1.11.0 to 1.11.1
 * `#361 <https://github.com/ngocdaothanh/xitrum/issues/361>`_
   Update Netty from 4.0.18 to 4.0.19
 
