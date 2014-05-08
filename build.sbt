@@ -14,6 +14,8 @@ javacOptions ++= Seq("-source", "1.7", "-target", "1.7")
 // Put config directory in classpath for easier development (sbt console etc.)
 unmanagedBase in Runtime <<= baseDirectory { base => base / "config" }
 
+//------------------------------------------------------------------------------
+
 // Most Scala projects are published to Sonatype, but Sonatype is not default
 // and it takes several hours to sync from Sonatype to Maven Central
 resolvers += "SonatypeReleases" at "http://oss.sonatype.org/content/repositories/releases/"
@@ -45,7 +47,7 @@ libraryDependencies += "com.beachape.filemanagement" %% "schwatcher" % "0.1.4"
 libraryDependencies += "tv.cntt" %% "sclasner" % "1.6"
 
 // For binary (de)serializing
-libraryDependencies += "tv.cntt" %% "chill-scala-2-11" % "1.0-SNAPSHOT"
+libraryDependencies += "tv.cntt" %% "chill-scala-2-11" % "1.0"
 
 // For JSON (de)serializing
 libraryDependencies += "org.json4s" %% "json4s-jackson" % "3.2.9"
@@ -66,9 +68,8 @@ libraryDependencies += "nl.grons" %% "metrics-scala" % "3.1.1.1_a2.3"
 libraryDependencies += "com.codahale.metrics" % "metrics-json" % "3.0.2"
 
 // For test
-libraryDependencies += "org.scalatest" %% "scalatest" % "2.1.3" % "test"
+libraryDependencies += "org.scalatest" %% "scalatest" % "2.1.5" % "test"
 
-//------------------------------------------------------------------------------
 // JSON4S uses scalap 2.10.0, which in turn uses scala-compiler 2.10.0, which in
 // turn uses scala-reflect 2.10.0. We need to force "scalaVersion" above, because
 // Scala annotations (used by routes and Swagger) compiled by a newer version
@@ -76,7 +77,6 @@ libraryDependencies += "org.scalatest" %% "scalatest" % "2.1.3" % "test"
 //
 // Also, we must release a new version of Xitrum every time a new version of
 // Scala is released.
-
 libraryDependencies <+= scalaVersion { sv => "org.scala-lang" % "scalap" % sv }
 
 //------------------------------------------------------------------------------

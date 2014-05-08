@@ -1,4 +1,4 @@
-3.8:
+3.11:
 
 * `#356 <https://github.com/ngocdaothanh/xitrum/issues/356>`_
   Fix: Remove metrics route when metrics is disabled
