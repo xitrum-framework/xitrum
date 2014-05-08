@@ -128,7 +128,7 @@ class RouteCollector extends Log {
       annotations: ActionAnnotations)
   {
     annotations.error.foreach { case a =>
-      val tpe = a.tpe
+      val tpe = a.tree.tpe
       if (tpe == TYPE_OF_ERROR_404) routes.error404 = Some(className)
       if (tpe == TYPE_OF_ERROR_500) routes.error500 = Some(className)
     }
@@ -142,7 +142,7 @@ class RouteCollector extends Log {
   {
     var pathPrefix: String = null
     annotations.routes.foreach { case a =>
-      if (a.tpe == TYPE_OF_SOCKJS)
+      if (a.tree.tpe == TYPE_OF_SOCKJS)
         pathPrefix = a.scalaArgs(0).productElement(0).asInstanceOf[universe.Constant].value.toString
     }
 
@@ -166,7 +166,7 @@ class RouteCollector extends Log {
       case None => 0
 
       case Some(annotation) =>
-        val tpe = annotation.tpe
+        val tpe = annotation.tree.tpe
         if (tpe == TYPE_OF_FIRST)
           -1
         else if (tpe == TYPE_OF_LAST)
@@ -182,7 +182,7 @@ class RouteCollector extends Log {
       case None => 0
 
       case Some(annotation) =>
-        val tpe = annotation.tpe
+        val tpe = annotation.tree.tpe
 
         if (tpe == TYPE_OF_CACHE_ACTION_DAY)
           -annotation.scalaArgs(0).toString.toInt * 24 * 60 * 60
@@ -207,7 +207,7 @@ class RouteCollector extends Log {
 
   /** @return Seq[(method, pattern)] */
   private def listMethodAndPattern(annotation: universe.Annotation): Seq[(String, String)] = {
-    val tpe = annotation.tpe
+    val tpe = annotation.tree.tpe
 
     if (tpe == TYPE_OF_GET)
       getStrings(annotation).map(("GET", _))

@@ -45,7 +45,7 @@ object ActionAnnotations {
     var ret = ActionAnnotations()
 
     annotations.foreach { a =>
-      val tpe = a.tpe
+      val tpe = a.tree.tpe
 
       if (tpe <:< TYPE_OF_ROUTE)
         ret = ret.copy(routes = ret.routes :+ a)
@@ -112,7 +112,7 @@ case class ActionAnnotations(
   def inherit(annotations: Seq[universe.Annotation]): ActionAnnotations = {
     var ret = this
     annotations.foreach { a =>
-      val tpe = a.tpe
+      val tpe = a.tree.tpe
 
       if (sockJsCookieNeeded.isEmpty && tpe <:< TYPE_OF_SOCKJS_COOKIE_NEEDED)
         ret = ret.copy(sockJsCookieNeeded = Some(a))
