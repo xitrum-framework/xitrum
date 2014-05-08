@@ -143,7 +143,7 @@ class RouteCollector extends Log {
     var pathPrefix: String = null
     annotations.routes.foreach { case a =>
       if (a.tree.tpe == TYPE_OF_SOCKJS)
-        pathPrefix = a.scalaArgs(0).productElement(0).asInstanceOf[universe.Constant].value.toString
+        pathPrefix = a.tree.children.tail(0).productElement(0).asInstanceOf[universe.Constant].value.toString
     }
 
     if (pathPrefix == null) {
@@ -185,21 +185,21 @@ class RouteCollector extends Log {
         val tpe = annotation.tree.tpe
 
         if (tpe == TYPE_OF_CACHE_ACTION_DAY)
-          -annotation.scalaArgs(0).toString.toInt * 24 * 60 * 60
+          -annotation.tree.children.tail(0).toString.toInt * 24 * 60 * 60
         else if (tpe == TYPE_OF_CACHE_ACTION_HOUR)
-          -annotation.scalaArgs(0).toString.toInt      * 60 * 60
+          -annotation.tree.children.tail(0).toString.toInt      * 60 * 60
         else if (tpe == TYPE_OF_CACHE_ACTION_MINUTE)
-          -annotation.scalaArgs(0).toString.toInt           * 60
+          -annotation.tree.children.tail(0).toString.toInt           * 60
         else if (tpe == TYPE_OF_CACHE_ACTION_SECOND)
-          -annotation.scalaArgs(0).toString.toInt
+          -annotation.tree.children.tail(0).toString.toInt
         else if (tpe == TYPE_OF_CACHE_PAGE_DAY)
-          annotation.scalaArgs(0).toString.toInt * 24 * 60 * 60
+          annotation.tree.children.tail(0).toString.toInt * 24 * 60 * 60
         else if (tpe == TYPE_OF_CACHE_PAGE_HOUR)
-          annotation.scalaArgs(0).toString.toInt      * 60 * 60
+          annotation.tree.children.tail(0).toString.toInt      * 60 * 60
         else if (tpe == TYPE_OF_CACHE_PAGE_MINUTE)
-          annotation.scalaArgs(0).toString.toInt           * 60
+          annotation.tree.children.tail(0).toString.toInt           * 60
         else if (tpe == TYPE_OF_CACHE_PAGE_SECOND)
-          annotation.scalaArgs(0).toString.toInt
+          annotation.tree.children.tail(0).toString.toInt
         else
           0
     }
@@ -226,7 +226,7 @@ class RouteCollector extends Log {
   }
 
   private def getStrings(annotation: universe.Annotation): Seq[String] = {
-    annotation.scalaArgs.map { tree => tree.productElement(0).asInstanceOf[universe.Constant].value.toString }
+    annotation.tree.children.tail.map { tree => tree.productElement(0).asInstanceOf[universe.Constant].value.toString }
   }
 
   //----------------------------------------------------------------------------
@@ -238,7 +238,7 @@ class RouteCollector extends Log {
     } else {
       var swaggerArgs = Seq.empty[SwaggerArg]
       universeAnnotations.foreach { annotation =>
-        annotation.scalaArgs.foreach { scalaArg =>
+        annotation.tree.children.tail.foreach { scalaArg =>
           // Ex:
           // List(xitrum.annotation.Swagger.Response.apply, 200, "ID of the newly created article will be returned")
           // List(xitrum.annotation.Swagger.StringForm.apply, "title", xitrum.annotation.Swagger.StringForm.apply$default$2)
