@@ -1,29 +1,46 @@
 package xitrum.util
 
+import java.io.{ByteArrayInputStream, ByteArrayOutputStream}
+
 import scala.util.{Success, Failure}
 import scala.util.control.NonFatal
 
-import com.twitter.chill.KryoInjection
+import com.esotericsoftware.kryo.Kryo
+import com.esotericsoftware.kryo.io.{Input, Output}
+import com.twitter.chill.KryoSerializer
+
 import org.json4s.{DefaultFormats, NoTypeHints}
 import org.json4s.jackson.{JsonMethods, Serialization}
 
 import xitrum.Config
 
 object SeriDeseri {
+  private val kryo = {
+    val a = KryoSerializer.registerAll
+    val k = new Kryo
+    a(k)
+    k
+  }
+
   private implicit val noTypeHints = Serialization.formats(NoTypeHints)
 
-  def toBytes(any: Any): Array[Byte] = KryoInjection(any)
+  def toBytes(any: Any): Array[Byte] = {
+    val b = new ByteArrayOutputStream
+    val o = new Output(b)
+    kryo.writeObject(o, any)
+    o.close()
+    b.toByteArray
+  }
 
   def fromBytes[T](bytes: Array[Byte])(implicit m: Manifest[T]): Option[T] = {
-    KryoInjection.invert(bytes) match {
-      case Failure(e) =>
-        None
-
-      case Success(any) =>
-        if (m.runtimeClass.isAssignableFrom(any.getClass))
-          Some(any.asInstanceOf[T])
-        else
-          None
+    val i = new Input(bytes)
+    try {
+      val t = kryo.readObject(i, m.runtimeClass.asInstanceOf[Class[T]])
+      Option(t)
+    } catch {
+      case NonFatal(e) => None
+    } finally {
+      i.close()
     }
   }
 

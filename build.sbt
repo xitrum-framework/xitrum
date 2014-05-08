@@ -4,7 +4,7 @@ name := "xitrum"
 
 version := "3.8-SNAPSHOT"
 
-scalaVersion := "2.10.4"
+scalaVersion := "2.11.0"
 
 scalacOptions ++= Seq("-deprecation", "-feature", "-unchecked")
 
@@ -39,16 +39,16 @@ libraryDependencies += "com.typesafe.akka" %% "akka-slf4j" % "2.3.2"
 
 // For file watch
 // (akka-agent is added here, should ensure same Akka version as above)
-libraryDependencies += "com.beachape.filemanagement" %% "schwatcher" % "0.1.1"
+libraryDependencies += "com.beachape.filemanagement" %% "schwatcher" % "0.1.4"
 
 // For scanning routes
 libraryDependencies += "tv.cntt" %% "sclasner" % "1.6"
 
 // For binary (de)serializing
-libraryDependencies += "com.twitter" %% "chill-bijection" % "0.3.6"
+libraryDependencies += "tv.cntt" %% "chill-scala-2-11" % "1.0-SNAPSHOT"
 
 // For JSON (de)serializing
-libraryDependencies += "org.json4s" %% "json4s-jackson" % "3.2.8"
+libraryDependencies += "org.json4s" %% "json4s-jackson" % "3.2.9"
 
 // For i18n
 libraryDependencies += "tv.cntt" %% "scaposer" % "1.3"
@@ -60,7 +60,7 @@ libraryDependencies += "org.apache.commons" % "commons-lang3" % "3.3.2"
 libraryDependencies += "tv.cntt" % "rhinocoffeescript" % "1.7.1"
 
 // For metrics
-libraryDependencies += "nl.grons" %% "metrics-scala" % "3.0.5_a2.3"
+libraryDependencies += "nl.grons" %% "metrics-scala" % "3.1.1.1_a2.3"
 
 // For metrics
 libraryDependencies += "com.codahale.metrics" % "metrics-json" % "3.0.2"
