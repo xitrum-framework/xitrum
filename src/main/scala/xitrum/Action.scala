@@ -140,7 +140,7 @@ trait Action extends RequestEnv
                 }
             }
           } else {
-            val errorMsg = e.toString + "\n\n" + e.getStackTraceString
+            val errorMsg = e.toString + "\n\n" + e.getStackTrace
             if (isAjax)
               jsRespond("alert(\"" + jsEscape(errorMsg) + "\")")
             else
