@@ -8,12 +8,14 @@
   Update Scala from 2.10.4 to 2.11.0
 * `#143 <https://github.com/ngocdaothanh/xitrum/issues/143>`_
   Replace Manifest with TypeTag when Scala 2.11 is released
+* `#364 <https://github.com/ngocdaothanh/xitrum/issues/364>`_
+  Replace Twitter Chill with chill-scala-2.11
 * `#358 <https://github.com/ngocdaothanh/xitrum/issues/358>`_
   Update JSON4S from 3.2.8 to 3.2.9
 * `#359 <https://github.com/ngocdaothanh/xitrum/issues/359>`_
   Update metrics-scala from 3.0.5_a2.3 to 3.1.1.1_a2.3
-* `#364 <https://github.com/ngocdaothanh/xitrum/issues/364>`_
-  Replace Twitter Chill with chill-scala-2.11
+* `#365 <https://github.com/ngocdaothanh/xitrum/issues/365>`_
+  Update Schwatcher from 0.1.1 to 0.1.4
 * `#361 <https://github.com/ngocdaothanh/xitrum/issues/361>`_
   Update Netty from 4.0.18 to 4.0.19
 
