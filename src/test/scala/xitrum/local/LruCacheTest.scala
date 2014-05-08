@@ -11,6 +11,8 @@ class LruCacheTest extends FlatSpec with Matchers {
 
   it should "put/get any object" in {
     System.setProperty("xitrum.mode", "production")
+    assert(xitrum.Config.productionMode)
+
     val cache = new LruCache
 
     cache.put("forever", "forever")
