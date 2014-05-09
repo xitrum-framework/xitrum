@@ -3,10 +3,13 @@ package xitrum
 import java.util.concurrent.TimeUnit
 import scala.concurrent.duration.Duration
 import scala.util.control.NonFatal
+
 import akka.actor.Actor
 
 import io.netty.channel.{ChannelFuture, ChannelFutureListener}
 import io.netty.handler.codec.http.{HttpMethod, HttpResponseStatus}
+
+import org.apache.commons.lang3.exception.ExceptionUtils
 
 import xitrum.action._
 import xitrum.exception.{InvalidAntiCsrfToken, InvalidInput, MissingParam, SessionExpired}
@@ -140,7 +143,7 @@ trait Action extends RequestEnv
                 }
             }
           } else {
-            val errorMsg = e.toString + "\n\n" + e.getStackTrace
+            val errorMsg = e.toString + "\n\n" + ExceptionUtils.getStackTrace(e)
             if (isAjax)
               jsRespond("alert(\"" + jsEscape(errorMsg) + "\")")
             else
