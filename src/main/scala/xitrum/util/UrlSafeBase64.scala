@@ -11,9 +11,10 @@ import xitrum.Log
 
 /**
  * URL-safe dialect is used:
- * http://netty.io/3.6/api/org/jboss/netty/handler/codec/base64/Base64Dialect.html
+ * http://netty.io/4.0/api/io/netty/handler/codec/base64/Base64Dialect.html
  *
- * If you want to use standard dialect, use the feature in Netty directly.
+ * If you want to use standard dialect, use this utility in Netty directly:
+ * http://netty.io/4.0/api/io/netty/handler/codec/base64/Base64.html
  */
 object UrlSafeBase64 extends Log {
   /**
