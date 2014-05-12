@@ -1,5 +1,7 @@
 3.12:
 
+* `#372 <https://github.com/ngocdaothanh/xitrum/issues/372>`_
+  ParamAccess: Support all primitive types
 * `#373 <https://github.com/ngocdaothanh/xitrum/issues/373>`_
   Add respondWebSocketJson respondSockJsJson
 * `#374 <https://github.com/ngocdaothanh/xitrum/issues/374>`_

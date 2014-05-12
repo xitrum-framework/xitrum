@@ -9,6 +9,10 @@ import xitrum.exception.MissingParam
 object ParamAccess {
   val TYPE_FILE_UPLOAD = typeOf[FileUpload]
   val TYPE_STRING      = typeOf[String]
+  val TYPE_CHAR        = typeOf[Char]
+  val TYPE_BOOLEAN     = typeOf[Boolean]
+  val TYPE_BYTE        = typeOf[Byte]
+  val TYPE_SHORT       = typeOf[Short]
   val TYPE_INT         = typeOf[Int]
   val TYPE_LONG        = typeOf[Long]
   val TYPE_FLOAT       = typeOf[Float]
@@ -85,15 +89,19 @@ trait ParamAccess {
   //----------------------------------------------------------------------------
 
   /** Applications may override this method to convert to more types. */
-  def convertText[T: TypeTag](value: String): T = {
+  def convertText[T: TypeTag](string: String): T = {
     val t = typeOf[T]
     val any: Any =
-           if (t <:< TYPE_STRING) value
-      else if (t <:< TYPE_INT)    value.toInt
-      else if (t <:< TYPE_LONG)   value.toLong
-      else if (t <:< TYPE_FLOAT)  value.toFloat
-      else if (t <:< TYPE_DOUBLE) value.toDouble
-      else throw new Exception("Cannot covert " + value + " to " + t)
+           if (t <:< TYPE_STRING)  string
+      else if (t <:< TYPE_CHAR)    string(0)
+      else if (t <:< TYPE_BOOLEAN) string.toBoolean
+      else if (t <:< TYPE_BYTE)    string.toByte
+      else if (t <:< TYPE_SHORT)   string.toShort
+      else if (t <:< TYPE_INT)     string.toInt
+      else if (t <:< TYPE_LONG)    string.toLong
+      else if (t <:< TYPE_FLOAT)   string.toFloat
+      else if (t <:< TYPE_DOUBLE)  string.toDouble
+      else throw new Exception("Cannot covert " + string + " to " + t)
     any.asInstanceOf[T]
   }
 }
