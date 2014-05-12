@@ -4,6 +4,7 @@ import akka.actor.{Actor, ActorRef}
 
 import xitrum.handler.{DefaultHttpChannelInitializer, HandlerEnv}
 import xitrum.sockjs.{CloseFromHandler, MessageFromHandler}
+import xitrum.util.SeriDeseri
 
 //------------------------------------------------------------------------------
 
@@ -36,6 +37,11 @@ trait SockJsAction extends Actor with Action {
 
   def respondSockJsText(text: String) {
     sessionActorRef ! MessageFromHandler(text)
+  }
+
+  def respondSockJsJson(scalaObject: AnyRef) {
+    val json = SeriDeseri.toJson(scalaObject)
+    sessionActorRef ! MessageFromHandler(json)
   }
 
   def respondSockJsClose() {

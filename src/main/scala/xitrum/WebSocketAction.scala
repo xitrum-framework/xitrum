@@ -2,6 +2,7 @@ package xitrum
 
 import scala.runtime.ScalaRunTime
 import akka.actor.{Actor, PoisonPill}
+
 import io.netty.buffer.{ByteBuf, Unpooled}
 import io.netty.channel.{Channel, ChannelFuture, ChannelFutureListener}
 import io.netty.handler.codec.http.websocketx.{
@@ -12,9 +13,11 @@ import io.netty.handler.codec.http.websocketx.{
   TextWebSocketFrame,
   WebSocketServerHandshakerFactory
 }
+
 import xitrum.handler.{AccessLog, DefaultHttpChannelInitializer, HandlerEnv, NoRealPipelining}
 import xitrum.handler.inbound.WebSocketEventDispatcher
 import xitrum.handler.DefaultHttpChannelInitializer
+import xitrum.util.SeriDeseri
 
 //------------------------------------------------------------------------------
 
@@ -69,6 +72,12 @@ trait WebSocketAction extends Actor with Action {
   def respondWebSocketText(text: Any): ChannelFuture = {
     if (log.isTraceEnabled) log.trace("[WS out] text: " + text)
     channel.writeAndFlush(new TextWebSocketFrame(text.toString))
+  }
+
+  def respondWebSocketJson(scalaObject: AnyRef) {
+    val json = SeriDeseri.toJson(scalaObject)
+    if (log.isTraceEnabled) log.trace("[WS out] text: " + json)
+    channel.writeAndFlush(new TextWebSocketFrame(json))
   }
 
   def respondWebSocketBinary(bytes: Array[Byte]): ChannelFuture = {

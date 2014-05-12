@@ -1,3 +1,8 @@
+3.12:
+
+* `#373 <https://github.com/ngocdaothanh/xitrum/issues/373>`_
+  Add respondWebSocketJson respondSockJsJson
+
 3.11:
 
 * `#357 <https://github.com/ngocdaothanh/xitrum/issues/357>`_
