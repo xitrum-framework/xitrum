@@ -2,6 +2,8 @@
 
 * `#373 <https://github.com/ngocdaothanh/xitrum/issues/373>`_
   Add respondWebSocketJson respondSockJsJson
+* `#374 <https://github.com/ngocdaothanh/xitrum/issues/374>`_
+  Merge UrlSafeBase64 to SeriDeseri
 
 3.11:
 

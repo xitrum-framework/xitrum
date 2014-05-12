@@ -7,7 +7,7 @@ import ChannelHandler.Sharable
 
 import xitrum.Config
 import xitrum.handler.{HandlerEnv, NoRealPipelining}
-import xitrum.util.{ByteBufUtil, UrlSafeBase64}
+import xitrum.util.{ByteBufUtil, SeriDeseri}
 
 object BasicAuth {
   /** f takes username and password, and returns true if it want to let the user in. */
@@ -33,7 +33,7 @@ object BasicAuth {
       None
     } else {
       val username_password = authorization.substring(6)  // Skip "Basic "
-      UrlSafeBase64.autoPaddingDecode(username_password).flatMap { bytes =>
+      SeriDeseri.fromUrlSafeBase64(username_password).flatMap { bytes =>
         val username_password2 = new String(bytes)
         val username_password3 = username_password2.split(':')
         if (username_password3.length != 2)
