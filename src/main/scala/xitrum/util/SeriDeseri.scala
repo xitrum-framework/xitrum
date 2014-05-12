@@ -6,7 +6,7 @@ import com.twitter.chill.{KryoInstantiator, KryoPool, KryoSerializer}
 import org.json4s.{DefaultFormats, NoTypeHints}
 import org.json4s.jackson.{JsonMethods, Serialization}
 
-import io.netty.buffer.Unpooled
+import io.netty.buffer.{ByteBuf, Unpooled}
 import io.netty.handler.codec.base64.{Base64, Base64Dialect}
 import io.netty.util.CharsetUtil
 
@@ -89,6 +89,36 @@ object SeriDeseri {
               None
           }
       }
+    }
+  }
+
+  //----------------------------------------------------------------------------
+
+  def toBase64(bytes: Array[Byte]): String = {
+    val src    = Unpooled.wrappedBuffer(bytes)
+    val dest   = Base64.encode(src)
+    val base64 = dest.toString(CharsetUtil.UTF_8)
+    src.release()
+    dest.release()
+    base64
+  }
+
+  def fromBase64(base64String: String): Option[Array[Byte]] = {
+    var src:  ByteBuf = null
+    var dest: ByteBuf = null
+
+    try {
+      src       = Unpooled.copiedBuffer(base64String, CharsetUtil.UTF_8)
+      dest      = Base64.decode(src)
+      val bytes = new Array[Byte](dest.readableBytes)
+      dest.readBytes(bytes)
+      Some(bytes)
+    } catch {
+      case NonFatal(e) =>
+        None
+    } finally {
+      if (src  != null) src.release()
+      if (dest != null) dest.release()
     }
   }
 

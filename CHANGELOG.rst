@@ -4,6 +4,8 @@
   Add respondWebSocketJson respondSockJsJson
 * `#374 <https://github.com/ngocdaothanh/xitrum/issues/374>`_
   Merge UrlSafeBase64 to SeriDeseri
+* `#375 <https://github.com/ngocdaothanh/xitrum/issues/375>`_
+  Add toBase64 and fromBase64 to SeriDeseri
 
 3.11:
 
