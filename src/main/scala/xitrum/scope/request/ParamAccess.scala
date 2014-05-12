@@ -49,7 +49,7 @@ trait ParamAccess {
     } else {
       val coll2 = if (coll == null) textParams else coll
       val value = if (coll2.contains(key)) coll2.apply(key)(0) else throw new MissingParam(key)
-      convertText[T](value)
+      convertTextParam[T](value)
     }
   }
 
@@ -60,7 +60,7 @@ trait ParamAccess {
       val coll2  = if (coll == null) textParams else coll
       val values = coll2.get(key)
       val valueo = values.map(_(0))
-      valueo.map(convertText[T])
+      valueo.map(convertTextParam[T])
     }
   }
 
@@ -73,7 +73,7 @@ trait ParamAccess {
     } else {
       val coll2  = if (coll == null) textParams else coll
       val values = if (coll2.contains(key)) coll2.apply(key) else throw new MissingParam(key)
-      values.map(convertText[T])
+      values.map(convertTextParam[T])
     }
   }
 
@@ -82,26 +82,26 @@ trait ParamAccess {
       bodyFileParams.get(key).asInstanceOf[Option[Seq[T]]]
     } else {
       val coll2 = if (coll == null) textParams else coll
-      coll2.get(key).map(_.map(convertText[T]))
+      coll2.get(key).map(_.map(convertTextParam[T]))
     }
   }
 
   //----------------------------------------------------------------------------
 
   /** Applications may override this method to convert to more types. */
-  def convertText[T: TypeTag](string: String): T = {
+  def convertTextParam[T: TypeTag](value: String): T = {
     val t = typeOf[T]
     val any: Any =
-           if (t <:< TYPE_STRING)  string
-      else if (t <:< TYPE_CHAR)    string(0)
-      else if (t <:< TYPE_BOOLEAN) string.toBoolean
-      else if (t <:< TYPE_BYTE)    string.toByte
-      else if (t <:< TYPE_SHORT)   string.toShort
-      else if (t <:< TYPE_INT)     string.toInt
-      else if (t <:< TYPE_LONG)    string.toLong
-      else if (t <:< TYPE_FLOAT)   string.toFloat
-      else if (t <:< TYPE_DOUBLE)  string.toDouble
-      else throw new Exception("Cannot covert " + string + " to " + t)
+           if (t <:< TYPE_STRING)  value
+      else if (t <:< TYPE_CHAR)    value(0)
+      else if (t <:< TYPE_BOOLEAN) value.toBoolean
+      else if (t <:< TYPE_BYTE)    value.toByte
+      else if (t <:< TYPE_SHORT)   value.toShort
+      else if (t <:< TYPE_INT)     value.toInt
+      else if (t <:< TYPE_LONG)    value.toLong
+      else if (t <:< TYPE_FLOAT)   value.toFloat
+      else if (t <:< TYPE_DOUBLE)  value.toDouble
+      else throw new Exception("convertTextParam cannot covert " + value + " to " + t)
     any.asInstanceOf[T]
   }
 }
