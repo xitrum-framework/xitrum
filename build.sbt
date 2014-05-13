@@ -81,6 +81,10 @@ libraryDependencies <+= scalaVersion { sv => "org.scala-lang" % "scalap" % sv }
 
 //------------------------------------------------------------------------------
 
+// Avoid messy Scaladoc by excluding things that are not intended to be used
+// directly by normal Xitrum users.
+scalacOptions in (Compile, doc) ++= Seq("-skip-packages", "xitrum.sockjs")
+
 // Skip API doc generation to speedup "publish-local" while developing.
 // Comment out this line when publishing to Sonatype.
 publishArtifact in (Compile, packageDoc) := false
