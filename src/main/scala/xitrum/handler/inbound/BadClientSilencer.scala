@@ -6,7 +6,7 @@ import xitrum.Log
 
 /**
  * This handler should be put at the last position of the inbound pipeline to
- * catch all exception caused be bad client (closed connection, malformed request etc.).
+ * catch all exception caused by bad client (closed connection, malformed request etc.).
  */
 @Sharable
 class BadClientSilencer extends SimpleChannelInboundHandler[Any] with Log {
