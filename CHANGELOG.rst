@@ -1,424 +1,424 @@
 3.12:
 
-* `#372 <https://github.com/ngocdaothanh/xitrum/issues/372>`_
+* `#372 <https://github.com/xitrum-framework/xitrum/issues/372>`_
   ParamAccess: Support all primitive types
-* `#373 <https://github.com/ngocdaothanh/xitrum/issues/373>`_
+* `#373 <https://github.com/xitrum-framework/xitrum/issues/373>`_
   Add respondWebSocketJson respondSockJsJson
-* `#374 <https://github.com/ngocdaothanh/xitrum/issues/374>`_
+* `#374 <https://github.com/xitrum-framework/xitrum/issues/374>`_
   Merge UrlSafeBase64 to SeriDeseri
-* `#375 <https://github.com/ngocdaothanh/xitrum/issues/375>`_
+* `#375 <https://github.com/xitrum-framework/xitrum/issues/375>`_
   Add toBase64 and fromBase64 to SeriDeseri
 
 3.11:
 
-* `#357 <https://github.com/ngocdaothanh/xitrum/issues/357>`_
+* `#357 <https://github.com/xitrum-framework/xitrum/issues/357>`_
   Update Scala from 2.10.4 to 2.11.0
-* `#361 <https://github.com/ngocdaothanh/xitrum/issues/361>`_
+* `#361 <https://github.com/xitrum-framework/xitrum/issues/361>`_
   Update Netty from 4.0.18 to 4.0.19
-* `#358 <https://github.com/ngocdaothanh/xitrum/issues/358>`_
+* `#358 <https://github.com/xitrum-framework/xitrum/issues/358>`_
   Update JSON4S from 3.2.8 to 3.2.9
-* `#359 <https://github.com/ngocdaothanh/xitrum/issues/359>`_
+* `#359 <https://github.com/xitrum-framework/xitrum/issues/359>`_
   Update metrics-scala from 3.0.5_a2.3 to 3.1.1.1_a2.3
-* `#365 <https://github.com/ngocdaothanh/xitrum/issues/365>`_
+* `#365 <https://github.com/xitrum-framework/xitrum/issues/365>`_
   Update Schwatcher from 0.1.1 to 0.1.4
-* `#368 <https://github.com/ngocdaothanh/xitrum/issues/368>`_
+* `#368 <https://github.com/xitrum-framework/xitrum/issues/368>`_
   Update jQuery from 1.11.0 to 1.11.1
-* `#369 <https://github.com/ngocdaothanh/xitrum/issues/369>`_
+* `#369 <https://github.com/xitrum-framework/xitrum/issues/369>`_
   jQuery Validate from 1.11.1 to 1.12.0
-* `#370 <https://github.com/ngocdaothanh/xitrum/issues/370>`_
+* `#370 <https://github.com/xitrum-framework/xitrum/issues/370>`_
   Update Swagger-UI from 2.0.14 to 2.0.16
-* `#356 <https://github.com/ngocdaothanh/xitrum/issues/356>`_
+* `#356 <https://github.com/xitrum-framework/xitrum/issues/356>`_
   Fix: Remove metrics route when metrics is disabled
-* `#360 <https://github.com/ngocdaothanh/xitrum/issues/360>`_
+* `#360 <https://github.com/xitrum-framework/xitrum/issues/360>`_
   Split "Imperatively" feature (using Scla continuations) to a separate project
-* `#143 <https://github.com/ngocdaothanh/xitrum/issues/143>`_
+* `#143 <https://github.com/xitrum-framework/xitrum/issues/143>`_
   Replace Manifest with TypeTag when Scala 2.11 is released
-* `#364 <https://github.com/ngocdaothanh/xitrum/issues/364>`_
+* `#364 <https://github.com/xitrum-framework/xitrum/issues/364>`_
   Replace Twitter Chill with chill-scala-2.11
 
 3.7:
 
-* `#354 <https://github.com/ngocdaothanh/xitrum/issues/354>`_
+* `#354 <https://github.com/xitrum-framework/xitrum/issues/354>`_
   Fix HTTP keep alive and pipelining do not work
 
 3.6:
 
-* `#347 <https://github.com/ngocdaothanh/xitrum/issues/347>`_
+* `#347 <https://github.com/xitrum-framework/xitrum/issues/347>`_
   Fix Terrible performance of FutureAction and ActorAction
-* `#348 <https://github.com/ngocdaothanh/xitrum/issues/348>`_
+* `#348 <https://github.com/xitrum-framework/xitrum/issues/348>`_
   Fix bug: Unable to change Content-Type for respondFile and respondResource
-* `#80 <https://github.com/ngocdaothanh/xitrum/issues/80>`_
+* `#80 <https://github.com/xitrum-framework/xitrum/issues/80>`_
   Integrate Metrics (for actions statistics etc.)
-* `#337 <https://github.com/ngocdaothanh/xitrum/issues/337>`_
+* `#337 <https://github.com/xitrum-framework/xitrum/issues/337>`_
   Update Scala from 2.10.3 to 2.10.4 (you need to update your own projects to use Scala 2.10.4)
-* `#339 <https://github.com/ngocdaothanh/xitrum/issues/339>`_
+* `#339 <https://github.com/xitrum-framework/xitrum/issues/339>`_
   Update Netty from 4.0.17 to 4.0.18
-* `#342 <https://github.com/ngocdaothanh/xitrum/issues/342>`_
+* `#342 <https://github.com/xitrum-framework/xitrum/issues/342>`_
   Update Glokka from 1.7 to 1.8 (update Akka from 2.3.0 to 2.3.2)
-* `#332 <https://github.com/ngocdaothanh/xitrum/issues/332>`_
+* `#332 <https://github.com/xitrum-framework/xitrum/issues/332>`_
   Update JSON4S from 3.2.7 to 3.2.8 and replace json4s-native with json4s-jackson
-* `#341 <https://github.com/ngocdaothanh/xitrum/issues/341>`_
+* `#341 <https://github.com/xitrum-framework/xitrum/issues/341>`_
   Update SLF4J from 1.7.6 to 1.7.7, Logback from 1.1.1 to 1.1.2
-* `#343 <https://github.com/ngocdaothanh/xitrum/issues/343>`_
+* `#343 <https://github.com/xitrum-framework/xitrum/issues/343>`_
   Update commons-lang3 from 3.3 to 3.3.2
 
 3.5:
 
-* `#329 <https://github.com/ngocdaothanh/xitrum/issues/329>`_
+* `#329 <https://github.com/xitrum-framework/xitrum/issues/329>`_
   Netty's HttpRequestDecoder unable to parse request
-* `#333 <https://github.com/ngocdaothanh/xitrum/issues/333>`_
+* `#333 <https://github.com/xitrum-framework/xitrum/issues/333>`_
   Update Glokka from 1.6 to 1.7 (update Akka from 2.2.3 to 2.3.0)
 
 3.4:
 
-* `#322 <https://github.com/ngocdaothanh/xitrum/issues/322>`_
+* `#322 <https://github.com/xitrum-framework/xitrum/issues/322>`_
   Handle "Expect: 100-continue" requests
-* `#327 <https://github.com/ngocdaothanh/xitrum/issues/327>`_
+* `#327 <https://github.com/xitrum-framework/xitrum/issues/327>`_
   Fix path exception when autoreloading i18n files on Windows
-* `#328 <https://github.com/ngocdaothanh/xitrum/issues/328>`_
+* `#328 <https://github.com/xitrum-framework/xitrum/issues/328>`_
   Load language lazily
 
 3.3:
 
-* `#275 <https://github.com/ngocdaothanh/xitrum/issues/275>`_
+* `#275 <https://github.com/xitrum-framework/xitrum/issues/275>`_
   Add a way to change session cookie max age
-* `#316 <https://github.com/ngocdaothanh/xitrum/issues/316>`_
+* `#316 <https://github.com/xitrum-framework/xitrum/issues/316>`_
   SockJS: Change heartbeat from 5s to 25s
-* `#317 <https://github.com/ngocdaothanh/xitrum/issues/317>`_
+* `#317 <https://github.com/xitrum-framework/xitrum/issues/317>`_
   SockJS: Add heartbeat for WebSocket transport
-* `#318 <https://github.com/ngocdaothanh/xitrum/issues/318>`_
+* `#318 <https://github.com/xitrum-framework/xitrum/issues/318>`_
   Fix Netty memory leak at xitrum.util.UrlSafeBase64
-* `#323 <https://github.com/ngocdaothanh/xitrum/issues/323>`_
+* `#323 <https://github.com/xitrum-framework/xitrum/issues/323>`_
   Stop Xitrum at startup on port bind exception
-* `#315 <https://github.com/ngocdaothanh/xitrum/issues/315>`_
+* `#315 <https://github.com/xitrum-framework/xitrum/issues/315>`_
   Update Akka from 2.2.3 to 2.3.0
-* `#319 <https://github.com/ngocdaothanh/xitrum/issues/319>`_
+* `#319 <https://github.com/xitrum-framework/xitrum/issues/319>`_
   Update Twitter Chill from 0.3.5 to 0.3.6
-* `#320 <https://github.com/ngocdaothanh/xitrum/issues/320>`_
+* `#320 <https://github.com/xitrum-framework/xitrum/issues/320>`_
   Update Schwatcher from 0.0.9 to 0.1.0
-* `#325 <https://github.com/ngocdaothanh/xitrum/issues/325>`_
+* `#325 <https://github.com/xitrum-framework/xitrum/issues/325>`_
   Update commons-lang3 from 3.2.1 to 3.3
 
 3.2:
 
-* `#312 <https://github.com/ngocdaothanh/xitrum/issues/312>`_
+* `#312 <https://github.com/xitrum-framework/xitrum/issues/312>`_
   Fix bug at xitrum.js: when ajaxLoadingImg is not specified, the next element of the submit element is removed
-* `#268 <https://github.com/ngocdaothanh/xitrum/issues/268>`_
+* `#268 <https://github.com/xitrum-framework/xitrum/issues/268>`_
   Add xitrum.util.FileMonitor (requires Java 7)
-* `#308 <https://github.com/ngocdaothanh/xitrum/issues/308>`_
+* `#308 <https://github.com/xitrum-framework/xitrum/issues/308>`_
   Reload .po files updated at runtime
-* `#311 <https://github.com/ngocdaothanh/xitrum/issues/311>`_
+* `#311 <https://github.com/xitrum-framework/xitrum/issues/311>`_
   xitrum.util: Merge Json and SecureUrlSafeBase64 to SeriDeseri
-* `#297 <https://github.com/ngocdaothanh/xitrum/issues/297>`_
+* `#297 <https://github.com/xitrum-framework/xitrum/issues/297>`_
   Disable xitrum.local.LruCache in development mode
-* `#306 <https://github.com/ngocdaothanh/xitrum/issues/306>`_
+* `#306 <https://github.com/xitrum-framework/xitrum/issues/306>`_
   Update Netty from 4.0.16 to 4.0.17
 
 3.1:
 
-* `#292 <https://github.com/ngocdaothanh/xitrum/issues/292>`_
+* `#292 <https://github.com/xitrum-framework/xitrum/issues/292>`_
   Fix chunked response bug
-* `#295 <https://github.com/ngocdaothanh/xitrum/issues/295>`_
+* `#295 <https://github.com/xitrum-framework/xitrum/issues/295>`_
   Fix bug at responding static file in the zero copy style
-* `#288 <https://github.com/ngocdaothanh/xitrum/issues/288>`_
+* `#288 <https://github.com/xitrum-framework/xitrum/issues/288>`_
   Add Scalive
-* `#289 <https://github.com/ngocdaothanh/xitrum/issues/289>`_
+* `#289 <https://github.com/xitrum-framework/xitrum/issues/289>`_
   Update SLF4J from 1.7.5 to 1.7.6, Logback from 1.0.13 to 1.1.1
-* `#300 <https://github.com/ngocdaothanh/xitrum/issues/300>`_
+* `#300 <https://github.com/xitrum-framework/xitrum/issues/300>`_
   Update Netty from 4.0.15 to 4.0.16
-* `#301 <https://github.com/ngocdaothanh/xitrum/issues/301>`_
+* `#301 <https://github.com/xitrum-framework/xitrum/issues/301>`_
   Update JSON4S from 3.2.6 to 3.2.7
-* `#302 <https://github.com/ngocdaothanh/xitrum/issues/302>`_
+* `#302 <https://github.com/xitrum-framework/xitrum/issues/302>`_
   Update RhinoCoffeeScript from 1.6.3 to 1.7.1
-* `#303 <https://github.com/ngocdaothanh/xitrum/issues/303>`_
+* `#303 <https://github.com/xitrum-framework/xitrum/issues/303>`_
   Update jQuery from 1.10.2 to 1.11.0
-* `#304 <https://github.com/ngocdaothanh/xitrum/issues/304>`_
+* `#304 <https://github.com/xitrum-framework/xitrum/issues/304>`_
   Update Swagger UI from 2.0.4 to 2.0.12
 
 3.0:
 
-* `#151 <https://github.com/ngocdaothanh/xitrum/issues/151>`_
+* `#151 <https://github.com/xitrum-framework/xitrum/issues/151>`_
   Update Netty from 3.9.0 to 4.0.15
-* `#284 <https://github.com/ngocdaothanh/xitrum/issues/284>`_
+* `#284 <https://github.com/xitrum-framework/xitrum/issues/284>`_
   Fix: xitrum.local.LruCache#putIfAbsent can't overwrite stale cache
-* `#265 <https://github.com/ngocdaothanh/xitrum/issues/265>`_
+* `#265 <https://github.com/xitrum-framework/xitrum/issues/265>`_
   Add FutureAction, rename ActionActor to ActorAction, SockJsActor to SockJsAction, WebSocketActor to WebSocketAction
-* `#261 <https://github.com/ngocdaothanh/xitrum/issues/261>`_
+* `#261 <https://github.com/xitrum-framework/xitrum/issues/261>`_
   Add convenient methods to manipulate routes after they are collected at startup
-* `#269 <https://github.com/ngocdaothanh/xitrum/issues/269>`_
+* `#269 <https://github.com/xitrum-framework/xitrum/issues/269>`_
   Increase akka.logger-startup-timeout from 5s to 30s to avoid Akka's log initialization timeout error at Xitrum startup
-* `#263 <https://github.com/ngocdaothanh/xitrum/issues/263>`_
+* `#263 <https://github.com/xitrum-framework/xitrum/issues/263>`_
   Increase access log level from DEBUG to INFO
-* `#259 <https://github.com/ngocdaothanh/xitrum/issues/259>`_
+* `#259 <https://github.com/xitrum-framework/xitrum/issues/259>`_
   Log WebSocket messages at TRACE level
-* `#272 <https://github.com/ngocdaothanh/xitrum/issues/272>`_
+* `#272 <https://github.com/xitrum-framework/xitrum/issues/272>`_
   Add sockJsCookieNeeded in xitrum.conf so that this option can be set when deploying, depending on deployment environment
-* `#74 <https://github.com/ngocdaothanh/xitrum/issues/74>`_
+* `#74 <https://github.com/xitrum-framework/xitrum/issues/74>`_
   Flash socket policy server can use the same port with HTTP server
-* `#274 <https://github.com/ngocdaothanh/xitrum/issues/274>`_
+* `#274 <https://github.com/xitrum-framework/xitrum/issues/274>`_
   Update commons-lang3 from 3.1 to 3.2.1
-* `#282 <https://github.com/ngocdaothanh/xitrum/issues/282>`_
+* `#282 <https://github.com/xitrum-framework/xitrum/issues/282>`_
   Update Swagger UI from 2.0.3 to 2.0.4
 
 2.15:
 
-* `#77 <https://github.com/ngocdaothanh/xitrum/issues/77>`_
+* `#77 <https://github.com/xitrum-framework/xitrum/issues/77>`_
   Remove HttpChunkAggregator to avoid memory problem with file upload
-* `#258 <https://github.com/ngocdaothanh/xitrum/issues/258>`_
+* `#258 <https://github.com/xitrum-framework/xitrum/issues/258>`_
   Add config for saving upload files to memory or to disk temporarily
-* `#257 <https://github.com/ngocdaothanh/xitrum/issues/257>`_
+* `#257 <https://github.com/xitrum-framework/xitrum/issues/257>`_
   Add config for directory path to save uploaded files temporarily
-* `#256 <https://github.com/ngocdaothanh/xitrum/issues/256>`_
+* `#256 <https://github.com/xitrum-framework/xitrum/issues/256>`_
   Replace syntax respondView(classOf[OtherAction]) with respondView[OtherAction]()
-* `#255 <https://github.com/ngocdaothanh/xitrum/issues/255>`_
+* `#255 <https://github.com/xitrum-framework/xitrum/issues/255>`_
   Update Netty from 3.8.0 to 3.9.0
 
 2.14:
 
-* `#252 <https://github.com/ngocdaothanh/xitrum/issues/252>`_
+* `#252 <https://github.com/xitrum-framework/xitrum/issues/252>`_
   Fix cache TTL bug
-* `#244 <https://github.com/ngocdaothanh/xitrum/issues/244>`_
+* `#244 <https://github.com/xitrum-framework/xitrum/issues/244>`_
   Easier way to get request content as string and JSON
-* `#245 <https://github.com/ngocdaothanh/xitrum/issues/245>`_
+* `#245 <https://github.com/xitrum-framework/xitrum/issues/245>`_
   Rename "atJs" to "atJson"
-* `#248 <https://github.com/ngocdaothanh/xitrum/issues/248>`_
+* `#248 <https://github.com/xitrum-framework/xitrum/issues/248>`_
   Collect all routes
-* `#249 <https://github.com/ngocdaothanh/xitrum/issues/249>`_
+* `#249 <https://github.com/xitrum-framework/xitrum/issues/249>`_
   Improve inheritance rule of route annotations
-* `#250 <https://github.com/ngocdaothanh/xitrum/issues/250>`_
+* `#250 <https://github.com/xitrum-framework/xitrum/issues/250>`_
   CORS allow-origin should not be set for domain not specified in xitrum.conf
-* `#253 <https://github.com/ngocdaothanh/xitrum/issues/253>`_
+* `#253 <https://github.com/xitrum-framework/xitrum/issues/253>`_
   Update JSON4S from 3.2.5 to 3.2.6
-* `#254 <https://github.com/ngocdaothanh/xitrum/issues/254>`_
+* `#254 <https://github.com/xitrum-framework/xitrum/issues/254>`_
   Update Swagger UI from 2.0.2 to 2.0.3
 
 2.13:
 
-* `#239 <https://github.com/ngocdaothanh/xitrum/issues/239>`_
+* `#239 <https://github.com/xitrum-framework/xitrum/issues/239>`_
   Readd feature: One action can have multiple routes
-* `#236 <https://github.com/ngocdaothanh/xitrum/issues/236>`_
+* `#236 <https://github.com/xitrum-framework/xitrum/issues/236>`_
   Remove Swagger related routes when it is disabled
-* `#145 <https://github.com/ngocdaothanh/xitrum/issues/145>`_
+* `#145 <https://github.com/xitrum-framework/xitrum/issues/145>`_
   Split Knockout.js to a separate module
-* `#234 <https://github.com/ngocdaothanh/xitrum/issues/234>`_
+* `#234 <https://github.com/xitrum-framework/xitrum/issues/234>`_
   xitrum.js: Fix bug XITRUM_BASE_URL does not exist
-* `#237 <https://github.com/ngocdaothanh/xitrum/issues/237>`_
+* `#237 <https://github.com/xitrum-framework/xitrum/issues/237>`_
   xitrum.js: Add withBaseUrl
-* `#242 <https://github.com/ngocdaothanh/xitrum/issues/242>`_
+* `#242 <https://github.com/xitrum-framework/xitrum/issues/242>`_
   Add atJs; atJs("key") returns the JSON form of at("key")
-* `#238 <https://github.com/ngocdaothanh/xitrum/issues/238>`_
+* `#238 <https://github.com/xitrum-framework/xitrum/issues/238>`_
   CSRF token can be set in header
 
 2.12:
 
-* `#230 <https://github.com/ngocdaothanh/xitrum/issues/230>`_
+* `#230 <https://github.com/xitrum-framework/xitrum/issues/230>`_
   Fix bug Routes with trailing '/' are not matched
-* `#218 <https://github.com/ngocdaothanh/xitrum/issues/218>`_
+* `#218 <https://github.com/xitrum-framework/xitrum/issues/218>`_
   Make Hazelcast optional
-* `#221 <https://github.com/ngocdaothanh/xitrum/issues/221>`_
+* `#221 <https://github.com/xitrum-framework/xitrum/issues/221>`_
   xitrum.conf: Improve config of template engine, cache, and session store
-* `#159 <https://github.com/ngocdaothanh/xitrum/issues/159>`_
+* `#159 <https://github.com/xitrum-framework/xitrum/issues/159>`_
   Support dot in route
-* `#206 <https://github.com/ngocdaothanh/xitrum/issues/206>`_
+* `#206 <https://github.com/xitrum-framework/xitrum/issues/206>`_
   Support index.html fallback
-* `#209 <https://github.com/ngocdaothanh/xitrum/issues/209>`_
+* `#209 <https://github.com/xitrum-framework/xitrum/issues/209>`_
   Support automatic OPTIONS request handling for the whole site
-* `#71 <https://github.com/ngocdaothanh/xitrum/issues/71>`_
+* `#71 <https://github.com/xitrum-framework/xitrum/issues/71>`_
   Support automatic CORS request handling for the whole site
-* `#204 <https://github.com/ngocdaothanh/xitrum/issues/204>`_
+* `#204 <https://github.com/xitrum-framework/xitrum/issues/204>`_
   Log Xitrum additional routes separately from app routes
-* `#233 <https://github.com/ngocdaothanh/xitrum/issues/233>`_
+* `#233 <https://github.com/xitrum-framework/xitrum/issues/233>`_
   Add xitrum.Log package object for convenience use
-* `#223 <https://github.com/ngocdaothanh/xitrum/issues/223>`_
+* `#223 <https://github.com/xitrum-framework/xitrum/issues/223>`_
   Rename logger to log
-* `#195 <https://github.com/ngocdaothanh/xitrum/issues/195>`_
+* `#195 <https://github.com/xitrum-framework/xitrum/issues/195>`_
   Rename xitrumCSS to xitrumCss
-* `#216 <https://github.com/ngocdaothanh/xitrum/issues/216>`_
+* `#216 <https://github.com/xitrum-framework/xitrum/issues/216>`_
   Remove package xitrum.mq
-* `#211 <https://github.com/ngocdaothanh/xitrum/issues/211>`_
+* `#211 <https://github.com/xitrum-framework/xitrum/issues/211>`_
   Remove xitrum/routes.js
-* `#220 <https://github.com/ngocdaothanh/xitrum/issues/220>`_
+* `#220 <https://github.com/xitrum-framework/xitrum/issues/220>`_
   Optimize xitrum.util.Loader.bytesFromInputStream
-* `#227 <https://github.com/ngocdaothanh/xitrum/issues/227>`_
+* `#227 <https://github.com/xitrum-framework/xitrum/issues/227>`_
   Optimize xitrum.util.Json by avoid creating formats at every call
-* `#196 <https://github.com/ngocdaothanh/xitrum/issues/196>`_
+* `#196 <https://github.com/xitrum-framework/xitrum/issues/196>`_
   Swagger: Rename Optional<ValueType><ParamType> to Opt<ValueType><ParamType>, ex: OptStringQuery
-* `#198 <https://github.com/ngocdaothanh/xitrum/issues/198>`_
+* `#198 <https://github.com/xitrum-framework/xitrum/issues/198>`_
   Swagger: Add inheritance
-* `#199 <https://github.com/ngocdaothanh/xitrum/issues/199>`_
+* `#199 <https://github.com/xitrum-framework/xitrum/issues/199>`_
   Swagger: Add notes
-* `#232 <https://github.com/ngocdaothanh/xitrum/issues/232>`_
+* `#232 <https://github.com/xitrum-framework/xitrum/issues/232>`_
   Update Netty from 3.7.0 to 3.8.0
-* `#214 <https://github.com/ngocdaothanh/xitrum/issues/214>`_
+* `#214 <https://github.com/xitrum-framework/xitrum/issues/214>`_
   Update Glokka from 1.2 to 1.3 (and akka-slf4j to 2.2.3)
-* `#231 <https://github.com/ngocdaothanh/xitrum/issues/231>`_
+* `#231 <https://github.com/xitrum-framework/xitrum/issues/231>`_
   Update Twitter Chill from 0.3.4 to 0.3.5
-* `#200 <https://github.com/ngocdaothanh/xitrum/issues/200>`_
+* `#200 <https://github.com/xitrum-framework/xitrum/issues/200>`_
   Update Scaposer from 1.2 to 1.3
-* `#222 <https://github.com/ngocdaothanh/xitrum/issues/222>`_
+* `#222 <https://github.com/xitrum-framework/xitrum/issues/222>`_
   Update Knockout.js from 2.3.0 to 3.0.0
 
 2.11: This release contains a noisy debug println, please use 2.12 instead
 
 2.10:
 
-* `#180 <https://github.com/ngocdaothanh/xitrum/issues/180>`_
+* `#180 <https://github.com/xitrum-framework/xitrum/issues/180>`_
   Swagger: Add option to xitrum.conf to disable Swagger Doc
-* `#181 <https://github.com/ngocdaothanh/xitrum/issues/181>`_
+* `#181 <https://github.com/xitrum-framework/xitrum/issues/181>`_
   Swagger: Improve annotations
-* `#182 <https://github.com/ngocdaothanh/xitrum/issues/182>`_
+* `#182 <https://github.com/xitrum-framework/xitrum/issues/182>`_
   Swagger: Cache result on 1st access
-* `#185 <https://github.com/ngocdaothanh/xitrum/issues/185>`_
+* `#185 <https://github.com/xitrum-framework/xitrum/issues/185>`_
   Swagger: Include Swagger UI
-* `#183 <https://github.com/ngocdaothanh/xitrum/issues/183>`_
+* `#183 <https://github.com/xitrum-framework/xitrum/issues/183>`_
   Fix: Dead actor sends Terminate message to itself
-* `#194 <https://github.com/ngocdaothanh/xitrum/issues/194>`_
+* `#194 <https://github.com/xitrum-framework/xitrum/issues/194>`_
   Fix: Wrong version (2.10.0) of scala-compiler, scala-reflect, and scalap is used
-* `#51 <https://github.com/ngocdaothanh/xitrum/issues/51>`_
+* `#51 <https://github.com/xitrum-framework/xitrum/issues/51>`_
   Add bin/runner.bat for Windows
-* `#93 <https://github.com/ngocdaothanh/xitrum/issues/93>`_
+* `#93 <https://github.com/xitrum-framework/xitrum/issues/93>`_
   Readd indices for xitrum.mq.MessageQueue
-* `#179 <https://github.com/ngocdaothanh/xitrum/issues/179>`_
+* `#179 <https://github.com/xitrum-framework/xitrum/issues/179>`_
   Add route aliasing
-* `#189 <https://github.com/ngocdaothanh/xitrum/issues/189>`_
+* `#189 <https://github.com/xitrum-framework/xitrum/issues/189>`_
   Add option to xitrum.conf to configure request maxInitialLineLength
-* `#193 <https://github.com/ngocdaothanh/xitrum/issues/193>`_
+* `#193 <https://github.com/xitrum-framework/xitrum/issues/193>`_
   Add request.staticFilePathRegex to xitrum.conf
-* `#172 <https://github.com/ngocdaothanh/xitrum/issues/172>`_
+* `#172 <https://github.com/xitrum-framework/xitrum/issues/172>`_
   Replace Java annotations with Scala annotations
-* `#191 <https://github.com/ngocdaothanh/xitrum/issues/191>`_
+* `#191 <https://github.com/xitrum-framework/xitrum/issues/191>`_
   Placeholder in URL can't be empty
-* `#132 <https://github.com/ngocdaothanh/xitrum/issues/132>`_
+* `#132 <https://github.com/xitrum-framework/xitrum/issues/132>`_
   Log network card interface
-* `#192 <https://github.com/ngocdaothanh/xitrum/issues/192>`_
+* `#192 <https://github.com/xitrum-framework/xitrum/issues/192>`_
   Update Twitter Chill from 0.3.2 to 0.3.4
 
 2.9:
 
-* `#169 <https://github.com/ngocdaothanh/xitrum/issues/169>`_
+* `#169 <https://github.com/xitrum-framework/xitrum/issues/169>`_
   Add Swagger Doc support
-* `#173 <https://github.com/ngocdaothanh/xitrum/issues/173>`_
+* `#173 <https://github.com/xitrum-framework/xitrum/issues/173>`_
   Speed up routing by caching latest matched routes
-* `#174 <https://github.com/ngocdaothanh/xitrum/issues/174>`_
+* `#174 <https://github.com/xitrum-framework/xitrum/issues/174>`_
   Redirect Akka log to SLF4J
-* `#175 <https://github.com/ngocdaothanh/xitrum/issues/175>`_
+* `#175 <https://github.com/xitrum-framework/xitrum/issues/175>`_
   Optimize static file serving by readding /public/ prefix
-* `#176 <https://github.com/ngocdaothanh/xitrum/issues/176>`_
+* `#176 <https://github.com/xitrum-framework/xitrum/issues/176>`_
   Change SkipCSRFCheck to SkipCsrfCheck; same for antiCSRFMeta etc.
-* `#177 <https://github.com/ngocdaothanh/xitrum/issues/177>`_
+* `#177 <https://github.com/xitrum-framework/xitrum/issues/177>`_
   Make routes.cache loading more robust with class name change
-* `#168 <https://github.com/ngocdaothanh/xitrum/issues/168>`_
+* `#168 <https://github.com/xitrum-framework/xitrum/issues/168>`_
   Better support for custom handler
-* `#167 <https://github.com/ngocdaothanh/xitrum/issues/167>`_
+* `#167 <https://github.com/xitrum-framework/xitrum/issues/167>`_
   Update Netty from 3.6.6.Final to 3.7.0.Final
-* `#171 <https://github.com/ngocdaothanh/xitrum/issues/171>`_
+* `#171 <https://github.com/xitrum-framework/xitrum/issues/171>`_
   Update Hazelcast from 3.0.1 to 3.0.2
-* `#170 <https://github.com/ngocdaothanh/xitrum/issues/170>`_
+* `#170 <https://github.com/xitrum-framework/xitrum/issues/170>`_
   Update Glokka from 1.1 to 1.2
-* `#178 <https://github.com/ngocdaothanh/xitrum/issues/178>`_
+* `#178 <https://github.com/xitrum-framework/xitrum/issues/178>`_
   Update Twitter Chill from 0.3.1 to 0.3.2
 
 2.8:
 
-* `#164 <https://github.com/ngocdaothanh/xitrum/issues/164>`_
+* `#164 <https://github.com/xitrum-framework/xitrum/issues/164>`_
   Fix: publicUrl and resourceUrl return URL containing double slash if reverseProxy.baseUrl in xitrum.conf is set
-* `#157 <https://github.com/ngocdaothanh/xitrum/issues/157>`_
+* `#157 <https://github.com/xitrum-framework/xitrum/issues/157>`_
   Support HTTP method PATCH
-* `#161 <https://github.com/ngocdaothanh/xitrum/issues/161>`_
+* `#161 <https://github.com/xitrum-framework/xitrum/issues/161>`_
   Update SBT from 0.12.4 to 0.13.0
-* `#162 <https://github.com/ngocdaothanh/xitrum/issues/162>`_
+* `#162 <https://github.com/xitrum-framework/xitrum/issues/162>`_
   Update Akka from 2.2.0 to 2.2.1
-* `#158 <https://github.com/ngocdaothanh/xitrum/issues/158>`_
+* `#158 <https://github.com/xitrum-framework/xitrum/issues/158>`_
   Update Hazelcast from 2.6 to 3.0.1
-* `#163 <https://github.com/ngocdaothanh/xitrum/issues/163>`_
+* `#163 <https://github.com/xitrum-framework/xitrum/issues/163>`_
   Update Twitter Chill from 0.3.0 to 0.3.1
 
 2.7:
 
-* `#152 <https://github.com/ngocdaothanh/xitrum/issues/152>`_
+* `#152 <https://github.com/xitrum-framework/xitrum/issues/152>`_
   Fix: Static files in public directory are not served on Windows
-* `#155 <https://github.com/ngocdaothanh/xitrum/issues/155>`_
+* `#155 <https://github.com/xitrum-framework/xitrum/issues/155>`_
   Fix: Workaround for thread safety problem of Scala reflection API
-* `#146 <https://github.com/ngocdaothanh/xitrum/issues/146>`_
+* `#146 <https://github.com/xitrum-framework/xitrum/issues/146>`_
   Add config option to disable auto gzip
-* `#140 <https://github.com/ngocdaothanh/xitrum/issues/140>`_
+* `#140 <https://github.com/xitrum-framework/xitrum/issues/140>`_
   Update Scala from 2.10.1 to 2.10.2
-* `#148 <https://github.com/ngocdaothanh/xitrum/issues/148>`_
+* `#148 <https://github.com/xitrum-framework/xitrum/issues/148>`_
   Update Akka from 2.1.4 to 2.2.0
-* `#142 <https://github.com/ngocdaothanh/xitrum/issues/142>`_
+* `#142 <https://github.com/xitrum-framework/xitrum/issues/142>`_
   Update Hazelcast from 2.5.1 to 2.6
-* `#153 <https://github.com/ngocdaothanh/xitrum/issues/153>`_
+* `#153 <https://github.com/xitrum-framework/xitrum/issues/153>`_
   Update Twitter Chill from 0.2.3 to 0.3.0
-* `#154 <https://github.com/ngocdaothanh/xitrum/issues/154>`_
+* `#154 <https://github.com/xitrum-framework/xitrum/issues/154>`_
   Update JSON4S from 3.2.4 to 3.2.5
-* `#147 <https://github.com/ngocdaothanh/xitrum/issues/147>`_
+* `#147 <https://github.com/xitrum-framework/xitrum/issues/147>`_
   Update RhinoCoffeeScript to 1.6.3
-* `#149 <https://github.com/ngocdaothanh/xitrum/issues/149>`_
+* `#149 <https://github.com/xitrum-framework/xitrum/issues/149>`_
   Update jQuery from 1.10.0 to 1.10.2
-* `#150 <https://github.com/ngocdaothanh/xitrum/issues/150>`_
+* `#150 <https://github.com/xitrum-framework/xitrum/issues/150>`_
   Update Knockout.js from 2.2.1 to 2.3.0
 
 2.6:
 
-* `#135 <https://github.com/ngocdaothanh/xitrum/issues/135>`_
+* `#135 <https://github.com/xitrum-framework/xitrum/issues/135>`_
   Fix: Hangs up on cached action
-* `#119 <https://github.com/ngocdaothanh/xitrum/issues/119>`_
+* `#119 <https://github.com/xitrum-framework/xitrum/issues/119>`_
   Close connection after sendUnsupportedWebSocketVersionResponse
-* `#139 <https://github.com/ngocdaothanh/xitrum/issues/139>`_
+* `#139 <https://github.com/xitrum-framework/xitrum/issues/139>`_
   Add UnserializableSessionStore
-* `#136 <https://github.com/ngocdaothanh/xitrum/issues/136>`_
+* `#136 <https://github.com/xitrum-framework/xitrum/issues/136>`_
   Update Netty to 3.6.6.Final
-* `#133 <https://github.com/ngocdaothanh/xitrum/issues/133>`_
+* `#133 <https://github.com/xitrum-framework/xitrum/issues/133>`_
   Update Akka to 2.1.4
-* `#137 <https://github.com/ngocdaothanh/xitrum/issues/137>`_
+* `#137 <https://github.com/xitrum-framework/xitrum/issues/137>`_
   Update Twitter Chill to 0.2.3
-* `#138 <https://github.com/ngocdaothanh/xitrum/issues/138>`_
+* `#138 <https://github.com/xitrum-framework/xitrum/issues/138>`_
   Update jQuery to 1.10.0
 
 2.5:
 
-* `#126 <https://github.com/ngocdaothanh/xitrum/issues/126>`_
+* `#126 <https://github.com/xitrum-framework/xitrum/issues/126>`_
   Basic authentication causes NullPointerException
-* `#127 <https://github.com/ngocdaothanh/xitrum/issues/127>`_
+* `#127 <https://github.com/xitrum-framework/xitrum/issues/127>`_
   Update Twitter Chill to 0.2.2
 
 2.4:
 
-* `#115 <https://github.com/ngocdaothanh/xitrum/issues/115>`_
+* `#115 <https://github.com/xitrum-framework/xitrum/issues/115>`_
   Replace Javassist with ASM to reduce the number of dependencies
-* `#121 <https://github.com/ngocdaothanh/xitrum/issues/121>`_
+* `#121 <https://github.com/xitrum-framework/xitrum/issues/121>`_
   Update Twitter Chill to 0.2.1
-* `#123 <https://github.com/ngocdaothanh/xitrum/issues/123>`_
+* `#123 <https://github.com/xitrum-framework/xitrum/issues/123>`_
   Update Hazelcast to 2.5.1
 
 2.3:
 
-* `#120 <https://github.com/ngocdaothanh/xitrum/issues/120>`_
+* `#120 <https://github.com/xitrum-framework/xitrum/issues/120>`_
   Add javacOptions -source 1.6 to avoid problem when Xitrum is built with
   Java 7 but the projects that use Xitrum are run with Java 6
 
 2.2:
 
-* `#112 <https://github.com/ngocdaothanh/xitrum/issues/112>`_
+* `#112 <https://github.com/xitrum-framework/xitrum/issues/112>`_
   Add redirectToThis to redirect to the current action
-* `#113 <https://github.com/ngocdaothanh/xitrum/issues/113>`_
+* `#113 <https://github.com/xitrum-framework/xitrum/issues/113>`_
   Rename urlForPublic to publicUrl, urlForResource to resourceUrl
-* `#117 <https://github.com/ngocdaothanh/xitrum/issues/117>`_
+* `#117 <https://github.com/xitrum-framework/xitrum/issues/117>`_
   Apps can be configured to use no template engine
-* `#118 <https://github.com/ngocdaothanh/xitrum/issues/118>`_
+* `#118 <https://github.com/xitrum-framework/xitrum/issues/118>`_
   Route collecting: support getting cache annotation from superclasses
 
 2.1:
 
-* `#110 <https://github.com/ngocdaothanh/xitrum/issues/110>`_
+* `#110 <https://github.com/xitrum-framework/xitrum/issues/110>`_
   Can't run in production mode because SockJsClassAndOptions
   in routes can't be serialized
-* `#111 <https://github.com/ngocdaothanh/xitrum/issues/111>`_
+* `#111 <https://github.com/xitrum-framework/xitrum/issues/111>`_
   Unify the "execute" method for Action, ActionActor,
   WebSocketActor, and SockJSActor
 
 2.0:
-`#104 <https://github.com/ngocdaothanh/xitrum/issues/104`_
+`#104 <https://github.com/xitrum-framework/xitrum/issues/104`_
 Annotate your Akka actor to make it accessible from web
 
 * Break actions in controller out to separate classes, each is an Action or
@@ -430,7 +430,7 @@ Annotate your Akka actor to make it accessible from web
 * Allow starting server with custom Netty ChannelPipelineFactory;
   for an example, see xitrum.handler.DefaultHttpChannelPipelineFactory
 * Speed up CoffeeScript compiling by using
-  https://github.com/ngocdaothanh/RhinoCoffeeScript
+  https://github.com/xitrum-framework/RhinoCoffeeScript
 * Use Akka log instead of using SLF4J directly
 * Ignore trailing slash in URL: treat "articles" and "articles/" the same;
   note that trailing slash is not recommended since browsers do not cache page with such URL
@@ -440,48 +440,48 @@ Annotate your Akka actor to make it accessible from web
 
 1.22:
 
-* `#106 <https://github.com/ngocdaothanh/xitrum/issues/106>`_
+* `#106 <https://github.com/xitrum-framework/xitrum/issues/106>`_
   Update JSON4S to 3.2.4
-* `#107 <https://github.com/ngocdaothanh/xitrum/issues/107>`_
+* `#107 <https://github.com/xitrum-framework/xitrum/issues/107>`_
   Update Netty to 3.6.4
 
 1.21:
 
-* `#103 <https://github.com/ngocdaothanh/xitrum/issues/103>`_
+* `#103 <https://github.com/xitrum-framework/xitrum/issues/103>`_
   Move Scalate template engine out to a separate project
-* `#105 <https://github.com/ngocdaothanh/xitrum/issues/105>`_
+* `#105 <https://github.com/xitrum-framework/xitrum/issues/105>`_
   Move xitrum-sbt-plugin out to a separate project
-* `#100 <https://github.com/ngocdaothanh/xitrum/issues/100>`_
+* `#100 <https://github.com/xitrum-framework/xitrum/issues/100>`_
   Update JSON4S to 3.2.3
-* `#102 <https://github.com/ngocdaothanh/xitrum/issues/102>`_
+* `#102 <https://github.com/xitrum-framework/xitrum/issues/102>`_
   Update slf4j-api to 1.7.5
 
 1.20:
 
-* `#88 <https://github.com/ngocdaothanh/xitrum/issues/88>`_
+* `#88 <https://github.com/xitrum-framework/xitrum/issues/88>`_
   Replace JBoss Marshalling with Twitter's Chill
-* `#99 <https://github.com/ngocdaothanh/xitrum/issues/99>`_
+* `#99 <https://github.com/xitrum-framework/xitrum/issues/99>`_
   Use ReflectASM (included by Twitter Chill) to initiate controllers faster
-* `#96 <https://github.com/ngocdaothanh/xitrum/issues/96>`_
+* `#96 <https://github.com/xitrum-framework/xitrum/issues/96>`_
   Rename xitrum.util.Base64 to UrlSafeBase64, SecureBase64 to SecureUrlSafeBase64
-* `#97 <https://github.com/ngocdaothanh/xitrum/issues/97>`_
+* `#97 <https://github.com/xitrum-framework/xitrum/issues/97>`_
   Update SLF4J from 1.7.2 to 1.7.3, Logback from 1.0.9 to 1.0.10
   You should update Logback in your project from 1.0.9 to 1.0.10
-* `#98 <https://github.com/ngocdaothanh/xitrum/issues/98>`_
+* `#98 <https://github.com/xitrum-framework/xitrum/issues/98>`_
   Update Akka from 2.1.1 to 2.1.2
 
 1.19:
 
-* `#91 <https://github.com/ngocdaothanh/xitrum/issues/91>`_
+* `#91 <https://github.com/xitrum-framework/xitrum/issues/91>`_
   Update Akka from 2.1.0 to 2.1.1
-* `#94 <https://github.com/ngocdaothanh/xitrum/issues/94>`_
+* `#94 <https://github.com/xitrum-framework/xitrum/issues/94>`_
   Improve Secure#unseal
 
 1.18:
 
-* `#87 <https://github.com/ngocdaothanh/xitrum/issues/87>`_
+* `#87 <https://github.com/xitrum-framework/xitrum/issues/87>`_
   Update Netty from 3.6.2 to 3.6.3
-* `#90 <https://github.com/ngocdaothanh/xitrum/issues/90>`_
+* `#90 <https://github.com/xitrum-framework/xitrum/issues/90>`_
   Update jQuery Validate from 1.10.0 to 1.11.0
 
 1.17:
@@ -490,7 +490,7 @@ Annotate your Akka actor to make it accessible from web
 
 1.16:
 
-* `#86 <https://github.com/ngocdaothanh/xitrum/issues/86>`_
+* `#86 <https://github.com/xitrum-framework/xitrum/issues/86>`_
   Add forwardTo
 * SockJS handler can now access session, request headers etc.
   ``def onOpen(session: immutable Map[String, Any])`` -> ``def onOpen(controller: Controller)``
@@ -518,13 +518,13 @@ Annotate your Akka actor to make it accessible from web
 
 See these examples to know how to update your project from 1.14 to 1.15:
 
-* `xitrum-new <https://github.com/ngocdaothanh/xitrum-new/commit/98b1af9a006491935f217d46fedda79bd522a3c9>`_
-* `xitrum-demos <https://github.com/ngocdaothanh/xitrum-demos/commit/e57872a1e7d6d74854b012e45879bf1500029217>`_
-* `And xsbt-scalate-generate <https://github.com/ngocdaothanh/xitrum-new/commit/ce9d3c777fec2f0e4cacdb5171476791a572f7bc>`_
+* `xitrum-new <https://github.com/xitrum-framework/xitrum-new/commit/98b1af9a006491935f217d46fedda79bd522a3c9>`_
+* `xitrum-demos <https://github.com/xitrum-framework/xitrum-demos/commit/e57872a1e7d6d74854b012e45879bf1500029217>`_
+* `And xsbt-scalate-generate <https://github.com/xitrum-framework/xitrum-new/commit/ce9d3c777fec2f0e4cacdb5171476791a572f7bc>`_
 
 1.14:
 
-* `Add config for template engine and Scalate template path <http://ngocdaothanh.github.com/xitrum/guide/howto.html#create-your-own-template-engine>`_
+* `Add config for template engine and Scalate template path <http://xitrum-framework.github.com/xitrum/guide/howto.html#create-your-own-template-engine>`_
 * `Add comparison of controllers and actions <https://groups.google.com/group/xitrum-framework/browse_thread/thread/a3469fea17f84ce4>`_
   ``if (currentController == MyController) ...``
   ``if (currentAction == MyController.index) ...``
@@ -533,14 +533,14 @@ See these examples to know how to update your project from 1.14 to 1.15:
 * Update jboss-marshalling from 1.3.15.GA to 1.3.16.GA
 
 Updating your project from Xitrum 1.13 to 1.14 is
-`simple <https://github.com/ngocdaothanh/xitrum-new/commit/fea3334ae3c7bedca1a6051d6abc851fb617d4ba>`_.
+`simple <https://github.com/xitrum-framework/xitrum-new/commit/fea3334ae3c7bedca1a6051d6abc851fb617d4ba>`_.
 
 1.13:
 
 * `Update Scala from 1.9.2 to 2.10.0 <https://groups.google.com/group/akka-user/browse_thread/thread/77e1f134b5134c70>`_
 * `Update Akka from 2.0.4 to 2.1.0 <http://doc.akka.io/docs/akka/2.1.0/project/migration-guide-2.0.x-2.1.x.html>`_
 * Change Scalate template directory from ``src/main/view/scalate`` to ``src/main/scalate``
-* `Add network interface config to config/xitrum.conf <https://github.com/ngocdaothanh/xitrum-new/blob/master/config/xitrum.conf>`_
+* `Add network interface config to config/xitrum.conf <https://github.com/xitrum-framework/xitrum-new/blob/master/config/xitrum.conf>`_
 * Add request and response log at TRACE level for easier debugging
 * Add log for 500 error in production mode
 
@@ -574,12 +574,12 @@ Updating your project from Xitrum 1.13 to 1.14 is
 
 1.10:
 
-* `Improve <http://ngocdaothanh.github.com/xitrum/guide/scopes.html#cookie>`_
+* `Improve <http://xitrum-framework.github.com/xitrum/guide/scopes.html#cookie>`_
   cookie API to requestCookies and responseCookies.
   Only cookies in responseCookies `will be sent to browsers <http://groups.google.com/group/xitrum-framework/browse_thread/thread/dbb7a8e638120b09>`_.
 * `Remove <http://groups.google.com/group/xitrum-framework/browse_thread/thread/310c61f501e0bba8>`_
   ``resetSession`` method. To reset session, call ``session.clear()``.
-* `Support Scalate Mustache template <http://ngocdaothanh.github.com/xitrum/guide/controller_action_view.html#scalate>`_
+* `Support Scalate Mustache template <http://xitrum-framework.github.com/xitrum/guide/controller_action_view.html#scalate>`_
 * `Fix bug with sending the last chunk in chunked mode for SockJS <http://groups.google.com/group/sockjs/msg/d66e2978249b5f26>`_
 * Fix URL to jquery.validate-1.10.0/localization/messages_<lang>.js
   (was "jquery.validate-1.9.0/..." instead)
@@ -635,13 +635,13 @@ Updating your project from Xitrum 1.13 to 1.14 is
 * Rename routes.sclasner to routes.cache
 * `Update Netty from 3.5.8.Final to 3.5.9.Final <https://netty.io/Blog/Netty+359Final+is+out>`_
 * Update Hazelcast from 2.3.1 to 2.4
-* `Update Scaposer from 1.1 to 1.2 <https://github.com/ngocdaothanh/scaposer/pull/3>`_
+* `Update Scaposer from 1.1 to 1.2 <https://github.com/xitrum-framework/scaposer/pull/3>`_
 
 1.9.7:
 
 * Fix problem when HTTPS is used and static file is bigger than
   "smallStaticFileSizeInKB" in config/xitrum.js:
-  https://github.com/ngocdaothanh/xitrum/issues/64
+  https://github.com/xitrum-framework/xitrum/issues/64
 * Fix iOS6 Safari POST caching problem by automatically setting "Cache-Control"
   header to "no-cache" for POST response:
   http://www.mnot.net/blog/2012/09/24/caching_POST
@@ -675,7 +675,7 @@ Updating your project from Xitrum 1.13 to 1.14 is
 * Support WebSocket for iPhone Safari when running on port 80 (HTTP) or 443 (HTTPS);
   previous Xitrum versions work OK for iPhone Safari when non-standard ports are used
 * Improve i18n feature, e.g. add autosetLanguage method:
-  http://ngocdaothanh.github.com/xitrum/guide/i18n.html
+  http://xitrum-framework.github.com/xitrum/guide/i18n.html
 
 1.9.5:
 
@@ -706,7 +706,7 @@ Updating your project from Xitrum 1.13 to 1.14 is
   http://www.adobe.com/devnet/flashplayer/articles/socket_policy_files.html
   http://www.lightsphere.com/dev/articles/flash_socket_policy.html
 * config/xitrum.json is slightly improved:
-  https://github.com/ngocdaothanh/xitrum-new/blob/master/config/xitrum.json
+  https://github.com/xitrum-framework/xitrum-new/blob/master/config/xitrum.json
 * "Cache-Control" header will be automatically set to "no-cache"
   for chunked response, e.g. when response.setChunked(true) is called
   Note that "Pragma" will not be sent because this header is for request, not response:
@@ -732,7 +732,7 @@ Updating your project from Xitrum 1.13 to 1.14 is
 
 * Add global basic authentication to protect the whole site.
   This is usually needed when putting an unfinished site to the Internet.
-  See https://github.com/ngocdaothanh/xitrum-new/blob/master/config/xitrum.json
+  See https://github.com/xitrum-framework/xitrum-new/blob/master/config/xitrum.json
 * Improve access log to include remote IP
 * Support "Range" request to static files
   Xitrum can now be used to serve interleaved MP4 movies
@@ -744,9 +744,9 @@ Updating your project from Xitrum 1.13 to 1.14 is
 * Update Hazelcast from 2.1.2 to 2.2:
   http://hazelcast.com/docs/2.2/manual/multi_html/ch18s04.html
   hazelcast_java_client.json is changed to hazelcast_java_client.properties
-  See https://github.com/ngocdaothanh/xitrum-new/blob/master/config/hazelcast_java_client.properties
+  See https://github.com/xitrum-framework/xitrum-new/blob/master/config/hazelcast_java_client.properties
 * Update Scaposer from 1.0 to 1.1:
-  https://github.com/ngocdaothanh/scaposer/pull/2
+  https://github.com/xitrum-framework/scaposer/pull/2
 
 1.9.1:
 
@@ -772,7 +772,7 @@ Updating your project from Xitrum 1.13 to 1.14 is
     Old code: import io.netty.util.CharsetUtil.UTF_8
     New code: import org.jboss.netty.util.CharsetUtil.UTF_8
 * basicAuthenticate now works as documented:
-  http://ngocdaothanh.github.com/xitrum/guide/howto.html#basic-authentication
+  http://xitrum-framework.github.com/xitrum/guide/howto.html#basic-authentication
 * Add I18n#tf, tcf, tnf, tcnf for formatted string;
   Standard placeholders %d, %s etc. work, but if the formatted string contains
   many of them, their order should not be changed
@@ -787,18 +787,18 @@ Updating your project from Xitrum 1.13 to 1.14 is
   ControllerObject.action.webSocketAbsoluteUrl
 * Update Hazelcast from 2.0.1 to 2.0.2
 * Fix #63
-  https://github.com/ngocdaothanh/xitrum/issues/63
+  https://github.com/xitrum-framework/xitrum/issues/63
 
 1.8.6:
 
 * Fix WebSocket bug introduced in Xitrum 1.8.4, now WebSocket frame receiving works again
 * Cleaner API for WebSocket:
-  http://ngocdaothanh.github.com/xitrum/doc/async.html#websocket
+  http://xitrum-framework.github.com/xitrum/doc/async.html#websocket
 * To easily put JS fragments to Scalate views, jsAtBottom is split to jsDefaults and jsForView.
   jsDefaults containing jQuery, Knockout.js etc. should be put at layout's <head>.
   jsForView containing JS fragments added by jsAddToView should be put at layout's bottom.
 * Add JS utility: xitrum.appendAndScroll, see example:
-  https://github.com/ngocdaothanh/xitrum-demos/blob/master/src/main/view/scalate/quickstart/controller/CometChat/index.jade
+  https://github.com/xitrum-framework/xitrum-demos/blob/master/src/main/view/scalate/quickstart/controller/CometChat/index.jade
 
 1.8.5:
 
@@ -828,14 +828,14 @@ Updating your project from Xitrum 1.13 to 1.14 is
 
 1.8.3:
 
-* Fix `#60 <https://github.com/ngocdaothanh/xitrum/issues/60>`_
+* Fix `#60 <https://github.com/xitrum-framework/xitrum/issues/60>`_
 
 1.8.2:
 
 * Filters now have "only" and "except"
-  http://ngocdaothanh.github.com/xitrum/filter.html
+  http://xitrum-framework.github.com/xitrum/filter.html
 * Optimize routing by using methods instead of vals
-  http://ngocdaothanh.github.com/xitrum/controller_action_view.html
+  http://xitrum-framework.github.com/xitrum/controller_action_view.html
 
 1.8:
 
@@ -857,12 +857,12 @@ Updating your project from Xitrum 1.13 to 1.14 is
     http://jim-mcbeath.blogspot.com/2010/08/delimited-continuations.html
 * Update jQuery from 1.6.4 to 1.7.1
 * Fix urlForPublic bug, resulted URL now has the leading "/"
-* Improve Quickstart: https://github.com/ngocdaothanh/xitrum-quickstart
+* Improve Quickstart: https://github.com/xitrum-framework/xitrum-quickstart
 
 1.7:
 
 * WebSocket, see:
-  http://ngocdaothanh.github.com/xitrum/async.html#websocket
+  http://xitrum-framework.github.com/xitrum/async.html#websocket
   http://netty.io/blog/2011/11/17/
 * Make postback tag attributes HTML5 standards-compliant:
   You must change:
@@ -871,7 +871,7 @@ Updating your project from Xitrum 1.13 to 1.14 is
     confirum to data-confirm
 * Expose APIs for data encryption so that application developers may use
   xitrum.util.{Secure, SecureBase64, SeriDeseri}
-  See http://ngocdaothanh.github.com/xitrum/howto.html#encrypt-data
+  See http://xitrum-framework.github.com/xitrum/howto.html#encrypt-data
 * Update Hazelcast from 1.9.4.4 to 1.9.4.5
 
 1.6:

@@ -67,7 +67,7 @@ Generate API doc with graphical type hierarchy
 ----------------------------------------------
 
 Demo:
-http://ngocdaothanh.github.io/xitrum/api/index.html#xitrum.Action
+http://xitrum-framework.github.io/xitrum/api/index.html#xitrum.Action
 
 Graphviz is required, see build.sbt.end.
 
@@ -75,7 +75,7 @@ Create dependency graph
 -----------------------
 
 Demo:
-http://ngocdaothanh.github.io/xitrum/guide/deps.html
+http://xitrum-framework.github.io/xitrum/guide/deps.html
 
 Generate target/dependencies-compile.dot:
 
@@ -140,14 +140,14 @@ Update related projects
 
 After each new version release, please update these projects to use that new Xitrum version:
 
-* `xitrum-new <https://github.com/ngocdaothanh/xitrum-new>`_
-* `xitrum-demos <https://github.com/ngocdaothanh/xitrum-demos>`_
-* `xitrum-placeholder <https://github.com/georgeOsdDev/xitrum-placeholder>`_
-* `xitrum-multimodule-demo <https://github.com/ngocdaothanh/xitrum-multimodule-demo>`_
-* `comy <https://github.com/ngocdaothanh/comy>`_
+* `xitrum-new <https://github.com/xitrum-framework/xitrum-new>`_
+* `xitrum-demos <https://github.com/xitrum-framework/xitrum-demos>`_
+* `xitrum-placeholder <https://github.com/xitrum-framework/xitrum-placeholder>`_
+* `xitrum-multimodule-demo <https://github.com/xitrum-framework/xitrum-multimodule-demo>`_
+* `comy <https://github.com/xitrum-framework/comy>`_
 
-Also update `gh-pages branch of Xitrum <https://github.com/ngocdaothanh/xitrum/tree/gh-pages>`_
-and `Xitrum guide <https://github.com/ngocdaothanh/xitrum-doc>`_.
+Also update `gh-pages branch of Xitrum <https://github.com/xitrum-framework/xitrum/tree/gh-pages>`_
+and `Xitrum guide <https://github.com/xitrum-framework/xitrum-doc>`_.
 
 When a new SBT generation is released, also update
-`xitrum-sbt-plugin <https://github.com/ngocdaothanh/xitrum-sbt-plugin>`_.
+`xitrum-sbt-plugin <https://github.com/xitrum-framework/xitrum-sbt-plugin>`_.

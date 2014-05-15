@@ -31,7 +31,7 @@ object Request2Env {
 
   // Creating factory should be after the above for the factory to take effect of the settings
 
-  // https://github.com/ngocdaothanh/xitrum/issues/77
+  // https://github.com/xitrum-framework/xitrum/issues/77
   // Save a field to disk if its size exceeds maxSizeInBytesOfUploadMem
   val factory = new DefaultHttpDataFactory(Config.xitrum.request.maxSizeInBytesOfUploadMem)
 }

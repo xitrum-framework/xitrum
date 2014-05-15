@@ -1,6 +1,6 @@
-Please see `Xitrum home page <http://ngocdaothanh.github.io/xitrum>`_.
+Please see `Xitrum home page <http://xitrum-framework.github.io/xitrum/>`_.
 
-.. image:: http://ngocdaothanh.github.io/xitrum/parts/whale.png
+.. image:: http://xitrum-framework.github.io/xitrum/parts/whale.png
 
 Xitrum is an async and clustered Scala web framework on top of
 `Netty <http://netty.io/>`_, `Akka <http://akka.io/>`_, and

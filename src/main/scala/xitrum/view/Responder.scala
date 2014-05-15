@@ -299,7 +299,7 @@ trait Responder extends Js with Flash with GetActionClassDefaultsToCurrentAction
    * @param path absolute or relative to the current working directory
    *
    * In some cases, the current working directory is not always the root directory
-   * of the project (https://github.com/ngocdaothanh/xitrum/issues/47), you may
+   * of the project (https://github.com/xitrum-framework/xitrum/issues/47), you may
    * need to use xitrum.Config.root to calculate the correct absolute path from
    * a relative path.
    *

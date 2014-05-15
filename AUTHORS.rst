@@ -1,5 +1,5 @@
 Authors are ordered by the time of their
-`first contribution <https://github.com/ngocdaothanh/xitrum/graphs/contributors>`_.
+`first contribution <https://github.com/xitrum-framework/xitrum/graphs/contributors>`_.
 
 (*): Currently active core members.
 

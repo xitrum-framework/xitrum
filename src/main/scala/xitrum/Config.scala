@@ -286,7 +286,7 @@ object Config extends Log {
       ConfigFactory.load()
     } catch {
       case NonFatal(e) =>
-        exitOnStartupError("Could not load config/application.conf. For an example, see https://github.com/ngocdaothanh/xitrum-new/blob/master/config/application.conf", e)
+        exitOnStartupError("Could not load config/application.conf. For an example, see https://github.com/xitrum-framework/xitrum-new/blob/master/config/application.conf", e)
         null
     }
   }
@@ -297,7 +297,7 @@ object Config extends Log {
       new Config(application.getConfig("xitrum"))
     } catch {
       case NonFatal(e) =>
-        exitOnStartupError("Could not load config/xitrum.conf. For an example, see https://github.com/ngocdaothanh/xitrum-new/blob/master/config/xitrum.conf", e)
+        exitOnStartupError("Could not load config/xitrum.conf. For an example, see https://github.com/xitrum-framework/xitrum-new/blob/master/config/xitrum.conf", e)
         null
     }
   }
@@ -307,7 +307,7 @@ object Config extends Log {
   /**
    * Path to the root directory of the current project.
    * If you're familiar with Rails, this is the same as Rails.root.
-   * See https://github.com/ngocdaothanh/xitrum/issues/47
+   * See https://github.com/xitrum-framework/xitrum/issues/47
    */
   val root = {
     val res = getClass.getClassLoader.getResource("xitrum.conf")

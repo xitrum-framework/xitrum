@@ -22,7 +22,7 @@ trait ActorAction extends Actor with Action {
       addConnectionClosedListener {
         // The check is for avoiding "Dead actor sends Terminate msg to itself"
         // See onDoneResponding below
-        // https://github.com/ngocdaothanh/xitrum/issues/183
+        // https://github.com/xitrum-framework/xitrum/issues/183
         if (!isDoneResponding) self ! PoisonPill
       }
 
