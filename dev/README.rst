@@ -1,50 +1,12 @@
-Use SBT 0.13.1 to compile. See project/build.properties.
+Use SBT 0.13.2 to compile. See project/build.properties.
 
 Update Swagger UI
 -----------------
 
-See:
-
-* SwaggerIndexAction
-* http://stackoverflow.com/questions/979975/how-to-get-the-value-from-url-parameter
-
-To update Swagger UI, copy dist directory from https://github.com/wordnik/swagger-ui
-to src/main/resources/public/xitrum as swagger-ui. Then in its index.html, replace:
-
-::
-
-  ...
-  window.swaggerUi = new SwaggerUi({
-  url: "http://petstore.swagger.wordnik.com/api/api-docs",
-  ...
-
-with:
-
-::
-
-  ...
-  window.swaggerUi = new SwaggerUi({
-  url: getUrl(),
-  ...
-
-getUrl:
-
-::
-
-  var getUrl = function() {
-    if (!location.search) return '/xitrum/swagger.json';
-
-    var parts = location.search.substring(1).split('&');
-    for (var i = 0; i < parts.length; i++) {
-      var part = parts[i];
-      if (part.indexOf('url=') == 0) {
-        var url = part.substring('url='.length);
-        return url;
-      }
-    }
-
-    return '/xitrum/swagger.json';
-  };
+* Copy dist directory from https://github.com/wordnik/swagger-ui
+  to src/main/resources/public/xitrum as ``swagger-ui-<version>``.
+* Modify ``xitrum.routing.SwaggerUiVersioned`` based on the index.html.
+* Remove index.html.
 
 Update src/main/resources/META-INF/mime.types
 ---------------------------------------------

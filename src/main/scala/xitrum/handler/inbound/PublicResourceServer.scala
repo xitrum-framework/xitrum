@@ -34,15 +34,24 @@ class PublicResourceServer extends SimpleChannelInboundHandler[HandlerEnv] {
     }
 
     val response = env.response
-    response.setStatus(OK)
     PathSanitizer.sanitize(pathInfo) match {
       case None =>
         XSendFile.set404Page(response, false)
+        ctx.channel.writeAndFlush(env)
 
       case Some(path) =>
-        NotModified.setClientCacheAggressively(response)
-        XSendResource.setHeader(response, pathInfo.substring("/resources/".length), false)
+        val resourcePath = pathInfo.substring("/resources/".length)
+        // Check resource existence
+        val url = getClass.getClassLoader.getResource(resourcePath)
+        if (url == null) {
+          // Not found, this may be dynamic path (action)
+          ctx.fireChannelRead(env)
+        } else {
+          response.setStatus(OK)
+          NotModified.setClientCacheAggressively(response)
+          XSendResource.setHeader(response, resourcePath, false)
+          ctx.channel.writeAndFlush(env)
+        }
     }
-    ctx.channel.writeAndFlush(env)
   }
 }

@@ -145,18 +145,8 @@ object SwaggerJson {
   Swagger.Note("Use this route in Swagger UI to see API doc.")
 )
 class SwaggerJson extends Action {
-  beforeFilter {
-    if (Config.xitrum.swaggerApiVersion.isEmpty) {
-      response.setStatus(HttpResponseStatus.NOT_FOUND)
-      respondText("Swagger Doc is disabled")
-      false
-    } else {
-      true
-    }
-  }
-
   def execute() {
-    // The beforeFilter above ensures that this can't be None
+    // Swagger routes are not collected if swaggerApiVersion is None
     val apiVersion = Config.xitrum.swaggerApiVersion.get
 
     // relPath may already contain baseUrl, remove it to get resourcePath
@@ -175,16 +165,121 @@ class SwaggerJson extends Action {
   }
 }
 
+/** This path is for users to easily remember: http(s)://host[:port]/xitrum/swagger */
 @First
 @GET("xitrum/swagger")
 class SwaggerUi extends Action {
   def execute() {
-    // Redirect to index.html of Swagger Doc. index.html of Swagger Doc is modified
-    // so that if there's no "url" param, it will load "/xitrum/swagger.json",
-    // otherwise it will load the specified URL
-    val json     = url[SwaggerJson]
-    val res      = resourceUrl("xitrum/swagger-ui-2.0.16/index.html")
-    val location = if (json == "/xitrum/swagger.json") res else res + "&url=" + json
-    redirectTo(location)
+    redirectTo[SwaggerUiVersioned]()
+  }
+}
+
+/** The directory path should be the same with other Swagger UI files. */
+@First
+@GET("resources/public/xitrum/swagger-ui-2.0.16/index.html")
+class SwaggerUiVersioned extends Action {
+  def execute() {
+    val swaggerJsonUrl = url[SwaggerJson]
+
+    // Need to update everytime a new Swagger UI version is released
+    val html =
+<html>
+<head>
+  {antiCsrfMeta}
+  <title>Swagger UI</title>
+  <link href='//fonts.googleapis.com/css?family=Droid+Sans:400,700' rel='stylesheet' type='text/css'/>
+  <link href='css/reset.css' media='screen' rel='stylesheet' type='text/css'/>
+  <link href='css/screen.css' media='screen' rel='stylesheet' type='text/css'/>
+  <link href='css/reset.css' media='print' rel='stylesheet' type='text/css'/>
+  <link href='css/screen.css' media='print' rel='stylesheet' type='text/css'/>
+  <script type="text/javascript" src="lib/shred.bundle.js"></script>
+  <script src='lib/jquery-1.8.0.min.js' type='text/javascript'></script>
+  <script src='lib/jquery.slideto.min.js' type='text/javascript'></script>
+  <script src='lib/jquery.wiggle.min.js' type='text/javascript'></script>
+  <script src='lib/jquery.ba-bbq.min.js' type='text/javascript'></script>
+  <script src='lib/handlebars-1.0.0.js' type='text/javascript'></script>
+  <script src='lib/underscore-min.js' type='text/javascript'></script>
+  <script src='lib/backbone-min.js' type='text/javascript'></script>
+  <script src='lib/swagger.js' type='text/javascript'></script>
+  <script src='swagger-ui.js' type='text/javascript'></script>
+  <script src='lib/highlight.7.3.pack.js' type='text/javascript'></script>
+
+  <!-- enabling this will enable oauth2 implicit scope support -->
+  <script src='lib/swagger-oauth.js' type='text/javascript'></script>
+
+  <script type="text/javascript">
+    var swaggerJsonUrl = '{swaggerJsonUrl}';
+
+    <xml:unparsed>
+    $(function () {
+      window.swaggerUi = new SwaggerUi({
+        url: swaggerJsonUrl,
+        dom_id: "swagger-ui-container",
+        supportedSubmitMethods: ['get', 'post', 'put', 'delete'],
+        onComplete: function(swaggerApi, swaggerUi){
+          log("Loaded SwaggerUI");
+
+          if(typeof initOAuth == "function") {
+            /*
+            initOAuth({
+              clientId: "your-client-id",
+              realm: "your-realms",
+              appName: "your-app-name"
+            });
+            */
+          }
+          $('pre code').each(function(i, e) {
+            hljs.highlightBlock(e)
+          });
+        },
+        onFailure: function(data) {
+          log("Unable to Load SwaggerUI");
+        },
+        docExpansion: "none"
+      });
+
+      $('#input_apiKey').change(function() {
+        var key = $('#input_apiKey')[0].value;
+        log("key: " + key);
+        if(key && key.trim() != "") {
+          log("added key " + key);
+          window.authorizations.add("key", new ApiKeyAuthorization("api_key", key, "query"));
+        }
+      })
+      window.swaggerUi.load();
+
+      // Set CSRF token for all Ajax requests
+      // https://github.com/wordnik/swagger-ui#custom-header-parameters---for-basic-auth-etc
+      var token = $("meta[name='csrf-token']").attr('content');
+      window.authorizations.add('X-CSRF-Token', new ApiKeyAuthorization('X-CSRF-Token', token, "header"));
+    });
+    </xml:unparsed>
+  </script>
+</head>
+
+<body class="swagger-section">
+<div id='header'>
+  <div class="swagger-ui-wrap">
+    <a id="logo" href="http://swagger.wordnik.com">swagger</a>
+    <form id='api_selector'>
+      <div class='input icon-btn'>
+        <img id="show-pet-store-icon" src="images/pet_store_api.png" title="Show Swagger Petstore Example Apis" />
+      </div>
+      <div class='input icon-btn'>
+        <img id="show-wordnik-dev-icon" src="images/wordnik_api.png" title="Show Wordnik Developer Apis" />
+      </div>
+      <div class='input'><input placeholder="http://example.com/api" id="input_baseUrl" name="baseUrl" type="text"/></div>
+      <div class='input'><input placeholder="api_key" id="input_apiKey" name="apiKey" type="text"/></div>
+      <div class='input'><a id="explore" href="#">Explore</a></div>
+    </form>
+  </div>
+</div>
+
+<div id="message-bar" class="swagger-ui-wrap">&nbsp;</div>
+<div id="swagger-ui-container" class="swagger-ui-wrap"></div>
+</body>
+</html>
+
+    respondHtml(DocType.html5(html))
   }
 }

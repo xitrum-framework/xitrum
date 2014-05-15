@@ -8,6 +8,8 @@
   Merge UrlSafeBase64 to SeriDeseri
 * `#375 <https://github.com/xitrum-framework/xitrum/issues/375>`_
   Add toBase64 and fromBase64 to SeriDeseri
+* `#376 <https://github.com/xitrum-framework/xitrum/issues/376>`_
+  Embed Xitrum CSRF token to requests from Swagger UI
 
 3.11:
 
