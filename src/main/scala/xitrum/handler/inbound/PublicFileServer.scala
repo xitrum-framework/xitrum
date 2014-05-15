@@ -37,7 +37,6 @@ class PublicFileServer extends SimpleChannelInboundHandler[HandlerEnv] {
     val response = env.response
     sanitizedAbsStaticPath(pathInfo) match {
       case None =>
-        response.setStatus(NOT_FOUND)
         XSendFile.set404Page(response, false)
         ctx.channel.writeAndFlush(env)
 

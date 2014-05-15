@@ -101,7 +101,6 @@ class Dispatcher extends SimpleChannelInboundHandler[HandlerEnv] {
     Config.routes.error404 match {
       case None =>
         val response = env.response
-        response.setStatus(NOT_FOUND)
         XSendFile.set404Page(response, false)
         ctx.channel.writeAndFlush(env)
 

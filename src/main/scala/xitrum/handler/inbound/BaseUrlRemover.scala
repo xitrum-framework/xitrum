@@ -1,7 +1,6 @@
 package xitrum.handler.inbound
 
 import io.netty.channel.{ChannelHandler, SimpleChannelInboundHandler, ChannelHandlerContext}
-import io.netty.handler.codec.http.{DefaultHttpResponse, HttpResponseStatus, HttpRequest, HttpVersion}
 import ChannelHandler.Sharable
 
 import xitrum.Config
@@ -16,7 +15,6 @@ class BaseUrlRemover extends SimpleChannelInboundHandler[HandlerEnv] {
     remove(request.getUri) match {
       case None =>
         val response = env.response
-        response.setStatus(HttpResponseStatus.NOT_FOUND)
         XSendFile.set404Page(response, false)
         ctx.channel.writeAndFlush(env)
 
