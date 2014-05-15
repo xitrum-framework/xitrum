@@ -8,7 +8,7 @@ import io.netty.buffer.Unpooled
 import io.netty.channel.{SimpleChannelInboundHandler, ChannelFutureListener, ChannelHandlerContext}
 import io.netty.handler.codec.http.{
   HttpRequest, FullHttpRequest, FullHttpResponse, DefaultFullHttpRequest, DefaultFullHttpResponse,
-  HttpHeaders, HttpContent, HttpObject, LastHttpContent, HttpResponseStatus, HttpVersion
+  HttpMethod, HttpHeaders, HttpContent, HttpObject, LastHttpContent, HttpResponseStatus, HttpVersion
 }
 import io.netty.handler.codec.http.multipart.{
   Attribute, DiskAttribute,
@@ -16,6 +16,7 @@ import io.netty.handler.codec.http.multipart.{
   DefaultHttpDataFactory, HttpPostRequestDecoder, InterfaceHttpData, HttpData
 }
 import InterfaceHttpData.HttpDataType
+import HttpMethod._
 
 import xitrum.{Config, Log}
 import xitrum.handler.{HandlerEnv, NoRealPipelining}
@@ -64,6 +65,10 @@ class Request2Env extends SimpleChannelInboundHandler[HttpObject] with Log {
     }
 
     try {
+      // For each request:
+      // - HttpRequest (or subclass) will come first
+      // - Other HttpObjects will follow
+      // - LastHttpContent (or subclass) will come last
       if (msg.isInstanceOf[HttpRequest]) {
         val request = msg.asInstanceOf[HttpRequest]
 
@@ -79,14 +84,15 @@ class Request2Env extends SimpleChannelInboundHandler[HttpObject] with Log {
         }
 
         handleHttpRequestHead(ctx, request)
-      } else {
+      } else if (env != null) {
+        // HttpContent can be LastHttpContent (see below)
         if (msg.isInstanceOf[HttpContent])
           handleHttpRequestContent(ctx, msg.asInstanceOf[HttpContent])
 
         // LastHttpContent is a HttpContent.
         // env may be set to null at handleHttpRequestContent above, when
         // closeOnBigRequest is called.
-        if (env != null && msg.isInstanceOf[LastHttpContent])
+        if (msg.isInstanceOf[LastHttpContent])
           sendUpstream(ctx)
       }
     } catch {
@@ -116,15 +122,16 @@ class Request2Env extends SimpleChannelInboundHandler[HttpObject] with Log {
 
     bodyBytesReceived = 0
     try {
-      // Otherwise env.bodyDecoder is null (see HandlerEnv's constructor)
-      if (isAPPLICATION_X_WWW_FORM_URLENCODED_or_MULTIPART_FORM_DATA(request))
+      val method       = request.getMethod
+      val bodyToDecode = (method == POST || method == PUT || method == PATCH)
+      if (bodyToDecode && isAPPLICATION_X_WWW_FORM_URLENCODED_or_MULTIPART_FORM_DATA(request))
+        // Otherwise env.bodyDecoder is null (see HandlerEnv's constructor)
         env.bodyDecoder = new HttpPostRequestDecoder(factory, request)
     } catch {
+      // Another exception is IncompatibleDataDecoderException, which means the
+      // request is valid, just no need to decode (see the check above)
       case e: HttpPostRequestDecoder.ErrorDataDecoderException =>
         ctx.channel.close()
-
-      case e: HttpPostRequestDecoder.IncompatibleDataDecoderException =>
-        sendUpstream(ctx)
     }
   }
 
