@@ -387,18 +387,25 @@ object Config extends Log {
 
   private def loadRouteCacheFileOrRecollectWithRetry(retried: Boolean = false): RouteCollection = {
     try {
-      log.info("Load file " + ROUTES_CACHE + " or recollect routes...")
+      log.info(s"Load $ROUTES_CACHE or recollect routes...")
       val routeCollector = new RouteCollector
       val discoveredAcc  = routeCollector.deserializeCacheFileOrRecollect(ROUTES_CACHE)
-      val withSwagger    = xitrum.swaggerApiVersion.isDefined
-      RouteCollection.fromSerializable(discoveredAcc, withSwagger)
+      if (discoveredAcc.xitrumVersion != _root_.xitrum.version.toString) {
+        log.info(s"Xitrum version changed. Delete $ROUTES_CACHE and retry...")
+        val file = new File(ROUTES_CACHE)
+        file.delete()
+        loadRouteCacheFileOrRecollectWithRetry(true)
+      } else {
+        val withSwagger = xitrum.swaggerApiVersion.isDefined
+        RouteCollection.fromSerializable(discoveredAcc, withSwagger)
+      }
     } catch {
       case NonFatal(e) =>
         if (retried) {
           Config.exitOnStartupError("Could not collect routes", e)
           throw e
         } else {
-          log.info("Could not load " + ROUTES_CACHE + ", delete and retry...")
+          log.info(s"Could not load $ROUTES_CACHE, delete and retry...")
           val file = new File(ROUTES_CACHE)
           file.delete()
           loadRouteCacheFileOrRecollectWithRetry(true)

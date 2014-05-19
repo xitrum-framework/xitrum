@@ -12,6 +12,8 @@
   Embed Xitrum CSRF token to requests from Swagger UI
 * `#379 <https://github.com/xitrum-framework/xitrum/issues/379>`_
   Add xitrum.version
+* `#380 <https://github.com/xitrum-framework/xitrum/issues/380>`_
+  Recreate routes.cache when Xitrum is updated
 
 3.11:
 

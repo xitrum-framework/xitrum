@@ -12,6 +12,7 @@ import xitrum.annotation._
 import xitrum.sockjs.SockJsPrefix
 
 case class DiscoveredAcc(
+  xitrumVersion:             String,
   normalRoutes:              SerializableRouteCollection,
   sockJsWithoutPrefixRoutes: SerializableRouteCollection,
   sockJsMap:                 Map[String, SockJsClassAndOptions],
@@ -24,19 +25,25 @@ class RouteCollector extends Log {
 
   def deserializeCacheFileOrRecollect(cachedFileName: String): DiscoveredAcc = {
     var acc = DiscoveredAcc(
+      "<Invalid Xitrum version>",
       new SerializableRouteCollection,
       new SerializableRouteCollection,
       Map.empty[String, SockJsClassAndOptions],
       Map.empty[Class[_ <: Action], Swagger]
     )
 
-    val actionTreeBuilder = Scanner.foldLeft(cachedFileName, new ActionTreeBuilder, discovered _)
-    val ka                = actionTreeBuilder.getConcreteActionsAndAnnotations
-    ka.foreach { case (klass, annotations) =>
-      acc = processAnnotations(acc, klass, annotations)
+    val xitrumVersion     = xitrum.version.toString
+    val actionTreeBuilder = Scanner.foldLeft(cachedFileName, new ActionTreeBuilder(xitrumVersion), discovered _)
+    if (actionTreeBuilder.xitrumVersion != xitrumVersion) {
+      // The caller should see that the Xitrum version is invalid and act properly
+      acc
+    } else {
+      val ka = actionTreeBuilder.getConcreteActionsAndAnnotations
+      ka.foreach { case (klass, annotations) =>
+        acc = processAnnotations(acc, klass, annotations)
+      }
+      DiscoveredAcc(xitrumVersion, acc.normalRoutes, acc.sockJsWithoutPrefixRoutes, acc.sockJsMap, acc.swaggerMap)
     }
-
-    acc
   }
 
   //----------------------------------------------------------------------------
@@ -74,7 +81,7 @@ class RouteCollector extends Log {
       case Some(swagger) => acc.swaggerMap + (klass -> swagger)
     }
 
-    DiscoveredAcc(acc.normalRoutes, acc.sockJsWithoutPrefixRoutes, newSockJsMap, newSwaggerMap)
+    DiscoveredAcc(acc.xitrumVersion, acc.normalRoutes, acc.sockJsWithoutPrefixRoutes, newSockJsMap, newSwaggerMap)
   }
 
   private def collectNormalRoutes(

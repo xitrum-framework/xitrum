@@ -21,7 +21,7 @@ import xitrum.annotation.ActionAnnotations
  *
  * @param parent2Children Map to save trees; names are class names
  */
-private case class ActionTreeBuilder(parent2Children: Map[String, Seq[String]] = Map.empty) {
+private case class ActionTreeBuilder(xitrumVersion: String, parent2Children: Map[String, Seq[String]] = Map.empty) {
   def addBranches(
       childInternalName:      String,
       superInternalName:      String,
@@ -50,7 +50,7 @@ private case class ActionTreeBuilder(parent2Children: Map[String, Seq[String]] =
       }
     }
 
-    ActionTreeBuilder(p2c)
+    ActionTreeBuilder(xitrumVersion, p2c)
   }
 
   /**

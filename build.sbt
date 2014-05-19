@@ -93,6 +93,7 @@ sourceGenerators in Compile += Def.task {
 class Version {
   val major = $major
   val minor = $minor
+  /** major.minor */
   override def toString = "$major.$minor"
 }
 """)
