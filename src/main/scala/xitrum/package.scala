@@ -3,6 +3,8 @@ import nl.grons.metrics.scala.InstrumentedBuilder
 import xitrum.metrics.MetricsManager
 
 package object xitrum {
+  val version = new Version
+
   /**
    * This is a convenient helper to let you call like this directly:
    * xitrum.Log.debug("msg"), xitrum.Log.info("msg") etc.
