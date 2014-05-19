@@ -16,6 +16,8 @@
   Recreate routes.cache when Xitrum is updated
 * `#362 <https://github.com/xitrum-framework/xitrum/issues/362>`_
   Update Schwatcher from 0.1.4 to 0.1.5
+* `#381 <https://github.com/xitrum-framework/xitrum/issues/381>`_
+  Update D3.js from 3.4.6 to 3.4.7
 
 3.11:
 
