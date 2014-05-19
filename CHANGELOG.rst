@@ -3,9 +3,9 @@
 * `#372 <https://github.com/xitrum-framework/xitrum/issues/372>`_
   ParamAccess: Support all primitive types
 * `#373 <https://github.com/xitrum-framework/xitrum/issues/373>`_
-  Add respondWebSocketJson respondSockJsJson
+  Add respondWebSocketJson and respondSockJsJson
 * `#374 <https://github.com/xitrum-framework/xitrum/issues/374>`_
-  Merge UrlSafeBase64 to SeriDeseri
+  Merge UrlSafeBase64 to SeriDeseri; Also solve memory leak problem
 * `#375 <https://github.com/xitrum-framework/xitrum/issues/375>`_
   Add toBase64 and fromBase64 to SeriDeseri
 * `#376 <https://github.com/xitrum-framework/xitrum/issues/376>`_
@@ -14,6 +14,8 @@
   Add xitrum.version
 * `#380 <https://github.com/xitrum-framework/xitrum/issues/380>`_
   Recreate routes.cache when Xitrum is updated
+* `#362 <https://github.com/xitrum-framework/xitrum/issues/362>`_
+  Update Schwatcher from 0.1.4 to 0.1.5
 
 3.11:
 
