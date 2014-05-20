@@ -68,7 +68,7 @@ libraryDependencies += "nl.grons" %% "metrics-scala" % "3.1.1.1_a2.3"
 libraryDependencies += "com.codahale.metrics" % "metrics-json" % "3.0.2"
 
 // For test
-libraryDependencies += "org.scalatest" %% "scalatest" % "2.1.5" % "test"
+libraryDependencies += "org.scalatest" %% "scalatest" % "2.1.6" % "test"
 
 // JSON4S uses scalap 2.10.0, which in turn uses scala-compiler 2.10.0, which in
 // turn uses scala-reflect 2.10.0. We need to force "scalaVersion" above, because
