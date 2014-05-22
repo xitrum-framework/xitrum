@@ -2,6 +2,8 @@
 
 * `#383 <https://github.com/xitrum-framework/xitrum/issues/383>`_
   Update Scala from 2.11.0 to 2.11.1
+* `#384 <https://github.com/xitrum-framework/xitrum/issues/384>`_
+  Update Akka from 2.3.2 to 2.3.3
 
 3.12:
 

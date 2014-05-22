@@ -11,9 +11,6 @@ scalacOptions ++= Seq("-deprecation", "-feature", "-unchecked")
 // xitrum.util.FileMonitor requires Java 7
 javacOptions ++= Seq("-source", "1.7", "-target", "1.7")
 
-// Put config directory in classpath for easier development (sbt console etc.)
-unmanagedBase in Runtime <<= baseDirectory { base => base / "config" }
-
 //------------------------------------------------------------------------------
 
 // Most Scala projects are published to Sonatype, but Sonatype is not default
@@ -33,11 +30,11 @@ libraryDependencies += "io.netty" % "netty-all" % "4.0.19.Final"
 libraryDependencies += "org.javassist" % "javassist" % "3.18.1-GA"
 
 // For clustering SockJS; Akka is included here
-libraryDependencies += "tv.cntt" %% "glokka" % "1.8"
+libraryDependencies += "tv.cntt" %% "glokka" % "1.9"
 
 // Redirect Akka log to SLF4J
 // (akka-slf4j version should be the same as the Akka version used by Glokka above)
-libraryDependencies += "com.typesafe.akka" %% "akka-slf4j" % "2.3.2"
+libraryDependencies += "com.typesafe.akka" %% "akka-slf4j" % "2.3.3"
 
 // For file watch
 // (akka-agent is added here, should ensure same Akka version as above)
@@ -99,6 +96,11 @@ class Version {
 """)
   Seq(file)
 }.taskValue
+
+// Put config directory in classpath for easier development --------------------
+
+// For "sbt console"
+unmanagedClasspath in Compile <+= (baseDirectory) map { bd => Attributed.blank(bd / "src/test/resources") }
 
 //------------------------------------------------------------------------------
 

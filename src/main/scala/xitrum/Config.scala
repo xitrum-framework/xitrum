@@ -150,7 +150,7 @@ class MetricsConfig(config: TConfig) {
   val actions = if (config.hasPath("actions")) config.getBoolean("actions") else false
 
   // For JMX metrics collecting
-  // http://doc.akka.io/docs/akka/2.3.2/scala/cluster-usage.html
+  // http://doc.akka.io/docs/akka/2.3.3/scala/cluster-usage.html
   val jmxGossipInterval        = (if (config.hasPath("jmxGossipInterval"))        config.getInt("jmxGossipInterval")        else 3).seconds
   val jmxMovingAverageHalfLife = (if (config.hasPath("jmxMovingAverageHalfLife")) config.getInt("jmxMovingAverageHalfLife") else 12).seconds
 
