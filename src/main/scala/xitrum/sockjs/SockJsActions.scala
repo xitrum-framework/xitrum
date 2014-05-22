@@ -281,12 +281,6 @@ class Iframe extends SockJsAction {
   def execute() {
     val iframe = param("iframe")
     if (iframe.startsWith("iframe") && iframe.endsWith(".html")) {
-      val src =
-        if (Config.productionMode)
-          "sockjs-client/0.3.4/sockjs.min.js"
-        else
-          "sockjs-client/0.3.4/sockjs.js"
-
       setClientCacheAggressively()
       respondHtml(DocType.html5(
 <html>
@@ -297,7 +291,7 @@ class Iframe extends SockJsAction {
     document.domain = document.domain;
     _sockjs_onload = function(){SockJS.bootstrap_iframe();};
   </xml:unparsed></script>
-  <script src={webJarsUrl(src)}></script>
+  <script src={webJarsUrl("sockjs-client/0.3.4", "sockjs.js", "sockjs.min.js")}></script>
 </head>
 <body>
   <h2>Don't panic!</h2>

@@ -135,9 +135,9 @@ class XitrumMetricsViewer extends Action with MetricsViewer {
     <html>
       <head>
         {xitrumCss}
-        <script type="text/javascript" src={webJarsUrl(if (Config.productionMode) "jquery/2.1.1/jquery.min.js"        else "jquery/2.1.1/jquery.js")}></script>
-        <script type="text/javascript" src={webJarsUrl(if (Config.productionMode) "sockjs-client/0.3.4/sockjs.min.js" else "sockjs-client/0.3.4/sockjs.js")}></script>
-        <script type="text/javascript" src={webJarsUrl(if (Config.productionMode) "d3js/3.4.6/d3.min.js"              else "d3js/3.4.6/d3.js")}></script>
+        <script type="text/javascript" src={webJarsUrl("jquery/2.1.1",        "jquery.js", "jquery.min.js")}></script>
+        <script type="text/javascript" src={webJarsUrl("sockjs-client/0.3.4", "sockjs.js", "sockjs.min.js")}></script>
+        <script type="text/javascript" src={webJarsUrl("d3js/3.4.6",          "d3.js",     "d3.min.js")}></script>
         <script type="text/javascript" src={url[xitrum.js]}></script>
         <script type="text/javascript" src={webJarsUrl(s"xitrum/${xitrum.version}/metrics.js")}></script>
         <title>Xitrum Default Metrics Viewer</title>
@@ -199,9 +199,9 @@ class XitrumMetricsViewer extends Action with MetricsViewer {
     <html>
       <head>
         {xitrumCss}
-        <script type="text/javascript" src={webJarsUrl(if (Config.productionMode) "jquery/2.1.1/jquery.min.js"        else "jquery/2.1.1/jquery.js")}></script>
-        <script type="text/javascript" src={webJarsUrl(if (Config.productionMode) "sockjs-client/0.3.4/sockjs.min.js" else "sockjs-client/0.3.4/sockjs.js")}></script>
-        <script type="text/javascript" src={webJarsUrl(if (Config.productionMode) "d3js/3.4.6/d3.min.js"              else "d3js/3.4.6/d3.js")}></script>
+        <script type="text/javascript" src={webJarsUrl("jquery/2.1.1",        "jquery.js", "jquery.min.js")}></script>
+        <script type="text/javascript" src={webJarsUrl("sockjs-client/0.3.4", "sockjs.js", "sockjs.min.js")}></script>
+        <script type="text/javascript" src={webJarsUrl("d3js/3.4.6",          "d3.js",     "d3.min.js")}></script>
         <script type="text/javascript" src={url[xitrum.js]}></script>
         <script type="text/javascript" src={webJarsUrl(s"xitrum/${xitrum.version}/metrics.js")}></script>
         <title>Xitrum Default Metrics Viewer</title>

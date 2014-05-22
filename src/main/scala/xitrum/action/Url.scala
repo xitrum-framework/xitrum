@@ -30,7 +30,7 @@ trait Url {
   //----------------------------------------------------------------------------
 
   /** @param path Relative to the "public" directory, without leading "/" */
-  def publicUrl(path: String) = {
+  def publicUrl(path: String): String = {
     val absPath     = Config.root + "/public/" + path
     val forceReload = Etag.forFile(absPath, None, true) match {
       case Etag.NotFound                           => Random.nextLong.toString
@@ -42,14 +42,38 @@ trait Url {
     Config.withBaseUrl(url + "?" + forceReload)
   }
 
+  /**
+   * Ex: publicUrl("jquery/2.1.1", "jquery.js", "jquery.min.js")
+   *
+   * @param devFile File to use in development environment
+   * @param prodFile File to use in production environment
+   */
+  def publicUrl(directory: String, devFile: String, prodFile: String): String = {
+    val file = if (Config.productionMode) prodFile else devFile
+    val path = s"$directory/$file"
+    publicUrl(path)
+  }
+
   /** @param path Use "myapp/foo.js" to specify "META-INF/resources/webjars/myapp/foo.js" */
-  def webJarsUrl(path: String) =  {
+  def webJarsUrl(path: String): String = {
     val classPathPath = "META-INF/resources/webjars/" + path
     val forceReload = Etag.forResource(classPathPath, None, true) match {
       case Etag.NotFound                           => Random.nextLong.toString
       case Etag.Small(bytes, etag, mimeo, gzipped) => etag
     }
     Config.withBaseUrl("/webjars/" + path + "?" + forceReload)
+  }
+
+  /**
+   * Ex: webJarsUrl("jquery/2.1.1", "jquery.js", "jquery.min.js")
+   *
+   * @param devFile File to use in development environment
+   * @param prodFile File to use in production environment
+   */
+  def webJarsUrl(directory: String, devFile: String, prodFile: String): String = {
+    val file = if (Config.productionMode) prodFile else devFile
+    val path = s"$directory/$file"
+    webJarsUrl(path)
   }
 
   //----------------------------------------------------------------------------
