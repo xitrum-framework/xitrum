@@ -4,7 +4,7 @@ name := "xitrum"
 
 version := "3.12-SNAPSHOT"
 
-scalaVersion := "2.11.0"
+scalaVersion := "2.11.1"
 
 scalacOptions ++= Seq("-deprecation", "-feature", "-unchecked")
 

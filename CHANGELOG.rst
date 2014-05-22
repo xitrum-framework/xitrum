@@ -1,3 +1,8 @@
+3.13:
+
+* `#383 <https://github.com/xitrum-framework/xitrum/issues/383>`_
+  Update Scala from 2.11.0 to 2.11.1
+
 3.12:
 
 * `#372 <https://github.com/xitrum-framework/xitrum/issues/372>`_
