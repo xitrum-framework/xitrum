@@ -1,4 +1,4 @@
-import org.slf4j.LoggerFactory
+import org.slf4s.LoggerFactory
 import nl.grons.metrics.scala.InstrumentedBuilder
 import xitrum.metrics.MetricsManager
 

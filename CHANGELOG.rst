@@ -1,5 +1,7 @@
 3.13:
 
+* `#363 <https://github.com/xitrum-framework/xitrum/issues/363>`_
+  Use SLF4S instead of using SLF4J directly
 * `#383 <https://github.com/xitrum-framework/xitrum/issues/383>`_
   Update Scala from 2.11.0 to 2.11.1
 * `#384 <https://github.com/xitrum-framework/xitrum/issues/384>`_

@@ -108,7 +108,7 @@ class Request2Env extends SimpleChannelInboundHandler[HttpObject] with Log {
   private def handleHttpRequestHead(ctx: ChannelHandlerContext, request: HttpRequest) {
     // See DefaultHttpChannelInitializer
     // This is the first Xitrum handler, log the request
-    if (log.isTraceEnabled) log.trace(request.toString)
+    log.trace(request.toString)
 
     // Clean previous files if any
     if (env != null) env.release()

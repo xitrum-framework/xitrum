@@ -1,6 +1,6 @@
 package xitrum
 
-import org.slf4j.LoggerFactory
+import org.slf4s.LoggerFactory
 
 /**
  * If you don't care about the class name where the log is made, without having

@@ -25,38 +25,35 @@ class WebSocketEventDispatcher(
     if (frame.isInstanceOf[TextWebSocketFrame]) {
       val text = frame.asInstanceOf[TextWebSocketFrame].text
       actorRef ! WebSocketText(text)
-      if (log.isTraceEnabled) log.trace("[WS in] text: " + text)
+      log.trace("[WS in] text: " + text)
       return
     }
 
     if (frame.isInstanceOf[BinaryWebSocketFrame]) {
       val bytes = ByteBufUtil.toBytes(frame.asInstanceOf[BinaryWebSocketFrame].content)
       actorRef ! WebSocketBinary(bytes)
-      if (log.isTraceEnabled) log.trace("[WS in] binary: " + ScalaRunTime.stringOf(bytes))
+      log.trace("[WS in] binary: " + ScalaRunTime.stringOf(bytes))
       return
     }
 
     if (frame.isInstanceOf[PingWebSocketFrame]) {
       ctx.channel.writeAndFlush(new PongWebSocketFrame(frame.content.retain()))
       actorRef ! WebSocketPing
-      if (log.isTraceEnabled) {
-        log.trace("[WS in] ping")
-        log.trace("[WS out] pong")
-      }
+      log.trace("[WS in] ping")
+      log.trace("[WS out] pong")
       return
     }
 
     if (frame.isInstanceOf[PongWebSocketFrame]) {
       actorRef ! WebSocketPong
-      if (log.isTraceEnabled) log.trace("[WS in] pong")
+      log.trace("[WS in] pong")
       return
     }
 
     if (frame.isInstanceOf[CloseWebSocketFrame]) {
       handshaker.close(ctx.channel, frame.retain().asInstanceOf[CloseWebSocketFrame]).addListener(ChannelFutureListener.CLOSE)
-      if (log.isTraceEnabled) log.trace("[WS in] close")
+      log.trace("[WS in] close")
       return
     }
   }
 }
-

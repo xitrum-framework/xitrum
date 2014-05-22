@@ -70,7 +70,7 @@ object Server extends Log {
     }
 
     val mode = if (Config.productionMode) "production" else "development"
-    log.info("Xitrum started in {} mode", mode)
+    log.info(s"Xitrum started in $mode mode")
 
     // This is a good timing to warn
     Config.warnOnDefaultSecureKey()
@@ -98,10 +98,10 @@ object Server extends Log {
 
     Config.xitrum.interface match {
       case None =>
-        log.info(s"${service} server started on port ${port}")
+        log.info(s"$service server started on port $port")
 
       case Some(hostnameOrIp) =>
-        log.info(s"${service} server started on ${hostnameOrIp}:${port}")
+        log.info(s"$service server started on $hostnameOrIp:$port")
     }
   }
 }

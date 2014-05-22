@@ -13,45 +13,39 @@ import xitrum.action.Net
 
 object AccessLog extends Log {
   def logFlashSocketPolicyFileAccess(remoteAddress: SocketAddress) {
-    if (log.isInfoEnabled) {
-      log.info(Net.clientIp(remoteAddress) + " (flash socket policy file)")
-    }
+    log.info(Net.clientIp(remoteAddress) + " (flash socket policy file)")
   }
 
   def logStaticFileAccess(remoteAddress: SocketAddress, request: HttpRequest, response: HttpResponse) {
-    if (log.isInfoEnabled) {
-      log.info(
-        Net.remoteIp(remoteAddress, request) + " " +
-        request.getMethod + " " +
-        request.getUri + " -> " +
-        response.getStatus.code +
-        " (static file)"
-      )
-    }
+    log.info(
+      Net.remoteIp(remoteAddress, request) + " " +
+      request.getMethod + " " +
+      request.getUri + " -> " +
+      response.getStatus.code +
+      " (static file)"
+    )
   }
 
   def logResourceInJarAccess(remoteAddress: SocketAddress, request: HttpRequest, response: HttpResponse) {
-    if (log.isInfoEnabled) {
-      log.info(
-        Net.remoteIp(remoteAddress, request) + " " +
-        request.getMethod + " " +
-        request.getUri + " -> " +
-        response.getStatus.code +
-        " (JAR resource)"
-      )
-    }
+    log.info(
+      Net.remoteIp(remoteAddress, request) + " " +
+      request.getMethod + " " +
+      request.getUri + " -> " +
+      response.getStatus.code +
+      " (JAR resource)"
+    )
   }
 
   def logActionAccess(action: Action, beginTimestamp: Long, cacheSecs: Int, hit: Boolean, e: Throwable = null) {
     if (e == null) {
-      if (log.isInfoEnabled) log.info(msgWithTime(action.getClass.getName, action, beginTimestamp) + extraInfo(action, cacheSecs, hit))
+      log.info(msgWithTime(action.getClass.getName, action, beginTimestamp) + extraInfo(action, cacheSecs, hit))
     } else {
       log.error("Dispatch error " + msgWithTime(action.getClass.getName, action, beginTimestamp) + extraInfo(action, cacheSecs, hit), e)
     }
   }
 
   def logWebSocketAccess(className: String, action: Action, beginTimestamp: Long) {
-    if (log.isInfoEnabled) log.info(msgWithTime(className, action, beginTimestamp) + extraInfo(action, 0, false))
+    log.info(msgWithTime(className, action, beginTimestamp) + extraInfo(action, 0, false))
   }
 
   def logOPTIONS(request: HttpRequest) {

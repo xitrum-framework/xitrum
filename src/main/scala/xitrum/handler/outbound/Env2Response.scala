@@ -77,7 +77,7 @@ class Env2Response extends ChannelOutboundHandlerAdapter with Log {
 
     // See DefaultHttpChannelInitializer
     // This is the last Xitrum handler, log the response
-    if (log.isTraceEnabled) log.trace(response.toString)
+    log.trace(response.toString)
 
     // Keep alive, channel reading resuming/closing etc. are handled
     // by the code that sends the response (Responder#respond)
