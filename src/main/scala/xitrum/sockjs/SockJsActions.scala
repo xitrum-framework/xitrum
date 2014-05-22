@@ -283,9 +283,9 @@ class Iframe extends SockJsAction {
     if (iframe.startsWith("iframe") && iframe.endsWith(".html")) {
       val src =
         if (Config.productionMode)
-          "xitrum/sockjs-0.3.4.min.js"
+          "sockjs-client/0.3.4/sockjs.min.js"
         else
-          "xitrum/sockjs-0.3.4.js"
+          "sockjs-client/0.3.4/sockjs.js"
 
       setClientCacheAggressively()
       respondHtml(DocType.html5(
@@ -297,7 +297,7 @@ class Iframe extends SockJsAction {
     document.domain = document.domain;
     _sockjs_onload = function(){SockJS.bootstrap_iframe();};
   </xml:unparsed></script>
-  <script src={resourceUrl(src)}></script>
+  <script src={webJarsUrl(src)}></script>
 </head>
 <body>
   <h2>Don't panic!</h2>

@@ -15,11 +15,11 @@ import xitrum.etag.NotModified
 import xitrum.util.PathSanitizer
 
 /**
- * Routes /resources/public/xxx URL to resources in classpath.
+ * Routes /webjars/xxx URL to resources in classpath: http://www.webjars.org/contributing
  * See DefaultHttpChannelInitializer, this handler is put after XSendResource.
  */
 @Sharable
-class PublicResourceServer extends SimpleChannelInboundHandler[HandlerEnv] {
+class WebJarsServer extends SimpleChannelInboundHandler[HandlerEnv] {
   override def channelRead0(ctx: ChannelHandlerContext, env: HandlerEnv) {
     val request = env.request
     if (request.getMethod != GET && request.getMethod != HEAD && request.getMethod != OPTIONS) {
@@ -28,7 +28,7 @@ class PublicResourceServer extends SimpleChannelInboundHandler[HandlerEnv] {
     }
 
     val pathInfo = request.getUri.split('?')(0)
-    if (!pathInfo.startsWith("/resources/public/")) {
+    if (!pathInfo.startsWith("/webjars/")) {
       ctx.fireChannelRead(env)
       return
     }
@@ -40,9 +40,11 @@ class PublicResourceServer extends SimpleChannelInboundHandler[HandlerEnv] {
         ctx.channel.writeAndFlush(env)
 
       case Some(path) =>
-        val resourcePath = pathInfo.substring("/resources/".length)
-        // Check resource existence
+        val resourcePath = "META-INF/resources" + pathInfo
+
+        // Check resource existence, null means the resource does not exist
         val url = getClass.getClassLoader.getResource(resourcePath)
+
         if (url == null) {
           // Not found, this may be dynamic path (action)
           ctx.fireChannelRead(env)

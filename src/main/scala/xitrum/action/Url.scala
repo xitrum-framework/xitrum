@@ -42,14 +42,14 @@ trait Url {
     Config.withBaseUrl(url + "?" + forceReload)
   }
 
-  /** @param path Relative to an entry in classpath, without leading "/" */
-  def resourceUrl(path: String) = {
-    val classPathPath = "public/" + path
+  /** @param path Use "myapp/foo.js" to specify "META-INF/resources/webjars/myapp/foo.js" */
+  def webJarsUrl(path: String) =  {
+    val classPathPath = "META-INF/resources/webjars/" + path
     val forceReload = Etag.forResource(classPathPath, None, true) match {
       case Etag.NotFound                           => Random.nextLong.toString
       case Etag.Small(bytes, etag, mimeo, gzipped) => etag
     }
-    Config.withBaseUrl("/resources/public/" + path + "?" + forceReload)
+    Config.withBaseUrl("/webjars/" + path + "?" + forceReload)
   }
 
   //----------------------------------------------------------------------------

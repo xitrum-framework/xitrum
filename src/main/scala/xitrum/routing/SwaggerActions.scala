@@ -176,7 +176,7 @@ class SwaggerUi extends Action {
 
 /** The directory path should be the same with other Swagger UI files. */
 @First
-@GET("resources/public/xitrum/swagger-ui-2.0.17/index.html")
+@GET("webjars/swagger-ui/2.0.14/index")
 class SwaggerUiVersioned extends Action {
   def execute() {
     val swaggerJsonUrl = url[SwaggerJson]
@@ -203,9 +203,6 @@ class SwaggerUiVersioned extends Action {
   <script src='lib/swagger.js' type='text/javascript'></script>
   <script src='swagger-ui.js' type='text/javascript'></script>
   <script src='lib/highlight.7.3.pack.js' type='text/javascript'></script>
-
-  <!-- enabling this will enable oauth2 implicit scope support -->
-  <script src='lib/swagger-oauth.js' type='text/javascript'></script>
 
   <script type="text/javascript">
     var swaggerJsonUrl = '{swaggerJsonUrl}';

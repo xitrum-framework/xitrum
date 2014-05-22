@@ -33,24 +33,24 @@ import xitrum.handler.outbound._
 object DefaultHttpChannelInitializer {
   // Sharable inbound handlers
 
-  lazy val baseUrlRemover       = new BaseUrlRemover
-  lazy val basicAuth            = new BasicAuth
-  lazy val publicFileServer     = new PublicFileServer
-  lazy val publicResourceServer = new PublicResourceServer
-  lazy val uriParser            = new UriParser
-  lazy val methodOverrider      = new MethodOverrider
-  lazy val dispatcher           = new Dispatcher
-  lazy val badClientSilencer    = new BadClientSilencer
+  lazy val baseUrlRemover    = new BaseUrlRemover
+  lazy val basicAuth         = new BasicAuth
+  lazy val publicFileServer  = new PublicFileServer
+  lazy val webJarsServer     = new WebJarsServer
+  lazy val uriParser         = new UriParser
+  lazy val methodOverrider   = new MethodOverrider
+  lazy val dispatcher        = new Dispatcher
+  lazy val badClientSilencer = new BadClientSilencer
 
   // Sharable outbound handlers
 
-  lazy val setCORS              = new SetCORS
-  lazy val OPTIONSResponse      = new OPTIONSResponse
-  lazy val fixiOS6SafariPOST    = new FixiOS6SafariPOST
-  lazy val xSendFile            = new XSendFile
-  lazy val xSendResource        = new XSendResource
-  lazy val env2Response         = new Env2Response
-  lazy val responseCacher       = new ResponseCacher
+  lazy val setCORS           = new SetCORS
+  lazy val OPTIONSResponse   = new OPTIONSResponse
+  lazy val fixiOS6SafariPOST = new FixiOS6SafariPOST
+  lazy val xSendFile         = new XSendFile
+  lazy val xSendResource     = new XSendResource
+  lazy val env2Response      = new Env2Response
+  lazy val responseCacher    = new ResponseCacher
 
   def removeUnusedHandlersForWebSocket(pipeline: ChannelPipeline) {
     // WebSocket handshaker in Netty dynamically changes the pipeline like this:
@@ -65,7 +65,7 @@ object DefaultHttpChannelInitializer {
     if (Config.xitrum.basicAuth.isDefined)
     removeHandlerIfExists(pipeline, classOf[BasicAuth])
     removeHandlerIfExists(pipeline, classOf[PublicFileServer])
-    removeHandlerIfExists(pipeline, classOf[PublicResourceServer])
+    removeHandlerIfExists(pipeline, classOf[WebJarsServer])
     removeHandlerIfExists(pipeline, classOf[UriParser])
     removeHandlerIfExists(pipeline, classOf[MethodOverrider])
     removeHandlerIfExists(pipeline, classOf[Dispatcher])
@@ -119,7 +119,7 @@ class DefaultHttpChannelInitializer extends ChannelInitializer[SocketChannel] {
     if (Config.xitrum.basicAuth.isDefined)
     p.addLast("BasicAuth",                basicAuth)
     p.addLast("PublicFileServer",         publicFileServer)
-    p.addLast("PublicResourceServer",     publicResourceServer)
+    p.addLast("WebJarsServer",            webJarsServer)
     p.addLast("UriParser",                uriParser)
     p.addLast("MethodOverrider",          methodOverrider)
     p.addLast("Dispatcher",               dispatcher)
