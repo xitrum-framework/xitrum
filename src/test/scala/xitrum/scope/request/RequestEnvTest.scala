@@ -1,7 +1,6 @@
 package xitrum.scope.request
 
-import org.scalatest.Matchers
-import org.scalatest.FlatSpec
+import org.scalatest.{FlatSpec, Matchers}
 import xitrum.Action
 
 class RequestEnvTest extends FlatSpec with Matchers {

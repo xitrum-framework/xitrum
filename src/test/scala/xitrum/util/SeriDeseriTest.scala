@@ -1,7 +1,6 @@
 package xitrum.util
 
-import org.scalatest.Matchers
-import org.scalatest.FlatSpec
+import org.scalatest.{FlatSpec, Matchers}
 
 class SeriDeseriTest extends FlatSpec with Matchers {
   behavior of "SeriDeseri"

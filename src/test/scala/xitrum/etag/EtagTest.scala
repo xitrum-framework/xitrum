@@ -1,10 +1,7 @@
 package xitrum.etag
 
-import java.io.File
-import java.io.FileOutputStream
-
-import org.scalatest.Matchers
-import org.scalatest.FlatSpec
+import java.io.{File, FileOutputStream}
+import org.scalatest.{FlatSpec, Matchers}
 
 class EtagTest extends FlatSpec with Matchers {
   behavior of "ETag"
