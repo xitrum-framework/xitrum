@@ -1,4 +1,4 @@
-Please see `Xitrum home page <http://xitrum-framework.github.io/xitrum/>`_.
+**Please see `Xitrum home page <http://xitrum-framework.github.io/xitrum/>`_ for more details.**
 
 .. image:: http://xitrum-framework.github.io/xitrum/parts/whale.png
 
@@ -25,3 +25,5 @@ It also has a fast built-in HTTP(S) server.
   +--------------------+
   |      Your app      |
   +--------------------+
+
+Xitrum is an open source project. See `list of contributors <http://xitrum-framework.github.io/xitrum/guide/intro.html#contributors>`_.
