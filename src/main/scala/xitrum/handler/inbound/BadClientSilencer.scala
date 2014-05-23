@@ -11,8 +11,9 @@ import xitrum.Log
 @Sharable
 class BadClientSilencer extends SimpleChannelInboundHandler[Any] with Log {
   override def channelRead0(ctx: ChannelHandlerContext, msg: Any) {
-    // Unknown msg, it has not been handled by any previous handler
+    // msg has not been handled by any previous handler
     ctx.channel.close()
+    Log.trace("Unknown msg: " + msg)
   }
 
   override def exceptionCaught(ctx: ChannelHandlerContext, e: Throwable) {
