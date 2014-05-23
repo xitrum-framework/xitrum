@@ -6,7 +6,7 @@ import xitrum.metrics.MetricsManager
  * Things that are usually used by application developers are put in this package
  * for convenience, because when they want to use XXX, they can simply write:
  *
- * {{import xitrum.XXX}}
+ * {{{import xitrum.XXX}}}
  *
  * To avoid polluting this namespace, things that are utilities should be put in
  * package xitrum.util, not here.
@@ -14,8 +14,10 @@ import xitrum.metrics.MetricsManager
  * Annotations and validators are put to package xitrum.annation and xitrum.validator
  * because there are many of them. It's better for application developers to write:
  *
- * {{import xitrum.annotation._
- * import xitrum.validator._}}
+ * {{{
+ * import xitrum.annotation._
+ * import xitrum.validator._
+ * }}}
  */
 package object xitrum {
   val version = new Version
