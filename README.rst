@@ -1,4 +1,4 @@
-**Please see `Xitrum home page <http://xitrum-framework.github.io/xitrum/>`_ for more details.**
+**Please see** `Xitrum home page <http://xitrum-framework.github.io/xitrum/>`_ **for more details.**
 
 .. image:: http://xitrum-framework.github.io/xitrum/parts/whale.png
 
