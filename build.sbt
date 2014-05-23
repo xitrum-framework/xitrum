@@ -106,7 +106,7 @@ libraryDependencies += "org.webjars" % "sockjs-client" % "0.3.4"
 
 libraryDependencies += "org.webjars" % "swagger-ui" % "2.0.17"
 
-libraryDependencies += "org.webjars" % "d3js" % "3.4.6-1"
+libraryDependencies += "org.webjars" % "d3js" % "3.4.8"
 
 // Put config directory in classpath for easier development --------------------
 
