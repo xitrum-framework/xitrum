@@ -176,7 +176,7 @@ class SwaggerUi extends Action {
 
 /** The directory path should be the same with other Swagger UI files. */
 @First
-@GET("webjars/swagger-ui/2.0.14/index")
+@GET("webjars/swagger-ui/2.0.17/index")
 class SwaggerUiVersioned extends Action {
   def execute() {
     val swaggerJsonUrl = url[SwaggerJson]
