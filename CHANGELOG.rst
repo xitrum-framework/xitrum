@@ -10,6 +10,8 @@
   Update Akka from 2.3.2 to 2.3.3
 * `#387 <https://github.com/xitrum-framework/xitrum/issues/387>`_
   Update JSON4S from 3.2.9 to 3.2.10
+* `#388 <https://github.com/xitrum-framework/xitrum/issues/388>`_
+  Update metrics-scala from 3.1.1.1_a2.3 to 3.2.0_a2.3
 
 3.12:
 
