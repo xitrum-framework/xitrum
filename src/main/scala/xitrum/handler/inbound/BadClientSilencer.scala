@@ -10,17 +10,21 @@ import xitrum.Log
  */
 @Sharable
 class BadClientSilencer extends SimpleChannelInboundHandler[Any] with Log {
-  override def channelRead0(ctx: ChannelHandlerContext, env: Any) {
+  override def channelRead0(ctx: ChannelHandlerContext, msg: Any) {
+    // Unknown msg, it has not been handled by any previous handler
     ctx.channel.close()
   }
 
   override def exceptionCaught(ctx: ChannelHandlerContext, e: Throwable) {
+    ctx.channel.close()
     if (e.isInstanceOf[java.io.IOException]                      ||  // Connection reset by peer, Broken pipe
         e.isInstanceOf[java.nio.channels.ClosedChannelException] ||
         e.isInstanceOf[io.netty.handler.codec.DecoderException]  ||
         e.isInstanceOf[java.lang.IllegalArgumentException]       ||  // Use https://... URL to connect to HTTP server
         e.isInstanceOf[javax.net.ssl.SSLException]               ||  // Use http://... URL to connect to HTTPS server
         e.isInstanceOf[io.netty.handler.ssl.NotSslRecordException])
-      Log.trace("BadClientSilencer caught exception", e)
+      Log.trace("Caught exception", e)  // Maybe client is bad
+    else
+      Log.warn("Caught exception", e)   // Maybe server is bad
   }
 }
