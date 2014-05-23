@@ -1,6 +1,7 @@
 package xitrum.handler.inbound
 
 import java.io.File
+import scala.util.control.NonFatal
 
 import io.netty.channel.{ChannelHandler, SimpleChannelInboundHandler, ChannelHandlerContext}
 import io.netty.handler.codec.http.{HttpMethod, HttpResponseStatus, HttpRequest, HttpHeaders}
@@ -43,16 +44,29 @@ class WebJarsServer extends SimpleChannelInboundHandler[HandlerEnv] {
         val resourcePath = "META-INF/resources" + pathInfo
 
         // Check resource existence, null means the resource does not exist
-        val url = getClass.getClassLoader.getResource(resourcePath)
-
-        if (url == null) {
+        val is = getClass.getClassLoader.getResourceAsStream(resourcePath)
+        if (is == null) {
           // Not found, this may be dynamic path (action)
           ctx.fireChannelRead(env)
         } else {
-          response.setStatus(OK)
-          NotModified.setClientCacheAggressively(response)
-          XSendResource.setHeader(response, resourcePath, false)
-          ctx.channel.writeAndFlush(env)
+          // Make sure that this is a file, not a directory
+          // getResourceAsStream("dir/") => is.available() will be 0
+          // getResourceAsStream("dir")  => is.available() will cause NullPointerException
+          try {
+            if (is.available() > 0) {
+              response.setStatus(OK)
+              NotModified.setClientCacheAggressively(response)
+              XSendResource.setHeader(response, resourcePath, false)
+              ctx.channel.writeAndFlush(env)
+            } else {
+              ctx.fireChannelRead(env)
+            }
+          } catch {
+            case NonFatal(e) => ctx.fireChannelRead(env)
+          } finally {
+            // getResourceAsStream("dir") => is.close() will cause NullPointerException
+            try { is.close() } catch { case NonFatal(e) => }
+          }
         }
     }
   }
