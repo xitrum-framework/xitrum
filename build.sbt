@@ -37,7 +37,7 @@ class Version {
 // and it takes several hours to sync from Sonatype to Maven Central
 resolvers += "SonatypeReleases" at "http://oss.sonatype.org/content/repositories/releases/"
 
-// Projects using Xitrum must provide a concrete implentation of SLF4J (Logback etc.)
+// Projects using Xitrum must provide a concrete implementation of SLF4J (Logback etc.)
 libraryDependencies += "org.slf4s" %% "slf4s-api" % "1.7.7"
 
 // An implementation of SLF4J is needed for log in tests to be output
