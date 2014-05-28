@@ -5,6 +5,7 @@ import io.netty.channel.{ChannelInitializer, ChannelPipeline}
 import io.netty.channel.nio.NioEventLoopGroup
 import io.netty.channel.socket.SocketChannel
 import io.netty.channel.socket.nio.NioServerSocketChannel
+import io.netty.util.ResourceLeakDetector
 
 import xitrum.handler.{
   DefaultHttpChannelInitializer,
@@ -54,6 +55,10 @@ object Server extends Log {
     routes.sockJsRouteMap.logRoutes()
     routes.logErrorRoutes()
     routes.logRoutes(true)
+
+    // By default, ResourceLeakDetector is enabled and at SIMPLE level
+    // http://netty.io/4.0/api/io/netty/util/ResourceLeakDetector.Level.html
+    if (!Config.productionMode) ResourceLeakDetector.setLevel(ResourceLeakDetector.Level.ADVANCED)
 
     // Lastly, start the server(s) after necessary things have been prepared
     val portConfig = Config.xitrum.port

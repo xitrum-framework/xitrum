@@ -1,3 +1,8 @@
+3.14:
+
+* `#393 <https://github.com/xitrum-framework/xitrum/issues/393>`_
+  For development mode, set Netty's ResourceLeakDetector level to ADVANCED
+
 3.13:
 
 * `#363 <https://github.com/xitrum-framework/xitrum/issues/363>`_
