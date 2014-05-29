@@ -132,21 +132,27 @@ object SeriDeseri {
    */
   def toUrlSafeBase64(bytes: Array[Byte]): String = {
     // No line break because the result may be used in HTTP response header (cookie)
-    val buffer       = Base64.encode(Unpooled.wrappedBuffer(bytes), false, Base64Dialect.URL_SAFE)
-    val base64String = buffer.toString(CharsetUtil.UTF_8)
+    val inBuffer     = Unpooled.wrappedBuffer(bytes)
+    val outBuffer    = Base64.encode(inBuffer, false, Base64Dialect.URL_SAFE)
+    val base64String = outBuffer.toString(CharsetUtil.UTF_8)
+    outBuffer.release()
+    inBuffer.release()
     removeUrlSafeBase64Padding(base64String)
   }
 
   /** @param base64String may contain optional padding ("=" characters) */
   def fromUrlSafeBase64(base64String: String): Option[Array[Byte]] = {
+    val withPadding = addUrlSafeBase64Padding(base64String)
+    val inBuffer    = Unpooled.copiedBuffer(withPadding, CharsetUtil.UTF_8)
     try {
-      val withPadding = addUrlSafeBase64Padding(base64String)
-      val buffer      = Base64.decode(Unpooled.copiedBuffer(withPadding, CharsetUtil.UTF_8), Base64Dialect.URL_SAFE)
-      val bytes       = ByteBufUtil.toBytes(buffer)
-      buffer.release()
+      val outBuffer = Base64.decode(inBuffer, Base64Dialect.URL_SAFE)
+      val bytes     = ByteBufUtil.toBytes(outBuffer)
+      outBuffer.release()
       Some(bytes)
     } catch {
       case NonFatal(e) => None
+    } finally {
+      inBuffer.release()
     }
   }
 

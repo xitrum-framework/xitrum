@@ -2,6 +2,8 @@
 
 * `#393 <https://github.com/xitrum-framework/xitrum/issues/393>`_
   For development mode, set Netty's ResourceLeakDetector level to ADVANCED
+* `#395 <https://github.com/xitrum-framework/xitrum/issues/395>`_
+  Fix memory leak at xitrum.util.SeriDeseri.fromUrlSafeBase64
 
 3.13:
 
