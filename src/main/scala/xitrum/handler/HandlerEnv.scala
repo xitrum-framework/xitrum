@@ -65,6 +65,7 @@ class HandlerEnv extends MHashMap[Any, Any] {
     ret
   }
 
+  /** Release native memory. */
   def release() {
     request.release()
     response.release()

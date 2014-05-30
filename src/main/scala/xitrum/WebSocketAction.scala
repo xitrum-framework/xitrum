@@ -38,16 +38,22 @@ case object WebSocketPong
 trait WebSocketAction extends Actor with Action {
   def receive = {
     case env: HandlerEnv =>
-      val beginTimestamp = System.currentTimeMillis()
-      apply(env)
-
       if (acceptWebSocket()) {
         // Don't use context.stop(self) to avoid leaking context outside this actor
         addConnectionClosedListener { self ! PoisonPill }
 
+        apply(env)
+
+        // This only releases native memory. Request headers do not use native
+        // memory, thus the "execute" below can still access headers.
+        // WebSocket requests are GET, thus don't use native memory, we release
+        // just in case.
+        env.release()
+
         // Can't use dispatchWithFailsafe because it may respond normal HTTP
         // response; we have just upgraded the connection to WebSocket protocol
         // at acceptWebSocket
+        val beginTimestamp = System.currentTimeMillis()
         execute()
         AccessLog.logWebSocketAccess(getClass.getName, this, beginTimestamp)
       } else {
@@ -117,7 +123,7 @@ trait WebSocketAction extends Actor with Action {
 
       val pipeline = channel.pipeline
       DefaultHttpChannelInitializer.removeUnusedHandlersForWebSocket(pipeline)
-      pipeline.addLast("webSocketEventDispatcher", new WebSocketEventDispatcher(handshaker, self))
+      pipeline.addLast("WebSocketEventDispatcher", new WebSocketEventDispatcher(handshaker, self))
 
       // Resume reading paused at NoRealPipelining
       NoRealPipelining.resumeReading(channel)
