@@ -13,10 +13,11 @@ import HttpVersion._
 import akka.actor.{Actor, Props}
 import com.esotericsoftware.reflectasm.ConstructorAccess
 
-import xitrum.{Action, ActorAction, FutureAction, Config}
+import xitrum.{Action, ActorAction, FutureAction, Config, Log}
 import xitrum.etag.NotModified
 import xitrum.handler.{HandlerEnv, NoRealPipelining}
 import xitrum.handler.outbound.XSendFile
+import xitrum.routing.SwaggerJson
 import xitrum.scope.request.PathInfo
 import xitrum.sockjs.SockJsPrefix
 import xitrum.util.{ClassFileLoader, FileMonitor}
@@ -56,7 +57,7 @@ private class ReloadableDispatcher {
   }
 }
 
-object Dispatcher {
+object Dispatcher extends Log {
   private val DEVELOPMENT_MODE_CLASSES_DIR = "target/scala-2.11/classes"
 
   private val prodDispatcher = new ReloadableDispatcher
@@ -88,7 +89,11 @@ object Dispatcher {
   if (!Config.productionMode) {
     val target = Paths.get(DEVELOPMENT_MODE_CLASSES_DIR).toAbsolutePath
     FileMonitor.monitorRecursive(FileMonitor.MODIFY, target, { path =>
-      DEVELOPMENT_MODE_CLASSES_DIR.synchronized { devNeedNewClassLoader = true }
+      DEVELOPMENT_MODE_CLASSES_DIR.synchronized {
+        devNeedNewClassLoader = true
+        if (path.endsWith(".class"))
+          log.info(s"$DEVELOPMENT_MODE_CLASSES_DIR changed; Reload classes and routes on next request")
+      }
     })
   }
 
@@ -97,6 +102,10 @@ object Dispatcher {
       if (devNeedNewClassLoader) {
         devClassLoader        = new ClassFileLoader(DEVELOPMENT_MODE_CLASSES_DIR, getClass.getClassLoader)
         devNeedNewClassLoader = false
+
+        // Also reload routes
+        Config.routes    = Config.loadRoutes()
+        SwaggerJson.apis = SwaggerJson.loadApis()
       }
       devClassLoader
     }

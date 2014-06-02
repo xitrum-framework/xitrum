@@ -48,11 +48,7 @@ object Server extends Log {
 
     if (Config.xitrum.metrics.isDefined) MetricsManager.start()
 
-    val routes = Config.routes
-    routes.logRoutes(false)
-    routes.sockJsRouteMap.logRoutes()
-    routes.logErrorRoutes()
-    routes.logRoutes(true)
+    Config.routes.logAll()
 
     // By default, ResourceLeakDetector is enabled and at SIMPLE level
     // http://netty.io/4.0/api/io/netty/util/ResourceLeakDetector.Level.html

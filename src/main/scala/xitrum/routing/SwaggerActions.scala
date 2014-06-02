@@ -18,8 +18,11 @@ object SwaggerJson {
   // See class SwaggerJsonAction.
   // Cache result of SwaggerAction at 1st access;
   // Can't cache header because a server may have multiple addresses
-  lazy val apis = for {
-    route <- routes
+  var apis = loadApis()
+
+  /** Maybe called multiple times in development mode when reloading routes. */
+  def loadApis() = for {
+    route <- Config.routes.all.flatten
     doc   <- docOf(route.klass)
     json  <- route2Json(route, doc)
   } yield json
@@ -116,15 +119,6 @@ object SwaggerJson {
     case method: SOCKJS    => method.paths.map(ApiMethod("SOCKJS",    _))
     case method: WEBSOCKET => method.paths.map(ApiMethod("WEBSOCKET", _))
     case _                 => Seq()
-  }
-
-  private def routes = {
-    import Config.routes._
-    firstGETs    ++ otherGETs    ++ lastGETs   ++
-    firstPOSTs   ++ otherPOSTs   ++ lastPOSTs  ++
-    firstPUTs    ++ otherPUTs    ++ lastPUTs   ++
-    firstPATCHs  ++ otherPATCHs  ++ lastPATCHs ++
-    firstDELETEs ++ otherDELETEs ++ lastDELETEs
   }
 
   private def cache(route: Route): String = {

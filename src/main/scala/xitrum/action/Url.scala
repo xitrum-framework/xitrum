@@ -78,7 +78,7 @@ trait Url {
 
   //----------------------------------------------------------------------------
 
-  def url(params: (String, Any)*) = Config.routesReverseMappings(getClass).url(params.toMap)
+  def url(params: (String, Any)*) = Config.routes.reverseMappings(getClass).url(params.toMap)
   lazy val url: String = url()
 
   def absUrl(params: (String, Any)*) = absUrlPrefix + url(params:_*)
@@ -91,7 +91,7 @@ trait Url {
 
   def url[T <: Action : Manifest](params: (String, Any)*) = {
     val klass = manifest[T].runtimeClass.asInstanceOf[Class[Action]]
-    val path  = Config.routesReverseMappings(klass).url(params.toMap)
+    val path  = Config.routes.reverseMappings(klass).url(params.toMap)
 
     // See xitrum.js
     if (klass == classOf[xitrum.js])
@@ -108,7 +108,7 @@ trait Url {
 
   def webSocketAbsUrl[T <: WebSocketAction : Manifest](params: (String, Any)*) = {
     val klass = manifest[T].runtimeClass.asInstanceOf[Class[Action]]
-    webSocketAbsUrlPrefix + Config.routesReverseMappings(klass).url(params.toMap)
+    webSocketAbsUrlPrefix + Config.routes.reverseMappings(klass).url(params.toMap)
   }
   def webSocketAbsUrl[T <: WebSocketAction : Manifest]: String = webSocketAbsUrl[T]()
 

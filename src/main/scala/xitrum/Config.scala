@@ -371,19 +371,14 @@ object Config extends Log {
 
   private[this] val ROUTES_CACHE = "routes.cache"
 
-  /**
-   * Use lazy to avoid collecting routes if they are not used.
-   * Sometimes we want to work in SBT console mode and don't like waste several
-   * seconds collecting routes that we don't use.
-   */
-  lazy val routes = {
+  var routes = loadRoutes()
+
+  /** Maybe called multiple times in development mode when reloading routes. */
+  def loadRoutes(): RouteCollection = {
     val ret = loadRouteCacheFileOrRecollectWithRetry()
     if (xitrum.metrics.isEmpty) ret.removeByPrefix("xitrum/metrics")
     ret
   }
-
-  /** routes.reverseMappings is used heavily in URL generation, cache it here */
-  lazy val routesReverseMappings = routes.reverseMappings
 
   private def loadRouteCacheFileOrRecollectWithRetry(retried: Boolean = false): RouteCollection = {
     try {

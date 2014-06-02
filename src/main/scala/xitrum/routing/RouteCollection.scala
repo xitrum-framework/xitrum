@@ -200,6 +200,13 @@ class RouteCollection(
   //----------------------------------------------------------------------------
   // Run only at startup, speed is not a problem
 
+  def logAll() {
+    logRoutes(false)
+    sockJsRouteMap.logRoutes()
+    logErrorRoutes()
+    logRoutes(true)
+  }
+
   /** @param xitrumRoutes true: log only Xitrum routes, false: log only app routes */
   def logRoutes(xitrumRoutes: Boolean) {
     // This method is only run once on start, speed is not a problem
@@ -323,6 +330,8 @@ class RouteCollection(
     }
   }
 
+  //----------------------------------------------------------------------------
+
   /** Used at SetCORS & OPTIONSResponse. */
   def tryAllMethods(pathInfo: PathInfo): Seq[HttpMethod] = {
     var methods = Seq.empty[HttpMethod]
@@ -346,6 +355,7 @@ class RouteCollection(
   }
 
   //----------------------------------------------------------------------------
+  // Convenient methods for modifying routes.
 
   /** removeByClass[ActionClassToRemove]()  */
   def removeByClass[A <: Action]()(implicit action: reflect.Manifest[A]) {
