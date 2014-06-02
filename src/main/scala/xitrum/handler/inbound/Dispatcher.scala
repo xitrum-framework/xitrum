@@ -1,7 +1,9 @@
 package xitrum.handler.inbound
 
 import java.io.File
+import java.nio.file.Paths
 import scala.collection.mutable.{Map => MMap}
+
 import io.netty.channel._
 import io.netty.handler.codec.http._
 import ChannelHandler.Sharable
@@ -13,11 +15,11 @@ import com.esotericsoftware.reflectasm.ConstructorAccess
 
 import xitrum.{Action, ActorAction, FutureAction, Config}
 import xitrum.etag.NotModified
-import xitrum.handler.{AccessLog, HandlerEnv, NoRealPipelining}
+import xitrum.handler.{HandlerEnv, NoRealPipelining}
 import xitrum.handler.outbound.XSendFile
 import xitrum.scope.request.PathInfo
 import xitrum.sockjs.SockJsPrefix
-import xitrum.util.ClassFileLoader
+import xitrum.util.{ClassFileLoader, FileMonitor}
 
 private class ReloadableDispatcher {
   private val CLASS_OF_ACTOR         = classOf[Actor]  // Can't be ActorAction, to support WebSocketAction and SockJsAction
@@ -55,18 +57,16 @@ private class ReloadableDispatcher {
 }
 
 object Dispatcher {
-  // In development mode, when .class files change, we can't reuse
-  // ReloadableDispatcher instance because of the way it's written.
-  // Instead, we must also reload it using a new class loader.
-  private val productionModeDispatcher = new ReloadableDispatcher
+  private val DEVELOPMENT_MODE_CLASSES_DIR = "target/scala-2.11/classes"
+
+  private val prodDispatcher = new ReloadableDispatcher
 
   def dispatch(actionClass: Class[_], handlerEnv: HandlerEnv) {
     if (Config.productionMode) {
-      productionModeDispatcher.dispatch(actionClass, handlerEnv)
+      prodDispatcher.dispatch(actionClass, handlerEnv)
     } else {
-      val classFileLoader     = new ClassFileLoader("target/scala-2.11/classes", getClass.getClassLoader)
-      val reloadedActionClass = classFileLoader.loadClass(actionClass.getName)  // Our main purpose
-      invokeReloadableDispatcher(classFileLoader, reloadedActionClass, handlerEnv)
+      val classLoader = devRenewClassLoaderIfNeeded()
+      devDispatch(classLoader, actionClass, handlerEnv)
     }
   }
 
@@ -78,14 +78,45 @@ object Dispatcher {
       actionClass.newInstance()
   }
 
-  /** For development mode. */
-  private def invokeReloadableDispatcher(classLoader: ClassLoader, reloadedActionClass: Class[_], handlerEnv: HandlerEnv) {
-    val reloadableDispatcherClass    = classLoader.loadClass("xitrum.handler.inbound.ReloadableDispatcher")
+  //----------------------------------------------------------------------------
+
+  private var devClassLoader        = new ClassFileLoader(DEVELOPMENT_MODE_CLASSES_DIR, getClass.getClassLoader)
+  private var devNeedNewClassLoader = false
+
+  // In development mode, watch the directory "classes". If there's modification,
+  // mark that at the next request, a new class loader should be created.
+  if (!Config.productionMode) {
+    val target = Paths.get(DEVELOPMENT_MODE_CLASSES_DIR).toAbsolutePath
+    FileMonitor.monitorRecursive(FileMonitor.MODIFY, target, { path =>
+      DEVELOPMENT_MODE_CLASSES_DIR.synchronized { devNeedNewClassLoader = true }
+    })
+  }
+
+  private def devRenewClassLoaderIfNeeded(): ClassLoader = {
+    DEVELOPMENT_MODE_CLASSES_DIR.synchronized {
+      if (devNeedNewClassLoader) {
+        devClassLoader        = new ClassFileLoader(DEVELOPMENT_MODE_CLASSES_DIR, getClass.getClassLoader)
+        devNeedNewClassLoader = false
+      }
+      devClassLoader
+    }
+  }
+
+  private def devDispatch(classLoader: ClassLoader, actionClass: Class[_], handlerEnv: HandlerEnv) {
+    // Our main purpose
+    val reloadedActionClass = classLoader.loadClass(actionClass.getName)
+
+    // In development mode, when .class files change, we can't reuse
+    // ReloadableDispatcher instance because of the way it's written.
+    // Instead, we must also reload it using a new class loader.
+    val reloadableDispatcherClass    = classLoader.loadClass(classOf[ReloadableDispatcher].getName)
     val reloadableDispatcherInstance = reloadableDispatcherClass.newInstance()
-    val dispatchMethod               = reloadableDispatcherClass.getMethod("dispatch", classOf[Class[_]], classOf[HandlerEnv])
-    dispatchMethod.invoke(reloadableDispatcherInstance, reloadedActionClass, handlerEnv)
+    val reloadableDispatcherMethod   = reloadableDispatcherClass.getMethod("dispatch", classOf[Class[_]], classOf[HandlerEnv])
+    reloadableDispatcherMethod.invoke(reloadableDispatcherInstance, reloadedActionClass, handlerEnv)
   }
 }
+
+//------------------------------------------------------------------------------
 
 @Sharable
 class Dispatcher extends SimpleChannelInboundHandler[HandlerEnv] {
