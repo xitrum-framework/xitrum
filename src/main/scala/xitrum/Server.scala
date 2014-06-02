@@ -31,14 +31,6 @@ object Server extends Log {
    * SSL codec handler will be automatically prepended for HTTPS server.
    */
   def start(httpChannelInitializer: ChannelInitializer[SocketChannel]) {
-    // Redirect Akka log to SLF4J
-    // http://doc.akka.io/docs/akka/2.3.3/scala/logging.html
-    // http://stackoverflow.com/questions/16202501/how-can-i-override-a-typesafe-config-list-value-on-the-command-line
-    System.setProperty("akka.loggers.0", "akka.event.slf4j.Slf4jLogger")
-
-    // https://www.assembla.com/spaces/ddEDvgVAKr3QrUeJe5aVNr/tickets/3747
-    System.setProperty("akka.logger-startup-timeout", "30s")
-
     Config.xitrum.template.foreach(_.start())
     Config.xitrum.cache.start()
     Config.xitrum.session.store.start()
