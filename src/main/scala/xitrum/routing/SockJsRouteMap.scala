@@ -1,11 +1,9 @@
 package xitrum.routing
 
 import scala.collection.mutable.{Map => MMap}
-
 import akka.actor.{Actor, ActorRef, ActorRefFactory, Props}
-import com.esotericsoftware.reflectasm.ConstructorAccess
-
 import xitrum.{Config, Log, SockJsAction}
+import xitrum.handler.inbound.Dispatcher
 
 /**
  * "websocket" and "cookieNeeded" members are named after SockJS options, ex:
@@ -58,7 +56,7 @@ class SockJsRouteMap(map: MMap[String, SockJsClassAndOptions]) extends Log {
   def createSockJsAction(context: ActorRefFactory, pathPrefix: String): ActorRef = {
     val sockJsClassAndOptions = map(pathPrefix)
     val actorClass            = sockJsClassAndOptions.actorClass
-    context.actorOf(Props(ConstructorAccess.get(actorClass).newInstance()))
+    context.actorOf(Props(Dispatcher.newActionInstance(actorClass).asInstanceOf[Actor]))
   }
 
   /** @param sockJsHandlerClass Normal SockJsHandler subclass or object class */

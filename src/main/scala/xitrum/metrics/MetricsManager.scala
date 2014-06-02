@@ -4,7 +4,6 @@ import java.util.concurrent.TimeUnit
 import scala.concurrent.duration._
 import scala.concurrent.duration.FiniteDuration
 
-import com.esotericsoftware.reflectasm.ConstructorAccess
 import com.codahale.metrics.MetricRegistry
 import com.codahale.metrics.json.MetricsModule
 import com.fasterxml.jackson.databind.ObjectMapper

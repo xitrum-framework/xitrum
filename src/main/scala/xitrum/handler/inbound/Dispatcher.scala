@@ -17,27 +17,28 @@ import xitrum.handler.{AccessLog, HandlerEnv, NoRealPipelining}
 import xitrum.handler.outbound.XSendFile
 import xitrum.scope.request.PathInfo
 import xitrum.sockjs.SockJsPrefix
+import xitrum.util.ClassFileLoader
 
-object Dispatcher {
+private class ReloadableDispatcher {
   private val CLASS_OF_ACTOR         = classOf[Actor]  // Can't be ActorAction, to support WebSocketAction and SockJsAction
   private val CLASS_OF_FUTURE_ACTION = classOf[FutureAction]
 
-  def dispatch(klass: Class[_], handlerEnv: HandlerEnv) {
+  def dispatch(actionClass: Class[_], handlerEnv: HandlerEnv) {
     // This method should be fast because it is run for every request
     // => Use ReflectASM instead of normal reflection to create action instance
 
-    if (CLASS_OF_ACTOR.isAssignableFrom(klass)) {
+    if (CLASS_OF_ACTOR.isAssignableFrom(actionClass)) {
       val actorRef = Config.actorSystem.actorOf(Props {
-        val actor = ConstructorAccess.get(klass).newInstance()
+        val actor = Dispatcher.newActionInstance(actionClass)
         setPathPrefixForSockJs(actor, handlerEnv)
         actor.asInstanceOf[Actor]
       })
       actorRef ! handlerEnv
     } else {
-      val action = ConstructorAccess.get(klass).newInstance().asInstanceOf[Action]
+      val action = Dispatcher.newActionInstance(actionClass).asInstanceOf[Action]
       setPathPrefixForSockJs(action, handlerEnv)
       action.apply(handlerEnv)
-      if (CLASS_OF_FUTURE_ACTION.isAssignableFrom(klass)) {
+      if (CLASS_OF_FUTURE_ACTION.isAssignableFrom(actionClass)) {
         Config.actorSystem.dispatcher.execute(new Runnable {
           def run() { action.dispatchWithFailsafe() }
         })
@@ -50,6 +51,39 @@ object Dispatcher {
   private def setPathPrefixForSockJs(instance: Any, handlerEnv: HandlerEnv) {
     if (instance.isInstanceOf[SockJsPrefix])
       instance.asInstanceOf[SockJsPrefix].setPathPrefix(handlerEnv.pathInfo)
+  }
+}
+
+object Dispatcher {
+  // In development mode, when .class files change, we can't reuse
+  // ReloadableDispatcher instance because of the way it's written.
+  // Instead, we must also reload it using a new class loader.
+  private val productionModeDispatcher = new ReloadableDispatcher
+
+  def dispatch(actionClass: Class[_], handlerEnv: HandlerEnv) {
+    if (Config.productionMode) {
+      productionModeDispatcher.dispatch(actionClass, handlerEnv)
+    } else {
+      val classFileLoader     = new ClassFileLoader("target/scala-2.11/classes", getClass.getClassLoader)
+      val reloadedActionClass = classFileLoader.loadClass(actionClass.getName)  // Our main purpose
+      invokeReloadableDispatcher(classFileLoader, reloadedActionClass, handlerEnv)
+    }
+  }
+
+  /** Use Class#newInstance for development mode, ConstructorAccess for production mode. */
+  def newActionInstance(actionClass: Class[_]) = {
+    if (Config.productionMode)
+      ConstructorAccess.get(actionClass).newInstance()
+    else
+      actionClass.newInstance()
+  }
+
+  /** For development mode. */
+  private def invokeReloadableDispatcher(classLoader: ClassLoader, reloadedActionClass: Class[_], handlerEnv: HandlerEnv) {
+    val reloadableDispatcherClass    = classLoader.loadClass("xitrum.handler.inbound.ReloadableDispatcher")
+    val reloadableDispatcherInstance = reloadableDispatcherClass.newInstance()
+    val dispatchMethod               = reloadableDispatcherClass.getMethod("dispatch", classOf[Class[_]], classOf[HandlerEnv])
+    dispatchMethod.invoke(reloadableDispatcherInstance, reloadedActionClass, handlerEnv)
   }
 }
 
