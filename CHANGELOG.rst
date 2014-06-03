@@ -6,6 +6,8 @@
   Recollect routes in development mode
 * `#393 <https://github.com/xitrum-framework/xitrum/issues/393>`_
   For development mode, set Netty's ResourceLeakDetector level to ADVANCED
+* `#394 <https://github.com/xitrum-framework/xitrum/issues/394>`_
+  Add automatic error handling (error 500) for ActorAction
 * `#395 <https://github.com/xitrum-framework/xitrum/issues/395>`_
   Fix memory leak at xitrum.util.SeriDeseri.fromUrlSafeBase64
 

@@ -39,16 +39,16 @@ trait WebSocketAction extends Actor with Action {
   def receive = {
     case env: HandlerEnv =>
       if (acceptWebSocket()) {
-        // Don't use context.stop(self) to avoid leaking context outside this actor
-        addConnectionClosedListener { self ! PoisonPill }
-
-        apply(env)
-
         // This only releases native memory. Request headers do not use native
         // memory, thus the "execute" below can still access headers.
         // WebSocket requests are GET, thus don't use native memory, we release
         // just in case.
         env.release()
+
+        // Don't use context.stop(self) to avoid leaking context outside this actor
+        addConnectionClosedListener { self ! PoisonPill }
+
+        apply(env)
 
         // Can't use dispatchWithFailsafe because it may respond normal HTTP
         // response; we have just upgraded the connection to WebSocket protocol
@@ -57,6 +57,7 @@ trait WebSocketAction extends Actor with Action {
         execute()
         AccessLog.logWebSocketAccess(getClass.getName, this, beginTimestamp)
       } else {
+        env.release()
         context.stop(self)
       }
   }

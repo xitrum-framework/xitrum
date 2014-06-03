@@ -1,7 +1,9 @@
 package xitrum
 
 import akka.actor.{Actor, PoisonPill}
+import io.netty.handler.codec.http.HttpResponseStatus
 import xitrum.handler.HandlerEnv
+import xitrum.handler.inbound.Dispatcher
 
 /**
  * An actor will be created when there's request. It will be stopped when:
@@ -23,7 +25,10 @@ trait ActorAction extends Actor with Action {
         // The check is for avoiding "Dead actor sends Terminate msg to itself"
         // See onDoneResponding below
         // https://github.com/xitrum-framework/xitrum/issues/183
-        if (!isDoneResponding) self ! PoisonPill
+        if (!isDoneResponding) {
+          env.release()
+          self ! PoisonPill
+        }
       }
 
       dispatchWithFailsafe()
@@ -33,5 +38,40 @@ trait ActorAction extends Actor with Action {
     // Don't use context.stop(self) to avoid leaking context outside this actor,
     // just in case onDoneResponding is called from another thread
     self ! PoisonPill
+  }
+
+  override def postStop() {
+    println("handlerEnv: " + handlerEnv)
+    println("ch: " + channel)
+
+    return
+
+    // When there's uncaught exception (dispatchWithFailsafe can only catch
+    // exception thrown from the current calling thread, not from other threads):
+    // - This actor is stopped without responding anything
+    // - Akka won't pass the exception to this actor, it will just log the error
+    if (!isDoneResponding && channel.isWritable) {
+      response.setStatus(HttpResponseStatus.INTERNAL_SERVER_ERROR)
+      if (Config.productionMode) {
+        Config.routes.error500 match {
+          case None =>
+            respondDefault500Page()
+
+          case Some(error500) =>
+            if (error500 == getClass) {
+              respondDefault500Page()
+            } else {
+              response.setStatus(HttpResponseStatus.INTERNAL_SERVER_ERROR)
+              Dispatcher.dispatch(error500, handlerEnv)
+            }
+        }
+      } else {
+        val errorMsg = s"The ActorAction ${getClass.getName} has stopped without responding anything. Check server log for exception."
+        if (isAjax)
+          jsRespond(s"""alert("${jsEscape(errorMsg)}")""")
+        else
+          respondText(errorMsg)
+      }
+    }
   }
 }

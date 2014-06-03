@@ -67,8 +67,8 @@ class HandlerEnv extends MHashMap[Any, Any] {
 
   /** Release native memory. */
   def release() {
-    request.release()
-    response.release()
+    if (request.refCnt() > 0)  request.release()
+    if (response.refCnt() > 0) response.release()
 
     if (bodyDecoder != null) {
       bodyDecoder.cleanFiles()
