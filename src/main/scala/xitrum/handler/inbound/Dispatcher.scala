@@ -90,19 +90,18 @@ object Dispatcher extends Log {
   if (!Config.productionMode) devMonitorClassesDir()
 
   private def devMonitorClassesDir() {
-    val target = Paths.get(DEVELOPMENT_MODE_CLASSES_DIR).toAbsolutePath
-    FileMonitor.monitorRecursive(FileMonitor.MODIFY, target, { path =>
+    val classesDir = Paths.get(DEVELOPMENT_MODE_CLASSES_DIR).toAbsolutePath
+    FileMonitor.monitorRecursive(FileMonitor.MODIFY, classesDir, { path =>
       DEVELOPMENT_MODE_CLASSES_DIR.synchronized {
-        if (path.toString.endsWith(".class")) {
-          devNeedNewClassLoader = true
+        // Do this not only for .class files, because event may be skipped
+        devNeedNewClassLoader = true
 
-          // Avoid logging too frequently
-          val now = System.currentTimeMillis()
-          val dt  = now - devLastLogAt
-          if (dt > 500) {
-            log.info(s"$DEVELOPMENT_MODE_CLASSES_DIR changed; reload classes and routes on next request")
-            devLastLogAt = now
-          }
+        // Avoid logging too frequently
+        val now = System.currentTimeMillis()
+        val dt  = now - devLastLogAt
+        if (dt > 500) {
+          log.info(s"$DEVELOPMENT_MODE_CLASSES_DIR changed; reload classes and routes on next request")
+          devLastLogAt = now
         }
 
         // https://github.com/lloydmeta/schwatcher
@@ -110,7 +109,7 @@ object Dispatcher extends Log {
         // persistently-recursive. That is, they do not propagate to new files
         // or folders created/deleted after registration. Currently, the plan is
         // to have developers handle this themselves in the callback functions.
-        FileMonitor.unmonitorRecursive(FileMonitor.MODIFY, target)
+        FileMonitor.unmonitorRecursive(FileMonitor.MODIFY, classesDir)
         devMonitorClassesDir()
       }
     })
