@@ -58,8 +58,6 @@ private class ReloadableDispatcher {
 }
 
 object Dispatcher extends Log {
-  val DEVELOPMENT_MODE_CLASSES_DIR = "target/scala-2.11/classes"
-
   private val prodDispatcher = new ReloadableDispatcher
 
   def dispatch(actionClass: Class[_], handlerEnv: HandlerEnv) {
@@ -81,13 +79,17 @@ object Dispatcher extends Log {
 
   //----------------------------------------------------------------------------
 
+  val DEVELOPMENT_MODE_CLASSES_DIR = "target/scala-2.11/classes"
+
   private var devClassLoader        = new ClassFileLoader(DEVELOPMENT_MODE_CLASSES_DIR, getClass.getClassLoader)
   private var devNeedNewClassLoader = false  // Only reload on new request
   private var devLastLogAt          = 0L     // Avoid logging too frequently
 
   // In development mode, watch the directory "classes". If there's modification,
   // mark that at the next request, a new class loader should be created.
-  if (!Config.productionMode) {
+  if (!Config.productionMode) devMonitorClassesDir()
+
+  private def devMonitorClassesDir() {
     val target = Paths.get(DEVELOPMENT_MODE_CLASSES_DIR).toAbsolutePath
     FileMonitor.monitorRecursive(FileMonitor.MODIFY, target, { path =>
       DEVELOPMENT_MODE_CLASSES_DIR.synchronized {
@@ -95,11 +97,21 @@ object Dispatcher extends Log {
           devNeedNewClassLoader = true
 
           // Avoid logging too frequently
-          val now      = System.currentTimeMillis()
-          val dt       = now - devLastLogAt
-          devLastLogAt = now
-          if (dt > 500) log.info(s"$DEVELOPMENT_MODE_CLASSES_DIR changed; reload classes and routes on next request")
+          val now = System.currentTimeMillis()
+          val dt  = now - devLastLogAt
+          if (dt > 500) {
+            log.info(s"$DEVELOPMENT_MODE_CLASSES_DIR changed; reload classes and routes on next request")
+            devLastLogAt = now
+          }
         }
+
+        // https://github.com/lloydmeta/schwatcher
+        // Callbacks that are registered with recursive=true are not
+        // persistently-recursive. That is, they do not propagate to new files
+        // or folders created/deleted after registration. Currently, the plan is
+        // to have developers handle this themselves in the callback functions.
+        FileMonitor.unmonitorRecursive(FileMonitor.MODIFY, target)
+        devMonitorClassesDir()
       }
     })
   }

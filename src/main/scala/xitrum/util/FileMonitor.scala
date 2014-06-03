@@ -15,11 +15,11 @@ object FileMonitor extends Log {
   val MODIFY = StandardWatchEventKinds.ENTRY_MODIFY
   val HIGH   = get_com_sun_nio_file_SensitivityWatchEventModifier_HIGH
 
-  private val FILE_MONITOR_CONCURRENCY = 5
-  private val fileMonitorActor = Config.actorSystem.actorOf(MonitorActor(FILE_MONITOR_CONCURRENCY))
+  // concurrency = 1 is sufficient for most cases
+  private val fileMonitorActor = Config.actorSystem.actorOf(MonitorActor(concurrency = 1))
 
-  def monitor(event: WatchEvent.Kind[Path], path: Path, callback: Callback*) {
-    callback.foreach { cb =>
+  def monitor(event: WatchEvent.Kind[Path], path: Path, callbacks: Callback*) {
+    callbacks.foreach { cb =>
       fileMonitorActor ! RegisterCallback(event, HIGH, false, path, cb)
     }
   }
@@ -44,8 +44,8 @@ object FileMonitor extends Log {
     try {
       val c = Class.forName("com.sun.nio.file.SensitivityWatchEventModifier")
       val f = c.getField("HIGH")
-      val e = f.get(c).asInstanceOf[Modifier]
-      Some(e)
+      val m = f.get(c).asInstanceOf[Modifier]
+      Some(m)
     } catch {
       case NonFatal(e) =>
         None
