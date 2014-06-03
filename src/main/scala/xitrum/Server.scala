@@ -14,6 +14,7 @@ import xitrum.handler.{
   SslChannelInitializer
 }
 
+import xitrum.handler.inbound.Dispatcher
 import xitrum.metrics.MetricsManager
 import xitrum.sockjs.{SockJsAction => SA}
 
@@ -60,8 +61,10 @@ object Server extends Log {
       }
     }
 
-    val mode = if (Config.productionMode) "production" else "development"
-    log.info(s"Xitrum started in $mode mode")
+    if (Config.productionMode)
+      log.info("Xitrum started in production mode")
+    else
+      log.info(s"Xitrum started in development mode; routes and classes in directory ${Dispatcher.DEVELOPMENT_MODE_CLASSES_DIR} will be reloaded")
 
     // This is a good timing to warn
     Config.warnOnDefaultSecureKey()

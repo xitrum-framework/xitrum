@@ -58,7 +58,7 @@ private class ReloadableDispatcher {
 }
 
 object Dispatcher extends Log {
-  private val DEVELOPMENT_MODE_CLASSES_DIR = "target/scala-2.11/classes"
+  val DEVELOPMENT_MODE_CLASSES_DIR = "target/scala-2.11/classes"
 
   private val prodDispatcher = new ReloadableDispatcher
 

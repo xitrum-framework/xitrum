@@ -45,8 +45,8 @@ trait Url {
   /**
    * Ex: publicUrl("jquery/2.1.1", "jquery.js", "jquery.min.js")
    *
-   * @param devFile File to use in development environment
-   * @param prodFile File to use in production environment
+   * @param devFile File to use in development mode
+   * @param prodFile File to use in production mode
    */
   def publicUrl(directory: String, devFile: String, prodFile: String): String = {
     val file = if (Config.productionMode) prodFile else devFile
@@ -67,8 +67,8 @@ trait Url {
   /**
    * Ex: webJarsUrl("jquery/2.1.1", "jquery.js", "jquery.min.js")
    *
-   * @param devFile File to use in development environment
-   * @param prodFile File to use in production environment
+   * @param devFile File to use in development mode
+   * @param prodFile File to use in production mode
    */
   def webJarsUrl(directory: String, devFile: String, prodFile: String): String = {
     val file = if (Config.productionMode) prodFile else devFile
