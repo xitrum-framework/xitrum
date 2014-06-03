@@ -4,6 +4,8 @@
   Reload classes in development mode
 * `#398 <https://github.com/xitrum-framework/xitrum/issues/398>`_
   Recollect routes in development mode
+* `#390 <https://github.com/xitrum-framework/xitrum/issues/390>`_
+  Add validation method "check" that returns true/false
 * `#393 <https://github.com/xitrum-framework/xitrum/issues/393>`_
   For development mode, set Netty's ResourceLeakDetector level to ADVANCED
 * `#394 <https://github.com/xitrum-framework/xitrum/issues/394>`_

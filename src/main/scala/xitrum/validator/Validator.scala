@@ -2,10 +2,15 @@ package xitrum.validator
 
 import xitrum.exception.InvalidInput
 
-trait Validator {
-  def v(name: String, value: Any): Option[String]
+trait Validator[T] {
+  /** Returns false if validation fails, otherwise true. */
+  def check(value: T): Boolean
 
-  def e(name: String, value: Any) {
-    v(name, value).foreach { message => throw new InvalidInput(message) }
+  /** Returns Some(error message) if validation fails, otherwise None. */
+  def message(name: String, value: T): Option[String]
+
+  /** Throws exception InvalidInput(error message) if validation fails. */
+  def exception(name: String, value: T) {
+    message(name, value).foreach { message => throw new InvalidInput(message) }
   }
 }
