@@ -100,14 +100,21 @@ class RouteCollection(
   val error500: Option[Class[Action]]
 ) extends Log
 {
-  lazy val reverseMappings: Map[Class[_], ReverseRoute] = {
-    val mmap = MMap.empty[Class[_], ArrayBuffer[Route]]
+  /**
+   * Class name -> ReverseRoute
+   *
+   * Use class name (String) instead of Class[_] becasuse we want to reload
+   * classes in development mode, but classes loaded by different class loaders
+   * can't be compared.
+   */
+  lazy val reverseMappings: scala.collection.Map[String, ReverseRoute] = {
+    val mmap = MMap.empty[String, ArrayBuffer[Route]]
 
-    allFirsts(None).foreach { r => mmap.getOrElseUpdate(r.klass, ArrayBuffer()).append(r) }
-    allOthers(None).foreach { r => mmap.getOrElseUpdate(r.klass, ArrayBuffer()).append(r) }
-    allLasts (None).foreach { r => mmap.getOrElseUpdate(r.klass, ArrayBuffer()).append(r) }
+    allFirsts(None).foreach { r => mmap.getOrElseUpdate(r.klass.getName, ArrayBuffer()).append(r) }
+    allOthers(None).foreach { r => mmap.getOrElseUpdate(r.klass.getName, ArrayBuffer()).append(r) }
+    allLasts (None).foreach { r => mmap.getOrElseUpdate(r.klass.getName, ArrayBuffer()).append(r) }
 
-    mmap.mapValues { routes => ReverseRoute(routes) }.toMap
+    mmap.mapValues { routes => ReverseRoute(routes) }
   }
 
   //----------------------------------------------------------------------------

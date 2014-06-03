@@ -19,7 +19,7 @@ trait SessionEnv extends Csrf {
    * send the cookie (name-value pairs).
    * http://en.wikipedia.org/wiki/HTTP_cookie#Cookie_attributes
    */
-  lazy val requestCookies: Map[String, String] = {
+  lazy val requestCookies: scala.collection.Map[String, String] = {
     val header  = HttpHeaders.getHeader(request, Names.COOKIE)
     if (header == null) {
       Map.empty[String, String]
@@ -31,7 +31,7 @@ trait SessionEnv extends Csrf {
         val cookie = iterator.next()
         acc(cookie.getName) = cookie.getValue
       }
-      acc.toMap
+      acc
     }
   }
 
