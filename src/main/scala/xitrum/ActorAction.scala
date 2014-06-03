@@ -16,6 +16,9 @@ import xitrum.handler.inbound.Dispatcher
  * See also Action and FutureAction.
  */
 trait ActorAction extends Actor with Action {
+  // Sending PoisonPill at postStop causes postStop to be called again!
+  private var postStopCalled = false
+
   def receive = {
     case env: HandlerEnv =>
       apply(env)
@@ -27,7 +30,7 @@ trait ActorAction extends Actor with Action {
         // https://github.com/xitrum-framework/xitrum/issues/183
         if (!isDoneResponding) {
           env.release()
-          self ! PoisonPill
+          if (!postStopCalled) self ! PoisonPill
         }
       }
 
@@ -37,41 +40,45 @@ trait ActorAction extends Actor with Action {
   override def onDoneResponding() {
     // Don't use context.stop(self) to avoid leaking context outside this actor,
     // just in case onDoneResponding is called from another thread
-    self ! PoisonPill
+    if (!postStopCalled) self ! PoisonPill
   }
 
   override def postStop() {
-    println("handlerEnv: " + handlerEnv)
-    println("ch: " + channel)
-
-    return
+    if (postStopCalled) return
+    postStopCalled = true
 
     // When there's uncaught exception (dispatchWithFailsafe can only catch
     // exception thrown from the current calling thread, not from other threads):
     // - This actor is stopped without responding anything
     // - Akka won't pass the exception to this actor, it will just log the error
-    if (!isDoneResponding && channel.isWritable) {
-      response.setStatus(HttpResponseStatus.INTERNAL_SERVER_ERROR)
-      if (Config.productionMode) {
-        Config.routes.error500 match {
-          case None =>
-            respondDefault500Page()
 
-          case Some(error500) =>
-            if (error500 == getClass) {
-              respondDefault500Page()
-            } else {
-              response.setStatus(HttpResponseStatus.INTERNAL_SERVER_ERROR)
-              Dispatcher.dispatch(error500, handlerEnv)
-            }
-        }
-      } else {
-        val errorMsg = s"The ActorAction ${getClass.getName} has stopped without responding anything. Check server log for exception."
-        if (isAjax)
-          jsRespond(s"""alert("${jsEscape(errorMsg)}")""")
-        else
-          respondText(errorMsg)
+    if (isDoneResponding) return
+
+    if (!channel.isWritable) {
+      handlerEnv.release()
+      return
+    }
+
+    response.setStatus(HttpResponseStatus.INTERNAL_SERVER_ERROR)
+    if (Config.productionMode) {
+      Config.routes.error500 match {
+        case None =>
+          respondDefault500Page()
+
+        case Some(error500) =>
+          if (error500 == getClass) {
+            respondDefault500Page()
+          } else {
+            response.setStatus(HttpResponseStatus.INTERNAL_SERVER_ERROR)
+            Dispatcher.dispatch(error500, handlerEnv)
+          }
       }
+    } else {
+      val errorMsg = s"The ActorAction ${getClass.getName} has stopped without responding anything. Check server log for exception."
+      if (isAjax)
+        jsRespond(s"""alert("${jsEscape(errorMsg)}")""")
+      else
+        respondText(errorMsg)
     }
   }
 }
