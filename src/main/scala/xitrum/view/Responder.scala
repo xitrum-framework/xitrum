@@ -379,10 +379,10 @@ trait Responder extends Js with Flash with GetActionClassDefaultsToCurrentAction
   private def throwDoubleResponseError(texto: Option[Any] = None) {
     texto match {
       case None =>
-        throw new IllegalStateException("Double response; See stack trace to know where to fix the error.")
+        throw new IllegalStateException("Double response error. See stack trace to know where to fix the error.")
 
       case Some(text) =>
-        throw new IllegalStateException(s"Double response; You're trying to respond: $text\nSee stack trace to know where to fix the error.")
+        throw new IllegalStateException(s"Double response error. See stack trace to know where to fix the error. You're trying to respond: $text\n")
     }
   }
 

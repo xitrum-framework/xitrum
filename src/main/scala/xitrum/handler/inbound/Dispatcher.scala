@@ -98,7 +98,7 @@ object Dispatcher extends Log {
           val now      = System.currentTimeMillis()
           val dt       = now - devLastLogAt
           devLastLogAt = now
-          if (dt > 500) log.info(s"$DEVELOPMENT_MODE_CLASSES_DIR changed; Reload classes and routes on next request")
+          if (dt > 500) log.info(s"$DEVELOPMENT_MODE_CLASSES_DIR changed; reload classes and routes on next request")
         }
       }
     })
