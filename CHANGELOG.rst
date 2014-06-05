@@ -12,6 +12,8 @@
   Add automatic error handling (error 500) for ActorAction
 * `#395 <https://github.com/xitrum-framework/xitrum/issues/395>`_
   Fix memory leak at xitrum.util.SeriDeseri.fromUrlSafeBase64
+* `#399 <https://github.com/xitrum-framework/xitrum/issues/399>`_
+  Add xitrum.Component
 
 3.13:
 

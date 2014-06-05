@@ -26,19 +26,19 @@ private class ReloadableDispatcher {
   private val CLASS_OF_ACTOR         = classOf[Actor]  // Can't be ActorAction, to support WebSocketAction and SockJsAction
   private val CLASS_OF_FUTURE_ACTION = classOf[FutureAction]
 
-  def dispatch(actionClass: Class[_], handlerEnv: HandlerEnv) {
+  def dispatch(actionClass: Class[_ <: Action], handlerEnv: HandlerEnv) {
     // This method should be fast because it is run for every request
     // => Use ReflectASM instead of normal reflection to create action instance
 
     if (CLASS_OF_ACTOR.isAssignableFrom(actionClass)) {
       val actorRef = Config.actorSystem.actorOf(Props {
-        val actor = Dispatcher.newActionInstance(actionClass)
+        val actor = Dispatcher.newAction(actionClass)
         setPathPrefixForSockJs(actor, handlerEnv)
         actor.asInstanceOf[Actor]
       })
       actorRef ! handlerEnv
     } else {
-      val action = Dispatcher.newActionInstance(actionClass).asInstanceOf[Action]
+      val action = Dispatcher.newAction(actionClass)
       setPathPrefixForSockJs(action, handlerEnv)
       action.apply(handlerEnv)
       if (CLASS_OF_FUTURE_ACTION.isAssignableFrom(actionClass)) {
@@ -60,7 +60,7 @@ private class ReloadableDispatcher {
 object Dispatcher extends Log {
   private val prodDispatcher = new ReloadableDispatcher
 
-  def dispatch(actionClass: Class[_], handlerEnv: HandlerEnv) {
+  def dispatch(actionClass: Class[_ <: Action], handlerEnv: HandlerEnv) {
     if (Config.productionMode) {
       prodDispatcher.dispatch(actionClass, handlerEnv)
     } else {
@@ -70,7 +70,7 @@ object Dispatcher extends Log {
   }
 
   /** Use Class#newInstance for development mode, ConstructorAccess for production mode. */
-  def newActionInstance(actionClass: Class[_]) = {
+  def newAction(actionClass: Class[_ <: Action]): Action = {
     if (Config.productionMode)
       ConstructorAccess.get(actionClass).newInstance()
     else

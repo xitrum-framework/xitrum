@@ -66,6 +66,13 @@ trait Action extends RequestEnv
     })
   }
 
+  def newComponent[T <: Component : Manifest](): T = {
+    val componentClass = manifest[T].runtimeClass.asInstanceOf[Class[Component]]
+    val component      = Dispatcher.newAction(componentClass).asInstanceOf[T]
+    component.apply(this)
+    component
+  }
+
   //----------------------------------------------------------------------------
 
   def dispatchWithFailsafe() {

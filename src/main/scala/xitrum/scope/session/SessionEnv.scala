@@ -35,7 +35,7 @@ trait SessionEnv extends Csrf {
     }
   }
 
-  val responseCookies = new ArrayBuffer[Cookie]
+  lazy val responseCookies = new ArrayBuffer[Cookie]
 
   // Avoid encoding, decoding cookies when session is not touched by the application
   private var sessionTouched = false

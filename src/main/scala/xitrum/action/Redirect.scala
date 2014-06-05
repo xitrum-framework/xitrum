@@ -13,18 +13,37 @@ import xitrum.handler.inbound.Dispatcher
 trait Redirect {
   this: Action =>
 
-  /** See also forwardTo. */
+  /**
+   * Example: redirectTo("https://google.com/"); status will be 302 FOUND
+   *
+   * Example: redirectTo("https://google.com/", HttpResponseStatus.MOVED_PERMANENTLY)
+   *
+   * See also forwardTo.
+   */
   def redirectTo(location: String, status: HttpResponseStatus = FOUND): ChannelFuture = {
     response.setStatus(status)
     HttpHeaders.setHeader(response, LOCATION, location)
     respond()
   }
 
-  /** See also forwardTo. */
+  /**
+   * Example: redirectTo[AnotherActionClass]()
+   *
+   * Example: redirectTo[AnotherActionClass]("param1" -> value1, "param2" -> value2)
+   *
+   * See also forwardTo.
+   */
   def redirectTo[T <: Action : Manifest](params: (String, Any)*): ChannelFuture = {
     redirectTo(url[T](params: _*))
   }
 
+  /**
+   * Example: redirectToThis()
+   *
+   * Example: redirectToThis("param1" -> value1, "param2" -> value2)
+   *
+   * Redirects back to the current action. See also forwardTo.
+   */
   def redirectToThis(params: (String, Any)*): ChannelFuture = {
     redirectTo(url(params: _*))
   }
@@ -35,6 +54,8 @@ trait Redirect {
   var forwarding = false
 
   /**
+   * Example: forwardTo[AnotherActionClass]()
+   *
    * Tells another action to process the current request for the current action.
    * See also redirectTo.
    */
