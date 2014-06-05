@@ -68,14 +68,10 @@ trait Net {
   /** See reverseProxy in config/xitrum.conf */
   private lazy val proxyNotAllowed = Net.proxyNotAllowed(clientIp)
 
-  /**
-   * TODO: inetSocketAddress can be Inet4Address or Inet6Address
-   * See java.net.preferIPv6Addresses
-   * @return IP of the direct HTTP client (may be the proxy)
-   */
+  /** @return IPv4 or IPv6 of the direct HTTP client (may be the proxy) */
   private lazy val clientIp = Net.clientIp(channel.remoteAddress)
 
-  /** @return IP of the original remote HTTP client (not the proxy), X-Forwarded-For is supported */
+  /** @return IPv4 or IPv6 of the original remote HTTP client (not the proxy), X-Forwarded-For is supported */
   lazy val remoteIp = Net.remoteIp(channel.remoteAddress, request)
 
   lazy val isSsl = {

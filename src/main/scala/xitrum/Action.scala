@@ -43,10 +43,13 @@ trait Action extends RequestEnv
   with Responder
   with I18n
 {
+  /** This is convenient, for example, when you want to get the current action in view templates. */
   implicit val currentAction = Action.this
 
+  /** This is convenient, for example, when you use scala.concurrent.Future. */
   implicit val executionContext = Config.actorSystem.dispatcher
 
+  /** This is convenient, for example, when you use scala.concurrent.Await. */
   implicit val timeout = Action.TIMEOUT
 
   //----------------------------------------------------------------------------
