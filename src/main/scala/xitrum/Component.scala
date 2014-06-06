@@ -13,9 +13,16 @@ trait Component extends Action {
   override def jsAddToView(js: Any) { parent.jsAddToView(js) }
 
   //----------------------------------------------------------------------------
-  // Override things that takes time to calculate by reusing them from parent
+  // Things that must be in sync with parent
 
   override lazy val at = parent.at
+
+  override def language = parent.language
+  override def language_=(lang: String) { parent.language = lang }
+
+  //----------------------------------------------------------------------------
+  // Reuse things from parent, things that can be calculated from handlerEnv,
+  // but takes time to calculate
 
   override lazy val requestCookies  = parent.requestCookies
   override lazy val responseCookies = parent.responseCookies
@@ -26,4 +33,6 @@ trait Component extends Action {
 
   override lazy val serverName = parent.serverName
   override lazy val serverPort = parent.serverPort
+
+  override lazy val browserLanguages = parent.browserLanguages
 }
