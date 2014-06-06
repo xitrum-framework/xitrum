@@ -14,6 +14,8 @@
   Fix memory leak at xitrum.util.SeriDeseri.fromUrlSafeBase64
 * `#399 <https://github.com/xitrum-framework/xitrum/issues/399>`_
   Add xitrum.Component
+* `#400 <https://github.com/xitrum-framework/xitrum/issues/400>`_
+  Support both Scala 2.10.x and 2.11.x
 
 3.13:
 

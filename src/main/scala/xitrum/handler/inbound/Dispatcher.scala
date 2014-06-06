@@ -3,6 +3,7 @@ package xitrum.handler.inbound
 import java.io.File
 import java.nio.file.Paths
 import scala.collection.mutable.{Map => MMap}
+import scala.util.Properties
 
 import io.netty.channel._
 import io.netty.handler.codec.http._
@@ -79,7 +80,11 @@ object Dispatcher extends Log {
 
   //----------------------------------------------------------------------------
 
-  val DEVELOPMENT_MODE_CLASSES_DIR = "target/scala-2.11/classes"
+  val DEVELOPMENT_MODE_CLASSES_DIR = {
+    val withPatch    = Properties.versionNumberString              // Ex: "2.11.1"
+    val withoutPatch = withPatch.split('.').take(2).mkString(".")  // Ex: "2.11"
+    s"target/scala-$withoutPatch/classes"
+  }
 
   private var devClassLoader        = new ClassFileLoader(DEVELOPMENT_MODE_CLASSES_DIR, getClass.getClassLoader)
   private var devNeedNewClassLoader = false  // Only reload on new request
