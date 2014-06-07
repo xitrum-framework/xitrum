@@ -98,8 +98,11 @@ object Dispatcher extends Log {
     val classesDir = Paths.get(DEVELOPMENT_MODE_CLASSES_DIR).toAbsolutePath
     FileMonitor.monitorRecursive(FileMonitor.MODIFY, classesDir, { path =>
       DEVELOPMENT_MODE_CLASSES_DIR.synchronized {
-        // Do this not only for .class files, because event may be skipped
+        // Do this not only for .class files, because file change event may be skipped
         devNeedNewClassLoader = true
+
+        // Notify template engine if any
+        Config.xitrum.template.foreach(_.reloadOnNextRender())
 
         // Avoid logging too frequently
         val now = System.currentTimeMillis()

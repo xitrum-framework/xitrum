@@ -8,8 +8,31 @@ import xitrum.Action
  * for every rendering request. Thus it should be thread-safe.
  */
 trait TemplateEngine {
+  /**
+   * Called once when Xitrum server starts. If necessary the template engine
+   * should allocate its resources here.
+   */
   def start()
+
+  /**
+   * Called once when Xitrum server stops. If necessary the template engine
+   * should release its resources here.
+   */
   def stop()
+
+  /**
+   * Called multiple times, but only in development mode, when Xitrum detects
+   * that there's a change in directory target/scala-<version>/classes. Because,
+   * for example, maybe there's new class file or existing class file has been
+   * changed, if necessary the template engine should reload when it renders on
+   * the next request.
+   *
+   * Because this method is only called in development mode, to optimize, the
+   * template engine may act differently for development mode and production
+   * mode. Use xitrum.Config.productionMode to check which mode the program is
+   * running in.
+   */
+  def reloadOnNextRender()
 
   /**
    * Renders the template at the location identified by the given action class.
