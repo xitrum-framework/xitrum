@@ -125,7 +125,7 @@ trait WebSocketAction extends Actor with Action {
 
       val pipeline = channel.pipeline
       DefaultHttpChannelInitializer.removeUnusedHandlersForWebSocket(pipeline)
-      pipeline.addLast("WebSocketEventDispatcher", new WebSocketEventDispatcher(handshaker, self))
+      pipeline.addBefore("BadClientSilencer", "WebSocketEventDispatcher", new WebSocketEventDispatcher(handshaker, self))
 
       // Resume reading paused at NoRealPipelining
       NoRealPipelining.resumeReading(channel)

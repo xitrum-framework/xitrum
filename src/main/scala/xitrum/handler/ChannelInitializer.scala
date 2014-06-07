@@ -69,7 +69,10 @@ object DefaultHttpChannelInitializer {
     removeHandlerIfExists(pipeline, classOf[UriParser])
     removeHandlerIfExists(pipeline, classOf[MethodOverrider])
     removeHandlerIfExists(pipeline, classOf[Dispatcher])
-    removeHandlerIfExists(pipeline, classOf[BadClientSilencer])
+
+    // Do not remove BadClientSilencer; WebSocketEventDispatcher will be added
+    // before BadClientSilencer, see WebSocketAction#acceptWebSocket
+    //removeHandlerIfExists(pipeline, classOf[BadClientSilencer])
 
     // Outbound
 
