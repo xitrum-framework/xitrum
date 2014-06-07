@@ -15,7 +15,7 @@ import io.netty.handler.codec.http.websocketx.{
 }
 
 import xitrum.handler.{AccessLog, DefaultHttpChannelInitializer, HandlerEnv, NoRealPipelining}
-import xitrum.handler.inbound.WebSocketEventDispatcher
+import xitrum.handler.inbound.{BadClientSilencer, WebSocketEventDispatcher}
 import xitrum.handler.DefaultHttpChannelInitializer
 import xitrum.util.SeriDeseri
 
@@ -125,7 +125,11 @@ trait WebSocketAction extends Actor with Action {
 
       val pipeline = channel.pipeline
       DefaultHttpChannelInitializer.removeUnusedHandlersForWebSocket(pipeline)
-      pipeline.addBefore("BadClientSilencer", "WebSocketEventDispatcher", new WebSocketEventDispatcher(handshaker, self))
+      pipeline.addBefore(
+        classOf[BadClientSilencer].getName,
+        classOf[WebSocketEventDispatcher].getName,
+        new WebSocketEventDispatcher(handshaker, self)
+      )
 
       // Resume reading paused at NoRealPipelining
       NoRealPipelining.resumeReading(channel)

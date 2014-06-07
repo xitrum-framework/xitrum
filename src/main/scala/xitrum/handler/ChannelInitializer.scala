@@ -115,30 +115,30 @@ class DefaultHttpChannelInitializer extends ChannelInitializer[SocketChannel] {
     // Inbound
 
     if (portConfig.flashSocketPolicy.isDefined && portConfig.flashSocketPolicy == portConfig.http)
-    p.addLast("FlashSocketPolicyHandler", new FlashSocketPolicyHandler)
-    p.addLast("HttpRequestDecoder",       new HttpRequestDecoder(Config.xitrum.request.maxInitialLineLength, 8192, 8192))
-    p.addLast("Request2Env",              new Request2Env)
-    p.addLast("BaseUrlRemover",           baseUrlRemover)
+    p.addLast(classOf[FlashSocketPolicyHandler].getName, new FlashSocketPolicyHandler)
+    p.addLast(classOf[HttpRequestDecoder].getName,       new HttpRequestDecoder(Config.xitrum.request.maxInitialLineLength, 8192, 8192))
+    p.addLast(classOf[Request2Env].getName,              new Request2Env)
+    p.addLast(classOf[BaseUrlRemover].getName,           baseUrlRemover)
     if (Config.xitrum.basicAuth.isDefined)
-    p.addLast("BasicAuth",                basicAuth)
-    p.addLast("PublicFileServer",         publicFileServer)
-    p.addLast("WebJarsServer",            webJarsServer)
-    p.addLast("UriParser",                uriParser)
-    p.addLast("MethodOverrider",          methodOverrider)
-    p.addLast("Dispatcher",               dispatcher)
-    p.addLast("BadClientSilencer",        badClientSilencer)
+    p.addLast(classOf[BasicAuth].getName,                basicAuth)
+    p.addLast(classOf[PublicFileServer].getName,         publicFileServer)
+    p.addLast(classOf[WebJarsServer].getName,            webJarsServer)
+    p.addLast(classOf[UriParser].getName,                uriParser)
+    p.addLast(classOf[MethodOverrider].getName,          methodOverrider)
+    p.addLast(classOf[Dispatcher].getName,               dispatcher)
+    p.addLast(classOf[BadClientSilencer].getName,        badClientSilencer)
 
     // Outbound
 
-    p.addLast("HttpResponseEncoder", new HttpResponseEncoder)
-    p.addLast("ChunkedWriteHandler", new ChunkedWriteHandler)  // For writing ChunkedFile, at XSendFile
-    p.addLast("Env2Response",        env2Response)
-    p.addLast("SetCORS",             setCORS)
-    p.addLast("OPTIONSResponse",     OPTIONSResponse)
-    p.addLast("FixiOS6SafariPOST",   fixiOS6SafariPOST)
-    p.addLast("XSendFile",           xSendFile)
-    p.addLast("XSendResource",       xSendResource)
-    p.addLast("ResponseCacher",      responseCacher)
+    p.addLast(classOf[HttpResponseEncoder].getName, new HttpResponseEncoder)
+    p.addLast(classOf[ChunkedWriteHandler].getName, new ChunkedWriteHandler)  // For writing ChunkedFile, at XSendFile
+    p.addLast(classOf[Env2Response].getName,        env2Response)
+    p.addLast(classOf[SetCORS].getName,             setCORS)
+    p.addLast(classOf[OPTIONSResponse].getName,     OPTIONSResponse)
+    p.addLast(classOf[FixiOS6SafariPOST].getName,   fixiOS6SafariPOST)
+    p.addLast(classOf[XSendFile].getName,           xSendFile)
+    p.addLast(classOf[XSendResource].getName,       xSendResource)
+    p.addLast(classOf[ResponseCacher].getName,      responseCacher)
   }
 }
 
@@ -147,8 +147,8 @@ class DefaultHttpChannelInitializer extends ChannelInitializer[SocketChannel] {
 class SslChannelInitializer(nonSslChannelInitializer: ChannelInitializer[SocketChannel]) extends ChannelInitializer[SocketChannel] {
   override def initChannel(ch: SocketChannel) {
     val p = ch.pipeline()
-    p.addLast("Ssl",    ServerSsl.handler())
-    p.addLast("NonSsl", nonSslChannelInitializer)
+    p.addLast(ServerSsl.getClass.getName, ServerSsl.handler())
+    p.addLast(nonSslChannelInitializer)
 
     // FlashSocketPolicyHandler can't be used with SSL
     DefaultHttpChannelInitializer.removeHandlerIfExists(p, classOf[FlashSocketPolicyHandler])
