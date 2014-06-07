@@ -38,6 +38,9 @@ case object WebSocketPong
 trait WebSocketAction extends Actor with Action {
   def receive = {
     case env: HandlerEnv =>
+      // env must be set before calling acceptWebSocket, because acceptWebSocket
+      // uses webSocketAbsRequestUrl
+      apply(env)
       if (acceptWebSocket()) {
         // This only releases native memory. Request headers do not use native
         // memory, thus the "execute" below can still access headers.
@@ -47,8 +50,6 @@ trait WebSocketAction extends Actor with Action {
 
         // Don't use context.stop(self) to avoid leaking context outside this actor
         addConnectionClosedListener { self ! PoisonPill }
-
-        apply(env)
 
         // Can't use dispatchWithFailsafe because it may respond normal HTTP
         // response; we have just upgraded the connection to WebSocket protocol
