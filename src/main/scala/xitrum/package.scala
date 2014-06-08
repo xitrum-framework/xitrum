@@ -27,10 +27,13 @@ package object xitrum {
    * If you're familiar with Rails, this is the same as Rails.root.
    */
   val root = {
-    // See https://github.com/xitrum-framework/xitrum/issues/47
-    val res = getClass.getClassLoader.getResource("xitrum.conf")
-    if (res != null) {
-      val fileName = res.getFile
+    // Support the case when Xitrum is used in a SBT subproject, see:
+    // https://github.com/xitrum-framework/xitrum/issues/47
+
+    // Don't use application.conf, because Akka .jar file also include it
+    val url = getClass.getClassLoader.getResource("xitrum.conf")
+    if (url != null) {
+      val fileName = url.getFile
       // This doesn't work on Windows, because "/" is always used in fileName
       // fileName.replace(File.separator + "config" + File.separator + "xitrum.conf", "")
       fileName.replace("/config/xitrum.conf", "")
