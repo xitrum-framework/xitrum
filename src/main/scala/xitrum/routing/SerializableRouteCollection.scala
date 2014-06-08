@@ -32,4 +32,13 @@ class SerializableRouteCollection extends Serializable {
   // 404.html and 500.html are used by default
   var error404: Option[String] = None
   var error500: Option[String] = None
+
+  override def toString =
+    s"GET: ${firstGETs ++ otherGETs ++ lastGETs}\n" +
+    s"POST: ${firstPOSTs ++ otherPOSTs ++ lastPOSTs}\n" +
+    s"PUT: ${firstPUTs ++ otherPUTs ++ lastPUTs}\n" +
+    s"PATCH: ${firstPATCHs ++ otherPATCHs ++ lastPATCHs}\n" +
+    s"DELETE: ${firstDELETEs ++ otherDELETEs ++ lastDELETEs}\n" +
+    s"WEBSOCKET: ${firstWEBSOCKETs ++ otherWEBSOCKETs ++ lastWEBSOCKETs}\n" +
+    s"error404: $error404, error500: $error500"
 }

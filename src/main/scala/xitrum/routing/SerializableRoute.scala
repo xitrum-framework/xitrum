@@ -38,4 +38,10 @@ class SerializableRoute(
       Class.forName(actionClass).asInstanceOf[Class[Action]], cacheSecs
     )
   }
+
+  override def toString =
+    if (cacheSecs == 0)
+      s"$httpMethod $compiledPattern -> $actionClass"
+    else
+      s"$httpMethod $compiledPattern -> $actionClass (${cacheSecs}s)"
 }
