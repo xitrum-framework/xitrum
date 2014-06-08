@@ -8,7 +8,7 @@ import akka.cluster.StandardMetrics.{Cpu, HeapMemory}
 import io.netty.handler.codec.http.HttpResponseStatus
 import glokka.Registry
 
-import xitrum.{Action, Config, Log, SockJsAction, SockJsText}
+import xitrum.{Action, Config, SockJsAction, SockJsText}
 import xitrum.annotation.{GET, Last, SOCKJS}
 import xitrum.util.SeriDeseri
 import xitrum.view.{DocType, Js}
@@ -43,7 +43,7 @@ class ClusterMetricsCollector(localPublisher: ActorRef) extends Actor {
 /**
  * Example: XitrumMetricsChannel
  */
-class MetricsPublisher extends Actor with Log {
+class MetricsPublisher extends Actor {
   private var clients                                = Seq[ActorRef]()
   private var lastPublished                          = System.currentTimeMillis()
   private var cachedNodeMetrics:    NodeMetrics      = _

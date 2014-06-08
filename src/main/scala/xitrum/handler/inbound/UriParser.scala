@@ -13,7 +13,7 @@ import xitrum.handler.HandlerEnv
 import xitrum.scope.request.{Params, PathInfo}
 
 @Sharable
-class UriParser extends SimpleChannelInboundHandler[HandlerEnv] with Log {
+class UriParser extends SimpleChannelInboundHandler[HandlerEnv] {
   override def channelRead0(ctx: ChannelHandlerContext, env: HandlerEnv) {
     val request = env.request
 
@@ -34,7 +34,7 @@ class UriParser extends SimpleChannelInboundHandler[HandlerEnv] with Log {
     } catch {
       case NonFatal(e) =>
         val msg = "Could not parse query params URI: " + request.getUri
-        log.warn(msg, e)
+        Log.warn(msg, e)
         ctx.channel.close()
     }
   }

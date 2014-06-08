@@ -98,7 +98,7 @@ class RouteCollection(
   // 404.html and 500.html are used by default
   val error404: Option[Class[Action]],
   val error500: Option[Class[Action]]
-) extends Log
+)
 {
   /**
    * Class name -> ReverseRoute
@@ -241,16 +241,16 @@ class RouteCollection(
 
     val strings = all.map { case (m, p, cr) => logFormat.format(m, p, cr) }
     if (xitrumRoutes)
-      log.info("Xitrum routes:\n" + strings.mkString("\n"))
+      Log.info("Xitrum routes:\n" + strings.mkString("\n"))
     else
-      log.info("Normal routes:\n" + strings.mkString("\n"))
+      Log.info("Normal routes:\n" + strings.mkString("\n"))
   }
 
   def logErrorRoutes() {
     val strings = ArrayBuffer.empty[String]
     error404.foreach { klass => strings.append("404  " + klass.getName) }
     error500.foreach { klass => strings.append("500  " + klass.getName) }
-    if (!strings.isEmpty) log.info("Error routes:\n" + strings.mkString("\n"))
+    if (!strings.isEmpty) Log.info("Error routes:\n" + strings.mkString("\n"))
   }
 
   private def targetWithCache(route: Route): String = {

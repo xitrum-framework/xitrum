@@ -19,40 +19,40 @@ import xitrum.util.ByteBufUtil
 class WebSocketEventDispatcher(
     handshaker: WebSocketServerHandshaker,
     actorRef:   ActorRef
-) extends SimpleChannelInboundHandler[WebSocketFrame] with Log
+) extends SimpleChannelInboundHandler[WebSocketFrame]
 {
   override def channelRead0(ctx: ChannelHandlerContext, frame: WebSocketFrame) {
     if (frame.isInstanceOf[TextWebSocketFrame]) {
       val text = frame.asInstanceOf[TextWebSocketFrame].text
       actorRef ! WebSocketText(text)
-      log.trace("[WS in] text: " + text)
+      Log.trace("[WS in] text: " + text)
       return
     }
 
     if (frame.isInstanceOf[BinaryWebSocketFrame]) {
       val bytes = ByteBufUtil.toBytes(frame.asInstanceOf[BinaryWebSocketFrame].content)
       actorRef ! WebSocketBinary(bytes)
-      log.trace("[WS in] binary: " + ScalaRunTime.stringOf(bytes))
+      Log.trace("[WS in] binary: " + ScalaRunTime.stringOf(bytes))
       return
     }
 
     if (frame.isInstanceOf[PingWebSocketFrame]) {
       ctx.channel.writeAndFlush(new PongWebSocketFrame(frame.content.retain()))
       actorRef ! WebSocketPing
-      log.trace("[WS in] ping")
-      log.trace("[WS out] pong")
+      Log.trace("[WS in] ping")
+      Log.trace("[WS out] pong")
       return
     }
 
     if (frame.isInstanceOf[PongWebSocketFrame]) {
       actorRef ! WebSocketPong
-      log.trace("[WS in] pong")
+      Log.trace("[WS in] pong")
       return
     }
 
     if (frame.isInstanceOf[CloseWebSocketFrame]) {
       handshaker.close(ctx.channel, frame.retain().asInstanceOf[CloseWebSocketFrame]).addListener(ChannelFutureListener.CLOSE)
-      log.trace("[WS in] close")
+      Log.trace("[WS in] close")
       return
     }
   }

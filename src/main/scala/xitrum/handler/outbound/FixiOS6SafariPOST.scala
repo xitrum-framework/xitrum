@@ -4,7 +4,6 @@ import io.netty.channel.{ChannelHandler, ChannelHandlerContext, ChannelOutboundH
 import io.netty.handler.codec.http.{HttpHeaders, HttpMethod, HttpRequest, HttpResponse}
 import ChannelHandler.Sharable
 
-import xitrum.Log
 import xitrum.handler.HandlerEnv
 import xitrum.etag.NotModified
 
@@ -15,7 +14,7 @@ import xitrum.etag.NotModified
  * http://stackoverflow.com/questions/12506897/is-safari-on-ios-6-caching-ajax-results
  */
 @Sharable
-class FixiOS6SafariPOST extends ChannelOutboundHandlerAdapter with Log {
+class FixiOS6SafariPOST extends ChannelOutboundHandlerAdapter {
   override def write(ctx: ChannelHandlerContext, msg: Object, promise: ChannelPromise) {
     if (!msg.isInstanceOf[HandlerEnv]) {
       ctx.write(msg, promise)

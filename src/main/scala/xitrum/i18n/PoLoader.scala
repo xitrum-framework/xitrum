@@ -10,7 +10,7 @@ import scaposer.{Po, Parser}
 import xitrum.Log
 import xitrum.util.{FileMonitor, Loader}
 
-object PoLoader extends Log {
+object PoLoader {
   private val cache    = MMap.empty[String, Po]
   private val watching = MMap.empty[Path, Boolean]
   watch()
@@ -65,7 +65,7 @@ object PoLoader extends Log {
    * Reloads all loaded po files of the specified language in the cache.
    */
   def reload(language: String) {
-    log.info("Reload po file of language: " + language)
+    Log.info("Reload po file of language: " + language)
     remove(language)
     get(language)
   }
@@ -80,7 +80,7 @@ object PoLoader extends Log {
       val i18nPath = Paths.get(withI18n.toURI)
       if (!watching.isDefinedAt(i18nPath) && Files.isDirectory(i18nPath)) {
         watching(i18nPath) = true
-        log.info("Monitor po files in: " + i18nPath)
+        Log.info("Monitor po files in: " + i18nPath)
         FileMonitor.monitor(FileMonitor.MODIFY, i18nPath, { path =>
           val fileName = path.getFileName.toString
           if (fileName.endsWith(".po")) {

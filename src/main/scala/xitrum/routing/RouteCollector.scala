@@ -20,7 +20,7 @@ case class DiscoveredAcc(
 )
 
 /** Scan all classes to collect routes from actions. */
-class RouteCollector extends Log {
+class RouteCollector {
   import ActionAnnotations._
 
   def deserializeCacheFileOrRecollect(cachedFileName: String): DiscoveredAcc = {
@@ -58,7 +58,7 @@ class RouteCollector extends Log {
       }
     } catch {
       case NonFatal(e) =>
-        log.warn("Could not scan route for " + entry.relPath + " in " + entry.container, e)
+        Log.warn("Could not scan route for " + entry.relPath + " in " + entry.container, e)
         acc
     }
   }

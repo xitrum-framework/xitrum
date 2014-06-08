@@ -7,9 +7,9 @@ import scala.util.control.NonFatal
 import com.beachape.filemanagement.Messages.{RegisterCallback, UnRegisterCallback}
 import com.beachape.filemanagement.MonitorActor
 import com.beachape.filemanagement.RegistryTypes.Callback
-import xitrum.{Config, Log}
+import xitrum.Config
 
-object FileMonitor extends Log {
+object FileMonitor {
   val CREATE = StandardWatchEventKinds.ENTRY_CREATE
   val DELETE = StandardWatchEventKinds.ENTRY_DELETE
   val MODIFY = StandardWatchEventKinds.ENTRY_MODIFY

@@ -18,7 +18,7 @@ class SockJsClassAndOptions(
     val cookieNeeded: Boolean
 ) extends Serializable
 
-class SockJsRouteMap(map: MMap[String, SockJsClassAndOptions]) extends Log {
+class SockJsRouteMap(map: MMap[String, SockJsClassAndOptions]) {
   def logRoutes() {
     // This method is only run once on start, speed is not a problem
 
@@ -43,7 +43,7 @@ class SockJsRouteMap(map: MMap[String, SockJsClassAndOptions]) extends Log {
           "cookie_needed: " + sockJsClassAndOptions.cookieNeeded
         )
       }
-      log.info("SockJS routes:\n" + strings.mkString("\n"))
+      Log.info("SockJS routes:\n" + strings.mkString("\n"))
     }
   }
 

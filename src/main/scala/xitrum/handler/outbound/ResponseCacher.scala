@@ -9,13 +9,13 @@ import ChannelHandler.Sharable
 import io.netty.handler.codec.http.{DefaultFullHttpResponse, HttpHeaders, HttpRequest, FullHttpResponse, HttpResponseStatus, HttpVersion}
 import HttpResponseStatus.OK
 
-import xitrum.{Cache, Config, Log}
+import xitrum.{Cache, Config}
 import xitrum.Action
 import xitrum.handler.HandlerEnv
 import xitrum.scope.request.Params
 import xitrum.util.{Gzip, Mime}
 
-object ResponseCacher extends Log {
+object ResponseCacher {
   //                             statusCode  headers           content
   private type CachedResponse = (Int, Array[(String, String)], Array[Byte])
 
@@ -115,7 +115,7 @@ object ResponseCacher extends Log {
 }
 
 @Sharable
-class ResponseCacher extends ChannelOutboundHandlerAdapter with Log {
+class ResponseCacher extends ChannelOutboundHandlerAdapter {
   override def write(ctx: ChannelHandlerContext, msg: Object, promise: ChannelPromise) {
     if (!msg.isInstanceOf[HandlerEnv]) {
       ctx.write(msg, promise)

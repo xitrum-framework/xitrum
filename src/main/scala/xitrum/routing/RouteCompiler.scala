@@ -1,8 +1,6 @@
 package xitrum.routing
 
-import xitrum.Log
-
-object RouteCompiler extends Log {
+object RouteCompiler {
   /**
    * Given the pattern "/articles/:id<[0-9]+>", compiles to
    * Seq(RouteToken("articles", true, None), RouteToken("id", false, Some("[0-9]+".r)))

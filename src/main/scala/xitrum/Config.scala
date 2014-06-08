@@ -164,7 +164,7 @@ class MetricsConfig(config: TConfig) {
 }
 
 /** This represents things in xitrum.conf. */
-class XitrumConfig(val config: TConfig) extends Log {
+class XitrumConfig(val config: TConfig) {
   val basicAuth =
     if (config.hasPath("basicAuth"))
       Some(new BasicAuthConfig(config.getConfig("basicAuth")))
@@ -214,7 +214,7 @@ class XitrumConfig(val config: TConfig) extends Log {
 //------------------------------------------------------------------------------
 
 /** See config/xitrum.properties */
-object Config extends Log {
+object Config {
   val ACTOR_SYSTEM_NAME = "xitrum"
 
   /** akka.actor.ActorSystem("xitrum") */
@@ -246,7 +246,9 @@ object Config extends Log {
   /** This represents application.conf. */
   val application: TConfig = {
     try {
-      ConfigFactory.load()
+      // Unlike ConfigFactory.load(), when class loader is given but
+      // "application" is not given, "application.conf" is not loaded!
+      ConfigFactory.load(getClass.getClassLoader, "application")
     } catch {
       case NonFatal(e) =>
         exitOnStartupError("Could not load config/application.conf. For an example, see https://github.com/xitrum-framework/xitrum-new/blob/master/config/application.conf", e)
@@ -295,12 +297,12 @@ object Config extends Log {
 
   def warnOnDefaultSecureKey() {
     if (xitrum.session.secureKey == DEFAULT_SECURE_KEY)
-      log.warn("*** For security, change secureKey in config/xitrum.conf to your own! ***")
+      Log.warn("*** For security, change secureKey in config/xitrum.conf to your own! ***")
   }
 
   def exitOnStartupError(msg: String, e: Throwable) {
-    log.error(msg, e)
-    log.error("Xitrum could not start because of the above error. Xitrum will now stop the current process.")
+    Log.error(msg, e)
+    Log.error("Xitrum could not start because of the above error. Xitrum will now stop the current process.")
 
     // Note: If the cache is Hazelcast, once it's started, calling only
     // System.exit(-1) does not stop the current process!
@@ -322,11 +324,11 @@ object Config extends Log {
 
   private def loadRouteCacheFileOrRecollectWithRetry(retried: Boolean = false): RouteCollection = {
     try {
-      log.info(s"Load $ROUTES_CACHE or recollect routes...")
+      Log.info(s"Load $ROUTES_CACHE or recollect routes...")
       val routeCollector = new RouteCollector
       val discoveredAcc  = routeCollector.deserializeCacheFileOrRecollect(ROUTES_CACHE)
       if (discoveredAcc.xitrumVersion != _root_.xitrum.version.toString) {
-        log.info(s"Xitrum version changed. Delete $ROUTES_CACHE and retry...")
+        Log.info(s"Xitrum version changed. Delete $ROUTES_CACHE and retry...")
         val file = new File(ROUTES_CACHE)
         file.delete()
         loadRouteCacheFileOrRecollectWithRetry(true)
@@ -340,7 +342,7 @@ object Config extends Log {
           Config.exitOnStartupError("Could not collect routes", e)
           throw e
         } else {
-          log.info(s"Could not load $ROUTES_CACHE, delete and retry...")
+          Log.info(s"Could not load $ROUTES_CACHE, delete and retry...")
           val file = new File(ROUTES_CACHE)
           file.delete()
           loadRouteCacheFileOrRecollectWithRetry(true)

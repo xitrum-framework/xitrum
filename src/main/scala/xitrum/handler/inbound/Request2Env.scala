@@ -41,7 +41,7 @@ object Request2Env {
  * This handler converts request with its content body (if any, e.g. in case of
  * file upload) to HandlerEnv, and send it upstream to the next handler.
  */
-class Request2Env extends SimpleChannelInboundHandler[HttpObject] with Log {
+class Request2Env extends SimpleChannelInboundHandler[HttpObject] {
   // Based on the file upload example in Netty.
 
   import Request2Env._
@@ -98,7 +98,7 @@ class Request2Env extends SimpleChannelInboundHandler[HttpObject] with Log {
     } catch {
       case NonFatal(e) =>
         val m = "Could not parse content body of request: " + msg
-        log.warn(m, e)
+        Log.warn(m, e)
         ctx.channel.close()
     }
   }
@@ -108,7 +108,7 @@ class Request2Env extends SimpleChannelInboundHandler[HttpObject] with Log {
   private def handleHttpRequestHead(ctx: ChannelHandlerContext, request: HttpRequest) {
     // See DefaultHttpChannelInitializer
     // This is the first Xitrum handler, log the request
-    log.trace(request.toString)
+    Log.trace(request.toString)
 
     // Clean previous files if any
     if (env != null) env.release()
@@ -263,7 +263,7 @@ class Request2Env extends SimpleChannelInboundHandler[HttpObject] with Log {
     )
     ctx.channel.writeAndFlush(env).addListener(ChannelFutureListener.CLOSE)
 
-    log.warn("Request content body is too big, see xitrum.request.maxSizeInMB in xitrum.conf")
+    Log.warn("Request content body is too big, see xitrum.request.maxSizeInMB in xitrum.conf")
 
     // Mark that closeOnBigRequest has been called.
     // See the check for LastHttpContent above.

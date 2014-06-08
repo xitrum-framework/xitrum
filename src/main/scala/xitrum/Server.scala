@@ -18,7 +18,7 @@ import xitrum.handler.inbound.Dispatcher
 import xitrum.metrics.MetricsManager
 import xitrum.sockjs.{SockJsAction => SA}
 
-object Server extends Log {
+object Server {
   /**
    * Starts with the default ChannelInitializer provided by Xitrum.
    */
@@ -55,14 +55,14 @@ object Server extends Log {
       if (portConfig.flashSocketPolicy != portConfig.http) {
         FlashSocketPolicyServer.start()
       } else {
-        log.info("Flash socket policy file will be served by the HTTP server")
+        Log.info("Flash socket policy file will be served by the HTTP server")
       }
     }
 
     if (Config.productionMode)
-      log.info("Xitrum started in production mode")
+      Log.info("Xitrum started in production mode")
     else
-      log.info(s"Xitrum started in development mode; routes and classes in directory ${Dispatcher.DEVELOPMENT_MODE_CLASSES_DIR} will be reloaded")
+      Log.info(s"Xitrum started in development mode; routes and classes in directory ${Dispatcher.DEVELOPMENT_MODE_CLASSES_DIR} will be reloaded")
 
     // This is a good timing to warn
     Config.warnOnDefaultSecureKey()
@@ -90,10 +90,10 @@ object Server extends Log {
 
     Config.xitrum.interface match {
       case None =>
-        log.info(s"$service server started on port $port")
+        Log.info(s"$service server started on port $port")
 
       case Some(hostnameOrIp) =>
-        log.info(s"$service server started on $hostnameOrIp:$port")
+        Log.info(s"$service server started on $hostnameOrIp:$port")
     }
   }
 }

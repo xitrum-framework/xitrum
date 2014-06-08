@@ -58,7 +58,7 @@ private class ReloadableDispatcher {
   }
 }
 
-object Dispatcher extends Log {
+object Dispatcher {
   private val prodDispatcher = new ReloadableDispatcher
 
   def dispatch(actionClass: Class[_ <: Action], handlerEnv: HandlerEnv) {
@@ -108,7 +108,7 @@ object Dispatcher extends Log {
         val now = System.currentTimeMillis()
         val dt  = now - devLastLogAt
         if (dt > 500) {
-          log.info(s"$DEVELOPMENT_MODE_CLASSES_DIR changed; reload classes and routes on next request")
+          Log.info(s"$DEVELOPMENT_MODE_CLASSES_DIR changed; reload classes and routes on next request")
           devLastLogAt = now
         }
 

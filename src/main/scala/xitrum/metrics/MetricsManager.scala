@@ -15,7 +15,7 @@ import akka.cluster.ClusterEvent.ClusterMetricsChanged
 import akka.cluster.StandardMetrics.{Cpu, HeapMemory}
 import glokka.Registry
 
-import xitrum.{Config, Log}
+import xitrum.Config
 
 case object Subscribe
 case object UnSubscribe
@@ -24,7 +24,7 @@ case object Collect
 case class Publish(registryAsJson: String)
 
 /** For convenience, you can use `xitrum.Metrics`. */
-object MetricsManager extends Log {
+object MetricsManager {
   // implicit executer for scheduled message
   import Config.actorSystem.dispatcher
 
@@ -160,7 +160,7 @@ object MetricsManager extends Log {
 }
 
 /** Common code for looking up MetricsPublisher actor from Glokka. */
-trait PublisherLookUp extends Log {
+trait PublisherLookUp {
   this: Actor =>
 
   def lookUpPublisher() {

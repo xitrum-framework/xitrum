@@ -21,7 +21,7 @@ import xitrum.handler.{AccessLog, HandlerEnv, NoRealPipelining}
 import xitrum.util.{ByteBufUtil, Gzip, Mime}
 
 // Based on https://github.com/netty/netty/tree/master/example/src/main/java/io/netty/example/http/file
-object XSendFile extends Log {
+object XSendFile {
   // setClientCacheAggressively should be called at PublicFileServer, not
   // here because XSendFile may be used by applications which does not want
   // to clients to cache.
@@ -224,7 +224,7 @@ object XSendFile extends Log {
       }
     } catch {
       case NonFatal(e) =>
-        log.warn("Unsupported Range spec: " + spec)
+        Log.warn("Unsupported Range spec: " + spec)
         None
     }
   }

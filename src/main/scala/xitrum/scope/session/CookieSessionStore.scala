@@ -10,8 +10,9 @@ import xitrum.Config
 import xitrum.util.SeriDeseri
 
 /** Compress big session cookie to try to avoid the 4KB limit. */
-class CookieSessionStore extends SessionStore with Log {
+class CookieSessionStore extends SessionStore {
   def start() {}
+
   def stop() {}
 
   def store(session: Session, env: SessionEnv) {
@@ -33,7 +34,7 @@ class CookieSessionStore extends SessionStore with Log {
       val serialized = SeriDeseri.toSecureUrlSafeBase64(immutableMap, true)
       val cookieSize = serialized.length
       if (cookieSize > 4 * 1024) {
-        log.error("Cookie size = " + cookieSize + " > 4KB limit: " + immutableMap)
+        Log.error("Cookie size = " + cookieSize + " > 4KB limit: " + immutableMap)
         return
       }
 

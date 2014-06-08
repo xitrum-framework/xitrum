@@ -9,7 +9,7 @@ import io.netty.channel.socket.nio.NioServerSocketChannel
 import xitrum.{Config, Log}
 import xitrum.handler.inbound.FlashSocketPolicyHandler
 
-object FlashSocketPolicyServer extends Log {
+object FlashSocketPolicyServer {
   def start() {
     val port        = Config.xitrum.port.flashSocketPolicy.get
     val bossGroup   = new NioEventLoopGroup(1)
@@ -26,6 +26,6 @@ object FlashSocketPolicyServer extends Log {
     NetOption.setOptions(bootstrap)
     NetOption.bind("flash socket", bootstrap, port, bossGroup, workerGroup)
 
-    log.info(s"Flash socket policy server started on port $port")
+    Log.info(s"Flash socket policy server started on port $port")
   }
 }

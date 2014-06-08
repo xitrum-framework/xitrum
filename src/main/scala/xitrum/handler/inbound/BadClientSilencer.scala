@@ -9,7 +9,7 @@ import xitrum.Log
  * catch all exception caused by bad client (closed connection, malformed request etc.).
  */
 @Sharable
-class BadClientSilencer extends SimpleChannelInboundHandler[Any] with Log {
+class BadClientSilencer extends SimpleChannelInboundHandler[Any] {
   override def channelRead0(ctx: ChannelHandlerContext, msg: Any) {
     // msg has not been handled by any previous handler
     ctx.channel.close()

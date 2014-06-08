@@ -11,13 +11,13 @@ import xitrum.{Action, Config, Log}
 import xitrum.scope.request.RequestEnv
 import xitrum.action.Net
 
-object AccessLog extends Log {
+object AccessLog {
   def logFlashSocketPolicyFileAccess(remoteAddress: SocketAddress) {
-    log.info(Net.clientIp(remoteAddress) + " (flash socket policy file)")
+    Log.info(Net.clientIp(remoteAddress) + " (flash socket policy file)")
   }
 
   def logStaticFileAccess(remoteAddress: SocketAddress, request: HttpRequest, response: HttpResponse) {
-    log.info(
+    Log.info(
       Net.remoteIp(remoteAddress, request) + " " +
       request.getMethod + " " +
       request.getUri + " -> " +
@@ -27,7 +27,7 @@ object AccessLog extends Log {
   }
 
   def logResourceInJarAccess(remoteAddress: SocketAddress, request: HttpRequest, response: HttpResponse) {
-    log.info(
+    Log.info(
       Net.remoteIp(remoteAddress, request) + " " +
       request.getMethod + " " +
       request.getUri + " -> " +
@@ -38,18 +38,18 @@ object AccessLog extends Log {
 
   def logActionAccess(action: Action, beginTimestamp: Long, cacheSecs: Int, hit: Boolean, e: Throwable = null) {
     if (e == null) {
-      log.info(msgWithTime(action.getClass.getName, action, beginTimestamp) + extraInfo(action, cacheSecs, hit))
+      Log.info(msgWithTime(action.getClass.getName, action, beginTimestamp) + extraInfo(action, cacheSecs, hit))
     } else {
-      log.error("Dispatch error " + msgWithTime(action.getClass.getName, action, beginTimestamp) + extraInfo(action, cacheSecs, hit), e)
+      Log.error("Dispatch error " + msgWithTime(action.getClass.getName, action, beginTimestamp) + extraInfo(action, cacheSecs, hit), e)
     }
   }
 
   def logWebSocketAccess(className: String, action: Action, beginTimestamp: Long) {
-    log.info(msgWithTime(className, action, beginTimestamp) + extraInfo(action, 0, false))
+    Log.info(msgWithTime(className, action, beginTimestamp) + extraInfo(action, 0, false))
   }
 
   def logOPTIONS(request: HttpRequest) {
-    log.info("OPTIONS " + request.getUri)
+    Log.info("OPTIONS " + request.getUri)
   }
 
   //----------------------------------------------------------------------------

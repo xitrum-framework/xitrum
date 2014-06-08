@@ -9,7 +9,7 @@ import xitrum.Log
  * Compiled script is cached. Cache with size 1024. Least recently used element
  * is removed first.
  */
-object CoffeeScriptCompiler extends Log {
+object CoffeeScriptCompiler {
   // http://www.java-blog.com/creating-simple-cache-java-linkedhashmap-anonymous-class
 
   private[this] val MAX_CACHE_SIZE = 1024
@@ -31,7 +31,7 @@ object CoffeeScriptCompiler extends Log {
       Some(javaScript)
     } catch {
       case e: ScriptException =>
-        log.warn("CoffeeScript syntax error at %d:%d".format(e.getLineNumber, e.getColumnNumber))
+        Log.error("CoffeeScript syntax error at %d:%d".format(e.getLineNumber, e.getColumnNumber))
         None
     }
   }
