@@ -1,5 +1,7 @@
 package xitrum
 
+import scala.util.control.NonFatal
+
 /**
  * This is the interface for cache implementations of Xitrum. All methods do not
  * take callbacks, because cache should be fast. The point of using cache is
@@ -42,4 +44,32 @@ abstract class Cache {
   def putMinuteIfAbsent(key: Any, value: Any, minutes: Int) { putSecondIfAbsent(key, value, minutes * 60) }
   def putHourIfAbsent  (key: Any, value: Any, hours:   Int) { putSecondIfAbsent(key, value, hours   * 60 * 60) }
   def putDayIfAbsent   (key: Any, value: Any, days:    Int) { putSecondIfAbsent(key, value, days    * 60 * 60 * 24) }
+}
+
+object Cache {
+  /**
+   * Cache config in xitrum.conf can be in 2 forms:
+   *
+   * cache = my.Cache
+   *
+   * Or if the cache needs additional options:
+   *
+   * cache {
+   *   "my.Cache" {
+   *     option1 = value1
+   *     option2 = value2
+   *   }
+   * }
+   */
+  def loadFromConfig(): Cache = {
+    try {
+      val cache = DualConfig.getClassInstance[Cache](Config.xitrum.config, "cache")
+      cache.start()
+      cache
+    } catch {
+      case NonFatal(e) =>
+        Config.exitOnStartupError("Could not load cache engine, please check config/xitrum.conf", e)
+        null
+    }
+  }
 }

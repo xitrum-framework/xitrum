@@ -86,7 +86,10 @@ object Dispatcher extends Log {
     s"target/scala-$withoutPatch/classes"
   }
 
-  private var devClassLoader        = new ClassFileLoader(DEVELOPMENT_MODE_CLASSES_DIR, getClass.getClassLoader)
+  // "public" because this can be used by, for example, Scalate template engine
+  // (xitrum-scalate) to pickup the latest class loader in development mode
+  var devClassLoader = new ClassFileLoader(DEVELOPMENT_MODE_CLASSES_DIR, getClass.getClassLoader)
+
   private var devNeedNewClassLoader = false  // Only reload on new request
   private var devLastLogAt          = 0L     // Avoid logging too frequently
 
@@ -100,9 +103,6 @@ object Dispatcher extends Log {
       DEVELOPMENT_MODE_CLASSES_DIR.synchronized {
         // Do this not only for .class files, because file change event may be skipped
         devNeedNewClassLoader = true
-
-        // Notify template engine if any
-        Config.xitrum.template.foreach(_.reloadOnNextRender())
 
         // Avoid logging too frequently
         val now = System.currentTimeMillis()

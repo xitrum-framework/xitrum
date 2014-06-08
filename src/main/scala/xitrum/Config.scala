@@ -90,7 +90,11 @@ class SessionConfig(config: TConfig) {
   val cookieMaxAge = if (config.hasPath("cookieMaxAge")) config.getLong("cookieMaxAge") else Long.MinValue
   val secureKey    = config.getString("secureKey")
 
-  lazy val store = DualConfig.getClassInstance[SessionStore](config, "store")
+  lazy val store = {
+    val ret = DualConfig.getClassInstance[SessionStore](config, "store")
+    ret.start()
+    ret
+  }
 }
 
 class StaticFileConfig(config: TConfig) {
@@ -182,68 +186,6 @@ class Config(val config: TConfig) extends Log {
     else
       None
 
-  /**
-   * lazy: initialized after xitrum.Config, so that inside
-   * the template engine class, xitrum.Config can be used.
-   *
-   * Template config in xitrum.conf can be in 2 forms:
-   *
-   * template = my.template.Engine
-   *
-   * Or if the template engine needs additional options:
-   *
-   * template {
-   *   "my.template.Engine" {
-   *     option1 = value1
-   *     option2 = value2
-   *   }
-   * }
-   */
-  lazy val template: Option[TemplateEngine] = {
-    if (config.hasPath("template")) {
-      try {
-        val engine = DualConfig.getClassInstance[TemplateEngine](config, "template")
-        Some(engine)
-      } catch {
-        case NonFatal(e) =>
-          Config.exitOnStartupError("Could not load template engine, please check config/xitrum.conf", e)
-          None
-      }
-    } else {
-      log.info("No template engine is configured")
-      None
-    }
-  }
-
-  /**
-   * lazy: initialized after xitrum.Config, so that inside
-   * the cache class, xitrum.Config can be used.
-   *
-   * Cache config in xitrum.conf can be in 2 forms:
-   *
-   * cache = my.Cache
-   *
-   * Or if the cache needs additional options:
-   *
-   * cache {
-   *   "my.Cache" {
-   *     option1 = value1
-   *     option2 = value2
-   *   }
-   * }
-   */
-  lazy val cache: Cache = {
-    try {
-      DualConfig.getClassInstance[Cache](config, "cache")
-    } catch {
-      case NonFatal(e) =>
-        Config.exitOnStartupError("Could not load cache engine, please check config/xitrum.conf", e)
-        null
-    }
-  }
-
-  val session = new SessionConfig(config.getConfig("session"))
-
   val staticFile = new StaticFileConfig(config.getConfig("staticFile"))
 
   val request = new RequestConfig(config.getConfig("request"))
@@ -253,6 +195,19 @@ class Config(val config: TConfig) extends Log {
   val swaggerApiVersion = if (config.hasPath("swaggerApiVersion")) Some(config.getString("swaggerApiVersion")) else None
 
   val metrics = if (config.hasPath("metrics")) Some(new MetricsConfig(config.getConfig("metrics"))) else None
+
+  //----------------------------------------------------------------------------
+  // These are initialized after xitrum.Config, so that they can use xitrum.Config.
+
+  var template: Option[TemplateEngine] = _
+  var cache:    Cache                  = _
+  var session:  SessionConfig          = _
+
+  def loadExternalEngines() {
+    template = TemplateEngine.loadFromConfig()
+    cache    = Cache.loadFromConfig()
+    session  = new SessionConfig(config.getConfig("session"))
+  }
 }
 
 //------------------------------------------------------------------------------

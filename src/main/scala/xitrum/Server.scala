@@ -32,9 +32,7 @@ object Server extends Log {
    * SSL codec handler will be automatically prepended for HTTPS server.
    */
   def start(httpChannelInitializer: ChannelInitializer[SocketChannel]) {
-    Config.xitrum.template.foreach(_.start())
-    Config.xitrum.cache.start()
-    Config.xitrum.session.store.start()
+    Config.xitrum.loadExternalEngines()
 
     // Trick to start actorRegistry on startup
     SA.entropy()

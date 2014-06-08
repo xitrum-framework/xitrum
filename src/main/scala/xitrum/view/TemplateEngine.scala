@@ -1,11 +1,18 @@
 package xitrum.view
 
-import xitrum.Action
+import scala.util.control.NonFatal
+import com.typesafe.config.{Config => TConfig}
+import xitrum.{Action, Config, DualConfig, Log}
 
 /**
  * Template engines should extend this trait and implement its methods.
  * On startup, an instance of the configured template engine is created and used
  * for every rendering request. Thus it should be thread-safe.
+ *
+ * In development mode, template engines may use
+ * xitrum.handler.inbound.Dispatcher.devClassLoader
+ * every time they render. devClassLoader may be changed in development mode
+ * every time the directory target/scala-<version>/classes is changed.
  */
 trait TemplateEngine {
   /**
@@ -19,20 +26,6 @@ trait TemplateEngine {
    * should release its resources here.
    */
   def stop()
-
-  /**
-   * Called multiple times, but only in development mode, when Xitrum detects
-   * that there's a change in directory target/scala-<version>/classes. Because,
-   * for example, maybe there's new class file or existing class file has been
-   * changed, if necessary the template engine should reload when it renders on
-   * the next request.
-   *
-   * Because this method is only called in development mode, to optimize, the
-   * template engine may act differently for development mode and production
-   * mode. Use xitrum.Config.productionMode to check which mode the program is
-   * running in.
-   */
-  def reloadOnNextRender()
 
   /**
    * Renders the template at the location identified by the given action class.
@@ -60,4 +53,37 @@ trait TemplateEngine {
    * @param options specific to the configured template engine
    */
   def renderFragment(location: Class[_ <: Action], fragment: String, currentAction: Action, options: Map[String, Any]): String
+}
+
+object TemplateEngine {
+  /**
+   * Template config in xitrum.conf can be in 2 forms:
+   *
+   * template = my.template.Engine
+   *
+   * Or if the template engine needs additional options:
+   *
+   * template {
+   *   "my.template.Engine" {
+   *     option1 = value1
+   *     option2 = value2
+   *   }
+   * }
+   */
+  def loadFromConfig(): Option[TemplateEngine] = {
+    if (Config.xitrum.config.hasPath("template")) {
+      try {
+        val engine = DualConfig.getClassInstance[TemplateEngine](Config.xitrum.config, "template")
+        engine.start()
+        Some(engine)
+      } catch {
+        case NonFatal(e) =>
+          Config.exitOnStartupError("Could not load template engine, please check config/xitrum.conf", e)
+          None
+      }
+    } else {
+      Log.info("No template engine is configured")
+      None
+    }
+  }
 }

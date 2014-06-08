@@ -6,7 +6,7 @@ import scala.util.control.NonFatal
 
 import io.netty.handler.codec.http.DefaultCookie
 
-import xitrum.Config.xitrum.session.{cookieMaxAge, cookieName}
+import xitrum.Config
 import xitrum.scope.request.RequestEnv
 import xitrum.util.SeriDeseri
 
@@ -41,8 +41,8 @@ trait ServerSessionStore extends SessionStore {
     if (session.isEmpty) {
       // If session cookie has been sent by browser, send back session cookie
       // with max age = 0 so that browser will delete it immediately
-      if (env.requestCookies.isDefinedAt(cookieName)) {
-        val cookie = new DefaultCookie(cookieName, "0")
+      if (env.requestCookies.isDefinedAt(Config.xitrum.session.cookieName)) {
+        val cookie = new DefaultCookie(Config.xitrum.session.cookieName, "0")
         cookie.setHttpOnly(true)
         cookie.setMaxAge(0)
         env.responseCookies.append(cookie)
@@ -55,10 +55,10 @@ trait ServerSessionStore extends SessionStore {
       val hSession = session.asInstanceOf[ServerSession]
       // newlyCreated: true means browser did not send session cookie or did send
       // but the cookie value is not a valid encrypted session ID
-      if (hSession.newlyCreated || cookieMaxAge > 0) {
-        val cookie = new DefaultCookie(cookieName, SeriDeseri.toSecureUrlSafeBase64(hSession.sessionId))
+      if (hSession.newlyCreated || Config.xitrum.session.cookieMaxAge > 0) {
+        val cookie = new DefaultCookie(Config.xitrum.session.cookieName, SeriDeseri.toSecureUrlSafeBase64(hSession.sessionId))
         cookie.setHttpOnly(true)
-        cookie.setMaxAge(cookieMaxAge)
+        cookie.setMaxAge(Config.xitrum.session.cookieMaxAge)
         env.responseCookies.append(cookie)
       }
 
@@ -70,7 +70,7 @@ trait ServerSessionStore extends SessionStore {
   }
 
   def restore(env: SessionEnv): Session = {
-    env.requestCookies.get(cookieName) match {
+    env.requestCookies.get(Config.xitrum.session.cookieName) match {
       case None =>
         val sessionId = UUID.randomUUID().toString
         new ServerSession(sessionId, true)
