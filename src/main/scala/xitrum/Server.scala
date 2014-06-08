@@ -1,5 +1,8 @@
 package xitrum
 
+import java.io.File
+import java.net.{URL, URLClassLoader}
+
 import io.netty.bootstrap.ServerBootstrap
 import io.netty.channel.{ChannelInitializer, ChannelPipeline}
 import io.netty.channel.nio.NioEventLoopGroup
@@ -23,6 +26,11 @@ object Server {
    * Starts with the default ChannelInitializer provided by Xitrum.
    */
   def start() {
+    // If Logback is used and SLF4J has been touched (for example, touched by
+    // Netty, e.g. via start(httpChannelInitializer) below) before the following
+    // call, config/logback.xml (i) will not take effect
+    addConfigDirectoryToClasspath()
+
     start(new DefaultHttpChannelInitializer)
   }
 
@@ -67,6 +75,38 @@ object Server {
     // This is a good timing to warn
     Config.warnOnDefaultSecureKey()
   }
+
+  //----------------------------------------------------------------------------
+
+  private def addConfigDirectoryToClasspath() {
+    // Check if config directory existence
+    val configDirPath = _root_.xitrum.root + File.separator + "config"
+    val configDir     = new File(configDirPath)
+    if (!configDir.exists) return
+
+    // Check if config directory is already in classpath
+    val cl  = getClass.getClassLoader
+    val appUrl = cl.getResource("application.conf")
+    if (appUrl != null) return
+
+    findURLClassLoader(cl).foreach { urlCl =>
+      val configDirUrl = configDir.toURI.toURL
+      val method = classOf[URLClassLoader].getDeclaredMethod("addURL", classOf[URL])
+      method.setAccessible(true)
+      method.invoke(urlCl, configDirUrl)
+    }
+  }
+
+  private def findURLClassLoader(cl: ClassLoader): Option[URLClassLoader] = {
+    if (cl.isInstanceOf[URLClassLoader]) {
+      Some(cl.asInstanceOf[URLClassLoader])
+    } else {
+      val parent = cl.getParent
+      if (parent == null) None else findURLClassLoader(parent)
+    }
+  }
+
+  //----------------------------------------------------------------------------
 
   private def doStart(https: Boolean, nonSslChannelInitializer: ChannelInitializer[SocketChannel]) {
     val channelInitializer =

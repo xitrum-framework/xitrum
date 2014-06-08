@@ -246,6 +246,8 @@ object Config {
   /** This represents application.conf. */
   val application: TConfig = {
     try {
+      // See Server#addConfigDirectoryToClasspath
+      //
       // Unlike ConfigFactory.load(), when class loader is given but
       // "application" is not given, "application.conf" is not loaded!
       ConfigFactory.load(getClass.getClassLoader, "application")

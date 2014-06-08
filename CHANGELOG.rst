@@ -1,5 +1,7 @@
 3.14:
 
+* `#400 <https://github.com/xitrum-framework/xitrum/issues/400>`_
+  Support both Scala 2.10.x and 2.11.x
 * `#81 <https://github.com/xitrum-framework/xitrum/issues/81>`_
   Reload classes in development mode
 * `#398 <https://github.com/xitrum-framework/xitrum/issues/398>`_
@@ -14,8 +16,8 @@
   Fix memory leak at xitrum.util.SeriDeseri.fromUrlSafeBase64
 * `#399 <https://github.com/xitrum-framework/xitrum/issues/399>`_
   Add xitrum.Component
-* `#400 <https://github.com/xitrum-framework/xitrum/issues/400>`_
-  Support both Scala 2.10.x and 2.11.x
+* `#404 <https://github.com/xitrum-framework/xitrum/issues/404>`_
+  At boot, add config directory to classpath, if it's not in classpath
 
 3.13:
 

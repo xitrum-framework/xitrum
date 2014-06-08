@@ -20,13 +20,13 @@ import xitrum.metrics.MetricsManager
  * }}}
  */
 package object xitrum {
-  val version = new Version
+  lazy val version = new Version
 
   /**
    * Path to the root directory of the current project.
    * If you're familiar with Rails, this is the same as Rails.root.
    */
-  val root = {
+  lazy val root = {
     // Support the case when Xitrum is used in a SBT subproject, see:
     // https://github.com/xitrum-framework/xitrum/issues/47
 
@@ -49,9 +49,10 @@ package object xitrum {
    *
    * If you do care about the class name where the log is made, use trait xitrum.Log.
    */
-  val Log = LoggerFactory.getLogger(getClass)
+  // This needs to be lazy, see Server#addConfigDirectoryToClasspath
+  lazy val Log = LoggerFactory.getLogger(getClass)
 
-  val Metrics = (new InstrumentedBuilder {
+  lazy val Metrics = (new InstrumentedBuilder {
     val metricRegistry = MetricsManager.metricRegistry
   }).metrics
 }
