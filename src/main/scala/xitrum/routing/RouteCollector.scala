@@ -32,8 +32,13 @@ class RouteCollector(cl: ClassLoader, cachedFileName: String) {
       Map.empty[Class[_ <: Action], Swagger]
     )
 
+    // Only serialize/deserialize ActionTreeBuilder, which represents
+    // traits/classes extending Action, and their relationship. The relationship
+    // is for the (Swagger) annotation inheritance feature. The traits/classes
+    // are then loaded to get annotations.
     val xitrumVersion     = xitrum.version.toString
     val actionTreeBuilder = Scanner.foldLeft(cachedFileName, new ActionTreeBuilder(xitrumVersion), discovered _)
+
     if (actionTreeBuilder.xitrumVersion != xitrumVersion) {
       // The caller should see that the Xitrum version is invalid and act properly
       acc
