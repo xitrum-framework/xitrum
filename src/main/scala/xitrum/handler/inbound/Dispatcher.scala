@@ -182,7 +182,7 @@ class Dispatcher extends SimpleChannelInboundHandler[HandlerEnv] {
   /** @return true if the request has been handled */
   private def handleIndexHtmlFallback(ctx: ChannelHandlerContext, env: HandlerEnv, pathInfo: PathInfo): Boolean = {
     // Try to fallback to index.html if it exists
-    val staticPath = Config.root + "/public" + pathInfo.decodedWithIndexHtml
+    val staticPath = xitrum.root + "/public" + pathInfo.decodedWithIndexHtml
     val file       = new File(staticPath)
     if (file.isFile && file.exists) {
       val response = env.response

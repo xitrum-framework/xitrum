@@ -15,7 +15,7 @@ import HttpMethod._
 import HttpResponseStatus._
 import HttpVersion._
 
-import xitrum.{Config, Log}
+import xitrum.Log
 import xitrum.etag.{Etag, NotModified}
 import xitrum.handler.{AccessLog, HandlerEnv, NoRealPipelining}
 import xitrum.util.{ByteBufUtil, Gzip, Mime}
@@ -34,8 +34,8 @@ object XSendFile extends Log {
   // GET /echo/ -> xitrum.sockjs.SockJsController#iframe, pathParams: {iframe: } -> 404, 1 [ms]
   val X_SENDFILE_HEADER_IS_FROM_ACTION = "X-Sendfile-Is-From-Action"
 
-  private[this] val ABS_404 = Config.root + "/public/404.html"
-  private[this] val ABS_500 = Config.root + "/public/500.html"
+  private[this] val ABS_404 = xitrum.root + "/public/404.html"
+  private[this] val ABS_500 = xitrum.root + "/public/500.html"
 
   /** @param path see Renderer#renderFile */
   def setHeader(response: FullHttpResponse, path: String, fromAction: Boolean) {

@@ -163,7 +163,8 @@ class MetricsConfig(config: TConfig) {
   val collectActorInterval     = (if (config.hasPath("collectActorInterval"))     config.getLong("collectActorInterval")     else 30).seconds
 }
 
-class Config(val config: TConfig) extends Log {
+/** This represents things in xitrum.conf. */
+class XitrumConfig(val config: TConfig) extends Log {
   val basicAuth =
     if (config.hasPath("basicAuth"))
       Some(new BasicAuthConfig(config.getConfig("basicAuth")))
@@ -216,6 +217,9 @@ class Config(val config: TConfig) extends Log {
 object Config extends Log {
   val ACTOR_SYSTEM_NAME = "xitrum"
 
+  /** akka.actor.ActorSystem("xitrum") */
+  val actorSystem = ActorSystem(ACTOR_SYSTEM_NAME)
+
   /**
    * Static textual files are always compressed
    * Dynamic textual responses are only compressed if they are big
@@ -225,6 +229,10 @@ object Config extends Log {
    */
   val BIG_TEXTUAL_RESPONSE_SIZE_IN_KB = 1
 
+  /**
+   * The default secure key in Xitrum new project skeleton xitrum.conf. At a
+   * program startup, Xitrum will warn if the program uses this key.
+   */
   private[this] val DEFAULT_SECURE_KEY = "ajconghoaofuxahoi92chunghiaujivietnamlasdoclapjfltudoil98hanhphucup8"
 
   //----------------------------------------------------------------------------
@@ -235,7 +243,7 @@ object Config extends Log {
    */
   val productionMode = System.getProperty("xitrum.mode") == "production"
 
-  /** config/application.conf */
+  /** This represents application.conf. */
   val application: TConfig = {
     try {
       ConfigFactory.load()
@@ -246,10 +254,10 @@ object Config extends Log {
     }
   }
 
-  /** config/xitrum.conf */
-  val xitrum: Config = {
+  /** This represents things in xitrum.conf. */
+  val xitrum: XitrumConfig = {
     try {
-      new Config(application.getConfig("xitrum"))
+      new XitrumConfig(application.getConfig("xitrum"))
     } catch {
       case NonFatal(e) =>
         exitOnStartupError("Could not load config/xitrum.conf. For an example, see https://github.com/xitrum-framework/xitrum-new/blob/master/config/xitrum.conf", e)
@@ -258,24 +266,6 @@ object Config extends Log {
   }
 
   //----------------------------------------------------------------------------
-
-  /**
-   * Path to the root directory of the current project.
-   * If you're familiar with Rails, this is the same as Rails.root.
-   * See https://github.com/xitrum-framework/xitrum/issues/47
-   */
-  val root = {
-    val res = getClass.getClassLoader.getResource("xitrum.conf")
-    if (res != null) {
-      val fileName = res.getFile
-      // This doesn't work on Windows, because "/" is always used in fileName
-      // fileName.replace(File.separator + "config" + File.separator + "xitrum.conf", "")
-      fileName.replace("/config/xitrum.conf", "")
-    } else {
-      // Fallback to current working directory
-      System.getProperty("user.dir")
-    }
-  }
 
   val baseUrl = xitrum.reverseProxy.map(_.baseUrl).getOrElse("")
 
@@ -300,11 +290,6 @@ object Config extends Log {
         baseUrl + "/" + path
     }
   }
-
-  //----------------------------------------------------------------------------
-
-  /** akka.actor.ActorSystem("xitrum") */
-  val actorSystem = ActorSystem(ACTOR_SYSTEM_NAME)
 
   //----------------------------------------------------------------------------
 

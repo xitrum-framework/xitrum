@@ -67,7 +67,7 @@ class PublicFileServer extends SimpleChannelInboundHandler[HandlerEnv] {
    */
   private def sanitizedAbsStaticPath(pathInfo: String): Option[String] = {
     PathSanitizer.sanitize(pathInfo).map { path =>
-      Config.root + "/public" + path
+      xitrum.root + "/public" + path
     }
   }
 }

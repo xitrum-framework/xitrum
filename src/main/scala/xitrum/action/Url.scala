@@ -31,7 +31,7 @@ trait Url {
 
   /** @param path Relative to the "public" directory, without leading "/" */
   def publicUrl(path: String): String = {
-    val absPath     = Config.root + "/public/" + path
+    val absPath     = xitrum.root + "/public/" + path
     val forceReload = Etag.forFile(absPath, None, true) match {
       case Etag.NotFound                           => Random.nextLong.toString
       case Etag.TooBig(file, mimeo)                => file.lastModified

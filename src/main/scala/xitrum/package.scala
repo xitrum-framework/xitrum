@@ -23,6 +23,24 @@ package object xitrum {
   val version = new Version
 
   /**
+   * Path to the root directory of the current project.
+   * If you're familiar with Rails, this is the same as Rails.root.
+   */
+  val root = {
+    // See https://github.com/xitrum-framework/xitrum/issues/47
+    val res = getClass.getClassLoader.getResource("xitrum.conf")
+    if (res != null) {
+      val fileName = res.getFile
+      // This doesn't work on Windows, because "/" is always used in fileName
+      // fileName.replace(File.separator + "config" + File.separator + "xitrum.conf", "")
+      fileName.replace("/config/xitrum.conf", "")
+    } else {
+      // Fallback to current working directory
+      System.getProperty("user.dir")
+    }
+  }
+
+  /**
    * This is a convenient helper to let you call like this directly:
    * xitrum.Log.debug("msg"), xitrum.Log.info("msg") etc.
    *
