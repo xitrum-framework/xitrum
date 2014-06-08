@@ -69,7 +69,7 @@ object Cache {
     } catch {
       case NonFatal(e) =>
         Config.exitOnStartupError("Could not load cache engine, please check config/xitrum.conf", e)
-        null
+        throw e
     }
   }
 }

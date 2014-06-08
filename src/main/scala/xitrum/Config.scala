@@ -254,7 +254,7 @@ object Config {
     } catch {
       case NonFatal(e) =>
         exitOnStartupError("Could not load config/application.conf. For an example, see https://github.com/xitrum-framework/xitrum-new/blob/master/config/application.conf", e)
-        null
+        throw e
     }
   }
 
@@ -265,7 +265,7 @@ object Config {
     } catch {
       case NonFatal(e) =>
         exitOnStartupError("Could not load config/xitrum.conf. For an example, see https://github.com/xitrum-framework/xitrum-new/blob/master/config/xitrum.conf", e)
-        null
+        throw e
     }
   }
 
