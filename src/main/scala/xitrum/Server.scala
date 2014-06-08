@@ -85,7 +85,7 @@ object Server {
     if (!configDir.exists) return
 
     // Check if config directory is already in classpath
-    val cl  = getClass.getClassLoader
+    val cl     = getClass.getClassLoader
     val appUrl = cl.getResource("application.conf")
     if (appUrl != null) return
 

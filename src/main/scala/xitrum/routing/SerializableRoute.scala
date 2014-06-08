@@ -32,10 +32,10 @@ class SerializableRoute(
     new SerializableRoute(httpMethod, newCompiledPattern, actionClass, cacheSecs)
   }
 
-  def toRoute: Route = {
+  def toRoute(cl: ClassLoader): Route = {
     new Route(
       new HttpMethod(httpMethod), compiledPattern,
-      Class.forName(actionClass).asInstanceOf[Class[Action]], cacheSecs
+      cl.loadClass(actionClass).asInstanceOf[Class[Action]], cacheSecs
     )
   }
 

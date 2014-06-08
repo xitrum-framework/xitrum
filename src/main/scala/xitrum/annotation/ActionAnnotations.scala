@@ -6,6 +6,17 @@ import scala.reflect.runtime.universe
 // http://www.veebsbraindump.com/2013/01/reflecting-annotations-in-scala-2-10/
 
 object ActionAnnotations {
+  // ==
+  //
+  // Can't use, for example, tpe == TYPE_OF_GET in development mode because
+  // new class loader may be created in development mode, in that case we
+  // can't compare things in different universes.
+  // => Must use .toString
+
+  // <:<
+  //
+  // <:< still works for different universes!
+
   val TYPE_OF_GET       = universe.typeOf[GET]
   val TYPE_OF_POST      = universe.typeOf[POST]
   val TYPE_OF_PUT       = universe.typeOf[PUT]

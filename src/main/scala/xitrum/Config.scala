@@ -315,28 +315,28 @@ object Config {
 
   private[this] val ROUTES_CACHE = "routes.cache"
 
-  var routes = loadRoutes()
+  var routes = loadRoutes(getClass.getClassLoader)
 
   /** Maybe called multiple times in development mode when reloading routes. */
-  def loadRoutes(): RouteCollection = {
-    val ret = loadRouteCacheFileOrRecollectWithRetry()
+  def loadRoutes(cl: ClassLoader): RouteCollection = {
+    val ret = loadRouteCacheFileOrRecollectWithRetry(cl)
     if (xitrum.metrics.isEmpty) ret.removeByPrefix("xitrum/metrics")
     ret
   }
 
-  private def loadRouteCacheFileOrRecollectWithRetry(retried: Boolean = false): RouteCollection = {
+  private def loadRouteCacheFileOrRecollectWithRetry(cl: ClassLoader, retried: Boolean = false): RouteCollection = {
     try {
       Log.info(s"Load $ROUTES_CACHE or recollect routes...")
-      val routeCollector = new RouteCollector
-      val discoveredAcc  = routeCollector.deserializeCacheFileOrRecollect(ROUTES_CACHE)
+      val routeCollector = new RouteCollector(cl, ROUTES_CACHE)
+      val discoveredAcc  = routeCollector.deserializeCacheFileOrRecollect()
       if (discoveredAcc.xitrumVersion != _root_.xitrum.version.toString) {
         Log.info(s"Xitrum version changed. Delete $ROUTES_CACHE and retry...")
         val file = new File(ROUTES_CACHE)
         file.delete()
-        loadRouteCacheFileOrRecollectWithRetry(true)
+        loadRouteCacheFileOrRecollectWithRetry(cl, true)
       } else {
         val withSwagger = xitrum.swaggerApiVersion.isDefined
-        RouteCollection.fromSerializable(discoveredAcc, withSwagger)
+        RouteCollection.fromSerializable(cl, discoveredAcc, withSwagger)
       }
     } catch {
       case NonFatal(e) =>
@@ -347,7 +347,7 @@ object Config {
           Log.info(s"Could not load $ROUTES_CACHE, delete and retry...")
           val file = new File(ROUTES_CACHE)
           file.delete()
-          loadRouteCacheFileOrRecollectWithRetry(true)
+          loadRouteCacheFileOrRecollectWithRetry(cl, true)
         }
     }
   }

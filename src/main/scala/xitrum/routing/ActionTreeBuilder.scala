@@ -1,7 +1,7 @@
 package xitrum.routing
 
 import java.lang.reflect.Modifier
-import scala.collection.mutable.ArrayBuffer
+import scala.collection.mutable.{ArrayBuffer, Map => MMap}
 import scala.reflect.runtime.universe
 
 import xitrum.Action
@@ -62,11 +62,11 @@ private case class ActionTreeBuilder(xitrumVersion: String, parent2Children: Map
    *
    * @return Concrete (non-trait) action classes and their annotations
    */
-  def getConcreteActionsAndAnnotations: Set[(Class[_ <: Action], ActionAnnotations)] = {
-    val concreteActions = getConcreteActions
-
-    val runtimeMirror = universe.runtimeMirror(getClass.getClassLoader)
-    var cache         = Map.empty[Class[_ <: Action], ActionAnnotations]
+  def getConcreteActionsAndAnnotations(cl: ClassLoader): Set[(Class[_ <: Action], ActionAnnotations)] = {
+    val actionClass     = cl.loadClass(classOf[Action].getName)
+    val concreteActions = getConcreteActions(cl)
+    val runtimeMirror   = universe.runtimeMirror(cl)
+    val cache           = MMap.empty[Class[_ <: Action], ActionAnnotations]
 
     def getActionAccumulatedAnnotations(klass: Class[_ <: Action]): ActionAnnotations = {
       cache.get(klass) match {
@@ -78,7 +78,7 @@ private case class ActionTreeBuilder(xitrumVersion: String, parent2Children: Map
             // parentClass is null if klass is a trait/interface
             if (parentClass == null) {
               acc
-            } else if (classOf[Action].isAssignableFrom(parentClass)) {
+            } else if (actionClass.isAssignableFrom(parentClass)) {
               val aa = getActionAccumulatedAnnotations(parentClass.asInstanceOf[Class[_ <: Action]])
               acc.inherit(aa)
             } else {
@@ -89,7 +89,7 @@ private case class ActionTreeBuilder(xitrumVersion: String, parent2Children: Map
           val universeAnnotations = runtimeMirror.classSymbol(klass).asClass.annotations
           val thisAnnotationsOnly = ActionAnnotations.fromUniverse(universeAnnotations)
           val ret                 = thisAnnotationsOnly.inherit(parentAnnotations)
-          cache += klass -> ret
+          cache(klass) = ret
           ret
       }
     }
@@ -103,14 +103,14 @@ private case class ActionTreeBuilder(xitrumVersion: String, parent2Children: Map
   // Internal name: xitrum/Action
   private def internalName2ClassName(internalName: String) = internalName.replace('/', '.')
 
-  private def getConcreteActions: Set[Class[_ <: Action]] = {
+  private def getConcreteActions(cl: ClassLoader): Set[Class[_ <: Action]] = {
     var concreteActions = Set.empty[Class[_ <: Action]]
 
     def traverseActionTree(className: String) {
       if (parent2Children.isDefinedAt(className)) {
         val children = parent2Children(className)
         children.foreach { className =>
-          val klass    = Class.forName(className)
+          val klass    = cl.loadClass(className)
           val concrete = !klass.isInterface && !Modifier.isAbstract(klass.getModifiers)
           if (concrete) concreteActions += klass.asInstanceOf[Class[_ <: Action]]
           traverseActionTree(className)

@@ -20,10 +20,10 @@ case class DiscoveredAcc(
 )
 
 /** Scan all classes to collect routes from actions. */
-class RouteCollector {
+class RouteCollector(cl: ClassLoader, cachedFileName: String) {
   import ActionAnnotations._
 
-  def deserializeCacheFileOrRecollect(cachedFileName: String): DiscoveredAcc = {
+  def deserializeCacheFileOrRecollect(): DiscoveredAcc = {
     var acc = DiscoveredAcc(
       "<Invalid Xitrum version>",
       new SerializableRouteCollection,
@@ -38,7 +38,7 @@ class RouteCollector {
       // The caller should see that the Xitrum version is invalid and act properly
       acc
     } else {
-      val ka = actionTreeBuilder.getConcreteActionsAndAnnotations
+      val ka = actionTreeBuilder.getConcreteActionsAndAnnotations(cl)
       ka.foreach { case (klass, annotations) =>
         acc = processAnnotations(acc, klass, annotations)
       }
@@ -80,7 +80,6 @@ class RouteCollector {
       case None          => acc.swaggerMap
       case Some(swagger) => acc.swaggerMap + (klass -> swagger)
     }
-
     DiscoveredAcc(acc.xitrumVersion, acc.normalRoutes, acc.sockJsWithoutPrefixRoutes, newSockJsMap, newSwaggerMap)
   }
 
@@ -135,9 +134,10 @@ class RouteCollector {
       annotations: ActionAnnotations)
   {
     annotations.error.foreach { case a =>
-      val tpe = a.tree.tpe
-      if (tpe == TYPE_OF_ERROR_404) routes.error404 = Some(className)
-      if (tpe == TYPE_OF_ERROR_500) routes.error500 = Some(className)
+      val tpe       = a.tree.tpe
+      val tpeString = tpe.toString
+      if (tpeString == TYPE_OF_ERROR_404.toString) routes.error404 = Some(className)
+      if (tpeString == TYPE_OF_ERROR_500.toString) routes.error500 = Some(className)
     }
   }
 
@@ -149,14 +149,17 @@ class RouteCollector {
   {
     var pathPrefix: String = null
     annotations.routes.foreach { case a =>
-      if (a.tree.tpe == TYPE_OF_SOCKJS)
+      val tpe       = a.tree.tpe
+      val tpeString = tpe.toString
+
+      if (tpeString == TYPE_OF_SOCKJS.toString)
         pathPrefix = a.tree.children.tail(0).productElement(0).asInstanceOf[universe.Constant].value.toString
     }
 
     if (pathPrefix == null) {
       sockJsMap
     } else {
-      val sockJsActorClass = Class.forName(className).asInstanceOf[Class[SockJsAction]]
+      val sockJsActorClass = cl.loadClass(className).asInstanceOf[Class[SockJsAction]]
       val noWebSocket      = annotations.sockJsNoWebSocket.isDefined
       var cookieNeeded     = Config.xitrum.response.sockJsCookieNeeded
       if (annotations.sockJsCookieNeeded  .isDefined) cookieNeeded = true
@@ -173,10 +176,11 @@ class RouteCollector {
       case None => 0
 
       case Some(annotation) =>
-        val tpe = annotation.tree.tpe
-        if (tpe == TYPE_OF_FIRST)
+        val tpe       = annotation.tree.tpe
+        val tpeString = tpe.toString
+        if (tpeString == TYPE_OF_FIRST.toString)
           -1
-        else if (tpe == TYPE_OF_LAST)
+        else if (tpeString == TYPE_OF_LAST.toString)
           1
         else
           0
@@ -189,23 +193,24 @@ class RouteCollector {
       case None => 0
 
       case Some(annotation) =>
-        val tpe = annotation.tree.tpe
+        val tpe       = annotation.tree.tpe
+        val tpeString = tpe.toString
 
-        if (tpe == TYPE_OF_CACHE_ACTION_DAY)
+        if (tpeString == TYPE_OF_CACHE_ACTION_DAY.toString)
           -annotation.tree.children.tail(0).toString.toInt * 24 * 60 * 60
-        else if (tpe == TYPE_OF_CACHE_ACTION_HOUR)
+        else if (tpeString == TYPE_OF_CACHE_ACTION_HOUR.toString)
           -annotation.tree.children.tail(0).toString.toInt      * 60 * 60
-        else if (tpe == TYPE_OF_CACHE_ACTION_MINUTE)
+        else if (tpeString == TYPE_OF_CACHE_ACTION_MINUTE.toString)
           -annotation.tree.children.tail(0).toString.toInt           * 60
-        else if (tpe == TYPE_OF_CACHE_ACTION_SECOND)
+        else if (tpeString == TYPE_OF_CACHE_ACTION_SECOND.toString)
           -annotation.tree.children.tail(0).toString.toInt
-        else if (tpe == TYPE_OF_CACHE_PAGE_DAY)
+        else if (tpeString == TYPE_OF_CACHE_PAGE_DAY.toString)
           annotation.tree.children.tail(0).toString.toInt * 24 * 60 * 60
-        else if (tpe == TYPE_OF_CACHE_PAGE_HOUR)
+        else if (tpeString == TYPE_OF_CACHE_PAGE_HOUR.toString)
           annotation.tree.children.tail(0).toString.toInt      * 60 * 60
-        else if (tpe == TYPE_OF_CACHE_PAGE_MINUTE)
+        else if (tpeString == TYPE_OF_CACHE_PAGE_MINUTE.toString)
           annotation.tree.children.tail(0).toString.toInt           * 60
-        else if (tpe == TYPE_OF_CACHE_PAGE_SECOND)
+        else if (tpeString == TYPE_OF_CACHE_PAGE_SECOND.toString)
           annotation.tree.children.tail(0).toString.toInt
         else
           0
@@ -214,19 +219,20 @@ class RouteCollector {
 
   /** @return Seq[(method, pattern)] */
   private def listMethodAndPattern(annotation: universe.Annotation): Seq[(String, String)] = {
-    val tpe = annotation.tree.tpe
+    val tpe       = annotation.tree.tpe
+    val tpeString = tpe.toString
 
-    if (tpe == TYPE_OF_GET)
+    if (tpeString == TYPE_OF_GET.toString)
       getStrings(annotation).map(("GET", _))
-    else if (tpe == TYPE_OF_POST)
+    else if (tpeString == TYPE_OF_POST.toString)
       getStrings(annotation).map(("POST", _))
-    else if (tpe == TYPE_OF_PUT)
+    else if (tpeString == TYPE_OF_PUT.toString)
       getStrings(annotation).map(("PUT", _))
-    else if (tpe == TYPE_OF_PATCH)
+    else if (tpeString == TYPE_OF_PATCH.toString)
       getStrings(annotation).map(("PATCH", _))
-    else if (tpe == TYPE_OF_DELETE)
+    else if (tpeString == TYPE_OF_DELETE.toString)
       getStrings(annotation).map(("DELETE", _))
-    else if (tpe == TYPE_OF_WEBSOCKET)
+    else if (tpeString == TYPE_OF_WEBSOCKET.toString)
       getStrings(annotation).map(("WEBSOCKET", _))
     else
       Seq()
@@ -282,7 +288,7 @@ class RouteCollector {
 
             // Ex: xitrum.annotation.Swagger$StringForm
             val javaClassName = builder.toString
-            val klass         = Class.forName(javaClassName)
+            val klass         = cl.loadClass(javaClassName)
             val constructor   = klass.getConstructor(classOf[String], classOf[String])
             swaggerArgs = swaggerArgs :+ constructor.newInstance(name, desc).asInstanceOf[SwaggerArg]
           }
