@@ -18,10 +18,18 @@ trait Js {
   // lazy because request is null when this instance is created
   lazy val isAjax = request.headers.contains("X-Requested-With")
 
+  /**
+   * You can use this method to add dynamic JS snippets to a buffer, then use
+   * method jsForView to take out that buffer to embed the snippets to view
+   * template.
+   */
   def jsAddToView(js: Any) {
     buffer.append(js.toString)
     buffer.append(";\n")
   }
+
+  /** See jsAddToView. */
+  lazy val jsForView = if (buffer.isEmpty) "" else <script type="text/javascript">{Unparsed("\n//<![CDATA[\n$(function() {\n" + buffer.toString + "});\n//]]>\n")}</script>
 
   //----------------------------------------------------------------------------
 
@@ -67,6 +75,4 @@ trait Js {
       <script type="text/javascript" src={url[xitrum.js]}></script>
     </xml:group>
   }
-
-  lazy val jsForView = if (buffer.isEmpty) "" else <script type="text/javascript">{Unparsed("\n//<![CDATA[\n$(function() {\n" + buffer.toString + "});\n//]]>\n")}</script>
 }
