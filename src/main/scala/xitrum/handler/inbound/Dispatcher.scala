@@ -132,7 +132,6 @@ object Dispatcher {
         // Also reload routes
         Config.routes    = Config.loadRoutes(devClassLoader)
         SwaggerJson.apis = SwaggerJson.loadApis()
-        Config.routes.logAllExceptForXitrum()
       }
       devClassLoader
     }

@@ -215,12 +215,6 @@ class RouteCollection(
     logRoutes(true)
   }
 
-  def logAllExceptForXitrum() {
-    logRoutes(false)
-    sockJsRouteMap.logRoutes(false)
-    logErrorRoutes()
-  }
-
   /** @param xitrumRoutes true: log only Xitrum routes, false: log only app routes */
   def logRoutes(xitrumRoutes: Boolean) {
     // This method is only run once on start, speed is not a problem
