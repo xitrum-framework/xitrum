@@ -107,7 +107,7 @@ object Dispatcher {
         // Avoid logging too frequently
         val now = System.currentTimeMillis()
         val dt  = now - devLastLogAt
-        if (dt > 500) {
+        if (dt > 4000) {
           Log.info(s"$DEVELOPMENT_MODE_CLASSES_DIR changed; reload classes and routes on next request")
           devLastLogAt = now
         }
