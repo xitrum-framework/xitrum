@@ -62,12 +62,10 @@ object Dispatcher {
   private val prodDispatcher = new ReloadableDispatcher
 
   def dispatch(actionClass: Class[_ <: Action], handlerEnv: HandlerEnv) {
-    if (Config.productionMode) {
+    if (Config.productionMode)
       prodDispatcher.dispatch(actionClass, handlerEnv)
-    } else {
-      val classLoader = devRenewClassLoaderIfNeeded()
-      devDispatch(classLoader, actionClass, handlerEnv)
-    }
+    else
+      devDispatch(devClassLoader, actionClass, handlerEnv)
   }
 
   /** Use Class#newInstance for development mode, ConstructorAccess for production mode. */
@@ -123,7 +121,7 @@ object Dispatcher {
     })
   }
 
-  private def devRenewClassLoaderIfNeeded(): ClassLoader = {
+  def devRenewClassLoaderAndRoutesIfNeeded() {
     DEVELOPMENT_MODE_CLASSES_DIR.synchronized {
       if (devNeedNewClassLoader) {
         devClassLoader        = new ClassFileLoader(DEVELOPMENT_MODE_CLASSES_DIR, getClass.getClassLoader)
@@ -133,7 +131,6 @@ object Dispatcher {
         Config.routes    = Config.loadRoutes(devClassLoader)
         SwaggerJson.apis = SwaggerJson.loadApis()
       }
-      devClassLoader
     }
   }
 
@@ -167,6 +164,10 @@ class Dispatcher extends SimpleChannelInboundHandler[HandlerEnv] {
 
     // Look up GET if method is HEAD
     val requestMethod = if (request.getMethod == HttpMethod.HEAD) HttpMethod.GET else request.getMethod
+
+    // Reload routes if needed before doing the route matching
+    if (!Config.productionMode) Dispatcher.devRenewClassLoaderAndRoutesIfNeeded()
+
     Config.routes.route(requestMethod, pathInfo) match {
       case Some((route, pathParams)) =>
         env.route      = route
