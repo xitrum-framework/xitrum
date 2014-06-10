@@ -5,13 +5,21 @@ name := "xitrum"
 version := "3.14-SNAPSHOT"
 
 scalaVersion := "2.11.1"
+//scalaVersion := "2.10.4"
+
+crossScalaVersions := Seq("2.11.1", "2.10.4")
 
 scalacOptions ++= Seq("-deprecation", "-feature", "-unchecked")
 
 // xitrum.util.FileMonitor requires Java 7
 javacOptions ++= Seq("-source", "1.7", "-target", "1.7")
 
-// Generate Version.scala from "version" above ---------------------------------
+// Source code for Scala 2.10 and 2.11 are a little different ------------------
+// See src/main/scala-2.10 and src/main/scala-2.11.
+
+unmanagedSourceDirectories in Compile += baseDirectory.value / "src" / "main" / s"scala-${scalaBinaryVersion.value}"
+
+// Generate src/main/scala/xitrum/Version.scala from "version" above -----------
 
 // Also check if the directory name is correct:
 // src/main/resources/META-INF/resources/webjars/xitrum/<version>
@@ -64,12 +72,13 @@ libraryDependencies += "com.typesafe.akka" %% "akka-slf4j" % "2.3.3"
 // For file watch
 // (akka-agent is added here, should ensure same Akka version as above)
 libraryDependencies += "com.beachape.filemanagement" %% "schwatcher" % "0.1.5"
+//libraryDependencies += "com.beachape.filemanagement" %% "schwatcher" % "0.1.1"
 
 // For scanning routes
 libraryDependencies += "tv.cntt" %% "sclasner" % "1.6"
 
 // For binary (de)serializing
-libraryDependencies += "tv.cntt" %% "chill-scala-2-11" % "1.0"
+libraryDependencies += "tv.cntt" %% "chill-scala" % "1.1"
 
 // For JSON (de)serializing
 libraryDependencies += "org.json4s" %% "json4s-jackson" % "3.2.10"

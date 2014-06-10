@@ -6,6 +6,10 @@ import io.netty.handler.codec.http.multipart.FileUpload
 import xitrum.Action
 import xitrum.exception.MissingParam
 
+/**
+ * Use "manifest" for Scala 2.10 and "typeOf" for Scala 2.11:
+ * https://github.com/ngocdaothanh/xitrum/issues/155
+ */
 object ParamAccess {
   val TYPE_FILE_UPLOAD = typeOf[FileUpload]
   val TYPE_STRING      = typeOf[String]
