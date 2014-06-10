@@ -18,6 +18,8 @@
   Add xitrum.Component
 * `#404 <https://github.com/xitrum-framework/xitrum/issues/404>`_
   At boot, add config directory to classpath, if it's not in classpath
+* `#407 <https://github.com/xitrum-framework/xitrum/issues/407>`_
+  Update javassist from 3.18.1-GA to 3.18.2-GA
 
 3.13:
 
