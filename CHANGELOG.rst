@@ -574,7 +574,7 @@ See these examples to know how to update your project from 1.14 to 1.15:
 
 1.14:
 
-* `Add config for template engine and Scalate template path <http://xitrum-framework.github.com/xitrum/guide/howto.html#create-your-own-template-engine>`_
+* `Add config for template engine and Scalate template path <http://xitrum-framework.github.io/guide/howto.html#create-your-own-template-engine>`_
 * `Add comparison of controllers and actions <https://groups.google.com/group/xitrum-framework/browse_thread/thread/a3469fea17f84ce4>`_
   ``if (currentController == MyController) ...``
   ``if (currentAction == MyController.index) ...``
@@ -624,12 +624,12 @@ Updating your project from Xitrum 1.13 to 1.14 is
 
 1.10:
 
-* `Improve <http://xitrum-framework.github.com/xitrum/guide/scopes.html#cookie>`_
+* `Improve <http://xitrum-framework.github.io/guide/scopes.html#cookie>`_
   cookie API to requestCookies and responseCookies.
   Only cookies in responseCookies `will be sent to browsers <http://groups.google.com/group/xitrum-framework/browse_thread/thread/dbb7a8e638120b09>`_.
 * `Remove <http://groups.google.com/group/xitrum-framework/browse_thread/thread/310c61f501e0bba8>`_
   ``resetSession`` method. To reset session, call ``session.clear()``.
-* `Support Scalate Mustache template <http://xitrum-framework.github.com/xitrum/guide/controller_action_view.html#scalate>`_
+* `Support Scalate Mustache template <http://xitrum-framework.github.io/guide/controller_action_view.html#scalate>`_
 * `Fix bug with sending the last chunk in chunked mode for SockJS <http://groups.google.com/group/sockjs/msg/d66e2978249b5f26>`_
 * Fix URL to jquery.validate-1.10.0/localization/messages_<lang>.js
   (was "jquery.validate-1.9.0/..." instead)
@@ -725,7 +725,7 @@ Updating your project from Xitrum 1.13 to 1.14 is
 * Support WebSocket for iPhone Safari when running on port 80 (HTTP) or 443 (HTTPS);
   previous Xitrum versions work OK for iPhone Safari when non-standard ports are used
 * Improve i18n feature, e.g. add autosetLanguage method:
-  http://xitrum-framework.github.com/xitrum/guide/i18n.html
+  http://xitrum-framework.github.io/guide/i18n.html
 
 1.9.5:
 
@@ -822,7 +822,7 @@ Updating your project from Xitrum 1.13 to 1.14 is
     Old code: import io.netty.util.CharsetUtil.UTF_8
     New code: import org.jboss.netty.util.CharsetUtil.UTF_8
 * basicAuthenticate now works as documented:
-  http://xitrum-framework.github.com/xitrum/guide/howto.html#basic-authentication
+  http://xitrum-framework.github.io/guide/howto.html#basic-authentication
 * Add I18n#tf, tcf, tnf, tcnf for formatted string;
   Standard placeholders %d, %s etc. work, but if the formatted string contains
   many of them, their order should not be changed
@@ -843,7 +843,7 @@ Updating your project from Xitrum 1.13 to 1.14 is
 
 * Fix WebSocket bug introduced in Xitrum 1.8.4, now WebSocket frame receiving works again
 * Cleaner API for WebSocket:
-  http://xitrum-framework.github.com/xitrum/doc/async.html#websocket
+  http://xitrum-framework.github.io/guide/async.html#websocket
 * To easily put JS fragments to Scalate views, jsAtBottom is split to jsDefaults and jsForView.
   jsDefaults containing jQuery, Knockout.js etc. should be put at layout's <head>.
   jsForView containing JS fragments added by jsAddToView should be put at layout's bottom.
@@ -883,9 +883,9 @@ Updating your project from Xitrum 1.13 to 1.14 is
 1.8.2:
 
 * Filters now have "only" and "except"
-  http://xitrum-framework.github.com/xitrum/filter.html
+  http://xitrum-framework.github.io/guide/filter.html
 * Optimize routing by using methods instead of vals
-  http://xitrum-framework.github.com/xitrum/controller_action_view.html
+  http://xitrum-framework.github.io/guide/controller_action_view.html
 
 1.8:
 
@@ -912,7 +912,7 @@ Updating your project from Xitrum 1.13 to 1.14 is
 1.7:
 
 * WebSocket, see:
-  http://xitrum-framework.github.com/xitrum/async.html#websocket
+  http://xitrum-framework.github.io/guide/async.html#websocket
   http://netty.io/blog/2011/11/17/
 * Make postback tag attributes HTML5 standards-compliant:
   You must change:
@@ -921,7 +921,7 @@ Updating your project from Xitrum 1.13 to 1.14 is
     confirum to data-confirm
 * Expose APIs for data encryption so that application developers may use
   xitrum.util.{Secure, SecureBase64, SeriDeseri}
-  See http://xitrum-framework.github.com/xitrum/howto.html#encrypt-data
+  See http://xitrum-framework.github.io/guide/howto.html#encrypt-data
 * Update Hazelcast from 1.9.4.4 to 1.9.4.5
 
 1.6:
