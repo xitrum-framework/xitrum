@@ -29,7 +29,7 @@ Generate API doc with graphical type hierarchy
 ----------------------------------------------
 
 Demo:
-http://xitrum-framework.github.io/xitrum/api/index.html#xitrum.Action
+http://xitrum-framework.github.io/api/index.html#xitrum.Action
 
 Graphviz is required, see build.sbt.end.
 
@@ -37,7 +37,7 @@ Create dependency graph
 -----------------------
 
 Demo:
-http://xitrum-framework.github.io/xitrum/guide/deps.html
+http://xitrum-framework.github.io/guide/deps.html
 
 Generate target/dependencies-compile.dot:
 
