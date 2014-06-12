@@ -18,7 +18,7 @@ publishArtifact in Test := false
 pomIncludeRepository := { _ => false }
 
 pomExtra := (
-  <url>https://xitrum-framework.github.com/xitrum/</url>
+  <url>https://xitrum-framework.github.io/</url>
   <licenses>
     <license>
       <name>MIT</name>
