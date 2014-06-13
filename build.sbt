@@ -57,7 +57,7 @@ libraryDependencies += "org.slf4s" %% "slf4s-api" % "1.7.7"
 libraryDependencies += "ch.qos.logback" % "logback-classic" % "1.1.2" % "test"
 
 // Netty is the core of Xitrum's HTTP(S) feature
-libraryDependencies += "io.netty" % "netty-all" % "4.0.19.Final"
+libraryDependencies += "io.netty" % "netty-all" % "4.0.20.Final"
 
 // Javassist boosts Netty 4 speed
 libraryDependencies += "org.javassist" % "javassist" % "3.18.2-GA"
