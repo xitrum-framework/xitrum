@@ -143,7 +143,7 @@ trait ServerIdSessionIdValidator extends Action {
 }
 
 trait SockJsPrefix {
-  protected var pathPrefix = ""
+  var pathPrefix = ""
 
   /** Called by Dispatcher. */
   def setPathPrefix(pathInfo: PathInfo) {

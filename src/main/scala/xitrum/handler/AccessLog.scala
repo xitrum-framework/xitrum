@@ -9,6 +9,7 @@ import io.netty.handler.codec.http.{HttpRequest, HttpResponse}
 
 import xitrum.{Action, Config, Log}
 import xitrum.scope.request.RequestEnv
+import xitrum.sockjs.SockJsAction
 import xitrum.action.Net
 
 object AccessLog {
@@ -62,10 +63,16 @@ object AccessLog {
   }
 
   private def msgWithTime(className: String, action: Action, beginTimestamp: Long) = {
-    val endTimestamp = System.currentTimeMillis()
-    val dt           = endTimestamp - beginTimestamp
-    val env          = action.handlerEnv
-    if (Config.xitrum.metrics.isDefined && Config.xitrum.metrics.get.actions) {
+    val endTimestamp                 = System.currentTimeMillis()
+    val dt                           = endTimestamp - beginTimestamp
+    val env                          = action.handlerEnv
+    val isSockJSMetricsChannelClient = action match {
+      case sa:SockJsAction => sa.pathPrefix.equals("xitrum/metrics/channel")
+      case _ => false
+    }
+    if (Config.xitrum.metrics.isDefined   &&
+        Config.xitrum.metrics.get.actions &&
+        !isSockJSMetricsChannelClient) {
       val histograms = xitrum.Metrics.registry.getHistograms
       val histogram =
         if (histograms.containsKey(action.getClass.getName))

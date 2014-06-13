@@ -521,15 +521,15 @@
     function renderHeapMemory(data) {
       var timestamp = data.TIMESTAMP,
           system    = data.SYSTEM,
-          host      = data.HOST,
-          port      = data.PORT,
+          host      = data.HOST || "",
+          port      = data.PORT || "",
           hash      = data.HASH,
           committed = Math.floor(data.COMMITTED / 1024 / 1024 * 100) / 100,
           used      = Math.floor(data.USED / 1024 / 1024 * 100) / 100,
           max       = Math.floor(data.MAX / 1024 / 1024 * 100) / 100,
           node      = system + "@" + host + ":" + port + "#" + hash
           ;
-          data.node = node;
+      data.node = node;
       $heapMemoryTable.append("<tr><td>"+formatDate(timestamp)+"</td><td>"+node+"</td><td>"+committed+"</td><td>"+used+"</td><td>"+max+"</td></tr>");
       $("#heapMemory").fixHeader();
       visualizeHeapMemory(data);
@@ -538,14 +538,14 @@
     function renderCPU(data) {
       var timestamp         = data.TIMESTAMP,
           system            = data.SYSTEM,
-          host              = data.HOST,
-          port              = data.PORT,
+          host              = data.HOST || "",
+          port              = data.PORT || "",
           hash              = data.HASH,
           processors        = data.PROCESSORS,
           systemLoadAverage = Math.floor(data.SYSTEMLOADAVERAGE * 100) / 100,
           node              = system + "@" + host + ":" + port + "#" + hash
           ;
-          data.node = node;
+      data.node = node;
 
       $cpuTable.append("<tr><td>"+formatDate(timestamp)+"</td><td>"+node+"</td><td>"+processors+"</td><td>"+systemLoadAverage+"</td></tr>");
       $("#cpu").fixHeader();
