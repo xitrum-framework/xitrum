@@ -11,7 +11,7 @@ See:
 * http://svn.apache.org/repos/asf/httpd/httpd/trunk/docs/conf/mime.types
 * http://docs.oracle.com/javase/7/docs/api/javax/activation/MimetypesFileTypeMap.html
 
-On Mac, can use ``opendiff`` GUI tool to compare.
+On Mac, can use ``opendiff`` GUI tool to compare:
 
 ::
 
