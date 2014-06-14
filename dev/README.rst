@@ -1,12 +1,4 @@
-Use SBT 0.13.2 to compile. See project/build.properties.
-
-Update Swagger UI
------------------
-
-* Copy dist directory from https://github.com/wordnik/swagger-ui
-  to src/main/resources/public/xitrum as ``swagger-ui-<version>``.
-* Modify ``xitrum.routing.SwaggerUiVersioned`` based on the index.html.
-* Remove index.html.
+Use SBT 0.13.5 to compile. See project/build.properties.
 
 Update src/main/resources/META-INF/mime.types
 ---------------------------------------------
@@ -17,12 +9,12 @@ See:
 
 * https://github.com/klacke/yaws/blob/master/priv/mime.types
 * http://svn.apache.org/repos/asf/httpd/httpd/trunk/docs/conf/mime.types
-* http://download.oracle.com/javaee/5/api/javax/activation/MimetypesFileTypeMap.html
+* http://docs.oracle.com/javase/7/docs/api/javax/activation/MimetypesFileTypeMap.html
 
 Debug client-server data receiving and sending
 ----------------------------------------------
 
-I recommend Tcpdump / Wireshark, or even better Tcpflow:
+"I recommend Tcpdump / Wireshark, or even better Tcpflow":
 http://groups.google.com/group/sockjs/msg/12f28eccf1851d54
 
 Generate API doc with graphical type hierarchy
