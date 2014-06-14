@@ -113,9 +113,9 @@ object MetricsManager {
      * from specified half-life and interval between observations.
      * Half-life is the interval over which the weights decrease by a factor of two.
      * The relevance of each data sample is halved for every passing half-life duration,
-     * i.e. after 4 times the half-life, a data sample’s relevance is reduced to 6% of
+     * i.e. after 4 times the half-life, a data sample's relevance is reduced to 6% of
      * its original relevance. The initial relevance of a data sample is given by
-     * 1 – 0.5 ^ (collect-interval / half-life).
+     * 1 - 0.5 ^ (collect-interval / half-life).
      */
     def alpha(halfLife: FiniteDuration, collectInterval: FiniteDuration): Double = {
       val halfLifeMillis = halfLife.toMillis
