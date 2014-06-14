@@ -8,7 +8,7 @@ import io.netty.buffer.Unpooled
 import io.netty.channel.{ChannelFuture, ChannelFutureListener}
 import io.netty.handler.codec.http.{DefaultCookie, HttpHeaders, HttpResponseStatus}
 
-import akka.actor.{Actor, ActorRef, PoisonPill, Props, ReceiveTimeout, Terminated}
+import akka.actor.{Actor, ActorRef, Props, ReceiveTimeout, Terminated}
 import glokka.Registry
 
 import xitrum.{

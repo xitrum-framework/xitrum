@@ -16,7 +16,8 @@ import xitrum.handler.inbound.Dispatcher
  * See also Action and FutureAction.
  */
 trait ActorAction extends Actor with Action {
-  // Sending PoisonPill at postStop causes postStop to be called again!
+  // Sending PoisonPill at postStop (or at another method called by it) causes
+  // postStop to be called again!
   private var postStopCalled = false
 
   def receive = {
@@ -38,9 +39,15 @@ trait ActorAction extends Actor with Action {
   }
 
   override def onDoneResponding() {
-    // Don't use context.stop(self) to avoid leaking context outside this actor,
-    // just in case onDoneResponding is called from another thread
-    if (!postStopCalled) self ! PoisonPill
+    // Use context.stop(self) instead of sending PoisonPill to avoid double
+    // response, because the PoisonPill mesage takes some time to arrive, and
+    // during that time other messages may arrive, and the actor logic may
+    // respond again. With context.stop(self), there should be no more message.
+    //
+    // Unlike the use of PoisonPill at addConnectionClosedListener above,
+    // responding should be called only within the actor, so when onDoneResponding
+    // is called, here we are inside the actor.
+    if (!postStopCalled) context.stop(self)
   }
 
   override def postStop() {

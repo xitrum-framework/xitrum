@@ -13,7 +13,7 @@ import xitrum.handler.inbound.Dispatcher
  * - cookieNeeded: true means load balancers needs JSESSION cookie
  */
 class SockJsClassAndOptions(
-  val actorClass:   Class[_ <: SockJsAction],
+  val actionClass:  Class[_ <: SockJsAction],  // Classes that extend SockJsAction are not always actor
   val websocket:    Boolean,
   val cookieNeeded: Boolean
 ) extends Serializable
@@ -24,7 +24,7 @@ class SockJsRouteMap(map: MMap[String, SockJsClassAndOptions]) {
     // This method is only run once on start, speed is not a problem
 
     val map = this.map.filter { case (path, sockJsClassAndOptions) =>
-      sockJsClassAndOptions.actorClass.getName.startsWith("xitrum") == xitrumRoutes
+      sockJsClassAndOptions.actionClass.getName.startsWith("xitrum") == xitrumRoutes
     }
 
     if (map.isEmpty) return
@@ -33,7 +33,7 @@ class SockJsRouteMap(map: MMap[String, SockJsClassAndOptions]) {
       map.toList.foldLeft((0, 0, "websocket: true,".length)) {
           case ((pmax, hmax, wmax), (pathPrefix, sockJsClassAndOptions)) =>
         val plen  = pathPrefix.length
-        val hlen  = sockJsClassAndOptions.actorClass.getName.length
+        val hlen  = sockJsClassAndOptions.actionClass.getName.length
         val pmax2 = if (pmax < plen) plen else pmax
         val hmax2 = if (hmax < hlen) hlen else hmax
         val wmax2 = if (sockJsClassAndOptions.websocket) wmax else "websocket: false,".length
@@ -44,7 +44,7 @@ class SockJsRouteMap(map: MMap[String, SockJsClassAndOptions]) {
     val strings = map.map { case (pathPrefix, sockJsClassAndOptions) =>
       logFormat.format(
         pathPrefix,
-        sockJsClassAndOptions.actorClass.getName,
+        sockJsClassAndOptions.actionClass.getName,
         "websocket: " + sockJsClassAndOptions.websocket + ",",
         "cookie_needed: " + sockJsClassAndOptions.cookieNeeded
       )
@@ -63,13 +63,13 @@ class SockJsRouteMap(map: MMap[String, SockJsClassAndOptions]) {
   /** Creates actor attached to the given context. */
   def createSockJsAction(context: ActorRefFactory, pathPrefix: String): ActorRef = {
     val sockJsClassAndOptions = map(pathPrefix)
-    val actorClass            = sockJsClassAndOptions.actorClass
+    val actorClass            = sockJsClassAndOptions.actionClass
     context.actorOf(Props(Dispatcher.newAction(actorClass).asInstanceOf[Actor]))
   }
 
   /** @param sockJsHandlerClass Normal SockJsHandler subclass or object class */
   def findPathPrefix(sockJsActorClass: Class[_ <: SockJsAction]): String = {
-    val kv = map.find { case (k, v) => v.actorClass == sockJsActorClass }
+    val kv = map.find { case (k, v) => v.actionClass == sockJsActorClass }
     kv match {
       case Some((k, v)) => "/" + k
       case None         => throw new Exception("Cannot lookup SockJS URL for class: " + sockJsActorClass)
