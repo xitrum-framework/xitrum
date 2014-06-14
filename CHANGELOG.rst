@@ -24,6 +24,8 @@
   Metrics: Ignore the actions of metrics itself
 * `#409 <https://github.com/xitrum-framework/xitrum/issues/409>`_
   Update Netty from 4.0.19 to 4.0.20
+* `#410 <https://github.com/xitrum-framework/xitrum/issues/410>`_
+  Allow the use of OpenSSL engine for faster HTTPS
 * `#407 <https://github.com/xitrum-framework/xitrum/issues/407>`_
   Update Javassist from 3.18.1-GA to 3.18.2-GA
 

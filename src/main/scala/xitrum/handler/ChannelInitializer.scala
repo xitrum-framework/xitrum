@@ -3,6 +3,7 @@ package xitrum.handler
 import io.netty.channel.{ChannelHandler, ChannelInitializer, ChannelPipeline}
 import io.netty.channel.ChannelHandler.Sharable
 import io.netty.channel.socket.SocketChannel
+import io.netty.handler.ssl.{SslContext, SslHandler, SslProvider}
 
 import io.netty.handler.codec.http.{HttpRequestDecoder, HttpResponseEncoder}
 import io.netty.handler.stream.ChunkedWriteHandler
@@ -142,12 +143,20 @@ class DefaultHttpChannelInitializer extends ChannelInitializer[SocketChannel] {
   }
 }
 
+object SslChannelInitializer {
+  val context = {
+    val https    = Config.xitrum.https.get
+    val provider = if (https.useOpenSSL) SslProvider.OPENSSL else SslProvider.JDK
+    SslContext.newServerContext(provider, https.certChainFile, https.keyFile)
+  }
+}
+
 /** This is a wrapper. It prepends SSL handler to the non-SSL pipeline. */
 @Sharable
 class SslChannelInitializer(nonSslChannelInitializer: ChannelInitializer[SocketChannel]) extends ChannelInitializer[SocketChannel] {
   override def initChannel(ch: SocketChannel) {
     val p = ch.pipeline()
-    p.addLast(ServerSsl.getClass.getName, ServerSsl.handler())
+    p.addLast(classOf[SslHandler].getName, SslChannelInitializer.context.newHandler(ch.alloc))
     p.addLast(nonSslChannelInitializer)
 
     // FlashSocketPolicyHandler can't be used with SSL

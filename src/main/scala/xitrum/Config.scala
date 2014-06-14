@@ -73,10 +73,20 @@ class PortConfig(config: TConfig) {
   val flashSocketPolicy = if (config.hasPath("flashSocketPolicy")) Some(config.getInt("flashSocketPolicy")) else None
 }
 
-class KeystoreConfig(config: TConfig) {
-  val path                = config.getString("path")
-  val password            = config.getString("password")
-  val certificatePassword = config.getString("certificatePassword")
+class HttpsConfig(config: TConfig) {
+  val useOpenSSL = config.getBoolean("useOpenSSL")
+  lazy val certChainFile = {
+    val path = config.getString("certChainFile")
+    val file = new File(path)
+    if (!file.exists) Config.exitOnStartupError("certChainFile specified in xitrum.conf does not exist")
+    file
+  }
+  lazy val keyFile = {
+    val path = config.getString("keyFile")
+    val file = new File(path)
+    if (!file.exists) Config.exitOnStartupError("keyFile specified in xitrum.conf does not exist")
+    file
+  }
 }
 
 class ReverseProxyConfig(config: TConfig) {
@@ -179,7 +189,7 @@ class XitrumConfig(val config: TConfig) {
 
   val port = new PortConfig(config.getConfig("port"))
 
-  val keystore = new KeystoreConfig(config.getConfig("keystore"))
+  val https = if (port.https.isDefined) Some(new HttpsConfig(config.getConfig("https"))) else None
 
   val reverseProxy =
     if (config.hasPath("reverseProxy"))
@@ -302,8 +312,16 @@ object Config {
       Log.warn("*** For security, change secureKey in config/xitrum.conf to your own! ***")
   }
 
+  def exitOnStartupError(msg: String) {
+    exitOnStartupError(msg, None)
+  }
+
   def exitOnStartupError(msg: String, e: Throwable) {
-    Log.error(msg, e)
+    exitOnStartupError(msg, Some(e))
+  }
+
+  private def exitOnStartupError(msg: String, eo: Option[Throwable]) {
+    eo.foreach { e => Log.error(msg, e) }
     Log.error("Xitrum could not start because of the above error. Xitrum will now stop the current process.")
 
     // Note: If the cache is Hazelcast, once it's started, calling only
