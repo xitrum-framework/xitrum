@@ -66,21 +66,24 @@ object AccessLog {
     val endTimestamp                 = System.currentTimeMillis()
     val dt                           = endTimestamp - beginTimestamp
     val env                          = action.handlerEnv
-    val isSockJSMetricsChannelClient = action match {
-      case sa:SockJsAction => sa.pathPrefix.equals("xitrum/metrics/channel")
-      case _ => false
-    }
+    val isSockJSMetricsChannelClient =
+      action.isInstanceOf[SockJsAction] &&
+      action.asInstanceOf[SockJsAction].pathPrefix == "xitrum/metrics/channel"
+
+    // Ignore the actions of metrics itself, to avoid showing them at the metrics viewer
     if (Config.xitrum.metrics.isDefined   &&
         Config.xitrum.metrics.get.actions &&
-        !isSockJSMetricsChannelClient) {
-      val histograms = xitrum.Metrics.registry.getHistograms
-      val histogram =
-        if (histograms.containsKey(action.getClass.getName))
-          histograms.get(action.getClass.getName)
+        !isSockJSMetricsChannelClient)
+    {
+      val histograms      = xitrum.Metrics.registry.getHistograms
+      val actionClassName = action.getClass.getName
+      val histogram       =
+        if (histograms.containsKey(actionClassName))
+          histograms.get(actionClassName)
         else
-          xitrum.Metrics.histogram(action.getClass.getName)
+          xitrum.Metrics.histogram(actionClassName)
       histogram.asInstanceOf[Histogram] += dt
-      lastExecTimeMap(action.getClass.getName) = Array(System.currentTimeMillis, dt)
+      lastExecTimeMap(actionClassName) = Array(System.currentTimeMillis, dt)
     }
 
     action.remoteIp + " " +
