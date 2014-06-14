@@ -1,11 +1,12 @@
 package xitrum.scope.session
 
-import scala.collection.mutable.{ArrayBuffer, HashMap => MHashMap}
+import scala.collection.mutable.{ArrayBuffer, Map => MMap}
+import scala.util.control.NonFatal
 
 import io.netty.handler.codec.http.{HttpRequest, Cookie, CookieDecoder, ServerCookieEncoder, HttpHeaders}
 import HttpHeaders.Names
 
-import xitrum.{Config, Action}
+import xitrum.{Action, Config, Log}
 
 trait SessionEnv extends Csrf {
   this: Action =>
@@ -20,18 +21,25 @@ trait SessionEnv extends Csrf {
    * http://en.wikipedia.org/wiki/HTTP_cookie#Cookie_attributes
    */
   lazy val requestCookies: scala.collection.Map[String, String] = {
-    val header  = HttpHeaders.getHeader(request, Names.COOKIE)
+    val header = HttpHeaders.getHeader(request, Names.COOKIE)
     if (header == null) {
       Map.empty[String, String]
     } else {
-      val cookies  = CookieDecoder.decode(header)
-      val iterator = cookies.iterator
-      val acc      = new MHashMap[String, String]
-      while (iterator.hasNext()) {
-        val cookie = iterator.next()
-        acc(cookie.getName) = cookie.getValue
+      try {
+        val cookies  = CookieDecoder.decode(header)
+        val iterator = cookies.iterator
+        val acc      = MMap.empty[String, String]
+        while (iterator.hasNext()) {
+          val cookie = iterator.next()
+          acc(cookie.getName) = cookie.getValue
+        }
+        acc
+      } catch {
+        // Cannot always get cookie, decrypt, deserialize, and type casting due to program changes etc.
+        case NonFatal(e) =>
+          Log.debug(s"requestCookies is set to empty because there's problem (${e.toString}) when decoding cookies: $header")
+          Map.empty[String, String]
       }
-      acc
     }
   }
 
@@ -43,7 +51,14 @@ trait SessionEnv extends Csrf {
   /** To reset session: session.clear() */
   lazy val session = {
     sessionTouched = true
-    Config.xitrum.session.store.restore(this)
+    try {
+      Config.xitrum.session.store.restore(this)
+    } catch {
+      // Cannot always get cookie, decrypt, deserialize, and type casting due to program changes etc.
+      case NonFatal(e) =>
+        Log.debug(s"session is set to empty because there's problem when restoring", e)
+        MMap.empty[String, Any]
+    }
   }
 
   def sessiono[T](key: String)(implicit d: T DefaultsTo String): Option[T] =

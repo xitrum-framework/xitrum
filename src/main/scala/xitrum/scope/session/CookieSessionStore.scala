@@ -54,7 +54,6 @@ class CookieSessionStore extends SessionStore {
   }
 
   def restore(env: SessionEnv): Session = {
-    // Cannot always get cookie, decrypt, deserialize, and type casting due to program changes etc.
     env.requestCookies.get(Config.xitrum.session.cookieName) match {
       case None =>
         MMap.empty[String, Any]

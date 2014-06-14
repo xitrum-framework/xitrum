@@ -6,18 +6,22 @@
   Reload classes in development mode
 * `#398 <https://github.com/xitrum-framework/xitrum/issues/398>`_
   Recollect routes in development mode
+* `#399 <https://github.com/xitrum-framework/xitrum/issues/399>`_
+  Add xitrum.Component
 * `#390 <https://github.com/xitrum-framework/xitrum/issues/390>`_
   Add validation method "check" that returns true/false
 * `#393 <https://github.com/xitrum-framework/xitrum/issues/393>`_
   For development mode, set Netty's ResourceLeakDetector level to ADVANCED
-* `#394 <https://github.com/xitrum-framework/xitrum/issues/394>`_
-  Add automatic error handling (error 500) for ActorAction
 * `#395 <https://github.com/xitrum-framework/xitrum/issues/395>`_
   Fix memory leak at xitrum.util.SeriDeseri.fromUrlSafeBase64
-* `#399 <https://github.com/xitrum-framework/xitrum/issues/399>`_
-  Add xitrum.Component
+* `#394 <https://github.com/xitrum-framework/xitrum/issues/394>`_
+  Add automatic error handling (error 500) for ActorAction
 * `#404 <https://github.com/xitrum-framework/xitrum/issues/404>`_
   At boot, add config directory to classpath, if it's not in classpath
+* `#411 <https://github.com/xitrum-framework/xitrum/issues/411>`_
+  Set Action#requestCookies to empty when there's problem decoding cookies
+* `#408 <https://github.com/xitrum-framework/xitrum/issues/408>`_
+  Metrics: Ignore the actions of metrics itself
 * `#409 <https://github.com/xitrum-framework/xitrum/issues/409>`_
   Update Netty from 4.0.19 to 4.0.20
 * `#407 <https://github.com/xitrum-framework/xitrum/issues/407>`_
