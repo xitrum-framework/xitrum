@@ -53,7 +53,7 @@ trait Url {
    * @param prodPath File path to use in production mode, relative to the "public" directory, without leading "/"
    */
   def publicUrl(devPath: String, prodPath: String): String = {
-    val path = if (Config.productionMode) devPath else prodPath
+    val path = if (Config.productionMode) prodPath else devPath
     publicUrl(path)
   }
 
@@ -65,7 +65,7 @@ trait Url {
    * @param prodPath File path to use in production mode, relative to "directory" above
    */
   def publicUrl(directory: String, devPath: String, prodPath: String): String = {
-    val path1 = if (Config.productionMode) devPath else prodPath
+    val path1 = if (Config.productionMode) prodPath else devPath
     val path2 = s"$directory/$path1"
     publicUrl(path2)
   }
