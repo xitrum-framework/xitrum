@@ -29,7 +29,11 @@ trait Url {
 
   //----------------------------------------------------------------------------
 
-  /** @param path Relative to the "public" directory, without leading "/" */
+  /**
+   * Ex: publicUrl("jquery/2.1.1/jquery.js")
+   *
+   * @param path Relative to the "public" directory, without leading "/"
+   */
   def publicUrl(path: String): String = {
     val absPath     = xitrum.root + "/public/" + path
     val forceReload = Etag.forFile(absPath, None, true) match {
@@ -43,15 +47,27 @@ trait Url {
   }
 
   /**
+   * Ex: publicUrl("jquery.js", "jquery.min.js")
+   *
+   * @param devPath File path to use in development mode, relative to the "public" directory, without leading "/"
+   * @param prodPath File path to use in production mode, relative to the "public" directory, without leading "/"
+   */
+  def publicUrl(devPath: String, prodPath: String): String = {
+    val path = if (Config.productionMode) devPath else prodPath
+    publicUrl(path)
+  }
+
+  /**
    * Ex: publicUrl("jquery/2.1.1", "jquery.js", "jquery.min.js")
    *
-   * @param devFile File to use in development mode
-   * @param prodFile File to use in production mode
+   * @param directory Relative to the "public" directory, without leading "/"
+   * @param devPath File path to use in development mode, relative to "directory" above
+   * @param prodPath File path to use in production mode, relative to "directory" above
    */
-  def publicUrl(directory: String, devFile: String, prodFile: String): String = {
-    val file = if (Config.productionMode) prodFile else devFile
-    val path = s"$directory/$file"
-    publicUrl(path)
+  def publicUrl(directory: String, devPath: String, prodPath: String): String = {
+    val path1 = if (Config.productionMode) devPath else prodPath
+    val path2 = s"$directory/$path1"
+    publicUrl(path2)
   }
 
   /** @param path Use "myapp/foo.js" to specify "META-INF/resources/webjars/myapp/foo.js" */
