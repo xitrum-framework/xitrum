@@ -36,7 +36,7 @@ class ClassFileLoader(classesDirectory: String, fallback: ClassLoader) extends C
   }
 
   private def loadClassData(name: String): Option[Array[Byte]] = {
-    val path = classesDirectory + File.separator + name.replaceAll("\\.", File.separator) + ".class"
+    val path = classesDirectory + File.separator + name.replaceAllLiterally(".", File.separator) + ".class"
     val file = new File(path)
     if (file.exists) Some(Loader.bytesFromFile(path)) else None
   }
