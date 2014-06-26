@@ -53,9 +53,6 @@ resolvers += "SonatypeReleases" at "http://oss.sonatype.org/content/repositories
 // Projects using Xitrum must provide a concrete implementation of SLF4J (Logback etc.)
 libraryDependencies += "org.slf4s" %% "slf4s-api" % "1.7.7"
 
-// An implementation of SLF4J is needed for log in tests to be output
-libraryDependencies += "ch.qos.logback" % "logback-classic" % "1.1.2" % "test"
-
 // Netty is the core of Xitrum's HTTP(S) feature
 libraryDependencies += "io.netty" % "netty-all" % "4.0.20.Final"
 
@@ -110,9 +107,6 @@ libraryDependencies += "nl.grons" %% "metrics-scala" % "3.2.0_a2.3"
 // For metrics
 libraryDependencies += "com.codahale.metrics" % "metrics-json" % "3.0.2"
 
-// For test
-libraryDependencies += "org.scalatest" %% "scalatest" % "2.2.0" % "test"
-
 // JSON4S uses scalap 2.10.0, which in turn uses scala-compiler 2.10.0, which in
 // turn uses scala-reflect 2.10.0. We need to force "scalaVersion" above, because
 // Scala annotations (used by routes and Swagger) compiled by a newer version
@@ -134,10 +128,18 @@ libraryDependencies += "org.webjars" % "swagger-ui" % "2.0.17"
 
 libraryDependencies += "org.webjars" % "d3js" % "3.4.8"
 
-// Put config directory in classpath for easier development --------------------
+// For test --------------------------------------------------------------------
+
+libraryDependencies += "org.scalatest" %% "scalatest" % "2.2.0" % "test"
+
+// An implementation of SLF4J is needed for log in tests to be output
+libraryDependencies += "ch.qos.logback" % "logback-classic" % "1.1.2" % "test"
 
 // For "sbt console"
 unmanagedClasspath in Compile <+= (baseDirectory) map { bd => Attributed.blank(bd / "src/test/resources") }
+
+// For "sbt run/test"
+unmanagedClasspath in Runtime <+= (baseDirectory) map { bd => Attributed.blank(bd / "src/test/resources") }
 
 //------------------------------------------------------------------------------
 
