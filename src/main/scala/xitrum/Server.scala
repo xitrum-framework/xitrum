@@ -19,7 +19,6 @@ import xitrum.handler.{
 
 import xitrum.handler.inbound.Dispatcher
 import xitrum.metrics.MetricsManager
-import xitrum.sockjs.{SockJsAction => SA}
 
 object Server {
   /**
@@ -43,7 +42,7 @@ object Server {
     Config.xitrum.loadExternalEngines()
 
     // Trick to start actorRegistry on startup
-    SA.entropy()
+    xitrum.sockjs.SockJsAction.entropy()
 
     if (Config.xitrum.metrics.isDefined) MetricsManager.start()
 
