@@ -1,3 +1,8 @@
+3.15:
+
+* `#424 <https://github.com/xitrum-framework/xitrum/issues/424>`_
+  Update Akka from 2.3.3 to 2.3.4
+
 3.14:
 
 * `#400 <https://github.com/xitrum-framework/xitrum/issues/400>`_
