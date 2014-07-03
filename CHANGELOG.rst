@@ -1,5 +1,7 @@
 3.15:
 
+* `#418 <https://github.com/xitrum-framework/xitrum/issues/418>`_
+  [Autoreload in dev mode] Do not reload Scala objects
 * `#424 <https://github.com/xitrum-framework/xitrum/issues/424>`_
   Update Akka from 2.3.3 to 2.3.4
 

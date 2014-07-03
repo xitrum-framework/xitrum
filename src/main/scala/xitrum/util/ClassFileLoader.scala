@@ -18,6 +18,10 @@ class ClassFileLoader(classesDirectory: String, fallback: ClassLoader) extends C
   }
 
   override def findClass(name: String): Class[_] = synchronized {
+    // Do not reload Scala objects:
+    // https://github.com/xitrum-framework/xitrum/issues/418
+    if (name.endsWith("$")) return fallback.loadClass(name)
+
     cache.get(name) match {
       case Some(klass) =>
         klass
