@@ -617,7 +617,6 @@
         default :
       }
     };
-    var channelOnClose = function(){console.log("channelClosed");};
     var channelOnMessageWithKey = function(key){
       $("#title").text(key.replace("xitrum.package.anon.", ""));
       return function(data) {
@@ -637,7 +636,6 @@
       };
     };
     window.channelOnMessage        = channelOnMessage;
-    window.channelOnClose          = channelOnClose;
     window.channelOnMessageWithKey = channelOnMessageWithKey;
   });
 })(window);

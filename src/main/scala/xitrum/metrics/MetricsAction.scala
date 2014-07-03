@@ -94,18 +94,22 @@ trait MetricsViewer extends Action {
   def jsAddMetricsNameSpace(namespace: String = null) {
     jsAddToView(s"""
 (function (namespace) {
-  var ns = namespace || window;
+  var ns  = namespace || window;
+  var url = '${sockJsUrl[XitrumMetricsChannel]}';
   var pullTimer;
-  var initMetricsChannel = function(onMessageFunc, onCloseFunc) {
-    var url = '${sockJsUrl[XitrumMetricsChannel]}';
+  var initMetricsChannel = function(onMessageFunc) {
     var socket;
     socket = new SockJS(url);
     socket.onopen = function(event) {
       socket.send('${MetricsManager.metrics.apiKey}');
-      pullTimer = setInterval(function(){ socket.send('pull')}, 5000);
+      pullTimer = setInterval(function() { socket.send('pull') }, 2000);
     };
-    socket.onclose   = function(e){clearInterval(pullTimer); onCloseFunc(e);};
-    socket.onmessage = function(e){onMessageFunc(e.data);}
+    socket.onclose = function(e) {
+      clearInterval(pullTimer);
+      // Reconnect
+      setTimeout(function() { initMetricsChannel(onMessageFunc) }, 2000);
+    };
+    socket.onmessage = function(e) { onMessageFunc(e.data); }
   };
   ns.initMetricsChannel = initMetricsChannel;
 })($namespace);
@@ -216,11 +220,11 @@ class XitrumMetricsViewer extends Action with MetricsViewer {
     jsAddMetricsNameSpace("window")
     paramo("focusAction") match {
       case Some(key) =>
-        jsAddToView("initMetricsChannel(channelOnMessageWithKey('"+ key +"'),channelOnClose);")
+        jsAddToView("initMetricsChannel(channelOnMessageWithKey('"+ key +"'));")
         respondHtml(focusHtml)
 
       case None =>
-        jsAddToView("initMetricsChannel(channelOnMessage,channelOnClose);")
+        jsAddToView("initMetricsChannel(channelOnMessage);")
         respondHtml(html)
     }
   }
