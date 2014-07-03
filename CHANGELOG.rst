@@ -6,6 +6,8 @@
   [Autoreload in dev mode] Allow disabling autoreload
 * `#418 <https://github.com/xitrum-framework/xitrum/issues/418>`_
   [Autoreload in dev mode] Do not reload Scala objects
+* `#425 <https://github.com/xitrum-framework/xitrum/issues/425>`_
+  Update Netty from 4.0.20 to 4.0.21
 * `#424 <https://github.com/xitrum-framework/xitrum/issues/424>`_
   Update Akka from 2.3.3 to 2.3.4
 
