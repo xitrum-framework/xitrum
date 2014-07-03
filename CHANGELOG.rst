@@ -1,5 +1,7 @@
 3.15:
 
+* `#415 <https://github.com/xitrum-framework/xitrum/issues/415>`_
+  Fix: publicUrl/3 reverses paths of development mode and production mode
 * `#418 <https://github.com/xitrum-framework/xitrum/issues/418>`_
   [Autoreload in dev mode] Do not reload Scala objects
 * `#424 <https://github.com/xitrum-framework/xitrum/issues/424>`_
