@@ -62,7 +62,7 @@ object Dispatcher {
   private val prodDispatcher = new ReloadableDispatcher
 
   def dispatch(actionClass: Class[_ <: Action], handlerEnv: HandlerEnv) {
-    if (Config.productionMode)
+    if (Config.productionMode || !Config.autoreloadInDevMode)
       prodDispatcher.dispatch(actionClass, handlerEnv)
     else
       devDispatch(devClassLoader, actionClass, handlerEnv)
@@ -70,7 +70,7 @@ object Dispatcher {
 
   /** Use Class#newInstance for development mode, ConstructorAccess for production mode. */
   def newAction(actionClass: Class[_ <: Action]): Action = {
-    if (Config.productionMode)
+    if (Config.productionMode || !Config.autoreloadInDevMode)
       ConstructorAccess.get(actionClass).newInstance()
     else
       actionClass.newInstance()
@@ -93,13 +93,14 @@ object Dispatcher {
 
   // In development mode, watch the directory "classes". If there's modification,
   // mark that at the next request, a new class loader should be created.
-  if (!Config.productionMode) devMonitorClassesDir()
+  if (!Config.productionMode && Config.autoreloadInDevMode) devMonitorClassesDir()
 
   private def devMonitorClassesDir() {
     val classesDir = Paths.get(DEVELOPMENT_MODE_CLASSES_DIR).toAbsolutePath
     FileMonitor.monitorRecursive(FileMonitor.MODIFY, classesDir, { path =>
       DEVELOPMENT_MODE_CLASSES_DIR.synchronized {
-        // Do this not only for .class files, because file change event may be skipped
+        // Do this not only for .class files, because file change events may
+        // sometimes be skipped!
         devNeedNewClassLoader = true
 
         // Avoid logging too frequently
@@ -116,7 +117,8 @@ object Dispatcher {
         // or folders created/deleted after registration. Currently, the plan is
         // to have developers handle this themselves in the callback functions.
         FileMonitor.unmonitorRecursive(FileMonitor.MODIFY, classesDir)
-        devMonitorClassesDir()
+
+        if (Config.autoreloadInDevMode) devMonitorClassesDir()
       }
     })
   }
@@ -166,7 +168,7 @@ class Dispatcher extends SimpleChannelInboundHandler[HandlerEnv] {
     val requestMethod = if (request.getMethod == HttpMethod.HEAD) HttpMethod.GET else request.getMethod
 
     // Reload routes if needed before doing the route matching
-    if (!Config.productionMode) Dispatcher.devRenewClassLoaderAndRoutesIfNeeded()
+    if (!Config.productionMode && Config.autoreloadInDevMode) Dispatcher.devRenewClassLoaderAndRoutesIfNeeded()
 
     Config.routes.route(requestMethod, pathInfo) match {
       case Some((route, pathParams)) =>
