@@ -15,7 +15,7 @@ object DevClassLoader {
 
   // "public" because this can be used by, for example, Scalate template engine
   // (xitrum-scalate) to pickup the latest class loader in development mode
-  var classLoader = new ClassFileLoader(CLASSES_DIR, getClass.getClassLoader)
+  var classLoader = new ClassFileLoader(CLASSES_DIR)
 
   def onReload(hook: () => Unit) {
     onReloads.append(hook)
@@ -25,7 +25,7 @@ object DevClassLoader {
     CLASSES_DIR.synchronized {
       if (needNewClassLoader) {
         needNewClassLoader = false
-        classLoader        = new ClassFileLoader(CLASSES_DIR, getClass.getClassLoader)
+        classLoader        = new ClassFileLoader(CLASSES_DIR)
 
         // Also reload routes
         Config.routes    = Config.loadRoutes(classLoader)
