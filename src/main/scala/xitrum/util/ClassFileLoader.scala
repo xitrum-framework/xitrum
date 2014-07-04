@@ -10,7 +10,7 @@ import scala.collection.mutable.{Map => MMap}
  * @param classesDirectory Example: target/scala-2.11/classes
  * @param fallback Class loader for loading other classes, not inside classesDirectory
  */
-class ClassFileLoader(classesDirectory: String) extends ClassLoader {
+class ClassFileLoader(classesDirectory: String) extends ClassLoader(getClass.getClassLoader) {
   // Need to cache because calling defineClass twice will cause exception
   protected val cache = MMap[String, Class[_]]()
 
