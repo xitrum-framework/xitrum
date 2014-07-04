@@ -126,26 +126,7 @@ class RequestConfig(config: TConfig) {
       config.getLong("maxSizeInKBOfUploadMem") * 1024
     else
       DefaultHttpDataFactory.MINSIZE
-  val tmpUploadDir              = getTmpUploadDir()
   val filteredParams            = config.getStringList("filteredParams").asScala
-
-  private def getTmpUploadDir(): String = {
-    // null means system tmp directory
-    val ret = if (config.hasPath("tmpUploadDir")) config.getString("tmpUploadDir") else null
-
-    // Check
-    if (ret != null) {
-      val dir = new File(ret)
-      if (!dir.exists && !dir.mkdirs()) {
-        throw new Exception("tmpUploadDir specified in xitrum.conf does not exist and Xitrum couldn't create it")
-      } else if (!dir.isDirectory) {
-        throw new Exception("tmpUploadDir specified in xitrum.conf is not a directory")
-      } else if (!dir.canWrite) {
-        throw new Exception("Xitrum cannot write to tmpUploadDir specified in xitrum.conf")
-      }
-    }
-    ret
-  }
 }
 
 class ResponseConfig(config: TConfig) {
@@ -196,6 +177,42 @@ class XitrumConfig(val config: TConfig) {
       Some(new ReverseProxyConfig(config.getConfig("reverseProxy")))
     else
       None
+
+  val tmpDir: File = {
+    if (config.hasPath("tmpDir")) {
+      val name = config.getString("tmpDir")
+      val dir  = new File(name)
+      if (!dir.exists && !dir.mkdirs()) {
+        throw new Exception("tmpDir specified in xitrum.conf does not exist and Xitrum couldn't create it")
+      } else if (!dir.isDirectory) {
+        throw new Exception("tmpDir specified in xitrum.conf is not a directory")
+      } else if (!dir.canWrite) {
+        throw new Exception("Xitrum cannot write to tmpDir specified in xitrum.conf")
+      }
+      dir
+    } else {
+      val f = File.createTempFile("xitrum-", "-tmp")
+      // Delete the file so we can make a new directory there instead
+      f.delete()
+
+      val ret = if (f.mkdirs()) {
+        f.deleteOnExit()
+        f
+      } else {
+        Log.warn(s"Couldn't delete file $f so we could create a temp directory")
+        val f2 = new File(new File(System.getProperty("java.io.tmpdir")), "-xitrum-tmp")
+        if (!f2.exists && !f2.mkdirs()) {
+          throw new Exception("Couldn't create temp directory; please try to specify tmpDir in xitrum.conf")
+        }
+        f2
+      }
+
+      // This directory path is random, let Xitrum user know where it is so that
+      // he can inspect things if he wants (Scalate generated .scala files etc.)
+      Log.info(s"Xitrum tmpDir: $ret")
+      ret
+    }
+  }
 
   val staticFile = new StaticFileConfig(config.getConfig("staticFile"))
 

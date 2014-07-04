@@ -1,5 +1,6 @@
 package xitrum.handler.inbound
 
+import java.io.File
 import java.nio.charset.Charset
 import scala.collection.mutable.{Map => MMap}
 import scala.util.control.NonFatal
@@ -24,11 +25,13 @@ import xitrum.scope.request.{FileUploadParams, Params, PathInfo}
 import xitrum.util.ByteBufUtil
 
 object Request2Env {
+  val uploadDir = Config.xitrum.tmpDir.getAbsolutePath + File.separator + "upload"
+
   DiskAttribute.deleteOnExitTemporaryFile  = true  // Should delete file on exit (in normal exit)
-  DiskAttribute.baseDirectory              = Config.xitrum.request.tmpUploadDir
+  DiskAttribute.baseDirectory              = uploadDir
 
   DiskFileUpload.deleteOnExitTemporaryFile = true  // Should delete file on exit (in normal exit)
-  DiskFileUpload.baseDirectory             = Config.xitrum.request.tmpUploadDir
+  DiskFileUpload.baseDirectory             = uploadDir
 
   // Creating factory should be after the above for the factory to take effect of the settings
 
