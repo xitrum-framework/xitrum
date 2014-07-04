@@ -17,7 +17,7 @@ object DevClassLoader {
   // (xitrum-scalate) to pickup the latest class loader in development mode
   var classLoader = new ClassFileLoader(CLASSES_DIR)
 
-  def onReload(hook: () => Unit) {
+  def onReload(hook: (ClassLoader) => Unit) {
     onReloads.append(hook)
   }
 
@@ -31,7 +31,7 @@ object DevClassLoader {
         Config.routes    = Config.loadRoutes(classLoader)
         SwaggerJson.apis = SwaggerJson.loadApis()
 
-        onReloads.foreach(_.apply)
+        onReloads.foreach(_.apply(classLoader))
       }
     }
   }
@@ -42,7 +42,7 @@ object DevClassLoader {
 
   private var needNewClassLoader = false  // Only reload on new request
   private var lastLogAt          = 0L     // Avoid logging too frequently
-  private val onReloads          = ArrayBuffer.empty[() => Unit]
+  private val onReloads          = ArrayBuffer.empty[(ClassLoader) => Unit]
 
   // In development mode, watch the directory "classes". If there's modification,
   // mark that at the next request, a new class loader should be created.
