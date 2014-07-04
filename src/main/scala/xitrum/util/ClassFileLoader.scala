@@ -47,13 +47,13 @@ class ClassFileLoader(classesDirectory: String) extends ClassLoader {
   protected def fallback: ClassLoader = getClass.getClassLoader
 
   protected def classNameToFilePath(name: String): Option[String] = {
-    if (skipClassName(name)) return None
+    if (useFallback(name)) return None
 
     val path = classesDirectory + File.separator + name.replaceAllLiterally(".", File.separator) + ".class"
     Some(path)
   }
 
-  protected def skipClassName(name: String): Boolean = {
+  protected def useFallback(name: String): Boolean = {
     // Do not reload Scala objects:
     // https://github.com/xitrum-framework/xitrum/issues/418
     if (name.endsWith("$")) return true
