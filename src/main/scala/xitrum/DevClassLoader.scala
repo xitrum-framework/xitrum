@@ -1,7 +1,6 @@
 package xitrum
 
 import java.nio.file.Paths
-import scala.collection.mutable.ArrayBuffer
 import scala.util.Properties
 import xitrum.routing.SwaggerJson
 import xitrum.util.{ClassFileLoader, FileMonitor}
@@ -18,7 +17,15 @@ object DevClassLoader {
   var classLoader = new ClassFileLoader(CLASSES_DIR)
 
   def onReload(hook: (ClassLoader) => Unit) {
-    onReloads.append(hook)
+    CLASSES_DIR.synchronized {
+      onReloads = onReloads :+ hook
+    }
+  }
+
+  def removeOnReload(hook: (ClassLoader) => Unit) {
+    CLASSES_DIR.synchronized {
+      onReloads = onReloads.filterNot(_ == hook)
+    }
   }
 
   def reloadIfNeeded() {
@@ -31,7 +38,7 @@ object DevClassLoader {
         Config.routes    = Config.loadRoutes(classLoader)
         SwaggerJson.apis = SwaggerJson.loadApis()
 
-        onReloads.foreach(_.apply(classLoader))
+        onReloads.foreach { hook => hook(classLoader) }
       }
     }
   }
@@ -42,7 +49,7 @@ object DevClassLoader {
 
   private var needNewClassLoader = false  // Only reload on new request
   private var lastLogAt          = 0L     // Avoid logging too frequently
-  private val onReloads          = ArrayBuffer.empty[(ClassLoader) => Unit]
+  private var onReloads          = Seq.empty[(ClassLoader) => Unit]
 
   // In development mode, watch the directory "classes". If there's modification,
   // mark that at the next request, a new class loader should be created.
