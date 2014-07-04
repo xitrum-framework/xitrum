@@ -106,7 +106,7 @@ class Dispatcher extends SimpleChannelInboundHandler[HandlerEnv] {
     val requestMethod = if (request.getMethod == HttpMethod.HEAD) HttpMethod.GET else request.getMethod
 
     // Reload routes if needed before doing the route matching
-    if (!Config.productionMode && Config.autoreloadInDevMode) DevClassLoader.refreshIfNeeded()
+    if (!Config.productionMode && Config.autoreloadInDevMode) DevClassLoader.reloadIfNeeded()
 
     Config.routes.route(requestMethod, pathInfo) match {
       case Some((route, pathParams)) =>

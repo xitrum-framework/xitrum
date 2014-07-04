@@ -1,6 +1,7 @@
 package xitrum
 
 import java.nio.file.Paths
+import scala.collection.mutable.ArrayBuffer
 import scala.util.Properties
 import xitrum.routing.SwaggerJson
 import xitrum.util.{ClassFileLoader, FileMonitor}
@@ -16,8 +17,32 @@ object DevClassLoader {
   // (xitrum-scalate) to pickup the latest class loader in development mode
   var classLoader = new ClassFileLoader(CLASSES_DIR, getClass.getClassLoader)
 
+  def onReload(hook: () => Unit) {
+    onReloads.append(hook)
+  }
+
+  def reloadIfNeeded() {
+    CLASSES_DIR.synchronized {
+      if (needNewClassLoader) {
+        needNewClassLoader = false
+        classLoader        = new ClassFileLoader(CLASSES_DIR, getClass.getClassLoader)
+
+        // Also reload routes
+        Config.routes    = Config.loadRoutes(classLoader)
+        SwaggerJson.apis = SwaggerJson.loadApis()
+
+        onReloads.foreach(_.apply)
+      }
+    }
+  }
+
+  def load(className: String) = classLoader.loadClass(className)
+
+  //----------------------------------------------------------------------------
+
   private var needNewClassLoader = false  // Only reload on new request
   private var lastLogAt          = 0L     // Avoid logging too frequently
+  private val onReloads          = ArrayBuffer.empty[() => Unit]
 
   // In development mode, watch the directory "classes". If there's modification,
   // mark that at the next request, a new class loader should be created.
@@ -50,19 +75,4 @@ object DevClassLoader {
       }
     })
   }
-
-  def refreshIfNeeded() {
-    CLASSES_DIR.synchronized {
-      if (needNewClassLoader) {
-        classLoader        = new ClassFileLoader(CLASSES_DIR, getClass.getClassLoader)
-        needNewClassLoader = false
-
-        // Also reload routes
-        Config.routes    = Config.loadRoutes(classLoader)
-        SwaggerJson.apis = SwaggerJson.loadApis()
-      }
-    }
-  }
-
-  def load(className: String) = classLoader.loadClass(className)
 }
