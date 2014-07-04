@@ -1,9 +1,7 @@
 package xitrum.handler.inbound
 
 import java.io.File
-import java.nio.file.Paths
 import scala.collection.mutable.{Map => MMap}
-import scala.util.Properties
 
 import io.netty.channel._
 import io.netty.handler.codec.http._
@@ -14,14 +12,12 @@ import HttpVersion._
 import akka.actor.{Actor, Props}
 import com.esotericsoftware.reflectasm.ConstructorAccess
 
-import xitrum.{Action, ActorAction, FutureAction, Config, Log}
+import xitrum.{Action, ActorAction, DevClassLoader, FutureAction, Config, Log}
 import xitrum.etag.NotModified
 import xitrum.handler.{HandlerEnv, NoRealPipelining}
 import xitrum.handler.outbound.XSendFile
-import xitrum.routing.SwaggerJson
 import xitrum.scope.request.PathInfo
 import xitrum.sockjs.SockJsPrefix
-import xitrum.util.{ClassFileLoader, FileMonitor}
 
 private class ReloadableDispatcher {
   private val CLASS_OF_ACTOR         = classOf[Actor]  // Can't be ActorAction, to support WebSocketAction and SockJsAction
@@ -65,7 +61,7 @@ object Dispatcher {
     if (Config.productionMode || !Config.autoreloadInDevMode)
       prodDispatcher.dispatch(actionClass, handlerEnv)
     else
-      devDispatch(devClassLoader, actionClass, handlerEnv)
+      devDispatch(actionClass, handlerEnv)
   }
 
   /** Use Class#newInstance for development mode, ConstructorAccess for production mode. */
@@ -78,72 +74,14 @@ object Dispatcher {
 
   //----------------------------------------------------------------------------
 
-  val DEVELOPMENT_MODE_CLASSES_DIR = {
-    val withPatch    = Properties.versionNumberString              // Ex: "2.11.1"
-    val withoutPatch = withPatch.split('.').take(2).mkString(".")  // Ex: "2.11"
-    s"target/scala-$withoutPatch/classes"
-  }
-
-  // "public" because this can be used by, for example, Scalate template engine
-  // (xitrum-scalate) to pickup the latest class loader in development mode
-  var devClassLoader = new ClassFileLoader(DEVELOPMENT_MODE_CLASSES_DIR, getClass.getClassLoader)
-
-  private var devNeedNewClassLoader = false  // Only reload on new request
-  private var devLastLogAt          = 0L     // Avoid logging too frequently
-
-  // In development mode, watch the directory "classes". If there's modification,
-  // mark that at the next request, a new class loader should be created.
-  if (!Config.productionMode && Config.autoreloadInDevMode) devMonitorClassesDir()
-
-  private def devMonitorClassesDir() {
-    val classesDir = Paths.get(DEVELOPMENT_MODE_CLASSES_DIR).toAbsolutePath
-    FileMonitor.monitorRecursive(FileMonitor.MODIFY, classesDir, { path =>
-      DEVELOPMENT_MODE_CLASSES_DIR.synchronized {
-        // Do this not only for .class files, because file change events may
-        // sometimes be skipped!
-        devNeedNewClassLoader = true
-
-        // Avoid logging too frequently
-        val now = System.currentTimeMillis()
-        val dt  = now - devLastLogAt
-        if (dt > 4000) {
-          Log.info(s"$DEVELOPMENT_MODE_CLASSES_DIR changed; reload classes and routes on next request")
-          devLastLogAt = now
-        }
-
-        // https://github.com/lloydmeta/schwatcher
-        // Callbacks that are registered with recursive=true are not
-        // persistently-recursive. That is, they do not propagate to new files
-        // or folders created/deleted after registration. Currently, the plan is
-        // to have developers handle this themselves in the callback functions.
-        FileMonitor.unmonitorRecursive(FileMonitor.MODIFY, classesDir)
-
-        if (Config.autoreloadInDevMode) devMonitorClassesDir()
-      }
-    })
-  }
-
-  def devRenewClassLoaderAndRoutesIfNeeded() {
-    DEVELOPMENT_MODE_CLASSES_DIR.synchronized {
-      if (devNeedNewClassLoader) {
-        devClassLoader        = new ClassFileLoader(DEVELOPMENT_MODE_CLASSES_DIR, getClass.getClassLoader)
-        devNeedNewClassLoader = false
-
-        // Also reload routes
-        Config.routes    = Config.loadRoutes(devClassLoader)
-        SwaggerJson.apis = SwaggerJson.loadApis()
-      }
-    }
-  }
-
-  private def devDispatch(classLoader: ClassLoader, actionClass: Class[_], handlerEnv: HandlerEnv) {
+  private def devDispatch(actionClass: Class[_], handlerEnv: HandlerEnv) {
     // Our main purpose
-    val reloadedActionClass = classLoader.loadClass(actionClass.getName)
+    val reloadedActionClass = DevClassLoader.load(actionClass.getName)
 
     // In development mode, when .class files change, we can't reuse
     // ReloadableDispatcher instance because of the way it's written.
     // Instead, we must also reload it using a new class loader.
-    val reloadableDispatcherClass    = classLoader.loadClass(classOf[ReloadableDispatcher].getName)
+    val reloadableDispatcherClass    = DevClassLoader.load(classOf[ReloadableDispatcher].getName)
     val reloadableDispatcherInstance = reloadableDispatcherClass.newInstance()
     val reloadableDispatcherMethod   = reloadableDispatcherClass.getMethod("dispatch", classOf[Class[_]], classOf[HandlerEnv])
     reloadableDispatcherMethod.invoke(reloadableDispatcherInstance, reloadedActionClass, handlerEnv)
@@ -168,7 +106,7 @@ class Dispatcher extends SimpleChannelInboundHandler[HandlerEnv] {
     val requestMethod = if (request.getMethod == HttpMethod.HEAD) HttpMethod.GET else request.getMethod
 
     // Reload routes if needed before doing the route matching
-    if (!Config.productionMode && Config.autoreloadInDevMode) Dispatcher.devRenewClassLoaderAndRoutesIfNeeded()
+    if (!Config.productionMode && Config.autoreloadInDevMode) DevClassLoader.refreshIfNeeded()
 
     Config.routes.route(requestMethod, pathInfo) match {
       case Some((route, pathParams)) =>

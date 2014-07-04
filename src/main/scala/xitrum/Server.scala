@@ -69,7 +69,7 @@ object Server {
     if (Config.productionMode)
       Log.info("Xitrum started in production mode")
     else
-      Log.info(s"Xitrum started in development mode; routes and classes in directory ${Dispatcher.DEVELOPMENT_MODE_CLASSES_DIR} will be reloaded")
+      Log.info(s"Xitrum started in development mode; routes and classes in directory ${DevClassLoader.CLASSES_DIR} will be reloaded")
 
     // This is a good timing to warn
     Config.warnOnDefaultSecureKey()
