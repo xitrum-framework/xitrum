@@ -25,18 +25,20 @@ import xitrum.scope.request.{FileUploadParams, Params, PathInfo}
 import xitrum.util.ByteBufUtil
 
 object Request2Env {
-  val uploadDir = Config.xitrum.tmpDir.getAbsolutePath + File.separator + "upload"
+  // This directory must exist otherwise Netty will throw:
+  // java.io.IOException: No such file or directory
+  val uploadDir = new File(Config.xitrum.tmpDir, "upload")
+  if (!uploadDir.exists) uploadDir.mkdir()
 
-  DiskAttribute.deleteOnExitTemporaryFile  = true  // Should delete file on exit (in normal exit)
-  DiskAttribute.baseDirectory              = uploadDir
+  DiskAttribute.baseDirectory  = uploadDir.getAbsolutePath
+  DiskFileUpload.baseDirectory = uploadDir.getAbsolutePath
 
-  DiskFileUpload.deleteOnExitTemporaryFile = true  // Should delete file on exit (in normal exit)
-  DiskFileUpload.baseDirectory             = uploadDir
+  // Should delete file on exit (in normal exit)
+  DiskAttribute.deleteOnExitTemporaryFile  = true
+  DiskFileUpload.deleteOnExitTemporaryFile = true
 
-  // Creating factory should be after the above for the factory to take effect of the settings
-
-  // https://github.com/xitrum-framework/xitrum/issues/77
-  // Save a field to disk if its size exceeds maxSizeInBytesOfUploadMem
+  // Save a field to disk if its size exceeds maxSizeInBytesOfUploadMem;
+  // creating factory should be after the above for the factory to take effect of the settings
   val factory = new DefaultHttpDataFactory(Config.xitrum.request.maxSizeInBytesOfUploadMem)
 }
 
