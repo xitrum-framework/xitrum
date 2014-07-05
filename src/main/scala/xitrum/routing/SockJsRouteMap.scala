@@ -69,7 +69,10 @@ class SockJsRouteMap(map: MMap[String, SockJsClassAndOptions]) {
 
   /** @param sockJsHandlerClass Normal SockJsHandler subclass or object class */
   def findPathPrefix(sockJsActorClass: Class[_ <: SockJsAction]): String = {
-    val kv = map.find { case (k, v) => v.actionClass == sockJsActorClass }
+    // Need to compare by class name because the classes may be loaded by
+    // different class loaders
+    val className = sockJsActorClass.getName
+    val kv = map.find { case (k, v) => v.actionClass.getName == className }
     kv match {
       case Some((k, v)) => "/" + k
       case None         => throw new Exception("Cannot lookup SockJS URL for class: " + sockJsActorClass)
