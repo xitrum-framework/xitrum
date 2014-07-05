@@ -52,7 +52,8 @@ class ClassFileLoader(classesDirectory: String) extends ClassLoader(getClass.get
 
   /** @return None to use the fallback ClassLoader */
   protected def classNameToFilePath(name: String): Option[String] = {
-    if (!ignorePattern.regex.isEmpty && ignorePattern.findFirstIn(name).isDefined) {
+    // Scala 2.10 only has #toString, #regex is from Scala 2.11
+    if (!ignorePattern.toString.isEmpty && ignorePattern.findFirstIn(name).isDefined) {
       None
     } else {
       val path = classesDirectory + File.separator + name.replaceAllLiterally(".", File.separator) + ".class"
