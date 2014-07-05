@@ -5,7 +5,7 @@
 * `#420 <https://github.com/xitrum-framework/xitrum/issues/420>`_
   [Autoreload in dev mode] Allow disabling autoreload
 * `#418 <https://github.com/xitrum-framework/xitrum/issues/418>`_
-  [Autoreload in dev mode] Do not reload Scala objects
+  [Autoreload in dev mode] Allow specifying classes that shouldn't be reloaded
 * `#426 <https://github.com/xitrum-framework/xitrum/issues/426>`_
   Add xitrum.Config.xitrum.tmpDir
 * `#413 <https://github.com/xitrum-framework/xitrum/issues/413>`_

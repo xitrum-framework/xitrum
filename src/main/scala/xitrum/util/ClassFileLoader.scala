@@ -44,20 +44,25 @@ class ClassFileLoader(classesDirectory: String) extends ClassLoader(getClass.get
 
   //----------------------------------------------------------------------------
 
+  /**
+   * Fallback ClassLoader used when the class file couldn't be found or when
+   * class name matches ignorePattern. Default: current ClassLoader.
+   */
   protected def fallback: ClassLoader = getClass.getClassLoader
 
+  /** @return None to use the fallback ClassLoader */
   protected def classNameToFilePath(name: String): Option[String] = {
-    if (useFallback(name)) return None
-
-    val path = classesDirectory + File.separator + name.replaceAllLiterally(".", File.separator) + ".class"
-    Some(path)
+    if (!ignorePattern.regex.isEmpty && ignorePattern.findFirstIn(name).isDefined) {
+      None
+    } else {
+      val path = classesDirectory + File.separator + name.replaceAllLiterally(".", File.separator) + ".class"
+      Some(path)
+    }
   }
 
-  protected def useFallback(name: String): Boolean = {
-    // Do not reload Scala objects:
-    // https://github.com/xitrum-framework/xitrum/issues/418
-    if (name.endsWith("$")) return true
-
-    false
-  }
+  /**
+   * Ignoring to reload classes that should be reloaded may cause exceptions like:
+   * java.lang.ClassCastException: demos.action.Article cannot be cast to demos.action.Article
+   */
+  protected def ignorePattern = "".r
 }

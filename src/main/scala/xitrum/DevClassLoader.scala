@@ -12,9 +12,12 @@ object DevClassLoader {
     s"target/scala-$withoutPatch/classes"
   }
 
+  /** Regex of names of the classes that shouldn't be reloaded. */
+  var ignorePattern = "".r
+
   // "public" because this can be used by, for example, Scalate template engine
   // (xitrum-scalate) to pickup the latest class loader in development mode
-  var classLoader = new ClassFileLoader(CLASSES_DIR)
+  var classLoader = newClassFileLoader()
 
   def onReload(hook: (ClassLoader) => Unit) {
     CLASSES_DIR.synchronized {
@@ -32,7 +35,7 @@ object DevClassLoader {
     CLASSES_DIR.synchronized {
       if (needNewClassLoader) {
         needNewClassLoader = false
-        classLoader        = new ClassFileLoader(CLASSES_DIR)
+        classLoader        = newClassFileLoader()
 
         // Also reload routes
         Config.routes    = Config.loadRoutes(classLoader)
@@ -54,6 +57,10 @@ object DevClassLoader {
   // In development mode, watch the directory "classes". If there's modification,
   // mark that at the next request, a new class loader should be created.
   if (!Config.productionMode && Config.autoreloadInDevMode) monitorClassesDir()
+
+  private def newClassFileLoader() = new ClassFileLoader(CLASSES_DIR) {
+    override def ignorePattern = DevClassLoader.ignorePattern
+  }
 
   private def monitorClassesDir() {
     val classesDir = Paths.get(CLASSES_DIR).toAbsolutePath
