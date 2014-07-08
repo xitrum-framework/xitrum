@@ -21,8 +21,6 @@ object SeriDeseri {
     KryoPool.withByteArrayOutputStream(Runtime.getRuntime.availableProcessors * 2, ki)
   }
 
-  private implicit val noTypeHints = Serialization.formats(NoTypeHints)
-
   def toBytes(any: Any): Array[Byte] = kryoPool.toBytesWithoutClass(any)
 
   def fromBytes[T](bytes: Array[Byte])(implicit m: Manifest[T]): Option[T] = {
@@ -35,6 +33,8 @@ object SeriDeseri {
   }
 
   //----------------------------------------------------------------------------
+
+  private implicit val noTypeHints = Serialization.formats(NoTypeHints)
 
   /**
    * Converts Scala object (case class, Map, Seq etc.) to JSON.
