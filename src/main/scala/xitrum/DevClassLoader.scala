@@ -1,16 +1,12 @@
 package xitrum
 
-import java.nio.file.Paths
+import java.nio.file.Path
 import scala.util.Properties
 import xitrum.routing.SwaggerJson
 import xitrum.util.{ClassFileLoader, FileMonitor}
 
 object DevClassLoader {
-  val CLASSES_DIR = {
-    val withPatch    = Properties.versionNumberString              // Ex: "2.11.1"
-    val withoutPatch = withPatch.split('.').take(2).mkString(".")  // Ex: "2.11"
-    s"target/scala-$withoutPatch/classes"
-  }
+  val CLASSES_DIRS = sclasner.Discoverer.files.filter(_.isDirectory).map(_.toPath)
 
   /** Regex of names of the classes that shouldn't be reloaded. */
   var ignorePattern = "".r
@@ -20,19 +16,19 @@ object DevClassLoader {
   var classLoader = newClassFileLoader()
 
   def onReload(hook: (ClassLoader) => Unit) {
-    CLASSES_DIR.synchronized {
+    CLASSES_DIRS.synchronized {
       onReloads = onReloads :+ hook
     }
   }
 
   def removeOnReload(hook: (ClassLoader) => Unit) {
-    CLASSES_DIR.synchronized {
+    CLASSES_DIRS.synchronized {
       onReloads = onReloads.filterNot(_ == hook)
     }
   }
 
   def reloadIfNeeded() {
-    CLASSES_DIR.synchronized {
+    CLASSES_DIRS.synchronized {
       if (needNewClassLoader) {
         needNewClassLoader = false
         classLoader        = newClassFileLoader()
@@ -56,16 +52,19 @@ object DevClassLoader {
 
   // In development mode, watch the directory "classes". If there's modification,
   // mark that at the next request, a new class loader should be created.
-  if (!Config.productionMode && Config.autoreloadInDevMode) monitorClassesDir()
+  if (!Config.productionMode && Config.autoreloadInDevMode) monitorClassesDirs()
 
-  private def newClassFileLoader() = new ClassFileLoader(CLASSES_DIR) {
+  private def newClassFileLoader() = new ClassFileLoader(CLASSES_DIRS) {
     override def ignorePattern = DevClassLoader.ignorePattern
   }
 
-  private def monitorClassesDir() {
-    val classesDir = Paths.get(CLASSES_DIR).toAbsolutePath
+  private def monitorClassesDirs() {
+    CLASSES_DIRS.foreach(monitorClassesDir)
+  }
+
+  private def monitorClassesDir(classesDir: Path) {
     FileMonitor.monitorRecursive(FileMonitor.MODIFY, classesDir, { path =>
-      CLASSES_DIR.synchronized {
+      CLASSES_DIRS.synchronized {
         // Do this not only for .class files, because file change events may
         // sometimes be skipped!
         needNewClassLoader = true
@@ -74,7 +73,7 @@ object DevClassLoader {
         val now = System.currentTimeMillis()
         val dt  = now - lastLogAt
         if (dt > 4000) {
-          Log.info(s"$CLASSES_DIR changed; reload classes and routes on next request")
+          Log.info(s"$classesDir changed; reload classes and routes on next request")
           lastLogAt = now
         }
 
@@ -85,7 +84,7 @@ object DevClassLoader {
         // to have developers handle this themselves in the callback functions.
         FileMonitor.unmonitorRecursive(FileMonitor.MODIFY, classesDir)
 
-        if (Config.autoreloadInDevMode) monitorClassesDir()
+        if (Config.autoreloadInDevMode) monitorClassesDir(classesDir)
       }
     })
   }

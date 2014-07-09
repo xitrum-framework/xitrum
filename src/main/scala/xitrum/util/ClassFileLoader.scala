@@ -1,15 +1,16 @@
 package xitrum.util
 
 import java.io.File
+import java.nio.file.Path
 import scala.collection.mutable.{Map => MMap}
 
 /**
  * This utility is useful for hot reloading .class files in a directory during
  * development.
  *
- * @param classesDirectory Example: target/scala-2.11/classes
+ * @param dirs Directories to search for .class files, example: Seq("target/scala-2.11/classes")
  */
-class ClassFileLoader(classesDirectory: String) extends ClassLoader(Thread.currentThread.getContextClassLoader) {
+class ClassFileLoader(dirs: Seq[Path]) extends ClassLoader(Thread.currentThread.getContextClassLoader) {
   // Need to cache because calling defineClass twice will cause exception
   protected val cache = MMap[String, Class[_]]()
 
@@ -28,15 +29,10 @@ class ClassFileLoader(classesDirectory: String) extends ClassLoader(Thread.curre
             fallback.loadClass(name)
 
           case Some(path) =>
-            val file = new File(path)
-            if (!file.exists) {
-              fallback.loadClass(name)
-            } else {
-              val bytes   = Loader.bytesFromFile(path)
-              val klass   = defineClass(name, bytes, 0, bytes.length)
-              cache(name) = klass
-              klass
-            }
+            val bytes   = Loader.bytesFromFile(path)
+            val klass   = defineClass(name, bytes, 0, bytes.length)
+            cache(name) = klass
+            klass
         }
     }
   }
@@ -55,8 +51,9 @@ class ClassFileLoader(classesDirectory: String) extends ClassLoader(Thread.curre
     if (!ignorePattern.toString.isEmpty && ignorePattern.findFirstIn(name).isDefined) {
       None
     } else {
-      val path = classesDirectory + File.separator + name.replaceAllLiterally(".", File.separator) + ".class"
-      Some(path)
+      val relPath = name.replaceAllLiterally(".", File.separator) + ".class"
+      val paths   = dirs.map(_ + File.separator + relPath)
+      paths.find(new File(_).exists)
     }
   }
 
