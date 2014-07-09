@@ -106,11 +106,11 @@ trait Url {
   //----------------------------------------------------------------------------
 
   def url[T <: Action : Manifest](params: (String, Any)*) = {
-    val klass = manifest[T].runtimeClass.asInstanceOf[Class[Action]]
-    val path  = Config.routes.reverseMappings(klass.getName).url(params.toMap)
+    val className = manifest[T].runtimeClass.getName
+    val path      = Config.routes.reverseMappings(className).url(params.toMap)
 
     // See xitrum.js
-    if (klass == classOf[xitrum.js])
+    if (className == classOf[xitrum.js].getName)
       path + "?" + Etag.forString(xitrum.js.body)
     else
       path

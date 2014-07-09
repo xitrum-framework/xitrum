@@ -1,3 +1,8 @@
+3.16:
+
+* `#428 <https://github.com/xitrum-framework/xitrum/issues/428>`_
+  Fix: SeriDeseri.toJson doesn't work in development mode
+
 3.15:
 
 * `#415 <https://github.com/xitrum-framework/xitrum/issues/415>`_

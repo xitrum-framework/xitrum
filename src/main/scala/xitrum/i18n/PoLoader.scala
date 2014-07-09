@@ -31,7 +31,7 @@ object PoLoader {
     if (cache.isDefinedAt(language)) return cache(language)
 
     synchronized {
-      val urlEnum = getClass.getClassLoader.getResources("i18n/" + language + ".po")
+      val urlEnum = Thread.currentThread.getContextClassLoader.getResources("i18n/" + language + ".po")
       val buffer  = ListBuffer.empty[Po]
       while (urlEnum.hasMoreElements) {
         val url    = urlEnum.nextElement
@@ -74,7 +74,7 @@ object PoLoader {
    * Watches i18n directories in classpath to reload po files automatically.
    */
   private def watch() {
-    val classPath = getClass.getClassLoader.asInstanceOf[URLClassLoader].getURLs
+    val classPath = Thread.currentThread.getContextClassLoader.asInstanceOf[URLClassLoader].getURLs
     classPath.foreach { cp =>
       val withI18n = new URL(cp, "i18n")
       val i18nPath = Paths.get(withI18n.toURI)

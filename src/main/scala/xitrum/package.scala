@@ -31,7 +31,7 @@ package object xitrum {
     // https://github.com/xitrum-framework/xitrum/issues/47
 
     // Don't use application.conf, because Akka .jar file also include it
-    val url = getClass.getClassLoader.getResource("xitrum.conf")
+    val url = Thread.currentThread.getContextClassLoader.getResource("xitrum.conf")
     if (url != null) {
       val fileName = url.getFile
       // This doesn't work on Windows, because "/" is always used in fileName

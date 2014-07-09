@@ -8,9 +8,8 @@ import scala.collection.mutable.{Map => MMap}
  * development.
  *
  * @param classesDirectory Example: target/scala-2.11/classes
- * @param fallback Class loader for loading other classes, not inside classesDirectory
  */
-class ClassFileLoader(classesDirectory: String) extends ClassLoader(getClass.getClassLoader) {
+class ClassFileLoader(classesDirectory: String) extends ClassLoader(Thread.currentThread.getContextClassLoader) {
   // Need to cache because calling defineClass twice will cause exception
   protected val cache = MMap[String, Class[_]]()
 
@@ -33,8 +32,8 @@ class ClassFileLoader(classesDirectory: String) extends ClassLoader(getClass.get
             if (!file.exists) {
               fallback.loadClass(name)
             } else {
-              val bytes = Loader.bytesFromFile(path)
-              val klass = defineClass(name, bytes, 0, bytes.length)
+              val bytes   = Loader.bytesFromFile(path)
+              val klass   = defineClass(name, bytes, 0, bytes.length)
               cache(name) = klass
               klass
             }
@@ -46,9 +45,9 @@ class ClassFileLoader(classesDirectory: String) extends ClassLoader(getClass.get
 
   /**
    * Fallback ClassLoader used when the class file couldn't be found or when
-   * class name matches ignorePattern. Default: current ClassLoader.
+   * class name matches ignorePattern. Default: Thread.currentThread.getContextClassLoader.
    */
-  protected def fallback: ClassLoader = getClass.getClassLoader
+  protected def fallback: ClassLoader = Thread.currentThread.getContextClassLoader
 
   /** @return None to use the fallback ClassLoader */
   protected def classNameToFilePath(name: String): Option[String] = {

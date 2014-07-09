@@ -54,7 +54,11 @@ object DualConfig {
   /** Used when "a.b.c" is a class name. */
   def getClassInstance[T](config: TConfig, key: String): T = {
     val className = getString(config, key)
-    val klass     = if (Config.productionMode) getClass.getClassLoader.loadClass(className) else DevClassLoader.load(className)
+    val klass     =
+      if (Config.productionMode)
+        Thread.currentThread.getContextClassLoader.loadClass(className)
+      else
+        DevClassLoader.load(className)
     klass.newInstance().asInstanceOf[T]
   }
 }
@@ -284,7 +288,7 @@ object Config {
       //
       // Unlike ConfigFactory.load(), when class loader is given but
       // "application" is not given, "application.conf" is not loaded!
-      ConfigFactory.load(getClass.getClassLoader, "application")
+      ConfigFactory.load(Thread.currentThread.getContextClassLoader, "application")
     } catch {
       case NonFatal(e) =>
         exitOnStartupError("Could not load config/application.conf. For an example, see https://github.com/xitrum-framework/xitrum-new/blob/master/config/application.conf", e)
@@ -357,7 +361,7 @@ object Config {
 
   private[this] val ROUTES_CACHE = "routes.cache"
 
-  var routes = loadRoutes(getClass.getClassLoader)
+  var routes = loadRoutes(Thread.currentThread.getContextClassLoader)
 
   /** Maybe called multiple times in development mode when reloading routes. */
   def loadRoutes(cl: ClassLoader): RouteCollection = {

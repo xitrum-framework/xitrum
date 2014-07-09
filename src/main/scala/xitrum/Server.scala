@@ -67,9 +67,9 @@ object Server {
     }
 
     if (Config.productionMode)
-      Log.info("Xitrum started in production mode")
+      Log.info(s"Xitrum $version started in production mode")
     else
-      Log.info(s"Xitrum started in development mode; routes and classes in directory ${DevClassLoader.CLASSES_DIR} will be reloaded")
+      Log.info(s"Xitrum $version started in development mode; routes and classes in directory ${DevClassLoader.CLASSES_DIR} will be reloaded")
 
     // This is a good timing to warn
     Config.warnOnDefaultSecureKey()
@@ -84,7 +84,7 @@ object Server {
     if (!configDir.exists) return
 
     // Check if config directory is already in classpath
-    val cl     = getClass.getClassLoader
+    val cl     = Thread.currentThread.getContextClassLoader
     val appUrl = cl.getResource("application.conf")
     if (appUrl != null) return
 

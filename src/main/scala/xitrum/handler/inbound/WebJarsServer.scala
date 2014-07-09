@@ -44,7 +44,7 @@ class WebJarsServer extends SimpleChannelInboundHandler[HandlerEnv] {
         val resourcePath = "META-INF/resources" + pathInfo
 
         // Check resource existence, null means the resource does not exist
-        val is = getClass.getClassLoader.getResourceAsStream(resourcePath)
+        val is = Thread.currentThread.getContextClassLoader.getResourceAsStream(resourcePath)
         if (is == null) {
           // Not found, this may be dynamic path (action)
           ctx.fireChannelRead(env)

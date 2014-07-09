@@ -60,7 +60,7 @@ object Loader {
    * @param path Relative to one of the elements in classpath, without leading "/"
    */
   def bytesFromClasspath(path: String): Array[Byte] = {
-    val is = getClass.getClassLoader.getResourceAsStream(path)
+    val is = Thread.currentThread.getContextClassLoader.getResourceAsStream(path)
     bytesFromInputStream(is)
   }
 
@@ -90,7 +90,7 @@ object Loader {
    */
   def propertiesFromClasspath(path: String): Properties = {
     // http://www.javaworld.com/javaworld/javaqa/2003-08/01-qa-0808-property.html?page=2
-    val is  = getClass.getClassLoader.getResourceAsStream(path)
+    val is  = Thread.currentThread.getContextClassLoader.getResourceAsStream(path)
     val ret = new Properties
     ret.load(is)
     is.close()
