@@ -4,7 +4,7 @@
   Fix: SeriDeseri.{fromJson, toJson} doesn't work in dev mode
 * `#416 <https://github.com/xitrum-framework/xitrum/issues/416>`_
   [Autoreload in dev mode] Autoreload all directories in classpath
-  (with this improvement, Xitrum can also autoreloads dependency modules in
+  (with this improvement, Xitrum can autoreload dependency modules in
   multimodule SBT projects)
 
 3.15:
