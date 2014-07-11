@@ -438,10 +438,10 @@
       var datasetByDate = {};
       return function(registryJson, key){
         var gauges            = registryJson.gauges || {},
-            lastExecTimeGauge = gauges["xitrum.package.anon.lastExecutionTime"].value;
+            lastExecTimeGauge = gauges["xitrum.anon.lastExecutionTime"].value;
 
         lastExecTimeGauge.forEach(function(obj){
-          if (obj["_1"] === key.replace("xitrum.package.anon.", "")) {
+          if (obj["_1"] === key.replace("xitrum.anon.", "")) {
             var keyDate = new Date(obj["_2"][0]).getTime();
             if (!datasetByDate[key]) datasetByDate[keyDate] = {date: new Date(obj["_2"][0]), ms:obj["_2"][1]};
           }
