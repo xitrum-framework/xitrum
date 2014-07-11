@@ -6,6 +6,8 @@
   [Autoreload in dev mode] Autoreload all directories in classpath
   (with this improvement, Xitrum can autoreload dependency modules in
   multimodule SBT projects)
+* `#430 <https://github.com/xitrum-framework/xitrum/issues/430>`_
+  Fix: JS error at metrics page of indiviual actions
 
 3.15:
 
