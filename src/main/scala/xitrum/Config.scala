@@ -274,13 +274,6 @@ object Config {
    */
   val productionMode = System.getProperty("xitrum.mode") == "production"
 
-  /**
-   * true by default. Set to false (typically at your program's boot) if you
-   * want to disable class autoreload feature in development mode. This is only
-   * neccessary in very special cases if you have problem with autoreload.
-   */
-  var autoreloadInDevMode = true
-
   /** This represents application.conf. */
   val application: TConfig = {
     try {

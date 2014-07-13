@@ -6,7 +6,15 @@ import xitrum.routing.SwaggerJson
 import xitrum.util.{ClassFileLoader, FileMonitor}
 
 object DevClassLoader {
-  val CLASSES_DIRS = sclasner.Discoverer.files.filter(_.isDirectory).map(_.toPath)
+  /** .class files this these directories will be reloaded. */
+  private val CLASSES_DIRS = sclasner.Discoverer.files.filter(_.isDirectory).map(_.toPath)
+
+  /**
+   * true by default. Set to false (typically at your program's boot) if you
+   * want to disable class autoreload feature in development mode. This is only
+   * neccessary in very special cases if you have problem with autoreload.
+   */
+  var enabled = true
 
   /** Regex of names of the classes that shouldn't be reloaded. */
   var ignorePattern = "".r
@@ -21,13 +29,15 @@ object DevClassLoader {
     }
   }
 
-  def removeOnReload(hook: (ClassLoader) => Unit) {
+  def removeReloadHook(hook: ClassLoader => Unit) {
     CLASSES_DIRS.synchronized {
       onReloads = onReloads.filterNot(_ == hook)
     }
   }
 
   def reloadIfNeeded() {
+    if (Config.productionMode || !enabled) return
+
     CLASSES_DIRS.synchronized {
       if (needNewClassLoader) {
         needNewClassLoader = false
@@ -42,6 +52,15 @@ object DevClassLoader {
     }
   }
 
+  def logInDevMode() {
+    if (Config.productionMode || !enabled) return
+
+    if (ignorePattern.toString.isEmpty)
+      Log.info(s"Routes and classes in directories $CLASSES_DIRS will be reloaded")
+    else
+      Log.info(s"Routes and classes in directories $CLASSES_DIRS will be reloaded; ignore classes: $ignorePattern")
+  }
+
   def load(className: String) = classLoader.loadClass(className)
 
   //----------------------------------------------------------------------------
@@ -52,7 +71,7 @@ object DevClassLoader {
 
   // In development mode, watch the directory "classes". If there's modification,
   // mark that at the next request, a new class loader should be created.
-  if (!Config.productionMode && Config.autoreloadInDevMode) monitorClassesDirs()
+  if (!Config.productionMode && enabled) monitorClassesDirs()
 
   private def newClassFileLoader() = new ClassFileLoader(CLASSES_DIRS) {
     override def ignorePattern = DevClassLoader.ignorePattern
@@ -84,7 +103,7 @@ object DevClassLoader {
         // to have developers handle this themselves in the callback functions.
         FileMonitor.unmonitorRecursive(FileMonitor.MODIFY, classesDir)
 
-        if (Config.autoreloadInDevMode) monitorClassesDir(classesDir)
+        if (enabled) monitorClassesDir(classesDir)
       }
     })
   }

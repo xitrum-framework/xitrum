@@ -1,3 +1,8 @@
+3.17:
+
+* `#431 <https://github.com/xitrum-framework/xitrum/issues/431>`_
+  [Autoreload in dev mode] Rename xitrum.Config.autoreloadInDevMode to DevClassLoader.enabled
+
 3.16:
 
 * `#428 <https://github.com/xitrum-framework/xitrum/issues/428>`_

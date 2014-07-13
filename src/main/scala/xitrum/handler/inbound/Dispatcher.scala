@@ -58,7 +58,7 @@ object Dispatcher {
   private val prodDispatcher = new ReloadableDispatcher
 
   def dispatch(actionClass: Class[_ <: Action], handlerEnv: HandlerEnv) {
-    if (Config.productionMode || !Config.autoreloadInDevMode)
+    if (Config.productionMode || !DevClassLoader.enabled)
       prodDispatcher.dispatch(actionClass, handlerEnv)
     else
       devDispatch(actionClass, handlerEnv)
@@ -66,7 +66,7 @@ object Dispatcher {
 
   /** Use Class#newInstance for development mode, ConstructorAccess for production mode. */
   def newAction(actionClass: Class[_ <: Action]): Action = {
-    if (Config.productionMode || !Config.autoreloadInDevMode)
+    if (Config.productionMode || !DevClassLoader.enabled)
       ConstructorAccess.get(actionClass).newInstance()
     else
       actionClass.newInstance()
@@ -106,7 +106,7 @@ class Dispatcher extends SimpleChannelInboundHandler[HandlerEnv] {
     val requestMethod = if (request.getMethod == HttpMethod.HEAD) HttpMethod.GET else request.getMethod
 
     // Reload routes if needed before doing the route matching
-    if (!Config.productionMode && Config.autoreloadInDevMode) DevClassLoader.reloadIfNeeded()
+    DevClassLoader.reloadIfNeeded()
 
     Config.routes.route(requestMethod, pathInfo) match {
       case Some((route, pathParams)) =>
