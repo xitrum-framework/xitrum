@@ -53,9 +53,11 @@ object DevClassLoader {
   }
 
   def logInDevMode() {
-    if (Config.productionMode || !enabled) return
+    if (Config.productionMode) return
 
-    if (ignorePattern.toString.isEmpty)
+    if (!enabled)
+      Log.info("Routes and classes reloading is disabled")
+    else if (ignorePattern.toString.isEmpty)
       Log.info(s"Routes and classes in directories $CLASSES_DIRS will be reloaded")
     else
       Log.info(s"Routes and classes in directories $CLASSES_DIRS will be reloaded; ignore classes: $ignorePattern")
