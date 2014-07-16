@@ -75,20 +75,29 @@ trait RequestEnv extends ParamAccess {
     remoteIp
   }
 
-  // Below are lazy because they are not always accessed by framwork/application
+  // The below are lazy because they are not always accessed by framwork/application
   // (to save calculation time) or the things they depend on are null when this
   // instance is created
 
-  // Shortcuts to handlerEnv for easy access for app developers
+  // Shortcuts to handlerEnv for easy access for app developers;
+  // comments are copied from HandlerEnv.scala
   lazy val channel        = handlerEnv.channel
   lazy val request        = handlerEnv.request
   lazy val response       = handlerEnv.response
-  lazy val queryParams    = handlerEnv.queryParams
+  /** Params after the question mark of the URL. Ex: /search?q=xitrum */
   lazy val bodyTextParams = handlerEnv.bodyTextParams
-  lazy val pathParams     = handlerEnv.pathParams
-  lazy val textParams     = handlerEnv.textParams
-  lazy val urlParams      = handlerEnv.urlParams
   lazy val bodyFileParams = handlerEnv.bodyFileParams
+  /** Params embedded in the path. Ex: /articles/:id */
+  lazy val pathParams     = handlerEnv.pathParams
+  /** Params after the question mark of the URL. Ex: /search?q=xitrum */
+  lazy val queryParams    = handlerEnv.queryParams
+  /** The merge of queryParams and pathParams, things that appear in the request URL. */
+  lazy val urlParams      = handlerEnv.urlParams
+  /**
+   * The merge of all text params (queryParams, bodyParams, and pathParams),
+   * as contrast to file upload (bodyFileParams).
+   */
+  lazy val textParams     = handlerEnv.textParams
 
   lazy val at = new At
 
