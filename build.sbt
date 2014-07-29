@@ -126,7 +126,7 @@ libraryDependencies += "org.webjars" % "sockjs-client" % "0.3.4"
 
 libraryDependencies += "org.webjars" % "swagger-ui" % "2.0.18"
 
-libraryDependencies += "org.webjars" % "d3js" % "3.4.8"
+libraryDependencies += "org.webjars" % "d3js" % "3.4.11"
 
 // For test --------------------------------------------------------------------
 

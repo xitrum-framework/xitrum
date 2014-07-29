@@ -4,6 +4,8 @@
   [Autoreload in dev mode] Rename xitrum.Config.autoreloadInDevMode to DevClassLoader.enabled
 * `#432 <https://github.com/xitrum-framework/xitrum/issues/432>`_
   Update Swagger UI from 2.0.17 to 2.0.18
+* `#433 <https://github.com/xitrum-framework/xitrum/issues/433>`_
+  Update D3.js from 3.4.8 to 3.4.11
 
 3.16:
 
