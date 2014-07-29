@@ -86,26 +86,30 @@ object DevClassLoader {
   private def monitorClassesDir(classesDir: Path) {
     FileMonitor.monitorRecursive(FileMonitor.MODIFY, classesDir, { path =>
       CLASSES_DIRS.synchronized {
-        // Do this not only for .class files, because file change events may
-        // sometimes be skipped!
-        needNewClassLoader = true
+        if (enabled) {
+          // Do this not only for .class files, because file change events may
+          // sometimes be skipped!
+          needNewClassLoader = true
 
-        // Avoid logging too frequently
-        val now = System.currentTimeMillis()
-        val dt  = now - lastLogAt
-        if (dt > 4000) {
-          Log.info(s"$classesDir changed; reload classes and routes on next request")
-          lastLogAt = now
+          // Avoid logging too frequently
+          val now = System.currentTimeMillis()
+          val dt  = now - lastLogAt
+          if (dt > 4000) {
+            Log.info(s"$classesDir changed; reload classes and routes on next request")
+            lastLogAt = now
+          }
+
+          // https://github.com/lloydmeta/schwatcher
+          // Callbacks that are registered with recursive=true are not
+          // persistently-recursive. That is, they do not propagate to new files
+          // or folders created/deleted after registration. Currently, the plan is
+          // to have developers handle this themselves in the callback functions.
+          FileMonitor.unmonitorRecursive(FileMonitor.MODIFY, classesDir)
+          monitorClassesDir(classesDir)
+        } else {
+          needNewClassLoader = false
+          FileMonitor.unmonitorRecursive(FileMonitor.MODIFY, classesDir)
         }
-
-        // https://github.com/lloydmeta/schwatcher
-        // Callbacks that are registered with recursive=true are not
-        // persistently-recursive. That is, they do not propagate to new files
-        // or folders created/deleted after registration. Currently, the plan is
-        // to have developers handle this themselves in the callback functions.
-        FileMonitor.unmonitorRecursive(FileMonitor.MODIFY, classesDir)
-
-        if (enabled) monitorClassesDir(classesDir)
       }
     })
   }
