@@ -1,7 +1,8 @@
 package xitrum.validator
 
 object Email extends Validator[String] {
-  private val PATTERN = """(?i)^[A-Z0-9._%+-]+@[A-Z0-9.-]+\.[A-Z]{2,4}$""".r
+  // http://www.w3.org/TR/html-markup/input.email.html
+  private val PATTERN = """^[a-zA-Z0-9.!#$%&’*+/=?^_`{|}~-]+@[a-zA-Z0-9-]+(?:\.[a-zA-Z0-9-]+)*$""".r
 
   def check(value: String) =
     PATTERN.findFirstIn(value).isDefined
