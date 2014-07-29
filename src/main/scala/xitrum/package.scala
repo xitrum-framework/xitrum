@@ -34,8 +34,8 @@ package object xitrum {
     val url = Thread.currentThread.getContextClassLoader.getResource("xitrum.conf")
     if (url != null) {
       val fileName = url.getFile
-      // This doesn't work on Windows, because "/" is always used in fileName
-      // fileName.replace(File.separator + "config" + File.separator + "xitrum.conf", "")
+      // Use "/" instead of File.separator because "/" is always used in fileName,
+      // even on Windows
       fileName.replace("/config/xitrum.conf", "")
     } else {
       // Fallback to current working directory
