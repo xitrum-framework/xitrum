@@ -39,7 +39,7 @@ class SockJsRouteMap(map: MMap[String, SockJsClassAndOptions]) {
         val wmax2 = if (sockJsClassAndOptions.websocket) wmax else "websocket: false,".length
         (pmax2, hmax2, wmax2)
       }
-    val logFormat = "%-" + pathPrefixMaxLength + "s  %-" + handlerClassNameMaxLength + "s  %-" + websocketOptionMaxLength + "s %s"
+    val logFormat = "%-" + (pathPrefixMaxLength + 1) + "s  %-" + handlerClassNameMaxLength + "s  %-" + websocketOptionMaxLength + "s %s"
 
     val strings = map.map { case (pathPrefix, sockJsClassAndOptions) =>
       logFormat.format(
