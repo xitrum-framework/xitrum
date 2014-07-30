@@ -43,7 +43,7 @@ class SockJsRouteMap(map: MMap[String, SockJsClassAndOptions]) {
 
     val strings = map.map { case (pathPrefix, sockJsClassAndOptions) =>
       logFormat.format(
-        pathPrefix,
+        "/" + pathPrefix,
         sockJsClassAndOptions.actionClass.getName,
         "websocket: " + sockJsClassAndOptions.websocket + ",",
         "cookie_needed: " + sockJsClassAndOptions.cookieNeeded
