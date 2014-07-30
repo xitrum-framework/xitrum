@@ -212,8 +212,9 @@ class RouteCollection(
     logRoutes(false)
     sockJsRouteMap.logRoutes(false)
     logErrorRoutes()
-    sockJsRouteMap.logRoutes(true)
+
     logRoutes(true)
+    sockJsRouteMap.logRoutes(true)
   }
 
   /** @param xitrumRoutes true: log only Xitrum routes, false: log only app routes */
@@ -225,9 +226,25 @@ class RouteCollection(
     var others = ArrayBuffer.empty[(String, String, String)]
     val lasts  = ArrayBuffer.empty[(String, String, String)]
 
-    for (r <- allFirsts(Some(xitrumRoutes))) firsts.append((r.httpMethod.toString, RouteCompiler.decompile(r.compiledPattern), targetWithCache(r)))
-    for (r <- allOthers(Some(xitrumRoutes))) others.append((r.httpMethod.toString, RouteCompiler.decompile(r.compiledPattern), targetWithCache(r)))
-    for (r <- allLasts (Some(xitrumRoutes))) lasts .append((r.httpMethod.toString, RouteCompiler.decompile(r.compiledPattern), targetWithCache(r)))
+    val (rFirsts, rOthers,rLasts) = if (xitrumRoutes) {
+      // Filter out routes created for SockJS to avoid noisy log
+      // (they are logged separately by sockJsRouteMap.logRoutes)
+      (
+        allFirsts(Some(xitrumRoutes)).filter(!_.klass.getName.startsWith("xitrum.sockjs")),
+        allOthers(Some(xitrumRoutes)).filter(!_.klass.getName.startsWith("xitrum.sockjs")),
+        allLasts (Some(xitrumRoutes)).filter(!_.klass.getName.startsWith("xitrum.sockjs"))
+      )
+    } else {
+      (
+        allFirsts(Some(xitrumRoutes)),
+        allOthers(Some(xitrumRoutes)),
+        allLasts (Some(xitrumRoutes))
+      )
+    }
+
+    for (r <- rFirsts) firsts.append((r.httpMethod.toString, RouteCompiler.decompile(r.compiledPattern), targetWithCache(r)))
+    for (r <- rOthers) others.append((r.httpMethod.toString, RouteCompiler.decompile(r.compiledPattern), targetWithCache(r)))
+    for (r <- rLasts)  lasts .append((r.httpMethod.toString, RouteCompiler.decompile(r.compiledPattern), targetWithCache(r)))
 
     // Sort by pattern
     var all = firsts ++ others.sortBy(_._2) ++ lasts
