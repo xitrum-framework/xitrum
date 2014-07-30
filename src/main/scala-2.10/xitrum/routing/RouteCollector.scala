@@ -43,7 +43,7 @@ class RouteCollector(cachedFileName: String) {
       // The caller should see that the Xitrum version is invalid and act properly
       acc
     } else {
-      val ka = actionTreeBuilder.getConcreteActionsAndAnnotations(cl)
+      val ka = actionTreeBuilder.getConcreteActionsAndAnnotations
       ka.foreach { case (klass, annotations) =>
         acc = processAnnotations(acc, klass, annotations)
       }
@@ -164,6 +164,7 @@ class RouteCollector(cachedFileName: String) {
     if (pathPrefix == null) {
       sockJsMap
     } else {
+      val cl               = Thread.currentThread.getContextClassLoader
       val sockJsActorClass = cl.loadClass(className).asInstanceOf[Class[SockJsAction]]
       val noWebSocket      = annotations.sockJsNoWebSocket.isDefined
       var cookieNeeded     = Config.xitrum.response.sockJsCookieNeeded
@@ -292,6 +293,7 @@ class RouteCollector(cachedFileName: String) {
             builder.setCharAt("xitrum.annotation.Swagger".length, '$')
 
             // Ex: xitrum.annotation.Swagger$StringForm
+            val cl            = Thread.currentThread.getContextClassLoader
             val javaClassName = builder.toString
             val klass         = cl.loadClass(javaClassName)
             val constructor   = klass.getConstructor(classOf[String], classOf[String])
