@@ -65,8 +65,6 @@ object Server {
     else
       Log.info(s"Xitrum $version started in development mode")
 
-    DevClassLoader.logInDevMode()
-
     // This is a good timing to warn
     Config.warnOnDefaultSecureKey()
   }

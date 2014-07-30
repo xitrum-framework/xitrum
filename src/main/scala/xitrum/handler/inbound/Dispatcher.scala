@@ -12,30 +12,27 @@ import HttpVersion._
 import akka.actor.{Actor, Props}
 import com.esotericsoftware.reflectasm.ConstructorAccess
 
-import xitrum.{Action, ActorAction, DevClassLoader, FutureAction, Config, Log}
+import xitrum.{Action, ActorAction, FutureAction, Config, Log}
 import xitrum.etag.NotModified
 import xitrum.handler.{HandlerEnv, NoRealPipelining}
 import xitrum.handler.outbound.XSendFile
 import xitrum.scope.request.PathInfo
 import xitrum.sockjs.SockJsPrefix
 
-private class ReloadableDispatcher {
+object Dispatcher {
   private val CLASS_OF_ACTOR         = classOf[Actor]  // Can't be ActorAction, to support WebSocketAction and SockJsAction
   private val CLASS_OF_FUTURE_ACTION = classOf[FutureAction]
 
   def dispatch(actionClass: Class[_ <: Action], handlerEnv: HandlerEnv) {
-    // This method should be fast because it is run for every request
-    // => Use ReflectASM instead of normal reflection to create action instance
-
     if (CLASS_OF_ACTOR.isAssignableFrom(actionClass)) {
       val actorRef = Config.actorSystem.actorOf(Props {
-        val actor = Dispatcher.newAction(actionClass)
+        val actor = newAction(actionClass)
         setPathPrefixForSockJs(actor, handlerEnv)
         actor.asInstanceOf[Actor]
       })
       actorRef ! handlerEnv
     } else {
-      val action = Dispatcher.newAction(actionClass)
+      val action = newAction(actionClass)
       setPathPrefixForSockJs(action, handlerEnv)
       action.apply(handlerEnv)
       if (CLASS_OF_FUTURE_ACTION.isAssignableFrom(actionClass)) {
@@ -48,43 +45,15 @@ private class ReloadableDispatcher {
     }
   }
 
+  def newAction(actionClass: Class[_ <: Action]): Action =
+    // This method should be fast because it is run for every request
+    // => Use ReflectASM instead of normal reflection to create action instance.
+    // ReflectASM is included by Kryo included by Chill.
+    ConstructorAccess.get(actionClass).newInstance()
+
   private def setPathPrefixForSockJs(instance: Any, handlerEnv: HandlerEnv) {
     if (instance.isInstanceOf[SockJsPrefix])
       instance.asInstanceOf[SockJsPrefix].setPathPrefix(handlerEnv.pathInfo)
-  }
-}
-
-object Dispatcher {
-  private val prodDispatcher = new ReloadableDispatcher
-
-  def dispatch(actionClass: Class[_ <: Action], handlerEnv: HandlerEnv) {
-    if (Config.productionMode || !DevClassLoader.enabled)
-      prodDispatcher.dispatch(actionClass, handlerEnv)
-    else
-      devDispatch(actionClass, handlerEnv)
-  }
-
-  /** Use Class#newInstance for development mode, ConstructorAccess for production mode. */
-  def newAction(actionClass: Class[_ <: Action]): Action = {
-    if (Config.productionMode || !DevClassLoader.enabled)
-      ConstructorAccess.get(actionClass).newInstance()
-    else
-      actionClass.newInstance()
-  }
-
-  //----------------------------------------------------------------------------
-
-  private def devDispatch(actionClass: Class[_], handlerEnv: HandlerEnv) {
-    // Our main purpose
-    val reloadedActionClass = DevClassLoader.load(actionClass.getName)
-
-    // In development mode, when .class files change, we can't reuse
-    // ReloadableDispatcher instance because of the way it's written.
-    // Instead, we must also reload it using a new class loader.
-    val reloadableDispatcherClass    = DevClassLoader.load(classOf[ReloadableDispatcher].getName)
-    val reloadableDispatcherInstance = reloadableDispatcherClass.newInstance()
-    val reloadableDispatcherMethod   = reloadableDispatcherClass.getMethod("dispatch", classOf[Class[_]], classOf[HandlerEnv])
-    reloadableDispatcherMethod.invoke(reloadableDispatcherInstance, reloadedActionClass, handlerEnv)
   }
 }
 
@@ -104,9 +73,6 @@ class Dispatcher extends SimpleChannelInboundHandler[HandlerEnv] {
 
     // Look up GET if method is HEAD
     val requestMethod = if (request.getMethod == HttpMethod.HEAD) HttpMethod.GET else request.getMethod
-
-    // Reload routes if needed before doing the route matching
-    DevClassLoader.reloadIfNeeded()
 
     Config.routes.route(requestMethod, pathInfo) match {
       case Some((route, pathParams)) =>

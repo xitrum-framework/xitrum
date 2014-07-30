@@ -55,11 +55,7 @@ object DualConfig {
   /** Used when "a.b.c" is a class name. */
   def getClassInstance[T](config: TConfig, key: String): T = {
     val className = getString(config, key)
-    val klass     =
-      if (Config.productionMode)
-        Thread.currentThread.getContextClassLoader.loadClass(className)
-      else
-        DevClassLoader.load(className)
+    val klass     = Thread.currentThread.getContextClassLoader.loadClass(className)
     klass.newInstance().asInstanceOf[T]
   }
 }

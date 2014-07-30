@@ -8,11 +8,6 @@ import xitrum.{Action, Config, DualConfig, Log}
  * Template engines should extend this trait and implement its methods.
  * On startup, an instance of the configured template engine is created and used
  * for every rendering request. Thus it should be thread-safe.
- *
- * In development mode, template engines may use
- * xitrum.handler.inbound.Dispatcher.devClassLoader
- * every time they render. devClassLoader may be changed in development mode
- * every time the directory target/scala-<version>/classes is changed.
  */
 trait TemplateEngine {
   /**
