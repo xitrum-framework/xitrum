@@ -62,9 +62,10 @@ private case class ActionTreeBuilder(xitrumVersion: String, parent2Children: Map
    *
    * @return Concrete (non-trait) action classes and their annotations
    */
-  def getConcreteActionsAndAnnotations(cl: ClassLoader): Set[(Class[_ <: Action], ActionAnnotations)] = {
+  def getConcreteActionsAndAnnotations: Set[(Class[_ <: Action], ActionAnnotations)] = {
+    val cl              = Thread.currentThread.getContextClassLoader
     val actionClass     = cl.loadClass(classOf[Action].getName)
-    val concreteActions = getConcreteActions(cl)
+    val concreteActions = getConcreteActions
     val runtimeMirror   = universe.runtimeMirror(cl)
     val cache           = MMap.empty[Class[_ <: Action], ActionAnnotations]
 
@@ -103,14 +104,14 @@ private case class ActionTreeBuilder(xitrumVersion: String, parent2Children: Map
   // Internal name: xitrum/Action
   private def internalName2ClassName(internalName: String) = internalName.replace('/', '.')
 
-  private def getConcreteActions(cl: ClassLoader): Set[Class[_ <: Action]] = {
+  private def getConcreteActions: Set[Class[_ <: Action]] = {
     var concreteActions = Set.empty[Class[_ <: Action]]
 
     def traverseActionTree(className: String) {
       if (parent2Children.isDefinedAt(className)) {
         val children = parent2Children(className)
         children.foreach { className =>
-          val klass    = cl.loadClass(className)
+          val klass    = Thread.currentThread.getContextClassLoader.loadClass(className)
           val concrete = !klass.isInterface && !Modifier.isAbstract(klass.getModifiers)
           if (concrete) concreteActions += klass.asInstanceOf[Class[_ <: Action]]
           traverseActionTree(className)

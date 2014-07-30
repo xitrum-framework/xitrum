@@ -388,28 +388,28 @@ object Config {
 
   private[this] val ROUTES_CACHE = "routes.cache"
 
-  var routes = loadRoutes(Thread.currentThread.getContextClassLoader)
+  var routes = loadRoutes(false)
 
   /** Maybe called multiple times in development mode when reloading routes. */
-  def loadRoutes(cl: ClassLoader): RouteCollection = {
-    val ret = loadRouteCacheFileOrRecollectWithRetry(cl)
+  def loadRoutes(quiet: Boolean): RouteCollection = {
+    val ret = loadRouteCacheFileOrRecollectWithRetry(quiet, false)
     if (xitrum.metrics.isEmpty) ret.removeByPrefix("xitrum/metrics")
     ret
   }
 
-  private def loadRouteCacheFileOrRecollectWithRetry(cl: ClassLoader, retried: Boolean = false): RouteCollection = {
+  private def loadRouteCacheFileOrRecollectWithRetry(quiet: Boolean, retried: Boolean): RouteCollection = {
     try {
-      Log.info(s"Load $ROUTES_CACHE or recollect routes...")
-      val routeCollector = new RouteCollector(cl, ROUTES_CACHE)
+      if (!quiet) Log.info(s"Load $ROUTES_CACHE or recollect routes...")
+      val routeCollector = new RouteCollector(ROUTES_CACHE)
       val discoveredAcc  = routeCollector.deserializeCacheFileOrRecollect()
       if (discoveredAcc.xitrumVersion != _root_.xitrum.version.toString) {
         Log.info(s"Xitrum version changed. Delete $ROUTES_CACHE and retry...")
         val file = new File(ROUTES_CACHE)
         file.delete()
-        loadRouteCacheFileOrRecollectWithRetry(cl, true)
+        loadRouteCacheFileOrRecollectWithRetry(quiet, true)
       } else {
         val withSwagger = xitrum.swaggerApiVersion.isDefined
-        RouteCollection.fromSerializable(cl, discoveredAcc, withSwagger)
+        RouteCollection.fromSerializable(discoveredAcc, withSwagger)
       }
     } catch {
       case NonFatal(e) =>
@@ -420,7 +420,7 @@ object Config {
           Log.info(s"Could not load $ROUTES_CACHE, delete and retry...")
           val file = new File(ROUTES_CACHE)
           file.delete()
-          loadRouteCacheFileOrRecollectWithRetry(cl, true)
+          loadRouteCacheFileOrRecollectWithRetry(quiet, true)
         }
     }
   }

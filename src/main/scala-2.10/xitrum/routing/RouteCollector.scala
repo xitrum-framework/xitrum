@@ -20,7 +20,7 @@ case class DiscoveredAcc(
 )
 
 /** Scan all classes to collect routes from actions. */
-class RouteCollector(cl: ClassLoader, cachedFileName: String) {
+class RouteCollector(cachedFileName: String) {
   import ActionAnnotations._
 
   def deserializeCacheFileOrRecollect(): DiscoveredAcc = {

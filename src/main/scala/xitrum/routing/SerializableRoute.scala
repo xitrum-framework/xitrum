@@ -32,7 +32,8 @@ class SerializableRoute(
     new SerializableRoute(httpMethod, newCompiledPattern, actionClass, cacheSecs)
   }
 
-  def toRoute(cl: ClassLoader): Route = {
+  def toRoute: Route = {
+    val cl = Thread.currentThread.getContextClassLoader
     new Route(
       new HttpMethod(httpMethod), compiledPattern,
       cl.loadClass(actionClass).asInstanceOf[Class[Action]], cacheSecs

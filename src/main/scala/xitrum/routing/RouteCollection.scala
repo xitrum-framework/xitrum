@@ -11,7 +11,7 @@ import xitrum.scope.request.{Params, PathInfo}
 import xitrum.util.LocalLruCache
 
 object RouteCollection {
-  def fromSerializable(cl: ClassLoader, acc: DiscoveredAcc, withSwagger: Boolean): RouteCollection = {
+  def fromSerializable(acc: DiscoveredAcc, withSwagger: Boolean): RouteCollection = {
     val normal              = acc.normalRoutes
     val sockJsWithoutPrefix = acc.sockJsWithoutPrefixRoutes
     val sockJsMap           = acc.sockJsMap
@@ -51,13 +51,14 @@ object RouteCollection {
           className == classOf[SwaggerJson].getName || className == classOf[SwaggerUi].getName
         }
 
+    val cl = Thread.currentThread.getContextClassLoader
     new RouteCollection(
-      firstGETs             .map(_.toRoute(cl)), normal.lastGETs      .map(_.toRoute(cl)), normal.otherGETs      .map(_.toRoute(cl)),
-      normal.firstPOSTs     .map(_.toRoute(cl)), normal.lastPOSTs     .map(_.toRoute(cl)), normal.otherPOSTs     .map(_.toRoute(cl)),
-      normal.firstPUTs      .map(_.toRoute(cl)), normal.lastPUTs      .map(_.toRoute(cl)), normal.otherPUTs      .map(_.toRoute(cl)),
-      normal.firstPATCHs    .map(_.toRoute(cl)), normal.lastPATCHs    .map(_.toRoute(cl)), normal.otherPATCHs    .map(_.toRoute(cl)),
-      normal.firstDELETEs   .map(_.toRoute(cl)), normal.lastDELETEs   .map(_.toRoute(cl)), normal.otherDELETEs   .map(_.toRoute(cl)),
-      normal.firstWEBSOCKETs.map(_.toRoute(cl)), normal.lastWEBSOCKETs.map(_.toRoute(cl)), normal.otherWEBSOCKETs.map(_.toRoute(cl)),
+      firstGETs             .map(_.toRoute), normal.lastGETs      .map(_.toRoute), normal.otherGETs      .map(_.toRoute),
+      normal.firstPOSTs     .map(_.toRoute), normal.lastPOSTs     .map(_.toRoute), normal.otherPOSTs     .map(_.toRoute),
+      normal.firstPUTs      .map(_.toRoute), normal.lastPUTs      .map(_.toRoute), normal.otherPUTs      .map(_.toRoute),
+      normal.firstPATCHs    .map(_.toRoute), normal.lastPATCHs    .map(_.toRoute), normal.otherPATCHs    .map(_.toRoute),
+      normal.firstDELETEs   .map(_.toRoute), normal.lastDELETEs   .map(_.toRoute), normal.otherDELETEs   .map(_.toRoute),
+      normal.firstWEBSOCKETs.map(_.toRoute), normal.lastWEBSOCKETs.map(_.toRoute), normal.otherWEBSOCKETs.map(_.toRoute),
       new SockJsRouteMap(MMap(sockJsMap.toSeq: _*)),
       swaggerMap,
       normal.error404.map(cl.loadClass(_).asInstanceOf[Class[Action]]),

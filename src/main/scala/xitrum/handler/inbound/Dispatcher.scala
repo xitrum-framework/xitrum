@@ -16,6 +16,7 @@ import xitrum.{Action, ActorAction, FutureAction, Config, Log}
 import xitrum.etag.NotModified
 import xitrum.handler.{HandlerEnv, NoRealPipelining}
 import xitrum.handler.outbound.XSendFile
+import xitrum.routing.SwaggerJson
 import xitrum.scope.request.PathInfo
 import xitrum.sockjs.SockJsPrefix
 
@@ -73,6 +74,18 @@ class Dispatcher extends SimpleChannelInboundHandler[HandlerEnv] {
 
     // Look up GET if method is HEAD
     val requestMethod = if (request.getMethod == HttpMethod.HEAD) HttpMethod.GET else request.getMethod
+
+    // In development mode, classes may be reloaded thus routes should also be
+    // reloaded.
+    //
+    // There's no standard way to tell exactly when the classes are reloaded,
+    // so the simplest way is reloading routes at every request. This is usually
+    // acceptably fast because the routes have already been cached thus only
+    // .class files in the development directory is reloaded.
+    if (!Config.productionMode) {
+      Config.routes    = Config.loadRoutes(true)
+      SwaggerJson.apis = SwaggerJson.loadApis()
+    }
 
     Config.routes.route(requestMethod, pathInfo) match {
       case Some((route, pathParams)) =>
