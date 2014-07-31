@@ -1,7 +1,7 @@
 3.17:
 
-* `#431 <https://github.com/xitrum-framework/xitrum/issues/431>`_
-  [Autoreload in dev mode] Rename xitrum.Config.autoreloadInDevMode to DevClassLoader.enabled
+* `#434 <https://github.com/xitrum-framework/xitrum/issues/434>`_
+  [Autoreload in dev mode] Replace classloaders with DCEVM
 * `#432 <https://github.com/xitrum-framework/xitrum/issues/432>`_
   Update Swagger UI from 2.0.17 to 2.0.18
 * `#433 <https://github.com/xitrum-framework/xitrum/issues/433>`_
