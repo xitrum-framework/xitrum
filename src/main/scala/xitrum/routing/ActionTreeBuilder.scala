@@ -4,8 +4,9 @@ import java.lang.reflect.Modifier
 import scala.collection.mutable.{ArrayBuffer, Map => MMap}
 import scala.reflect.runtime.universe
 
-import xitrum.Action
+import xitrum.{Action, Config}
 import xitrum.annotation.ActionAnnotations
+import xitrum.util.ClassFileLoader
 
 /**
  * Intended for use by RouteCollector.
@@ -18,6 +19,8 @@ import xitrum.annotation.ActionAnnotations
  * concrete (non-trait, non-abstract) action classes and their annotations.
  *
  * This class is immutable because it will be serialized to routes.cache.
+ * xitrumVersion is intended to be saved in routes.cache, so that when we load
+ * routes.cache later, we can check if Xitrum version has changed.
  *
  * @param parent2Children Map to save trees; names are class names
  */
@@ -63,24 +66,34 @@ private case class ActionTreeBuilder(xitrumVersion: String, parent2Children: Map
    * @return Concrete (non-trait) action classes and their annotations
    */
   def getConcreteActionsAndAnnotations: Set[(Class[_ <: Action], ActionAnnotations)] = {
-    val cl              = Thread.currentThread.getContextClassLoader
-    val actionClass     = cl.loadClass(classOf[Action].getName)
-    val concreteActions = getConcreteActions
-    val runtimeMirror   = universe.runtimeMirror(cl)
-    val cache           = MMap.empty[Class[_ <: Action], ActionAnnotations]
+    // We can't use ASM or Javassist to get annotations, because they don't
+    // understand Scala annotations.
 
-    def getActionAccumulatedAnnotations(klass: Class[_ <: Action]): ActionAnnotations = {
-      cache.get(klass) match {
+    val concreteActions = getConcreteActions
+
+    // Below:
+    // * In development mode, we must use a new class loader, so that modified
+    //   annotations (if any) can be recollected.
+    // * We use class name instead of class, to avoid conflict between different
+    //   class loaders.
+    val cl            = if (Config.productionMode) Thread.currentThread.getContextClassLoader else new ClassFileLoader
+    val actionClass   = cl.loadClass(classOf[Action].getName)
+    val runtimeMirror = universe.runtimeMirror(cl)
+    val cache         = MMap.empty[String, ActionAnnotations]
+
+    def getActionAccumulatedAnnotations(className: String): ActionAnnotations = {
+      cache.get(className) match {
         case Some(aa) => aa
 
         case None =>
+          val klass             = cl.loadClass(className)
           val parentClasses     = Seq(klass.getSuperclass) ++ klass.getInterfaces
           val parentAnnotations = parentClasses.foldLeft(ActionAnnotations()) { case (acc, parentClass) =>
             // parentClass is null if klass is a trait/interface
             if (parentClass == null) {
               acc
             } else if (actionClass.isAssignableFrom(parentClass)) {
-              val aa = getActionAccumulatedAnnotations(parentClass.asInstanceOf[Class[_ <: Action]])
+              val aa = getActionAccumulatedAnnotations(parentClass.getName)
               acc.inherit(aa)
             } else {
               acc
@@ -90,12 +103,12 @@ private case class ActionTreeBuilder(xitrumVersion: String, parent2Children: Map
           val universeAnnotations = runtimeMirror.classSymbol(klass).asClass.annotations
           val thisAnnotationsOnly = ActionAnnotations.fromUniverse(universeAnnotations)
           val ret                 = thisAnnotationsOnly.inherit(parentAnnotations)
-          cache(klass) = ret
+          cache(className)        = ret
           ret
       }
     }
 
-    concreteActions.map { ca => (ca, getActionAccumulatedAnnotations(ca)) }
+    concreteActions.map { ca => (ca, getActionAccumulatedAnnotations(ca.getName)) }
   }
 
   //----------------------------------------------------------------------------
