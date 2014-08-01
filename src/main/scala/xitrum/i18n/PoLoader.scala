@@ -1,18 +1,17 @@
 package xitrum.i18n
 
-import java.net.{URL, URLClassLoader}
-import java.nio.file.{Files, Path, Paths}
-import scala.collection.mutable.{ListBuffer, Map => MMap}
+import java.io.File
+import scala.collection.mutable.{ArrayBuffer, Map => MMap}
 
 import io.netty.util.CharsetUtil.UTF_8
 import scaposer.{Po, Parser}
+import sclasner.Discoverer
 
 import xitrum.Log
 import xitrum.util.{FileMonitor, Loader}
 
 object PoLoader {
-  private val cache    = MMap.empty[String, Po]
-  private val watching = MMap.empty[Path, Boolean]
+  private val cache = MMap.empty[String, Po]
   watch()
 
   /**
@@ -32,10 +31,10 @@ object PoLoader {
 
     synchronized {
       val urlEnum = Thread.currentThread.getContextClassLoader.getResources("i18n/" + language + ".po")
-      val buffer  = ListBuffer.empty[Po]
-      while (urlEnum.hasMoreElements) {
-        val url    = urlEnum.nextElement
-        val is     = url.openStream
+      val buffer  = ArrayBuffer.empty[Po]
+      while (urlEnum.hasMoreElements()) {
+        val url    = urlEnum.nextElement()
+        val is     = url.openStream()
         val bytes  = Loader.bytesFromInputStream(is)
         val string = new String(bytes, UTF_8)
         Parser.parsePo(string).foreach(buffer.append(_))
@@ -74,12 +73,11 @@ object PoLoader {
    * Watches i18n directories in classpath to reload po files automatically.
    */
   private def watch() {
-    val classPath = Thread.currentThread.getContextClassLoader.asInstanceOf[URLClassLoader].getURLs
-    classPath.foreach { cp =>
-      val withI18n = new URL(cp, "i18n")
-      val i18nPath = Paths.get(withI18n.toURI)
-      if (!watching.isDefinedAt(i18nPath) && Files.isDirectory(i18nPath)) {
-        watching(i18nPath) = true
+    val searchDirs = Discoverer.files.filter(_.isDirectory)
+    searchDirs.foreach { dir =>
+      val withI18n = new File(dir, "i18n")
+      if (withI18n.exists && withI18n.isDirectory) {
+        val i18nPath = withI18n.toPath
         Log.info("Monitor po files in: " + i18nPath)
         FileMonitor.monitor(FileMonitor.MODIFY, i18nPath, { path =>
           val fileName = path.getFileName.toString

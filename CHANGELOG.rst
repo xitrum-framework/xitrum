@@ -4,6 +4,8 @@
   [Autoreload in dev mode] Replace classloaders with DCEVM
 * `#436 <https://github.com/xitrum-framework/xitrum/issues/436>`_
   Check for CSRF when request method is PATCH
+* `#439 <https://github.com/xitrum-framework/xitrum/issues/439>`_
+  Fix type cast error at PoLoader
 * `#432 <https://github.com/xitrum-framework/xitrum/issues/432>`_
   Update Swagger UI from 2.0.17 to 2.0.18
 * `#433 <https://github.com/xitrum-framework/xitrum/issues/433>`_
