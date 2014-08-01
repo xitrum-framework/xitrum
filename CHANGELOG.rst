@@ -2,6 +2,8 @@
 
 * `#434 <https://github.com/xitrum-framework/xitrum/issues/434>`_
   [Autoreload in dev mode] Replace classloaders with DCEVM
+* `#436 <https://github.com/xitrum-framework/xitrum/issues/436>`_
+  Check for CSRF when request method is PATCH
 * `#432 <https://github.com/xitrum-framework/xitrum/issues/432>`_
   Update Swagger UI from 2.0.17 to 2.0.18
 * `#433 <https://github.com/xitrum-framework/xitrum/issues/433>`_

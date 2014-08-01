@@ -82,9 +82,9 @@ trait Action extends RequestEnv
     var hit            = false
 
     try {
-      // Check for CSRF (CSRF has been checked if "postback" is true)
       if ((request.getMethod == HttpMethod.POST ||
            request.getMethod == HttpMethod.PUT ||
+           request.getMethod == HttpMethod.PATCH ||
            request.getMethod == HttpMethod.DELETE) &&
           !isInstanceOf[SkipCsrfCheck] &&
           !Csrf.isValidToken(this)) throw new InvalidAntiCsrfToken
