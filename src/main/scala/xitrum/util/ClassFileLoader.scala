@@ -32,8 +32,8 @@ class ClassFileLoader extends ClassLoader {
             Thread.currentThread.getContextClassLoader.loadClass(className)
 
           case Some(path) =>
-            val bytes   = Loader.bytesFromFile(path)
-            val klass   = defineClass(className, bytes, 0, bytes.length)
+            val bytes        = Loader.bytesFromFile(path)
+            val klass        = defineClass(className, bytes, 0, bytes.length)
             cache(className) = klass
             klass
         }

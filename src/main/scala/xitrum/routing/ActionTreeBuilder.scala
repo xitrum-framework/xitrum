@@ -72,8 +72,8 @@ private case class ActionTreeBuilder(xitrumVersion: String, parent2Children: Map
     val concreteActions = getConcreteActions
 
     // Below:
-    // * In development mode, we must use a new class loader, so that modified
-    //   annotations (if any) can be recollected.
+    // * In development mode, we must use a new throwaway class loader, so that
+    //   modified annotations (if any) can be recollected.
     // * We use class name instead of class, to avoid conflict between different
     //   class loaders.
     val cl            = if (Config.productionMode) Thread.currentThread.getContextClassLoader else new ClassFileLoader
