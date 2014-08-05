@@ -2,19 +2,26 @@ package xitrum.annotation
 
 import scala.annotation.StaticAnnotation
 
-// Put outside object Swagger so that in IDE like Eclipse, when typing Swagger.
+// Put outside object Swagger so that in IDEs like Eclipse, when typing Swagger.
 // ParamOrResponse is not shown, only appropriate things are shown
 sealed trait SwaggerArg
 
-case class Swagger(varargs: SwaggerArg*) extends StaticAnnotation
+case class Swagger(swaggerArgs: SwaggerArg*) extends StaticAnnotation
 
 /**
  * See:
+ * https://github.com/wordnik/swagger-core/tree/master/modules/swagger-annotations/src/main/java/com/wordnik/swagger/annotations
  * https://github.com/wordnik/swagger-core/wiki/API-Declaration
  * https://github.com/wordnik/swagger-core/wiki/Datatypes
  * https://github.com/wordnik/swagger-core/wiki/Parameters
  */
 object Swagger {
+  case class Listing(api: String, desc: String = "", position: Int = 0) extends SwaggerArg
+
+  case class Produces(contentTypes: String*) extends SwaggerArg
+
+  case class Consumes(contentTypes: String*) extends SwaggerArg
+
   case class Summary(summary: String) extends SwaggerArg
 
   case class Note(note: String) extends SwaggerArg

@@ -15,30 +15,27 @@ import xitrum.view.DocType
 case class ApiMethod(method: String, route: String)
 
 object SwaggerJson {
-  // See class SwaggerJsonAction.
-  // Cache result of SwaggerAction at 1st access;
-  // Can't cache header because a server may have multiple addresses
   var apis = loadApis()
 
   /** Maybe called multiple times in development mode when reloading routes. */
   def loadApis() = for {
     route <- Config.routes.all.flatten
     doc   <- docOf(route.klass)
-    json  <- route2Json(route, doc)
+    json  <- swagger2Json(route, doc)
   } yield json
 
   //----------------------------------------------------------------------------
 
   private def docOf(klass: Class[_ <: Action]): Option[Swagger] = Config.routes.swaggerMap.get(klass)
 
-  private def route2Json(route: Route, doc: Swagger): Option[JObject] = {
+  private def swagger2Json(route: Route, doc: Swagger): Option[JObject] = {
     val routePath = RouteCompiler.decompile(route.compiledPattern, true)
     val nickname  = route.klass.getSimpleName
 
-    val summary   = doc.varargs.find(_.isInstanceOf[Swagger.Summary]).asInstanceOf[Option[Swagger.Summary]].map(_.summary).getOrElse("")
-    val notes     = doc.varargs.filter(_.isInstanceOf[Swagger.Note]).asInstanceOf[Seq[Swagger.Note]].map(_.note).mkString(" ")
-    val responses = doc.varargs.filter(_.isInstanceOf[Swagger.Response]).asInstanceOf[Seq[Swagger.Response]].map(response2json)
-    val params    = doc.varargs.filterNot { arg =>
+    val summary   = doc.swaggerArgs.find(_.isInstanceOf[Swagger.Summary]).asInstanceOf[Option[Swagger.Summary]].map(_.summary).getOrElse("")
+    val notes     = doc.swaggerArgs.filter(_.isInstanceOf[Swagger.Note]).asInstanceOf[Seq[Swagger.Note]].map(_.note).mkString(" ")
+    val responses = doc.swaggerArgs.filter(_.isInstanceOf[Swagger.Response]).asInstanceOf[Seq[Swagger.Response]].map(response2json)
+    val params    = doc.swaggerArgs.filterNot { arg =>
       arg.isInstanceOf[Swagger.Summary] || arg.isInstanceOf[Swagger.Note] || arg.isInstanceOf[Swagger.Response]
     }.sortBy(
       _.toString.indexOf("Opt")  // Required params first, optional params later
@@ -114,8 +111,8 @@ object SwaggerJson {
     case method: GET       => method.paths.map(ApiMethod("GET",       _))
     case method: POST      => method.paths.map(ApiMethod("POST",      _))
     case method: PUT       => method.paths.map(ApiMethod("PUT",       _))
-    case method: DELETE    => method.paths.map(ApiMethod("DELETE",    _))
     case method: PATCH     => method.paths.map(ApiMethod("PATCH",     _))
+    case method: DELETE    => method.paths.map(ApiMethod("DELETE",    _))
     case method: SOCKJS    => method.paths.map(ApiMethod("SOCKJS",    _))
     case method: WEBSOCKET => method.paths.map(ApiMethod("WEBSOCKET", _))
     case _                 => Seq()
@@ -132,19 +129,27 @@ object SwaggerJson {
   }
 }
 
+//------------------------------------------------------------------------------
+
+/** Swagger resource listing: https://github.com/wordnik/swagger-spec/blob/master/versions/1.2.md */
 @First
-@GET("xitrum/swagger.json")
-@Swagger(
-  Swagger.Summary("JSON for Swagger Doc of this whole project"),
-  Swagger.Note("Use this route in Swagger UI to see API doc.")
-)
-class SwaggerJson extends Action {
+@GET("xitrum/swagger")
+class SwaggerApis extends Action {
+  def execute() {
+
+  }
+}
+
+/** Swagger API declaration: https://github.com/wordnik/swagger-spec/blob/master/versions/1.2.md */
+@First
+@GET("xitrum/swagger/:api")
+class SwaggerApi extends Action {
   def execute() {
     // Swagger routes are not collected if swaggerApiVersion is None
     val apiVersion = Config.xitrum.swaggerApiVersion.get
 
     // relPath may already contain baseUrl, remove it to get resourcePath
-    val relPath      = url[SwaggerJson]
+    val relPath      = url[SwaggerApis]
     val baseUrl      = Config.baseUrl
     val resourcePath = if (baseUrl.isEmpty) relPath else relPath.substring(baseUrl.length)
 
@@ -159,21 +164,30 @@ class SwaggerJson extends Action {
   }
 }
 
-/** This path is for users to easily remember: http(s)://host[:port]/xitrum/swagger */
+//------------------------------------------------------------------------------
+// Swagger UI
+
+/**
+ * Easy-to-remember path to Swagger UI:
+ * http(s)://host[:port]/xitrum/swagger
+ */
 @First
-@GET("xitrum/swagger")
+@GET("xitrum/swagger-ui")
 class SwaggerUi extends Action {
   def execute() {
     redirectTo[SwaggerUiVersioned]()
   }
 }
 
-/** The directory path should be the same with other Swagger UI files. */
+/**
+ * Not-so-easy-to-remember path to Swagger UI. The path is longer because the
+ * directory must be at the same level with other Swagger UI files.
+ */
 @First
 @GET("webjars/swagger-ui/2.0.18/index")
 class SwaggerUiVersioned extends Action {
   def execute() {
-    val swaggerJsonUrl = url[SwaggerJson]
+    val swaggerJsonUrl = url[SwaggerApis]
 
     // Need to update everytime a new Swagger UI version is released
     val html =
