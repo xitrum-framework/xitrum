@@ -9,20 +9,18 @@ import xitrum.annotation.ActionAnnotations
 import xitrum.util.ClassFileLoader
 
 /**
- * Intended for use by RouteCollector.
+ * This class is intended to be used by RouteCollector and to be serialized to
+ * routes.cache. xitrumVersion is saved in routes.cache, so that when we load
+ * routes.cache later, we can check if Xitrum version has changed.
  *
- * For each .class file, RouteCollector uses ASM's ClassReader to load it, then
- * calls "addBranches" to pass its class name, super class name, and interface names.
- * At this step, we build trees of parent -> children.
+ * For each .class file, RouteCollector calls "addBranches" to pass its class
+ * name, super class name, and interface names. At this step, we build trees of
+ * parent -> children.
  *
  * Lastly, RouteCollector calls "getConcreteActionsAndAnnotations" to get
  * concrete (non-trait, non-abstract) action classes and their annotations.
  *
- * This class is immutable because it will be serialized to routes.cache.
- * xitrumVersion is intended to be saved in routes.cache, so that when we load
- * routes.cache later, we can check if Xitrum version has changed.
- *
- * @param parent2Children Map to save trees; names are class names
+ * @param parent2Children Map to save trees; keys and values are class names
  */
 private case class ActionTreeBuilder(xitrumVersion: String, parent2Children: Map[String, Seq[String]] = Map.empty) {
   def addBranches(

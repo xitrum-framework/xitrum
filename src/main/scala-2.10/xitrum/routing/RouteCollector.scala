@@ -4,7 +4,7 @@ import scala.collection.mutable.{ArrayBuffer, Map => MMap}
 import scala.reflect.runtime.universe
 import scala.util.control.NonFatal
 
-import org.objectweb.asm.{AnnotationVisitor, ClassReader, ClassVisitor, Opcodes, Type}
+import org.objectweb.asm.ClassReader
 import sclasner.{FileEntry, Scanner}
 
 import xitrum.{Action, Config, Log, SockJsAction}
