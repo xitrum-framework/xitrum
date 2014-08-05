@@ -386,7 +386,7 @@ object Config {
 
   //----------------------------------------------------------------------------
 
-  private[this] val ROUTES_CACHE = "routes.cache"
+  private[this] val ROUTES_CACHE = "tmp/routes.cache"
 
   var routes = loadRoutes(false)
 

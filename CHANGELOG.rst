@@ -1,3 +1,8 @@
+3.18:
+
+* `#441 <https://github.com/xitrum-framework/xitrum/issues/441>`_
+  Move routes.cache to tmp/routes.cache
+
 3.17:
 
 * `#434 <https://github.com/xitrum-framework/xitrum/issues/434>`_
