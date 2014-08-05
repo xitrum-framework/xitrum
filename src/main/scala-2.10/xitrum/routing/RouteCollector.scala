@@ -1,10 +1,10 @@
 package xitrum.routing
 
+import java.io.File
 import scala.collection.mutable.{ArrayBuffer, Map => MMap}
 import scala.reflect.runtime.universe
 import scala.util.control.NonFatal
 
-import org.objectweb.asm.ClassReader
 import sclasner.{FileEntry, Scanner}
 
 import xitrum.{Action, Config, Log, SockJsAction}
@@ -20,10 +20,10 @@ case class DiscoveredAcc(
 )
 
 /** Scan all classes to collect routes from actions. */
-class RouteCollector(cachedFileName: String) {
+object RouteCollector {
   import ActionAnnotations._
 
-  def deserializeCacheFileOrRecollect(): DiscoveredAcc = {
+  def deserializeCacheFileOrRecollect(cachedFileName: String, cl: ClassLoader): DiscoveredAcc = {
     var acc = DiscoveredAcc(
       "<Invalid Xitrum version>",
       new SerializableRouteCollection,
@@ -37,13 +37,13 @@ class RouteCollector(cachedFileName: String) {
     // is for the (Swagger) annotation inheritance feature. The traits/classes
     // are then loaded to get annotations.
     val xitrumVersion     = xitrum.version.toString
-    val actionTreeBuilder = Scanner.foldLeft(cachedFileName, new ActionTreeBuilder(xitrumVersion), discovered _)
+    val actionTreeBuilder = Scanner.foldLeft(cachedFileName, new ActionTreeBuilder(xitrumVersion), discovered(cl))
 
     if (actionTreeBuilder.xitrumVersion != xitrumVersion) {
       // The caller should see that the Xitrum version is invalid and act properly
       acc
     } else {
-      val ka = actionTreeBuilder.getConcreteActionsAndAnnotations
+      val ka = actionTreeBuilder.getConcreteActionsAndAnnotations(cl)
       ka.foreach { case (klass, annotations) =>
         acc = processAnnotations(acc, klass, annotations)
       }
@@ -53,17 +53,38 @@ class RouteCollector(cachedFileName: String) {
 
   //----------------------------------------------------------------------------
 
-  private def discovered(acc: ActionTreeBuilder, entry: FileEntry): ActionTreeBuilder = {
+  private def discovered(cl: ClassLoader)(acc: ActionTreeBuilder, entry: FileEntry): ActionTreeBuilder = {
+    // At ActionTreeBuilder, we can't use ASM or Javassist to get annotations
+    // (because they don't understand Scala annotations), we have to actually
+    // classes anyway, here we guess class name from .class file name and
+    // load the class.
+
+    if (!entry.relPath.endsWith(".class")) return acc
+
+    // Optimize: Ignore Java and Scala default classes; these can be thousands
+    val relPath = if (File.separatorChar != '/') entry.relPath.replace(File.separatorChar, '/') else entry.relPath
+    val skip =
+      relPath.startsWith("java/")  ||
+      relPath.startsWith("javax/") ||
+      relPath.startsWith("scala/") ||
+      relPath.startsWith("sun/")   ||
+      relPath.startsWith("com/sun/")
+    if (skip) return acc
+
     try {
-      if (entry.relPath.endsWith(".class")) {
-        val reader = new ClassReader(entry.bytes)
-        acc.addBranches(reader.getClassName, reader.getSuperName, reader.getInterfaces)
-      } else {
-        acc
-      }
+      val withoutExt      = relPath.substring(0, relPath.length - ".class".length)
+      val className       = withoutExt.replace('/', '.')
+      val klass           = cl.loadClass(className)
+      val superclass      = klass.getSuperclass.asInstanceOf[Class[_]]
+      val superclassNameo = if (superclass == null) None else Some(superclass.getName)
+      acc.addBranches(klass.getName, superclassNameo, klass.getInterfaces.map(_.getName))
     } catch {
+      // Probably java.lang.NoClassDefFoundError: javax/servlet/http/HttpServlet
+      case e: java.lang.Error =>
+        acc
+
+      // Probably the .class file name -> class name guess was wrong
       case NonFatal(e) =>
-        Log.warn("Could not scan route for " + entry.relPath + " in " + entry.container, e)
         acc
     }
   }

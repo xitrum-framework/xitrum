@@ -19,6 +19,7 @@ import xitrum.handler.outbound.XSendFile
 import xitrum.routing.SwaggerJson
 import xitrum.scope.request.PathInfo
 import xitrum.sockjs.SockJsPrefix
+import xitrum.util.ClassFileLoader
 
 object Dispatcher {
   private val CLASS_OF_ACTOR         = classOf[Actor]  // Can't be ActorAction, to support WebSocketAction and SockJsAction
@@ -83,7 +84,8 @@ class Dispatcher extends SimpleChannelInboundHandler[HandlerEnv] {
     // acceptably fast because the routes have already been cached thus only
     // .class files in the development directory is reloaded.
     if (!Config.productionMode) {
-      Config.routes    = Config.loadRoutes(true)
+      val cl           = new ClassFileLoader
+      Config.routes    = Config.loadRoutes(cl, true)
       SwaggerJson.apis = SwaggerJson.loadApis()
     }
 

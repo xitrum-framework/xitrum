@@ -388,25 +388,24 @@ object Config {
 
   private[this] val ROUTES_CACHE = "tmp/routes.cache"
 
-  var routes = loadRoutes(false)
+  var routes = loadRoutes(Thread.currentThread.getContextClassLoader, false)
 
   /** Maybe called multiple times in development mode when reloading routes. */
-  def loadRoutes(quiet: Boolean): RouteCollection = {
-    val ret = loadRouteCacheFileOrRecollectWithRetry(quiet, false)
+  def loadRoutes(cl: ClassLoader, quiet: Boolean): RouteCollection = {
+    val ret = loadRouteCacheFileOrRecollectWithRetry(cl, quiet, false)
     if (xitrum.metrics.isEmpty) ret.removeByPrefix("xitrum/metrics")
     ret
   }
 
-  private def loadRouteCacheFileOrRecollectWithRetry(quiet: Boolean, retried: Boolean): RouteCollection = {
+  private def loadRouteCacheFileOrRecollectWithRetry(cl: ClassLoader, quiet: Boolean, retried: Boolean): RouteCollection = {
     try {
       if (!quiet) Log.info(s"Load $ROUTES_CACHE or recollect routes...")
-      val routeCollector = new RouteCollector(ROUTES_CACHE)
-      val discoveredAcc  = routeCollector.deserializeCacheFileOrRecollect()
+      val discoveredAcc = RouteCollector.deserializeCacheFileOrRecollect(ROUTES_CACHE, cl)
       if (discoveredAcc.xitrumVersion != _root_.xitrum.version.toString) {
         Log.info(s"Xitrum version changed. Delete $ROUTES_CACHE and retry...")
         val file = new File(ROUTES_CACHE)
         file.delete()
-        loadRouteCacheFileOrRecollectWithRetry(quiet, true)
+        loadRouteCacheFileOrRecollectWithRetry(cl, quiet, true)
       } else {
         val withSwagger = xitrum.swaggerApiVersion.isDefined
         RouteCollection.fromSerializable(discoveredAcc, withSwagger)
@@ -420,7 +419,7 @@ object Config {
           Log.info(s"Could not load $ROUTES_CACHE, delete and retry...")
           val file = new File(ROUTES_CACHE)
           file.delete()
-          loadRouteCacheFileOrRecollectWithRetry(quiet, true)
+          loadRouteCacheFileOrRecollectWithRetry(cl, quiet, true)
         }
     }
   }
