@@ -286,7 +286,26 @@ object RouteCollector {
           val children = scalaArg.children
 
           val child0 = children(0).toString
-          if (child0 == "xitrum.annotation.Swagger.Summary.apply") {
+          if (child0 == "xitrum.annotation.Swagger.Resource.apply") {
+            val path = children(1).productElement(0).asInstanceOf[universe.Constant].value.toString
+            val desc =
+              if (children(2).toString.startsWith("xitrum.annotation.Swagger"))
+                ""
+              else
+                children(2).productElement(0).asInstanceOf[universe.Constant].value.toString
+            val position =
+              if (children(3).toString.startsWith("xitrum.annotation.Swagger"))
+                0
+              else
+                children(3).toString.toInt
+            swaggerArgs = swaggerArgs :+ Swagger.Resource(path, desc, position)
+          } else if (child0 == "xitrum.annotation.Swagger.Produces.apply") {
+            val contentTypes = children.tail.map(_.productElement(0).asInstanceOf[universe.Constant].value.toString)
+            swaggerArgs = swaggerArgs :+ Swagger.Produces(contentTypes: _*)
+          } else if (child0 == "xitrum.annotation.Swagger.Consumes.apply") {
+            val contentTypes = children.tail.map(_.productElement(0).asInstanceOf[universe.Constant].value.toString)
+            swaggerArgs = swaggerArgs :+ Swagger.Consumes(contentTypes: _*)
+          } else if (child0 == "xitrum.annotation.Swagger.Summary.apply") {
             val summary = children(1).productElement(0).asInstanceOf[universe.Constant].value.toString
             swaggerArgs = swaggerArgs :+ Swagger.Summary(summary)
           } else if (child0 == "xitrum.annotation.Swagger.Note.apply") {

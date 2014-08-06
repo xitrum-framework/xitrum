@@ -7,40 +7,101 @@ import org.json4s.jackson.JsonMethods._
 
 import io.netty.handler.codec.http.HttpResponseStatus
 
-import xitrum.{Action, Config}
+import xitrum.{Action, FutureAction, Config}
 import xitrum.annotation.{First, DELETE, GET, PATCH, POST, PUT, SOCKJS, WEBSOCKET}
 import xitrum.annotation.{Swagger, SwaggerArg}
 import xitrum.view.DocType
 
 case class ApiMethod(method: String, route: String)
 
+/** https://github.com/wordnik/swagger-spec/blob/master/versions/1.2.md */
 object SwaggerJson {
-  var apis = loadApis()
+  val SWAGGER_VERSION = "1.2"
+  val NONAME_RESOURCE = "noname"
 
   /** Maybe called multiple times in development mode when reloading routes. */
-  def loadApis() = for {
-    route <- Config.routes.all.flatten
-    doc   <- docOf(route.klass)
-    json  <- swagger2Json(route, doc)
-  } yield json
+  var resources = groupByResource()
+
+  def groupByResource(): Map[Option[Swagger.Resource], Map[Class[_ <: Action], Swagger]] = {
+    Config.routes.swaggerMap.groupBy { case (klass, swagger) =>
+      val swaggerArgs = swagger.swaggerArgs
+      swaggerArgs.find(_.isInstanceOf[Swagger.Resource]).asInstanceOf[Option[Swagger.Resource]]
+    }
+  }
 
   //----------------------------------------------------------------------------
 
-  private def docOf(klass: Class[_ <: Action]): Option[Swagger] = Config.routes.swaggerMap.get(klass)
+  def resourcesJson(apiVersion: String): String = {
+    val apis = SwaggerJson.resources.keys.map {
+      case None =>
+        ("path" -> ("/" + NONAME_RESOURCE)) ~ ("description" -> "APIs without named resource")
 
-  private def swagger2Json(route: Route, doc: Swagger): Option[JObject] = {
+      case Some(resource) =>
+        ("path" -> ("/" + resource.path)) ~ ("description" -> resource.desc)
+    }
+
+    val json =
+      ("swaggerVersion" -> SWAGGER_VERSION) ~
+      ("apiVersion"     -> apiVersion) ~
+      ("apis"           -> apis)
+    pretty(render(json))
+  }
+
+  def resourceJson(apiVersion: String, resourcePatho: Option[String], basePath: String): Option[String] = {
+    val keyo = resourcePatho match {
+      case None =>
+        Some(None)
+
+      case Some(path) =>
+        resources.keys.find { ro => ro.isDefined && ro.get.path == path }
+    }
+
+    keyo match {
+      case None =>
+        None
+
+      case Some(key) =>
+        resources.get(key).map { swaggerMap =>
+          val json =
+            ("swaggerVersion" -> SWAGGER_VERSION) ~
+            ("apiVersion"     -> apiVersion) ~
+            ("basePath"       -> basePath) ~
+            ("apis"           -> loadApis(swaggerMap))
+          pretty(render(json))
+        }
+    }
+  }
+
+  //----------------------------------------------------------------------------
+
+  private def loadApis(swaggerMap: Map[Class[_ <: Action], Swagger]): Seq[JObject] = for {
+    route   <- Config.routes.all.flatten
+    swagger <- swaggerMap.get(route.klass)
+  } yield swagger2Json(route, swagger)
+
+  private def swagger2Json(route: Route, swagger: Swagger): JObject = {
+    val swaggerArgs = swagger.swaggerArgs
+
     val routePath = RouteCompiler.decompile(route.compiledPattern, true)
     val nickname  = route.klass.getSimpleName
 
-    val summary   = doc.swaggerArgs.find(_.isInstanceOf[Swagger.Summary]).asInstanceOf[Option[Swagger.Summary]].map(_.summary).getOrElse("")
-    val notes     = doc.swaggerArgs.filter(_.isInstanceOf[Swagger.Note]).asInstanceOf[Seq[Swagger.Note]].map(_.note).mkString(" ")
-    val responses = doc.swaggerArgs.filter(_.isInstanceOf[Swagger.Response]).asInstanceOf[Seq[Swagger.Response]].map(response2json)
-    val params    = doc.swaggerArgs.filterNot { arg =>
-      arg.isInstanceOf[Swagger.Summary] || arg.isInstanceOf[Swagger.Note] || arg.isInstanceOf[Swagger.Response]
+    val produces  = swaggerArgs.filter(_.isInstanceOf[Swagger.Produces]).asInstanceOf[Seq[Swagger.Produces]].map(_.contentTypes).flatten.distinct
+    val consumes  = swaggerArgs.filter(_.isInstanceOf[Swagger.Consumes]).asInstanceOf[Seq[Swagger.Consumes]].map(_.contentTypes).flatten.distinct
+    val summary   = swaggerArgs.find(_.isInstanceOf[Swagger.Summary]).asInstanceOf[Option[Swagger.Summary]].map(_.summary).getOrElse("")
+    val notes     = swaggerArgs.filter(_.isInstanceOf[Swagger.Note]).asInstanceOf[Seq[Swagger.Note]].map(_.note).mkString(" ")
+    val responses = swaggerArgs.filter(_.isInstanceOf[Swagger.Response]).asInstanceOf[Seq[Swagger.Response]].map(response2Json)
+
+    val params = swaggerArgs.filterNot { arg =>
+      arg.isInstanceOf[Swagger.Resource] ||
+      arg.isInstanceOf[Swagger.Produces] ||
+      arg.isInstanceOf[Swagger.Consumes] ||
+      arg.isInstanceOf[Swagger.Summary]  ||
+      arg.isInstanceOf[Swagger.Note]     ||
+      arg.isInstanceOf[Swagger.Response]
     }.sortBy(
       _.toString.indexOf("Opt")  // Required params first, optional params later
     ).map(
-      param2json
+      param2Json
     )
 
     val cacheNote  = cache(route)
@@ -58,12 +119,14 @@ object SwaggerJson {
       ("notes"            -> finalNotes) ~
       ("nickname"         -> nickname) ~
       ("parameters"       -> params.toSeq) ~
-      ("responseMessages" -> responses.toSeq))
+      ("responseMessages" -> responses.toSeq) ~
+      ("produces"         -> produces) ~
+      ("consumes"         -> consumes))
 
-    Some(("path" -> routePath) ~ ("operations" -> operations))
+    ("path" -> routePath) ~ ("operations" -> operations)
   }
 
-  private def param2json(param: SwaggerArg): JObject = {
+  private def param2Json(param: SwaggerArg): JObject = {
     // Use class name to extract paramType, valueType, and required
     // See Swagger.scala
 
@@ -102,12 +165,12 @@ object SwaggerJson {
     ("required"    -> required)
   }
 
-  private def response2json(response: Swagger.Response): JObject = {
+  private def response2Json(response: Swagger.Response): JObject = {
     ("code"    -> response.code) ~
     ("message" -> response.desc)
   }
 
-  private def annotation2method(annotation: Any): Seq[ApiMethod] = annotation match {
+  private def annotation2Method(annotation: Any): Seq[ApiMethod] = annotation match {
     case method: GET       => method.paths.map(ApiMethod("GET",       _))
     case method: POST      => method.paths.map(ApiMethod("POST",      _))
     case method: PUT       => method.paths.map(ApiMethod("PUT",       _))
@@ -134,33 +197,28 @@ object SwaggerJson {
 /** Swagger resource listing: https://github.com/wordnik/swagger-spec/blob/master/versions/1.2.md */
 @First
 @GET("xitrum/swagger")
-class SwaggerApis extends Action {
+class SwaggerResources extends FutureAction {
   def execute() {
-
+    val apiVersion = Config.xitrum.swaggerApiVersion.get
+    val json       = SwaggerJson.resourcesJson(apiVersion)
+    respondJsonText(json)
   }
 }
 
 /** Swagger API declaration: https://github.com/wordnik/swagger-spec/blob/master/versions/1.2.md */
 @First
-@GET("xitrum/swagger/:api")
-class SwaggerApi extends Action {
+@GET("xitrum/swagger/:resourcePath")
+class SwaggerResource extends FutureAction {
   def execute() {
-    // Swagger routes are not collected if swaggerApiVersion is None
-    val apiVersion = Config.xitrum.swaggerApiVersion.get
-
-    // relPath may already contain baseUrl, remove it to get resourcePath
-    val relPath      = url[SwaggerApis]
-    val baseUrl      = Config.baseUrl
-    val resourcePath = if (baseUrl.isEmpty) relPath else relPath.substring(baseUrl.length)
-
-    val header =
-      ("apiVersion"     -> apiVersion) ~
-      ("basePath"       -> absUrlPrefix) ~
-      ("swaggerVersion" -> "1.2") ~
-      ("resourcePath"   -> resourcePath)
-
-    val json = pretty(render(header ~ ("apis" -> SwaggerJson.apis)))
-    respondJsonText(json)
+    val apiVersion    = Config.xitrum.swaggerApiVersion.get
+    val resourcePath  = param("resourcePath")
+    val resourcePatho = if (resourcePath == SwaggerJson.NONAME_RESOURCE) None else Some(resourcePath)
+    SwaggerJson.resourceJson(apiVersion, resourcePatho, absUrlPrefix) match {
+      case Some(json) =>
+        respondJsonText(json)
+      case None =>
+        respond404Page()
+    }
   }
 }
 
@@ -173,7 +231,7 @@ class SwaggerApi extends Action {
  */
 @First
 @GET("xitrum/swagger-ui")
-class SwaggerUi extends Action {
+class SwaggerUi extends FutureAction {
   def execute() {
     redirectTo[SwaggerUiVersioned]()
   }
@@ -185,9 +243,9 @@ class SwaggerUi extends Action {
  */
 @First
 @GET("webjars/swagger-ui/2.0.18/index")
-class SwaggerUiVersioned extends Action {
+class SwaggerUiVersioned extends FutureAction {
   def execute() {
-    val swaggerJsonUrl = url[SwaggerApis]
+    val swaggerResourcesUrl = url[SwaggerResources]
 
     // Need to update everytime a new Swagger UI version is released
     val html =
@@ -216,12 +274,12 @@ class SwaggerUiVersioned extends Action {
   <script src='lib/swagger-oauth.js' type='text/javascript'></script>
 
   <script type="text/javascript">
-    var swaggerJsonUrl = '{swaggerJsonUrl}';
+    var swaggerResourcesUrl = '{swaggerResourcesUrl}';
 
     <xml:unparsed>
     $(function () {
       window.swaggerUi = new SwaggerUi({
-        url: swaggerJsonUrl,
+        url: swaggerResourcesUrl,
         dom_id: "swagger-ui-container",
         supportedSubmitMethods: ['get', 'post', 'put', 'delete'],
         onComplete: function(swaggerApi, swaggerUi){

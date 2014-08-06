@@ -1,5 +1,7 @@
 3.18:
 
+* `#429 <https://github.com/xitrum-framework/xitrum/issues/429>`_
+  Generate Swagger API doc listing so that codegen tool works
 * `#441 <https://github.com/xitrum-framework/xitrum/issues/441>`_
   Move routes.cache to tmp/routes.cache
 * `#442 <https://github.com/xitrum-framework/xitrum/issues/442>`_

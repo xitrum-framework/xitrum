@@ -84,9 +84,9 @@ class Dispatcher extends SimpleChannelInboundHandler[HandlerEnv] {
     // acceptably fast because the routes have already been cached thus only
     // .class files in the development directory is reloaded.
     if (!Config.productionMode) {
-      val cl           = new ClassFileLoader
-      Config.routes    = Config.loadRoutes(cl, true)
-      SwaggerJson.apis = SwaggerJson.loadApis()
+      val cl                = new ClassFileLoader
+      Config.routes         = Config.loadRoutes(cl, true)
+      SwaggerJson.resources = SwaggerJson.groupByResource()
     }
 
     Config.routes.route(requestMethod, pathInfo) match {

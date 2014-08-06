@@ -48,7 +48,7 @@ object RouteCollection {
       else
         normal.firstGETs.filterNot { r =>
           val className = r.actionClass
-          className == classOf[SwaggerJson].getName || className == classOf[SwaggerUi].getName
+          className.contains("Swagger")
         }
 
     val cl = Thread.currentThread.getContextClassLoader

@@ -8,7 +8,7 @@ import akka.cluster.StandardMetrics.{Cpu, HeapMemory}
 import io.netty.handler.codec.http.HttpResponseStatus
 import glokka.Registry
 
-import xitrum.{Action, Config, SockJsAction, SockJsText}
+import xitrum.{FutureAction, Config, SockJsAction, SockJsText}
 import xitrum.annotation.{GET, Last, SOCKJS}
 import xitrum.util.SeriDeseri
 import xitrum.view.{DocType, Js}
@@ -90,7 +90,7 @@ class MetricsPublisher extends Actor {
 }
 
 /** Javascript fragment for establish metrics JSON sockJS channel. */
-trait MetricsViewer extends Action {
+trait MetricsViewer extends FutureAction {
   def jsAddMetricsNameSpace(namespace: String = null) {
     jsAddToView(s"""
 (function (namespace) {
@@ -124,7 +124,7 @@ trait MetricsViewer extends Action {
  */
 @Last
 @GET("xitrum/metrics/viewer")
-class XitrumMetricsViewer extends Action with MetricsViewer {
+class XitrumMetricsViewer extends FutureAction with MetricsViewer {
   beforeFilter {
     val apiKey  = param("api_key")
     val correct = apiKey == MetricsManager.metrics.apiKey

@@ -154,7 +154,7 @@ $(function() {
 /** To innclude xitrum.js in your view, use: url[xitrum.js]. */
 @First
 @GET("xitrum/xitrum.js")
-class js extends Action {
+class js extends FutureAction {
   def execute() {
     setClientCacheAggressively()  // See Url#url[xitrum.js]
     respondJs(js.body)

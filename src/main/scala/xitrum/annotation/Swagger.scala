@@ -16,7 +16,7 @@ case class Swagger(swaggerArgs: SwaggerArg*) extends StaticAnnotation
  * https://github.com/wordnik/swagger-core/wiki/Parameters
  */
 object Swagger {
-  case class Listing(api: String, desc: String = "", position: Int = 0) extends SwaggerArg
+  case class Resource(path: String, desc: String = "", position: Int = 0) extends SwaggerArg
 
   case class Produces(contentTypes: String*) extends SwaggerArg
 
