@@ -37,7 +37,8 @@ object SwaggerJson {
         ("path" -> ("/" + NONAME_RESOURCE)) ~ ("description" -> "APIs without named resource")
 
       case Some(resource) =>
-        ("path" -> ("/" + resource.path)) ~ ("description" -> resource.desc)
+        val path = if (resource.path.startsWith("/")) resource.path else "/" + resource.path
+        ("path" -> path) ~ ("description" -> resource.desc)
     }
 
     val json =
@@ -47,13 +48,13 @@ object SwaggerJson {
     pretty(render(json))
   }
 
-  def resourceJson(apiVersion: String, resourcePatho: Option[String], basePath: String): Option[String] = {
+  def resourceJson(apiVersion: String, basePath: String, resourcePatho: Option[String]): Option[String] = {
     val keyo = resourcePatho match {
       case None =>
         Some(None)
 
       case Some(path) =>
-        resources.keys.find { ro => ro.isDefined && ro.get.path == path }
+        resources.keys.find { ro => ro.isDefined && (ro.get.path == path || ro.get.path == "/" + path) }
     }
 
     keyo match {
@@ -66,6 +67,7 @@ object SwaggerJson {
             ("swaggerVersion" -> SWAGGER_VERSION) ~
             ("apiVersion"     -> apiVersion) ~
             ("basePath"       -> basePath) ~
+            ("resourcePath"   -> "/resourcePath") ~
             ("apis"           -> loadApis(swaggerMap))
           pretty(render(json))
         }
@@ -207,13 +209,13 @@ class SwaggerResources extends FutureAction {
 
 /** Swagger API declaration: https://github.com/wordnik/swagger-spec/blob/master/versions/1.2.md */
 @First
-@GET("xitrum/swagger/:resourcePath")
+@GET("xitrum/swagger/:*")
 class SwaggerResource extends FutureAction {
   def execute() {
     val apiVersion    = Config.xitrum.swaggerApiVersion.get
-    val resourcePath  = param("resourcePath")
+    val resourcePath  = param("*")
     val resourcePatho = if (resourcePath == SwaggerJson.NONAME_RESOURCE) None else Some(resourcePath)
-    SwaggerJson.resourceJson(apiVersion, resourcePatho, absUrlPrefix) match {
+    SwaggerJson.resourceJson(apiVersion, absUrlPrefix, resourcePatho) match {
       case Some(json) =>
         respondJsonText(json)
       case None =>
