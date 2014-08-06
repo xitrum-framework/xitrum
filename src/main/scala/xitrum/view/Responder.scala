@@ -366,6 +366,42 @@ trait Responder extends Js with Flash with GetActionClassDefaultsToCurrentAction
 
   //----------------------------------------------------------------------------
 
+  def respond404Page() {
+    if (isAjax) {
+      response.setStatus(HttpResponseStatus.NOT_FOUND)
+      jsRespond("alert(\"" + jsEscape("Not Found") + "\")")
+    } else {
+      Config.routes.error404 match {
+        case None =>
+          XSendFile.set404Page(response, true)
+          respond()
+
+        case Some(error404) =>
+          response.setStatus(HttpResponseStatus.NOT_FOUND)
+          forwardTo(error404)
+      }
+    }
+  }
+
+  def respond500Page() {
+    if (isAjax) {
+      response.setStatus(HttpResponseStatus.INTERNAL_SERVER_ERROR)
+      jsRespond("alert(\"" + jsEscape("Internal Server Error") + "\")")
+    } else {
+      Config.routes.error500 match {
+        case None =>
+          XSendFile.set500Page(response, true)
+          respond()
+
+        case Some(error500) =>
+          response.setStatus(HttpResponseStatus.INTERNAL_SERVER_ERROR)
+          forwardTo(error500)
+      }
+    }
+  }
+
+  //----------------------------------------------------------------------------
+
   def setClientCacheAggressively() {
     NotModified.setClientCacheAggressively(response)
   }

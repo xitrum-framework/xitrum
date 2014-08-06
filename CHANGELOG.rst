@@ -2,6 +2,8 @@
 
 * `#441 <https://github.com/xitrum-framework/xitrum/issues/441>`_
   Move routes.cache to tmp/routes.cache
+* `#442 <https://github.com/xitrum-framework/xitrum/issues/442>`_
+  Add respond404Page and respond500Page
 
 3.17:
 

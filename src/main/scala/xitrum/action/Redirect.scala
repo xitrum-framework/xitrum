@@ -61,6 +61,10 @@ trait Redirect {
    */
   def forwardTo[T <: Action : Manifest]() {
     val actionClass = manifest[T].runtimeClass.asInstanceOf[Class[Action]]
+    forwardTo(actionClass)
+  }
+
+  def forwardTo(actionClass: Class[_ <:Action]) {
     forwarding = true
     Dispatcher.dispatch(actionClass, handlerEnv)
   }
