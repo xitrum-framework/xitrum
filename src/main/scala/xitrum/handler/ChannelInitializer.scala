@@ -51,7 +51,6 @@ object DefaultHttpChannelInitializer {
   lazy val xSendFile         = new XSendFile
   lazy val xSendResource     = new XSendResource
   lazy val env2Response      = new Env2Response
-  lazy val responseCacher    = new ResponseCacher
 
   def removeUnusedHandlersForWebSocket(pipeline: ChannelPipeline) {
     // WebSocket handshaker in Netty dynamically changes the pipeline like this:
@@ -84,7 +83,6 @@ object DefaultHttpChannelInitializer {
     removeHandlerIfExists(pipeline, classOf[FixiOS6SafariPOST])
     removeHandlerIfExists(pipeline, classOf[XSendFile])
     removeHandlerIfExists(pipeline, classOf[XSendResource])
-    removeHandlerIfExists(pipeline, classOf[ResponseCacher])
   }
 
   /**
@@ -139,7 +137,6 @@ class DefaultHttpChannelInitializer extends ChannelInitializer[SocketChannel] {
     p.addLast(classOf[FixiOS6SafariPOST].getName,   fixiOS6SafariPOST)
     p.addLast(classOf[XSendFile].getName,           xSendFile)
     p.addLast(classOf[XSendResource].getName,       xSendResource)
-    p.addLast(classOf[ResponseCacher].getName,      responseCacher)
   }
 }
 

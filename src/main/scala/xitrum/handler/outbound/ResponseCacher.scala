@@ -19,6 +19,18 @@ object ResponseCacher {
   //                             statusCode  headers           content
   private type CachedResponse = (Int, Array[(String, String)], Array[Byte])
 
+  def shouldCache(env: HandlerEnv): Boolean = {
+    val route    = env.route
+    val response = env.response
+
+    // route may be null when the request could not go to Dispatcher, for
+    // example when the response is served from PublicResourceServer
+    route != null &&
+    route.cacheSecs != 0 &&
+    response.getStatus == OK &&
+    !HttpHeaders.isTransferEncodingChunked(response)
+  }
+
   def cacheResponse(env: HandlerEnv) {
     val actionClass = env.route.klass
     val urlParams   = env.urlParams
@@ -27,7 +39,7 @@ object ResponseCacher {
     val cache       = Config.xitrum.cache
     if (!cache.isDefinedAt(key)) {  // Check to avoid the cost of serializing
       val response          = env.response
-      val cachedResponse    = serializeResponse(env.request, response)
+      val cachedResponse    = serializeResponse(gzipped, response)
       val cacheSecs         = env.route.cacheSecs
       val positiveCacheSecs = if (cacheSecs < 0) -cacheSecs else cacheSecs
       cache.putSecondIfAbsent(key, cachedResponse, positiveCacheSecs)
@@ -69,12 +81,12 @@ object ResponseCacher {
    *   content: Array[Byte]
    *   gzipped: Boolean, big textual content is gzipped to save memory
    */
-  private def serializeResponse(request: HttpRequest, response: FullHttpResponse): CachedResponse = {
+  private def serializeResponse(gzipAccepted: Boolean, response: FullHttpResponse): CachedResponse = {
     val status = response.getStatus.code
 
     // Should be before extracting headers, because the CONTENT_LENGTH header
     // can be updated if the content if gzipped
-    val bytes = Gzip.tryCompressBigTextualResponse(request, response, true)
+    val bytes = Gzip.tryCompressBigTextualResponse(gzipAccepted, response, true)
 
     val headers = {
       val list = response.headers.entries  // JList[JMap.Entry[String, String]], JMap.Entry is not Serializable!
@@ -111,31 +123,5 @@ object ResponseCacher {
       actionClass.getName + "/" +
       sortedMap.toString
     if (gzipped) key + "_gzipped" else key
-  }
-}
-
-@Sharable
-class ResponseCacher extends ChannelOutboundHandlerAdapter {
-  override def write(ctx: ChannelHandlerContext, msg: Object, promise: ChannelPromise) {
-    if (!msg.isInstanceOf[HandlerEnv]) {
-      ctx.write(msg, promise)
-      return
-    }
-
-    val env   = msg.asInstanceOf[HandlerEnv]
-    val route = env.route
-
-    // route may be null when the request could not go to Dispatcher, for
-    // example when the response is served from PublicResourceServer
-    if (route == null) {
-      ctx.write(env, promise)
-      return
-    }
-
-    val response = env.response
-    if (response.getStatus == OK && !HttpHeaders.isTransferEncodingChunked(response) && env.route.cacheSecs != 0)
-      ResponseCacher.cacheResponse(env)
-
-    ctx.write(env, promise)
   }
 }

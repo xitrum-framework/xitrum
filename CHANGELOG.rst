@@ -1,5 +1,7 @@
 3.18:
 
+* `#446 <https://github.com/xitrum-framework/xitrum/issues/446>`_
+  Fix bug: Action cache does not work when the response is not gzip
 * `#429 <https://github.com/xitrum-framework/xitrum/issues/429>`_
   Generate Swagger API doc listing so that codegen tool works
 * `#441 <https://github.com/xitrum-framework/xitrum/issues/441>`_

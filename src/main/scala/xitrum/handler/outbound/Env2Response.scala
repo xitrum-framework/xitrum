@@ -39,7 +39,7 @@ class Env2Response extends ChannelOutboundHandlerAdapter {
       // http://stackoverflow.com/questions/3854842/content-length-header-with-head-requests
       response.content.clear()
     else if (!tryEtag(request, response))
-      Gzip.tryCompressBigTextualResponse(request, response, false)
+      Gzip.tryCompressBigTextualResponse(Gzip.isAccepted(request), response, false)
 
     // The status may be set to NOT_MODIFIED by tryEtag above
     val notModified = response.getStatus == NOT_MODIFIED
@@ -72,6 +72,8 @@ class Env2Response extends ChannelOutboundHandlerAdapter {
       // Need to retain because response will be released when env.release() is called below
       ctx.write(response.retain(), promise)
     }
+
+    if (ResponseCacher.shouldCache(env)) ResponseCacher.cacheResponse(env)
 
     env.release()
 

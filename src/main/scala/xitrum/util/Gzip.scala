@@ -70,7 +70,7 @@ object Gzip {
    * @return Response body content as bytes
    */
   def tryCompressBigTextualResponse(
-      request:   HttpRequest,
+      gzipAccepted: Boolean,
       response:  FullHttpResponse,
       needBytes: Boolean
   ): Array[Byte] =
@@ -78,7 +78,7 @@ object Gzip {
     // See Request2Env
     val cb = response.content.asInstanceOf[CompositeByteBuf]
 
-    if (!isAccepted(request) ||
+    if (!gzipAccepted ||
         response.headers.contains(CONTENT_ENCODING) ||
         !Mime.isTextual(HttpHeaders.getHeader(response, CONTENT_TYPE)) ||
         cb.readableBytes < Config.BIG_TEXTUAL_RESPONSE_SIZE_IN_KB * 1024
