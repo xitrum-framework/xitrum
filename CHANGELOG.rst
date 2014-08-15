@@ -6,6 +6,8 @@
   Move routes.cache to tmp/routes.cache
 * `#442 <https://github.com/xitrum-framework/xitrum/issues/442>`_
   Add respond404Page and respond500Page
+* `#444 <https://github.com/xitrum-framework/xitrum/issues/444>`_
+  Update Akka from 2.3.4 to 2.3.5
 
 3.17:
 
