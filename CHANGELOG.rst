@@ -21,6 +21,8 @@
   Update Akka from 2.3.4 to 2.3.5
 * `#445 <https://github.com/xitrum-framework/xitrum/issues/445>`_
   Update Netty from 4.0.21 to 4.0.23
+* `#449 <https://github.com/xitrum-framework/xitrum/issues/449>`_
+  Update metrics-scala from 3.2.0_a2.3 to 3.2.1_a2.3
 
 3.17:
 

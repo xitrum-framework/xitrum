@@ -102,7 +102,7 @@ libraryDependencies += "org.apache.commons" % "commons-lang3" % "3.3.2"
 libraryDependencies += "tv.cntt" % "rhinocoffeescript" % "1.7.1"
 
 // For metrics
-libraryDependencies += "nl.grons" %% "metrics-scala" % "3.2.0_a2.3"
+libraryDependencies += "nl.grons" %% "metrics-scala" % "3.2.1_a2.3"
 
 // For metrics
 libraryDependencies += "com.codahale.metrics" % "metrics-json" % "3.0.2"
