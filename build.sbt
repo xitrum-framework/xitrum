@@ -54,7 +54,7 @@ resolvers += "SonatypeReleases" at "http://oss.sonatype.org/content/repositories
 libraryDependencies += "org.slf4s" %% "slf4s-api" % "1.7.7"
 
 // Netty is the core of Xitrum's HTTP(S) feature
-libraryDependencies += "io.netty" % "netty-all" % "4.0.22.Final"
+libraryDependencies += "io.netty" % "netty-all" % "4.0.23.Final"
 
 // http://netty.io/wiki/forked-tomcat-native.html
 // Include all classifiers for convenience

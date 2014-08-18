@@ -11,7 +11,7 @@
 * `#444 <https://github.com/xitrum-framework/xitrum/issues/444>`_
   Update Akka from 2.3.4 to 2.3.5
 * `#445 <https://github.com/xitrum-framework/xitrum/issues/445>`_
-  Update Netty from 4.0.21 to 4.0.22
+  Update Netty from 4.0.21 to 4.0.23
 
 3.17:
 
