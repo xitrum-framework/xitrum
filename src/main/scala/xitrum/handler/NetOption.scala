@@ -10,11 +10,10 @@ import xitrum.Config
 
 object NetOption {
   def setOptions(bootstrap: ServerBootstrap) {
-    // Backlog of 128 seems to be a sweet spot because that's OS default.
-    // But that's still not optimal.
+    // Backlog: Netty 4.0.23+ uses io.netty.util.NetUtil.SOMAXCONN for backlog by default.
     // See http://lionet.livejournal.com/42016.html and the
-    // "Tune Linux for many connections" section in the Xitrum guide
-    bootstrap.option(ChannelOption.SO_BACKLOG,   Int.box(1024))
+    // "Tune Linux for many connections" section in the Xitrum guide to know
+    // how to tune the value for io.netty.util.NetUtil.SOMAXCONN to get.
     bootstrap.option(ChannelOption.SO_REUSEADDR, Boolean.box(true))
     bootstrap.childOption(ChannelOption.TCP_NODELAY,  Boolean.box(true))
     bootstrap.childOption(ChannelOption.SO_KEEPALIVE, Boolean.box(true))
