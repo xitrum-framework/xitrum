@@ -2,10 +2,13 @@
 
 * `#446 <https://github.com/xitrum-framework/xitrum/issues/446>`_
   Fix bug: Action cache does not work when the response is not gzip
+* `#307 <https://github.com/xitrum-framework/xitrum/issues/307>`_
+  Add option edgeTriggeredEpoll to xitrum.conf to use Netty's epoll feature for
+  maximal performance and low latency
 * `#429 <https://github.com/xitrum-framework/xitrum/issues/429>`_
   Generate Swagger API doc listing so that codegen tool works
 * `#441 <https://github.com/xitrum-framework/xitrum/issues/441>`_
-  Move routes.cache to tmp/routes.cache
+  Move routes.cache to tmp directory
 * `#442 <https://github.com/xitrum-framework/xitrum/issues/442>`_
   Add respond404Page and respond500Page
 * `#444 <https://github.com/xitrum-framework/xitrum/issues/444>`_

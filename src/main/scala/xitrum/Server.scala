@@ -2,14 +2,12 @@ package xitrum
 
 import java.io.File
 
-import io.netty.bootstrap.ServerBootstrap
-import io.netty.channel.{ChannelInitializer, ChannelPipeline}
-import io.netty.channel.nio.NioEventLoopGroup
+import io.netty.channel.ChannelInitializer
 import io.netty.channel.socket.SocketChannel
-import io.netty.channel.socket.nio.NioServerSocketChannel
 import io.netty.util.ResourceLeakDetector
 
 import xitrum.handler.{
+  Bootstrap,
   DefaultHttpChannelInitializer,
   FlashSocketPolicyServer,
   NetOption,
@@ -51,7 +49,7 @@ object Server {
     if (portConfig.http.isDefined)  doStart(false, httpChannelInitializer)
     if (portConfig.https.isDefined) doStart(true,  httpChannelInitializer)
 
-    // Flash socket server may reuse HTTP port
+    // Flash socket server may use same port with HTTP server
     if (portConfig.flashSocketPolicy.isDefined) {
       if (portConfig.flashSocketPolicy != portConfig.http) {
         FlashSocketPolicyServer.start()
@@ -78,18 +76,13 @@ object Server {
       else
         nonSslChannelInitializer
 
-    val bossGroup   = new NioEventLoopGroup(1)
-    val workerGroup = new NioEventLoopGroup
-    val bootstrap   = new ServerBootstrap
-    bootstrap.group(bossGroup, workerGroup)
-             .channel(classOf[NioServerSocketChannel])
-             .childHandler(channelInitializer)
+    val (bootstrap, groups) = Bootstrap.newBootstrap(channelInitializer)
 
     val portConfig      = Config.xitrum.port
     val (service, port) = if (https) ("HTTPS", portConfig.https.get) else ("HTTP", portConfig.http.get)
 
     NetOption.setOptions(bootstrap)
-    NetOption.bind(service, bootstrap, port, bossGroup, workerGroup)
+    NetOption.bind(service, bootstrap, port, groups)
 
     Config.xitrum.interface match {
       case None =>

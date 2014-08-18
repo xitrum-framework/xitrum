@@ -75,7 +75,7 @@ class PortConfig(config: TConfig) {
 }
 
 class HttpsConfig(config: TConfig) {
-  val useOpenSSL = config.getBoolean("useOpenSSL")
+  val openSSL = config.getBoolean("openSSL")
   lazy val certChainFile = {
     val path = config.getString("certChainFile")
     val file = new File(path)
@@ -170,6 +170,8 @@ class XitrumConfig(val config: TConfig) {
       None
 
   val port = new PortConfig(config.getConfig("port"))
+
+  val edgeTriggeredEpoll = config.getBoolean("edgeTriggeredEpoll")
 
   val https = if (port.https.isDefined) Some(new HttpsConfig(config.getConfig("https"))) else None
 

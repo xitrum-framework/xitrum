@@ -3,8 +3,7 @@ package xitrum.handler
 import java.net.InetSocketAddress
 
 import io.netty.bootstrap.ServerBootstrap
-import io.netty.channel.{ChannelFuture, ChannelFutureListener, ChannelOption}
-import io.netty.channel.nio.NioEventLoopGroup
+import io.netty.channel.{ChannelFuture, ChannelFutureListener, ChannelOption, EventLoopGroup}
 
 import xitrum.Config
 
@@ -20,7 +19,7 @@ object NetOption {
   }
 
   /** Stops the JVM process if cannot bind to the port. */
-  def bind(service: String, bootstrap: ServerBootstrap, port: Int, bossGroup: NioEventLoopGroup, workerGroup: NioEventLoopGroup) {
+  def bind(service: String, bootstrap: ServerBootstrap, port: Int, groups: Seq[EventLoopGroup]) {
     val ic = Config.xitrum.interface
 
     val addr = ic match {
@@ -46,18 +45,17 @@ object NetOption {
           .format(hostnameOrIp, port, service)
       }
 
-      bossGroup.shutdownGracefully()
-      workerGroup.shutdownGracefully()
+      groups.foreach(_.shutdownGracefully())
       Config.exitOnStartupError(msg, portOpenFuture.cause)
+      return
     }
 
-    // Connection established successfully
+    // At this point, connection has been established successfully
 
     // Graceful shutdown when the socket is closed
     portOpenFuture.channel.closeFuture.addListener(new ChannelFutureListener {
       override def operationComplete(future: ChannelFuture) {
-        bossGroup.shutdownGracefully()
-        workerGroup.shutdownGracefully()
+        groups.foreach(_.shutdownGracefully())
       }
     })
   }

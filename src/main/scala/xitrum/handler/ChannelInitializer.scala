@@ -143,7 +143,7 @@ class DefaultHttpChannelInitializer extends ChannelInitializer[SocketChannel] {
 object SslChannelInitializer {
   val context = {
     val https    = Config.xitrum.https.get
-    val provider = if (https.useOpenSSL) SslProvider.OPENSSL else SslProvider.JDK
+    val provider = if (https.openSSL) SslProvider.OPENSSL else SslProvider.JDK
     SslContext.newServerContext(provider, https.certChainFile, https.keyFile)
   }
 }
@@ -152,7 +152,7 @@ object SslChannelInitializer {
 @Sharable
 class SslChannelInitializer(nonSslChannelInitializer: ChannelInitializer[SocketChannel]) extends ChannelInitializer[SocketChannel] {
   override def initChannel(ch: SocketChannel) {
-    val p = ch.pipeline()
+    val p = ch.pipeline
     p.addLast(classOf[SslHandler].getName, SslChannelInitializer.context.newHandler(ch.alloc))
     p.addLast(nonSslChannelInitializer)
 
