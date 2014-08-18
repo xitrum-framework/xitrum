@@ -44,49 +44,68 @@ trait ParamAccess {
 
   //----------------------------------------------------------------------------
 
-  def param[T: TypeTag](key: String, coll: Params = null)(implicit d: T DefaultsTo String): T = {
+  def param[T: TypeTag](key: String)(implicit d: T DefaultsTo String): T =
+    param(key, textParams)
+
+  def param[T: TypeTag](key: String, coll: Params)(implicit d: T DefaultsTo String): T = {
     if (typeOf[T] <:< TYPE_FILE_UPLOAD) {
       bodyFileParams.get(key) match {
         case None         => throw new MissingParam(key)
         case Some(values) => values(0).asInstanceOf[T]
       }
     } else {
-      val coll2 = if (coll == null) textParams else coll
-      val value = if (coll2.contains(key)) coll2.apply(key)(0) else throw new MissingParam(key)
+      val value = if (coll.contains(key)) coll(key).head else throw new MissingParam(key)
       convertTextParam[T](value)
     }
   }
 
-  def paramo[T: TypeTag](key: String, coll: Params = null)(implicit d: T DefaultsTo String): Option[T] = {
+  def paramo[T: TypeTag](key: String)(implicit d: T DefaultsTo String): Option[T] =
+    paramo(key, textParams)
+
+  def paramo[T: TypeTag](key: String, coll: Params)(implicit d: T DefaultsTo String): Option[T] = {
     if (typeOf[T] <:< TYPE_FILE_UPLOAD) {
       bodyFileParams.get(key).map { values => values(0).asInstanceOf[T] }
     } else {
-      val coll2  = if (coll == null) textParams else coll
-      val values = coll2.get(key)
-      val valueo = values.map(_(0))
-      valueo.map(convertTextParam[T])
+      coll.get(key) match {
+        case None =>
+          None
+        case Some(values) =>
+          val value = values.head
+          if (value.isEmpty) None else Some(convertTextParam[T](value))
+      }
     }
   }
 
-  def params[T: TypeTag](key: String, coll: Params = null)(implicit d: T DefaultsTo String): Seq[T] = {
+  def params[T: TypeTag](key: String)(implicit d: T DefaultsTo String): Seq[T] =
+    params(key, textParams)
+
+  def params[T: TypeTag](key: String, coll: Params)(implicit d: T DefaultsTo String): Seq[T] = {
     if (typeOf[T] <:< TYPE_FILE_UPLOAD) {
       bodyFileParams.get(key) match {
         case None         => throw new MissingParam(key)
         case Some(values) => values.asInstanceOf[Seq[T]]
       }
     } else {
-      val coll2  = if (coll == null) textParams else coll
-      val values = if (coll2.contains(key)) coll2.apply(key) else throw new MissingParam(key)
-      values.map(convertTextParam[T])
+      val values   = if (coll.contains(key)) coll(key) else throw new MissingParam(key)
+      val nonEmpty = values.filterNot(_.isEmpty)
+      nonEmpty.map(convertTextParam[T])
     }
   }
 
-  def paramso[T: TypeTag](key: String, coll: Params = null)(implicit d: T DefaultsTo String): Option[Seq[T]] = {
+  def paramso[T: TypeTag](key: String)(implicit d: T DefaultsTo String): Option[Seq[T]] =
+    paramso(key, textParams)
+
+  def paramso[T: TypeTag](key: String, coll: Params)(implicit d: T DefaultsTo String): Option[Seq[T]] = {
     if (typeOf[T] <:< TYPE_FILE_UPLOAD) {
       bodyFileParams.get(key).asInstanceOf[Option[Seq[T]]]
     } else {
-      val coll2 = if (coll == null) textParams else coll
-      coll2.get(key).map(_.map(convertTextParam[T]))
+      coll.get(key) match {
+        case None =>
+          None
+        case Some(values) =>
+          val nonEmpty = values.filterNot(_.isEmpty)
+          Some(nonEmpty.map(convertTextParam[T]))
+      }
     }
   }
 

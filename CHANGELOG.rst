@@ -7,6 +7,8 @@
   maximal performance and low latency
 * `#429 <https://github.com/xitrum-framework/xitrum/issues/429>`_
   Generate Swagger API doc listing so that codegen tool works
+* `#443 <https://github.com/xitrum-framework/xitrum/issues/443>`_
+  paramo returns None for empty param, params and paramso ignore empty params
 * `#441 <https://github.com/xitrum-framework/xitrum/issues/441>`_
   Move routes.cache to tmp directory
 * `#442 <https://github.com/xitrum-framework/xitrum/issues/442>`_
