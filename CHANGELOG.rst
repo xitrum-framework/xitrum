@@ -7,6 +7,8 @@
   maximal performance and low latency
 * `#429 <https://github.com/xitrum-framework/xitrum/issues/429>`_
   Generate Swagger API doc listing so that codegen tool works
+* `#448 <https://github.com/xitrum-framework/xitrum/issues/448>`_
+  Update Swagger UI from 2.0.18 to 2.0.22
 * `#443 <https://github.com/xitrum-framework/xitrum/issues/443>`_
   paramo returns None for empty param, params and paramso ignore empty params
 * `#438 <https://github.com/xitrum-framework/xitrum/issues/438>`_
