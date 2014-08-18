@@ -16,14 +16,14 @@ import xitrum.{Action, ActorAction, FutureAction, Config, Log}
 import xitrum.etag.NotModified
 import xitrum.handler.{HandlerEnv, NoRealPipelining}
 import xitrum.handler.outbound.XSendFile
-import xitrum.routing.SwaggerJson
 import xitrum.scope.request.PathInfo
 import xitrum.sockjs.SockJsPrefix
-import xitrum.util.ClassFileLoader
 
 object Dispatcher {
   private val CLASS_OF_ACTOR         = classOf[Actor]  // Can't be ActorAction, to support WebSocketAction and SockJsAction
   private val CLASS_OF_FUTURE_ACTION = classOf[FutureAction]
+
+  private val routeReloader = if (Config.productionMode) None else Some(new RouteReloader)
 
   def dispatch(actionClass: Class[_ <: Action], handlerEnv: HandlerEnv) {
     if (CLASS_OF_ACTOR.isAssignableFrom(actionClass)) {
@@ -64,6 +64,9 @@ object Dispatcher {
 @Sharable
 class Dispatcher extends SimpleChannelInboundHandler[HandlerEnv] {
   override def channelRead0(ctx: ChannelHandlerContext, env: HandlerEnv) {
+    // Reload routes before doing the route matching
+    Dispatcher.routeReloader.foreach(_.reloadIfShould())
+
     val request  = env.request
     val pathInfo = env.pathInfo
 
@@ -75,19 +78,6 @@ class Dispatcher extends SimpleChannelInboundHandler[HandlerEnv] {
 
     // Look up GET if method is HEAD
     val requestMethod = if (request.getMethod == HttpMethod.HEAD) HttpMethod.GET else request.getMethod
-
-    // In development mode, classes may be reloaded thus routes should also be
-    // reloaded.
-    //
-    // There's no standard way to tell exactly when the classes are reloaded,
-    // so the simplest way is reloading routes at every request. This is usually
-    // acceptably fast because the routes have already been cached thus only
-    // .class files in the development directory is reloaded.
-    if (!Config.productionMode) {
-      val cl                = new ClassFileLoader
-      Config.routes         = Config.loadRoutes(cl, true)
-      SwaggerJson.resources = SwaggerJson.groupByResource()
-    }
 
     Config.routes.route(requestMethod, pathInfo) match {
       case Some((route, pathParams)) =>

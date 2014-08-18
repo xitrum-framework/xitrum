@@ -9,6 +9,8 @@
   Generate Swagger API doc listing so that codegen tool works
 * `#443 <https://github.com/xitrum-framework/xitrum/issues/443>`_
   paramo returns None for empty param, params and paramso ignore empty params
+* `#438 <https://github.com/xitrum-framework/xitrum/issues/438>`_
+  In dev mode, only recollect routes when there's .class file change
 * `#441 <https://github.com/xitrum-framework/xitrum/issues/441>`_
   Move routes.cache to tmp directory
 * `#442 <https://github.com/xitrum-framework/xitrum/issues/442>`_
