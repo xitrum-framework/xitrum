@@ -196,7 +196,7 @@ object SwaggerJson {
     else if (secs > 0)
       s"(Page cache: ${route.cacheSecs} [sec])"
     else
-      s"(Pction cache: ${-route.cacheSecs} [sec])"
+      s"(Action cache: ${-route.cacheSecs} [sec])"
   }
 }
 
