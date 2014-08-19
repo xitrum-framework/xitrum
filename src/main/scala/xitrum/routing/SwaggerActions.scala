@@ -1,5 +1,7 @@
 package xitrum.routing
 
+import org.apache.commons.lang3.text.WordUtils
+
 import org.json4s.JsonAST.{JObject, JValue}
 import org.json4s.JsonDSL._
 import org.json4s.jackson._
@@ -63,11 +65,13 @@ object SwaggerJson {
 
       case Some(key) =>
         resources.get(key).map { swaggerMap =>
-          val json =
+          val resourcePath = resourcePatho.getOrElse(NONAME_RESOURCE)
+          val path         = if (resourcePath.startsWith("/")) resourcePath else "/" + resourcePath
+          val json         =
             ("swaggerVersion" -> SWAGGER_VERSION) ~
             ("apiVersion"     -> apiVersion) ~
             ("basePath"       -> basePath) ~
-            ("resourcePath"   -> "/resourcePath") ~
+            ("resourcePath"   -> path) ~
             ("apis"           -> loadApis(swaggerMap))
           pretty(render(json))
         }
@@ -85,8 +89,8 @@ object SwaggerJson {
     val swaggerArgs = swagger.swaggerArgs
 
     val routePath = RouteCompiler.decompile(route.compiledPattern, true)
-    val nickname  = route.klass.getSimpleName
 
+    val nickname  = swaggerArgs.find(_.isInstanceOf[Swagger.Nickname]).map(_.asInstanceOf[Swagger.Nickname].nickname).getOrElse(WordUtils.uncapitalize(route.klass.getSimpleName))
     val produces  = swaggerArgs.filter(_.isInstanceOf[Swagger.Produces]).asInstanceOf[Seq[Swagger.Produces]].map(_.contentTypes).flatten.distinct
     val consumes  = swaggerArgs.filter(_.isInstanceOf[Swagger.Consumes]).asInstanceOf[Seq[Swagger.Consumes]].map(_.contentTypes).flatten.distinct
     val summary   = swaggerArgs.find(_.isInstanceOf[Swagger.Summary]).asInstanceOf[Option[Swagger.Summary]].map(_.summary).getOrElse("")
@@ -95,6 +99,7 @@ object SwaggerJson {
 
     val params = swaggerArgs.filterNot { arg =>
       arg.isInstanceOf[Swagger.Resource] ||
+      arg.isInstanceOf[Swagger.Nickname] ||
       arg.isInstanceOf[Swagger.Produces] ||
       arg.isInstanceOf[Swagger.Consumes] ||
       arg.isInstanceOf[Swagger.Summary]  ||
@@ -120,6 +125,7 @@ object SwaggerJson {
       ("summary"          -> summary) ~
       ("notes"            -> finalNotes) ~
       ("nickname"         -> nickname) ~
+      ("type"         -> "string") ~  // FIXME
       ("parameters"       -> params.toSeq) ~
       ("responseMessages" -> responses.toSeq) ~
       ("produces"         -> produces) ~

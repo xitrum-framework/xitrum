@@ -18,6 +18,8 @@ case class Swagger(swaggerArgs: SwaggerArg*) extends StaticAnnotation
 object Swagger {
   case class Resource(path: String, desc: String = "", position: Int = 0) extends SwaggerArg
 
+  case class Nickname(nickname: String) extends SwaggerArg
+
   case class Produces(contentTypes: String*) extends SwaggerArg
 
   case class Consumes(contentTypes: String*) extends SwaggerArg

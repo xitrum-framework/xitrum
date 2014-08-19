@@ -299,6 +299,9 @@ object RouteCollector {
               else
                 children(3).toString.toInt
             swaggerArgs = swaggerArgs :+ Swagger.Resource(path, desc, position)
+          } else if (child0 == "xitrum.annotation.Swagger.Nickname.apply") {
+            val nickname = children(1).productElement(0).asInstanceOf[universe.Constant].value.toString
+            swaggerArgs = swaggerArgs :+ Swagger.Nickname(nickname)
           } else if (child0 == "xitrum.annotation.Swagger.Produces.apply") {
             val contentTypes = children.tail.map(_.productElement(0).asInstanceOf[universe.Constant].value.toString)
             swaggerArgs = swaggerArgs :+ Swagger.Produces(contentTypes: _*)
