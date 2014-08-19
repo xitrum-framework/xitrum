@@ -250,7 +250,7 @@ class SwaggerUi extends FutureAction {
  * directory must be at the same level with other Swagger UI files.
  */
 @First
-@GET("webjars/swagger-ui/2.0.18/index")
+@GET("webjars/swagger-ui/2.0.22/index")
 class SwaggerUiVersioned extends FutureAction {
   def execute() {
     val swaggerResourcesUrl = url[SwaggerResources]
