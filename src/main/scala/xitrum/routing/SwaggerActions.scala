@@ -125,7 +125,7 @@ object SwaggerJson {
       ("summary"          -> summary) ~
       ("notes"            -> finalNotes) ~
       ("nickname"         -> nickname) ~
-      ("type"         -> "string") ~  // FIXME
+      ("type"             -> "string") ~  // FIXME: Support models
       ("parameters"       -> params.toSeq) ~
       ("responseMessages" -> responses.toSeq) ~
       ("produces"         -> produces) ~
