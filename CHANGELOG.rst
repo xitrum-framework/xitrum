@@ -1,3 +1,8 @@
+3.19:
+
+* `#452 <https://github.com/xitrum-framework/xitrum/issues/452>`_
+  Postback: Split data-extra to data-params and data-form
+
 3.18:
 
 * `#446 <https://github.com/xitrum-framework/xitrum/issues/446>`_

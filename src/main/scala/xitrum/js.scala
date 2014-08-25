@@ -34,17 +34,17 @@ object js {
     var action = target1.attr('action');
     var data   = '';
 
-    // data may come from "extra" data
+    // data may come from "data-params"
     // http://api.jquery.com/data/
-    var extraParams = target1.data('extra');
-    if (extraParams) data = extraParams + '&';
+    var params = target1.data('params');
+    if (params) data = params + '&';
 
-    // or come from extra form
-    var extraFormSelector = target1.attr('data-extra');
-    if (extraFormSelector) {
-      var extraForm = $(extraFormSelector);
-      if (extraForm && extraForm[0].tagName === 'FORM' && extraForm.valid())
-        data = data + extraForm.serialize() + '&';
+    // or come from "data-form"
+    var formSelector = target1.attr('data-form');
+    if (formSelector) {
+      var form = $(formSelector);
+      if (form && form[0].tagName === 'FORM' && form.valid())
+        data = data + form.serialize() + '&';
     }
 
     // or come from this element itself
