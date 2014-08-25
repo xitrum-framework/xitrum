@@ -24,7 +24,7 @@
   font-size: 80%;
 }
 
-.bar ,
+.bar,
 .dot {
   fill: steelblue;
 }
@@ -63,8 +63,8 @@
 }
 
 .metricsTableHeader {
-  position:absolute;
-  margin-top: -2.5em
+  position: absolute;
+  margin-top: -2.5em;
 }
 
 .metricsTableHeader th {
@@ -90,6 +90,6 @@
   width: 50%;
 }
 
-.clearFroat{
-  clear: both
+.clearBoth {
+  clear: both;
 }

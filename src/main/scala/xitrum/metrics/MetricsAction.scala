@@ -158,7 +158,7 @@ class XitrumMetricsViewer extends FutureAction with MetricsViewer {
               </table>
             </div>
             <div id="heapMemoryGraph" class="metricsGraph nodeMetricsGraph"></div>
-            <div class="clearFroat"></div>
+            <div class="clearBoth"></div>
           </div>
           <hr/>
           <div class="metricsContent">
@@ -171,7 +171,7 @@ class XitrumMetricsViewer extends FutureAction with MetricsViewer {
               </table>
             </div>
             <div id="cpuGraph" class="metricsGraph"></div>
-            <div class="clearFroat"></div>
+            <div class="clearBoth"></div>
           </div>
         </div>
         <hr/>
@@ -188,7 +188,7 @@ class XitrumMetricsViewer extends FutureAction with MetricsViewer {
                 </table>
               </div>
               <div id="histogramsGraph" class="metricsGraph"></div>
-              <div class="clearFroat"></div>
+              <div class="clearBoth"></div>
             </div>
           </div>
         </div>
