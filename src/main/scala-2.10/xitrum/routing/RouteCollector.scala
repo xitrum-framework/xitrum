@@ -293,12 +293,7 @@ object RouteCollector {
                 ""
               else
                 children(2).productElement(0).asInstanceOf[universe.Constant].value.toString
-            val position =
-              if (children(3).toString.startsWith("xitrum.annotation.Swagger"))
-                0
-              else
-                children(3).toString.toInt
-            swaggerArgs = swaggerArgs :+ Swagger.Resource(path, desc, position)
+            swaggerArgs = swaggerArgs :+ Swagger.Resource(path, desc)
           } else if (child0 == "xitrum.annotation.Swagger.Nickname.apply") {
             val nickname = children(1).productElement(0).asInstanceOf[universe.Constant].value.toString
             swaggerArgs = swaggerArgs :+ Swagger.Nickname(nickname)
