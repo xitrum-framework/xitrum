@@ -67,14 +67,14 @@ libraryDependencies += "io.netty" % "netty-tcnative" % "1.1.30.Fork2" classifier
 // Javassist boosts Netty 4 speed
 libraryDependencies += "org.javassist" % "javassist" % "3.18.2-GA"
 
-libraryDependencies += "com.typesafe.akka" %% "akka-actor" % "2.3.5"
+libraryDependencies += "com.typesafe.akka" %% "akka-actor" % "2.3.6"
 
-libraryDependencies += "com.typesafe.akka" %% "akka-cluster" % "2.3.5"
+libraryDependencies += "com.typesafe.akka" %% "akka-cluster" % "2.3.6"
 
-libraryDependencies += "com.typesafe.akka" %% "akka-contrib" % "2.3.5"
+libraryDependencies += "com.typesafe.akka" %% "akka-contrib" % "2.3.6"
 
 // Redirect Akka log to SLF4J
-libraryDependencies += "com.typesafe.akka" %% "akka-slf4j" % "2.3.5"
+libraryDependencies += "com.typesafe.akka" %% "akka-slf4j" % "2.3.6"
 
 // For clustering SockJS with Akka
 libraryDependencies += "tv.cntt" %% "glokka" % "2.0"
