@@ -247,9 +247,9 @@ class XitrumConfig(val config: TConfig) {
 object Config {
   // Do this as soon as possible.
   //
-  // If Logback is used and SLF4J has been touched (for example, touched by
-  // Netty, e.g. via start(httpChannelInitializer) below) before the following
-  // call, config/logback.xml (i) will not take effect
+  // But if Logback is used (because SLF4J has been touched) before the following
+  // call, config/logback.xml will not take effect. Instead Logback's default
+  // config is used.
   addConfigDirectoryToClasspath()
 
   private def addConfigDirectoryToClasspath() {
