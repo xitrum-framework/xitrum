@@ -252,7 +252,8 @@ class Request2Env extends SimpleChannelInboundHandler[HttpObject] {
       // https://github.com/xitrum-framework/xitrum/issues/463
       val fileUpload = data.asInstanceOf[FileUpload]
       if (fileUpload.isCompleted) {
-        val name = fileUpload.getName
+        val name   = fileUpload.getName
+        val length = fileUpload.length
         sanitizeFileUploadFilename(fileUpload)
         putOrAppendFileUpload(env.bodyFileParams, name, fileUpload)
         bodyBytesReceived += length
