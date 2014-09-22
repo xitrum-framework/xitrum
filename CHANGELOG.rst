@@ -2,6 +2,8 @@
 
 * `#452 <https://github.com/xitrum-framework/xitrum/issues/452>`_
   Postback: Split data-extra to data-params and data-form
+* `#463 <https://github.com/xitrum-framework/xitrum/issues/463>`_
+  Do not ignore empty uploaded files
 * `#461 <https://github.com/xitrum-framework/xitrum/issues/461>`_
   Update Akka from 2.3.5 to 2.3.6
 * `#465 <https://github.com/xitrum-framework/xitrum/issues/465>`_

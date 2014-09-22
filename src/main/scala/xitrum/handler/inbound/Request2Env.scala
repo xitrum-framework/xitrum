@@ -248,9 +248,10 @@ class Request2Env extends SimpleChannelInboundHandler[HttpObject] {
       putOrAppendString(env.bodyTextParams, name, value)
       bodyBytesReceived += attribute.length
     } else if (dataType == HttpDataType.FileUpload) {
+      // Do not skip empty file
+      // https://github.com/xitrum-framework/xitrum/issues/463
       val fileUpload = data.asInstanceOf[FileUpload]
-      val length     = fileUpload.length
-      if (fileUpload.isCompleted && length > 0) {  // Skip empty file
+      if (fileUpload.isCompleted) {
         val name = fileUpload.getName
         sanitizeFileUploadFilename(fileUpload)
         putOrAppendFileUpload(env.bodyFileParams, name, fileUpload)
