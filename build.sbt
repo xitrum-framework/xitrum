@@ -93,7 +93,7 @@ libraryDependencies += "tv.cntt" %% "chill-scala" % "1.2"
 libraryDependencies += "org.json4s" %% "json4s-jackson" % "3.2.10"
 
 // For i18n
-libraryDependencies += "tv.cntt" %% "scaposer" % "1.4"
+libraryDependencies += "tv.cntt" %% "scaposer" % "1.5"
 
 // For jsEscape
 libraryDependencies += "org.apache.commons" % "commons-lang3" % "3.3.2"

@@ -4,6 +4,8 @@
   Postback: Split data-extra to data-params and data-form
 * `#461 <https://github.com/xitrum-framework/xitrum/issues/461>`_
   Update Akka from 2.3.5 to 2.3.6
+* `#465 <https://github.com/xitrum-framework/xitrum/issues/465>`_
+  Update Scaposer from 1.4 to 1.5
 
 3.18:
 
