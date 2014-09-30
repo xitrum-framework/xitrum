@@ -1,12 +1,21 @@
 package xitrum.util
 
 import java.io.{FileInputStream, InputStream}
+import java.nio.file.{Files, Paths}
 import java.util.{Arrays, Properties}
 
 import io.netty.util.CharsetUtil.UTF_8
 
 object Loader {
   private[this] val BUFFER_SIZE = 1024
+
+  /** Writes bytes to the specified file path. */
+  def bytesToFile(bytes: Array[Byte], path: String) {
+    // http://stackoverflow.com/questions/6879427/scala-write-string-to-file-in-one-statement
+    Files.write(Paths.get(path), bytes)
+  }
+
+  //----------------------------------------------------------------------------
 
   /** The input stream will be closed by this method after reading. */
   def bytesFromInputStream(is: InputStream): Array[Byte] = {

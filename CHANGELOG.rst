@@ -4,6 +4,8 @@
   Postback: Split data-extra to data-params and data-form
 * `#463 <https://github.com/xitrum-framework/xitrum/issues/463>`_
   Do not ignore empty uploaded files
+* `#466 <https://github.com/xitrum-framework/xitrum/issues/466>`_
+  Add xitrum.util.Loader.bytesToFile method to write to file
 * `#467 <https://github.com/xitrum-framework/xitrum/issues/467>`_
   Improve xitrum.util.SeriDeseri
 * `#461 <https://github.com/xitrum-framework/xitrum/issues/461>`_
