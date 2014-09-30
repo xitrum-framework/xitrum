@@ -16,6 +16,8 @@
   Update Scaposer from 1.4 to 1.5
 * `#469 <https://github.com/xitrum-framework/xitrum/issues/469>`_
   Update metrics-scala from 3.2.1_a2.3 to 3.3.0_a2.3
+* `#470 <https://github.com/xitrum-framework/xitrum/issues/470>`_
+  Update rhinocoffeescript from 1.7.1 to 1.8.0
 
 3.18:
 
