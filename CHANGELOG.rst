@@ -14,6 +14,8 @@
   Update Akka from 2.3.5 to 2.3.6
 * `#465 <https://github.com/xitrum-framework/xitrum/issues/465>`_
   Update Scaposer from 1.4 to 1.5
+* `#469 <https://github.com/xitrum-framework/xitrum/issues/469>`_
+  Update metrics-scala from 3.2.1_a2.3 to 3.3.0_a2.3
 
 3.18:
 
