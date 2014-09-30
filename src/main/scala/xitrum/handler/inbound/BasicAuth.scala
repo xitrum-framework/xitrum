@@ -33,7 +33,7 @@ object BasicAuth {
       None
     } else {
       val username_password = authorization.substring(6)  // Skip "Basic "
-      SeriDeseri.fromUrlSafeBase64(username_password).flatMap { bytes =>
+      SeriDeseri.bytesFromUrlSafeBase64(username_password).flatMap { bytes =>
         val username_password2 = new String(bytes)
         val username_password3 = username_password2.split(':')
         if (username_password3.length != 2)

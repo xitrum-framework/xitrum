@@ -33,7 +33,7 @@ object Etag {
     val md5 = MessageDigest.getInstance("MD5")  // MD5 is fastest
     md5.reset()
     md5.update(bytes)
-    SeriDeseri.toUrlSafeBase64(md5.digest)
+    SeriDeseri.bytesToUrlSafeBase64(md5.digest)
   }
 
   def forString(string: String) = forBytes(string.getBytes(Config.xitrum.request.charset))

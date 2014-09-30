@@ -94,7 +94,7 @@ object SeriDeseri {
 
   //----------------------------------------------------------------------------
 
-  def toBase64(bytes: Array[Byte]): String = {
+  def bytesToBase64(bytes: Array[Byte]): String = {
     val src    = Unpooled.wrappedBuffer(bytes)
     val dest   = Base64.encode(src)
     val base64 = dest.toString(CharsetUtil.UTF_8)
@@ -103,7 +103,7 @@ object SeriDeseri {
     base64
   }
 
-  def fromBase64(base64String: String): Option[Array[Byte]] = {
+  def bytesFromBase64(base64String: String): Option[Array[Byte]] = {
     var src:  ByteBuf = null
     var dest: ByteBuf = null
 
@@ -124,13 +124,27 @@ object SeriDeseri {
 
   //----------------------------------------------------------------------------
 
+  def toBase64(any: Any): String = {
+    val bytes  = toBytes(any)
+    bytesToBase64(bytes)
+  }
+
+  def fromBase64[T](base64String: String)(implicit m: Manifest[T]): Option[T] = {
+    for {
+      bytes <- bytesFromBase64(base64String)
+      t     <- fromBytes(bytes)(m)
+    } yield t
+  }
+
+  //----------------------------------------------------------------------------
+
   /**
    * The result contains no padding ("=" characters) so that it can be used as
    * request parameter name. (Netty POST body decoder prohibits "=" in parameter name.)
    *
    * See http://en.wikipedia.org/wiki/Base_64#Padding
    */
-  def toUrlSafeBase64(bytes: Array[Byte]): String = {
+  def bytesToUrlSafeBase64(bytes: Array[Byte]): String = {
     // No line break because the result may be used in HTTP response header (cookie)
     val inBuffer     = Unpooled.wrappedBuffer(bytes)
     val outBuffer    = Base64.encode(inBuffer, false, Base64Dialect.URL_SAFE)
@@ -141,7 +155,7 @@ object SeriDeseri {
   }
 
   /** @param base64String may contain optional padding ("=" characters) */
-  def fromUrlSafeBase64(base64String: String): Option[Array[Byte]] = {
+  def bytesFromUrlSafeBase64(base64String: String): Option[Array[Byte]] = {
     val withPadding = addUrlSafeBase64Padding(base64String)
     val inBuffer    = Unpooled.copiedBuffer(withPadding, CharsetUtil.UTF_8)
     try {
@@ -159,17 +173,41 @@ object SeriDeseri {
   private def removeUrlSafeBase64Padding(base64String: String) = base64String.replace("=", "")
 
   private def addUrlSafeBase64Padding(base64String: String) = {
-    val mod = base64String.length % 4
-    val padding = if (mod == 0) "" else if (mod == 1) "===" else if (mod == 2) "==" else if (mod == 3) "="
+    val mod     = base64String.length % 4
+    val padding = mod match {
+      case 1 => "==="
+      case 2 => "=="
+      case 3 => "="
+      case _ => ""
+    }
     base64String + padding
   }
 
   //----------------------------------------------------------------------------
 
   /**
-   * Encrypts using the key in config/xitrum.conf.
-   * Combination of Secure and UrlSafeBase64.
+   * The result contains no padding ("=" characters) so that it can be used as
+   * request parameter name. (Netty POST body decoder prohibits "=" in parameter name.)
+   *
+   * See http://en.wikipedia.org/wiki/Base_64#Padding
    */
+  def toUrlSafeBase64(any: Any): String = {
+    val bytes = toBytes(any)
+    bytesToUrlSafeBase64(bytes)
+  }
+
+
+  /** @param base64String may contain optional padding ("=" characters) */
+  def fromUrlSafeBase64[T](base64String: String)(implicit m: Manifest[T]): Option[T] = {
+    for {
+      bytes <- bytesFromUrlSafeBase64(base64String)
+      t     <- fromBytes(bytes)(m)
+    } yield t
+  }
+
+  //----------------------------------------------------------------------------
+
+  /** Encrypts using the key in config/xitrum.conf. */
   def toSecureUrlSafeBase64(any: Any, forCookie: Boolean = false): String =
     toSecureUrlSafeBase64(any, Config.xitrum.session.secureKey, forCookie)
 
@@ -208,10 +246,7 @@ object SeriDeseri {
     }
   }
 
-  /**
-   * Decrypts using the key in config/xitrum.conf.
-   * Combination of Secure and UrlSafeBase64.
-   */
+  /** Decrypts using the key in config/xitrum.conf. */
   def fromSecureUrlSafeBase64[T](base64String: String, forCookie: Boolean = false)(implicit m: Manifest[T]): Option[T] =
     fromSecureUrlSafeBase64[T](base64String, Config.xitrum.session.secureKey, forCookie)(m)
 
@@ -220,11 +255,11 @@ object SeriDeseri {
    * @param forCookie If true, tries to GZIP uncompress if the input is compressed
    */
   def fromSecureUrlSafeBase64[T](base64String: String, key: String, forCookie: Boolean)(implicit m: Manifest[T]): Option[T] = {
-    fromUrlSafeBase64(base64String).flatMap { encrypted =>
-      Secure.decrypt(encrypted, key).flatMap { maybeCompressed =>
-        val bytes = if (forCookie) Gzip.mayUncompress(maybeCompressed) else maybeCompressed
-        fromBytes[T](bytes)(m)
-      }
-    }
+    for {
+      encrypted       <- bytesFromUrlSafeBase64(base64String)
+      maybeCompressed <- Secure.decrypt(encrypted, key)
+      bytes           =  if (forCookie) Gzip.mayUncompress(maybeCompressed) else maybeCompressed
+      t               <- fromBytes[T](bytes)(m)
+    } yield t
   }
 }
