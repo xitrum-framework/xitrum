@@ -2,6 +2,5 @@ log
 project/project
 project/target
 target
-upload
-routes.cache
+tmp
 .*
