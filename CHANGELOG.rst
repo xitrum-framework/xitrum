@@ -18,6 +18,8 @@
   Update metrics-scala from 3.2.1_a2.3 to 3.3.0_a2.3
 * `#470 <https://github.com/xitrum-framework/xitrum/issues/470>`_
   Update RhinoCoffeeScript from 1.7.1 to 1.8.0
+* `#471 <https://github.com/xitrum-framework/xitrum/issues/471>`_
+  Update Swagger UI from 2.0.22 to 2.0.24
 
 3.18:
 
