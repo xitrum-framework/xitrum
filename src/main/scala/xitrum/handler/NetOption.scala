@@ -13,9 +13,9 @@ object NetOption {
     // See http://lionet.livejournal.com/42016.html and the
     // "Tune Linux for many connections" section in the Xitrum guide to know
     // how to tune the value for io.netty.util.NetUtil.SOMAXCONN to get.
-    bootstrap.option(ChannelOption.SO_REUSEADDR, Boolean.box(true))
-    bootstrap.childOption(ChannelOption.TCP_NODELAY,  Boolean.box(true))
-    bootstrap.childOption(ChannelOption.SO_KEEPALIVE, Boolean.box(true))
+    bootstrap.option(ChannelOption.SO_REUSEADDR, java.lang.Boolean.TRUE)
+    bootstrap.childOption(ChannelOption.TCP_NODELAY,  java.lang.Boolean.TRUE)
+    bootstrap.childOption(ChannelOption.SO_KEEPALIVE, java.lang.Boolean.TRUE)
   }
 
   /** Stops the JVM process if cannot bind to the port. */
