@@ -12,6 +12,8 @@ class SessionVar[T] {
 
   def isDefined(implicit action: Action) = action.session.isDefinedAt(key)
 
+  def isEmpty(implicit action: Action) = !action.session.isDefinedAt(key)
+
   def remove()(implicit action: Action) {
     action.session.remove(key)
   }

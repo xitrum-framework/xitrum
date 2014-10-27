@@ -8,6 +8,8 @@
   Add xitrum.util.Loader.bytesToFile method to write to file
 * `#467 <https://github.com/xitrum-framework/xitrum/issues/467>`_
   Improve xitrum.util.SeriDeseri
+* `#474 <https://github.com/xitrum-framework/xitrum/issues/474>`_
+  Add isEmpty to SessionVar for convenience
 * `#462 <https://github.com/xitrum-framework/xitrum/issues/462>`_
   Switch back to Twitter's Chill (from chill-scala) because it now supports Scala 2.11
 * `#461 <https://github.com/xitrum-framework/xitrum/issues/461>`_
