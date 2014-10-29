@@ -8,25 +8,42 @@ import xitrum.routing.Route
 trait Filter {
   this: Action =>
 
-  private val beforeFilters = ArrayBuffer.empty[() => Boolean]
+  private val beforeFilters = ArrayBuffer.empty[() => Any]
 
-  def beforeFilter(f: => Boolean) {
-    beforeFilters.append(() => f)
+  /** Adds a before filter. */
+  def beforeFilter(f: => Any) {
+    beforeFilters.append(f _)
   }
 
-  /** Called by Dispatcher */
-  def callBeforeFilters(): Boolean = beforeFilters.forall { bf => bf() }
+  /**
+   * Called by Dispatcher.
+   * Calls all before filters until a filter has responded something.
+   *
+   * @return false if a before filter has responded something
+   */
+  def callBeforeFilters(): Boolean = {
+    beforeFilters.forall { bf =>
+      bf()
+      !isDoneResponding
+    }
+  }
 
   //----------------------------------------------------------------------------
 
+  /** Adds an after filter. */
   private val afterFilters = ArrayBuffer.empty[() => Any]
 
   def afterFilter(f: => Any) {
-    afterFilters.append(() => f)
+    afterFilters.append(f _)
   }
 
-  /** Called by Dispatcher */
-  def callAfterFilters() { afterFilters.foreach { af => af() } }
+  /**
+   * Called by Dispatcher.
+   * Calls all after filters.
+   */
+  def callAfterFilters() {
+    afterFilters.foreach { af => af() }
+  }
 
   //----------------------------------------------------------------------------
 
