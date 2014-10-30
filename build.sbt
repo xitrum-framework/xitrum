@@ -2,9 +2,9 @@ organization := "tv.cntt"
 
 name := "xitrum"
 
-version := "2.15-SNAPSHOT"
+version := "2.16-SNAPSHOT"
 
-scalaVersion := "2.10.3"
+scalaVersion := "2.10.4"
 
 scalacOptions ++= Seq("-deprecation", "-feature", "-unchecked")
 
@@ -28,7 +28,7 @@ libraryDependencies += "org.slf4j" % "slf4j-api" % "1.7.5" % "provided"
 libraryDependencies += "ch.qos.logback" % "logback-classic" % "1.0.13" % "test"
 
 // Netty is the core of Xitrum's HTTP(S) feature
-libraryDependencies += "io.netty" % "netty" % "3.9.0.Final"
+libraryDependencies += "io.netty" % "netty" % "3.9.4.Final"
 
 // For clustering SockJS; Akka is included here
 libraryDependencies += "tv.cntt" %% "glokka" % "1.3"

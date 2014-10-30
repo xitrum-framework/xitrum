@@ -1,3 +1,7 @@
+2.16:
+
+* #477 Disable SSLv3 to avoid POODLE vulnerability
+
 2.15:
 * #77  Remove HttpChunkAggregator to avoid memory problem with file upload
 * #258 Add config for saving upload files to memory or to disk temporarily

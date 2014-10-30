@@ -8,6 +8,7 @@ import xitrum.handler.{
   DefaultHttpChannelPipelineFactory,
   FlashSocketPolicyServer,
   NetOption,
+  ServerSsl,
   SslChannelPipelineFactory
 }
 import xitrum.sockjs.SockJsAction
@@ -81,6 +82,11 @@ object Server extends Log {
 
       case Some(hostnameOrIp) =>
         log.info(s"${service} server started on ${hostnameOrIp}:${port}")
+    }
+
+    if (https) {
+      log.info("SSL protocols: "     + ServerSsl.protocols.mkString(", "))
+      log.info("SSL cipher suites: " + ServerSsl.ciphers.mkString(", "))
     }
   }
 }
