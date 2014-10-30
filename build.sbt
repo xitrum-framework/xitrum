@@ -51,7 +51,7 @@ class Version {
 resolvers += "SonatypeReleases" at "http://oss.sonatype.org/content/repositories/releases/"
 
 // Projects using Xitrum must provide a concrete implementation of SLF4J (Logback etc.)
-libraryDependencies += "org.slf4s" %% "slf4s-api" % "1.7.7"
+libraryDependencies += "org.slf4s" %% "slf4s-api" % "1.7.7" % "provided"
 
 // Netty is the core of Xitrum's HTTP(S) feature
 libraryDependencies += "io.netty" % "netty-all" % "4.0.23.Final"
