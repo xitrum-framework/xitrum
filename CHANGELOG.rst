@@ -2,6 +2,8 @@
 
 * `#452 <https://github.com/xitrum-framework/xitrum/issues/452>`_
   Postback: Split data-extra to data-params and data-form
+* `#460 <https://github.com/xitrum-framework/xitrum/issues/460>`_
+  Make respondView more convenient, so that one action can have multiple views
 * `#463 <https://github.com/xitrum-framework/xitrum/issues/463>`_
   Do not ignore empty uploaded files
 * `#466 <https://github.com/xitrum-framework/xitrum/issues/466>`_

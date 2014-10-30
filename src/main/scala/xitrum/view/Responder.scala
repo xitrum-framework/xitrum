@@ -224,25 +224,63 @@ trait Responder extends Js with Flash with GetActionClassDefaultsToCurrentAction
   /**
    * @param options specific to the configured template engine
    */
+  def respondView(customLayout: () => Any, location: String, options: Map[String, Any]): ChannelFuture = {
+    val string = renderView(customLayout, location, options)
+    respondText(string, "text/html")
+  }
+
+  def respondView(customLayout: () => Any, location: String): ChannelFuture = {
+    val string = renderView(customLayout, location, Map.empty[String, Any])
+    respondText(string, "text/html")
+  }
+
+  def respondView(location: String, options: Map[String, Any]): ChannelFuture = {
+    val string = renderView(layout _, location, options)
+    respondText(string, "text/html")
+  }
+
+  def respondView(location: String): ChannelFuture = {
+    val string = renderView(layout _, location, Map.empty[String, Any])
+    respondText(string, "text/html")
+  }
+
+  //----------------------------------------------------------------------------
+
+  /**
+   * @param options specific to the configured template engine
+   */
   def respondView(customLayout: () => Any, location: Class[_ <: Action], options: Map[String, Any]): ChannelFuture = {
     val string = renderView(customLayout, location, options)
     respondText(string, "text/html")
   }
 
-  def respondView[T <: Action : Manifest](customLayout: () => Any, options: Map[String, Any]): ChannelFuture = {
+  def respondView[T <: Action: Manifest](customLayout: () => Any, options: Map[String, Any]): ChannelFuture = {
     respondView(customLayout, getActionClass[T], options)
   }
 
-  def respondView[T <: Action : Manifest](customLayout: () => Any): ChannelFuture = {
-    respondView(customLayout, getActionClass[T], Map.empty)
+  def respondView[T <: Action: Manifest](customLayout: () => Any): ChannelFuture = {
+    respondView(customLayout, getActionClass[T], Map.empty[String, Any])
   }
 
-  def respondView[T <: Action : Manifest](options: Map[String, Any]): ChannelFuture = {
+  def respondView[T <: Action: Manifest](options: Map[String, Any]): ChannelFuture = {
     respondView(layout _, getActionClass[T], options)
   }
 
-  def respondView[T <: Action : Manifest](): ChannelFuture = {
-    respondView(layout _, getActionClass[T], Map.empty)
+  def respondView[T <: Action: Manifest](): ChannelFuture = {
+    respondView(layout _, getActionClass[T], Map.empty[String, Any])
+  }
+
+  //----------------------------------------------------------------------------
+
+  /** Content-Type header is set to "text/html". */
+  def respondViewNoLayout(location: String, options: Map[String, Any]): ChannelFuture = {
+    val string = renderViewNoLayout(location, options)
+    respondText(string, "text/html")
+  }
+
+  def respondViewNoLayout(location: String): ChannelFuture = {
+    val string = renderViewNoLayout(location, Map.empty[String, Any])
+    respondText(string, "text/html")
   }
   //----------------------------------------------------------------------------
 
@@ -252,12 +290,12 @@ trait Responder extends Js with Flash with GetActionClassDefaultsToCurrentAction
     respondText(string, "text/html")
   }
 
-  def respondViewNoLayout[T <: Action : Manifest](options: Map[String, Any]): ChannelFuture = {
+  def respondViewNoLayout[T <: Action: Manifest](options: Map[String, Any]): ChannelFuture = {
     respondViewNoLayout(getActionClass[T], options)
   }
 
-  def respondViewNoLayout[T <: Action : Manifest](): ChannelFuture = {
-    respondViewNoLayout(getActionClass[T], Map.empty)
+  def respondViewNoLayout[T <: Action: Manifest](): ChannelFuture = {
+    respondViewNoLayout(getActionClass[T], Map.empty[String, Any])
   }
 
   //----------------------------------------------------------------------------

@@ -42,12 +42,12 @@ trait Renderer extends GetActionClassDefaultsToCurrentAction {
   //----------------------------------------------------------------------------
 
   /**
-   * Renders the template associated with an action to "renderedTemplate",
+   * Renders the template associated with the location to "renderedView",
    * then calls the layout function.
    *
    * @param options specific to the configured template engine
    */
-  def renderView(customLayout: () => Any, location: Class[_ <: Action], options: Map[String, Any]): String = {
+  def renderView(customLayout: () => Any, location: String, options: Map[String, Any]): String = {
     Config.xitrum.template match {
       case Some(engine) =>
         renderedView = engine.renderView(location, this, options)
@@ -59,21 +59,47 @@ trait Renderer extends GetActionClassDefaultsToCurrentAction {
     }
   }
 
-  def renderView[T <: Action : Manifest](customLayout: () => Any, options: Map[String, Any]): String =
-    renderView(customLayout, getActionClass[T], options)
+  /**
+   * Renders the template associated with the location to "renderedView",
+   * then calls the layout function.
+   */
+  def renderView(customLayout: () => Any, location: String): String = {
+    renderView(customLayout, location, Map.empty[String, Any])
+  }
 
-  def renderView[T <: Action : Manifest](customLayout: () => Any): String =
-    renderView(customLayout, getActionClass[T], Map.empty)
+  def renderView(location: String, options: Map[String, Any]): String =
+    renderView(layout _, location, options)
 
-  def renderView[T <: Action : Manifest](options: Map[String, Any]): String =
-    renderView(layout _, getActionClass[T], options)
-
-  def renderView[T <: Action : Manifest](): String =
-    renderView(layout _, getActionClass[T], Map.empty)
+  def renderView(location: String): String =
+    renderView(layout _, location, Map.empty[String, Any])
 
   //----------------------------------------------------------------------------
 
-  def renderViewNoLayout(location: Class[_ <: Action], options: Map[String, Any]): String =
+  /**
+   * Renders the template associated with the location to "renderedView",
+   * then calls the layout function.
+   *
+   * @param options specific to the configured template engine
+   */
+  def renderView(customLayout: () => Any, location: Class[_ <: Action], options: Map[String, Any]): String = {
+    renderView(customLayout, templatePathFromClass(location), options)
+  }
+
+  def renderView[T <: Action: Manifest](customLayout: () => Any, options: Map[String, Any]): String =
+    renderView(customLayout, getActionClass[T], options)
+
+  def renderView[T <: Action: Manifest](customLayout: () => Any): String =
+    renderView(customLayout, getActionClass[T], Map.empty[String, Any])
+
+  def renderView[T <: Action: Manifest](options: Map[String, Any]): String =
+    renderView(layout _, getActionClass[T], options)
+
+  def renderView[T <: Action: Manifest](): String =
+    renderView(layout _, getActionClass[T], Map.empty[String, Any])
+
+  //----------------------------------------------------------------------------
+
+  def renderViewNoLayout(location: String, options: Map[String, Any]): String =
     Config.xitrum.template match {
       case Some(engine) =>
         val ret = engine.renderView(location, this, options)
@@ -85,29 +111,45 @@ trait Renderer extends GetActionClassDefaultsToCurrentAction {
         ""
     }
 
-  def renderViewNoLayout[T <: Action : Manifest](options: Map[String, Any]): String =
-    renderViewNoLayout(getActionClass[T], options)
-
-  def renderViewNoLayout[T <: Action : Manifest](): String =
-    renderViewNoLayout(getActionClass[T], Map.empty)
+  def renderViewNoLayout(location: String): String =
+    renderViewNoLayout(location, Map.empty[String, Any])
 
   //----------------------------------------------------------------------------
 
-  def renderFragment(location: Class[_ <: Action], fragment: String, options: Map[String, Any]): String =
+  def renderViewNoLayout(location: Class[_ <: Action], options: Map[String, Any]): String =
+    renderViewNoLayout(templatePathFromClass(location), options)
+
+  def renderViewNoLayout[T <: Action: Manifest](options: Map[String, Any]): String =
+    renderViewNoLayout(getActionClass[T], options)
+
+  def renderViewNoLayout[T <: Action: Manifest](): String =
+    renderViewNoLayout(getActionClass[T], Map.empty[String, Any])
+
+  //----------------------------------------------------------------------------
+
+  def renderFragment(directory: String, fragment: String, options: Map[String, Any]): String =
     Config.xitrum.template match {
       case Some(engine) =>
-        engine.renderFragment(location, fragment, this, options)
+        engine.renderFragment(directory, fragment, this, options)
 
       case None =>
         log.warn("No template engine is configured")
         ""
     }
 
-  def renderFragment[T <: Action : Manifest](fragment: String, options: Map[String, Any]): String =
+  def renderFragment(directory: String, fragment: String): String =
+    renderFragment(directory, fragment, Map.empty[String, Any])
+
+  //----------------------------------------------------------------------------
+
+  def renderFragment(directory: Class[_ <: Action], fragment: String, options: Map[String, Any]): String =
+    renderFragment(fragmentDirectoryFromClass(directory), fragment, options)
+
+  def renderFragment[T <: Action: Manifest](fragment: String, options: Map[String, Any]): String =
     renderFragment(getActionClass[T], fragment, options)
 
-  def renderFragment[T <: Action : Manifest](fragment: String): String =
-    renderFragment(getActionClass[T], fragment, Map.empty)
+  def renderFragment[T <: Action: Manifest](fragment: String): String =
+    renderFragment(getActionClass[T], fragment, Map.empty[String, Any])
 
   //----------------------------------------------------------------------------
 
@@ -115,5 +157,19 @@ trait Renderer extends GetActionClassDefaultsToCurrentAction {
     renderedView = inlineView
     val any = layout  // Call layout
     any.toString
+  }
+
+  //----------------------------------------------------------------------------
+
+  /** Converts, for example, a.b.C to a/b/C. */
+  private def templatePathFromClass(klass: Class[_]): String = {
+    klass.getName.replace('.', File.separatorChar)
+  }
+
+  /** Converts, for example, a.b.C to a/b/C. */
+  private def fragmentDirectoryFromClass(klass: Class[_]): String = {
+    // location.getPackage will only return a non-null value if the current
+    // ClassLoader is already aware of the package
+    klass.getName.split('.').dropRight(1).mkString(File.separator)
   }
 }

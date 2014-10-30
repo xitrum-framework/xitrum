@@ -23,31 +23,23 @@ trait TemplateEngine {
   def stop()
 
   /**
-   * Renders the template at the location identified by the given action class.
+   * Renders the template at the location identified by the path
+   * (and may be options, depending on template engines).
    *
-   * Ex: When location = myapp.SiteIndex and Scalate template
-   * engine is used, by default the template path will be:
-   * src/main/scalate/myapp/SiteIndex.jade
-   *
-   * @param location the action class used to identify the template location
+   * @param location the template
    *
    * @param options specific to the configured template engine
    */
-  def renderView(location: Class[_ <: Action], currentAction: Action, options: Map[String, Any]): String
+  def renderView(path: String, currentAction: Action, options: Map[String, Any]): String
 
   /**
-   * Renders the template at the location identified by the package of the given
-   * action class and the given fragment.
+   * Renders the fragment template at the directory.
    *
-   * Ex: When location = myapp.ArticleNew, fragment = form and Scalate template
-   * engine is used, by default the template path will be:
-   * src/main/scalate/myapp/_form.jade
-   *
-   * @param location the action class used to identify the template location
+   * @param directory contains the fragment
    *
    * @param options specific to the configured template engine
    */
-  def renderFragment(location: Class[_ <: Action], fragment: String, currentAction: Action, options: Map[String, Any]): String
+  def renderFragment(directory: String, fragment: String, currentAction: Action, options: Map[String, Any]): String
 }
 
 object TemplateEngine {
