@@ -15,6 +15,8 @@
   If a filter responds something, the main action will not be called
 * `#462 <https://github.com/xitrum-framework/xitrum/issues/462>`_
   Switch back to Twitter's Chill (from chill-scala) because it now supports Scala 2.11
+* `#476 <https://github.com/xitrum-framework/xitrum/issues/476>`_
+  Update Netty from 4.0.23 to 4.0.24
 * `#461 <https://github.com/xitrum-framework/xitrum/issues/461>`_
   Update Akka from 2.3.5 to 2.3.6
 * `#465 <https://github.com/xitrum-framework/xitrum/issues/465>`_
