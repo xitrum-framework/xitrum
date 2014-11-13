@@ -20,7 +20,7 @@
 * `#476 <https://github.com/xitrum-framework/xitrum/issues/476>`_
   Update Netty from 4.0.23 to 4.0.24
 * `#461 <https://github.com/xitrum-framework/xitrum/issues/461>`_
-  Update Akka from 2.3.5 to 2.3.6
+  Update Akka from 2.3.5 to 2.3.7
 * `#465 <https://github.com/xitrum-framework/xitrum/issues/465>`_
   Update Scaposer from 1.4 to 1.5
 * `#469 <https://github.com/xitrum-framework/xitrum/issues/469>`_
