@@ -225,7 +225,7 @@ object SeriDeseri {
 
     val maybeCompressed = if (bytesCompressed) Gzip.compress(bytes) else bytes
     val encrypted       = Secure.encrypt(maybeCompressed, key)
-    val ret1            = toUrlSafeBase64(encrypted)
+    val ret1            = bytesToUrlSafeBase64(encrypted)
 
     if (!forCookie) {
       // Not cookie, nothing to do
@@ -241,7 +241,7 @@ object SeriDeseri {
         // bytes has not been compressed, let's try
         val reallyCompressed = Gzip.compress(bytes)
         val encrypted        = Secure.encrypt(reallyCompressed, key)
-        toUrlSafeBase64(encrypted)
+        bytesToUrlSafeBase64(encrypted)
       }
     }
   }
