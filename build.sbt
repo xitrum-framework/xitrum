@@ -90,7 +90,7 @@ libraryDependencies += "tv.cntt" %% "sclasner" % "1.6"
 libraryDependencies += "com.twitter" %% "chill" % "0.5.0"
 
 // For JSON (de)serializing
-libraryDependencies += "org.json4s" %% "json4s-jackson" % "3.2.10"
+libraryDependencies += "org.json4s" %% "json4s-jackson" % "3.2.11"
 
 // For i18n
 libraryDependencies += "tv.cntt" %% "scaposer" % "1.5"

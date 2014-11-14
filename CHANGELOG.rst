@@ -21,6 +21,8 @@
   Update Netty from 4.0.23 to 4.0.24
 * `#461 <https://github.com/xitrum-framework/xitrum/issues/461>`_
   Update Akka from 2.3.5 to 2.3.7
+* `#478 <https://github.com/xitrum-framework/xitrum/issues/478>`_
+  Update JSON4S from 3.2.10 to 3.2.11
 * `#465 <https://github.com/xitrum-framework/xitrum/issues/465>`_
   Update Scaposer from 1.4 to 1.5
 * `#469 <https://github.com/xitrum-framework/xitrum/issues/469>`_
