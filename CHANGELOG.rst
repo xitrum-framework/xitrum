@@ -23,10 +23,11 @@
   SSLv3.0 is disabled to avoid POODLE vulnerability
 * `#461 <https://github.com/xitrum-framework/xitrum/issues/461>`_
   Update Akka from 2.3.5 to 2.3.7
+* `#465 <https://github.com/xitrum-framework/xitrum/issues/465>`_
+  Update Scaposer from 1.4 to 1.5;
+  the original string is used when it hasn't been translated yet
 * `#478 <https://github.com/xitrum-framework/xitrum/issues/478>`_
   Update JSON4S from 3.2.10 to 3.2.11
-* `#465 <https://github.com/xitrum-framework/xitrum/issues/465>`_
-  Update Scaposer from 1.4 to 1.5
 * `#469 <https://github.com/xitrum-framework/xitrum/issues/469>`_
   Update metrics-scala from 3.2.1_a2.3 to 3.3.0_a2.3
 * `#470 <https://github.com/xitrum-framework/xitrum/issues/470>`_
