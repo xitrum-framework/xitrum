@@ -12,7 +12,7 @@ import io.netty.handler.codec.http.{HttpMethod, HttpResponseStatus}
 import org.apache.commons.lang3.exception.ExceptionUtils
 
 import xitrum.action._
-import xitrum.exception.{InvalidAntiCsrfToken, InvalidInput, MissingParam, SessionExpired}
+import xitrum.exception.{InvalidAntiCsrfToken, InvalidInput, MissingParam}
 import xitrum.handler.{AccessLog, HandlerEnv, NoRealPipelining}
 import xitrum.handler.inbound.Dispatcher
 import xitrum.handler.outbound.ResponseCacher
@@ -114,10 +114,10 @@ trait Action extends RequestEnv
       case NonFatal(e) if forwarding =>
         log.warn("Error", e)
 
-      case NonFatal(e) if (e.isInstanceOf[SessionExpired] || e.isInstanceOf[InvalidAntiCsrfToken] || e.isInstanceOf[MissingParam] || e.isInstanceOf[InvalidInput]) =>
+      case NonFatal(e) if (e.isInstanceOf[InvalidAntiCsrfToken] || e.isInstanceOf[MissingParam] || e.isInstanceOf[InvalidInput]) =>
         // These exceptions are special cases:
         // We know that the exception is caused by the client (bad request)
-        val msg = if (e.isInstanceOf[SessionExpired] || e.isInstanceOf[InvalidAntiCsrfToken]) {
+        val msg = if (e.isInstanceOf[InvalidAntiCsrfToken]) {
           session.clear()
           "Session expired. Please refresh your browser."
         } else if (e.isInstanceOf[MissingParam]) {

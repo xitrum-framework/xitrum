@@ -3,7 +3,6 @@ package xitrum.scope.session
 import java.util.UUID
 
 import xitrum.Action
-import xitrum.exception.InvalidAntiCsrfToken
 import xitrum.util.SeriDeseri
 
 /**
