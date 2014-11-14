@@ -31,6 +31,8 @@
   Update RhinoCoffeeScript from 1.7.1 to 1.8.0
 * `#471 <https://github.com/xitrum-framework/xitrum/issues/471>`_
   Update Swagger UI from 2.0.22 to 2.0.24
+* `#479 <https://github.com/xitrum-framework/xitrum/issues/479>`_
+  Update D3.js from 3.4.11 to 3.4.13
 
 3.18:
 
