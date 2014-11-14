@@ -2,7 +2,7 @@ organization := "tv.cntt"
 
 name := "xitrum"
 
-version := "3.19-SNAPSHOT"
+version := "3.20-SNAPSHOT"
 
 scalaVersion := "2.11.4"
 //scalaVersion := "2.10.4"
@@ -107,8 +107,8 @@ libraryDependencies += "nl.grons" %% "metrics-scala" % "3.3.0_a2.3"
 // For metrics
 libraryDependencies += "io.dropwizard.metrics" % "metrics-json" % "3.1.0"
 
-// JSON4S uses scalap 2.10.0, which in turn uses scala-compiler 2.10.0, which in
-// turn uses scala-reflect 2.10.0. We need to force "scalaVersion" above, because
+// JSON4S uses scalap 2.10.0/2.11.0, which in turn uses scala-compiler 2.10.0/2.11.0, which in
+// turn uses scala-reflect 2.10.0/2.11.0. We need to force "scalaVersion" above, because
 // Scala annotations (used by routes and Swagger) compiled by a newer version
 // can't be read by an older version.
 //
