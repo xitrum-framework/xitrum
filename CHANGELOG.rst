@@ -9,16 +9,18 @@
 * `#466 <https://github.com/xitrum-framework/xitrum/issues/466>`_
   Add xitrum.util.Loader.bytesToFile method to write to file
 * `#467 <https://github.com/xitrum-framework/xitrum/issues/467>`_
-  Improve xitrum.util.SeriDeseri
+  Improve xitrum.util.SeriDeseri methods
 * `#474 <https://github.com/xitrum-framework/xitrum/issues/474>`_
   Add isEmpty to SessionVar for convenience
 * `#475 <https://github.com/xitrum-framework/xitrum/issues/475>`_
   Make writing before filters more convenient:
-  If a filter responds something, the main action will not be called
+  If a filter responds something, the main action will not be called;
+  you don't have to make the filter return true/false any more
 * `#462 <https://github.com/xitrum-framework/xitrum/issues/462>`_
   Switch back to Twitter's Chill (from chill-scala) because it now supports Scala 2.11
 * `#476 <https://github.com/xitrum-framework/xitrum/issues/476>`_
-  Update Netty from 4.0.23 to 4.0.24
+  Update Netty from 4.0.23 to 4.0.24;
+  SSLv3.0 is disabled to avoid POODLE vulnerability
 * `#461 <https://github.com/xitrum-framework/xitrum/issues/461>`_
   Update Akka from 2.3.5 to 2.3.7
 * `#478 <https://github.com/xitrum-framework/xitrum/issues/478>`_
