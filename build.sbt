@@ -2,7 +2,7 @@ organization := "tv.cntt"
 
 name := "xitrum"
 
-version := "3.19-SNAPSHOT"
+version := "3.20-SNAPSHOT"
 
 scalaVersion := "2.11.4"
 //scalaVersion := "2.10.4"
@@ -77,7 +77,7 @@ libraryDependencies += "com.typesafe.akka" %% "akka-contrib" % "2.3.7"
 libraryDependencies += "com.typesafe.akka" %% "akka-slf4j" % "2.3.7"
 
 // For clustering SockJS with Akka
-libraryDependencies += "tv.cntt" %% "glokka" % "2.0"
+libraryDependencies += "tv.cntt" %% "glokka" % "2.2"
 
 // For file watch
 // (akka-agent is added here, should ensure same Akka version as above)

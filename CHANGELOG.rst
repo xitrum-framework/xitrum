@@ -1,3 +1,8 @@
+3.20:
+
+* `#480 <https://github.com/xitrum-framework/xitrum/issues/480>`_
+  Update Glokka from 2.0 to 2.2
+
 3.19:
 
 * `#452 <https://github.com/xitrum-framework/xitrum/issues/452>`_
