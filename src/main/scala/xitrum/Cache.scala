@@ -50,20 +50,41 @@ object Cache {
   /**
    * Cache config in xitrum.conf can be in 2 forms:
    *
+   * {{{
    * cache = my.Cache
+   * }}}
    *
    * Or if the cache needs additional options:
    *
+   * {{{
    * cache {
    *   "my.Cache" {
    *     option1 = value1
    *     option2 = value2
    *   }
+   *
+   *   # - Commented out:   Cache is automatically disabled in development mode,
+   *   #                    and enabled in production mode.
+   *   # - enabled = true:  Force cache to be enabled even in development mode.
+   *   # - enabled = false: Force cache to be disabled even in production mode.
+   *   enabled = true
    * }
+   * }}}
    */
   def loadFromConfig(): Cache = {
     try {
-      val cache = DualConfig.getClassInstance[Cache](Config.xitrum.config, "cache")
+      val enabled =
+        if (Config.xitrum.config.hasPath("cache.enabled"))
+          Config.xitrum.config.getBoolean("cache.enabled")
+        else
+          Config.productionMode
+
+      val cache =
+        if (enabled)
+          DualConfig.getClassInstance[Cache](Config.xitrum.config, "cache")
+        else
+          dummy()
+
       cache.start()
       cache
     } catch {
@@ -71,5 +92,27 @@ object Cache {
         Config.exitOnStartupError("Could not load cache engine, please check config/xitrum.conf", e)
         throw e
     }
+  }
+
+  private def dummy(): Cache = new Cache {
+    def start() {}
+
+    def stop() {}
+
+    def isDefinedAt(key: Any) = false
+
+    def get(key: Any) = None
+
+    def put(key: Any, value: Any) {}
+
+    def putIfAbsent(key: Any, value: Any) {}
+
+    def putSecond(key: Any, value: Any, seconds: Int) {}
+
+    def putSecondIfAbsent(key: Any, value: Any, seconds: Int) {}
+
+    def remove(key: Any) {}
+
+    def clear() {}
   }
 }

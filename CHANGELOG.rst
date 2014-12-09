@@ -2,6 +2,8 @@
 
 * `#480 <https://github.com/xitrum-framework/xitrum/issues/480>`_
   Update Glokka from 2.0 to 2.2
+* `#481 <https://github.com/xitrum-framework/xitrum/issues/481>`_
+  Allow enabling cache in development mode/disabling cache in production mode
 
 3.19:
 
