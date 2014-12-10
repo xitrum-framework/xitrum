@@ -80,10 +80,13 @@ object Cache {
           Config.productionMode
 
       val cache =
-        if (enabled)
-          DualConfig.getClassInstance[Cache](Config.xitrum.config, "cache")
-        else
+        if (enabled) {
+          // DualConfig works with config with only one entry
+          val withoutEnabled = Config.xitrum.config.withoutPath("cache.enabled")
+          DualConfig.getClassInstance[Cache](withoutEnabled, "cache")
+        } else {
           dummy()
+        }
 
       cache.start()
       cache
