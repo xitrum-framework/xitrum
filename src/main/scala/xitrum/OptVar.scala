@@ -2,7 +2,25 @@ package xitrum
 
 import scala.collection.mutable.{Map => MMap}
 
-abstract class OptVar[+A] {
+/**
+ *  @define none `None`
+ *  @define some [[scala.Some]]
+ *  @define option [[scala.Option]]
+ *  @define p `p`
+ *  @define f `f`
+ *  @define coll option
+ *  @define Coll `Option`
+ *  @define orderDependent
+ *  @define orderDependentFold
+ *  @define mayNotTerminateInf
+ *  @define willNotTerminateInf
+ *  @define collectExample
+ *  @define undefinedorder
+ *  @define thatinfo the class of the returned collection. In the standard library configuration, `That` is `Iterable[B]`
+ *  @define bfinfo an implicit value of class `CanBuildFrom` which determines the result class `That` from the current
+ *    representation type `Repr` and the new element type `B`.
+ */
+abstract class OptVar[+A] extends Product with Serializable {
   private[this] val key = this.getClass.getName
 
   def getAll(implicit action: Action): MMap[String, Any]
