@@ -20,7 +20,7 @@ import scala.collection.mutable.{Map => MMap}
  *  @define bfinfo an implicit value of class `CanBuildFrom` which determines the result class `That` from the current
  *    representation type `Repr` and the new element type `B`.
  */
-abstract class OptVar[+A] extends Product with Serializable {
+abstract class OptVar[+A] {
   private[this] val key = this.getClass.getName
 
   def getAll(implicit action: Action): MMap[String, Any]
