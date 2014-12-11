@@ -54,11 +54,13 @@ trait ParamAccess {
     if (m <:< MANIFEST_FILE_UPLOAD) {
       bodyFileParams.get(key) match {
         case None         => throw new MissingParam(key)
-        case Some(values) => values(0).asInstanceOf[T]
+        case Some(values) => values.head.asInstanceOf[T]
       }
     } else {
-      val value = if (coll.contains(key)) coll(key).head else throw new MissingParam(key)
-      convertTextParam[T](value)
+      coll.get(key) match {
+        case None         => throw new MissingParam(key)
+        case Some(values) => convertTextParam[T](values.head)
+      }
     }
   }
 
@@ -67,15 +69,9 @@ trait ParamAccess {
 
   def paramo[T](key: String, coll: Params)(implicit e: T DefaultsTo String, m: Manifest[T]): Option[T] = {
     if (m <:< MANIFEST_FILE_UPLOAD) {
-      bodyFileParams.get(key).map { values => values(0).asInstanceOf[T] }
+      bodyFileParams.get(key).map(_.head.asInstanceOf[T])
     } else {
-      coll.get(key) match {
-        case None =>
-          None
-        case Some(values) =>
-          val value = values.head
-          if (value.isEmpty) None else Some(convertTextParam[T](value))
-      }
+      coll.get(key).map(values => convertTextParam[T](values.head))
     }
   }
 
@@ -89,9 +85,10 @@ trait ParamAccess {
         case Some(values) => values.asInstanceOf[Seq[T]]
       }
     } else {
-      val values   = if (coll.contains(key)) coll(key) else throw new MissingParam(key)
-      val nonEmpty = values.filterNot(_.isEmpty)
-      nonEmpty.map(convertTextParam[T])
+      coll.get(key) match {
+        case None         => throw new MissingParam(key)
+        case Some(values) => values.map(convertTextParam[T])
+      }
     }
   }
 
@@ -102,13 +99,7 @@ trait ParamAccess {
     if (m <:< MANIFEST_FILE_UPLOAD) {
       bodyFileParams.get(key).asInstanceOf[Option[Seq[T]]]
     } else {
-      coll.get(key) match {
-        case None =>
-          None
-        case Some(values) =>
-          val nonEmpty = values.filterNot(_.isEmpty)
-          Some(nonEmpty.map(convertTextParam[T]))
-      }
+      coll.get(key).map(_.map(convertTextParam[T]))
     }
   }
 

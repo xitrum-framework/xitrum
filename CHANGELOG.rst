@@ -1,5 +1,7 @@
 3.20:
 
+* `#482 <https://github.com/xitrum-framework/xitrum/issues/482>`_
+  paramo, params, and paramso should not filter out empty params
 * `#484 <https://github.com/xitrum-framework/xitrum/issues/484>`_
   Add methods in Option to RequestVar and SessionVar
 * `#481 <https://github.com/xitrum-framework/xitrum/issues/481>`_
