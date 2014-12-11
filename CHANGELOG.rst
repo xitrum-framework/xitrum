@@ -1,9 +1,11 @@
 3.20:
 
-* `#480 <https://github.com/xitrum-framework/xitrum/issues/480>`_
-  Update Glokka from 2.0 to 2.2
+* `#484 <https://github.com/xitrum-framework/xitrum/issues/484>`_
+  Add methods in Option to RequestVar and SessionVar
 * `#481 <https://github.com/xitrum-framework/xitrum/issues/481>`_
   Allow enabling cache in development mode/disabling cache in production mode
+* `#480 <https://github.com/xitrum-framework/xitrum/issues/480>`_
+  Update Glokka from 2.0 to 2.2
 
 3.19:
 
