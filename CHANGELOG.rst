@@ -8,6 +8,8 @@
   Allow enabling cache in development mode/disabling cache in production mode
 * `#480 <https://github.com/xitrum-framework/xitrum/issues/480>`_
   Update Glokka from 2.0 to 2.2
+* `#485 <https://github.com/xitrum-framework/xitrum/issues/485>`_
+  Update Twitter Chill from 0.5.0 to 0.5.1
 
 3.19:
 
