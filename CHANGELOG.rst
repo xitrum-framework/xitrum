@@ -10,6 +10,8 @@
   Update Glokka from 2.0 to 2.2
 * `#485 <https://github.com/xitrum-framework/xitrum/issues/485>`_
   Update Twitter Chill from 0.5.0 to 0.5.1
+* `#487 <https://github.com/xitrum-framework/xitrum/issues/487>`_
+  Update jQuery Validation from 0.13.0 to 0.13.1
 * `#486 <https://github.com/xitrum-framework/xitrum/issues/486>`_
   Update D3.js from 3.4.13 to 3.5.2
 
