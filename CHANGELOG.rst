@@ -2,6 +2,8 @@
 
 * `#489 <https://github.com/xitrum-framework/xitrum/issues/489>`_
   When forwardTo is called in a before filter, the action's execute method should not be called
+* `#491 <https://github.com/xitrum-framework/xitrum/issues/491>`_
+  Remove paramso; params returns Seq.empty when there's no such param
 
 3.20:
 

@@ -81,25 +81,14 @@ trait ParamAccess {
   def params[T](key: String, coll: Params)(implicit e: T DefaultsTo String, m: Manifest[T]): Seq[T] = {
     if (m <:< MANIFEST_FILE_UPLOAD) {
       bodyFileParams.get(key) match {
-        case None         => throw new MissingParam(key)
+        case None         => Seq.empty
         case Some(values) => values.asInstanceOf[Seq[T]]
       }
     } else {
       coll.get(key) match {
-        case None         => throw new MissingParam(key)
+        case None         => Seq.empty
         case Some(values) => values.map(convertTextParam[T])
       }
-    }
-  }
-
-  def paramso[T](key: String)(implicit e: T DefaultsTo String, m: Manifest[T]): Option[Seq[T]] =
-    paramso(key, textParams)
-
-  def paramso[T](key: String, coll: Params)(implicit e: T DefaultsTo String, m: Manifest[T]): Option[Seq[T]] = {
-    if (m <:< MANIFEST_FILE_UPLOAD) {
-      bodyFileParams.get(key).asInstanceOf[Option[Seq[T]]]
-    } else {
-      coll.get(key).map(_.map(convertTextParam[T]))
     }
   }
 

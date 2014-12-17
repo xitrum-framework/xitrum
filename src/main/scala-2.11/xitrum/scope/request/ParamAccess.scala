@@ -78,25 +78,14 @@ trait ParamAccess {
   def params[T: TypeTag](key: String, coll: Params)(implicit d: T DefaultsTo String): Seq[T] = {
     if (typeOf[T] <:< TYPE_FILE_UPLOAD) {
       bodyFileParams.get(key) match {
-        case None         => throw new MissingParam(key)
+        case None         => Seq.empty
         case Some(values) => values.asInstanceOf[Seq[T]]
       }
     } else {
       coll.get(key) match {
-        case None         => throw new MissingParam(key)
+        case None         => Seq.empty
         case Some(values) => values.map(convertTextParam[T])
       }
-    }
-  }
-
-  def paramso[T: TypeTag](key: String)(implicit d: T DefaultsTo String): Option[Seq[T]] =
-    paramso(key, textParams)
-
-  def paramso[T: TypeTag](key: String, coll: Params)(implicit d: T DefaultsTo String): Option[Seq[T]] = {
-    if (typeOf[T] <:< TYPE_FILE_UPLOAD) {
-      bodyFileParams.get(key).asInstanceOf[Option[Seq[T]]]
-    } else {
-      coll.get(key).map(_.map(convertTextParam[T]))
     }
   }
 
