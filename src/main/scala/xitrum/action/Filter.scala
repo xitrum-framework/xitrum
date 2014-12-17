@@ -19,12 +19,13 @@ trait Filter {
    * Called by Dispatcher.
    * Calls all before filters until a filter has responded something.
    *
-   * @return false if a before filter has responded something
+   * @return false if a before filter has responded something and later before
+   * filters and the action's "execute" method should not be called 
    */
   def callBeforeFilters(): Boolean = {
     beforeFilters.forall { bf =>
       bf()
-      !isDoneResponding
+      !isDoneResponding && !forwarding
     }
   }
 

@@ -1,3 +1,8 @@
+3.21:
+
+* `#489 <https://github.com/xitrum-framework/xitrum/issues/489>`_
+  When forwardTo is called in a before filter, the action's execute method should not be called
+
 3.20:
 
 * `#482 <https://github.com/xitrum-framework/xitrum/issues/482>`_
