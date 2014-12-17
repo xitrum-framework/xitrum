@@ -1,6 +1,7 @@
 package xitrum.util
 
-import java.io.{FileInputStream, InputStream}
+import java.io.{File, FileInputStream, InputStream}
+import java.nio.charset.Charset
 import java.nio.file.{Files, Paths}
 import java.util.{Arrays, Properties}
 
@@ -65,6 +66,11 @@ object Loader {
     bytesFromInputStream(is)
   }
 
+  def bytesFromFile(file: File): Array[Byte] = {
+    val is = new FileInputStream(file)
+    bytesFromInputStream(is)
+  }
+
   /**
    * @param path Relative to one of the elements in classpath, without leading "/"
    */
@@ -75,8 +81,28 @@ object Loader {
 
   //----------------------------------------------------------------------------
 
-  def stringFromFile(path: String) =
-    new String(bytesFromFile(path), UTF_8)
+  def stringFromInputStream(is: InputStream, charset: String) =
+    new String(bytesFromInputStream(is), charset)
+
+  def stringFromInputStream(is: InputStream, charset: Charset) =
+    new String(bytesFromInputStream(is), charset)
+
+  /** Charset is UTF-8 */
+  def stringFromInputStream(is: InputStream) =
+    new String(bytesFromInputStream(is), UTF_8)
+
+  //----------------------------------------------------------------------------
+
+  def stringFromFile(path: String, charset: String) = new String(bytesFromFile(path), charset)
+  def stringFromFile(file: File,   charset: String) = new String(bytesFromFile(file), charset)
+
+  def stringFromFile(path: String, charset: Charset) = new String(bytesFromFile(path), charset)
+  def stringFromFile(file: File,   charset: Charset) = new String(bytesFromFile(file), charset)
+
+  /** Charset is UTF-8 */
+  def stringFromFile(path: String) = new String(bytesFromFile(path), UTF_8)
+  /** Charset is UTF-8 */
+  def stringFromFile(file: File)   = new String(bytesFromFile(file), UTF_8)
 
   /**
    * @param path Relative to one of the elements in classpath, without leading "/"
@@ -86,8 +112,10 @@ object Loader {
 
   //----------------------------------------------------------------------------
 
-  def propertiesFromFile(path: String): Properties = {
-    val is  = new FileInputStream(path)
+  def propertiesFromFile(path: String): Properties = propertiesFromFile(new File(path))
+
+  def propertiesFromFile(file: File): Properties = {
+    val is  = new FileInputStream(file)
     val ret = new Properties
     ret.load(is)
     is.close()
@@ -110,6 +138,9 @@ object Loader {
 
   def jsonFromFile[T](path: String)(implicit m: Manifest[T]): Option[T] =
     SeriDeseri.fromJson[T](stringFromFile(path))(m)
+
+  def jsonFromFile[T](file: File)(implicit m: Manifest[T]): Option[T] =
+    SeriDeseri.fromJson[T](stringFromFile(file))(m)
 
   /**
    * @param path Relative to one of the elements in classpath, without leading "/"

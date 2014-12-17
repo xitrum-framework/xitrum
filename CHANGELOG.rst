@@ -4,6 +4,8 @@
   When forwardTo is called in a before filter, the action's execute method should not be called
 * `#491 <https://github.com/xitrum-framework/xitrum/issues/491>`_
   Remove paramso; params returns Seq.empty when there's no such param
+* `#493 <https://github.com/xitrum-framework/xitrum/issues/493>`_
+  Add some more methods to xitrum.util.Loader
 * `#492 <https://github.com/xitrum-framework/xitrum/issues/492>`_
   Update Akka from 2.3.7 to 2.3.8
 
