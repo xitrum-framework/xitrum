@@ -11,15 +11,20 @@ import xitrum.Log
 import xitrum.util.{FileMonitor, Loader}
 
 object PoLoader {
+  // Also watch this directory in development mode
+  private val DEV_RESOURCES_DIR = "src/main/resources"
+
   private val cache = MMap.empty[String, Po]
   watch()
 
   /**
    * For the specified language, this method loads and merges all po files in
-   * classpath, at i18n/<language>.po. You can store the po files in JAR files,
-   * at src/main/resources/i18n/<language>.po (compile time), or at
-   * config/i18n/<language>.po ("config" directory is put to classpath by Xitrum
-   * at run time, this is convenient if you want to modify po files at run time).
+   * classpath and src/main/resources, at i18n/<language>.po.
+   *
+   * You can store the po files in JAR files, at src/main/resources/i18n/<language>.po
+   * (compile time), or at config/i18n/<language>.po ("config" directory is put
+   * to classpath by Xitrum at run time, this is convenient if you want to modify
+   * po files at run time without having to recompile or restart).
    *
    * The result is stored in cache for further fast access. If you want to reload
    * the po files, use clear() or remove(language) to clean the cache, then load again.
@@ -35,8 +40,13 @@ object PoLoader {
       while (urlEnum.hasMoreElements()) {
         val url    = urlEnum.nextElement()
         val is     = url.openStream()
-        val bytes  = Loader.bytesFromInputStream(is)
-        val string = new String(bytes, UTF_8)
+        val string = Loader.stringFromInputStream(is)
+        Parser.parsePo(string).foreach(buffer.append(_))
+      }
+
+      val file = new File(DEV_RESOURCES_DIR + "/i18n/" + language + ".po")
+      if (file.exists) {
+        val string = Loader.stringFromFile(file)
         Parser.parsePo(string).foreach(buffer.append(_))
       }
 
@@ -70,10 +80,11 @@ object PoLoader {
   }
 
   /**
-   * Watches i18n directories in classpath to reload po files automatically.
+   * Watches i18n directories in classpath and src/main/resources
+   * (for development mode) to reload .po files automatically.
    */
   private def watch() {
-    val searchDirs = Discoverer.files.filter(_.isDirectory)
+    val searchDirs = Discoverer.files.filter(_.isDirectory) ++ Seq(new File(DEV_RESOURCES_DIR))
     searchDirs.foreach { dir =>
       val withI18n = new File(dir, "i18n")
       if (withI18n.exists && withI18n.isDirectory) {

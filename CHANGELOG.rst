@@ -4,6 +4,8 @@
   When forwardTo is called in a before filter, the action's execute method should not be called
 * `#491 <https://github.com/xitrum-framework/xitrum/issues/491>`_
   Remove paramso; params returns Seq.empty when there's no such param
+* `#455 <https://github.com/xitrum-framework/xitrum/issues/455>`_
+  PoLoader should watch src/main/resources/i18n directory in development mode
 * `#493 <https://github.com/xitrum-framework/xitrum/issues/493>`_
   Add some more methods to xitrum.util.Loader
 * `#492 <https://github.com/xitrum-framework/xitrum/issues/492>`_
