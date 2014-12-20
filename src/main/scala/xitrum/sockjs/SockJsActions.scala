@@ -129,15 +129,10 @@ trait ServerIdSessionIdValidator extends Action {
   beforeFilter {
     if (pathParams.contains("serverId") || pathParams.contains("sessionId")) {
       val noDots = pathParams("serverId")(0).indexOf('.') < 0 && pathParams("sessionId")(0).indexOf('.') < 0
-      if (noDots) {
-        true
-      } else {
+      if (!noDots) {
         response.setStatus(HttpResponseStatus.NOT_FOUND)
         respondText("")
-        false
       }
-    } else {
-      true
     }
   }
 }

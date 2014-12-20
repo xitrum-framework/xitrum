@@ -127,12 +127,10 @@ trait MetricsViewer extends FutureAction {
 class XitrumMetricsViewer extends FutureAction with MetricsViewer {
   beforeFilter {
     val apiKey  = param("api_key")
-    val correct = apiKey == MetricsManager.metrics.apiKey
-    if (!correct) {
+    if (apiKey != MetricsManager.metrics.apiKey) {
       response.setStatus(HttpResponseStatus.UNAUTHORIZED)
       respondHtml(<p>Unauthorized</p>)
     }
-    correct
   }
 
   lazy val html = DocType.html5(
