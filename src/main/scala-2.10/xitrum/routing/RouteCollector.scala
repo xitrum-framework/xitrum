@@ -61,15 +61,9 @@ object RouteCollector {
 
     if (!entry.relPath.endsWith(".class")) return acc
 
-    // Optimize: Ignore Java and Scala default classes; these can be thousands
+    // Optimize: Ignore standard Java, standard Scala, Netty classes etc.; these can be thousands
     val relPath = if (File.separatorChar != '/') entry.relPath.replace(File.separatorChar, '/') else entry.relPath
-    val skip =
-      relPath.startsWith("java/")  ||
-      relPath.startsWith("javax/") ||
-      relPath.startsWith("scala/") ||
-      relPath.startsWith("sun/")   ||
-      relPath.startsWith("com/sun/")
-    if (skip) return acc
+    if (IgnoredPackages.isIgnored(relPath)) return acc
 
     try {
       val withoutExt      = relPath.substring(0, relPath.length - ".class".length)
