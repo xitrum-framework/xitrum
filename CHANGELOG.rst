@@ -1,3 +1,8 @@
+3.22:
+
+* `#495 <https://github.com/xitrum-framework/xitrum/issues/495>`_
+  Update Netty from 4.0.24 to 4.0.25
+
 3.21:
 
 * `#489 <https://github.com/xitrum-framework/xitrum/issues/489>`_

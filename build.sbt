@@ -59,23 +59,19 @@ class Version {
 
 //------------------------------------------------------------------------------
 
-// Most Scala projects are published to Sonatype, but Sonatype is not default
-// and it takes several hours to sync from Sonatype to Maven Central
-resolvers += "SonatypeReleases" at "http://oss.sonatype.org/content/repositories/releases/"
-
 // Projects using Xitrum must provide a concrete implementation of SLF4J (Logback etc.)
 libraryDependencies += "org.slf4s" %% "slf4s-api" % "1.7.7"
 
 // Netty is the core of Xitrum's HTTP(S) feature
-libraryDependencies += "io.netty" % "netty-all" % "4.0.24.Final"
+libraryDependencies += "io.netty" % "netty-all" % "4.0.25.Final"
 
 // http://netty.io/wiki/forked-tomcat-native.html
 // Include all classifiers for convenience
-libraryDependencies += "io.netty" % "netty-tcnative" % "1.1.30.Fork2" classifier "linux-x86_64"
+libraryDependencies += "io.netty" % "netty-tcnative" % "1.1.32.Fork1" classifier "linux-x86_64"
 
-libraryDependencies += "io.netty" % "netty-tcnative" % "1.1.30.Fork2" classifier "osx-x86_64"
+libraryDependencies += "io.netty" % "netty-tcnative" % "1.1.32.Fork1" classifier "osx-x86_64"
 
-libraryDependencies += "io.netty" % "netty-tcnative" % "1.1.30.Fork2" classifier "windows-x86_64"
+libraryDependencies += "io.netty" % "netty-tcnative" % "1.1.32.Fork1" classifier "windows-x86_64"
 
 // Javassist boosts Netty 4 speed
 libraryDependencies += "org.javassist" % "javassist" % "3.18.2-GA"
