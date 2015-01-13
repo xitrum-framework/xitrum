@@ -10,7 +10,7 @@ import scala.util.control.NonFatal
 abstract class Cache {
   /**
    * Cache engine like Hazelcast may take serveral seconds to start, this method
-   * is called at Xitrum server start to force the cahe to start, instead of
+   * is called at Xitrum server start to force the cache to start, instead of
    * letting it start lazily at first cache access.
    */
   def start()
