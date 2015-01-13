@@ -8,6 +8,8 @@
   Update Javassist from 3.18.2-GA to 3.19.0-GA
 * `#497 <https://github.com/xitrum-framework/xitrum/issues/497>`_
   Update jQuery from 2.1.1 to 2.1.3
+* `#500 <https://github.com/xitrum-framework/xitrum/issues/500>`_
+  Update D3.js from 3.5.2 to 3.5.3
 
 3.21:
 

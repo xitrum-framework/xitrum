@@ -138,7 +138,7 @@ class XitrumMetricsViewer extends FutureAction with MetricsViewer {
       <head>
         {xitrumCss}
         {jsDefaults}
-        <script type="text/javascript" src={webJarsUrl("d3js/3.5.2", "d3.js", "d3.min.js")}></script>
+        <script type="text/javascript" src={webJarsUrl("d3js/3.5.3", "d3.js", "d3.min.js")}></script>
         <script type="text/javascript" src={webJarsUrl(s"xitrum/${xitrum.version}/metrics.js")}></script>
         <title>Xitrum Default Metrics Viewer</title>
       </head>
@@ -200,7 +200,7 @@ class XitrumMetricsViewer extends FutureAction with MetricsViewer {
       <head>
         {xitrumCss}
         {jsDefaults}
-        <script type="text/javascript" src={webJarsUrl("d3js/3.5.2", "d3.js", "d3.min.js")}></script>
+        <script type="text/javascript" src={webJarsUrl("d3js/3.5.3", "d3.js", "d3.min.js")}></script>
         <script type="text/javascript" src={webJarsUrl(s"xitrum/${xitrum.version}/metrics.js")}></script>
         <title>Xitrum Default Metrics Viewer</title>
       </head>
