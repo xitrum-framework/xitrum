@@ -3,6 +3,10 @@ package xitrum.util
 import org.scalatest.{FlatSpec, Matchers}
 
 class SeriDeseriTest extends FlatSpec with Matchers {
+  // Need this so that xitrum.Config.xitrum.session is loaded, so that
+  // xitrum.util.Secure can use Config.xitrum.session.secureKey
+  xitrum.Config.xitrum.loadExternalEngines()
+
   behavior of "SeriDeseri"
 
   "bytesToBase64" should "serialize bytes to base64 with padding" in {
