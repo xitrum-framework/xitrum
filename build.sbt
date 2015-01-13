@@ -74,7 +74,7 @@ libraryDependencies += "io.netty" % "netty-tcnative" % "1.1.32.Fork1" classifier
 libraryDependencies += "io.netty" % "netty-tcnative" % "1.1.32.Fork1" classifier "windows-x86_64"
 
 // Javassist boosts Netty 4 speed
-libraryDependencies += "org.javassist" % "javassist" % "3.18.2-GA"
+libraryDependencies += "org.javassist" % "javassist" % "3.19.0-GA"
 
 libraryDependencies += "com.typesafe.akka" %% "akka-actor" % "2.3.8"
 
