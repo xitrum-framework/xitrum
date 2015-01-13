@@ -4,6 +4,8 @@
   Optimize route collecting: Ignore more packages that obviously don't contain routes
 * `#495 <https://github.com/xitrum-framework/xitrum/issues/495>`_
   Update Netty from 4.0.24 to 4.0.25
+* `#497 <https://github.com/xitrum-framework/xitrum/issues/497>`_
+  Update jQuery from 2.1.1 to 2.1.3
 
 3.21:
 
