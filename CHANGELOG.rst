@@ -4,6 +4,8 @@
   Optimize route collecting: Ignore more packages that obviously don't contain routes
 * `#495 <https://github.com/xitrum-framework/xitrum/issues/495>`_
   Update Netty from 4.0.24 to 4.0.25
+* `#501 <https://github.com/xitrum-framework/xitrum/issues/501>`_
+  Update Akka from 2.3.8 to 2.3.9
 * `#498 <https://github.com/xitrum-framework/xitrum/issues/498>`_
   Update Javassist from 3.18.2-GA to 3.19.0-GA
 * `#497 <https://github.com/xitrum-framework/xitrum/issues/497>`_

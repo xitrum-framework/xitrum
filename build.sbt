@@ -4,7 +4,7 @@ name := "xitrum"
 
 version := "3.22-SNAPSHOT"
 
-scalaVersion := "2.11.4"
+scalaVersion := "2.11.5"
 //scalaVersion := "2.10.4"
 
 crossScalaVersions := Seq("2.11.4", "2.10.4")
@@ -76,14 +76,14 @@ libraryDependencies += "io.netty" % "netty-tcnative" % "1.1.32.Fork1" classifier
 // Javassist boosts Netty 4 speed
 libraryDependencies += "org.javassist" % "javassist" % "3.19.0-GA"
 
-libraryDependencies += "com.typesafe.akka" %% "akka-actor" % "2.3.8"
+libraryDependencies += "com.typesafe.akka" %% "akka-actor" % "2.3.9"
 
-libraryDependencies += "com.typesafe.akka" %% "akka-cluster" % "2.3.8"
+libraryDependencies += "com.typesafe.akka" %% "akka-cluster" % "2.3.9"
 
-libraryDependencies += "com.typesafe.akka" %% "akka-contrib" % "2.3.8"
+libraryDependencies += "com.typesafe.akka" %% "akka-contrib" % "2.3.9"
 
 // Redirect Akka log to SLF4J
-libraryDependencies += "com.typesafe.akka" %% "akka-slf4j" % "2.3.8"
+libraryDependencies += "com.typesafe.akka" %% "akka-slf4j" % "2.3.9"
 
 // For clustering SockJS with Akka
 libraryDependencies += "tv.cntt" %% "glokka" % "2.2"
