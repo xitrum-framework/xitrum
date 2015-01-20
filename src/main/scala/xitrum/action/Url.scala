@@ -30,7 +30,7 @@ trait Url {
   //----------------------------------------------------------------------------
 
   /**
-   * Ex: publicUrl("jquery/2.1.1/jquery.js")
+   * Ex: publicUrl("jquery/2.1.3/jquery.js")
    *
    * @param path Relative to the "public" directory, without leading "/"
    */
@@ -58,7 +58,7 @@ trait Url {
   }
 
   /**
-   * Ex: publicUrl("jquery/2.1.1", "jquery.js", "jquery.min.js")
+   * Ex: publicUrl("jquery/2.1.3", "jquery.js", "jquery.min.js")
    *
    * @param directory Relative to the "public" directory, without leading "/"
    * @param devPath File path to use in development mode, relative to "directory" above
@@ -81,7 +81,7 @@ trait Url {
   }
 
   /**
-   * Ex: webJarsUrl("jquery/2.1.1", "jquery.js", "jquery.min.js")
+   * Ex: webJarsUrl("jquery/2.1.3", "jquery.js", "jquery.min.js")
    *
    * @param devFile File to use in development mode
    * @param prodFile File to use in production mode
