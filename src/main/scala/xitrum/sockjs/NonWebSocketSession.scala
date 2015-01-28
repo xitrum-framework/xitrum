@@ -19,17 +19,22 @@ case object AbortFromReceiverClient
 
 case class  MessagesFromSenderClient(messages: Seq[String])
 
-case class  MessageFromHandler(message: String)
-case object CloseFromHandler
+case class  MessageFromHandler(index: Int, message: String)
+case class  CloseFromHandler(index: Int)
 
 case object SubscribeResultToReceiverClientAnotherConnectionStillOpen
 case object SubscribeResultToReceiverClientClosed
 case class  SubscribeResultToReceiverClientMessages(messages: Seq[String])
 case object SubscribeResultToReceiverClientWaitForMessage
 
-case class  NotificationToReceiverClientMessage(message: String)
+case class  NotificationToReceiverClientMessage(index: Int, message: String, handler: ActorRef)
+case class  NotificationToReceiverClientClosed(index: Int, handler: ActorRef)
 case object NotificationToReceiverClientHeartbeat
-case object NotificationToReceiverClientClosed
+
+case class  NotificationToHandlerChannelCloseSuccess(index: Int)
+case class  NotificationToHandlerChannelCloseFailure(index: Int)
+case class  NotificationToHandlerChannelWriteSuccess(index: Int)
+case class  NotificationToHandlerChannelWriteFailure(index: Int)
 
 object NonWebSocketSession {
   // The session must time out after 5 seconds of not having a receiving connection
@@ -103,7 +108,7 @@ class NonWebSocketSession(var receiverCliento: Option[ActorRef], pathPrefix: Str
       if (monitored == sockJsActorRef && !closed) {
         // See CloseFromHandler
         unwatchAndStop()
-      } else if (receiverCliento == Some(monitored)){
+      } else if (receiverCliento == Some(monitored)) {
         context.unwatch(monitored)
         receiverCliento = None
         context.setReceiveTimeout(TIMEOUT_CONNECTION)
@@ -135,11 +140,11 @@ class NonWebSocketSession(var receiverCliento: Option[ActorRef], pathPrefix: Str
         }
       }
 
-    case CloseFromHandler =>
+    case CloseFromHandler(index) =>
       // Until the timeout occurs, the server must serve the close message
       closed = true
       receiverCliento.foreach { receiverClient =>
-        receiverClient ! NotificationToReceiverClientClosed
+        receiverClient ! NotificationToReceiverClientClosed(index, sockJsActorRef)
         context.unwatch(receiverClient)
         receiverCliento = None
         context.setReceiveTimeout(TIMEOUT_CONNECTION)
@@ -148,7 +153,7 @@ class NonWebSocketSession(var receiverCliento: Option[ActorRef], pathPrefix: Str
     case MessagesFromSenderClient(messages) =>
       if (!closed) messages.foreach { msg => sockJsActorRef ! SockJsText(msg) }
 
-    case MessageFromHandler(message) =>
+    case MessageFromHandler(index, message) =>
       if (!closed) {
         receiverCliento match {
           case None =>
@@ -161,7 +166,7 @@ class NonWebSocketSession(var receiverCliento: Option[ActorRef], pathPrefix: Str
 
           case Some(receiverClient) =>
             // buffer is empty at this moment, because receiverCliento is not empty
-            receiverClient ! NotificationToReceiverClientMessage(message)
+            receiverClient ! NotificationToReceiverClientMessage(index, message, sockJsActorRef)
         }
       }
 

@@ -20,6 +20,33 @@ import xitrum.scope.request.PathInfo
 import xitrum.util.SeriDeseri
 import xitrum.view.DocType
 
+private object NotificationToHandlerUtil {
+  def onComplete(
+    channelFuture: ChannelFuture,
+    index: Int, sockJsActorRef: ActorRef, write: Boolean
+  ): ChannelFuture = {
+    channelFuture.addListener(new ChannelFutureListener {
+      def operationComplete(f: ChannelFuture) {
+        val msg =
+          if (write) {
+            if (f.isSuccess) 
+              NotificationToHandlerChannelWriteSuccess(index)
+            else 
+              NotificationToHandlerChannelWriteFailure(index)
+          } else {
+            if (f.isSuccess) 
+              NotificationToHandlerChannelCloseSuccess(index)
+            else 
+              NotificationToHandlerChannelCloseFailure(index)
+          }
+
+        sockJsActorRef ! msg
+      }
+    })
+    channelFuture
+  }
+}
+
 // General info:
 // http://sockjs.github.com/sockjs-protocol/sockjs-protocol-0.3.html
 // http://en.wikipedia.org/wiki/Cross-origin_resource_sharing
@@ -202,25 +229,33 @@ trait NonWebSocketSessionActorAction extends ActorAction with SockJsAction {
    *
    * @return false if the channel will be closed when the channel write completes
    */
-  protected def respondStreamingWithLimit(text: String, isEventSource: Boolean = false): Boolean = {
+  protected def respondStreamingWithLimit(text: String, isEventSource: Boolean = false, index_handler: Option[(Int, ActorRef)] = None): Boolean = {
     // This is length in characters, not bytes,
     // but in this case the result doesn't have to be precise
     val size = text.length
     streamingBytesSent += size
-    if (streamingBytesSent < SockJsAction.CHUNKED_RESPONSE_LIMIT) {
-      if (isEventSource) respondEventSource(text) else respondText(text)
-      true
+    val (f, ret) = if (streamingBytesSent < SockJsAction.CHUNKED_RESPONSE_LIMIT) {
+      val f = if (isEventSource) respondEventSource(text) else respondText(text)
+      (f, true)
     } else {
       context.stop(self)
-
-      if (isEventSource) respondEventSource(text) else respondText(text)
+      val f = if (isEventSource) respondEventSource(text) else respondText(text)
       closeWithLastChunk()
-      false
+      (f, false)
     }
+
+    index_handler.foreach { case (index, handler) =>
+      NotificationToHandlerUtil.onComplete(f, index, handler, false)
+    }
+
+    ret
   }
 
-  protected def closeWithLastChunk() {
-    respondLastChunk().addListener(ChannelFutureListener.CLOSE)
+  protected def closeWithLastChunk(index_handler: Option[(Int, ActorRef)] = None) {
+    val f = respondLastChunk().addListener(ChannelFutureListener.CLOSE)
+    index_handler.foreach { case (index, handler) =>
+      NotificationToHandlerUtil.onComplete(f, index, handler, false)
+    }
   }
 }
 
@@ -362,17 +397,19 @@ class XhrPollingReceive extends NonWebSocketSessionReceiverActorAction with Skip
   }
 
   protected override def receiveNotification: Receive = {
-    case NotificationToReceiverClientMessage(message) =>
+    case NotificationToReceiverClientMessage(index, message, handler) =>
       val json   = SeriDeseri.toJson(Seq(message))
       val quoted = SockJsAction.quoteUnicode(json)
-      respondJs("a" + quoted + "\n")
+      NotificationToHandlerUtil.onComplete(respondJs("a" + quoted + "\n"), index, handler, true)
 
     case NotificationToReceiverClientHeartbeat =>
       respondJs("h\n")
 
-    case NotificationToReceiverClientClosed =>
-      respondJs("c[3000,\"Go away!\"]\n")
-      .addListener(ChannelFutureListener.CLOSE)
+    case NotificationToReceiverClientClosed(index, handler) =>
+      NotificationToHandlerUtil.onComplete(
+        respondJs("c[3000,\"Go away!\"]\n"),
+        index, handler, false
+      ).addListener(ChannelFutureListener.CLOSE)
 
     case Terminated(actorRef) if (actorRef == nonWebSocketSession) =>
       respondJs("c[2011,\"Server error\"]\n")
@@ -466,17 +503,23 @@ class XhrStreamingReceive extends NonWebSocketSessionReceiverActorAction with Sk
   }
 
   protected override def receiveNotification: Receive = {
-    case NotificationToReceiverClientMessage(message) =>
+    case NotificationToReceiverClientMessage(index, message, handler) =>
       val json   = SeriDeseri.toJson(Seq(message))
       val quoted = SockJsAction.quoteUnicode(json)
-      respondStreamingWithLimit("a" + quoted + "\n")
+      respondStreamingWithLimit("a" + quoted + "\n", false, Some(index, handler))
 
     case NotificationToReceiverClientHeartbeat =>
       respondStreamingWithLimit("h\n")
 
-    case NotificationToReceiverClientClosed =>
-      respondJs("c[3000,\"Go away!\"]\n")
-      closeWithLastChunk()
+    case NotificationToReceiverClientClosed(index, handler) =>
+      respondJs("c[3000,\"Go away!\"]\n").addListener(new ChannelFutureListener {
+        def operationComplete(f: ChannelFuture) {
+          if (f.isSuccess)
+            closeWithLastChunk(Some(index, handler))
+          else
+            NotificationToHandlerUtil.onComplete(f, index, handler, false)
+        }
+      })
 
     case Terminated(actorRef) if (actorRef == nonWebSocketSession) =>
       respondJs("c[2011,\"Server error\"]\n")
@@ -556,24 +599,30 @@ class HtmlFileReceive extends NonWebSocketSessionReceiverActorAction {
   }
 
   protected override def receiveNotification: Receive = {
-    case NotificationToReceiverClientMessage(message) =>
+    case NotificationToReceiverClientMessage(index, message, handler) =>
       val buffer = new StringBuilder
       val json   = SeriDeseri.toJson(Seq(message))
       val quoted = SockJsAction.quoteUnicode(json)
       buffer.append("<script>\np(\"a")
       buffer.append(jsEscape(quoted))
       buffer.append("\");\n</script>\r\n")
-      respondStreamingWithLimit(buffer.toString)
+      respondStreamingWithLimit(buffer.toString, false, Some(index, handler))
 
     case NotificationToReceiverClientHeartbeat =>
       respondStreamingWithLimit("<script>\np(\"h\");\n</script>\r\n")
 
-    case NotificationToReceiverClientClosed =>
+    case NotificationToReceiverClientClosed(index, handler) =>
       respondHtml(
         SockJsAction.htmlFile(callback, false) +
         "<script>\np(\"c[3000,\\\"Go away!\\\"]\");\n</script>\r\n"
-      )
-      closeWithLastChunk()
+      ).addListener(new ChannelFutureListener {
+        def operationComplete(f: ChannelFuture) {
+          if (f.isSuccess)
+            closeWithLastChunk(Some(index, handler))
+          else
+            NotificationToHandlerUtil.onComplete(f, index, handler, false)
+        }
+      })
 
     case Terminated(actorRef) if (actorRef == nonWebSocketSession) =>
       respondHtml(
@@ -594,7 +643,7 @@ class JsonPPollingReceive extends NonWebSocketSessionReceiverActorAction {
     val callbacko = callbackParam()
     if (callbacko.isEmpty) return
 
-    callback  = callbacko.get
+    callback      = callbacko.get
     val sessionId = param("sessionId")
 
     handleCookie()
@@ -639,21 +688,23 @@ class JsonPPollingReceive extends NonWebSocketSessionReceiverActorAction {
   }
 
   protected override def receiveNotification: Receive = {
-    case NotificationToReceiverClientMessage(message) =>
+    case NotificationToReceiverClientMessage(index, message, handler) =>
       val buffer = new StringBuilder
       val json   = SeriDeseri.toJson(Seq(message))
       val quoted = SockJsAction.quoteUnicode(json)
       buffer.append(callback + "(\"a")
       buffer.append(jsEscape(quoted))
       buffer.append("\");\r\n")
-      respondJs(buffer.toString)
+      NotificationToHandlerUtil.onComplete(respondJs(buffer.toString), index, handler, true)
 
     case NotificationToReceiverClientHeartbeat =>
       respondJs(callback + "(\"h\");\r\n")
 
-    case NotificationToReceiverClientClosed =>
-      respondJs(callback + "(\"c[3000,\\\"Go away!\\\"]\");\r\n")
-      .addListener(ChannelFutureListener.CLOSE)
+    case NotificationToReceiverClientClosed(index, handler) =>
+      NotificationToHandlerUtil.onComplete(
+        respondJs(callback + "(\"c[3000,\\\"Go away!\\\"]\");\r\n"),
+        index, handler, false
+      ).addListener(ChannelFutureListener.CLOSE)
 
     case Terminated(actorRef) if (actorRef == nonWebSocketSession) =>
       respondJs(callback + "(\"c[2011,\\\"Server error\\\"]\");\r\n")
@@ -755,17 +806,17 @@ class EventSourceReceive extends NonWebSocketSessionReceiverActorAction {
   }
 
   protected override def receiveNotification: Receive = {
-    case NotificationToReceiverClientMessage(message) =>
+    case NotificationToReceiverClientMessage(index, message, handler) =>
       val json   = "a" + SeriDeseri.toJson(Seq(message))
       val quoted = SockJsAction.quoteUnicode(json)
-      respondStreamingWithLimit(quoted, true)
+      respondStreamingWithLimit(quoted, true, Some(index, handler))
 
     case NotificationToReceiverClientHeartbeat =>
       respondStreamingWithLimit("h", true)
 
-    case NotificationToReceiverClientClosed =>
+    case NotificationToReceiverClientClosed(index, handler) =>
       respondJs("c[3000,\"Go away!\"]\n")
-      closeWithLastChunk()
+      closeWithLastChunk(Some(index, handler))
 
     case Terminated(actorRef) if (actorRef == nonWebSocketSession) =>
       respondEventSource("c[2011,\"Server error\"]")
@@ -837,17 +888,19 @@ class WebSocket extends WebSocketAction with ServerIdSessionIdValidator with Soc
           }
         }
 
-      case MessageFromHandler(text) =>
+      case MessageFromHandler(index, text) =>
         val json = SeriDeseri.toJson(Seq(text))
-        respondWebSocketText("a" + json)
+        NotificationToHandlerUtil.onComplete(respondWebSocketText("a" + json), index, sockJsActorRef, true)
 
-      case CloseFromHandler =>
+      case CloseFromHandler(index) =>
         respondWebSocketText("c[3000,\"Go away!\"]").addListener(new ChannelFutureListener {
-          def operationComplete(f: ChannelFuture) { respondWebSocketClose() }
+          def operationComplete(f: ChannelFuture) {
+            if (f.isSuccess)
+              NotificationToHandlerUtil.onComplete(respondWebSocketClose(), index, sockJsActorRef, false)
+            else
+              NotificationToHandlerUtil.onComplete(f, index, sockJsActorRef, false)
+          }
         })
-
-      case _ =>
-        // Ignore all others
     }
   }
 
@@ -871,14 +924,11 @@ class RawWebSocket extends WebSocketAction with ServerIdSessionIdValidator with 
       case WebSocketText(text) =>
         sockJsActorRef ! SockJsText(text)
 
-      case MessageFromHandler(text) =>
-        respondWebSocketText(text)
+      case MessageFromHandler(index, text) =>
+        NotificationToHandlerUtil.onComplete(respondWebSocketText(text), index, sockJsActorRef, true)
 
-      case CloseFromHandler =>
-        respondWebSocketClose()
-
-      case _ =>
-        // Ignore all others
+      case CloseFromHandler(index) =>
+        NotificationToHandlerUtil.onComplete(respondWebSocketClose(), index, sockJsActorRef, false)
     }
   }
 
