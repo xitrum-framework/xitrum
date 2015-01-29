@@ -1,10 +1,19 @@
 package xitrum
 
+import scala.collection.mutable.{Map => MMap}
+import scala.concurrent.{Future, Promise}
 import akka.actor.{Actor, ActorRef}
-
 import xitrum.handler.{DefaultHttpChannelInitializer, HandlerEnv}
-import xitrum.sockjs.{CloseFromHandler, MessageFromHandler}
+import xitrum.sockjs.{
+  NotificationToHandlerChannelCloseSuccess,
+  NotificationToHandlerChannelCloseFailure,
+  NotificationToHandlerChannelWriteSuccess,
+  NotificationToHandlerChannelWriteFailure,
+  CloseFromHandler,
+  MessageFromHandler
+}
 import xitrum.util.SeriDeseri
+import xitrum.sockjs.NotificationToHandlerChannelWriteFailure
 
 //------------------------------------------------------------------------------
 
@@ -17,13 +26,37 @@ case class SockJsText(text: String)
 trait SockJsAction extends Actor with Action {
   // Ref of xitrum.sockjs.{NonWebSocketSessionActor, WebSocket, or RawWebSocket}
   private[this] var sessionActorRef: ActorRef = _
+  private[this] var promiseIndex: Int = 0
+  private[this] val promises: MMap[Int, Promise[Unit]] = MMap.empty
+
+  private def nextIndex: Int = synchronized {
+    promiseIndex += 1
+    promiseIndex
+  }
+
+  private def createPromise(index: Int): Future[Unit] = {
+    val p = Promise[Unit]()
+    promises(index) = p
+    p.future
+  }
 
   def receive = {
     case (sessionActorRef: ActorRef, action: Action) =>
       this.sessionActorRef = sessionActorRef
-
       apply(action.handlerEnv)
       execute()
+
+    case NotificationToHandlerChannelCloseSuccess(index) =>
+      promises.remove(index).foreach(_.success(Unit))
+
+    case NotificationToHandlerChannelCloseFailure(index) =>
+      promises.remove(index).foreach(_.failure(new Throwable))
+
+    case NotificationToHandlerChannelWriteSuccess(index) =>
+      promises.remove(index).foreach(_.success(Unit))
+
+    case NotificationToHandlerChannelWriteFailure(index) =>
+      promises.remove(index).foreach(_.failure(new Throwable))
   }
 
   /**
@@ -35,20 +68,29 @@ trait SockJsAction extends Actor with Action {
 
   //----------------------------------------------------------------------------
 
-  def respondSockJsText(text: String) {
-    sessionActorRef ! MessageFromHandler(text)
+  def respondSockJsText(text: String): Future[Unit] = {
+    val index = nextIndex
+    sessionActorRef ! MessageFromHandler(index, text)
+    createPromise(index)
   }
 
-  def respondSockJsJson(scalaObject: AnyRef) {
-    val json = SeriDeseri.toJson(scalaObject)
-    sessionActorRef ! MessageFromHandler(json)
+  def respondSockJsJson(scalaObject: AnyRef): Future[Unit] = {
+    val json  = SeriDeseri.toJson(scalaObject)
+    respondSockJsText(json)
   }
 
-  def respondSockJsClose() {
+  def respondSockJsClose(): Future[Unit] = {
+    val index = nextIndex
     // sessionActorRef will stop this actor when it stops.
     //
     // For non-WebSocket session, until the timeout occurs, the server must serve
     // the close message.
-    sessionActorRef ! CloseFromHandler
+    sessionActorRef ! CloseFromHandler(index)
+    createPromise(index)
+  }
+
+  override def postStop() {
+    promises.values.foreach(_.failure(new Throwable))
+    super.postStop()
   }
 }
