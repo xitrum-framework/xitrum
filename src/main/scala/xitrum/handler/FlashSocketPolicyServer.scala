@@ -1,13 +1,13 @@
 package xitrum.handler
 
-import io.netty.channel.ChannelInitializer
+import io.netty.channel.{ChannelInitializer, EventLoopGroup}
 import io.netty.channel.socket.SocketChannel
 
 import xitrum.{Config, Log}
 import xitrum.handler.inbound.FlashSocketPolicyHandler
 
 object FlashSocketPolicyServer {
-  def start() {
+  def start(): Seq[EventLoopGroup] = {
     val (bootstrap, groups) = Bootstrap.newBootstrap(newChannelInitializer())
 
     val port = Config.xitrum.port.flashSocketPolicy.get
@@ -15,6 +15,7 @@ object FlashSocketPolicyServer {
     NetOption.bind("flash socket", bootstrap, port, groups)
 
     Log.info(s"Flash socket policy server started on port $port")
+    groups
   }
 
   private def newChannelInitializer(): ChannelInitializer[SocketChannel] = {
