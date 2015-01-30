@@ -2,7 +2,7 @@ package xitrum
 
 import java.io.File
 
-import io.netty.channel.ChannelInitializer
+import io.netty.channel.{ChannelInitializer, EventLoopGroup}
 import io.netty.channel.socket.SocketChannel
 import io.netty.util.ResourceLeakDetector
 
@@ -18,10 +18,18 @@ import xitrum.handler.inbound.Dispatcher
 import xitrum.metrics.MetricsManager
 
 object Server {
+
+  private var eventLoopGroups = Seq.empty[EventLoopGroup]
+
+  def stop() {
+    eventLoopGroups.foreach(_.shutdownGracefully())
+    Log.info(s"Xitrum $version stopped")
+  }
+
   /**
    * Starts with the default ChannelInitializer provided by Xitrum.
    */
-  def start() {
+  def start(): Seq[EventLoopGroup] = {
     start(new DefaultHttpChannelInitializer)
   }
 
@@ -30,7 +38,7 @@ object Server {
    * xitrum.handler.DefaultHttpChannelInitializer.
    * SSL codec handler will be automatically prepended for HTTPS server.
    */
-  def start(httpChannelInitializer: ChannelInitializer[SocketChannel]) {
+  def start(httpChannelInitializer: ChannelInitializer[SocketChannel]): Seq[EventLoopGroup] = {
     Config.xitrum.loadExternalEngines()
 
     // Trick to start actorRegistry on startup
@@ -46,13 +54,13 @@ object Server {
 
     // Lastly, start the server(s) after necessary things have been prepared
     val portConfig = Config.xitrum.port
-    if (portConfig.http.isDefined)  doStart(false, httpChannelInitializer)
-    if (portConfig.https.isDefined) doStart(true,  httpChannelInitializer)
+    if (portConfig.http.isDefined)  eventLoopGroups = eventLoopGroups ++ doStart(false, httpChannelInitializer)
+    if (portConfig.https.isDefined) eventLoopGroups = eventLoopGroups ++ doStart(true,  httpChannelInitializer)
 
     // Flash socket server may use same port with HTTP server
     if (portConfig.flashSocketPolicy.isDefined) {
       if (portConfig.flashSocketPolicy != portConfig.http) {
-        FlashSocketPolicyServer.start()
+        eventLoopGroups = eventLoopGroups ++ FlashSocketPolicyServer.start()
       } else {
         Log.info("Flash socket policy file will be served by the HTTP server")
       }
@@ -65,11 +73,12 @@ object Server {
 
     // This is a good timing to warn
     Config.warnOnDefaultSecureKey()
+    eventLoopGroups
   }
 
   //----------------------------------------------------------------------------
 
-  private def doStart(https: Boolean, nonSslChannelInitializer: ChannelInitializer[SocketChannel]) {
+  private def doStart(https: Boolean, nonSslChannelInitializer: ChannelInitializer[SocketChannel]): Seq[EventLoopGroup] = {
     val channelInitializer =
       if (https)
         new SslChannelInitializer(nonSslChannelInitializer)
@@ -91,5 +100,6 @@ object Server {
       case Some(hostnameOrIp) =>
         Log.info(s"$service server started on $hostnameOrIp:$port")
     }
+    groups
   }
 }
