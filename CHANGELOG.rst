@@ -2,6 +2,8 @@
 
 * `#503 <https://github.com/xitrum-framework/xitrum/issues/503>`_
   Make respondSockJsXxx return Future like other respondXxx methods
+* `#504 <https://github.com/xitrum-framework/xitrum/issues/504>`_
+  The result of xitrum.Server.start can be used to stop the server
 * `#459 <https://github.com/xitrum-framework/xitrum/issues/459>`_
   Optimize route collecting: Ignore more packages that obviously don't contain routes
 * `#495 <https://github.com/xitrum-framework/xitrum/issues/495>`_
