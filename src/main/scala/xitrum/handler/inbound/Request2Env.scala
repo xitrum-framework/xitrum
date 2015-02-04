@@ -65,7 +65,7 @@ class Request2Env extends SimpleChannelInboundHandler[HttpObject] {
 
   override def channelRead0(ctx: ChannelHandlerContext, msg: HttpObject) {
     if (msg.getDecoderResult.isFailure) {
-      ctx.channel.close()
+      BadClientSilencer.respond400(ctx.channel, "Server could not decode request")
       return
     }
 
@@ -104,7 +104,7 @@ class Request2Env extends SimpleChannelInboundHandler[HttpObject] {
       case NonFatal(e) =>
         val m = "Could not parse content body of request: " + msg
         Log.warn(m, e)
-        ctx.channel.close()
+        BadClientSilencer.respond400(ctx.channel, "Server could not parse content body of request")
     }
   }
 
@@ -115,28 +115,39 @@ class Request2Env extends SimpleChannelInboundHandler[HttpObject] {
     // This is the first Xitrum handler, log the request
     Log.trace(request.toString)
 
-    // Clean previous files if any
+    // Clean previous files if any;
+    // one connection may be used to send multiple requests,
+    // so one handler instance may be used to handle multiple requests
     if (env != null) env.release()
 
-    env                = new HandlerEnv
-    env.channel        = ctx.channel
-    env.bodyTextParams = MMap.empty[String, Seq[String]]
-    env.bodyFileParams = MMap.empty[String, Seq[FileUpload]]
-    env.request        = createEmptyFullHttpRequest(request)
-    env.response       = createEmptyFullResponse(request)
-
-    bodyBytesReceived = 0
-    try {
-      val method       = request.getMethod
-      val bodyToDecode = (method == POST || method == PUT || method == PATCH)
-      if (bodyToDecode && isAPPLICATION_X_WWW_FORM_URLENCODED_or_MULTIPART_FORM_DATA(request))
-        // Otherwise env.bodyDecoder is null (see HandlerEnv's constructor)
-        env.bodyDecoder = new HttpPostRequestDecoder(factory, request)
-    } catch {
-      // Another exception is IncompatibleDataDecoderException, which means the
-      // request is valid, just no need to decode (see the check above)
-      case e: HttpPostRequestDecoder.ErrorDataDecoderException =>
-        ctx.channel.close()
+    val method       = request.getMethod
+    val bodyToDecode = (method == POST || method == PUT || method == PATCH)
+    var responded400 = false
+    val bodyDecoder  =
+      if (bodyToDecode && isAPPLICATION_X_WWW_FORM_URLENCODED_or_MULTIPART_FORM_DATA(request)){
+        try {
+          new HttpPostRequestDecoder(factory, request)
+        } catch {
+          // Another exception is IncompatibleDataDecoderException, which means the
+          // request is valid, just no need to decode (see the check above)
+          case e: HttpPostRequestDecoder.ErrorDataDecoderException =>
+            BadClientSilencer.respond400(ctx.channel, "Server could not parse content body of request")
+            responded400 = true
+            null
+        }
+      } else {
+        null
+      }
+    // Only initialize env when needed
+    if (!responded400) {
+      env                = new HandlerEnv
+      env.channel        = ctx.channel
+      env.bodyTextParams = MMap.empty[String, Seq[String]]
+      env.bodyFileParams = MMap.empty[String, Seq[FileUpload]]
+      env.request        = createEmptyFullHttpRequest(request)
+      env.response       = createEmptyFullResponse(request)
+      env.bodyDecoder    = bodyDecoder
+      bodyBytesReceived = 0
     }
   }
 

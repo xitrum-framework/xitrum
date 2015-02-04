@@ -1,8 +1,18 @@
 package xitrum.handler.inbound
 
-import io.netty.channel.{ChannelHandler, ChannelHandlerContext, SimpleChannelInboundHandler}
+import io.netty.buffer.Unpooled
+import io.netty.channel.{Channel, ChannelHandler, ChannelHandlerContext, ChannelFutureListener, SimpleChannelInboundHandler}
 import ChannelHandler.Sharable
-import xitrum.Log
+import io.netty.handler.codec.http.{DefaultFullHttpResponse, HttpVersion, HttpResponseStatus}
+import xitrum.{Config, Log}
+
+object BadClientSilencer {
+  def respond400(channel: Channel, body: String) {
+    val content  = Unpooled.copiedBuffer(body, Config.xitrum.request.charset)
+    val response = new DefaultFullHttpResponse(HttpVersion.HTTP_1_1, HttpResponseStatus.BAD_REQUEST, content)
+    channel.writeAndFlush(response).addListener(ChannelFutureListener.CLOSE);
+  }
+}
 
 /**
  * This handler should be put at the last position of the inbound pipeline to
