@@ -38,7 +38,7 @@ class UriParser extends SimpleChannelInboundHandler[HandlerEnv] {
         // https://github.com/xitrum-framework/xitrum/issues/508#issuecomment-72808997
         // Do not close channel without responding status code.
         // Nginx decides that upstream is down if upstream drop connection without responding status code.
-        BadClientSilencer.respond400(ctx.channel, "Server could not parse params in URI")
+        BadClientSilencer.respond400(ctx.channel, "Could not parse params in URI: " + e.getMessage)
     }
   }
 

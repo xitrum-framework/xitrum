@@ -64,8 +64,9 @@ class Request2Env extends SimpleChannelInboundHandler[HttpObject] {
   }
 
   override def channelRead0(ctx: ChannelHandlerContext, msg: HttpObject) {
-    if (msg.getDecoderResult.isFailure) {
-      BadClientSilencer.respond400(ctx.channel, "Server could not decode request")
+    val decRet = msg.getDecoderResult
+    if (decRet.isFailure) {
+      BadClientSilencer.respond400(ctx.channel, "Could not decode request: " + decRet.cause.getMessage)
       return
     }
 
@@ -104,7 +105,7 @@ class Request2Env extends SimpleChannelInboundHandler[HttpObject] {
       case NonFatal(e) =>
         val m = "Could not parse content body of request: " + msg
         Log.warn(m, e)
-        BadClientSilencer.respond400(ctx.channel, "Server could not parse content body of request")
+        BadClientSilencer.respond400(ctx.channel, "Could not parse content body of request: " + e.getMessage)
     }
   }
 
@@ -131,7 +132,7 @@ class Request2Env extends SimpleChannelInboundHandler[HttpObject] {
           // Another exception is IncompatibleDataDecoderException, which means the
           // request is valid, just no need to decode (see the check above)
           case e: HttpPostRequestDecoder.ErrorDataDecoderException =>
-            BadClientSilencer.respond400(ctx.channel, "Server could not parse content body of request")
+            BadClientSilencer.respond400(ctx.channel, "Could not parse content body of request: " + e.getMessage)
             responded400 = true
             null
         }
