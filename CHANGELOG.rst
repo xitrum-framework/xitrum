@@ -1,11 +1,15 @@
-3.22:
+3.23:
 
 * `#503 <https://github.com/xitrum-framework/xitrum/issues/503>`_
   Make respondSockJsXxx return Future like other respondXxx methods
 * `#504 <https://github.com/xitrum-framework/xitrum/issues/504>`_
   The result of xitrum.Server.start can be used to stop the server
 * `#508 <https://github.com/xitrum-framework/xitrum/issues/508>`_
-  Respond 400 Bad Request when params in request URI or body can't be decoded
+  Respond 400 Bad Request when params in request URI or body can't be decoded,
+  not just closing the connection
+
+3.22:
+
 * `#459 <https://github.com/xitrum-framework/xitrum/issues/459>`_
   Optimize route collecting: Ignore more packages that obviously don't contain routes
 * `#495 <https://github.com/xitrum-framework/xitrum/issues/495>`_

@@ -138,6 +138,7 @@ class Request2Env extends SimpleChannelInboundHandler[HttpObject] {
       } else {
         null
       }
+
     // Only initialize env when needed
     if (!responded400) {
       env                = new HandlerEnv
@@ -147,7 +148,7 @@ class Request2Env extends SimpleChannelInboundHandler[HttpObject] {
       env.request        = createEmptyFullHttpRequest(request)
       env.response       = createEmptyFullResponse(request)
       env.bodyDecoder    = bodyDecoder
-      bodyBytesReceived = 0
+      bodyBytesReceived  = 0
     }
   }
 
