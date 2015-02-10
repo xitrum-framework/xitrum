@@ -7,6 +7,8 @@
 * `#508 <https://github.com/xitrum-framework/xitrum/issues/508>`_
   Respond 400 Bad Request when params in request URI or body can't be decoded,
   not just closing the connection
+* `#512 <https://github.com/xitrum-framework/xitrum/issues/512>`_
+  Feature request: needed more control over netty configuration
 * `#511 <https://github.com/xitrum-framework/xitrum/issues/511>`_
   Update RhinoCoffeeScript from 1.8.0 to 1.9.0
 

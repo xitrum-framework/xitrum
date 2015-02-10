@@ -120,7 +120,8 @@ class StaticFileConfig(config: TConfig) {
 class RequestConfig(config: TConfig) {
   val charsetName               = config.getString("charset")
   val charset                   = Charset.forName(charsetName)
-  val maxInitialLineLength      = config.getInt("maxInitialLineLength")
+  val maxInitialLineLength      = if (config.hasPath("maxInitialLineLength")) config.getInt("maxInitialLineLength") else 4096
+  val maxHeaderSize             = if (config.hasPath("maxHeaderSize"))        config.getInt("maxHeaderSize")        else 8192
   val maxSizeInBytes            = config.getLong("maxSizeInMB") * 1024 * 1024
   val maxSizeInBytesOfUploadMem =
     if (config.hasPath("maxSizeInKBOfUploadMem"))
