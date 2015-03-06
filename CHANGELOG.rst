@@ -11,6 +11,8 @@
   Add config maxHeaderSize (for the entire HTTP header, defaults to 8192)
 * `#511 <https://github.com/xitrum-framework/xitrum/issues/511>`_
   Update RhinoCoffeeScript from 1.8.0 to 1.9.0
+* `#515 <https://github.com/xitrum-framework/xitrum/issues/515>`_
+  Update Schwatcher from 0.1.5 to 0.1.6
 
 3.22:
 
