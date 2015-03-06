@@ -9,6 +9,8 @@
   not just closing the connection
 * `#512 <https://github.com/xitrum-framework/xitrum/issues/512>`_
   Add config maxHeaderSize (for the entire HTTP header, defaults to 8192)
+* `#517 <https://github.com/xitrum-framework/xitrum/issues/517>`_
+  Update Scala to 2.10.5 and 2.11.6
 * `#511 <https://github.com/xitrum-framework/xitrum/issues/511>`_
   Update RhinoCoffeeScript from 1.8.0 to 1.9.0
 * `#515 <https://github.com/xitrum-framework/xitrum/issues/515>`_
