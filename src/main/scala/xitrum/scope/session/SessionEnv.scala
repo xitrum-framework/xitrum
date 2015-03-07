@@ -7,6 +7,7 @@ import io.netty.handler.codec.http.{HttpRequest, Cookie, CookieDecoder, ServerCo
 import HttpHeaders.Names
 
 import xitrum.{Action, Config, Log}
+import xitrum.util.DefaultsTo
 
 trait SessionEnv extends Csrf {
   this: Action =>

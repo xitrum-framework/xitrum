@@ -6,7 +6,7 @@ import io.netty.handler.codec.http.multipart.FileUpload
 import xitrum.{Config, Action}
 import xitrum.handler.HandlerEnv
 import xitrum.routing.Route
-import xitrum.util.SeriDeseri
+import xitrum.util.{DefaultsTo, SeriDeseri}
 
 object RequestEnv {
   def inspectParamsWithFilter(params: MMap[String, _ <: Seq[AnyRef]]): String = {
@@ -109,6 +109,6 @@ trait RequestEnv extends ParamAccess {
   }
 
   /** Ex: val json = requestContentJson[Map[String, String]] */
-  def requestContentJson[T](implicit m: Manifest[T]): Option[T] =
-    SeriDeseri.fromJson[T](requestContentString)(m)
+  def requestContentJson[T](implicit e: T DefaultsTo String, m: Manifest[T]): Option[T] =
+    SeriDeseri.fromJson[T](requestContentString)(e, m)
 }

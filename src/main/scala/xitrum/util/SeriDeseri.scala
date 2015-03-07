@@ -23,7 +23,7 @@ object SeriDeseri {
 
   def toBytes(any: Any): Array[Byte] = kryoPool.toBytesWithoutClass(any)
 
-  def fromBytes[T](bytes: Array[Byte])(implicit m: Manifest[T]): Option[T] = {
+  def fromBytes[T](bytes: Array[Byte])(implicit e: T DefaultsTo String, m: Manifest[T]): Option[T] = {
     try {
       val t = kryoPool.fromBytes(bytes, m.runtimeClass.asInstanceOf[Class[T]])
       Option(t)
@@ -49,7 +49,7 @@ object SeriDeseri {
    * If you want to do more complicated things, you should use JSON4S directly:
    * https://github.com/json4s/json4s
    */
-  def fromJson[T](jsonString: String)(implicit m: Manifest[T]): Option[T] = {
+  def fromJson[T](jsonString: String)(implicit e: T DefaultsTo String, m: Manifest[T]): Option[T] = {
     // Serialization.read doesn't work without type hints.
     //
     // Serialization.read[Map[String, Any]]("""{"name": "X", "age": 45}""")
@@ -129,10 +129,10 @@ object SeriDeseri {
     bytesToBase64(bytes)
   }
 
-  def fromBase64[T](base64String: String)(implicit m: Manifest[T]): Option[T] = {
+  def fromBase64[T](base64String: String)(implicit e: T DefaultsTo String, m: Manifest[T]): Option[T] = {
     for {
       bytes <- bytesFromBase64(base64String)
-      t     <- fromBytes(bytes)(m)
+      t     <- fromBytes(bytes)(e, m)
     } yield t
   }
 
@@ -198,10 +198,10 @@ object SeriDeseri {
 
 
   /** @param base64String may contain optional padding ("=" characters) */
-  def fromUrlSafeBase64[T](base64String: String)(implicit m: Manifest[T]): Option[T] = {
+  def fromUrlSafeBase64[T](base64String: String)(implicit e: T DefaultsTo String, m: Manifest[T]): Option[T] = {
     for {
       bytes <- bytesFromUrlSafeBase64(base64String)
-      t     <- fromBytes(bytes)(m)
+      t     <- fromBytes(bytes)(e, m)
     } yield t
   }
 
@@ -247,19 +247,27 @@ object SeriDeseri {
   }
 
   /** Decrypts using the key in config/xitrum.conf. */
-  def fromSecureUrlSafeBase64[T](base64String: String, forCookie: Boolean = false)(implicit m: Manifest[T]): Option[T] =
-    fromSecureUrlSafeBase64[T](base64String, Config.xitrum.session.secureKey, forCookie)(m)
+  def fromSecureUrlSafeBase64[T](
+    base64String: String, forCookie: Boolean = false
+  )(
+    implicit e: T DefaultsTo String, m: Manifest[T]
+  ): Option[T] =
+    fromSecureUrlSafeBase64[T](base64String, Config.xitrum.session.secureKey, forCookie)(e, m)
 
   /**
    * @param base64String may contain optional padding ("=" characters)
    * @param forCookie If true, tries to GZIP uncompress if the input is compressed
    */
-  def fromSecureUrlSafeBase64[T](base64String: String, key: String, forCookie: Boolean)(implicit m: Manifest[T]): Option[T] = {
+  def fromSecureUrlSafeBase64[T](
+    base64String: String, key: String, forCookie: Boolean
+  )(
+    implicit e: T DefaultsTo String, m: Manifest[T]
+  ): Option[T] = {
     for {
       encrypted       <- bytesFromUrlSafeBase64(base64String)
       maybeCompressed <- Secure.decrypt(encrypted, key)
       bytes           =  if (forCookie) Gzip.mayUncompress(maybeCompressed) else maybeCompressed
-      t               <- fromBytes[T](bytes)(m)
+      t               <- fromBytes[T](bytes)(e, m)
     } yield t
   }
 }

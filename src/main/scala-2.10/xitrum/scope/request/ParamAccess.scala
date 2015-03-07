@@ -4,6 +4,7 @@ import io.netty.handler.codec.http.multipart.FileUpload
 
 import xitrum.Action
 import xitrum.exception.MissingParam
+import xitrum.util.DefaultsTo
 
 /**
  * Use "manifest" for Scala 2.10 and "typeOf" for Scala 2.11:
@@ -30,20 +31,6 @@ trait ParamAccess {
   this: Action =>
 
   import ParamAccess._
-
-  //----------------------------------------------------------------------------
-
-  // http://groups.google.com/group/scala-user/browse_thread/thread/bb5214c5360b13c3
-
-  sealed class DefaultsTo[A, B]
-
-  trait LowPriorityDefaultsTo {
-    implicit def overrideDefault[A, B] = new DefaultsTo[A, B]
-  }
-
-  object DefaultsTo extends LowPriorityDefaultsTo {
-    implicit def default[B] = new DefaultsTo[B, B]
-  }
 
   //----------------------------------------------------------------------------
 

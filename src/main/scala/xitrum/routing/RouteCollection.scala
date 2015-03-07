@@ -384,7 +384,7 @@ class RouteCollection(
   // Convenient methods for modifying routes.
 
   /** removeByClass[ActionClassToRemove]()  */
-  def removeByClass[A <: Action]()(implicit action: reflect.Manifest[A]) {
+  def removeByClass[A <: Action]()(implicit action: Manifest[A]) {
     val className = action.toString
     all.foreach { routes =>
       val tobeRemoved = routes.filter(_.klass.getName == className)

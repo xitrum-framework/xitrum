@@ -3,7 +3,7 @@ package xitrum.scope.session
 import java.util.UUID
 
 import xitrum.Action
-import xitrum.util.SeriDeseri
+import xitrum.util.{DefaultsTo, SeriDeseri}
 
 /**
  * SeriDeseri's to/fromSecureUrlSafeBase64 is for preventing a user to mess with
@@ -36,13 +36,13 @@ object Csrf {
   def encrypt(action: Action, any: Any): String =
     action.antiCsrfToken + SeriDeseri.toSecureUrlSafeBase64(any)
 
-  def decrypt[T](action: Action, string: String)(implicit m: Manifest[T]): Option[T] = {
+  def decrypt[T](action: Action, string: String)(implicit e: T DefaultsTo String, m: Manifest[T]): Option[T] = {
     val prefix = action.antiCsrfToken
     if (!string.startsWith(prefix)) {
       None
     } else {
       val base64String = string.substring(prefix.length)
-      SeriDeseri.fromSecureUrlSafeBase64[T](base64String)(m)
+      SeriDeseri.fromSecureUrlSafeBase64[T](base64String)(e, m)
     }
   }
 }

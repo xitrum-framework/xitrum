@@ -136,15 +136,15 @@ object Loader {
 
   //----------------------------------------------------------------------------
 
-  def jsonFromFile[T](path: String)(implicit m: Manifest[T]): Option[T] =
-    SeriDeseri.fromJson[T](stringFromFile(path))(m)
+  def jsonFromFile[T](path: String)(implicit e: T DefaultsTo String, m: Manifest[T]): Option[T] =
+    SeriDeseri.fromJson[T](stringFromFile(path))(e, m)
 
-  def jsonFromFile[T](file: File)(implicit m: Manifest[T]): Option[T] =
-    SeriDeseri.fromJson[T](stringFromFile(file))(m)
+  def jsonFromFile[T](file: File)(implicit e: T DefaultsTo String, m: Manifest[T]): Option[T] =
+    SeriDeseri.fromJson[T](stringFromFile(file))(e, m)
 
   /**
    * @param path Relative to one of the elements in classpath, without leading "/"
    */
-  def jsonFromClasspath[T](path: String)(implicit m: Manifest[T]): Option[T] =
-    SeriDeseri.fromJson[T](stringFromClasspath(path))(m)
+  def jsonFromClasspath[T](path: String)(implicit e: T DefaultsTo String, m: Manifest[T]): Option[T] =
+    SeriDeseri.fromJson[T](stringFromClasspath(path))(e, m)
 }
