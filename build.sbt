@@ -63,7 +63,7 @@ class Version {
 libraryDependencies += "org.slf4s" %% "slf4s-api" % "1.7.10"
 
 // Netty is the core of Xitrum's HTTP(S) feature
-libraryDependencies += "io.netty" % "netty-all" % "4.0.25.Final"
+libraryDependencies += "io.netty" % "netty-all" % "4.0.26.Final"
 
 // http://netty.io/wiki/forked-tomcat-native.html
 // Include all classifiers for convenience
