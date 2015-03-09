@@ -17,6 +17,8 @@
   Update RhinoCoffeeScript from 1.8.0 to 1.9.0
 * `#515 <https://github.com/xitrum-framework/xitrum/issues/515>`_
   Update Schwatcher from 0.1.5 to 0.1.6
+* `#520 <https://github.com/xitrum-framework/xitrum/issues/520>`_
+  Update slf4s-api from 1.7.7 to 1.7.10
 
 3.22:
 
