@@ -4,6 +4,8 @@
   Make respondSockJsXxx return Future like other respondXxx methods
 * `#504 <https://github.com/xitrum-framework/xitrum/issues/504>`_
   The result of xitrum.Server.start can be used to stop the server
+* `#505 <https://github.com/xitrum-framework/xitrum/issues/505>`_
+  Reset session when there's type cast error with SessionVar
 * `#508 <https://github.com/xitrum-framework/xitrum/issues/508>`_
   Respond 400 Bad Request when params in request URI or body can't be decoded,
   not just closing the connection

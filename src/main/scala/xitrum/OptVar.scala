@@ -20,18 +20,58 @@ import scala.collection.mutable.{Map => MMap}
  *  @define bfinfo an implicit value of class `CanBuildFrom` which determines the result class `That` from the current
  *    representation type `Repr` and the new element type `B`.
  */
-abstract class OptVar[+A] {
-  private[this] val key = this.getClass.getName
+abstract class OptVar[+A](implicit m: Manifest[A]) {
+  protected[this] val key = getClass.getName
 
   def getAll(implicit action: Action): MMap[String, Any]
 
-  def get(implicit action: Action) = getAll(action)(key).asInstanceOf[A]
+  /**
+   * App developer may change type of a SessionVar when modifying his app code. If
+   * the session is not reset, the user with old session version will be stuck.
+   * He will always see 500 "server error" and won't be able to recover, unless
+   * he removes the session cookie.
+   *
+   * We clear all, instead of just removing the key, to avoid inconsistent app logic,
+   * which is worse than the ClassCastException.
+   */
+  private def clearAllOnClassCastException(a: Any)(implicit action: Action) {
+    val classOfA = m.runtimeClass
+    if (!classOfA.isInstance(a)) {
+      action.log.warn(s"Value $a of key $key can't be cast to $classOfA, $this is now cleared to try to recover from ClassCastException on next call")
+      getAll.clear()
+      throw new ClassCastException(s"Value $a of key $key can't be cast to $classOfA")
+    }
+  }
 
-  def set[B >: A](value: B)(implicit action: Action) = getAll.update(key, value)
+  def get(implicit action: Action): A = {
+    val a = getAll(action)(key)
+    clearAllOnClassCastException(a)
+    a.asInstanceOf[A]
+  }
 
-  def remove()(implicit action: Action) = getAll.remove(key).asInstanceOf[Option[A]]
+  def set[B >: A](value: B)(implicit action: Action) { getAll.update(key, value) }
 
-  def toOption(implicit action: Action) = getAll.get(key).asInstanceOf[Option[A]]
+  def remove()(implicit action: Action): Option[A] = {
+    getAll.remove(key) match {
+      case None =>
+        None
+
+      case Some(a) =>
+        clearAllOnClassCastException(a)
+        Some(a.asInstanceOf[A])
+    }
+  }
+
+  def toOption(implicit action: Action): Option[A] = {
+    getAll.get(key) match {
+      case None =>
+        None
+
+      case Some(a) =>
+        clearAllOnClassCastException(a)
+        Some(a.asInstanceOf[A])
+    }
+  }
 
   //----------------------------------------------------------------------------
   // Methods copied from Option (can't extend Option because it's sealed).

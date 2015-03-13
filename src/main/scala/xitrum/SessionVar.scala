@@ -1,5 +1,5 @@
 package xitrum
 
-class SessionVar[+A] extends OptVar[A] {
+class SessionVar[+A](implicit m: Manifest[A]) extends OptVar[A] {
   def getAll(implicit action: Action) = action.session
 }
