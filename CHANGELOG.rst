@@ -23,6 +23,8 @@
   Update slf4s-api from 1.7.7 to 1.7.10
 * `#521 <https://github.com/xitrum-framework/xitrum/issues/521>`_
   Update Twitter Chill from 0.5.1 to 0.5.2
+* `#523 <https://github.com/xitrum-framework/xitrum/issues/523>`_
+  Update SockJS JS library from 0.3.4 to 0.3.4-1
 
 3.22:
 

@@ -29,14 +29,14 @@ private object NotificationToHandlerUtil {
       def operationComplete(f: ChannelFuture) {
         val msg =
           if (write) {
-            if (f.isSuccess) 
+            if (f.isSuccess)
               NotificationToHandlerChannelWriteSuccess(index)
-            else 
+            else
               NotificationToHandlerChannelWriteFailure(index)
           } else {
-            if (f.isSuccess) 
+            if (f.isSuccess)
               NotificationToHandlerChannelCloseSuccess(index)
-            else 
+            else
               NotificationToHandlerChannelCloseFailure(index)
           }
 
@@ -321,7 +321,7 @@ class Iframe extends SockJsAction {
     document.domain = document.domain;
     _sockjs_onload = function(){SockJS.bootstrap_iframe();};
   </xml:unparsed></script>
-  <script src={webJarsUrl("sockjs-client/0.3.4", "sockjs.js", "sockjs.min.js")}></script>
+  <script src={webJarsUrl("sockjs-client/0.3.4-1", "sockjs.js", "sockjs.min.js")}></script>
 </head>
 <body>
   <h2>Don't panic!</h2>

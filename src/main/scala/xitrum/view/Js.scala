@@ -71,7 +71,7 @@ trait Js {
       <script type="text/javascript" src={webJarsUrl("jquery-validation/1.13.1",  "jquery.validate.js",    "jquery.validate.min.js")}></script>
       <script type="text/javascript" src={webJarsUrl("jquery-validation/1.13.1",  "additional-methods.js", "additional-methods.min.js")}></script>
       {validatei18n}
-      <script type="text/javascript" src={webJarsUrl("sockjs-client/0.3.4",       "sockjs.js",             "sockjs.min.js")}></script>
+      <script type="text/javascript" src={webJarsUrl("sockjs-client/0.3.4-1",     "sockjs.js",             "sockjs.min.js")}></script>
       <script type="text/javascript" src={url[xitrum.js]}></script>
     </xml:group>
   }
