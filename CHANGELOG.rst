@@ -10,7 +10,7 @@
 * `#512 <https://github.com/xitrum-framework/xitrum/issues/512>`_
   Add config maxHeaderSize (for the entire HTTP header, defaults to 8192)
 * `#518 <https://github.com/xitrum-framework/xitrum/issues/518>`_
-  xitrum.util.SeriDeseri.fromXXX[T] defaults to String
+  Make xitrum.util.SeriDeseri.fromXXX return String by default, instead of Nothing
 * `#517 <https://github.com/xitrum-framework/xitrum/issues/517>`_
   Update Scala to 2.10.5 and 2.11.6
 * `#519 <https://github.com/xitrum-framework/xitrum/issues/519>`_
@@ -21,6 +21,8 @@
   Update Schwatcher from 0.1.5 to 0.1.6
 * `#520 <https://github.com/xitrum-framework/xitrum/issues/520>`_
   Update slf4s-api from 1.7.7 to 1.7.10
+* `#521 <https://github.com/xitrum-framework/xitrum/issues/521>`_
+  Update Twitter Chill from 0.5.1 to 0.5.2
 
 3.22:
 
