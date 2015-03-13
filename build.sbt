@@ -114,7 +114,7 @@ libraryDependencies += "tv.cntt" % "rhinocoffeescript" % "1.9.0"
 libraryDependencies += "nl.grons" %% "metrics-scala" % "3.3.0_a2.3"
 
 // For metrics
-libraryDependencies += "io.dropwizard.metrics" % "metrics-json" % "3.1.0"
+libraryDependencies += "io.dropwizard.metrics" % "metrics-json" % "3.1.1"
 
 // JSON4S uses scalap 2.10.0/2.11.0, which in turn uses scala-compiler 2.10.0/2.11.0, which in
 // turn uses scala-reflect 2.10.0/2.11.0. We need to force "scalaVersion" above, because
