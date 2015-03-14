@@ -125,7 +125,7 @@ object SeriDeseri {
   //----------------------------------------------------------------------------
 
   def toBase64(any: Any): String = {
-    val bytes  = toBytes(any)
+    val bytes = toBytes(any)
     bytesToBase64(bytes)
   }
 

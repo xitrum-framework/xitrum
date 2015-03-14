@@ -1,6 +1,7 @@
 package xitrum
 
 import scala.collection.mutable.{Map => MMap}
+import xitrum.util.TypeCheck
 
 /**
  *  @define none `None`
@@ -34,30 +35,12 @@ abstract class OptVar[+A](implicit m: Manifest[A]) {
    * We clear all, instead of just removing the key, to avoid inconsistent app logic,
    * which is worse than the ClassCastException.
    */
-  private def clearAllOnClassCastException(a: Any)(implicit action: Action) {
+  private def clearAllOnClassCastException(maybeA: Any)(implicit action: Action) {
     val rClass = m.runtimeClass
-
-    // http://docs.oracle.com/javase/7/docs/api/java/lang/Class.html#isPrimitive()
-    // http://stackoverflow.com/questions/16825927/classtag-based-pattern-matching-fails-for-primitives
-    val rightClass = if (rClass.isPrimitive) {
-      val aClass = a.getClass
-      (aClass == classOf[java.lang.Boolean]   && rClass == java.lang.Boolean.TYPE) ||
-      (aClass == classOf[java.lang.Character] && rClass == java.lang.Character.TYPE) ||
-      (aClass == classOf[java.lang.Byte]      && rClass == java.lang.Byte.TYPE) ||
-      (aClass == classOf[java.lang.Short]     && rClass == java.lang.Short.TYPE) ||
-      (aClass == classOf[java.lang.Integer]   && rClass == java.lang.Integer.TYPE) ||
-      (aClass == classOf[java.lang.Long]      && rClass == java.lang.Long.TYPE) ||
-      (aClass == classOf[java.lang.Float]     && rClass == java.lang.Float.TYPE) ||
-      (aClass == classOf[java.lang.Double]    && rClass == java.lang.Double.TYPE) ||
-      (aClass == classOf[java.lang.Void]      && rClass == java.lang.Void.TYPE)
-    } else {
-      rClass.isInstance(a)
-    }
-
-    if (!rightClass) {
-      action.log.warn(s"Value $a of key $key can't be cast to $rClass, $this is now cleared to try to recover from ClassCastException on next call")
+    if (!TypeCheck.isInstance(rClass, maybeA)) {
+      action.log.warn(s"Value $maybeA of key $key can't be cast to $rClass, $this is now cleared to try to recover from ClassCastException on next call")
       getAll.clear()
-      throw new ClassCastException(s"Value $a of key $key can't be cast to $rClass")
+      throw new ClassCastException(s"Value $maybeA of key $key can't be cast to $rClass")
     }
   }
 
