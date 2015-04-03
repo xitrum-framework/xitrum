@@ -54,10 +54,10 @@ object RouteCollector {
   //----------------------------------------------------------------------------
 
   private def discovered(cl: ClassLoader)(acc: ActionTreeBuilder, entry: FileEntry): ActionTreeBuilder = {
-    // At ActionTreeBuilder, we can't use ASM or Javassist to get annotations
-    // (because they don't understand Scala annotations), we have to actually
-    // classes anyway, here we guess class name from .class file name and
-    // load the class.
+    // At ActionTreeBuilder, we can't use ASM or Javassist to get annotations,
+    // because they don't understand Scala annotations. We have to actually load
+    // the class and use Scala reflection to get annotations. Here we guess class
+    // name from .class file name and load the class using the provided ClassLoader.
 
     if (!entry.relPath.endsWith(".class")) return acc
 
