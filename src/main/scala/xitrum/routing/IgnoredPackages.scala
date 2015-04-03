@@ -12,10 +12,12 @@ private object IgnoredPackages {
   def isIgnored(relPath: String) = {
     // Standard Java and Scala
     relPath.startsWith("java/")  ||
+    relPath.startsWith("javafx/") ||
     relPath.startsWith("javax/") ||
     relPath.startsWith("scala/") ||
     relPath.startsWith("sun/")   ||
     relPath.startsWith("com/sun/") ||
+
     // Others
     relPath.startsWith("akka/") ||
     relPath.startsWith("ch/qos/logback") ||
