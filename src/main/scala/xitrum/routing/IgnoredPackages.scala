@@ -17,7 +17,6 @@ private object IgnoredPackages {
     relPath.startsWith("scala/") ||
     relPath.startsWith("sun/")   ||
     relPath.startsWith("com/sun/") ||
-
     // Others
     relPath.startsWith("akka/") ||
     relPath.startsWith("ch/qos/logback") ||
