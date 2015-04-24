@@ -1,3 +1,8 @@
+3.24:
+
+* `#528 <https://github.com/xitrum-framework/xitrum/issues/528>`_
+  Update Akka from 2.3.9 to 2.3.10
+
 3.23:
 
 * `#503 <https://github.com/xitrum-framework/xitrum/issues/503>`_
