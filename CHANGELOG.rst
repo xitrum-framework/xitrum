@@ -2,6 +2,8 @@
 
 * `#528 <https://github.com/xitrum-framework/xitrum/issues/528>`_
   Update Akka from 2.3.9 to 2.3.10
+* `#529 <https://github.com/xitrum-framework/xitrum/issues/529>`_
+  Update Glokka from 2.2 to 2.3
 
 3.23:
 

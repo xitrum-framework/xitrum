@@ -40,7 +40,7 @@ libraryDependencies += "com.typesafe.akka" %% "akka-contrib" % "2.3.10"
 libraryDependencies += "com.typesafe.akka" %% "akka-slf4j"   % "2.3.10"
 
 // For clustering SockJS with Akka
-libraryDependencies += "tv.cntt" %% "glokka" % "2.2"
+libraryDependencies += "tv.cntt" %% "glokka" % "2.3"
 
 // For file watch
 // (akka-agent is added here, should ensure same Akka version as above)
