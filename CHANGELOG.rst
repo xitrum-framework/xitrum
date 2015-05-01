@@ -1,5 +1,7 @@
 3.24:
 
+* `#527 <https://github.com/xitrum-framework/xitrum/issues/527>`_
+  Update Netty from 4.0.26 to 4.0.27
 * `#528 <https://github.com/xitrum-framework/xitrum/issues/528>`_
   Update Akka from 2.3.9 to 2.3.10
 * `#529 <https://github.com/xitrum-framework/xitrum/issues/529>`_
