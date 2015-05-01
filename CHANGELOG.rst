@@ -6,6 +6,8 @@
   Update Akka from 2.3.9 to 2.3.10
 * `#529 <https://github.com/xitrum-framework/xitrum/issues/529>`_
   Update Glokka from 2.2 to 2.3
+* `#525 <https://github.com/xitrum-framework/xitrum/issues/525>`_
+  Update Schwatcher from 0.1.6 to 0.1.8
 
 3.23:
 
