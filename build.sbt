@@ -1,10 +1,17 @@
 organization := "tv.cntt"
 name         := "xitrum"
-version      := "3.24-SNAPSHOT"
 
-scalaVersion := "2.11.6"
-//scalaVersion := "2.10.5"
+// Run sbt mima-report-binary-issues to check for binary compatibility ---------
+// http://www.typesafe.com/community/core-tools/migration-manager
+
+scalaVersion       := "2.11.6"  // "2.10.5"
 crossScalaVersions := Seq("2.11.6", "2.10.5")
+
+version := "3.24-SNAPSHOT"
+com.typesafe.tools.mima.plugin.MimaPlugin.mimaDefaultSettings
+com.typesafe.tools.mima.plugin.MimaKeys.previousArtifact := Some("tv.cntt" % ("xitrum_" + scalaBinaryVersion.value) % "3.23")
+
+//------------------------------------------------------------------------------
 
 scalacOptions ++= Seq("-deprecation", "-feature", "-unchecked")
 
