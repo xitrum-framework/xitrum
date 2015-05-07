@@ -26,4 +26,4 @@ It also has a fast built-in HTTP(S) server.
   |      Your app      |
   +--------------------+
 
-Xitrum is an open source project. See `list of contributors <http://xitrum-framework.github.io/guide/intro.html#contributors>`_.
+Xitrum is an open source project. See `list of contributors <https://github.com/xitrum-framework/xitrum/graphs/contributors>`_.
