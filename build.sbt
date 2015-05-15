@@ -41,10 +41,10 @@ libraryDependencies += "io.netty" % "netty-tcnative" % "1.1.33.Fork1" classifier
 libraryDependencies += "org.javassist" % "javassist" % "3.19.0-GA"
 
 // Redirect Akka log to SLF4J
-libraryDependencies += "com.typesafe.akka" %% "akka-actor"   % "2.3.10"
-libraryDependencies += "com.typesafe.akka" %% "akka-cluster" % "2.3.10"
-libraryDependencies += "com.typesafe.akka" %% "akka-contrib" % "2.3.10"
-libraryDependencies += "com.typesafe.akka" %% "akka-slf4j"   % "2.3.10"
+libraryDependencies += "com.typesafe.akka" %% "akka-actor"   % "2.3.11"
+libraryDependencies += "com.typesafe.akka" %% "akka-cluster" % "2.3.11"
+libraryDependencies += "com.typesafe.akka" %% "akka-contrib" % "2.3.11"
+libraryDependencies += "com.typesafe.akka" %% "akka-slf4j"   % "2.3.11"
 
 // For clustering SockJS with Akka
 libraryDependencies += "tv.cntt" %% "glokka" % "2.3"
