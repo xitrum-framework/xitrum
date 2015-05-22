@@ -3,7 +3,8 @@ package xitrum.scope.session
 import scala.collection.mutable.{ArrayBuffer, Map => MMap}
 import scala.util.control.NonFatal
 
-import io.netty.handler.codec.http.{HttpRequest, Cookie, CookieDecoder, ServerCookieEncoder, HttpHeaders}
+import io.netty.handler.codec.http.{HttpRequest, HttpHeaders}
+import io.netty.handler.codec.http.cookie.{Cookie, ServerCookieDecoder, ServerCookieEncoder}
 import HttpHeaders.Names
 
 import xitrum.{Action, Config, Log}
@@ -27,12 +28,12 @@ trait SessionEnv extends Csrf {
       Map.empty[String, String]
     } else {
       try {
-        val cookies  = CookieDecoder.decode(header)
+        val cookies  = ServerCookieDecoder.LAX.decode(header)
         val iterator = cookies.iterator
         val acc      = MMap.empty[String, String]
         while (iterator.hasNext()) {
           val cookie = iterator.next()
-          acc(cookie.getName) = cookie.getValue
+          acc(cookie.name) = cookie.value
         }
         acc
       } catch {
@@ -77,8 +78,8 @@ trait SessionEnv extends Csrf {
       // http://en.wikipedia.org/wiki/HTTP_cookie
       // Server needs to SET_COOKIE multiple times
       responseCookies.foreach { cookie =>
-        if (cookie.getPath == null) cookie.setPath(rootPath)
-        HttpHeaders.addHeader(response, Names.SET_COOKIE, ServerCookieEncoder.encode(cookie))
+        if (cookie.path == null) cookie.setPath(rootPath)
+        HttpHeaders.addHeader(response, Names.SET_COOKIE, ServerCookieEncoder.LAX.encode(cookie))
       }
     }
   }

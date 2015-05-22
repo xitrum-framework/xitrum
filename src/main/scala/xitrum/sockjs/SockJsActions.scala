@@ -6,7 +6,8 @@ import scala.util.control.NonFatal
 
 import io.netty.buffer.Unpooled
 import io.netty.channel.{ChannelFuture, ChannelFutureListener}
-import io.netty.handler.codec.http.{DefaultCookie, HttpHeaders, HttpResponseStatus}
+import io.netty.handler.codec.http.{HttpHeaders, HttpResponseStatus}
+import io.netty.handler.codec.http.cookie.DefaultCookie
 
 import akka.actor.{Actor, ActorRef, Props, ReceiveTimeout, Terminated}
 import glokka.Registry

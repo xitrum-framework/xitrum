@@ -1,13 +1,12 @@
 organization := "tv.cntt"
 name         := "xitrum"
 
-// Run sbt mima-report-binary-issues to check for binary compatibility ---------
-// http://www.typesafe.com/community/core-tools/migration-manager
-
 scalaVersion       := "2.11.6"  // "2.10.5"
 crossScalaVersions := Seq("2.11.6", "2.10.5")
 
-version := "3.24-SNAPSHOT"
+// Run sbt mima-report-binary-issues to check for binary compatibility ---------
+// http://www.typesafe.com/community/core-tools/migration-manager
+version := "3.24.0-SNAPSHOT"
 com.typesafe.tools.mima.plugin.MimaPlugin.mimaDefaultSettings
 com.typesafe.tools.mima.plugin.MimaKeys.previousArtifact := Some("tv.cntt" % ("xitrum_" + scalaBinaryVersion.value) % "3.23")
 
@@ -29,13 +28,13 @@ unmanagedSourceDirectories in Compile += baseDirectory.value / "src" / "main" / 
 libraryDependencies += "org.slf4s" %% "slf4s-api" % "1.7.10"
 
 // Netty is the core of Xitrum's HTTP(S) feature
-libraryDependencies += "io.netty" % "netty-all" % "4.0.27.Final"
+libraryDependencies += "io.netty" % "netty-all" % "4.0.28.Final"
 
 // http://netty.io/wiki/forked-tomcat-native.html
 // Include all classifiers for convenience
-libraryDependencies += "io.netty" % "netty-tcnative" % "1.1.33.Fork1" classifier "linux-x86_64"
-libraryDependencies += "io.netty" % "netty-tcnative" % "1.1.33.Fork1" classifier "osx-x86_64"
-libraryDependencies += "io.netty" % "netty-tcnative" % "1.1.33.Fork1" classifier "windows-x86_64"
+libraryDependencies += "io.netty" % "netty-tcnative" % "1.1.33.Fork2" classifier "linux-x86_64"
+libraryDependencies += "io.netty" % "netty-tcnative" % "1.1.33.Fork2" classifier "osx-x86_64"
+libraryDependencies += "io.netty" % "netty-tcnative" % "1.1.33.Fork2" classifier "windows-x86_64"
 
 // Javassist boosts Netty 4 speed
 libraryDependencies += "org.javassist" % "javassist" % "3.19.0-GA"
@@ -122,12 +121,13 @@ generateVersionFileTask <<= generateVersionFile
 def generateVersionFile = Def.task {
   val versions = version.value.split('.')
   val major    = versions(0).toInt
-  val minor    = versions(1).split('-')(0).toInt
-  val ma_mi    = s"$major.$minor"
+  val minor    = versions(1).toInt
+  val patch    = versions(2).split('-')(0).toInt
+  val ma_mi_pa = s"$major.$minor.$patch"
   val base     = (baseDirectory in Compile).value
 
   // Also check if the directory name is correct
-  val resDir = base / s"src/main/resources/META-INF/resources/webjars/xitrum/$ma_mi"
+  val resDir = base / s"src/main/resources/META-INF/resources/webjars/xitrum/$ma_mi_pa"
   if (!resDir.exists) throw new Exception(s"Directory name incorrect: $resDir")
 
   // Do not overwrite version file if its content doesn't change
@@ -137,8 +137,9 @@ package xitrum
 class Version {
   val major = $major
   val minor = $minor
-  /** major.minor */
-  override def toString = "$ma_mi"
+  val patch = $patch
+  /** major.minor.patch: $ma_mi_pa */
+  override def toString = "$ma_mi_pa"
 }
 """
   if (!file.exists) {
