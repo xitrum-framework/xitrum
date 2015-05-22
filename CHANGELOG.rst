@@ -1,5 +1,7 @@
 3.24:
 
+* `#535 <https://github.com/xitrum-framework/xitrum/issues/535>`_
+  Localize function t doesn't work in Component
 * `#527 <https://github.com/xitrum-framework/xitrum/issues/527>`_
   Update Netty from 4.0.26 to 4.0.27
 * `#528 <https://github.com/xitrum-framework/xitrum/issues/528>`_
