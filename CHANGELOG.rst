@@ -10,6 +10,8 @@
   Update Glokka from 2.2 to 2.3
 * `#525 <https://github.com/xitrum-framework/xitrum/issues/525>`_
   Update Schwatcher from 0.1.6 to 0.1.8
+* `#536 <https://github.com/xitrum-framework/xitrum/issues/536>`_
+  Update Twitter Chill from 0.5.2 to 0.6.0
 * `#533 <https://github.com/xitrum-framework/xitrum/issues/533>`_
   Update sockjs-client from 0.3.4-1 to 1.0.0
 
