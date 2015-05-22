@@ -65,7 +65,7 @@ libraryDependencies += "org.json4s" %% "json4s-jackson" % "3.2.11"
 libraryDependencies += "tv.cntt" %% "scaposer" % "1.5"
 
 // For jsEscape
-libraryDependencies += "org.apache.commons" % "commons-lang3" % "3.3.2"
+libraryDependencies += "org.apache.commons" % "commons-lang3" % "3.4"
 
 // For compiling CoffeeScript to JavaScript
 libraryDependencies += "tv.cntt" % "rhinocoffeescript" % "1.9.0"

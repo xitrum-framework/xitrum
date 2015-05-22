@@ -12,6 +12,8 @@
   Update Schwatcher from 0.1.6 to 0.1.8
 * `#536 <https://github.com/xitrum-framework/xitrum/issues/536>`_
   Update Twitter Chill from 0.5.2 to 0.6.0
+* `#537 <https://github.com/xitrum-framework/xitrum/issues/537>`_
+  Update commons-lang3 from 3.3.2 to 3.4
 * `#533 <https://github.com/xitrum-framework/xitrum/issues/533>`_
   Update sockjs-client from 0.3.4-1 to 1.0.0
 
