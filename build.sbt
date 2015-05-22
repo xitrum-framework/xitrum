@@ -102,7 +102,7 @@ libraryDependencies += "org.webjars" % "d3js" % "3.5.5-1"
 libraryDependencies += "org.scalatest" %% "scalatest" % "2.2.4" % "test"
 
 // An implementation of SLF4J is needed for log in tests to be output
-libraryDependencies += "ch.qos.logback" % "logback-classic" % "1.1.2" % "test"
+libraryDependencies += "ch.qos.logback" % "logback-classic" % "1.1.3" % "test"
 
 // For "sbt console"
 unmanagedClasspath in Compile <+= (baseDirectory) map { bd => Attributed.blank(bd / "src/test/resources") }
