@@ -18,6 +18,8 @@
   Update metrics-scala from 3.3.0_a2.3 to 3.5.1_a2.3
 * `#539 <https://github.com/xitrum-framework/xitrum/issues/539>`_
   WebJars: Update jquery from 2.1.3 to 2.1.4, d3js from 3.5.3 to 3.5.5-1
+* `#540 <https://github.com/xitrum-framework/xitrum/issues/540>`_
+  Update RhinoCoffeeScript from 1.9.0 to 1.9.2
 * `#533 <https://github.com/xitrum-framework/xitrum/issues/533>`_
   Update sockjs-client from 0.3.4-1 to 1.0.0
 
