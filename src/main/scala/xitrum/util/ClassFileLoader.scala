@@ -8,11 +8,10 @@ import sclasner.Discoverer
 /**
  * This utility is useful for hot reloading .class files in defined directories
  * during development.
- *
- * @param searchDirs Directories to search for .class files, example: Seq("target/scala-2.11/classes")
  */
 class ClassFileLoader extends ClassLoader {
-  private val searchDirs = Discoverer.files.filter(_.isDirectory).map(_.toPath)
+  // Directories to search for .class files, example: Seq("target/scala-2.11/classes")
+  private val searchDirs = Discoverer.containers.filter(_.isDirectory).map(_.toPath)
 
   // Need to cache because calling defineClass twice will cause exception
   protected val cache = MMap[String, Class[_]]()

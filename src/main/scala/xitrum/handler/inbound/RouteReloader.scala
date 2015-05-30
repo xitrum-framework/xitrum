@@ -8,7 +8,7 @@ import xitrum.util.{ClassFileLoader, FileMonitor}
 // In development mode, classes may be reloaded thus routes should also be
 // reloaded.
 private class RouteReloader {
-  private val CLASSES_DIRS = sclasner.Discoverer.files.filter(_.isDirectory).map(_.toPath)
+  private val CLASSES_DIRS = sclasner.Discoverer.containers.filter(_.isDirectory).map(_.toPath)
   CLASSES_DIRS.foreach(monitorClassesDir)
 
   private var shouldReloadOnNextRequest = false

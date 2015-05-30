@@ -84,7 +84,7 @@ object PoLoader {
    * (for development mode) to reload .po files automatically.
    */
   private def watch() {
-    val searchDirs = Discoverer.files.filter(_.isDirectory) ++ Seq(new File(DEV_RESOURCES_DIR))
+    val searchDirs = Discoverer.containers.filter(_.isDirectory) ++ Seq(new File(DEV_RESOURCES_DIR))
     searchDirs.foreach { dir =>
       val withI18n = new File(dir, "i18n")
       if (withI18n.exists && withI18n.isDirectory) {

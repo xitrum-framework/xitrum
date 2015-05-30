@@ -23,7 +23,7 @@ case class DiscoveredAcc(
 object RouteCollector {
   import ActionAnnotations._
 
-  def deserializeCacheFileOrRecollect(cachedFileName: String, cl: ClassLoader): DiscoveredAcc = {
+  def deserializeCacheFileOrRecollect(cachedFile: File, cl: ClassLoader): DiscoveredAcc = {
     var acc = DiscoveredAcc(
       "<Invalid Xitrum version>",
       new SerializableRouteCollection,
@@ -37,7 +37,7 @@ object RouteCollector {
     // is for the (Swagger) annotation inheritance feature. The traits/classes
     // are then loaded to get annotations.
     val xitrumVersion     = xitrum.version.toString
-    val actionTreeBuilder = Scanner.foldLeft(cachedFileName, new ActionTreeBuilder(xitrumVersion), discovered(cl))
+    val actionTreeBuilder = Scanner.foldLeft(cachedFile, new ActionTreeBuilder(xitrumVersion), discovered(cl) _)
 
     if (actionTreeBuilder.xitrumVersion != xitrumVersion) {
       // The caller should see that the Xitrum version is invalid and act properly

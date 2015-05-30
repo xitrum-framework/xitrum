@@ -195,8 +195,9 @@ class XitrumConfig(val config: TConfig) {
       }
       dir
     } else {
+      // To create a temp directory, we File.createTempFile then
+      // delete the file and create a new directory there instead
       val f = File.createTempFile("xitrum-", "-tmp")
-      // Delete the file so we can make a new directory there instead
       f.delete()
 
       val ret = if (f.mkdirs()) {
@@ -389,7 +390,7 @@ object Config {
 
   //----------------------------------------------------------------------------
 
-  private[this] val ROUTES_CACHE = "tmp/routes.cache"
+  private[this] val ROUTES_CACHE = new File(xitrum.tmpDir, "routes.cache")
 
   var routes = loadRoutes(Thread.currentThread.getContextClassLoader, false)
 
@@ -406,8 +407,7 @@ object Config {
       val discoveredAcc = RouteCollector.deserializeCacheFileOrRecollect(ROUTES_CACHE, cl)
       if (discoveredAcc.xitrumVersion != _root_.xitrum.version.toString) {
         Log.info(s"Xitrum version changed. Delete $ROUTES_CACHE and retry...")
-        val file = new File(ROUTES_CACHE)
-        file.delete()
+        ROUTES_CACHE.delete()
         loadRouteCacheFileOrRecollectWithRetry(cl, quiet, true)
       } else {
         val withSwagger = xitrum.swaggerApiVersion.isDefined
@@ -420,8 +420,7 @@ object Config {
           throw e
         } else {
           Log.info(s"Could not load $ROUTES_CACHE, delete and retry...")
-          val file = new File(ROUTES_CACHE)
-          file.delete()
+          ROUTES_CACHE.delete()
           loadRouteCacheFileOrRecollectWithRetry(cl, quiet, true)
         }
     }

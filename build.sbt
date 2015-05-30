@@ -6,7 +6,7 @@ crossScalaVersions := Seq("2.11.6", "2.10.5")
 
 // Run sbt mima-report-binary-issues to check for binary compatibility ---------
 // http://www.typesafe.com/community/core-tools/migration-manager
-version := "3.24.0-SNAPSHOT"
+version := "3.24.1-SNAPSHOT"
 com.typesafe.tools.mima.plugin.MimaPlugin.mimaDefaultSettings
 com.typesafe.tools.mima.plugin.MimaKeys.previousArtifact := Some("tv.cntt" % ("xitrum_" + scalaBinaryVersion.value) % "3.23")
 
@@ -53,7 +53,7 @@ libraryDependencies += "tv.cntt" %% "glokka" % "2.3"
 libraryDependencies += "com.beachape.filemanagement" %% "schwatcher" % "0.1.8"
 
 // For scanning routes
-libraryDependencies += "tv.cntt" %% "sclasner" % "1.6"
+libraryDependencies += "tv.cntt" %% "sclasner" % "1.7.0"
 
 // For binary (de)serializing
 libraryDependencies += "com.twitter" %% "chill" % "0.6.0"

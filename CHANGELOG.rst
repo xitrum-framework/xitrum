@@ -1,3 +1,8 @@
+3.24.1:
+
+* `#541 <https://github.com/xitrum-framework/xitrum/issues/541>`_
+  routes.cache should be saved in tmpDir as configured in xitrum.conf
+
 3.24.0:
 
 * `#535 <https://github.com/xitrum-framework/xitrum/issues/535>`_
