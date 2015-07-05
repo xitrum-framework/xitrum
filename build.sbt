@@ -25,7 +25,7 @@ unmanagedSourceDirectories in Compile += baseDirectory.value / "src" / "main" / 
 //------------------------------------------------------------------------------
 
 // Projects using Xitrum must provide a concrete implementation of SLF4J (Logback etc.)
-libraryDependencies += "org.slf4s" %% "slf4s-api" % "1.7.10"
+libraryDependencies += "org.slf4s" %% "slf4s-api" % "1.7.12"
 
 // Netty is the core of Xitrum's HTTP(S) feature
 libraryDependencies += "io.netty" % "netty-all" % "4.0.29.Final"
