@@ -2,6 +2,8 @@
 
 * `#541 <https://github.com/xitrum-framework/xitrum/issues/541>`_
   routes.cache should be saved in tmpDir as configured in xitrum.conf
+* `#548 <https://github.com/xitrum-framework/xitrum/issues/548>`_
+  Update Netty from 4.0.28 to 4.0.29
 
 3.24.0:
 
