@@ -103,10 +103,11 @@ trait RequestEnv extends ParamAccess {
 
   def atJson(key: String) = at.toJson(key)
 
-  lazy val requestContentString = {
-    val byteBuf = request.content
-    byteBuf.toString(Config.xitrum.request.charset)
-  }
+  lazy val requestContentString =
+    handlerEnv.requestContentString
+  
+  def requestContentJson =
+    handlerEnv.requestJson
 
   /** Ex: val json = requestContentJson[Map[String, String]] */
   def requestContentJson[T](implicit e: T DefaultsTo String, m: Manifest[T]): Option[T] =
