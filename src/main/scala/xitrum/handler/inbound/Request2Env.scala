@@ -1,12 +1,11 @@
 package xitrum.handler.inbound
 
 import java.io.File
-import java.nio.charset.Charset
 import scala.collection.mutable.{Map => MMap}
 import scala.util.control.NonFatal
 
 import io.netty.buffer.Unpooled
-import io.netty.channel.{SimpleChannelInboundHandler, ChannelFutureListener, ChannelHandlerContext}
+import io.netty.channel.{SimpleChannelInboundHandler, ChannelHandlerContext}
 import io.netty.handler.codec.http.{
   HttpRequest, FullHttpRequest, FullHttpResponse, DefaultFullHttpRequest, DefaultFullHttpResponse,
   HttpMethod, HttpHeaders, HttpContent, HttpObject, LastHttpContent, HttpResponseStatus, HttpVersion
@@ -21,8 +20,7 @@ import HttpMethod._
 
 import xitrum.{Config, Log}
 import xitrum.handler.{HandlerEnv, NoRealPipelining}
-import xitrum.scope.request.{FileUploadParams, Params, PathInfo}
-import xitrum.util.ByteBufUtil
+import xitrum.scope.request.{FileUploadParams, Params}
 
 import org.json4s._
 import org.json4s.jackson.JsonMethods
@@ -280,18 +278,12 @@ class Request2Env extends SimpleChannelInboundHandler[HttpObject] {
   }
 
   private def closeOnBigRequest(ctx: ChannelHandlerContext) {
-    val response = env.response
-    response.setStatus(HttpResponseStatus.BAD_REQUEST)
-    ByteBufUtil.writeComposite(
-      response.content,
-      Unpooled.copiedBuffer("Request content body is too big", Config.xitrum.request.charset)
-    )
-    ctx.channel.writeAndFlush(env).addListener(ChannelFutureListener.CLOSE)
-
     Log.warn("Request content body is too big, see xitrum.request.maxSizeInMB in xitrum.conf")
+    BadClientSilencer.respond400(ctx.channel, "Request content body is too big. Limit: " + Config.xitrum.request.config.getLong("maxSizeInMB") + " bytes")
 
     // Mark that closeOnBigRequest has been called.
     // See the check for LastHttpContent above.
+    env.release()
     env = null
   }
 

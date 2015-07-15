@@ -62,19 +62,19 @@ object DualConfig {
 
 //------------------------------------------------------------------------------
 
-class BasicAuthConfig(config: TConfig) {
+class BasicAuthConfig(val config: TConfig) {
   val realm    = config.getString("realm")
   val username = config.getString("username")
   val password = config.getString("password")
 }
 
-class PortConfig(config: TConfig) {
+class PortConfig(val config: TConfig) {
   val http              = if (config.hasPath("http"))              Some(config.getInt("http"))              else None
   val https             = if (config.hasPath("https"))             Some(config.getInt("https"))             else None
   val flashSocketPolicy = if (config.hasPath("flashSocketPolicy")) Some(config.getInt("flashSocketPolicy")) else None
 }
 
-class HttpsConfig(config: TConfig) {
+class HttpsConfig(val config: TConfig) {
   val openSSL = config.getBoolean("openSSL")
   lazy val certChainFile = {
     val path = config.getString("certChainFile")
@@ -90,12 +90,12 @@ class HttpsConfig(config: TConfig) {
   }
 }
 
-class ReverseProxyConfig(config: TConfig) {
+class ReverseProxyConfig(val config: TConfig) {
   val ips     = config.getStringList("ips").asScala
   val baseUrl = config.getString("baseUrl")
 }
 
-class SessionConfig(config: TConfig) {
+class SessionConfig(val config: TConfig) {
   val cookieName   = config.getString("cookieName")
   // DefaultCookie has max age of Long.MIN_VALUE by default
   val cookieMaxAge = if (config.hasPath("cookieMaxAge")) config.getLong("cookieMaxAge") else Long.MinValue
@@ -108,7 +108,7 @@ class SessionConfig(config: TConfig) {
   }
 }
 
-class StaticFileConfig(config: TConfig) {
+class StaticFileConfig(val config: TConfig) {
   val pathRegex = config.getString("pathRegex").r
 
   val maxSizeInBytesOfCachedFiles = config.getInt("maxSizeInKBOfCachedFiles") * 1024
@@ -117,7 +117,7 @@ class StaticFileConfig(config: TConfig) {
   val revalidate = config.getBoolean("revalidate")
 }
 
-class RequestConfig(config: TConfig) {
+class RequestConfig(val config: TConfig) {
   val charsetName               = config.getString("charset")
   val charset                   = Charset.forName(charsetName)
   val maxInitialLineLength      = if (config.hasPath("maxInitialLineLength")) config.getInt("maxInitialLineLength") else 4096
@@ -131,13 +131,13 @@ class RequestConfig(config: TConfig) {
   val filteredParams            = config.getStringList("filteredParams").asScala
 }
 
-class ResponseConfig(config: TConfig) {
+class ResponseConfig(val config: TConfig) {
   val autoGzip           = config.getBoolean("autoGzip")
   val sockJsCookieNeeded = if (config.hasPath("sockJsCookieNeeded")) config.getBoolean("sockJsCookieNeeded") else false
   val corsAllowOrigins   = if (config.hasPath("corsAllowOrigins")) config.getStringList("corsAllowOrigins").asScala else Seq.empty[String]
 }
 
-class MetricsConfig(config: TConfig) {
+class MetricsConfig(val config: TConfig) {
   import scala.concurrent.duration._
 
   val apiKey = if (config.hasPath("apiKey")) config.getString("apiKey") else ""
