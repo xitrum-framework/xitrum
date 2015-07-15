@@ -24,6 +24,9 @@ import xitrum.handler.{HandlerEnv, NoRealPipelining}
 import xitrum.scope.request.{FileUploadParams, Params, PathInfo}
 import xitrum.util.ByteBufUtil
 
+import org.json4s._
+import org.json4s.jackson.JsonMethods._
+
 object Request2Env {
   // This directory must exist otherwise Netty will throw:
   // java.io.IOException: No such file or directory
@@ -98,8 +101,10 @@ class Request2Env extends SimpleChannelInboundHandler[HttpObject] {
         // LastHttpContent is a HttpContent.
         // env may be set to null at handleHttpRequestContent above, when
         // closeOnBigRequest is called.
-        if (msg.isInstanceOf[LastHttpContent])
+        if (msg.isInstanceOf[LastHttpContent]) {
+          if (isAPPLICATION_JSON(env.request)) parseTextParamsFromJson(env)
           sendUpstream(ctx)
+        }
       }
     } catch {
       case NonFatal(e) =>
@@ -305,5 +310,38 @@ class Request2Env extends SimpleChannelInboundHandler[HttpObject] {
     // Reset for the next request on this same connection (e.g. keep alive)
     env               = null
     bodyBytesReceived = 0
+  }
+
+  private def isAPPLICATION_JSON(request: HttpRequest): Boolean = {
+    val requestContentType = HttpHeaders.getHeader(request, HttpHeaders.Names.CONTENT_TYPE)
+    if (requestContentType == null) return false
+
+    val requestContentTypeLowerCase = requestContentType.toLowerCase
+    requestContentTypeLowerCase.startsWith("application/json")
+  }
+
+  private def parseTextParamsFromJson(env: HandlerEnv) {
+    def jValue2String(value: JValue) = value match {
+      case JNull | JNothing => "null"
+      case JString(value)   => value
+      case JInt(value)      => value.toString
+      case JDouble(value)   => value.toString
+      case JDecimal(value)  => value.toString
+      case JBool(value)     => value.toString
+      case value            => compact(value)
+    }
+
+    env.requestJson match {
+      case JObject(fields) =>
+        fields.foreach {
+          case JField(name, JArray(values)) =>
+            values.foreach { value =>
+              putOrAppendString(env.bodyTextParams, name, jValue2String(value))
+            }
+          case JField(name, value) =>
+            putOrAppendString(env.bodyTextParams, name, jValue2String(value))
+        }
+      case _ => // Nothing to do
+    }
   }
 }

@@ -101,6 +101,8 @@ libraryDependencies += "org.webjars" % "d3js" % "3.5.5-1"
 
 libraryDependencies += "org.scalatest" %% "scalatest" % "2.2.4" % "test"
 
+libraryDependencies += "com.m3" %% "curly-scala" % "0.5.+" % "test"
+
 // An implementation of SLF4J is needed for log in tests to be output
 libraryDependencies += "ch.qos.logback" % "logback-classic" % "1.1.3" % "test"
 
