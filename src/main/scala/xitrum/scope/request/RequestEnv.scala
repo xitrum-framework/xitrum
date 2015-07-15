@@ -81,35 +81,39 @@ trait RequestEnv extends ParamAccess {
 
   // Shortcuts to handlerEnv for easy access for app developers;
   // comments are copied from HandlerEnv.scala
-  lazy val channel        = handlerEnv.channel
-  lazy val request        = handlerEnv.request
-  lazy val response       = handlerEnv.response
-  /** Params after the question mark of the URL. Ex: /search?q=xitrum */
+
+  lazy val channel              = handlerEnv.channel
+  lazy val request              = handlerEnv.request
+  lazy val response             = handlerEnv.response
+
+  /** Params in request body. */
   lazy val bodyTextParams = handlerEnv.bodyTextParams
-  lazy val bodyFileParams = handlerEnv.bodyFileParams
+
+  /** File params in request body. */
+  lazy val bodyFileParams       = handlerEnv.bodyFileParams
+
   /** Params embedded in the path. Ex: /articles/:id */
-  lazy val pathParams     = handlerEnv.pathParams
+  lazy val pathParams           = handlerEnv.pathParams
+
   /** Params after the question mark of the URL. Ex: /search?q=xitrum */
-  lazy val queryParams    = handlerEnv.queryParams
+  lazy val queryParams          = handlerEnv.queryParams
+
   /** The merge of queryParams and pathParams, things that appear in the request URL. */
-  lazy val urlParams      = handlerEnv.urlParams
+  lazy val urlParams            = handlerEnv.urlParams
+
   /**
    * The merge of all text params (queryParams, bodyParams, and pathParams),
    * as contrast to file upload (bodyFileParams).
    */
-  lazy val textParams     = handlerEnv.textParams
+  lazy val textParams           = handlerEnv.textParams
+
+  lazy val requestContentString = handlerEnv.requestContentString
+  lazy val requestContentJson   = handlerEnv.requestContentJson
 
   lazy val at = new At
-
   def atJson(key: String) = at.toJson(key)
-
-  lazy val requestContentString =
-    handlerEnv.requestContentString
-  
-  def requestContentJson =
-    handlerEnv.requestJson
 
   /** Ex: val json = requestContentJson[Map[String, String]] */
   def requestContentJson[T](implicit e: T DefaultsTo String, m: Manifest[T]): Option[T] =
-    SeriDeseri.fromJson[T](requestContentString)(e, m)
+    SeriDeseri.fromJson[T](handlerEnv.requestContentJson)(e, m)
 }

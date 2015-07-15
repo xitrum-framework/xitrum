@@ -2,12 +2,9 @@ package xitrum.routing
 
 import org.apache.commons.lang3.text.WordUtils
 
-import org.json4s.JsonAST.{JObject, JValue}
+import org.json4s.JsonAST.JObject
 import org.json4s.JsonDSL._
-import org.json4s.jackson._
-import org.json4s.jackson.JsonMethods._
-
-import io.netty.handler.codec.http.HttpResponseStatus
+import org.json4s.jackson.JsonMethods
 
 import xitrum.{Action, FutureAction, Config}
 import xitrum.annotation.{First, DELETE, GET, PATCH, POST, PUT, SOCKJS, WEBSOCKET}
@@ -47,7 +44,7 @@ object SwaggerJson {
       ("swaggerVersion" -> SWAGGER_VERSION) ~
       ("apiVersion"     -> apiVersion) ~
       ("apis"           -> apis)
-    pretty(render(json))
+    JsonMethods.pretty(JsonMethods.render(json))
   }
 
   def resourceJson(apiVersion: String, basePath: String, resourcePatho: Option[String]): Option[String] = {
@@ -73,7 +70,7 @@ object SwaggerJson {
             ("basePath"       -> basePath) ~
             ("resourcePath"   -> path) ~
             ("apis"           -> loadApis(swaggerMap))
-          pretty(render(json))
+          JsonMethods.pretty(JsonMethods.render(json))
         }
     }
   }

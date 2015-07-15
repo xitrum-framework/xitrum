@@ -25,7 +25,7 @@ import xitrum.scope.request.{FileUploadParams, Params, PathInfo}
 import xitrum.util.ByteBufUtil
 
 import org.json4s._
-import org.json4s.jackson.JsonMethods._
+import org.json4s.jackson.JsonMethods
 
 object Request2Env {
   // This directory must exist otherwise Netty will throw:
@@ -93,15 +93,15 @@ class Request2Env extends SimpleChannelInboundHandler[HttpObject] {
         }
 
         handleHttpRequestHead(ctx, request)
-      } else if (env != null) {
+      } else {
         // HttpContent can be LastHttpContent (see below)
-        if (msg.isInstanceOf[HttpContent])
+        if (env != null && msg.isInstanceOf[HttpContent])
           handleHttpRequestContent(ctx, msg.asInstanceOf[HttpContent])
 
         // LastHttpContent is a HttpContent.
         // env may be set to null at handleHttpRequestContent above, when
         // closeOnBigRequest is called.
-        if (msg.isInstanceOf[LastHttpContent]) {
+        if (env != null && msg.isInstanceOf[LastHttpContent]) {
           if (isAPPLICATION_JSON(env.request)) parseTextParamsFromJson(env)
           sendUpstream(ctx)
         }
@@ -320,28 +320,34 @@ class Request2Env extends SimpleChannelInboundHandler[HttpObject] {
     requestContentTypeLowerCase.startsWith("application/json")
   }
 
+  /**
+   * Only parses one level.
+   * Should use requestContentJson directly for more advanced uses.
+   */
   private def parseTextParamsFromJson(env: HandlerEnv) {
-    def jValue2String(value: JValue) = value match {
-      case JNull | JNothing => "null"
-      case JString(value)   => value
-      case JInt(value)      => value.toString
-      case JDouble(value)   => value.toString
-      case JDecimal(value)  => value.toString
-      case JBool(value)     => value.toString
-      case value            => compact(value)
-    }
-
-    env.requestJson match {
+    env.requestContentJson match {
       case JObject(fields) =>
         fields.foreach {
           case JField(name, JArray(values)) =>
             values.foreach { value =>
               putOrAppendString(env.bodyTextParams, name, jValue2String(value))
             }
+
           case JField(name, value) =>
             putOrAppendString(env.bodyTextParams, name, jValue2String(value))
         }
+
       case _ => // Nothing to do
     }
+  }
+
+  private def jValue2String(value: JValue) = value match {
+    case JNull | JNothing => "null"
+    case JString(value)   => value
+    case JInt(value)      => value.toString
+    case JDouble(value)   => value.toString
+    case JDecimal(value)  => value.toString
+    case JBool(value)     => value.toString
+    case value            => JsonMethods.compact(value)
   }
 }

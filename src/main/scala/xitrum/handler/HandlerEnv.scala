@@ -7,12 +7,11 @@ import io.netty.handler.codec.http.{FullHttpRequest, FullHttpResponse}
 import io.netty.handler.codec.http.multipart.HttpPostRequestDecoder
 
 import xitrum.Config
-import xitrum.Action
 import xitrum.routing.Route
 import xitrum.scope.request.{FileUploadParams, Params, PathInfo}
 
-import org.json4s._
-import org.json4s.jackson.JsonMethods._
+import org.json4s.JObject
+import org.json4s.jackson.JsonMethods
 
 /**
  * Env is basically a map for sharing data between handlers. But for more
@@ -80,10 +79,10 @@ class HandlerEnv extends MHashMap[Any, Any] {
     byteBuf.toString(Config.xitrum.request.charset)
   }
 
-  lazy val requestJson = if (requestContentString.isEmpty) {
+  lazy val requestContentJson = if (requestContentString.isEmpty) {
     JObject()
   } else {
-    parse(requestContentString)
+    JsonMethods.parse(requestContentString)
   }
 
   /** Releases native memory used by the request, response, and bodyDecoder. */

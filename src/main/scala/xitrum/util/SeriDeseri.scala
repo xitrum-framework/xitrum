@@ -3,7 +3,7 @@ package xitrum.util
 import scala.util.control.NonFatal
 
 import com.twitter.chill.{KryoInstantiator, KryoPool, KryoSerializer}
-import org.json4s.{DefaultFormats, NoTypeHints}
+import org.json4s.{DefaultFormats, JValue, NoTypeHints}
 import org.json4s.jackson.{JsonMethods, Serialization}
 
 import io.netty.buffer.{ByteBuf, Unpooled}
@@ -50,6 +50,16 @@ object SeriDeseri {
    * https://github.com/json4s/json4s
    */
   def fromJson[T](jsonString: String)(implicit e: T DefaultsTo String, m: Manifest[T]): Option[T] = {
+    val json = JsonMethods.parse(jsonString)
+    fromJson[T](json)(e, m)
+  }
+
+  /**
+   * Converts JSON to Scala object (case class, Map, Seq etc.).
+   * If you want to do more complicated things, you should use JSON4S directly:
+   * https://github.com/json4s/json4s
+   */
+  def fromJson[T](json: JValue)(implicit e: T DefaultsTo String, m: Manifest[T]): Option[T] = {
     // Serialization.read doesn't work without type hints.
     //
     // Serialization.read[Map[String, Any]]("""{"name": "X", "age": 45}""")
@@ -59,7 +69,7 @@ object SeriDeseri {
     // JsonMethods.parse works for the above.
     if (m.runtimeClass.getName.startsWith("scala")) {
       try {
-        val any = JsonMethods.parse(jsonString).values
+        val any = json.values
         if (m.runtimeClass.isAssignableFrom(any.getClass))
           Some(any.asInstanceOf[T])
         else
@@ -67,7 +77,7 @@ object SeriDeseri {
       } catch {
         case NonFatal(e) =>
           try {
-            Some(Serialization.read[T](jsonString)(DefaultFormats, m))
+            Some(json.extract[T](DefaultFormats, m))
           } catch {
             case NonFatal(e) =>
               None
@@ -75,11 +85,11 @@ object SeriDeseri {
       }
     } else {
       try {
-        Some(Serialization.read[T](jsonString)(DefaultFormats, m))
+        Some(json.extract[T](DefaultFormats, m))
       } catch {
         case NonFatal(e) =>
           try {
-            val any = JsonMethods.parse(jsonString).values
+            val any = json.values
             if (m.runtimeClass.isAssignableFrom(any.getClass))
               Some(any.asInstanceOf[T])
             else
