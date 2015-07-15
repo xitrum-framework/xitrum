@@ -1,13 +1,13 @@
 package xitrum.routing
 
 import java.io.File
-import scala.collection.mutable.{ArrayBuffer, Map => MMap}
+import scala.collection.mutable.ArrayBuffer
 import scala.reflect.runtime.universe
 import scala.util.control.NonFatal
 
 import sclasner.{FileEntry, Scanner}
 
-import xitrum.{Action, Config, Log, SockJsAction}
+import xitrum.{Action, Config, SockJsAction}
 import xitrum.annotation._
 import xitrum.sockjs.SockJsPrefix
 
@@ -173,7 +173,7 @@ object RouteCollector {
       val tpeString = tpe.toString
 
       if (tpeString == TYPE_OF_SOCKJS.toString)
-        pathPrefix = a.tree.children.tail(0).productElement(0).asInstanceOf[universe.Constant].value.toString
+        pathPrefix = a.tree.children.tail.head.productElement(0).asInstanceOf[universe.Constant].value.toString
     }
 
     if (pathPrefix == null) {
@@ -218,21 +218,21 @@ object RouteCollector {
         val tpeString = tpe.toString
 
         if (tpeString == TYPE_OF_CACHE_ACTION_DAY.toString)
-          -annotation.tree.children.tail(0).toString.toInt * 24 * 60 * 60
+          -annotation.tree.children.tail.head.toString.toInt * 24 * 60 * 60
         else if (tpeString == TYPE_OF_CACHE_ACTION_HOUR.toString)
-          -annotation.tree.children.tail(0).toString.toInt      * 60 * 60
+          -annotation.tree.children.tail.head.toString.toInt      * 60 * 60
         else if (tpeString == TYPE_OF_CACHE_ACTION_MINUTE.toString)
-          -annotation.tree.children.tail(0).toString.toInt           * 60
+          -annotation.tree.children.tail.head.toString.toInt           * 60
         else if (tpeString == TYPE_OF_CACHE_ACTION_SECOND.toString)
-          -annotation.tree.children.tail(0).toString.toInt
+          -annotation.tree.children.tail.head.toString.toInt
         else if (tpeString == TYPE_OF_CACHE_PAGE_DAY.toString)
-          annotation.tree.children.tail(0).toString.toInt * 24 * 60 * 60
+          annotation.tree.children.tail.head.toString.toInt * 24 * 60 * 60
         else if (tpeString == TYPE_OF_CACHE_PAGE_HOUR.toString)
-          annotation.tree.children.tail(0).toString.toInt      * 60 * 60
+          annotation.tree.children.tail.head.toString.toInt      * 60 * 60
         else if (tpeString == TYPE_OF_CACHE_PAGE_MINUTE.toString)
-          annotation.tree.children.tail(0).toString.toInt           * 60
+          annotation.tree.children.tail.head.toString.toInt           * 60
         else if (tpeString == TYPE_OF_CACHE_PAGE_SECOND.toString)
-          annotation.tree.children.tail(0).toString.toInt
+          annotation.tree.children.tail.head.toString.toInt
         else
           0
     }

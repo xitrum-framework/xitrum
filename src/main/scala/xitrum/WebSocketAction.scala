@@ -4,17 +4,16 @@ import scala.runtime.ScalaRunTime
 import akka.actor.{Actor, PoisonPill}
 
 import io.netty.buffer.{ByteBuf, Unpooled}
-import io.netty.channel.{Channel, ChannelFuture, ChannelFutureListener}
+import io.netty.channel.{ChannelFuture, ChannelFutureListener}
 import io.netty.handler.codec.http.websocketx.{
   BinaryWebSocketFrame,
   CloseWebSocketFrame,
   PingWebSocketFrame,
-  PongWebSocketFrame,
   TextWebSocketFrame,
   WebSocketServerHandshakerFactory
 }
 
-import xitrum.handler.{AccessLog, DefaultHttpChannelInitializer, HandlerEnv, NoRealPipelining}
+import xitrum.handler.{AccessLog, HandlerEnv, NoRealPipelining}
 import xitrum.handler.inbound.{BadClientSilencer, WebSocketEventDispatcher}
 import xitrum.handler.DefaultHttpChannelInitializer
 import xitrum.util.SeriDeseri

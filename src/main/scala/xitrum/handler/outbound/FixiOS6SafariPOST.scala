@@ -1,7 +1,7 @@
 package xitrum.handler.outbound
 
 import io.netty.channel.{ChannelHandler, ChannelHandlerContext, ChannelOutboundHandlerAdapter, ChannelPromise}
-import io.netty.handler.codec.http.{HttpHeaders, HttpMethod, HttpRequest, HttpResponse}
+import io.netty.handler.codec.http.{HttpHeaders, HttpMethod}
 import ChannelHandler.Sharable
 
 import xitrum.handler.HandlerEnv

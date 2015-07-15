@@ -3,7 +3,7 @@ package xitrum.scope.session
 import scala.collection.mutable.{ArrayBuffer, Map => MMap}
 import scala.util.control.NonFatal
 
-import io.netty.handler.codec.http.{HttpRequest, HttpHeaders}
+import io.netty.handler.codec.http.HttpHeaders
 import io.netty.handler.codec.http.cookie.{Cookie, ServerCookieDecoder, ServerCookieEncoder}
 import HttpHeaders.Names
 
@@ -31,7 +31,7 @@ trait SessionEnv extends Csrf {
         val cookies  = ServerCookieDecoder.LAX.decode(header)
         val iterator = cookies.iterator
         val acc      = MMap.empty[String, String]
-        while (iterator.hasNext()) {
+        while (iterator.hasNext) {
           val cookie = iterator.next()
           acc(cookie.name) = cookie.value
         }

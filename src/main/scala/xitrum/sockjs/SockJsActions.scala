@@ -9,12 +9,12 @@ import io.netty.channel.{ChannelFuture, ChannelFutureListener}
 import io.netty.handler.codec.http.{HttpHeaders, HttpResponseStatus}
 import io.netty.handler.codec.http.cookie.DefaultCookie
 
-import akka.actor.{Actor, ActorRef, Props, ReceiveTimeout, Terminated}
+import akka.actor.{ActorRef, Props, ReceiveTimeout, Terminated}
 import glokka.Registry
 
 import xitrum.{
   Action, ActorAction, Config, SkipCsrfCheck, SockJsText,
-  WebSocketAction, WebSocketBinary, WebSocketPing, WebSocketPong, WebSocketText
+  WebSocketAction, WebSocketText
 }
 import xitrum.annotation._
 import xitrum.scope.request.PathInfo
@@ -179,7 +179,7 @@ trait SockJsPrefix {
         encoded.substring(1, encoded.lastIndexOf("/"))
       else {
         val tokens = pathInfo.tokens
-        tokens.take(tokens.size - n).mkString("/")
+        tokens.take(tokens.length - n).mkString("/")
       }
   }
 
@@ -193,7 +193,7 @@ trait SockJsAction extends ServerIdSessionIdValidator with SockJsPrefix {
   protected def handleCookie() {
     val sockJsClassAndOptions = Config.routes.sockJsRouteMap.lookup(pathPrefix)
     if (sockJsClassAndOptions.cookieNeeded) {
-      val value  = requestCookies.get("JSESSIONID").getOrElse("dummy")
+      val value  = requestCookies.getOrElse("JSESSIONID", "dummy")
       val cookie = new DefaultCookie("JSESSIONID", value)
       responseCookies.append(cookie)
     }
@@ -202,7 +202,7 @@ trait SockJsAction extends ServerIdSessionIdValidator with SockJsPrefix {
   protected def callbackParam(): Option[String] = {
     val paramName = if (handlerEnv.queryParams.isDefinedAt("c")) "c" else "callback"
     val ret = paramo(paramName)
-    if (ret == None) {
+    if (ret.isEmpty) {
       response.setStatus(HttpResponseStatus.INTERNAL_SERVER_ERROR)
       respondText("\"callback\" parameter required")
     }
@@ -392,7 +392,7 @@ class XhrPollingReceive extends NonWebSocketSessionReceiverActorAction with Skip
     case SubscribeResultToReceiverClientWaitForMessage =>
       context.become(receiveNotification)
 
-    case Terminated(actorRef) if (actorRef == nonWebSocketSession) =>
+    case Terminated(actorRef) if actorRef == nonWebSocketSession =>
       respondJs("c[2011,\"Server error\"]\n")
       .addListener(ChannelFutureListener.CLOSE)
   }
@@ -412,7 +412,7 @@ class XhrPollingReceive extends NonWebSocketSessionReceiverActorAction with Skip
         index, handler, false
       ).addListener(ChannelFutureListener.CLOSE)
 
-    case Terminated(actorRef) if (actorRef == nonWebSocketSession) =>
+    case Terminated(actorRef) if actorRef == nonWebSocketSession =>
       respondJs("c[2011,\"Server error\"]\n")
       .addListener(ChannelFutureListener.CLOSE)
   }
@@ -498,7 +498,7 @@ class XhrStreamingReceive extends NonWebSocketSessionReceiverActorAction with Sk
     case SubscribeResultToReceiverClientWaitForMessage =>
       context.become(receiveNotification)
 
-    case Terminated(actorRef) if (actorRef == nonWebSocketSession) =>
+    case Terminated(actorRef) if actorRef == nonWebSocketSession =>
       respondJs("c[2011,\"Server error\"]\n")
       closeWithLastChunk()
   }
@@ -522,7 +522,7 @@ class XhrStreamingReceive extends NonWebSocketSessionReceiverActorAction with Sk
         }
       })
 
-    case Terminated(actorRef) if (actorRef == nonWebSocketSession) =>
+    case Terminated(actorRef) if actorRef == nonWebSocketSession =>
       respondJs("c[2011,\"Server error\"]\n")
       closeWithLastChunk()
   }
@@ -591,7 +591,7 @@ class HtmlFileReceive extends NonWebSocketSessionReceiverActorAction {
       respondHtml(SockJsAction.htmlFile(callback, true))
       context.become(receiveNotification)
 
-    case Terminated(actorRef) if (actorRef == nonWebSocketSession) =>
+    case Terminated(actorRef) if actorRef == nonWebSocketSession =>
       respondHtml(
         SockJsAction.htmlFile(callback, false) +
         "<script>\np(\"c[2011,\\\"Server error\\\"]\");\n</script>\r\n"
@@ -625,7 +625,7 @@ class HtmlFileReceive extends NonWebSocketSessionReceiverActorAction {
         }
       })
 
-    case Terminated(actorRef) if (actorRef == nonWebSocketSession) =>
+    case Terminated(actorRef) if actorRef == nonWebSocketSession =>
       respondHtml(
         SockJsAction.htmlFile(callback, false) +
         "<script>\np(\"c[2011,\\\"Server error\\\"]\");\n</script>\r\n"
@@ -683,7 +683,7 @@ class JsonPPollingReceive extends NonWebSocketSessionReceiverActorAction {
     case SubscribeResultToReceiverClientWaitForMessage =>
       context.become(receiveNotification)
 
-    case Terminated(actorRef) if (actorRef == nonWebSocketSession) =>
+    case Terminated(actorRef) if actorRef == nonWebSocketSession =>
       respondJs(callback + "(\"c[2011,\\\"Server error\\\"]\");\r\n")
       .addListener(ChannelFutureListener.CLOSE)
   }
@@ -707,7 +707,7 @@ class JsonPPollingReceive extends NonWebSocketSessionReceiverActorAction {
         index, handler, false
       ).addListener(ChannelFutureListener.CLOSE)
 
-    case Terminated(actorRef) if (actorRef == nonWebSocketSession) =>
+    case Terminated(actorRef) if actorRef == nonWebSocketSession =>
       respondJs(callback + "(\"c[2011,\\\"Server error\\\"]\");\r\n")
       .addListener(ChannelFutureListener.CLOSE)
   }
@@ -801,7 +801,7 @@ class EventSourceReceive extends NonWebSocketSessionReceiverActorAction {
     case SubscribeResultToReceiverClientWaitForMessage =>
       context.become(receiveNotification)
 
-    case Terminated(actorRef) if (actorRef == nonWebSocketSession) =>
+    case Terminated(actorRef) if actorRef == nonWebSocketSession =>
       respondJs("c[2011,\"Server error\"]\n")
       .addListener(ChannelFutureListener.CLOSE)
   }
@@ -819,7 +819,7 @@ class EventSourceReceive extends NonWebSocketSessionReceiverActorAction {
       respondJs("c[3000,\"Go away!\"]\n")
       closeWithLastChunk(Some(index, handler))
 
-    case Terminated(actorRef) if (actorRef == nonWebSocketSession) =>
+    case Terminated(actorRef) if actorRef == nonWebSocketSession =>
       respondEventSource("c[2011,\"Server error\"]")
       closeWithLastChunk()
   }

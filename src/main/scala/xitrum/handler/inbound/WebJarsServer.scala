@@ -1,15 +1,13 @@
 package xitrum.handler.inbound
 
-import java.io.File
 import scala.util.control.NonFatal
 
 import io.netty.channel.{ChannelHandler, SimpleChannelInboundHandler, ChannelHandlerContext}
-import io.netty.handler.codec.http.{HttpMethod, HttpResponseStatus, HttpRequest, HttpHeaders}
+import io.netty.handler.codec.http.{HttpMethod, HttpResponseStatus}
 import ChannelHandler.Sharable
 import HttpMethod._
 import HttpResponseStatus._
 
-import xitrum.Config
 import xitrum.handler.HandlerEnv
 import xitrum.handler.outbound.{XSendFile, XSendResource}
 import xitrum.etag.NotModified

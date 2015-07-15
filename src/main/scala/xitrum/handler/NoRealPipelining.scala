@@ -1,7 +1,7 @@
 package xitrum.handler
 
 import io.netty.channel.{Channel, ChannelFuture, ChannelFutureListener}
-import io.netty.handler.codec.http.{HttpHeaders, HttpRequest, HttpResponse}
+import io.netty.handler.codec.http.{HttpHeaders, HttpRequest}
 
 /**
  * http://en.wikipedia.org/wiki/HTTP_pipelining

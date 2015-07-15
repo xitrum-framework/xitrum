@@ -5,8 +5,7 @@ import scala.xml.Unparsed
 import org.apache.commons.lang3.StringEscapeUtils
 import io.netty.channel.ChannelFuture
 
-import xitrum.{Config, Action}
-import xitrum.etag.{Etag, NotModified}
+import xitrum.Action
 
 // http://stackoverflow.com/questions/2703861/chromes-loading-indicator-keeps-spinning-during-xmlhttprequest
 // http://stackoverflow.com/questions/1735560/stop-the-browser-throbber-of-doom-while-loading-comet-server-push-xmlhttpreques
@@ -66,6 +65,7 @@ trait Js {
 
   lazy val jsDefaults = {
     val validatei18n = if (language == "en") "" else (<script type="text/javascript" src={webJarsUrl(s"jquery-validation/1.13.1/localization/messages_$language.js")}></script>)
+
     <xml:group>
       <script type="text/javascript" src={webJarsUrl("jquery/2.1.4",              "jquery.js",             "jquery.min.js")}></script>
       <script type="text/javascript" src={webJarsUrl("jquery-validation/1.13.1",  "jquery.validate.js",    "jquery.validate.min.js")}></script>

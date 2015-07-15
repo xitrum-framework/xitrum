@@ -4,8 +4,6 @@ import java.util.concurrent.TimeUnit
 import scala.concurrent.duration.Duration
 import scala.util.control.NonFatal
 
-import akka.actor.Actor
-
 import io.netty.channel.{ChannelFuture, ChannelFutureListener}
 import io.netty.handler.codec.http.{HttpMethod, HttpResponseStatus}
 
@@ -13,7 +11,7 @@ import org.apache.commons.lang3.exception.ExceptionUtils
 
 import xitrum.action._
 import xitrum.exception.{InvalidAntiCsrfToken, InvalidInput, MissingParam}
-import xitrum.handler.{AccessLog, HandlerEnv, NoRealPipelining}
+import xitrum.handler.{AccessLog, NoRealPipelining}
 import xitrum.handler.inbound.Dispatcher
 import xitrum.handler.outbound.ResponseCacher
 import xitrum.scope.request.RequestEnv
@@ -114,7 +112,7 @@ trait Action extends RequestEnv
       case NonFatal(e) if forwarding =>
         log.warn("Error", e)
 
-      case NonFatal(e) if (e.isInstanceOf[InvalidAntiCsrfToken] || e.isInstanceOf[MissingParam] || e.isInstanceOf[InvalidInput]) =>
+      case NonFatal(e) if e.isInstanceOf[InvalidAntiCsrfToken] || e.isInstanceOf[MissingParam] || e.isInstanceOf[InvalidInput] =>
         // These exceptions are special cases:
         // We know that the exception is caused by the client (bad request)
         val msg = if (e.isInstanceOf[InvalidAntiCsrfToken]) {

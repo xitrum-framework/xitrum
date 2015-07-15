@@ -14,9 +14,8 @@ import akka.actor.ActorSystem
 import io.netty.handler.codec.http.multipart.DefaultHttpDataFactory
 
 import xitrum.scope.session.SessionStore
-import xitrum.routing.{DiscoveredAcc, RouteCollection, RouteCollector, SerializableRouteCollection}
+import xitrum.routing.{RouteCollection, RouteCollector}
 import xitrum.view.TemplateEngine
-import xitrum.util.Loader
 
 //------------------------------------------------------------------------------
 

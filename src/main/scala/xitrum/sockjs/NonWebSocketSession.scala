@@ -2,7 +2,7 @@ package xitrum.sockjs
 
 import scala.collection.mutable.ArrayBuffer
 
-import akka.actor.{Actor, ActorRef, ActorSystem, Props, ReceiveTimeout, Terminated}
+import akka.actor.{Actor, ActorRef, ReceiveTimeout, Terminated}
 import scala.concurrent.duration._
 
 import xitrum.{Action, Config, SockJsText}

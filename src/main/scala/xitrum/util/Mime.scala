@@ -25,7 +25,7 @@ object Mime {
       false
     } else {
       val lower = mime.toLowerCase
-      (lower.indexOf("text") >= 0 || lower.indexOf("xml") >= 0 || lower.indexOf("script") >= 0 || lower.indexOf("json") >= 0)
+      lower.indexOf("text") >= 0 || lower.indexOf("xml") >= 0 || lower.indexOf("script") >= 0 || lower.indexOf("json") >= 0
     }
   }
 }

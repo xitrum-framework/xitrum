@@ -2,12 +2,10 @@ package xitrum.scope.session
 
 import java.util.UUID
 import scala.collection.mutable.HashMap
-import scala.util.control.NonFatal
 
 import io.netty.handler.codec.http.cookie.DefaultCookie
 
 import xitrum.Config
-import xitrum.scope.request.RequestEnv
 import xitrum.util.SeriDeseri
 
 /**

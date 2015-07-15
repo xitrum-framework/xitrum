@@ -1,18 +1,14 @@
 package xitrum.view
 
-import java.io.File
 import scala.xml.{Node, NodeSeq, Xhtml}
-import scala.util.control.NonFatal
 
 import io.netty.buffer.{ByteBuf, Unpooled}
-import io.netty.channel.{ChannelFuture, ChannelFutureListener}
+import io.netty.channel.ChannelFuture
 import io.netty.handler.codec.http.{
   DefaultHttpContent, DefaultLastHttpContent,
-  HttpHeaders, HttpResponseStatus, HttpVersion, LastHttpContent
+  HttpHeaders, HttpResponseStatus, LastHttpContent
 }
-import io.netty.util.CharsetUtil
-import HttpHeaders.Names.{CONTENT_TYPE, CONTENT_LENGTH, TRANSFER_ENCODING}
-import HttpHeaders.Values.{CHUNKED, NO_CACHE}
+import HttpHeaders.Names.{CONTENT_TYPE, CONTENT_LENGTH}
 
 import xitrum.{Action, Config}
 import xitrum.etag.NotModified

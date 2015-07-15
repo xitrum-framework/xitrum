@@ -88,8 +88,8 @@ object SwaggerJson {
     val routePath = RouteCompiler.decompile(route.compiledPattern, true)
 
     val nickname  = swaggerArgs.find(_.isInstanceOf[Swagger.Nickname]).map(_.asInstanceOf[Swagger.Nickname].nickname).getOrElse(WordUtils.uncapitalize(route.klass.getSimpleName))
-    val produces  = swaggerArgs.filter(_.isInstanceOf[Swagger.Produces]).asInstanceOf[Seq[Swagger.Produces]].map(_.contentTypes).flatten.distinct
-    val consumes  = swaggerArgs.filter(_.isInstanceOf[Swagger.Consumes]).asInstanceOf[Seq[Swagger.Consumes]].map(_.contentTypes).flatten.distinct
+    val produces  = swaggerArgs.filter(_.isInstanceOf[Swagger.Produces]).asInstanceOf[Seq[Swagger.Produces]].flatMap(_.contentTypes).distinct
+    val consumes  = swaggerArgs.filter(_.isInstanceOf[Swagger.Consumes]).asInstanceOf[Seq[Swagger.Consumes]].flatMap(_.contentTypes).distinct
     val summary   = swaggerArgs.find(_.isInstanceOf[Swagger.Summary]).asInstanceOf[Option[Swagger.Summary]].map(_.summary).getOrElse("")
     val notes     = swaggerArgs.filter(_.isInstanceOf[Swagger.Note]).asInstanceOf[Seq[Swagger.Note]].map(_.note).mkString(" ")
     val responses = swaggerArgs.filter(_.isInstanceOf[Swagger.Response]).asInstanceOf[Seq[Swagger.Response]].map(response2Json)

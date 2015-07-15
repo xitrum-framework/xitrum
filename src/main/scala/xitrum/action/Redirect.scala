@@ -1,13 +1,11 @@
 package xitrum.action
 
-import java.lang.reflect.Method
-
 import io.netty.channel.ChannelFuture
 import io.netty.handler.codec.http.{HttpHeaders, HttpResponseStatus}
 import HttpHeaders.Names.LOCATION
 import HttpResponseStatus.FOUND
 
-import xitrum.{Action, Config}
+import xitrum.Action
 import xitrum.handler.inbound.Dispatcher
 
 trait Redirect {

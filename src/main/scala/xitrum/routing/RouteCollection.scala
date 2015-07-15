@@ -223,7 +223,7 @@ class RouteCollection(
 
     //                              method  pattern target
     val firsts = ArrayBuffer.empty[(String, String, String)]
-    var others = ArrayBuffer.empty[(String, String, String)]
+    val others = ArrayBuffer.empty[(String, String, String)]
     val lasts  = ArrayBuffer.empty[(String, String, String)]
 
     val (rFirsts, rOthers,rLasts) = if (xitrumRoutes) {
@@ -247,7 +247,7 @@ class RouteCollection(
     for (r <- rLasts)  lasts .append((r.httpMethod.toString, RouteCompiler.decompile(r.compiledPattern), targetWithCache(r)))
 
     // Sort by pattern
-    var all = firsts ++ others.sortBy(_._2) ++ lasts
+    val all = firsts ++ others.sortBy(_._2) ++ lasts
 
     val (methodHttpMaxLength, patternMaxLength) = all.foldLeft((0, 0)) { case ((mmax, pmax), (m, p, _)) =>
       val mlen  = m.length
@@ -269,7 +269,7 @@ class RouteCollection(
     val strings = ArrayBuffer.empty[String]
     error404.foreach { klass => strings.append("404  " + klass.getName) }
     error500.foreach { klass => strings.append("500  " + klass.getName) }
-    if (!strings.isEmpty) Log.info("Error routes:\n" + strings.mkString("\n"))
+    if (strings.nonEmpty) Log.info("Error routes:\n" + strings.mkString("\n"))
   }
 
   private def targetWithCache(route: Route): String = {

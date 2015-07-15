@@ -1,13 +1,13 @@
 package xitrum.routing
 
 import java.io.File
-import scala.collection.mutable.{ArrayBuffer, Map => MMap}
+import scala.collection.mutable.ArrayBuffer
 import scala.reflect.runtime.universe
 import scala.util.control.NonFatal
 
 import sclasner.{FileEntry, Scanner}
 
-import xitrum.{Action, Config, Log, SockJsAction}
+import xitrum.{Action, Config, SockJsAction}
 import xitrum.annotation._
 import xitrum.sockjs.SockJsPrefix
 

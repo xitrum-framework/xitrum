@@ -22,7 +22,7 @@ object RouteCompiler {
 
     // split("/", -1): see PathInfo#tokens
     val fragments = noSlashSuffix.split("/", -1)
-    fragments.map(compilePatternFragment _)
+    fragments.map(compilePatternFragment)
   }
 
   def decompile(routeTokens: Seq[RouteToken], forSwagger: Boolean = false): String = {

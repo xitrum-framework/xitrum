@@ -1,10 +1,10 @@
 package xitrum.routing
 
 import java.lang.reflect.Modifier
-import scala.collection.mutable.{ArrayBuffer, Map => MMap}
+import scala.collection.mutable.{Map => MMap}
 import scala.reflect.runtime.universe
 
-import xitrum.{Action, Config}
+import xitrum.Action
 import xitrum.annotation.ActionAnnotations
 
 /**

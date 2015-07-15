@@ -1,7 +1,6 @@
 package xitrum.routing
 
 import scala.annotation.tailrec
-import scala.collection.mutable.{Map => MMap}
 import scala.util.matching.Regex
 
 import xitrum.scope.request.Params
@@ -81,7 +80,7 @@ case class NonDotRouteToken(value: String, isPlaceholder: Boolean, regex: Option
             false
           } else {
             // Placeholder in URL can't be empty
-            val value = pathTokens(0)
+            val value = pathTokens.head
             if (value.length == 0) false else matchRegex(pathParams, value)
           }
         }
@@ -90,12 +89,12 @@ case class NonDotRouteToken(value: String, isPlaceholder: Boolean, regex: Option
           false
         } else {
           // Placeholder in URL can't be empty
-          val value = pathTokens(0)
+          val value = pathTokens.head
           if (value.length == 0) false else matchRegex(pathParams, value)
         }
       }
     } else {
-      pathTokens(0) == value
+      pathTokens.head == value
     }
   }
 
@@ -139,7 +138,7 @@ case class DotRouteToken(nonDotRouteTokens: Seq[NonDotRouteToken]) extends Route
   }
 
   def matchToken(pathParams: Params, pathTokens: Seq[String], last: Boolean): Boolean = {
-    val ts = pathTokens(0).split('.')  // TODO: How to reuse this?
+    val ts = pathTokens.head.split('.')  // TODO: How to reuse this?
     if (ts.length == nonDotRouteTokens.length)
       matchNonDotRouteTokens(pathParams, ts, nonDotRouteTokens)
     else
@@ -149,7 +148,7 @@ case class DotRouteToken(nonDotRouteTokens: Seq[NonDotRouteToken]) extends Route
   /** pathTokens and nonDotRouteTokens are of the same length. */
   @tailrec
   private def matchNonDotRouteTokens(pathParams: Params, pathTokens: Seq[String], nonDotRouteTokens: Seq[NonDotRouteToken]): Boolean = {
-    if (pathTokens.length == 0) {
+    if (pathTokens.isEmpty) {
       true
     } else {
       val matched = nonDotRouteTokens.head.matchToken(pathParams, Seq(pathTokens.head), false)

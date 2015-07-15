@@ -1,6 +1,5 @@
 package xitrum.handler.outbound
 
-import io.netty.buffer.Unpooled
 import io.netty.channel.{ChannelHandler, ChannelHandlerContext, ChannelOutboundHandlerAdapter, ChannelPromise}
 import io.netty.handler.codec.http.{DefaultHttpResponse, HttpHeaders, HttpMethod, HttpRequest, FullHttpResponse, HttpResponseStatus, HttpVersion}
 import ChannelHandler.Sharable
@@ -11,7 +10,7 @@ import HttpResponseStatus._
 import xitrum.{Config, Log}
 import xitrum.etag.Etag
 import xitrum.handler.HandlerEnv
-import xitrum.util.{ByteBufUtil, Gzip, Mime}
+import xitrum.util.{ByteBufUtil, Gzip}
 
 @Sharable
 class Env2Response extends ChannelOutboundHandlerAdapter {

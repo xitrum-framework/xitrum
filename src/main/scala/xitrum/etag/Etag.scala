@@ -3,10 +3,8 @@ package xitrum.etag
 import java.io.File
 import java.security.MessageDigest
 
-import io.netty.buffer.Unpooled
 import io.netty.handler.codec.http.{HttpHeaders, HttpRequest, HttpResponse, HttpResponseStatus}
 import HttpHeaders.Names._
-import HttpHeaders.Values._
 import HttpResponseStatus._
 
 import xitrum.{Action, Config}

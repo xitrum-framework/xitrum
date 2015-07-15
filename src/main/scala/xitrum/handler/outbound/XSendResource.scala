@@ -1,21 +1,16 @@
 package xitrum.handler.outbound
 
-import java.io.{File, RandomAccessFile}
-
 import io.netty.buffer.Unpooled
-import io.netty.channel.{ChannelHandler, ChannelHandlerContext, ChannelFuture, DefaultFileRegion, ChannelFutureListener, ChannelOutboundHandlerAdapter, ChannelPromise}
-import io.netty.handler.codec.http.{HttpHeaders, HttpMethod, HttpRequest, FullHttpResponse, HttpResponseStatus, HttpVersion}
+import io.netty.channel.{ChannelHandler, ChannelHandlerContext, ChannelOutboundHandlerAdapter, ChannelPromise}
+import io.netty.handler.codec.http.{HttpHeaders, HttpMethod, HttpRequest, FullHttpResponse, HttpResponseStatus}
 import ChannelHandler.Sharable
 import HttpHeaders.Names._
-import HttpHeaders.Values._
 import HttpMethod._
 import HttpResponseStatus._
-import HttpVersion._
 
-import xitrum.Config
-import xitrum.etag.{Etag, NotModified}
+import xitrum.etag.Etag
 import xitrum.handler.{AccessLog, HandlerEnv, NoRealPipelining}
-import xitrum.util.{ByteBufUtil, Gzip, Mime}
+import xitrum.util.{ByteBufUtil, Gzip}
 
 object XSendResource {
   // setClientCacheAggressively should be called at PublicResourceServer, not

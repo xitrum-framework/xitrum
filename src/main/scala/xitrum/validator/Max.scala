@@ -18,5 +18,5 @@ class Max[T <: Comparable[T]](max: T) extends Validator[T] {
     if (value.compareTo(max) <= 0)
       None
     else
-      Some("%s must be less than or equal to %f".format(name, max))
+      Some("%s must be less than or equal to %s".format(name, max.toString))
 }

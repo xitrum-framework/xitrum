@@ -3,7 +3,6 @@ package xitrum.action
 import scala.collection.mutable.ArrayBuffer
 
 import xitrum.Action
-import xitrum.routing.Route
 
 trait Filter {
   this: Action =>

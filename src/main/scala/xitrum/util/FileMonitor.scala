@@ -1,6 +1,6 @@
 package xitrum.util
 
-import java.nio.file.{Path, Paths, StandardWatchEventKinds, WatchEvent}
+import java.nio.file.{Path, StandardWatchEventKinds, WatchEvent}
 import java.nio.file.WatchEvent.Modifier
 import scala.util.control.NonFatal
 

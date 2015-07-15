@@ -3,12 +3,10 @@ package xitrum
 import scala.collection.mutable.{Map => MMap}
 import scala.concurrent.{Future, Promise}
 import akka.actor.{Actor, ActorRef}
-import xitrum.handler.{DefaultHttpChannelInitializer, HandlerEnv}
 import xitrum.sockjs.{
   NotificationToHandlerChannelCloseSuccess,
   NotificationToHandlerChannelCloseFailure,
   NotificationToHandlerChannelWriteSuccess,
-  NotificationToHandlerChannelWriteFailure,
   CloseFromHandler,
   MessageFromHandler
 }

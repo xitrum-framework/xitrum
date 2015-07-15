@@ -1,7 +1,7 @@
 package xitrum.handler.inbound
 
 import io.netty.buffer.{ByteBuf, Unpooled}
-import io.netty.channel.{Channel, ChannelFutureListener, ChannelHandlerContext, SimpleChannelInboundHandler}
+import io.netty.channel.{ChannelFutureListener, ChannelHandlerContext, SimpleChannelInboundHandler}
 import io.netty.util.CharsetUtil
 
 import xitrum.handler.AccessLog

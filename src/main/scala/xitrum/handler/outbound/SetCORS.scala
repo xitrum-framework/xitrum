@@ -1,7 +1,7 @@
 package xitrum.handler.outbound
 
 import io.netty.channel.{ChannelHandler, ChannelHandlerContext, ChannelOutboundHandlerAdapter, ChannelPromise}
-import io.netty.handler.codec.http.{HttpHeaders, HttpMethod, HttpRequest, HttpResponse, HttpResponseStatus}
+import io.netty.handler.codec.http.{HttpHeaders, HttpMethod, HttpResponseStatus}
 import ChannelHandler.Sharable
 import HttpHeaders.Names._
 import HttpMethod._
@@ -28,7 +28,7 @@ class SetCORS extends ChannelOutboundHandlerAdapter {
 
     // Access-Control-Allow-Origin
     if (!response.headers.contains(ACCESS_CONTROL_ALLOW_ORIGIN)) {
-      if (corsAllowOrigins(0).equals("*")) {
+      if (corsAllowOrigins.head.equals("*")) {
         if (requestOrigin == null || requestOrigin == "null")
           HttpHeaders.setHeader(response, ACCESS_CONTROL_ALLOW_ORIGIN, "*")
         else

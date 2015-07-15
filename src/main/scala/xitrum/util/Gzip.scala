@@ -58,7 +58,7 @@ object Gzip {
   def isAccepted(request: HttpRequest) = {
     if (Config.xitrum.response.autoGzip) {
       val acceptEncoding = HttpHeaders.getHeader(request, ACCEPT_ENCODING)
-      (acceptEncoding != null && acceptEncoding.contains("gzip"))
+      acceptEncoding != null && acceptEncoding.contains("gzip")
     } else {
       false
     }

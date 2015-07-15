@@ -1,10 +1,8 @@
 package xitrum.handler.outbound
 
-import io.netty.buffer.Unpooled
 import io.netty.channel.{ChannelHandler, ChannelHandlerContext, ChannelOutboundHandlerAdapter, ChannelPromise}
-import io.netty.handler.codec.http.{DefaultHttpResponse, HttpHeaders, HttpMethod, HttpRequest, HttpResponse, HttpResponseStatus}
+import io.netty.handler.codec.http.{HttpMethod, HttpResponseStatus}
 import ChannelHandler.Sharable
-import HttpHeaders.Names._
 import HttpMethod._
 import HttpResponseStatus._
 
@@ -33,7 +31,7 @@ class OPTIONSResponse extends ChannelOutboundHandlerAdapter {
         if (response.getStatus != NOT_FOUND) response.setStatus(NO_CONTENT)
       } else {
         // Dynamic resources
-        if (!Config.routes.tryAllMethods(pathInfo).isEmpty)
+        if (Config.routes.tryAllMethods(pathInfo).nonEmpty)
           response.setStatus(NO_CONTENT)
         else
           response.setStatus(NOT_FOUND)

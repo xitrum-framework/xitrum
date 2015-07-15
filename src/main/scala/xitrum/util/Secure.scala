@@ -1,7 +1,7 @@
 package xitrum.util
 
 import java.nio.ByteBuffer
-import java.security.{MessageDigest, SecureRandom}
+import java.security.MessageDigest
 import java.util.Arrays
 
 import javax.crypto.{Cipher, Mac}
@@ -69,7 +69,7 @@ object Secure {
       defaultKey
     } else {
       val messageDigest = MessageDigest.getInstance("MD5")
-      messageDigest.reset
+      messageDigest.reset()
       messageDigest.update(key.getBytes(UTF_8))
       messageDigest.digest
     }

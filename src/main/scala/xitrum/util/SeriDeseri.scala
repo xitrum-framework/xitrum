@@ -231,7 +231,7 @@ object SeriDeseri {
    */
   def toSecureUrlSafeBase64(any: Any, key: String, forCookie: Boolean): String = {
     val bytes           = toBytes(any)
-    val bytesCompressed = (forCookie && bytes.length > 4 * 1024)
+    val bytesCompressed = forCookie && bytes.length > 4 * 1024
 
     val maybeCompressed = if (bytesCompressed) Gzip.compress(bytes) else bytes
     val encrypted       = Secure.encrypt(maybeCompressed, key)

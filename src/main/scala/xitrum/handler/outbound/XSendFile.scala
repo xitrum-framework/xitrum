@@ -1,11 +1,11 @@
 package xitrum.handler.outbound
 
-import java.io.{File, RandomAccessFile}
+import java.io.RandomAccessFile
 import scala.util.control.NonFatal
 
 import io.netty.buffer.Unpooled
 import io.netty.channel.{ChannelOutboundHandlerAdapter, ChannelHandler, ChannelHandlerContext, ChannelFuture, ChannelPromise, DefaultFileRegion, ChannelFutureListener}
-import io.netty.handler.codec.http.{HttpHeaders, HttpMethod, FullHttpRequest, FullHttpResponse, HttpResponseStatus, HttpVersion, LastHttpContent}
+import io.netty.handler.codec.http.{HttpHeaders, HttpMethod, FullHttpRequest, FullHttpResponse, HttpResponseStatus, LastHttpContent}
 import io.netty.handler.ssl.SslHandler
 import io.netty.handler.stream.ChunkedFile
 import ChannelHandler.Sharable
@@ -13,12 +13,11 @@ import HttpHeaders.Names._
 import HttpHeaders.Values._
 import HttpMethod._
 import HttpResponseStatus._
-import HttpVersion._
 
 import xitrum.Log
 import xitrum.etag.{Etag, NotModified}
 import xitrum.handler.{AccessLog, HandlerEnv, NoRealPipelining}
-import xitrum.util.{ByteBufUtil, Gzip, Mime}
+import xitrum.util.{ByteBufUtil, Gzip}
 
 // Based on https://github.com/netty/netty/tree/master/example/src/main/java/io/netty/example/http/file
 object XSendFile {
@@ -64,7 +63,6 @@ object XSendFile {
     setHeader(response, ABS_500, fromController)
   }
 
-  /** @param path see Renderer#renderFile */
   def sendFile(ctx: ChannelHandlerContext, env: HandlerEnv, promise: ChannelPromise) {
     val channel       = ctx.channel
     val remoteAddress = channel.remoteAddress
@@ -217,7 +215,7 @@ object XSendFile {
             None
           } else {
             val s = se(0).toLong
-            val e = -1
+            val e = -1L
             Some((s, e))
           }
         }

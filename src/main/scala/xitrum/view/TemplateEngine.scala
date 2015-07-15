@@ -1,7 +1,6 @@
 package xitrum.view
 
 import scala.util.control.NonFatal
-import com.typesafe.config.{Config => TConfig}
 import xitrum.{Action, Config, DualConfig, Log}
 
 /**
@@ -26,7 +25,7 @@ trait TemplateEngine {
    * Renders the template at the location identified by the path
    * (and may be options, depending on template engines).
    *
-   * @param location the template
+   * @param path the template
    *
    * @param options specific to the configured template engine
    */

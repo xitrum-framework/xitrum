@@ -3,8 +3,8 @@ package xitrum
 import scala.collection.mutable.{Map => MMap}
 import org.scalatest.{FlatSpec, Matchers}
 
-class OptVarRecoverTest extends FlatSpec with Matchers {
-  behavior of "OptVarRecover"
+class OptVarRecoveryTest extends FlatSpec with Matchers {
+  behavior of "OptVarRecovery"
 
   implicit val action = new Action { def execute() {} }
 

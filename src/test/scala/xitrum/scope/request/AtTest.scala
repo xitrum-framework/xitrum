@@ -1,7 +1,6 @@
 package xitrum.scope.request
 
 import org.scalatest.{FlatSpec, Matchers}
-import xitrum.Action
 
 private class AtTestClass(val a: String, val b: Double)
 private case class AtTestCaseClass(a: String, b: Int)

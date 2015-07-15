@@ -1,7 +1,6 @@
 package xitrum.util
 
 import java.io.File
-import java.nio.file.Path
 import scala.collection.mutable.{Map => MMap}
 import sclasner.Discoverer
 

@@ -1,8 +1,5 @@
 package xitrum.local
 
-import java.util.Collections
-import com.typesafe.config.ConfigObject
-
 import xitrum.{Cache, Config}
 import xitrum.util.LocalLruCache
 

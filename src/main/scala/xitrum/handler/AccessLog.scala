@@ -2,7 +2,6 @@ package xitrum.handler
 
 import java.net.SocketAddress
 import scala.collection.mutable.{Map => MMap}
-import scala.collection.JavaConverters._
 
 import nl.grons.metrics.scala.Histogram
 import io.netty.handler.codec.http.{HttpRequest, HttpResponse}
@@ -58,9 +57,6 @@ object AccessLog {
   // Save last executeTime of each access
   // Map('actionName': [timestamp, execTime])
   private lazy val lastExecTimeMap = MMap[String, Array[Long]]()
-  private val gauge = xitrum.Metrics.gauge("lastExecutionTime") {
-    lastExecTimeMap.toArray
-  }
 
   private def msgWithTime(className: String, action: Action, beginTimestamp: Long) = {
     val endTimestamp                 = System.currentTimeMillis()

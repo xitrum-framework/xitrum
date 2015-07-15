@@ -1,6 +1,6 @@
 package xitrum.handler.inbound
 
-import java.util.{Map => JMap, List => JList, LinkedHashMap => JLinkedHashMap}
+import java.util.{Map => JMap, List => JList}
 import scala.collection.mutable.{ArrayBuffer, Map => MMap}
 import scala.util.control.NonFatal
 
@@ -49,13 +49,13 @@ class UriParser extends SimpleChannelInboundHandler[HandlerEnv] {
 
     val it  = keySet.iterator
     val ret = MMap.empty[String, Seq[String]]
-    while (it.hasNext()) {
+    while (it.hasNext) {
       val key    = it.next()
       val values = params.get(key)
 
       val it2  = values.iterator
       val ret2 = ArrayBuffer.empty[String]
-      while (it2.hasNext()) {
+      while (it2.hasNext) {
         val value = it2.next()
         ret2.append(value)
       }

@@ -3,8 +3,6 @@ package xitrum.util
 import java.util.{Collections, LinkedHashMap}
 import java.util.Map.Entry
 
-import xitrum.Cache
-
 /**
  * Non-threadsafe, non-distributed LRU cache.
  *

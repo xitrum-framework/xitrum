@@ -1,7 +1,6 @@
 package xitrum.scope.session
 
 import scala.collection.mutable.{Map => MMap}
-import scala.util.control.NonFatal
 
 import io.netty.handler.codec.http.cookie.DefaultCookie
 

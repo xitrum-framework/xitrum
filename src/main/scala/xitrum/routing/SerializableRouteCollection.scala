@@ -2,7 +2,6 @@ package xitrum.routing
 
 import java.io.Serializable
 import scala.collection.mutable.ArrayBuffer
-import xitrum.Action
 
 class SerializableRouteCollection extends Serializable {
   val firstGETs = ArrayBuffer.empty[SerializableRoute]

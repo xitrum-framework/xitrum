@@ -1,7 +1,6 @@
 package xitrum.view
 
 import java.io.File
-
 import xitrum.{Action, Config}
 
 trait Renderer extends GetActionClassDefaultsToCurrentAction {

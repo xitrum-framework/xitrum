@@ -4,16 +4,14 @@ import scala.collection.immutable.SortedMap
 import scala.collection.mutable.{Map => MMap}
 
 import io.netty.buffer.Unpooled
-import io.netty.channel.{ChannelHandler, ChannelHandlerContext, ChannelOutboundHandlerAdapter, ChannelPromise}
-import ChannelHandler.Sharable
-import io.netty.handler.codec.http.{DefaultFullHttpResponse, HttpHeaders, HttpRequest, FullHttpResponse, HttpResponseStatus, HttpVersion}
+import io.netty.handler.codec.http.{DefaultFullHttpResponse, HttpHeaders, FullHttpResponse, HttpResponseStatus, HttpVersion}
 import HttpResponseStatus.OK
 
-import xitrum.{Cache, Config}
+import xitrum.Config
 import xitrum.Action
 import xitrum.handler.HandlerEnv
 import xitrum.scope.request.Params
-import xitrum.util.{Gzip, Mime}
+import xitrum.util.Gzip
 
 object ResponseCacher {
   //                             statusCode  headers           content

@@ -1,17 +1,16 @@
 package xitrum.metrics
 
-import akka.actor.{Actor, ActorRef, Props, Terminated}
+import akka.actor.{Actor, ActorRef, Terminated}
 import akka.cluster.{Cluster, NodeMetrics}
-import akka.cluster.ClusterEvent.{ClusterMetricsChanged, CurrentClusterState}
+import akka.cluster.ClusterEvent.ClusterMetricsChanged
 import akka.cluster.StandardMetrics.{Cpu, HeapMemory}
 
 import io.netty.handler.codec.http.HttpResponseStatus
-import glokka.Registry
 
 import xitrum.{FutureAction, Config, SockJsAction, SockJsText}
 import xitrum.annotation.{GET, Last, SOCKJS}
 import xitrum.util.SeriDeseri
-import xitrum.view.{DocType, Js}
+import xitrum.view.DocType
 
 /** JMX metrics collector for single node application. */
 class MetricsCollector(localPublisher: ActorRef) extends Actor {
@@ -23,10 +22,10 @@ class MetricsCollector(localPublisher: ActorRef) extends Actor {
 
 /** JMX metrics collector for clustered node application. */
 class ClusterMetricsCollector(localPublisher: ActorRef) extends Actor {
-  override def preStart =
+  override def preStart() =
     Cluster(context.system).subscribe(self, classOf[ClusterMetricsChanged])
 
-  override def postStop =
+  override def postStop() =
     Cluster(context.system).unsubscribe(self)
 
   def receive = {
@@ -76,11 +75,11 @@ class MetricsPublisher extends Actor {
 
     case Subscribe =>
       clients = clients :+ sender
-      context.watch(sender)
+      context.watch(sender())
 
     case UnSubscribe =>
       clients =  clients.filterNot(_ == sender)
-      context.unwatch(sender)
+      context.unwatch(sender())
 
     case Terminated(client) =>
       clients = clients.filterNot(_ == client)
@@ -237,7 +236,7 @@ class XitrumMetricsChannel extends SockJsAction with PublisherLookUp {
 
   private def checkAPIKey() {
     context.become {
-      case SockJsText(text) if (text == MetricsManager.metrics.apiKey) =>
+      case SockJsText(text) if text == MetricsManager.metrics.apiKey =>
         lookUpPublisher()
 
       case SockJsText(key) =>
@@ -253,7 +252,7 @@ class XitrumMetricsChannel extends SockJsAction with PublisherLookUp {
     publisher ! Subscribe
     context.watch(publisher)
     context.become {
-      case msg @ (first::rest) =>
+      case msg @ (first :: rest) =>
         msg.foreach { nodeMetrics =>
           sendHeapMemory(nodeMetrics.asInstanceOf[NodeMetrics])
           sendCpu(nodeMetrics.asInstanceOf[NodeMetrics])

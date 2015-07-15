@@ -1,7 +1,5 @@
 package xitrum
 
-import java.io.File
-
 import io.netty.channel.{ChannelInitializer, EventLoopGroup}
 import io.netty.channel.socket.SocketChannel
 import io.netty.util.ResourceLeakDetector
@@ -14,7 +12,6 @@ import xitrum.handler.{
   SslChannelInitializer
 }
 
-import xitrum.handler.inbound.Dispatcher
 import xitrum.metrics.MetricsManager
 
 object Server {

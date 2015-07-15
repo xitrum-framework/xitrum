@@ -18,5 +18,5 @@ class Min[T <: Comparable[T]](min: T) extends Validator[T] {
     if (value.compareTo(min) >= 0)
       None
     else
-      Some("%s must be greater than or equal to %f".format(name, min))
+      Some("%s must be greater than or equal to %s".format(name, min.toString))
 }

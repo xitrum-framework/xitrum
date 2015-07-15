@@ -5,7 +5,6 @@ import io.netty.handler.codec.http.multipart.FileUpload
 
 import xitrum.{Config, Action}
 import xitrum.handler.HandlerEnv
-import xitrum.routing.Route
 import xitrum.util.{DefaultsTo, SeriDeseri}
 
 object RequestEnv {
@@ -14,7 +13,7 @@ object RequestEnv {
     sb.append("{")
 
     val keys = params.keys.toArray
-    val size = keys.size
+    val size = keys.length
     for (i <- 0 until size) {
       val key = keys(i)
 
@@ -28,17 +27,17 @@ object RequestEnv {
         sb.append("[FILTERED]")
       } else {
         val values = params(key)
-        if (values.length == 0) {
+        if (values.isEmpty) {
           sb.append("[EMPTY]")
         } else if (values.length == 1) {
-          val value = values(0)
+          val value = values.head
           if (value.isInstanceOf[FileUpload])
             sb.append("<file>")
           else
-            sb.append(values(0))
+            sb.append(values.head)
         } else {
           sb.append("[")
-          val value = values(0)
+          val value = values.head
           if (value.isInstanceOf[FileUpload])
             sb.append("<files>")
           else

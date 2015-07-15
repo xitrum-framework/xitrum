@@ -7,12 +7,10 @@ import scala.concurrent.duration.FiniteDuration
 import com.codahale.metrics.MetricRegistry
 import com.codahale.metrics.json.MetricsModule
 import com.fasterxml.jackson.databind.ObjectMapper
-import nl.grons.metrics.scala.InstrumentedBuilder
 
-import akka.actor.{Actor, ActorRef, Address, Cancellable, ExtendedActorSystem, Props, Terminated}
-import akka.cluster.{ClusterActorRefProvider, JmxMetricsCollector, NodeMetrics}
+import akka.actor.{Actor, ActorRef, Cancellable, ExtendedActorSystem, Props, Terminated}
+import akka.cluster.{JmxMetricsCollector, NodeMetrics}
 import akka.cluster.ClusterEvent.ClusterMetricsChanged
-import akka.cluster.StandardMetrics.{Cpu, HeapMemory}
 import glokka.Registry
 
 import xitrum.Config

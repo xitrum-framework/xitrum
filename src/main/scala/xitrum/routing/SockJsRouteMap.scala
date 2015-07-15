@@ -67,7 +67,7 @@ class SockJsRouteMap(map: MMap[String, SockJsClassAndOptions]) {
     context.actorOf(Props(Dispatcher.newAction(actorClass).asInstanceOf[Actor]))
   }
 
-  /** @param sockJsHandlerClass Normal SockJsHandler subclass or object class */
+  /** @param sockJsActorClass Normal SockJsHandler subclass or object class */
   def findPathPrefix(sockJsActorClass: Class[_ <: SockJsAction]): String = {
     // Need to compare by class name because the classes may be loaded by
     // different class loaders

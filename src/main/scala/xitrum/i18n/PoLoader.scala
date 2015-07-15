@@ -3,7 +3,6 @@ package xitrum.i18n
 import java.io.File
 import scala.collection.mutable.{ArrayBuffer, Map => MMap}
 
-import io.netty.util.CharsetUtil.UTF_8
 import scaposer.{Po, Parser}
 import sclasner.Discoverer
 
@@ -37,7 +36,7 @@ object PoLoader {
     synchronized {
       val urlEnum = Thread.currentThread.getContextClassLoader.getResources("i18n/" + language + ".po")
       val buffer  = ArrayBuffer.empty[Po]
-      while (urlEnum.hasMoreElements()) {
+      while (urlEnum.hasMoreElements) {
         val url    = urlEnum.nextElement()
         val is     = url.openStream()
         val string = Loader.stringFromInputStream(is)

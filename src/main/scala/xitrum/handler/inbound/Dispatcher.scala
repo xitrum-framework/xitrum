@@ -7,12 +7,11 @@ import io.netty.channel._
 import io.netty.handler.codec.http._
 import ChannelHandler.Sharable
 import HttpResponseStatus._
-import HttpVersion._
 
 import akka.actor.{Actor, Props}
 import com.esotericsoftware.reflectasm.ConstructorAccess
 
-import xitrum.{Action, ActorAction, FutureAction, Config, Log}
+import xitrum.{Action, FutureAction, Config}
 import xitrum.etag.NotModified
 import xitrum.handler.{HandlerEnv, NoRealPipelining}
 import xitrum.handler.outbound.XSendFile

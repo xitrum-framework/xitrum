@@ -3,10 +3,9 @@ package xitrum.etag
 import java.text.SimpleDateFormat
 import java.util.{Locale, TimeZone}
 
-import io.netty.handler.codec.http.{HttpHeaders, FullHttpResponse, HttpResponseStatus}
+import io.netty.handler.codec.http.{HttpHeaders, FullHttpResponse}
 import HttpHeaders.Names._
 import HttpHeaders.Values._
-import HttpResponseStatus._
 
 object NotModified {
   private[this] val SECS_IN_A_YEAR = 365 * 24 * 60 * 60

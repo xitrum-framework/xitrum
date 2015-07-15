@@ -4,8 +4,7 @@ import scala.runtime.ScalaRunTime
 import akka.actor.ActorRef
 
 import io.netty.channel.{
-  Channel, ChannelHandler, ChannelHandlerContext, ChannelFuture,
-  ChannelFutureListener, SimpleChannelInboundHandler
+  ChannelHandlerContext, ChannelFutureListener, SimpleChannelInboundHandler
 }
 import io.netty.handler.codec.http.websocketx.{
   BinaryWebSocketFrame, CloseWebSocketFrame, PingWebSocketFrame, PongWebSocketFrame,
@@ -22,38 +21,33 @@ class WebSocketEventDispatcher(
 ) extends SimpleChannelInboundHandler[WebSocketFrame]
 {
   override def channelRead0(ctx: ChannelHandlerContext, frame: WebSocketFrame) {
-    if (frame.isInstanceOf[TextWebSocketFrame]) {
-      val text = frame.asInstanceOf[TextWebSocketFrame].text
-      actorRef ! WebSocketText(text)
-      Log.trace("[WS in] text: " + text)
-      return
-    }
+    frame match {
+      case textFrame: TextWebSocketFrame =>
+        val text = textFrame.text
+        actorRef ! WebSocketText(text)
+        Log.trace("[WS in] text: " + text)
 
-    if (frame.isInstanceOf[BinaryWebSocketFrame]) {
-      val bytes = ByteBufUtil.toBytes(frame.asInstanceOf[BinaryWebSocketFrame].content)
-      actorRef ! WebSocketBinary(bytes)
-      Log.trace("[WS in] binary: " + ScalaRunTime.stringOf(bytes))
-      return
-    }
+      case binaryFrame: BinaryWebSocketFrame =>
+        val bytes = ByteBufUtil.toBytes(binaryFrame.content)
+        actorRef ! WebSocketBinary(bytes)
+        Log.trace("[WS in] binary: " + ScalaRunTime.stringOf(bytes))
 
-    if (frame.isInstanceOf[PingWebSocketFrame]) {
-      ctx.channel.writeAndFlush(new PongWebSocketFrame(frame.content.retain()))
-      actorRef ! WebSocketPing
-      Log.trace("[WS in] ping")
-      Log.trace("[WS out] pong")
-      return
-    }
+      case pingFrame: PingWebSocketFrame =>
+        ctx.channel.writeAndFlush(new PongWebSocketFrame(pingFrame.content.retain()))
+        actorRef ! WebSocketPing
+        Log.trace("[WS in] ping")
+        Log.trace("[WS out] pong")
 
-    if (frame.isInstanceOf[PongWebSocketFrame]) {
-      actorRef ! WebSocketPong
-      Log.trace("[WS in] pong")
-      return
-    }
+      case pongFrame: PongWebSocketFrame =>
+        actorRef ! WebSocketPong
+        Log.trace("[WS in] pong")
 
-    if (frame.isInstanceOf[CloseWebSocketFrame]) {
-      handshaker.close(ctx.channel, frame.retain().asInstanceOf[CloseWebSocketFrame]).addListener(ChannelFutureListener.CLOSE)
-      Log.trace("[WS in] close")
-      return
+      case closeFrame: CloseWebSocketFrame =>
+        handshaker.close(ctx.channel, frame.retain().asInstanceOf[CloseWebSocketFrame]).addListener(ChannelFutureListener.CLOSE)
+        Log.trace("[WS in] close")
+
+      case otherFrame =>
+        Log.trace("[WS in] unprocessed frame: $otherFrame")
     }
   }
 }
