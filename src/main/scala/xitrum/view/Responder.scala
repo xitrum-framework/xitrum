@@ -436,10 +436,29 @@ trait Responder extends Js with Flash with GetActionClassDefaultsToCurrentAction
 
   //----------------------------------------------------------------------------
 
+  /**
+   * Tells the browser to cache static files for a long time.
+   * This works well even when this is a cluster of web servers behind a load balancer
+   * because the URL created by urlForResource is in the form: resource?etag
+   *
+   * Don't worry that browsers do not pick up new files after you modified them,
+   * see the doc about static files.
+   *
+   * Google recommends 1 year:
+   * http://code.google.com/speed/page-speed/docs/caching.html
+   *
+   * Both Max-age and Expires header are set because IEs use Expires, not max-age:
+   * http://mrcoles.com/blog/cookies-max-age-vs-expires/
+   */
   def setClientCacheAggressively() {
     NotModified.setClientCacheAggressively(response)
   }
 
+  /**
+   * Prevents client cache.
+   * Note that "pragma: no-cache" is linked to requests, not responses:
+   * http://palizine.plynt.com/issues/2008Jul/cache-control-attributes/
+   */
   def setNoClientCache() {
     NotModified.setNoClientCache(response)
   }
