@@ -28,16 +28,16 @@ unmanagedSourceDirectories in Compile += baseDirectory.value / "src" / "main" / 
 libraryDependencies += "org.slf4s" %% "slf4s-api" % "1.7.12"
 
 // Netty is the core of Xitrum's HTTP(S) feature
-libraryDependencies += "io.netty" % "netty-all" % "4.0.29.Final"
+libraryDependencies += "io.netty" % "netty-all" % "4.0.30.Final"
 
 // http://netty.io/wiki/forked-tomcat-native.html
 // Include all classifiers for convenience
-libraryDependencies += "io.netty" % "netty-tcnative" % "1.1.33.Fork3" classifier "linux-x86_64"
-libraryDependencies += "io.netty" % "netty-tcnative" % "1.1.33.Fork3" classifier "osx-x86_64"
-libraryDependencies += "io.netty" % "netty-tcnative" % "1.1.33.Fork3" classifier "windows-x86_64"
+libraryDependencies += "io.netty" % "netty-tcnative" % "1.1.33.Fork4" classifier "linux-x86_64"
+libraryDependencies += "io.netty" % "netty-tcnative" % "1.1.33.Fork4" classifier "osx-x86_64"
+libraryDependencies += "io.netty" % "netty-tcnative" % "1.1.33.Fork4" classifier "windows-x86_64"
 
 // Javassist boosts Netty 4 speed
-libraryDependencies += "org.javassist" % "javassist" % "3.19.0-GA"
+libraryDependencies += "org.javassist" % "javassist" % "3.20.0-GA"
 
 // Redirect Akka log to SLF4J
 libraryDependencies += "com.typesafe.akka" %% "akka-actor"   % "2.3.11"
