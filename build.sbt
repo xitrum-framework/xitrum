@@ -5,10 +5,10 @@ scalaVersion       := "2.11.6"  // "2.10.5"
 crossScalaVersions := Seq("2.11.6", "2.10.5")
 
 // Run sbt mima-report-binary-issues to check for binary compatibility ---------
-// http://www.typesafe.com/community/core-tools/migration-manager
-version := "3.24.1-SNAPSHOT"
-com.typesafe.tools.mima.plugin.MimaPlugin.mimaDefaultSettings
-com.typesafe.tools.mima.plugin.MimaKeys.previousArtifact := Some("tv.cntt" % ("xitrum_" + scalaBinaryVersion.value) % "3.23")
+// https://github.com/typesafehub/migration-manager
+version := "3.25.0-SNAPSHOT"
+//com.typesafe.tools.mima.plugin.MimaPlugin.mimaDefaultSettings
+//com.typesafe.tools.mima.plugin.MimaKeys.previousArtifact := Some("tv.cntt" % ("xitrum_" + scalaBinaryVersion.value) % "3.25.0")
 
 //------------------------------------------------------------------------------
 

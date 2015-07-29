@@ -7,7 +7,6 @@ import io.netty.util.ResourceLeakDetector
 import xitrum.handler.{
   Bootstrap,
   DefaultHttpChannelInitializer,
-  FlashSocketPolicyServer,
   NetOption,
   SslChannelInitializer
 }
@@ -87,7 +86,6 @@ object Server {
     val portConfig      = Config.xitrum.port
     val (service, port) = if (https) ("HTTPS", portConfig.https.get) else ("HTTP", portConfig.http.get)
 
-    NetOption.setOptions(bootstrap)
     NetOption.bind(service, bootstrap, port, groups)
 
     Config.xitrum.interface match {

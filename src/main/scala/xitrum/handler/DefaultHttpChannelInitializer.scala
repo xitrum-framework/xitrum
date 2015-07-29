@@ -114,14 +114,17 @@ class DefaultHttpChannelInitializer extends ChannelInitializer[SocketChannel] {
 
     if (portConfig.flashSocketPolicy.isDefined && portConfig.flashSocketPolicy == portConfig.http)
     p.addLast(classOf[FlashSocketPolicyHandler].getName, new FlashSocketPolicyHandler)
+
     p.addLast(classOf[HttpRequestDecoder].getName,       new HttpRequestDecoder(
                                                            Config.xitrum.request.maxInitialLineLength,
                                                            Config.xitrum.request.maxHeaderSize,
                                                            8192))
     p.addLast(classOf[Request2Env].getName,              new Request2Env)
     p.addLast(classOf[BaseUrlRemover].getName,           baseUrlRemover)
+
     if (Config.xitrum.basicAuth.isDefined)
     p.addLast(classOf[BasicAuth].getName,                basicAuth)
+
     p.addLast(classOf[PublicFileServer].getName,         publicFileServer)
     p.addLast(classOf[WebJarsServer].getName,            webJarsServer)
     p.addLast(classOf[UriParser].getName,                uriParser)

@@ -33,11 +33,12 @@ object Bootstrap {
       channelInitializer: ChannelInitializer[SocketChannel]
   ): (ServerBootstrap, Seq[EventLoopGroup]) =
   {
-    val group     = new EpollEventLoopGroup
-    val bootstrap = new ServerBootstrap
-    bootstrap.group(group)
+    val bossGroup   = new EpollEventLoopGroup(1)
+    val workerGroup = new EpollEventLoopGroup
+    val bootstrap   = new ServerBootstrap
+    bootstrap.group(bossGroup, workerGroup)
              .channel(classOf[EpollServerSocketChannel])
              .childHandler(channelInitializer)
-    (bootstrap, Seq(group))
+    (bootstrap, Seq(bossGroup, workerGroup))
   }
 }
