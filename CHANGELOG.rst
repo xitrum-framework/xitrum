@@ -4,6 +4,8 @@
   routes.cache should be saved in tmpDir as configured in xitrum.conf
 * `#548 <https://github.com/xitrum-framework/xitrum/issues/548>`_
   Update Netty from 4.0.28 to 4.0.30
+* `#554 <https://github.com/xitrum-framework/xitrum/issues/554>`_
+  Update Akka from 2.3.11 to 2.3.12
 * `#549 <https://github.com/xitrum-framework/xitrum/issues/549>`_
   Update slf4s-api from 1.7.10 to 1.7.12
 
