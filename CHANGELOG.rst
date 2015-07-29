@@ -2,6 +2,8 @@
 
 * `#541 <https://github.com/xitrum-framework/xitrum/issues/541>`_
   routes.cache should be saved in tmpDir as configured in xitrum.conf
+* `#555 <https://github.com/xitrum-framework/xitrum/issues/555>`_
+  Log error message when ssl certificate file not found
 * `#548 <https://github.com/xitrum-framework/xitrum/issues/548>`_
   Update Netty from 4.0.28 to 4.0.30
 * `#554 <https://github.com/xitrum-framework/xitrum/issues/554>`_

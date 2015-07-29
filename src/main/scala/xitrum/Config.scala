@@ -1,6 +1,6 @@
 package xitrum
 
-import java.io.File
+import java.io.{File, FileNotFoundException}
 import java.net.{URL, URLClassLoader}
 import java.nio.charset.Charset
 import java.util.{Map => JMap}
@@ -78,13 +78,13 @@ class HttpsConfig(val config: TConfig) {
   lazy val certChainFile = {
     val path = config.getString("certChainFile")
     val file = new File(path)
-    if (!file.exists) Config.exitOnStartupError("certChainFile specified in xitrum.conf does not exist")
+    if (!file.exists) Config.exitOnStartupError("certChainFile specified in xitrum.conf does not exist", new FileNotFoundException(file.getAbsolutePath))
     file
   }
   lazy val keyFile = {
     val path = config.getString("keyFile")
     val file = new File(path)
-    if (!file.exists) Config.exitOnStartupError("keyFile specified in xitrum.conf does not exist")
+    if (!file.exists) Config.exitOnStartupError("keyFile specified in xitrum.conf does not exist", new FileNotFoundException(file.getAbsolutePath))
     file
   }
 }
