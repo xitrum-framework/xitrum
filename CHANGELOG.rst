@@ -12,6 +12,8 @@
   Update Akka from 2.3.11 to 2.3.12
 * `#549 <https://github.com/xitrum-framework/xitrum/issues/549>`_
   Update slf4s-api from 1.7.10 to 1.7.12
+* `#557 <https://github.com/xitrum-framework/xitrum/issues/557>`_
+  Update jQuery Validation from 1.13.1 to 1.14.0
 
 3.24.0:
 
@@ -109,7 +111,7 @@
 * `#485 <https://github.com/xitrum-framework/xitrum/issues/485>`_
   Update Twitter Chill from 0.5.0 to 0.5.1
 * `#487 <https://github.com/xitrum-framework/xitrum/issues/487>`_
-  Update jQuery Validation from 0.13.0 to 0.13.1
+  Update jQuery Validation from 1.13.0 to 1.13.1
 * `#486 <https://github.com/xitrum-framework/xitrum/issues/486>`_
   Update D3.js from 3.4.13 to 3.5.2
 
@@ -191,7 +193,7 @@
 * `#433 <https://github.com/xitrum-framework/xitrum/issues/433>`_
   Update D3.js from 3.4.8 to 3.4.11
 * `#435 <https://github.com/xitrum-framework/xitrum/issues/435>`_
-  Update jQuery Validation from 0.12.0 to 0.13.0
+  Update jQuery Validation from 1.12.0 to 1.13.0
 
 3.16:
 

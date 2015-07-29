@@ -89,7 +89,7 @@ libraryDependencies <+= scalaVersion { sv => "org.scala-lang" % "scalap" % sv }
 
 libraryDependencies += "org.webjars" % "jquery" % "2.1.4"
 
-libraryDependencies += "org.webjars" % "jquery-validation" % "1.13.1"
+libraryDependencies += "org.webjars" % "jquery-validation" % "1.14.0"
 
 libraryDependencies += "org.webjars" % "sockjs-client" % "1.0.0"
 
