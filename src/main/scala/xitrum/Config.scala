@@ -74,13 +74,17 @@ class PortConfig(val config: TConfig) {
 }
 
 class HttpsConfig(val config: TConfig) {
+  // https://github.com/netty/netty/wiki/Forked-Tomcat-Native
+  // https://groups.google.com/forum/#!topic/netty/oRATC6Tl0A4
   val openSSL = config.getBoolean("openSSL")
+
   lazy val certChainFile = {
     val path = config.getString("certChainFile")
     val file = new File(path)
     if (!file.exists) Config.exitOnStartupError("certChainFile specified in xitrum.conf does not exist", new FileNotFoundException(file.getAbsolutePath))
     file
   }
+
   lazy val keyFile = {
     val path = config.getString("keyFile")
     val file = new File(path)
@@ -171,6 +175,8 @@ class XitrumConfig(val config: TConfig) {
 
   val port = new PortConfig(config.getConfig("port"))
 
+  // https://github.com/netty/netty/wiki/Native-transports
+  // https://groups.google.com/forum/#!topic/netty/oRATC6Tl0A4
   val edgeTriggeredEpoll = config.getBoolean("edgeTriggeredEpoll")
 
   val https = if (port.https.isDefined) Some(new HttpsConfig(config.getConfig("https"))) else None
