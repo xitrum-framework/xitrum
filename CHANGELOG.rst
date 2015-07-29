@@ -16,6 +16,8 @@
   Update slf4s-api from 1.7.10 to 1.7.12
 * `#557 <https://github.com/xitrum-framework/xitrum/issues/557>`_
   Update jQuery Validation from 1.13.1 to 1.14.0
+* `#560 <https://github.com/xitrum-framework/xitrum/issues/560>`_
+  Update sockjs-client from 1.0.0 to 1.0.2
 * `#558 <https://github.com/xitrum-framework/xitrum/issues/558>`_
   Update Swagger from 1.2 to 2.0
 * `#559 <https://github.com/xitrum-framework/xitrum/issues/559>`_
