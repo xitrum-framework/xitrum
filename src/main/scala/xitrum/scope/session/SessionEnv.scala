@@ -28,7 +28,7 @@ trait SessionEnv extends Csrf {
       Map.empty[String, String]
     } else {
       try {
-        val cookies  = ServerCookieDecoder.LAX.decode(header)
+        val cookies  = ServerCookieDecoder.STRICT.decode(header)
         val iterator = cookies.iterator
         val acc      = MMap.empty[String, String]
         while (iterator.hasNext) {
@@ -79,7 +79,7 @@ trait SessionEnv extends Csrf {
       // Server needs to SET_COOKIE multiple times
       responseCookies.foreach { cookie =>
         if (cookie.path == null) cookie.setPath(rootPath)
-        HttpHeaders.addHeader(response, Names.SET_COOKIE, ServerCookieEncoder.LAX.encode(cookie))
+        HttpHeaders.addHeader(response, Names.SET_COOKIE, ServerCookieEncoder.STRICT.encode(cookie))
       }
     }
   }

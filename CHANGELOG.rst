@@ -2,6 +2,8 @@
 
 * `#541 <https://github.com/xitrum-framework/xitrum/issues/541>`_
   routes.cache should be saved in tmpDir as configured in xitrum.conf
+* `#542 <https://github.com/xitrum-framework/xitrum/issues/542>`_
+  Use cookie parsing's strict mode to avoid security problems
 * `#555 <https://github.com/xitrum-framework/xitrum/issues/555>`_
   Log error message when ssl certificate file not found
 * `#548 <https://github.com/xitrum-framework/xitrum/issues/548>`_
