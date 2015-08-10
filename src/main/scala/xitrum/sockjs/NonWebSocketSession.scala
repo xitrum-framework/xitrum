@@ -108,7 +108,7 @@ class NonWebSocketSession(var receiverCliento: Option[ActorRef], pathPrefix: Str
       if (monitored == sockJsActorRef && !closed) {
         // See CloseFromHandler
         unwatchAndStop()
-      } else if (receiverCliento == Some(monitored)) {
+      } else if (receiverCliento.contains(monitored)) {
         context.unwatch(monitored)
         receiverCliento = None
         context.setReceiveTimeout(TIMEOUT_CONNECTION)
