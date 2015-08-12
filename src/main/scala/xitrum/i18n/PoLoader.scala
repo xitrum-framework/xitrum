@@ -40,13 +40,25 @@ object PoLoader {
         val url    = urlEnum.nextElement()
         val is     = url.openStream()
         val string = Loader.stringFromInputStream(is)
-        Parser.parsePo(string).foreach(buffer.append(_))
+        Parser.parsePo(string) match {
+          case Left((msg, position)) =>
+            Log.warn(s"Could not load $url: $msg\nError position: ${position.toString}\n${position.longString}")
+
+          case Right(po) =>
+            buffer.append(po)
+        }
       }
 
       val file = new File(DEV_RESOURCES_DIR + "/i18n/" + language + ".po")
       if (file.exists) {
         val string = Loader.stringFromFile(file)
-        Parser.parsePo(string).foreach(buffer.append(_))
+        Parser.parsePo(string) match {
+          case Left((msg, position)) =>
+            Log.warn(s"Could not load $file: $msg\nError position: ${position.toString}\n${position.longString}")
+
+          case Right(po) =>
+            buffer.append(po)
+        }
       }
 
       val ret = buffer.foldLeft(new Po(Map.empty)) { (acc, e) => acc ++ e }

@@ -50,9 +50,9 @@ trait I18n {
   }
 
   def t(singular: String) = PoLoader.get(language).t(singular)
-  def tc(ctx: String, singular: String) = PoLoader.get(language).t(ctx, singular)
-  def tn(singular: String, plural: String, n: Long) = PoLoader.get(language).t(singular, plural, n)
-  def tcn(ctx: String, singular: String, plural: String, n: Long) = PoLoader.get(language).t(ctx, singular, plural, n)
+  def tc(ctx: String, singular: String) = PoLoader.get(language).tc(ctx, singular)
+  def tn(singular: String, plural: String, n: Long) = PoLoader.get(language).tn(singular, plural, n)
+  def tcn(ctx: String, singular: String, plural: String, n: Long) = PoLoader.get(language).tcn(ctx, singular, plural, n)
 
   def tf(singular: String, args: Any*) = t(singular).format(args:_*)
   def tcf(ctx: String, singular: String, args: Any*) = tc(ctx, singular).format(args:_*)
