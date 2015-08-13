@@ -12,18 +12,20 @@
   Update Netty from 4.0.28 to 4.0.30
 * `#554 <https://github.com/xitrum-framework/xitrum/issues/554>`_
   Update Akka from 2.3.11 to 2.3.12
+* `#563 <https://github.com/xitrum-framework/xitrum/issues/563>`_
+  Update Twitter Chill from 0.6.0 to 0.7.0
 * `#549 <https://github.com/xitrum-framework/xitrum/issues/549>`_
   Update slf4s-api from 1.7.10 to 1.7.12
-* `#557 <https://github.com/xitrum-framework/xitrum/issues/557>`_
-  Update jQuery Validation from 1.13.1 to 1.14.0
-* `#560 <https://github.com/xitrum-framework/xitrum/issues/560>`_
-  Update sockjs-client from 1.0.0 to 1.0.2
 * `#562 <https://github.com/xitrum-framework/xitrum/issues/562>`_
   Update Scaposer from 1.5 to 1.6
 * `#558 <https://github.com/xitrum-framework/xitrum/issues/558>`_
   Update Swagger from 1.2 to 2.0
 * `#559 <https://github.com/xitrum-framework/xitrum/issues/559>`_
   Update Swagger-UI from 2.0.24 to 2.1.1
+* `#557 <https://github.com/xitrum-framework/xitrum/issues/557>`_
+  Update jQuery Validation from 1.13.1 to 1.14.0
+* `#560 <https://github.com/xitrum-framework/xitrum/issues/560>`_
+  Update sockjs-client from 1.0.0 to 1.0.2
 
 3.24.0:
 
