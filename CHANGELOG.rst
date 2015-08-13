@@ -6,6 +6,8 @@
   Use cookie parsing's strict mode to avoid security problems
 * `#550 <https://github.com/xitrum-framework/xitrum/issues/550>`_
   Params extraction also works for request with content type application/json
+* `#565 <https://github.com/xitrum-framework/xitrum/issues/565>`_
+  Allow to get request content body as JSON4S JValue
 * `#555 <https://github.com/xitrum-framework/xitrum/issues/555>`_
   Log error message when ssl certificate file not found
 * `#548 <https://github.com/xitrum-framework/xitrum/issues/548>`_

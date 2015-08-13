@@ -10,7 +10,7 @@ import xitrum.Config
 import xitrum.routing.Route
 import xitrum.scope.request.{FileUploadParams, Params, PathInfo}
 
-import org.json4s.JObject
+import org.json4s.{JObject, JValue}
 import org.json4s.jackson.JsonMethods
 
 /**
@@ -74,15 +74,17 @@ class HandlerEnv extends MHashMap[Any, Any] {
     ret
   }
 
-  lazy val requestContentString = {
+  /** The whole request body as String. */
+  lazy val requestContentString: String = {
     val byteBuf = request.content
     byteBuf.toString(Config.xitrum.request.charset)
   }
 
-  lazy val requestContentJson = if (requestContentString.isEmpty) {
+  /** The whole request body parsed as JSON4S JValue. */
+  lazy val requestContentJValue: JValue = if (requestContentString.isEmpty) {
     JObject()
   } else {
-    JsonMethods.parse(requestContentString)
+    JsonMethods.parseOpt(requestContentString).getOrElse(JObject())
   }
 
   /** Releases native memory used by the request, response, and bodyDecoder. */

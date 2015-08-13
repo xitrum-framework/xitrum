@@ -317,7 +317,7 @@ class Request2Env extends SimpleChannelInboundHandler[HttpObject] {
    * Should use requestContentJson directly for more advanced uses.
    */
   private def parseTextParamsFromJson(env: HandlerEnv) {
-    env.requestContentJson match {
+    env.requestContentJValue match {
       case JObject(fields) =>
         fields.foreach {
           case JField(name, JArray(values)) =>

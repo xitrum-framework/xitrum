@@ -50,12 +50,7 @@ object SeriDeseri {
    * https://github.com/json4s/json4s
    */
   def fromJson[T](jsonString: String)(implicit e: T DefaultsTo String, m: Manifest[T]): Option[T] = {
-    try {
-      val json = JsonMethods.parse(jsonString)
-      fromJson[T](json)(e, m)
-    } catch {
-      case NonFatal(err) => None
-    }
+    JsonMethods.parseOpt(jsonString).flatMap { json => fromJson[T](json)(e, m) }
   }
 
   /**
