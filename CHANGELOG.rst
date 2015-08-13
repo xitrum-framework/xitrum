@@ -26,6 +26,8 @@
   Update jQuery Validation from 1.13.1 to 1.14.0
 * `#560 <https://github.com/xitrum-framework/xitrum/issues/560>`_
   Update sockjs-client from 1.0.0 to 1.0.2
+* `#564 <https://github.com/xitrum-framework/xitrum/issues/564>`_
+  Update RhinoCoffeeScript from 1.9.2 to 1.9.3
 
 3.24.0:
 
