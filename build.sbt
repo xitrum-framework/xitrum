@@ -33,9 +33,9 @@ libraryDependencies += "io.netty" % "netty-all" % "4.0.30.Final"
 // https://github.com/netty/netty/wiki/Forked-Tomcat-Native
 // https://groups.google.com/forum/#!topic/netty/oRATC6Tl0A4
 // Include all classifiers for convenience
-libraryDependencies += "io.netty" % "netty-tcnative" % "1.1.33.Fork4" classifier "linux-x86_64"
-libraryDependencies += "io.netty" % "netty-tcnative" % "1.1.33.Fork4" classifier "osx-x86_64"
-libraryDependencies += "io.netty" % "netty-tcnative" % "1.1.33.Fork4" classifier "windows-x86_64"
+libraryDependencies += "io.netty" % "netty-tcnative" % "1.1.33.Fork5" classifier "linux-x86_64"
+libraryDependencies += "io.netty" % "netty-tcnative" % "1.1.33.Fork5" classifier "osx-x86_64"
+libraryDependencies += "io.netty" % "netty-tcnative" % "1.1.33.Fork5" classifier "windows-x86_64"
 
 // https://github.com/netty/netty/wiki/Native-transports
 // Only works on Linux
