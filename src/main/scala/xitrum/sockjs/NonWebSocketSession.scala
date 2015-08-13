@@ -108,7 +108,7 @@ class NonWebSocketSession(var receiverCliento: Option[ActorRef], pathPrefix: Str
       if (monitored == sockJsActorRef && !closed) {
         // See CloseFromHandler
         unwatchAndStop()
-      } else if (receiverCliento.contains(monitored)) {
+      } else if (receiverCliento == Some(monitored)) {  // Scala 2.10 doesn't have Option#contains
         context.unwatch(monitored)
         receiverCliento = None
         context.setReceiveTimeout(TIMEOUT_CONNECTION)

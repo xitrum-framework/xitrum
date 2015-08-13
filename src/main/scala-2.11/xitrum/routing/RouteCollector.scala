@@ -256,7 +256,7 @@ object RouteCollector {
     else if (tpeString == TYPE_OF_WEBSOCKET.toString)
       getStrings(annotation).map(("WEBSOCKET", _))
     else
-      Seq()
+      Seq.empty
   }
 
   private def getStrings(annotation: universe.Annotation): Seq[String] = {
@@ -270,7 +270,7 @@ object RouteCollector {
     if (universeAnnotations.isEmpty) {
       None
     } else {
-      var swaggerArgs = Seq.empty[SwaggerArg]
+      var swaggerArgs = Seq.empty[SwaggerTypes.SwaggerArg]
       universeAnnotations.foreach { annotation =>
         annotation.tree.children.tail.foreach { scalaArg =>
           // Ex:
@@ -279,34 +279,46 @@ object RouteCollector {
           // List(xitrum.annotation.Swagger.StringForm.apply, "title", "desc")
           val children = scalaArg.children
 
-          val child0 = children(0).toString
-          if (child0 == "xitrum.annotation.Swagger.Resource.apply") {
-            val path = children(1).productElement(0).asInstanceOf[universe.Constant].value.toString
+          val child0 = children.head.toString
+          if (child0 == "xitrum.annotation.Swagger.Tags.apply") {
+            val tags = children.tail.map(_.productElement(0).asInstanceOf[universe.Constant].value.toString)
+            swaggerArgs = swaggerArgs :+ Swagger.Tags(tags: _*)
+          } else if (child0 == "xitrum.annotation.Swagger.Summary.apply") {
+            val summary = children(1).productElement(0).asInstanceOf[universe.Constant].value.toString
+            swaggerArgs = swaggerArgs :+ Swagger.Summary(summary)
+          } else if (child0 == "xitrum.annotation.Swagger.Description.apply") {
+            val description = children(1).productElement(0).asInstanceOf[universe.Constant].value.toString
+            swaggerArgs = swaggerArgs :+ Swagger.Description(description)
+          } else if (child0 == "xitrum.annotation.Swagger.ExternalDocs.apply") {
+            val url = children(1).productElement(0).asInstanceOf[universe.Constant].value.toString
             val desc =
               if (children(2).toString.startsWith("xitrum.annotation.Swagger"))
                 ""
               else
                 children(2).productElement(0).asInstanceOf[universe.Constant].value.toString
-            swaggerArgs = swaggerArgs :+ Swagger.Resource(path, desc)
-          } else if (child0 == "xitrum.annotation.Swagger.Nickname.apply") {
-            val nickname = children(1).productElement(0).asInstanceOf[universe.Constant].value.toString
-            swaggerArgs = swaggerArgs :+ Swagger.Nickname(nickname)
-          } else if (child0 == "xitrum.annotation.Swagger.Produces.apply") {
-            val contentTypes = children.tail.map(_.productElement(0).asInstanceOf[universe.Constant].value.toString)
-            swaggerArgs = swaggerArgs :+ Swagger.Produces(contentTypes: _*)
+            swaggerArgs = swaggerArgs :+ Swagger.ExternalDocs(url, desc)
+          } else if (child0 == "xitrum.annotation.Swagger.OperationId.apply") {
+            val id = children(1).productElement(0).asInstanceOf[universe.Constant].value.toString
+            swaggerArgs = swaggerArgs :+ Swagger.OperationId(id)
           } else if (child0 == "xitrum.annotation.Swagger.Consumes.apply") {
             val contentTypes = children.tail.map(_.productElement(0).asInstanceOf[universe.Constant].value.toString)
             swaggerArgs = swaggerArgs :+ Swagger.Consumes(contentTypes: _*)
-          } else if (child0 == "xitrum.annotation.Swagger.Summary.apply") {
-            val summary = children(1).productElement(0).asInstanceOf[universe.Constant].value.toString
-            swaggerArgs = swaggerArgs :+ Swagger.Summary(summary)
-          } else if (child0 == "xitrum.annotation.Swagger.Note.apply") {
-            val note = children(1).productElement(0).asInstanceOf[universe.Constant].value.toString
-            swaggerArgs = swaggerArgs :+ Swagger.Note(note)
+          } else if (child0 == "xitrum.annotation.Swagger.Produces.apply") {
+            val contentTypes = children.tail.map(_.productElement(0).asInstanceOf[universe.Constant].value.toString)
+            swaggerArgs = swaggerArgs :+ Swagger.Produces(contentTypes: _*)
           } else if (child0 == "xitrum.annotation.Swagger.Response.apply") {
-            val code = children(1).toString.toInt
+            val code =
+              if (children(1).toString.startsWith("xitrum.annotation.Swagger"))
+                0
+              else
+                children(1).productElement(0).asInstanceOf[universe.Constant].value.toString.toInt
             val desc = children(2).productElement(0).asInstanceOf[universe.Constant].value.toString
             swaggerArgs = swaggerArgs :+ Swagger.Response(code, desc)
+          } else if (child0 == "xitrum.annotation.Swagger.Schemes.apply") {
+            val schemes = children.tail.map(_.productElement(0).asInstanceOf[universe.Constant].value.toString)
+            swaggerArgs = swaggerArgs :+ Swagger.Schemes(schemes: _*)
+          } else if (child0 == "xitrum.annotation.Swagger.Deprecated.apply") {
+            swaggerArgs = swaggerArgs :+ Swagger.Deprecated
           } else {  // param or optional param
             val name = children(1).productElement(0).asInstanceOf[universe.Constant].value.toString
 
@@ -329,7 +341,7 @@ object RouteCollector {
             val javaClassName = builder.toString
             val klass         = cl.loadClass(javaClassName)
             val constructor   = klass.getConstructor(classOf[String], classOf[String])
-            swaggerArgs = swaggerArgs :+ constructor.newInstance(name, desc).asInstanceOf[SwaggerArg]
+            swaggerArgs = swaggerArgs :+ constructor.newInstance(name, desc).asInstanceOf[SwaggerTypes.SwaggerArg]
           }
         }
       }

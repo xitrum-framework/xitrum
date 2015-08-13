@@ -2,236 +2,254 @@ package xitrum.routing
 
 import org.apache.commons.lang3.text.WordUtils
 
-import org.json4s.JsonAST.JObject
+import org.json4s.JField
+import org.json4s.JsonAST.{JString, JArray, JValue, JObject}
 import org.json4s.JsonDSL._
 import org.json4s.jackson.JsonMethods
 
-import xitrum.{Action, FutureAction, Config}
-import xitrum.annotation.{First, DELETE, GET, PATCH, POST, PUT, SOCKJS, WEBSOCKET}
-import xitrum.annotation.{Swagger, SwaggerArg}
-import xitrum.view.DocType
+import xitrum.{FutureAction, Config}
+import xitrum.annotation.{First, GET, Swagger, SwaggerTypes}
 
-case class ApiMethod(method: String, route: String)
+import scala.collection.immutable.ListMap
+import scala.collection.mutable.ArrayBuffer
 
-/** https://github.com/wordnik/swagger-spec/blob/master/versions/1.2.md */
-object SwaggerJson {
-  val SWAGGER_VERSION = "1.2"
-  val NONAME_RESOURCE = "noname"
-
-  /** Maybe called multiple times in development mode when reloading routes. */
-  var resources = groupByResource()
-
-  def groupByResource(): Map[Option[Swagger.Resource], Map[Class[_ <: Action], Swagger]] = {
-    Config.routes.swaggerMap.groupBy { case (klass, swagger) =>
-      val swaggerArgs = swagger.swaggerArgs
-      swaggerArgs.find(_.isInstanceOf[Swagger.Resource]).asInstanceOf[Option[Swagger.Resource]]
-    }
-  }
-
-  //----------------------------------------------------------------------------
-
-  def resourcesJson(apiVersion: String): String = {
-    val apis = SwaggerJson.resources.keys.map {
-      case None =>
-        ("path" -> ("/" + NONAME_RESOURCE)) ~ ("description" -> "APIs without named resource")
-
-      case Some(resource) =>
-        val path = if (resource.path.startsWith("/")) resource.path else "/" + resource.path
-        ("path" -> path) ~ ("description" -> resource.desc)
-    }
-
-    val json =
-      ("swaggerVersion" -> SWAGGER_VERSION) ~
-      ("apiVersion"     -> apiVersion) ~
-      ("apis"           -> apis)
-    JsonMethods.pretty(JsonMethods.render(json))
-  }
-
-  def resourceJson(apiVersion: String, basePath: String, resourcePatho: Option[String]): Option[String] = {
-    val keyo = resourcePatho match {
-      case None =>
-        Some(None)
-
-      case Some(path) =>
-        resources.keys.find { ro => ro.isDefined && (ro.get.path == path || ro.get.path == "/" + path) }
-    }
-
-    keyo match {
-      case None =>
-        None
-
-      case Some(key) =>
-        resources.get(key).map { swaggerMap =>
-          val resourcePath = resourcePatho.getOrElse(NONAME_RESOURCE)
-          val path         = if (resourcePath.startsWith("/")) resourcePath else "/" + resourcePath
-          val json         =
-            ("swaggerVersion" -> SWAGGER_VERSION) ~
-            ("apiVersion"     -> apiVersion) ~
-            ("basePath"       -> basePath) ~
-            ("resourcePath"   -> path) ~
-            ("apis"           -> loadApis(swaggerMap))
-          JsonMethods.pretty(JsonMethods.render(json))
-        }
-    }
-  }
-
-  //----------------------------------------------------------------------------
-
-  private def loadApis(swaggerMap: Map[Class[_ <: Action], Swagger]): Seq[JObject] = for {
-    route   <- Config.routes.all.flatten
-    swagger <- swaggerMap.get(route.klass)
-  } yield swagger2Json(route, swagger)
-
-  private def swagger2Json(route: Route, swagger: Swagger): JObject = {
-    val swaggerArgs = swagger.swaggerArgs
-
-    val routePath = RouteCompiler.decompile(route.compiledPattern, true)
-
-    val nickname  = swaggerArgs.find(_.isInstanceOf[Swagger.Nickname]).map(_.asInstanceOf[Swagger.Nickname].nickname).getOrElse(WordUtils.uncapitalize(route.klass.getSimpleName))
-    val produces  = swaggerArgs.filter(_.isInstanceOf[Swagger.Produces]).asInstanceOf[Seq[Swagger.Produces]].flatMap(_.contentTypes).distinct
-    val consumes  = swaggerArgs.filter(_.isInstanceOf[Swagger.Consumes]).asInstanceOf[Seq[Swagger.Consumes]].flatMap(_.contentTypes).distinct
-    val summary   = swaggerArgs.find(_.isInstanceOf[Swagger.Summary]).asInstanceOf[Option[Swagger.Summary]].map(_.summary).getOrElse("")
-    val notes     = swaggerArgs.filter(_.isInstanceOf[Swagger.Note]).asInstanceOf[Seq[Swagger.Note]].map(_.note).mkString(" ")
-    val responses = swaggerArgs.filter(_.isInstanceOf[Swagger.Response]).asInstanceOf[Seq[Swagger.Response]].map(response2Json)
-
-    val params = swaggerArgs.filterNot { arg =>
-      arg.isInstanceOf[Swagger.Resource] ||
-      arg.isInstanceOf[Swagger.Nickname] ||
-      arg.isInstanceOf[Swagger.Produces] ||
-      arg.isInstanceOf[Swagger.Consumes] ||
-      arg.isInstanceOf[Swagger.Summary]  ||
-      arg.isInstanceOf[Swagger.Note]     ||
-      arg.isInstanceOf[Swagger.Response]
-    }.sortBy(
-      _.toString.indexOf("Opt")  // Required params first, optional params later
-    ).map(
-      param2Json
-    )
-
-    val cacheNote  = cache(route)
-    val finalNotes =
-      if (cacheNote.isEmpty)
-        notes
-      else if (notes.isEmpty)
-        cacheNote
-      else
-        notes + " " + cacheNote
-
-    val operations = Seq[JObject](
-      ("httpMethod"       -> route.httpMethod.toString) ~
-      ("summary"          -> summary) ~
-      ("notes"            -> finalNotes) ~
-      ("nickname"         -> nickname) ~
-      ("type"             -> "string") ~  // FIXME: Support models
-      ("parameters"       -> params.toSeq) ~
-      ("responseMessages" -> responses.toSeq) ~
-      ("produces"         -> produces) ~
-      ("consumes"         -> consumes))
-
-    ("path" -> routePath) ~ ("operations" -> operations)
-  }
-
-  private def param2Json(param: SwaggerArg): JObject = {
-    // Use class name to extract paramType, valueType, and required
-    // See Swagger.scala
-
-    val klass          = param.getClass
-    val className      = klass.getName            // Ex: xitrum.annotation.Swagger$OptBytePath
-    val shortClassName = className.split('$')(1)  // Ex: OptBytePath
-
-    val paramType =
-           if (shortClassName.endsWith("Path"))   "path"
-      else if (shortClassName.endsWith("Query"))  "query"
-      else if (shortClassName.endsWith("Body"))   "body"
-      else if (shortClassName.endsWith("Header")) "header"
-      else                                        "form"
-
-    val required = !shortClassName.startsWith("Opt")
-
-    val valueType =
-      if (required)
-        shortClassName.substring(0, shortClassName.length - paramType.length).toLowerCase
-      else
-        shortClassName.substring("Opt".length, shortClassName.length - paramType.length).toLowerCase
-
-    // Use reflection to extract name and desc
-
-    val nameMethod = klass.getMethod("name")
-    val name       = nameMethod.invoke(param).asInstanceOf[String]
-
-
-    val descMethod = klass.getMethod("desc")
-    val desc       = descMethod.invoke(param).asInstanceOf[String]
-
-    ("name"        -> name) ~
-    ("paramType"   -> paramType) ~
-    ("type"        -> valueType) ~
-    ("description" -> desc) ~
-    ("required"    -> required)
-  }
-
-  private def response2Json(response: Swagger.Response): JObject = {
-    ("code"    -> response.code) ~
-    ("message" -> response.desc)
-  }
-
-  private def annotation2Method(annotation: Any): Seq[ApiMethod] = annotation match {
-    case method: GET       => method.paths.map(ApiMethod("GET",       _))
-    case method: POST      => method.paths.map(ApiMethod("POST",      _))
-    case method: PUT       => method.paths.map(ApiMethod("PUT",       _))
-    case method: PATCH     => method.paths.map(ApiMethod("PATCH",     _))
-    case method: DELETE    => method.paths.map(ApiMethod("DELETE",    _))
-    case method: SOCKJS    => method.paths.map(ApiMethod("SOCKJS",    _))
-    case method: WEBSOCKET => method.paths.map(ApiMethod("WEBSOCKET", _))
-    case _                 => Seq()
-  }
-
-  private def cache(route: Route): String = {
-    val secs = route.cacheSecs
-    if (route.cacheSecs == 0)
-      ""
-    else if (secs > 0)
-      s"(Page cache: ${route.cacheSecs} [sec])"
-    else
-      s"(Action cache: ${-route.cacheSecs} [sec])"
-  }
-}
-
-//------------------------------------------------------------------------------
-
-/** Swagger resource listing: https://github.com/wordnik/swagger-spec/blob/master/versions/1.2.md */
 @First
-@GET("xitrum/swagger")
-class SwaggerResources extends FutureAction {
+@GET("xitrum/swagger.json")
+class SwaggerJson extends FutureAction {
   def execute() {
-    val apiVersion = Config.xitrum.swaggerApiVersion.get
-    val json       = SwaggerJson.resourcesJson(apiVersion)
-    respondJsonText(json)
+    respondJsonText(SwaggerJson.json)
   }
 }
 
-/** Swagger API declaration: https://github.com/wordnik/swagger-spec/blob/master/versions/1.2.md */
-@First
-@GET("xitrum/swagger/:*")
-class SwaggerResource extends FutureAction {
-  def execute() {
-    val apiVersion    = Config.xitrum.swaggerApiVersion.get
-    val resourcePath  = param("*")
-    val resourcePatho = if (resourcePath == SwaggerJson.NONAME_RESOURCE) None else Some(resourcePath)
-    SwaggerJson.resourceJson(apiVersion, absUrlPrefix, resourcePatho) match {
-      case Some(json) =>
-        respondJsonText(json)
-      case None =>
-        respond404Page()
-    }
-  }
-}
-
-/** Easy-to-remember path to Swagger UI: http(s)://host[:port]/xitrum/swagger-ui */
+/** Easy-to-remember path to Swagger UI: /xitrum/swagger-ui */
 @First
 @GET("xitrum/swagger-ui")
 class SwaggerUi extends FutureAction {
   def execute() {
-    redirectTo(webJarsUrl("swagger-ui/2.1.1/index.html?url=" + url[SwaggerResources]))
+    redirectTo(webJarsUrl("swagger-ui/2.1.1/index.html?url=" + url[SwaggerJson]))
+  }
+}
+
+/** https://github.com/swagger-api/swagger-spec/blob/master/versions/2.0.md */
+object SwaggerJson {
+  import SwaggerTypes._
+
+  private val SWAGGER_VERSION = "2.0"
+
+  private val apiVersion = Config.xitrum.swaggerApiVersion.getOrElse("1.0")
+
+  /** Maybe set multiple times in development mode when reloading routes. */
+  private var prettyJson = JsonMethods.pretty(JsonMethods.render(getSwaggerObject))
+
+  //----------------------------------------------------------------------------
+
+  def json = prettyJson
+
+  /** Maybe called multiple times in development mode when reloading routes. */
+  def reloadFromRoutes() {
+    prettyJson = JsonMethods.pretty(JsonMethods.render(getSwaggerObject))
+  }
+
+  //----------------------------------------------------------------------------
+
+  private def getSwaggerObject: JValue = {
+    val info     = ("title" -> "APIs documented by Swagger") ~ ("version" -> apiVersion)
+    val basePath = if (Config.baseUrl.isEmpty) "/" else Config.baseUrl
+    ("swagger"  -> SWAGGER_VERSION) ~
+    ("info"     -> info) ~
+    ("basePath" -> basePath) ~
+    ("paths"    -> getPathsObject)
+  }
+
+  private def getPathsObject: JValue = {
+    // Shorter paths are often less complex than longer paths.
+    // We sort so that the API doc becomes easier to understand.
+    val sortedByPath = groupSwaggerRoutesByPath.toSeq.sortBy(_._1.length)
+
+    val pathToPathItemObjects: Seq[(String, JValue)] =
+      sortedByPath.map { case (path, routes) =>
+        val pathItem = getPathItem(routes)
+        (path, pathItem)
+      }
+    JObject(pathToPathItemObjects: _*)
+  }
+
+  private def groupSwaggerRoutesByPath: Map[String, Seq[Route]] = {
+    val swaggerMap = Config.routes.swaggerMap
+
+    // Use ListMap to preserve the order of routes
+    Config.routes.allFlatten().foldLeft(ListMap.empty[String, ArrayBuffer[Route]]) { (acc, route) =>
+      if (swaggerMap.contains(route.klass)) {
+        val path = RouteCompiler.decompile(route.compiledPattern, forSwagger = true)
+        acc.get(path) match {
+          case None =>
+            val routes = ArrayBuffer[Route](route)
+            acc.updated(path, routes)
+
+          case Some(existingRoutes) =>
+            existingRoutes.append(route)
+            acc
+        }
+      } else {
+        acc
+      }
+    }
+  }
+
+  private def getPathItem(routes: Seq[Route]): JValue = {
+    val methodToOperationObject: Seq[(String, JValue)] = routes.map { route =>
+      (route.httpMethod.name.toLowerCase, getOperation(route))
+    }
+    JObject(methodToOperationObject: _*)
+  }
+
+  private def getOperation(route: Route): JValue = {
+    val swagger = Config.routes.swaggerMap(route.klass)
+    val args    = swagger.swaggerArgs
+
+    val fields = Seq(
+      getTags(args),
+      getSummary(args, route),
+      getDescription(args),
+      getExternalDocs(args),
+      getOperationId(args, route),
+      getConsumes(args),
+      getProduces(args),
+      getParameters(args),
+      getResponses(args),
+      getSchemes(args),
+      getDeprecated(args)
+    ).flatten
+    JObject(fields: _*)
+  }
+
+  private def getTags(args: Seq[SwaggerArg]): Option[JField] = {
+    args.find(_.isInstanceOf[Swagger.Tags]).map { arg =>
+      "tags" -> arg.asInstanceOf[Swagger.Tags].tags
+    }
+  }
+
+  private def getSummary(args: Seq[SwaggerArg], route: Route): Option[JField] = {
+    val so = args.find(_.isInstanceOf[Swagger.Summary]).map { arg =>
+      arg.asInstanceOf[Swagger.Summary].summary
+    }
+    val co = getCacheInfo(route)
+
+    (so, co) match {
+      case (None,    None)    => None
+      case (Some(s), Some(c)) => Some("summary" -> s"$s $c")
+      case _                  => Some("summary" -> so.orElse(co).get)
+    }
+  }
+
+  private def getCacheInfo(route: Route): Option[String] = {
+    val secs = route.cacheSecs
+    if (route.cacheSecs == 0)
+      None
+    else if (secs > 0)
+      Some(s"(Page cache: ${route.cacheSecs} [sec])")
+    else
+      Some(s"(Action cache: ${-route.cacheSecs} [sec])")
+  }
+
+  private def getDescription(args: Seq[SwaggerArg]): Option[JField] = {
+    args.find(_.isInstanceOf[Swagger.Description]).map { arg =>
+      "description" -> arg.asInstanceOf[Swagger.Description].desc
+    }
+  }
+
+  private def getExternalDocs(args: Seq[SwaggerArg]): Option[JField] = {
+    args.find(_.isInstanceOf[Swagger.ExternalDocs]).map { arg =>
+      val externalDocs = arg.asInstanceOf[Swagger.ExternalDocs]
+      "externalDocs" ->
+        ("description" -> externalDocs.desc) ~
+        ("url"         -> externalDocs.url)
+    }
+  }
+
+  private def getOperationId(args: Seq[SwaggerArg], route: Route): Option[JField] = {
+    val operationId = args.find(_.isInstanceOf[Swagger.OperationId]).map { arg =>
+      arg.asInstanceOf[Swagger.OperationId].id
+    }.getOrElse(
+      WordUtils.uncapitalize(route.klass.getSimpleName)
+    )
+    Some("operationId" -> operationId)
+  }
+
+  private def getConsumes(args: Seq[SwaggerArg]): Option[JField] = {
+    args.find(_.isInstanceOf[Swagger.Consumes]).map { arg =>
+      "consumes" -> arg.asInstanceOf[Swagger.Consumes].contentTypes
+    }
+  }
+
+  private def getProduces(args: Seq[SwaggerArg]): Option[JField] = {
+    args.find(_.isInstanceOf[Swagger.Produces]).map { arg =>
+      "produces" -> arg.asInstanceOf[Swagger.Produces].contentTypes
+    }
+  }
+
+  private def getParameters(args: Seq[SwaggerArg]): Option[JField] = {
+    val params = args.filter { arg =>
+      arg.isInstanceOf[SwaggerParamArg]
+    }.sortBy { arg =>  // Sort required params first, optional params later
+      if (arg.isInstanceOf[SwaggerOptParamArg]) 0 else -1
+    }.map { arg =>
+      getParameter(arg.asInstanceOf[SwaggerParamArg])
+    }
+    if (params.isEmpty) None else Some("parameters" -> JArray(params.toList))
+  }
+
+  private def getParameter(arg: SwaggerParamArg): JValue = {
+    val location = arg match {
+      case _: SwaggerPathParam   => "path"
+      case _: SwaggerQueryParam  => "query"
+      case _: SwaggerHeaderParam => "header"
+      case _: SwaggerBodyParam   => "body"
+      case _                     => "formData"
+    }
+
+    val required = !arg.isInstanceOf[SwaggerOptParamArg]
+
+    val (tipe, format) = arg match {
+      case _: SwaggerIntParam      => ("integer",  "int32")
+      case _: SwaggerLongParam     => ("integer",  "int64")
+      case _: SwaggerFloatParam    => ("number",  "float")
+      case _: SwaggerDoubleParam   => ("number",  "double")
+      case _: SwaggerStringParam   => ("string",  "")
+      case _: SwaggerByteParam     => ("string",  "byte")
+      case _: SwaggerBinaryParam   => ("string",  "binary")
+      case _: SwaggerBooleanParam  => ("boolean", "")
+      case _: SwaggerDateParam     => ("string",  "date")
+      case _: SwaggerDateTimeParam => ("string",  "date-time")
+      case _: SwaggerPasswordParam => ("string",  "password")
+      case _: SwaggerFileParam     => ("file",    "")
+    }
+
+    ("name"        -> arg.name) ~
+    ("in"          -> location) ~
+    ("description" -> arg.desc) ~
+    ("required"    -> required) ~
+    ("type"        -> tipe) ~
+    ("format"      -> format)
+  }
+
+  private def getResponses(args: Seq[SwaggerArg]): Option[JField] = {
+    val codeToDescs = args.filter(_.isInstanceOf[Swagger.Response]).map { arg =>
+      val response = arg.asInstanceOf[Swagger.Response]
+      val code = if (response.code <= 0) "default" else response.code.toString
+      val desc = response.desc
+      code -> JString(desc)
+    }
+    Some("responses" -> JObject(codeToDescs: _*))
+  }
+
+  private def getSchemes(args: Seq[SwaggerArg]): Option[JField] = {
+    args.find(_.isInstanceOf[Swagger.Schemes]).map { arg =>
+      "schemes" -> arg.asInstanceOf[Swagger.Schemes].schemes
+    }
+  }
+
+  private def getDeprecated(args: Seq[SwaggerArg]): Option[JField] = {
+    if (args.contains(Swagger.Deprecated)) Some("deprecated" -> true) else None
   }
 }

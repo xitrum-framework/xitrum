@@ -17,9 +17,8 @@ private class RouteReloader {
     if (!shouldReloadOnNextRequest) return
     shouldReloadOnNextRequest = false
 
-    val cl                = new ClassFileLoader
-    Config.routes         = Config.loadRoutes(cl, true)
-    SwaggerJson.resources = SwaggerJson.groupByResource()
+    Config.routes = Config.loadRoutes(new ClassFileLoader, true)
+    SwaggerJson.reloadFromRoutes()
   }
 
   private def monitorClassesDir(classesDir: Path) {

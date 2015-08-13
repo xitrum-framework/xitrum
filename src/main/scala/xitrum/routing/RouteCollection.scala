@@ -48,7 +48,7 @@ object RouteCollection {
       else
         normal.firstGETs.filterNot { r =>
           val className = r.actionClass
-          className.contains("Swagger")
+          className == classOf[SwaggerJson].getName || className == classOf[SwaggerUi].getName
         }
 
     val cl = Thread.currentThread.getContextClassLoader
@@ -67,7 +67,10 @@ object RouteCollection {
   }
 }
 
-/** Direct listing is used, map is not used, so that route matching is faster. */
+/**
+ * Routes are grouped by methods.
+ * The routes are `ArrayBuffer` so that routes can be modified after collected.
+ */
 class RouteCollection(
   val firstGETs: ArrayBuffer[Route],
   val lastGETs:  ArrayBuffer[Route],
@@ -120,14 +123,17 @@ class RouteCollection(
 
   //----------------------------------------------------------------------------
 
-  def all = Seq(
-    firstGETs,       lastGETs,       otherGETs,
-    firstPOSTs,      lastPOSTs,      otherPOSTs,
-    firstPUTs,       lastPUTs,       otherPUTs,
-    firstPATCHs,     lastPATCHs,     otherPATCHs,
-    firstDELETEs,    lastDELETEs,    otherDELETEs,
-    firstWEBSOCKETs, lastWEBSOCKETs, otherWEBSOCKETs
+  /**
+   * All routes in one place for ease of use. Elements are `ArrayBuffer` and can
+   * still be modified.
+   */
+  val all: Seq[ArrayBuffer[Route]] = Seq(
+    firstGETs, firstPOSTs, firstPUTs, firstPATCHs, firstDELETEs, firstWEBSOCKETs,
+    otherGETs, otherPOSTs, otherPUTs, otherPATCHs, otherDELETEs, otherWEBSOCKETs,
+    lastGETs, lastPOSTs, lastPUTs, lastPATCHs, lastDELETEs, lastWEBSOCKETs
   )
+
+  def allFlatten(): Seq[Route] = all.flatten
 
   /**
    * @param xitrumRoutes
@@ -135,7 +141,7 @@ class RouteCollection(
    * - Some(true): Only return Xitrum internal routes
    * - Some(false): Only return non Xitrum internal routes
    */
-  def allFirsts(xitrumRoutes: Option[Boolean]): ArrayBuffer[Route] = {
+  def allFirsts(xitrumRoutes: Option[Boolean]): Seq[Route] = {
     xitrumRoutes match {
       case None =>
         val ret = ArrayBuffer.empty[Route]
@@ -158,7 +164,7 @@ class RouteCollection(
   }
 
   /** See allFirsts */
-  def allLasts(xitrumRoutes: Option[Boolean]): ArrayBuffer[Route] = {
+  def allLasts(xitrumRoutes: Option[Boolean]): Seq[Route] = {
     xitrumRoutes match {
       case None =>
         val ret = ArrayBuffer.empty[Route]
@@ -181,7 +187,7 @@ class RouteCollection(
   }
 
   /** See allFirsts */
-  def allOthers(xitrumRoutes: Option[Boolean]): ArrayBuffer[Route] = {
+  def allOthers(xitrumRoutes: Option[Boolean]): Seq[Route] = {
     xitrumRoutes match {
       case None =>
         val ret = ArrayBuffer.empty[Route]
@@ -242,9 +248,9 @@ class RouteCollection(
       )
     }
 
-    for (r <- rFirsts) firsts.append((r.httpMethod.toString, RouteCompiler.decompile(r.compiledPattern), targetWithCache(r)))
-    for (r <- rOthers) others.append((r.httpMethod.toString, RouteCompiler.decompile(r.compiledPattern), targetWithCache(r)))
-    for (r <- rLasts)  lasts .append((r.httpMethod.toString, RouteCompiler.decompile(r.compiledPattern), targetWithCache(r)))
+    for (r <- rFirsts) firsts.append((r.httpMethod.name, RouteCompiler.decompile(r.compiledPattern), targetWithCache(r)))
+    for (r <- rOthers) others.append((r.httpMethod.name, RouteCompiler.decompile(r.compiledPattern), targetWithCache(r)))
+    for (r <- rLasts)  lasts .append((r.httpMethod.name, RouteCompiler.decompile(r.compiledPattern), targetWithCache(r)))
 
     // Sort by pattern
     val all = firsts ++ others.sortBy(_._2) ++ lasts
@@ -304,6 +310,7 @@ class RouteCollection(
 
   //----------------------------------------------------------------------------
 
+  // Cache recently matched routes to speed up route matching
   private val matchedRouteCache = LocalLruCache[String, (Route, Params)](1024)
 
   def route(httpMethod: HttpMethod, pathInfo: PathInfo): Option[(Route, Params)] = {
@@ -322,10 +329,10 @@ class RouteCollection(
           case None =>
             matchAndExtractPathParams(tokens, others) match {
               case None => matchAndExtractPathParams(tokens, lasts)
-              case s    => s
+              case some => some
             }
 
-          case s => s
+          case some => some
         }
     }
     maybeCached.foreach { value => matchedRouteCache.put(key, value) }

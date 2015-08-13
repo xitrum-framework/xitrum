@@ -81,4 +81,14 @@ class Route(
         false
     }
   }
+
+  override def toString: String = {
+    val withoutCacheInfo = httpMethod.name + " " + RouteCompiler.decompile(compiledPattern) + " -> " + klass.getName
+    if (cacheSecs == 0)
+      withoutCacheInfo
+    else if (cacheSecs > 0)
+      withoutCacheInfo + s" (page cache ${cacheSecs}s)"
+    else
+      withoutCacheInfo + s" (action cache ${-cacheSecs}s)"
+  }
 }
