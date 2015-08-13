@@ -64,7 +64,7 @@ trait Js {
   //----------------------------------------------------------------------------
 
   lazy val jsDefaults = {
-    val validatei18n = if (language == "en") "" else (<script type="text/javascript" src={webJarsUrl(s"jquery-validation/1.14.0/localization", "messages_$language.js", "messages_$language.min.js")}></script>)
+    val validatei18n = if (language == "en") "" else (<script type="text/javascript" src={webJarsUrl("jquery-validation/1.14.0/localization", s"messages_${language}.js", s"messages_${language}.min.js")}></script>)
 
     <xml:group>
       <script type="text/javascript" src={webJarsUrl("jquery/2.1.4",              "jquery.js",             "jquery.min.js")}></script>
