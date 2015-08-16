@@ -3,7 +3,7 @@ package xitrum.i18n
 import java.io.File
 import scala.collection.mutable.{ArrayBuffer, Map => MMap}
 
-import scaposer.{Po, Parser}
+import scaposer.{Parser, I18n}
 import sclasner.Discoverer
 
 import xitrum.Log
@@ -13,7 +13,7 @@ object PoLoader {
   // Also watch this directory in development mode
   private val DEV_RESOURCES_DIR = "src/main/resources"
 
-  private val cache = MMap.empty[String, Po]
+  private val cache = MMap.empty[String, I18n]
   watch()
 
   /**
@@ -30,38 +30,40 @@ object PoLoader {
    *
    * @return Empty Po if there's no po file
    */
-  def get(language: String): Po = {
+  def get(language: String): I18n = {
     if (cache.isDefinedAt(language)) return cache(language)
 
     synchronized {
       val urlEnum = Thread.currentThread.getContextClassLoader.getResources("i18n/" + language + ".po")
-      val buffer  = ArrayBuffer.empty[Po]
+      val buffer  = ArrayBuffer.empty[I18n]
       while (urlEnum.hasMoreElements) {
         val url    = urlEnum.nextElement()
         val is     = url.openStream()
         val string = Loader.stringFromInputStream(is)
-        Parser.parsePo(string) match {
-          case Left((msg, position)) =>
-            Log.warn(s"Could not load $url: $msg\nError position: ${position.toString}\n${position.longString}")
+        Parser.parse(string) match {
+          case Left(parseFailure) =>
+            Log.warn(s"Could not load $url: $parseFailure")
 
-          case Right(po) =>
-            buffer.append(po)
+          case Right(translations) =>
+            val i18n = I18n(translations)
+            buffer.append(i18n)
         }
       }
 
       val file = new File(DEV_RESOURCES_DIR + "/i18n/" + language + ".po")
       if (file.exists) {
         val string = Loader.stringFromFile(file)
-        Parser.parsePo(string) match {
-          case Left((msg, position)) =>
-            Log.warn(s"Could not load $file: $msg\nError position: ${position.toString}\n${position.longString}")
+        Parser.parse(string) match {
+          case Left(parseFailure) =>
+            Log.warn(s"Could not load $file: $parseFailure")
 
-          case Right(po) =>
-            buffer.append(po)
+          case Right(translations) =>
+            val i18n = I18n(translations)
+            buffer.append(i18n)
         }
       }
 
-      val ret = buffer.foldLeft(new Po(Map.empty)) { (acc, e) => acc ++ e }
+      val ret = buffer.foldLeft(new I18n(Map.empty)) { (acc, e) => acc ++ e }
       cache(language) = ret
       ret
     }

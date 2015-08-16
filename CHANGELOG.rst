@@ -1,3 +1,8 @@
+3.26.0:
+
+* `#566 <https://github.com/xitrum-framework/xitrum/issues/566>`_
+  Update Scaposer from 1.6 to 1.7
+
 3.25.0:
 
 * `#541 <https://github.com/xitrum-framework/xitrum/issues/541>`_
