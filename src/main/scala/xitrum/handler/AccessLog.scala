@@ -57,6 +57,7 @@ object AccessLog {
   // Save last executeTime of each access
   // Map('actionName': [timestamp, execTime])
   private lazy val lastExecTimeMap = MMap[String, Array[Long]]()
+  private final val executionTimeHistogramKey = "executionTime"
 
   private def msgWithTime(className: String, action: Action, beginTimestamp: Long) = {
     val endTimestamp                 = System.currentTimeMillis()
@@ -78,7 +79,13 @@ object AccessLog {
           histograms.get(actionClassName)
         else
           xitrum.Metrics.histogram(actionClassName)
+      val executionTimeHistogram = 
+        if (histograms.containsKey(executionTimeHistogramKey))
+          histograms.get(executionTimeHistogramKey)
+        else
+          xitrum.Metrics.histogram(executionTimeHistogramKey)
       histogram.asInstanceOf[Histogram] += dt
+      executionTimeHistogram.asInstanceOf[Histogram] += dt
       lastExecTimeMap(actionClassName) = Array(System.currentTimeMillis, dt)
     }
 
