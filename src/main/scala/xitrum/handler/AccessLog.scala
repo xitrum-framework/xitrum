@@ -38,14 +38,14 @@ object AccessLog {
 
   def logActionAccess(action: Action, beginTimestamp: Long, cacheSecs: Int, hit: Boolean, e: Throwable = null) {
     if (e == null) {
-      Log.info(msgWithTime(action.getClass.getName, action, beginTimestamp) + extraInfo(action, cacheSecs, hit))
+      Log.info(msgWithTime(action, beginTimestamp) + extraInfo(action, cacheSecs, hit))
     } else {
-      Log.error("Dispatch error " + msgWithTime(action.getClass.getName, action, beginTimestamp) + extraInfo(action, cacheSecs, hit), e)
+      Log.error("Dispatch error " + msgWithTime(action, beginTimestamp) + extraInfo(action, cacheSecs, hit), e)
     }
   }
 
-  def logWebSocketAccess(className: String, action: Action, beginTimestamp: Long) {
-    Log.info(msgWithTime(className, action, beginTimestamp) + extraInfo(action, 0, false))
+  def logWebSocketAccess(action: Action, beginTimestamp: Long) {
+    Log.info(msgWithTime(action, beginTimestamp) + extraInfo(action, 0, false))
   }
 
   def logOPTIONS(request: HttpRequest) {
@@ -54,15 +54,18 @@ object AccessLog {
 
   //----------------------------------------------------------------------------
 
+  val LAST_EXECUTION_TIME_GAUGE = "lastExecutionTime"
+  val EXECUTION_TIME_HISTOGRAM  = "executionTime"
+
   // Save last execution time of each access in
   // Map(actionName -> Array[timestamp, executionTime]).
   // The number of actions in a program is limited, so this won't go without bounds.
-  private val lastExecTimeMap = MMap[String, Array[Long]]()
-  xitrum.Metrics.gauge("lastExecutionTime") {
-    lastExecTimeMap.toArray
+  private val lastExecutionTimeMap = MMap[String, Array[Long]]()
+  xitrum.Metrics.gauge(LAST_EXECUTION_TIME_GAUGE) {
+    lastExecutionTimeMap.toArray
   }
 
-  private def msgWithTime(className: String, action: Action, beginTimestamp: Long): String = {
+  private def msgWithTime(action: Action, beginTimestamp: Long): String = {
     val endTimestamp = System.currentTimeMillis()
     val dt           = endTimestamp - beginTimestamp
     val env          = action.handlerEnv
@@ -76,7 +79,7 @@ object AccessLog {
     b.append(" ")
     b.append(action.request.getUri)
     b.append(" -> ")
-    b.append(className)
+    b.append(action.getClass.getName)
     if (env.queryParams.nonEmpty) {
       b.append(", queryParams: ")
       b.append(RequestEnv.inspectParamsWithFilter(env.queryParams))
@@ -113,17 +116,18 @@ object AccessLog {
       Config.xitrum.metrics.get.actions &&
       !isSockJSMetricsChannelClient)
     {
-      val histograms      = xitrum.Metrics.registry.getHistograms
       val actionClassName = action.getClass.getName
-      val histogram: Histogram =
-        if (histograms.containsKey(actionClassName))
-          histograms.get(actionClassName).asInstanceOf[Histogram]
-        else
-          xitrum.Metrics.histogram(actionClassName)
-      histogram += executionTime
-
-      lastExecTimeMap(actionClassName) = Array(beginTimestamp, executionTime)
+      takeActionExecutionTimeHistogram(actionClassName,          executionTime)
+      takeActionExecutionTimeHistogram(EXECUTION_TIME_HISTOGRAM, executionTime)
+      lastExecutionTimeMap(actionClassName)          = Array(beginTimestamp, executionTime)
+      lastExecutionTimeMap(EXECUTION_TIME_HISTOGRAM) = Array(beginTimestamp, executionTime)
     }
+  }
+
+  private def takeActionExecutionTimeHistogram(name: String, executionTime: Long) {
+    val histograms = xitrum.Metrics.registry.getHistograms
+    val histogram  = Option(histograms.get(name).asInstanceOf[Histogram]).getOrElse(xitrum.Metrics.histogram(name))
+    histogram += executionTime
   }
 
   private def extraInfo(action: Action, cacheSecs: Int, hit: Boolean): String = {

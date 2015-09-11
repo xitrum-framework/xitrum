@@ -55,7 +55,7 @@ trait WebSocketAction extends Actor with Action {
         // at acceptWebSocket
         val beginTimestamp = System.currentTimeMillis()
         execute()
-        AccessLog.logWebSocketAccess(getClass.getName, this, beginTimestamp)
+        AccessLog.logWebSocketAccess(this, beginTimestamp)
       } else {
         env.release()
         context.stop(self)

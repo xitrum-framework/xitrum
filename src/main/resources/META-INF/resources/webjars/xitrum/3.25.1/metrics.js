@@ -202,7 +202,7 @@
             .attr("y", 6)
             .attr("dx", "2em")
             .style("text-anchor", "start")
-            .text("SYSTEM LOAD AVERAGE");
+            .text("System load average");
 
       var datasetByKeyNode = {};
       return function(data){
