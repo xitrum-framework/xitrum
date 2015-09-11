@@ -54,26 +54,56 @@ object AccessLog {
 
   //----------------------------------------------------------------------------
 
-  private def msgWithTime(className: String, action: Action, beginTimestamp: Long) = {
+  // Save last execution time of each access in
+  // Map(actionName -> Array[timestamp, executionTime]).
+  // The number of actions in a program is limited, so this won't go without bounds.
+  private val lastExecTimeMap = MMap[String, Array[Long]]()
+  xitrum.Metrics.gauge("lastExecutionTime") {
+    lastExecTimeMap.toArray
+  }
+
+  private def msgWithTime(className: String, action: Action, beginTimestamp: Long): String = {
     val endTimestamp = System.currentTimeMillis()
     val dt           = endTimestamp - beginTimestamp
     val env          = action.handlerEnv
 
-    takeActionExecutionTimeMetrics(action, dt)
+    takeActionExecutionTimeMetrics(action, beginTimestamp, dt)
 
-    action.remoteIp + " " +
-    action.request.getMethod + " " +
-    action.request.getUri + " -> " +
-    className +
-    (if (env.queryParams.nonEmpty)    ", queryParams: "    + RequestEnv.inspectParamsWithFilter(env.queryParams)    else "") +
-    (if (env.bodyTextParams.nonEmpty) ", bodyTextParams: " + RequestEnv.inspectParamsWithFilter(env.bodyTextParams) else "") +
-    (if (env.pathParams.nonEmpty)     ", pathParams: "     + RequestEnv.inspectParamsWithFilter(env.pathParams)     else "") +
-    (if (env.bodyFileParams.nonEmpty) ", bodyFileParams: " + RequestEnv.inspectParamsWithFilter(env.bodyFileParams) else "") +
-    (if (action.isDoneResponding)       " -> "             + action.response.getStatus.code                         else "") +
-    ", " + dt + " [ms]"
+    val b = new StringBuilder
+    b.append(action.remoteIp)
+    b.append(" ")
+    b.append(action.request.getMethod)
+    b.append(" ")
+    b.append(action.request.getUri)
+    b.append(" -> ")
+    b.append(className)
+    if (env.queryParams.nonEmpty) {
+      b.append(", queryParams: ")
+      b.append(RequestEnv.inspectParamsWithFilter(env.queryParams))
+    }
+    if (env.bodyTextParams.nonEmpty) {
+      b.append(", bodyTextParams: ")
+      b.append(RequestEnv.inspectParamsWithFilter(env.bodyTextParams))
+    }
+    if (env.pathParams.nonEmpty) {
+      b.append(", pathParams: ")
+      b.append(RequestEnv.inspectParamsWithFilter(env.pathParams))
+    }
+    if (env.bodyFileParams.nonEmpty) {
+      b.append(", bodyFileParams: ")
+      b.append(RequestEnv.inspectParamsWithFilter(env.bodyFileParams))
+    }
+    if (action.isDoneResponding) {
+      b.append(" -> ")
+      b.append(action.response.getStatus.code)
+    }
+    b.append(", ")
+    b.append(dt)
+    b.append(" [ms]")
+    b.toString
   }
 
-  private def takeActionExecutionTimeMetrics(action: Action, executionTime: Long) {
+  private def takeActionExecutionTimeMetrics(action: Action, beginTimestamp: Long, executionTime: Long) {
     val isSockJSMetricsChannelClient =
       action.isInstanceOf[SockJsAction] &&
       action.asInstanceOf[SockJsAction].pathPrefix == "xitrum/metrics/channel"
@@ -91,10 +121,12 @@ object AccessLog {
         else
           xitrum.Metrics.histogram(actionClassName)
       histogram += executionTime
+
+      lastExecTimeMap(actionClassName) = Array(beginTimestamp, executionTime)
     }
   }
 
-  private def extraInfo(action: Action, cacheSecs: Int, hit: Boolean) = {
+  private def extraInfo(action: Action, cacheSecs: Int, hit: Boolean): String = {
     if (cacheSecs == 0) {
       if (action.isDoneResponding) "" else " (async)"
     } else {

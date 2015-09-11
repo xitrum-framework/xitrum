@@ -1,7 +1,9 @@
-3.26.0:
+3.25.1:
 
 * `#566 <https://github.com/xitrum-framework/xitrum/issues/566>`_
   Update Scaposer from 1.6 to 1.7
+* `#572 <https://github.com/xitrum-framework/xitrum/issues/572>`_
+  JavaScript error at metrics detail page of actions
 
 3.25.0:
 
