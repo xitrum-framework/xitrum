@@ -1,11 +1,13 @@
 3.25.1:
 
-* `#566 <https://github.com/xitrum-framework/xitrum/issues/566>`_
-  Update Scaposer from 1.6 to 1.7
 * `#572 <https://github.com/xitrum-framework/xitrum/issues/572>`_
   [Metrics] Fix JavaScript error at metrics detail page of actions
 * `#574 <https://github.com/xitrum-framework/xitrum/issues/574>`_
   [Metrics] Add single executionTime histogram for all actions
+* `#566 <https://github.com/xitrum-framework/xitrum/issues/566>`_
+  Update Scaposer from 1.6 to 1.7
+* `#576 <https://github.com/xitrum-framework/xitrum/issues/576>`_
+  Update Akka from 2.3.12 to 2.3.14
 
 3.25.0:
 
