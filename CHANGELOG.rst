@@ -1,7 +1,9 @@
 3.25.1:
 
+* `#579 <https://github.com/xitrum-framework/xitrum/issues/579>`_
+  xitrum.util.SeriDeseri: Add method to convert byte array to hexadecimal string and vice versa
 * `#580 <https://github.com/xitrum-framework/xitrum/issues/580>`_
-  Secure: Expose method to calculate HMAC SHA256
+  xitrum.util.Secure: Expose method to calculate HMAC SHA256
 * `#572 <https://github.com/xitrum-framework/xitrum/issues/572>`_
   [Metrics] Fix JavaScript error at metrics detail page of actions
 * `#574 <https://github.com/xitrum-framework/xitrum/issues/574>`_

@@ -1,5 +1,6 @@
 package xitrum.util
 
+import scala.util.Try
 import scala.util.control.NonFatal
 
 import com.twitter.chill.{KryoInstantiator, KryoPool, KryoSerializer}
@@ -129,6 +130,22 @@ object SeriDeseri {
       if (src  != null) src.release()
       if (dest != null) dest.release()
     }
+  }
+
+  //----------------------------------------------------------------------------
+
+  /** @return Lower case hexadecimal string */
+  def bytesToHex(bytes: Array[Byte]): String = {
+    val sb = new StringBuilder(bytes.length * 2)
+    for (b <- bytes) {
+      val nonnegative = b & 0xff  // The byte may be negative
+      sb.append("%02x".format(nonnegative))
+    }
+    sb.toString
+  }
+
+  def bytesFromHex(hex: String): Option[Array[Byte]] = {
+    Try(hex.sliding(2, 2).toArray.map(Integer.parseInt(_, 16).toByte)).toOption
   }
 
   //----------------------------------------------------------------------------
