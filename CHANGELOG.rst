@@ -1,5 +1,7 @@
 3.25.1:
 
+* `#580 <https://github.com/xitrum-framework/xitrum/issues/580>`_
+  Secure: Expose method to calculate HMAC SHA256
 * `#572 <https://github.com/xitrum-framework/xitrum/issues/572>`_
   [Metrics] Fix JavaScript error at metrics detail page of actions
 * `#574 <https://github.com/xitrum-framework/xitrum/issues/574>`_
