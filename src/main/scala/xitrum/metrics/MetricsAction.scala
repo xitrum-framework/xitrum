@@ -1,8 +1,7 @@
 package xitrum.metrics
 
 import akka.actor.{Actor, ActorRef, Terminated}
-import akka.cluster.Cluster
-import akka.cluster.metrics.{ClusterMetricsChanged, NodeMetrics}
+import akka.cluster.metrics.{ClusterMetricsChanged, ClusterMetricsExtension, NodeMetrics}
 import akka.cluster.metrics.StandardMetrics.{Cpu, HeapMemory}
 
 import io.netty.handler.codec.http.HttpResponseStatus
@@ -22,18 +21,22 @@ class MetricsCollector(localPublisher: ActorRef) extends Actor {
 
 /** JMX metrics collector for clustered node application. */
 class ClusterMetricsCollector(localPublisher: ActorRef) extends Actor {
-  override def preStart() =
-    Cluster(context.system).subscribe(self, classOf[ClusterMetricsChanged])
+  private val extension = ClusterMetricsExtension(context.system)
 
-  override def postStop() =
-    Cluster(context.system).unsubscribe(self)
+  override def preStart() {
+    extension.subscribe(self)
+  }
+
+  override def postStop() {
+    extension.unsubscribe(self)
+  }
 
   def receive = {
-    case m @ ClusterMetricsChanged(clusterMetrics) =>
-      if (localPublisher != null) localPublisher ! m
+    case m: ClusterMetricsChanged =>
+      localPublisher ! m
 
     case UnSubscribe =>
-      Cluster(context.system).unsubscribe(self)
+      extension.unsubscribe(self)
 
     case _ =>
   }

@@ -9,8 +9,7 @@ import com.codahale.metrics.json.MetricsModule
 import com.fasterxml.jackson.databind.ObjectMapper
 
 import akka.actor.{Actor, ActorRef, Cancellable, ExtendedActorSystem, Props, Terminated}
-import akka.cluster.metrics.{JmxMetricsCollector, NodeMetrics}
-import akka.cluster.ClusterEvent.ClusterMetricsChanged
+import akka.cluster.metrics.{ClusterMetricsChanged, JmxMetricsCollector, NodeMetrics}
 import glokka.Registry
 
 import xitrum.Config
@@ -31,14 +30,14 @@ object MetricsManager {
   lazy val metrics = Config.xitrum.metrics.get
 
   // Glokka registry
-  val actorRegistry = Registry.start(Config.actorSystem, "metrics")
+  val actorRegistry = Registry.start(Config.actorSystem, getClass.getName)
 
   // For non-clusterd actor system
   // http://grokbase.com/t/gg/akka-user/136m8mmyed/get-address-of-the-actorsystem-in-akka-2-2
   private val provider = Config.actorSystem.asInstanceOf[ExtendedActorSystem].provider
   private val address  = provider.getDefaultAddress
 
-  // See http://doc.akka.io/docs/akka/2.3.3/scala/cluster-usage.html
+  // http://doc.akka.io/docs/akka/2.3.3/scala/cluster-usage.html
   lazy val jmx = new JmxMetricsCollector(address, EWMA.alpha(metrics.jmxMovingAverageHalfLife, metrics.jmxGossipInterval))
 
   // For metrics of application
@@ -63,21 +62,18 @@ object MetricsManager {
     localPublisher = Config.actorSystem.actorOf(Props(classOf[LocalPublisher]))
     tickPublisher(localPublisher)
 
-    provider.getClass.getName match {
-      case "akka.cluster.ClusterActorRefProvider" =>
-        if (metrics.jmx)
-          Config.actorSystem.actorOf(Props(classOf[ClusterMetricsCollector], localPublisher))
-
-      case _ =>
-        if (metrics.jmx) {
-          collector  = Config.actorSystem.actorOf(Props(classOf[MetricsCollector], localPublisher))
-          collecting = Config.actorSystem.scheduler.schedule(
-            metrics.collectActorInitialDelay,
-            metrics.collectActorInterval,
-            collector,
-            Collect
-          )
-        }
+    if (metrics.jmx) {
+      if (provider.getClass.getName == "akka.cluster.ClusterActorRefProvider") {
+        Config.actorSystem.actorOf(Props(classOf[ClusterMetricsCollector], localPublisher))
+      } else {
+        collector  = Config.actorSystem.actorOf(Props(classOf[MetricsCollector], localPublisher))
+        collecting = Config.actorSystem.scheduler.schedule(
+          metrics.collectActorInitialDelay,
+          metrics.collectActorInterval,
+          collector,
+          Collect
+        )
+      }
     }
   }
 
@@ -145,8 +141,8 @@ object MetricsManager {
         case nodeMetrics: NodeMetrics =>
           globalPublisher ! nodeMetrics
 
-        case ClusterMetricsChanged(clusterMetrics) =>
-          globalPublisher ! ClusterMetricsChanged(clusterMetrics)
+        case m: ClusterMetricsChanged =>
+          globalPublisher ! m
 
         case Terminated(publisher) =>
           lookUpPublisher()
