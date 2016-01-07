@@ -45,13 +45,14 @@ libraryDependencies += "io.netty" % "netty-transport-native-epoll" % "4.0.33.Fin
 libraryDependencies += "org.javassist" % "javassist" % "3.20.0-GA"
 
 // Redirect Akka log to SLF4J
-libraryDependencies += "com.typesafe.akka" %% "akka-actor"   % "2.3.14"
-libraryDependencies += "com.typesafe.akka" %% "akka-cluster" % "2.3.14"
-libraryDependencies += "com.typesafe.akka" %% "akka-contrib" % "2.3.14"
-libraryDependencies += "com.typesafe.akka" %% "akka-slf4j"   % "2.3.14"
+libraryDependencies += "com.typesafe.akka" %% "akka-actor"           % "2.4.1"
+libraryDependencies += "com.typesafe.akka" %% "akka-cluster"         % "2.4.1"
+libraryDependencies += "com.typesafe.akka" %% "akka-cluster-metrics" % "2.4.1"
+libraryDependencies += "com.typesafe.akka" %% "akka-contrib"         % "2.4.1"
+libraryDependencies += "com.typesafe.akka" %% "akka-slf4j"           % "2.4.1"
 
 // For clustering SockJS with Akka
-libraryDependencies += "tv.cntt" %% "glokka" % "2.3"
+libraryDependencies += "tv.cntt" %% "glokka" % "2.4"
 
 // For file watch
 // (akka-agent is added here, should ensure same Akka version as above)

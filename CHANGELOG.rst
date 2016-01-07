@@ -13,7 +13,7 @@
 * `#566 <https://github.com/xitrum-framework/xitrum/issues/566>`_
   Update Scaposer from 1.6 to 1.7
 * `#576 <https://github.com/xitrum-framework/xitrum/issues/576>`_
-  Update Akka from 2.3.12 to 2.3.14
+  Update Akka from 2.3.12 to 2.4.1
 
 3.25.0:
 

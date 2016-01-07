@@ -1,9 +1,9 @@
 package xitrum.metrics
 
 import akka.actor.{Actor, ActorRef, Terminated}
-import akka.cluster.{Cluster, NodeMetrics}
-import akka.cluster.ClusterEvent.ClusterMetricsChanged
-import akka.cluster.StandardMetrics.{Cpu, HeapMemory}
+import akka.cluster.Cluster
+import akka.cluster.metrics.{ClusterMetricsChanged, NodeMetrics}
+import akka.cluster.metrics.StandardMetrics.{Cpu, HeapMemory}
 
 import io.netty.handler.codec.http.HttpResponseStatus
 
@@ -294,7 +294,7 @@ class XitrumMetricsChannel extends SockJsAction with PublisherLookUp {
 
   private def sendCpu(nodeMetrics:NodeMetrics):Unit = {
     nodeMetrics match {
-      case Cpu(address, timestamp, Some(systemLoadAverage), cpuCombined, processors) =>
+      case Cpu(address, timestamp, Some(systemLoadAverage), cpuCombined, cpuStolen, processors) =>
         respondSockJsText(SeriDeseri.toJson(Map(
           "TYPE"              -> "cpu",
           "SYSTEM"            -> address.system,

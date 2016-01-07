@@ -9,7 +9,7 @@ import com.codahale.metrics.json.MetricsModule
 import com.fasterxml.jackson.databind.ObjectMapper
 
 import akka.actor.{Actor, ActorRef, Cancellable, ExtendedActorSystem, Props, Terminated}
-import akka.cluster.{JmxMetricsCollector, NodeMetrics}
+import akka.cluster.metrics.{JmxMetricsCollector, NodeMetrics}
 import akka.cluster.ClusterEvent.ClusterMetricsChanged
 import glokka.Registry
 
