@@ -20,6 +20,8 @@
   Update Twitter Chill from 0.7.0 to 0.7.2
 * `#582 <https://github.com/xitrum-framework/xitrum/issues/582>`_
   Update JSON4S from 3.2.11 to 3.3.0
+* `#573 <https://github.com/xitrum-framework/xitrum/issues/573>`_
+  Update sockjs-client from 1.0.2 to 1.0.3
 
 3.25.0:
 
