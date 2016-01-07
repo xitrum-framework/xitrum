@@ -1,4 +1,4 @@
-3.25.1:
+3.26.0:
 
 * `#579 <https://github.com/xitrum-framework/xitrum/issues/579>`_
   xitrum.util.SeriDeseri: Add method to convert byte array to hexadecimal string and vice versa
@@ -10,10 +10,12 @@
   [Metrics] Add single executionTime histogram for all actions
 * `#578 <https://github.com/xitrum-framework/xitrum/issues/578>`_
   Update Netty from 4.0.30 to 4.0.33
-* `#566 <https://github.com/xitrum-framework/xitrum/issues/566>`_
-  Update Scaposer from 1.6 to 1.7
 * `#576 <https://github.com/xitrum-framework/xitrum/issues/576>`_
   Update Akka from 2.3.12 to 2.4.1
+* `#566 <https://github.com/xitrum-framework/xitrum/issues/566>`_
+  Update Scaposer from 1.6 to 1.7
+* `#581 <https://github.com/xitrum-framework/xitrum/issues/581>`_
+  Update Twitter Chill from 0.7.0 to 0.7.2
 
 3.25.0:
 
