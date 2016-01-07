@@ -16,6 +16,8 @@
   Update Scaposer from 1.6 to 1.7
 * `#581 <https://github.com/xitrum-framework/xitrum/issues/581>`_
   Update Twitter Chill from 0.7.0 to 0.7.2
+* `#582 <https://github.com/xitrum-framework/xitrum/issues/582>`_
+  Update JSON4S from 3.2.11 to 3.3.0
 
 3.25.0:
 
