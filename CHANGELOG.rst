@@ -8,6 +8,8 @@
   [Metrics] Fix JavaScript error at metrics detail page of actions
 * `#574 <https://github.com/xitrum-framework/xitrum/issues/574>`_
   [Metrics] Add single executionTime histogram for all actions
+* `#583 <https://github.com/xitrum-framework/xitrum/issues/583>`_
+  Update metrics-scala from 3.5.1_a2.3 to 3.5.2_a2.3
 * `#578 <https://github.com/xitrum-framework/xitrum/issues/578>`_
   Update Netty from 4.0.30 to 4.0.33
 * `#576 <https://github.com/xitrum-framework/xitrum/issues/576>`_
