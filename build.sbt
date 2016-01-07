@@ -1,12 +1,13 @@
 organization := "tv.cntt"
 name         := "xitrum"
 
-scalaVersion       := "2.11.6"  // "2.10.5"
-crossScalaVersions := Seq("2.11.6", "2.10.5")
+// Akka 2.4.0+ dropped Scala 2.10.x support
+scalaVersion       := "2.11.7"
+crossScalaVersions := Seq("2.11.7")
 
 // Run sbt mima-report-binary-issues to check for binary compatibility ---------
 // https://github.com/typesafehub/migration-manager
-version := "3.25.1-SNAPSHOT"
+version := "3.26.0-SNAPSHOT"
 //com.typesafe.tools.mima.plugin.MimaPlugin.mimaDefaultSettings
 //com.typesafe.tools.mima.plugin.MimaKeys.previousArtifact := Some("tv.cntt" % ("xitrum_" + scalaBinaryVersion.value) % "3.25.0")
 
@@ -14,8 +15,8 @@ version := "3.25.1-SNAPSHOT"
 
 scalacOptions ++= Seq("-deprecation", "-feature", "-unchecked")
 
-// xitrum.util.FileMonitor requires Java 7
-javacOptions ++= Seq("-source", "1.7", "-target", "1.7")
+// Akka 2.4.0+ requires Java 8
+javacOptions ++= Seq("-source", "1.8", "-target", "1.8")
 
 // Source code for Scala 2.10 and 2.11 are a little different ------------------
 // See src/main/scala-2.10 and src/main/scala-2.11.

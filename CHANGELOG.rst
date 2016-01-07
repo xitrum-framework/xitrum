@@ -1,5 +1,7 @@
 3.26.0:
 
+* `#547 <https://github.com/xitrum-framework/xitrum/issues/547>`_
+  Update Scala from 2.11.6 to 2.11.7 and drop support for Scala 2.10.x and Java 7
 * `#579 <https://github.com/xitrum-framework/xitrum/issues/579>`_
   xitrum.util.SeriDeseri: Add method to convert byte array to hexadecimal string and vice versa
 * `#580 <https://github.com/xitrum-framework/xitrum/issues/580>`_
