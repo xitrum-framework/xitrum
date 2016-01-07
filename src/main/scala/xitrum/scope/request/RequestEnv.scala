@@ -109,19 +109,12 @@ trait RequestEnv extends ParamAccess {
   /** The whole request body as String. */
   lazy val requestContentString = handlerEnv.requestContentString
 
-  /** The whole request body parsed as JSON4S JValue. */
+  /**
+   * The whole request body parsed as JSON4S JValue. You can use [[SeriDeseri.fromJValue]]
+   * to convert this to Scala object (case class, Map, Seq etc.).
+   */
   lazy val requestContentJValue = handlerEnv.requestContentJValue
 
   lazy val at = new At
-  def atJson(key: String) = at.toJson(key)
-
-  /**
-   * Utility to convert [[requestContentJValue]] to Scala data structure.
-   * See also [[SeriDeseri]].
-   *
-   * Ex:
-   * {{{val map = requestContentJson[Map[String, String]]}}}
-   */
-  def requestContentJson[T](implicit e: T DefaultsTo String, m: Manifest[T]): Option[T] =
-    SeriDeseri.fromJson[T](requestContentJValue)(e, m)
+  def atJson(key: String): String = at.toJson(key)
 }

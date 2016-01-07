@@ -4,7 +4,7 @@ import scala.util.Try
 import scala.util.control.NonFatal
 
 import com.twitter.chill.{KryoInstantiator, KryoPool, KryoSerializer}
-import org.json4s.{DefaultFormats, JValue, NoTypeHints}
+import org.json4s.{DefaultFormats, Extraction, JValue, NoTypeHints}
 import org.json4s.jackson.{JsonMethods, Serialization}
 
 import io.netty.buffer.{ByteBuf, Unpooled}
@@ -38,7 +38,7 @@ object SeriDeseri {
   private implicit val noTypeHints = Serialization.formats(NoTypeHints)
 
   /**
-   * Converts Scala object (case class, Map, Seq etc.) to JSON.
+   * Converts Scala object (case class, Map, Seq etc.) to JSON string.
    * If you want to do more complicated things, you should use JSON4S directly:
    * https://github.com/json4s/json4s
    */
@@ -46,20 +46,28 @@ object SeriDeseri {
     Serialization.write(scalaObject)(noTypeHints)
 
   /**
-   * Converts JSON to Scala object (case class, Map, Seq etc.).
+   * Converts JSON string to Scala object (case class, Map, Seq etc.).
    * If you want to do more complicated things, you should use JSON4S directly:
    * https://github.com/json4s/json4s
    */
-  def fromJson[T](jsonString: String)(implicit e: T DefaultsTo String, m: Manifest[T]): Option[T] = {
-    JsonMethods.parseOpt(jsonString).flatMap { json => fromJson[T](json)(e, m) }
-  }
+  def fromJson[T](jsonString: String)(implicit e: T DefaultsTo String, m: Manifest[T]): Option[T] =
+    JsonMethods.parseOpt(jsonString).flatMap { json => fromJValue[T](json)(e, m) }
+
+  //----------------------------------------------------------------------------
 
   /**
-   * Converts JSON to Scala object (case class, Map, Seq etc.).
+   * Similar to [[toJson]], but the result is JSON4S [[JValue]] instead of string,
+   * so that you can further transform it before rendering to string.
+   */
+  def toJValue(scalaObject: AnyRef): JValue =
+    Extraction.decompose(scalaObject)
+
+  /**
+   * Converts JSON4S [[JValue]] to Scala object (case class, Map, Seq etc.).
    * If you want to do more complicated things, you should use JSON4S directly:
    * https://github.com/json4s/json4s
    */
-  def fromJson[T](json: JValue)(implicit e: T DefaultsTo String, m: Manifest[T]): Option[T] = {
+  def fromJValue[T](jvalue: JValue)(implicit e: T DefaultsTo String, m: Manifest[T]): Option[T] = {
     // Serialization.read doesn't work without type hints.
     //
     // Serialization.read[Map[String, Any]]("""{"name": "X", "age": 45}""")
@@ -69,7 +77,7 @@ object SeriDeseri {
     // JsonMethods.parse works for the above.
     if (m.runtimeClass.getName.startsWith("scala")) {
       try {
-        val any = json.values
+        val any = jvalue.values
         if (m.runtimeClass.isAssignableFrom(any.getClass))
           Some(any.asInstanceOf[T])
         else
@@ -77,7 +85,7 @@ object SeriDeseri {
       } catch {
         case NonFatal(e) =>
           try {
-            Some(json.extract[T](DefaultFormats, m))
+            Some(jvalue.extract[T](DefaultFormats, m))
           } catch {
             case NonFatal(e) =>
               None
@@ -85,11 +93,11 @@ object SeriDeseri {
       }
     } else {
       try {
-        Some(json.extract[T](DefaultFormats, m))
+        Some(jvalue.extract[T](DefaultFormats, m))
       } catch {
         case NonFatal(e) =>
           try {
-            val any = json.values
+            val any = jvalue.values
             if (m.runtimeClass.isAssignableFrom(any.getClass))
               Some(any.asInstanceOf[T])
             else

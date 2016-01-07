@@ -3,9 +3,11 @@
 * `#547 <https://github.com/xitrum-framework/xitrum/issues/547>`_
   Update Scala from 2.11.6 to 2.11.7 and drop support for Scala 2.10.x and Java 7
 * `#579 <https://github.com/xitrum-framework/xitrum/issues/579>`_
-  xitrum.util.SeriDeseri: Add method to convert byte array to hexadecimal string and vice versa
+  Add xitrum.util.SeriDeseri.bytesToHex and bytesFromHex to convert bytes to hexadecimal string and vice versa
+* `#568 <https://github.com/xitrum-framework/xitrum/issues/568>`_
+  Add xitrum.util.SeriDeseri.toJValue and fromJValue to convert Scala objects to JSON4S JValue and vice versa
 * `#580 <https://github.com/xitrum-framework/xitrum/issues/580>`_
-  xitrum.util.Secure: Expose method to calculate HMAC SHA256
+  Add xitrum.util.Secure.hmacSha256 to calculate HMAC SHA256
 * `#572 <https://github.com/xitrum-framework/xitrum/issues/572>`_
   [Metrics] Fix JavaScript error at metrics detail page of actions
 * `#574 <https://github.com/xitrum-framework/xitrum/issues/574>`_
