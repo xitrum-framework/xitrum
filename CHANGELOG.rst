@@ -18,6 +18,8 @@
   Update Netty from 4.0.30 to 4.0.33
 * `#576 <https://github.com/xitrum-framework/xitrum/issues/576>`_
   Update Akka from 2.3.12 to 2.4.1
+* `#587 <https://github.com/xitrum-framework/xitrum/issues/587>`_
+  Update Schwatcher from 0.1.8 to 0.2.0
 * `#566 <https://github.com/xitrum-framework/xitrum/issues/566>`_
   Update Scaposer from 1.6 to 1.7
 * `#581 <https://github.com/xitrum-framework/xitrum/issues/581>`_

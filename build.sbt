@@ -57,7 +57,7 @@ libraryDependencies += "tv.cntt" %% "glokka" % "2.4"
 
 // For file watch
 // (akka-agent is added here, should ensure same Akka version as above)
-libraryDependencies += "com.beachape.filemanagement" %% "schwatcher" % "0.1.8"
+libraryDependencies += "com.beachape.filemanagement" %% "schwatcher" % "0.2.0"
 
 // For scanning routes
 libraryDependencies += "tv.cntt" %% "sclasner" % "1.7.0"
