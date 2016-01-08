@@ -25,7 +25,9 @@
 * `#582 <https://github.com/xitrum-framework/xitrum/issues/582>`_
   Update JSON4S from 3.2.11 to 3.3.0
 * `#573 <https://github.com/xitrum-framework/xitrum/issues/573>`_
-  Update sockjs-client from 1.0.2 to 1.0.3
+  WebJars: Update sockjs-client from 1.0.2 to 1.0.3
+* `#585 <https://github.com/xitrum-framework/xitrum/issues/585>`_
+  WebJars: Update d3js from 3.5.5-1 to 3.5.12
 
 3.25.0:
 
