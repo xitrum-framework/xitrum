@@ -314,7 +314,7 @@ class Request2Env extends SimpleChannelInboundHandler[HttpObject] {
 
   /**
    * Only parses one level.
-   * Should use requestContentJson directly for more advanced uses.
+   * Should use requestContentJValue directly for more advanced uses.
    */
   private def parseTextParamsFromJson(env: HandlerEnv) {
     env.requestContentJValue match {
