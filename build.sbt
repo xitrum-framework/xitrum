@@ -18,8 +18,8 @@ scalacOptions ++= Seq("-deprecation", "-feature", "-unchecked")
 // Akka 2.4.0+ requires Java 8
 javacOptions ++= Seq("-source", "1.8", "-target", "1.8")
 
-// Source code for Scala 2.10 and 2.11 are a little different ------------------
-// See src/main/scala-2.10 and src/main/scala-2.11.
+// Source code for Scala 2.11 and 2.12 may be a little different ---------------
+// See src/main/scala-2.11.
 
 unmanagedSourceDirectories in Compile += baseDirectory.value / "src" / "main" / s"scala-${scalaBinaryVersion.value}"
 
