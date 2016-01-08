@@ -28,6 +28,8 @@
   WebJars: Update sockjs-client from 1.0.2 to 1.0.3
 * `#585 <https://github.com/xitrum-framework/xitrum/issues/585>`_
   WebJars: Update d3js from 3.5.5-1 to 3.5.12
+* `#586 <https://github.com/xitrum-framework/xitrum/issues/586>`_
+  WebJars: Update Swagger-UI from 2.1.1 to 2.1.4
 
 3.25.0:
 
