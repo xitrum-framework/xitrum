@@ -2,6 +2,8 @@
 
 * `#589 <https://github.com/xitrum-framework/xitrum/issues/589>`_
   Update Scala from 2.11.7 to 2.11.8
+* `#595 <https://github.com/xitrum-framework/xitrum/issues/595>`_
+  Update Netty from 4.0.33 to 4.1.0
 
 3.26.0:
 

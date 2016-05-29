@@ -23,12 +23,12 @@ class OPTIONSResponse extends ChannelOutboundHandlerAdapter {
     val response = env.response
     val pathInfo = env.pathInfo
 
-    if (request.getMethod == OPTIONS) {
+    if (request.method == OPTIONS) {
       AccessLog.logOPTIONS(request)
 
       if (pathInfo == null) {
         // Static files/resources
-        if (response.getStatus != NOT_FOUND) response.setStatus(NO_CONTENT)
+        if (response.status != NOT_FOUND) response.setStatus(NO_CONTENT)
       } else {
         // Dynamic resources
         if (Config.routes.tryAllMethods(pathInfo).nonEmpty)

@@ -17,7 +17,7 @@ private class RouteReloader {
     if (!shouldReloadOnNextRequest) return
     shouldReloadOnNextRequest = false
 
-    Config.routes = Config.loadRoutes(new ClassFileLoader, true)
+    Config.routes = Config.loadRoutes(new ClassFileLoader, quiet = true)
     SwaggerJson.reloadFromRoutes()
   }
 

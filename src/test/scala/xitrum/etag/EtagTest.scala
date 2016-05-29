@@ -11,14 +11,14 @@ class EtagTest extends FlatSpec with Matchers {
     val filePath = file.getAbsoluteFile.toString
     file.deleteOnExit()
 
-    val result = Etag.forFile(filePath, None, false)
+    val result = Etag.forFile(filePath, None, gzipped = false)
 
     val etag = result match {
-      case Etag.Small(_, etag, _, _) => etag
+      case Etag.Small(_, et, _, _) => et
       case _ => fail()
     }
 
-    etag should equal (Etag.forFile(filePath, None, false).asInstanceOf[Etag.Small].etag)
+    etag should equal (Etag.forFile(filePath, None, gzipped = false).asInstanceOf[Etag.Small].etag)
 
     Thread.sleep(1000)
 
@@ -26,6 +26,6 @@ class EtagTest extends FlatSpec with Matchers {
     stream.write(1)
     stream.close()
 
-    etag should not equal (Etag.forFile(filePath, None, false).asInstanceOf[Etag.Small].etag)
+    etag should not equal Etag.forFile(filePath, None, gzipped = false).asInstanceOf[Etag.Small].etag
   }
 }

@@ -43,7 +43,7 @@ class FlashSocketPolicyHandler extends SimpleChannelInboundHandler[ByteBuf] {
     // to avoid problem
     val pipeline = ctx.pipeline
     val it       = pipeline.iterator()
-    while (it.hasNext()) {
+    while (it.hasNext) {
       val entry   = it.next()
       val handler = entry.getValue
       pipeline.remove(handler)

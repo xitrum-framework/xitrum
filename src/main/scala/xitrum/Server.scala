@@ -50,8 +50,8 @@ object Server {
 
     // Lastly, start the server(s) after necessary things have been prepared
     val portConfig = Config.xitrum.port
-    if (portConfig.http.isDefined)  eventLoopGroups = eventLoopGroups ++ doStart(false, httpChannelInitializer)
-    if (portConfig.https.isDefined) eventLoopGroups = eventLoopGroups ++ doStart(true,  httpChannelInitializer)
+    if (portConfig.http.isDefined)  eventLoopGroups = eventLoopGroups ++ doStart(https = false, httpChannelInitializer)
+    if (portConfig.https.isDefined) eventLoopGroups = eventLoopGroups ++ doStart(https = true,  httpChannelInitializer)
 
     // Flash socket server may use same port with HTTP server
     if (portConfig.flashSocketPolicy.isDefined) {

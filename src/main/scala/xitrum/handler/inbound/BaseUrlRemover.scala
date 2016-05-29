@@ -12,10 +12,10 @@ class BaseUrlRemover extends SimpleChannelInboundHandler[HandlerEnv] {
   override def channelRead0(ctx: ChannelHandlerContext, env: HandlerEnv) {
     val request = env.request
 
-    remove(request.getUri) match {
+    remove(request.uri) match {
       case None =>
         val response = env.response
-        XSendFile.set404Page(response, false)
+        XSendFile.set404Page(response, fromController = false)
         ctx.channel.writeAndFlush(env)
 
       case Some(withoutBaseUri) =>

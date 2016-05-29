@@ -151,7 +151,7 @@ case class DotRouteToken(nonDotRouteTokens: Seq[NonDotRouteToken]) extends Route
     if (pathTokens.isEmpty) {
       true
     } else {
-      val matched = nonDotRouteTokens.head.matchToken(pathParams, Seq(pathTokens.head), false)
+      val matched = nonDotRouteTokens.head.matchToken(pathParams, Seq(pathTokens.head), last = false)
       if (matched)
         matchNonDotRouteTokens(pathParams, pathTokens.tail, nonDotRouteTokens.tail)
       else

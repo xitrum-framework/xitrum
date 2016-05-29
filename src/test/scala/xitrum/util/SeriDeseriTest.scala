@@ -27,7 +27,7 @@ class SeriDeseriTest extends FlatSpec with Matchers {
 
   "toSecureUrlSafeBase64 and fromSecureUrlSafeBase64" should "serialize and deserialize" in {
     val map1       = Map("csrf-token" -> "4ad194c6-06f4-41fb-86b8-8a4fc6053ab6")
-    val serialized = SeriDeseri.toSecureUrlSafeBase64(map1, "key", true)
+    val serialized = SeriDeseri.toSecureUrlSafeBase64(map1, "key", forCookie = true)
     val map2       = SeriDeseri.fromSecureUrlSafeBase64[Map[String, String]](serialized, "key", true)
     map2.get should equal (map1)
   }

@@ -8,7 +8,7 @@ import io.netty.buffer.Unpooled
 import io.netty.channel.{SimpleChannelInboundHandler, ChannelHandlerContext}
 import io.netty.handler.codec.http.{
   HttpRequest, FullHttpRequest, FullHttpResponse, DefaultFullHttpRequest, DefaultFullHttpResponse,
-  HttpMethod, HttpHeaders, HttpContent, HttpObject, LastHttpContent, HttpResponseStatus, HttpVersion
+  HttpMethod, HttpHeaderNames, HttpHeaderValues, HttpContent, HttpObject, LastHttpContent, HttpResponseStatus, HttpUtil, HttpVersion
 }
 import io.netty.handler.codec.http.multipart.{
   Attribute, DiskAttribute,
@@ -65,7 +65,7 @@ class Request2Env extends SimpleChannelInboundHandler[HttpObject] {
   }
 
   override def channelRead0(ctx: ChannelHandlerContext, msg: HttpObject) {
-    val decRet = msg.getDecoderResult
+    val decRet = msg.decoderResult
     if (decRet.isFailure) {
       BadClientSilencer.respond400(ctx.channel, "Could not decode request: " + decRet.cause.getMessage)
       return
@@ -76,33 +76,33 @@ class Request2Env extends SimpleChannelInboundHandler[HttpObject] {
       // - HttpRequest (or subclass) will come first
       // - Other HttpObjects will follow
       // - LastHttpContent (or subclass) will come last
-      if (msg.isInstanceOf[HttpRequest]) {
-        val request = msg.asInstanceOf[HttpRequest]
+      msg match {
+        case request: HttpRequest =>
+          // http://www.w3.org/Protocols/rfc2616/rfc2616-sec8.html
+          // curl can send "100-continue" header:
+          // curl -v -X POST -F "a=b" http://server/
+          if (HttpUtil.is100ContinueExpected(request)) {
+            // This request only contains headers, write response and flush
+            // immediately so that the client sends the rest of the request as
+            // soon as possible
+            val response = new DefaultFullHttpResponse(HttpVersion.HTTP_1_1, HttpResponseStatus.CONTINUE)
+            ctx.channel.writeAndFlush(response)
+          }
 
-        // http://www.w3.org/Protocols/rfc2616/rfc2616-sec8.html
-        // curl can send "100-continue" header:
-        // curl -v -X POST -F "a=b" http://server/
-        if (HttpHeaders.is100ContinueExpected(request)) {
-          // This request only contains headers, write response and flush
-          // immediately so that the client sends the rest of the request as
-          // soon as possible
-          val response = new DefaultFullHttpResponse(HttpVersion.HTTP_1_1, HttpResponseStatus.CONTINUE)
-          ctx.channel.writeAndFlush(response)
-        }
+          handleHttpRequestHead(ctx, request)
 
-        handleHttpRequestHead(ctx, request)
-      } else {
-        // HttpContent can be LastHttpContent (see below)
-        if (env != null && msg.isInstanceOf[HttpContent])
-          handleHttpRequestContent(ctx, msg.asInstanceOf[HttpContent])
+        case _ =>
+          // HttpContent can be LastHttpContent (see below)
+          if (env != null && msg.isInstanceOf[HttpContent])
+            handleHttpRequestContent(ctx, msg.asInstanceOf[HttpContent])
 
-        // LastHttpContent is a HttpContent.
-        // env may be set to null at handleHttpRequestContent above, when
-        // closeOnBigRequest is called.
-        if (env != null && msg.isInstanceOf[LastHttpContent]) {
-          if (isAPPLICATION_JSON(env.request)) parseTextParamsFromJson(env)
-          sendUpstream(ctx)
-        }
+          // LastHttpContent is a HttpContent.
+          // env may be set to null at handleHttpRequestContent above, when
+          // closeOnBigRequest is called.
+          if (env != null && msg.isInstanceOf[LastHttpContent]) {
+            if (isAPPLICATION_JSON(env.request)) parseTextParamsFromJson(env)
+            sendUpstream(ctx)
+          }
       }
     } catch {
       case NonFatal(e) =>
@@ -124,8 +124,8 @@ class Request2Env extends SimpleChannelInboundHandler[HttpObject] {
     // so one handler instance may be used to handle multiple requests
     if (env != null) env.release()
 
-    val method       = request.getMethod
-    val bodyToDecode = (method == POST || method == PUT || method == PATCH)
+    val method       = request.method
+    val bodyToDecode = method == POST || method == PUT || method == PATCH
     var responded400 = false
     val bodyDecoder  =
       if (bodyToDecode && isAPPLICATION_X_WWW_FORM_URLENCODED_or_MULTIPART_FORM_DATA(request)){
@@ -176,7 +176,7 @@ class Request2Env extends SimpleChannelInboundHandler[HttpObject] {
   //----------------------------------------------------------------------------
 
   private def createEmptyFullHttpRequest(request: HttpRequest): FullHttpRequest = {
-    val ret = new DefaultFullHttpRequest(request.getProtocolVersion, request.getMethod, request.getUri)
+    val ret = new DefaultFullHttpRequest(request.protocolVersion, request.method, request.uri)
     ret.headers.set(request.headers)
     ret
   }
@@ -192,25 +192,25 @@ class Request2Env extends SimpleChannelInboundHandler[HttpObject] {
     // Unless the Connection: keep-alive header is present in the HTTP response,
     // apache benchmark (ab) hangs on keep alive connections
     // https://github.com/veebs/netty/commit/64f529945282e41eb475952fde382f234da8eec7
-    if (HttpHeaders.isKeepAlive(request))
-      HttpHeaders.setHeader(ret, HttpHeaders.Names.CONNECTION, HttpHeaders.Values.KEEP_ALIVE)
+    if (HttpUtil.isKeepAlive(request))
+      ret.headers.set(HttpHeaderNames.CONNECTION, HttpHeaderValues.KEEP_ALIVE)
 
     ret
   }
 
   private def isAPPLICATION_X_WWW_FORM_URLENCODED_or_MULTIPART_FORM_DATA(request: HttpRequest): Boolean = {
-    val requestContentType = HttpHeaders.getHeader(request, HttpHeaders.Names.CONTENT_TYPE)
+    val requestContentType = request.headers.get(HttpHeaderNames.CONTENT_TYPE)
     if (requestContentType == null) return false
 
     val requestContentTypeLowerCase = requestContentType.toLowerCase
-    requestContentTypeLowerCase.startsWith(HttpHeaders.Values.APPLICATION_X_WWW_FORM_URLENCODED) ||
-    requestContentTypeLowerCase.startsWith(HttpHeaders.Values.MULTIPART_FORM_DATA)
+    requestContentTypeLowerCase.startsWith(HttpHeaderValues.APPLICATION_X_WWW_FORM_URLENCODED.toString) ||
+    requestContentTypeLowerCase.startsWith(HttpHeaderValues.MULTIPART_FORM_DATA.toString)
   }
 
   private def readHttpDataChunkByChunk(): Boolean = {
     try {
       var sizeOk = true
-      while (sizeOk && env.bodyDecoder.hasNext()) {
+      while (sizeOk && env.bodyDecoder.hasNext) {
         val data = env.bodyDecoder.next()
         if (data != null) {
           sizeOk = checkHttpDataSize(data)
@@ -305,7 +305,7 @@ class Request2Env extends SimpleChannelInboundHandler[HttpObject] {
   }
 
   private def isAPPLICATION_JSON(request: HttpRequest): Boolean = {
-    val requestContentType = HttpHeaders.getHeader(request, HttpHeaders.Names.CONTENT_TYPE)
+    val requestContentType = request.headers.get(HttpHeaderNames.CONTENT_TYPE)
     if (requestContentType == null) return false
 
     val requestContentTypeLowerCase = requestContentType.toLowerCase
@@ -335,11 +335,11 @@ class Request2Env extends SimpleChannelInboundHandler[HttpObject] {
 
   private def jValue2String(value: JValue) = value match {
     case JNull | JNothing => "null"
-    case JString(value)   => value
-    case JInt(value)      => value.toString
-    case JDouble(value)   => value.toString
-    case JDecimal(value)  => value.toString
-    case JBool(value)     => value.toString
-    case value            => JsonMethods.compact(value)
+    case JString(v)       => v
+    case JInt(v)          => v.toString
+    case JDouble(v)       => v.toString
+    case JDecimal(v)      => v.toString
+    case JBool(v)         => v.toString
+    case v                => JsonMethods.compact(v)
   }
 }

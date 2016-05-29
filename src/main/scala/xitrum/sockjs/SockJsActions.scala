@@ -6,7 +6,7 @@ import scala.util.control.NonFatal
 
 import io.netty.buffer.Unpooled
 import io.netty.channel.{ChannelFuture, ChannelFutureListener}
-import io.netty.handler.codec.http.{HttpHeaders, HttpResponseStatus}
+import io.netty.handler.codec.http.{HttpHeaderNames, HttpHeaderValues, HttpResponseStatus, HttpUtil}
 import io.netty.handler.codec.http.cookie.DefaultCookie
 
 import akka.actor.{ActorRef, Props, ReceiveTimeout, Terminated}
@@ -71,7 +71,7 @@ object SockJsAction {
 
   private[this] val random = new Random(System.currentTimeMillis())
 
-  /** 0 to 2^32 - 1 */
+  /** `0 to 2^32 - 1` */
   def entropy() = random.nextInt().abs
 
   //----------------------------------------------------------------------------
@@ -156,7 +156,7 @@ trait ServerIdSessionIdValidator extends Action {
   // (placeholder in URL can't be empty, no need to check)
   beforeFilter {
     if (pathParams.contains("serverId") || pathParams.contains("sessionId")) {
-      val noDots = pathParams("serverId")(0).indexOf('.') < 0 && pathParams("sessionId")(0).indexOf('.') < 0
+      val noDots = pathParams("serverId").head.indexOf('.') < 0 && pathParams("sessionId").head.indexOf('.') < 0
       if (!noDots) {
         response.setStatus(HttpResponseStatus.NOT_FOUND)
         respondText("")
@@ -246,7 +246,7 @@ trait NonWebSocketSessionActorAction extends ActorAction with SockJsAction {
     }
 
     index_handler.foreach { case (index, handler) =>
-      NotificationToHandlerUtil.onComplete(f, index, handler, false)
+      NotificationToHandlerUtil.onComplete(f, index, handler, write = false)
     }
 
     ret
@@ -255,7 +255,7 @@ trait NonWebSocketSessionActorAction extends ActorAction with SockJsAction {
   protected def closeWithLastChunk(index_handler: Option[(Int, ActorRef)] = None) {
     val f = respondLastChunk().addListener(ChannelFutureListener.CLOSE)
     index_handler.foreach { case (index, handler) =>
-      NotificationToHandlerUtil.onComplete(f, index, handler, false)
+      NotificationToHandlerUtil.onComplete(f, index, handler, write = false)
     }
   }
 }
@@ -445,7 +445,7 @@ class XhrSend extends NonWebSocketSessionActorAction with SkipCsrfCheck {
           case Registry.Found(`sessionId`, nonWebSocketSession) =>
             nonWebSocketSession ! MessagesFromSenderClient(messages)
             response.setStatus(HttpResponseStatus.NO_CONTENT)
-            HttpHeaders.setHeader(response, HttpHeaders.Names.CONTENT_TYPE, "text/plain; charset=UTF-8")
+            response.headers.set(HttpHeaderNames.CONTENT_TYPE, "text/plain; charset=UTF-8")
             respond()
         }
     }
@@ -463,8 +463,8 @@ class XhrStreamingReceive extends NonWebSocketSessionReceiverActorAction with Sk
     setNoClientCache()
 
     // There's always 2KB prelude, even for immediate close frame
-    HttpHeaders.setTransferEncodingChunked(response)
-    HttpHeaders.setHeader(response, HttpHeaders.Names.CONTENT_TYPE, "application/javascript; charset=" + Config.xitrum.request.charset)
+    HttpUtil.setTransferEncodingChunked(response, true)
+    response.headers.set(HttpHeaderNames.CONTENT_TYPE, "application/javascript; charset=" + Config.xitrum.request.charset)
     respondBinary(Unpooled.wrappedBuffer(SockJsAction.H2K))
 
     lookupOrCreateNonWebSocketSessionActor(sessionId)
@@ -549,8 +549,8 @@ class HtmlFileReceive extends NonWebSocketSessionReceiverActorAction {
 
   protected def onLookupOrRecreateResult(newlyCreated: Boolean) {
     if (newlyCreated) {
-      HttpHeaders.setTransferEncodingChunked(response)
-      respondHtml(SockJsAction.htmlFile(callback, true))
+      HttpUtil.setTransferEncodingChunked(response, true)
+      respondHtml(SockJsAction.htmlFile(callback, with1KSpaces = true))
       respondText("<script>\np(\"o\");\n</script>\r\n")
       context.become(receiveNotification)
     } else {
@@ -562,14 +562,14 @@ class HtmlFileReceive extends NonWebSocketSessionReceiverActorAction {
   private def receiveSubscribeResult: Receive = {
     case SubscribeResultToReceiverClientAnotherConnectionStillOpen =>
       respondHtml(
-        SockJsAction.htmlFile(callback, false) +
+        SockJsAction.htmlFile(callback, with1KSpaces = false) +
         "<script>\np(\"c[2010,\\\"Another connection still open\\\"]\");\n</script>\r\n"
       )
       .addListener(ChannelFutureListener.CLOSE)
 
     case SubscribeResultToReceiverClientClosed =>
       respondHtml(
-        SockJsAction.htmlFile(callback, false) +
+        SockJsAction.htmlFile(callback, with1KSpaces = false) +
         "<script>\np(\"c[3000,\\\"Go away!\\\"]\");\n</script>\r\n"
       )
       .addListener(ChannelFutureListener.CLOSE)
@@ -581,19 +581,19 @@ class HtmlFileReceive extends NonWebSocketSessionReceiverActorAction {
       buffer.append("<script>\np(\"a")
       buffer.append(jsEscape(quoted))
       buffer.append("\");\n</script>\r\n")
-      HttpHeaders.setTransferEncodingChunked(response)
-      respondHtml(SockJsAction.htmlFile(callback, true))
+      HttpUtil.setTransferEncodingChunked(response, true)
+      respondHtml(SockJsAction.htmlFile(callback, with1KSpaces = true))
       if (respondStreamingWithLimit(buffer.toString))
         context.become(receiveNotification)
 
     case SubscribeResultToReceiverClientWaitForMessage =>
-      HttpHeaders.setTransferEncodingChunked(response)
-      respondHtml(SockJsAction.htmlFile(callback, true))
+      HttpUtil.setTransferEncodingChunked(response, true)
+      respondHtml(SockJsAction.htmlFile(callback, with1KSpaces = true))
       context.become(receiveNotification)
 
     case Terminated(actorRef) if actorRef == nonWebSocketSession =>
       respondHtml(
-        SockJsAction.htmlFile(callback, false) +
+        SockJsAction.htmlFile(callback, with1KSpaces = false) +
         "<script>\np(\"c[2011,\\\"Server error\\\"]\");\n</script>\r\n"
       )
       .addListener(ChannelFutureListener.CLOSE)
@@ -719,8 +719,8 @@ class JsonPPollingSend extends NonWebSocketSessionActorAction with SkipCsrfCheck
 
   def execute() {
     val body: String = try {
-      val contentType = HttpHeaders.getHeader(request, HttpHeaders.Names.CONTENT_TYPE)
-      if (contentType != null && contentType.toLowerCase.startsWith(HttpHeaders.Values.APPLICATION_X_WWW_FORM_URLENCODED)) {
+      val contentType = request.headers.get(HttpHeaderNames.CONTENT_TYPE)
+      if (contentType != null && contentType.toLowerCase.startsWith(HttpHeaderValues.APPLICATION_X_WWW_FORM_URLENCODED.toString)) {
         param("d")
       } else {
         request.content.toString(Config.xitrum.request.charset)
@@ -846,7 +846,7 @@ class WebSocketPOST extends SockJsAction with SkipCsrfCheck {
 
   def execute() {
     response.setStatus(HttpResponseStatus.METHOD_NOT_ALLOWED)
-    HttpHeaders.setHeader(response, HttpHeaders.Names.ALLOW, "GET")
+    response.headers.set(HttpHeaderNames.ALLOW, "GET")
     respond()
   }
 }
@@ -926,10 +926,10 @@ class RawWebSocket extends WebSocketAction with ServerIdSessionIdValidator with 
         sockJsActorRef ! SockJsText(text)
 
       case MessageFromHandler(index, text) =>
-        NotificationToHandlerUtil.onComplete(respondWebSocketText(text), index, sockJsActorRef, true)
+        NotificationToHandlerUtil.onComplete(respondWebSocketText(text), index, sockJsActorRef, write = true)
 
       case CloseFromHandler(index) =>
-        NotificationToHandlerUtil.onComplete(respondWebSocketClose(), index, sockJsActorRef, false)
+        NotificationToHandlerUtil.onComplete(respondWebSocketClose(), index, sockJsActorRef, write = false)
     }
   }
 

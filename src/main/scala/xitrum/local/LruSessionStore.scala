@@ -1,7 +1,5 @@
 package xitrum.local
 
-import scala.collection.mutable.{Map => MMap}
-
 import xitrum.Config
 import xitrum.scope.session.ServerSessionStore
 import xitrum.util.LocalLruCache

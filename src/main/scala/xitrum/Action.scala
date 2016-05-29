@@ -80,10 +80,10 @@ trait Action extends RequestEnv
     var hit            = false
 
     try {
-      if ((request.getMethod == HttpMethod.POST ||
-           request.getMethod == HttpMethod.PUT ||
-           request.getMethod == HttpMethod.PATCH ||
-           request.getMethod == HttpMethod.DELETE) &&
+      if ((request.method == HttpMethod.POST ||
+           request.method == HttpMethod.PUT ||
+           request.method == HttpMethod.PATCH ||
+           request.method == HttpMethod.DELETE) &&
           !isInstanceOf[SkipCsrfCheck] &&
           !Csrf.isValidToken(this)) throw new InvalidAntiCsrfToken
 
@@ -115,15 +115,16 @@ trait Action extends RequestEnv
       case NonFatal(e) if e.isInstanceOf[InvalidAntiCsrfToken] || e.isInstanceOf[MissingParam] || e.isInstanceOf[InvalidInput] =>
         // These exceptions are special cases:
         // We know that the exception is caused by the client (bad request)
-        val msg = if (e.isInstanceOf[InvalidAntiCsrfToken]) {
-          session.clear()
-          "Session expired. Please refresh your browser."
-        } else if (e.isInstanceOf[MissingParam]) {
-          val mp  = e.asInstanceOf[MissingParam]
-          "Missing param: " + mp.key
-        } else {
-          val ve = e.asInstanceOf[InvalidInput]
-          "Validation error: " + ve.message
+        val msg = e match {
+          case invalidAntiCsrfToken: InvalidAntiCsrfToken =>
+            session.clear()
+            "Session expired. Please refresh your browser."
+
+          case missingParam: MissingParam =>
+            "Missing param: " + missingParam.key
+
+          case invalidInput: InvalidInput =>
+            "Validation error: " + invalidInput.message
         }
 
         response.setStatus(HttpResponseStatus.BAD_REQUEST)
@@ -132,7 +133,7 @@ trait Action extends RequestEnv
         else
           respondText(msg)
 
-        AccessLog.logActionAccess(this, beginTimestamp, 0, false)
+        AccessLog.logActionAccess(this, beginTimestamp, 0, hit = false)
 
       case NonFatal(e) =>
         if (!isDoneResponding) {
@@ -158,7 +159,7 @@ trait Action extends RequestEnv
               respondText(errorMsg)
           }
         }
-        AccessLog.logActionAccess(this, beginTimestamp, 0, false, e)
+        AccessLog.logActionAccess(this, beginTimestamp, 0, hit = false, e)
     }
   }
 
@@ -169,8 +170,8 @@ trait Action extends RequestEnv
         f  // Execute f
         false
 
-      case Some(response) =>
-        val future = channel.writeAndFlush(response)
+      case Some(cachedResponse) =>
+        val future = channel.writeAndFlush(cachedResponse)
         NoRealPipelining.if_keepAliveRequest_then_resumeReading_else_closeOnComplete(request, channel, future)
         handlerEnv.release()
         true

@@ -23,12 +23,12 @@ import xitrum.util.PathSanitizer
 class PublicFileServer extends SimpleChannelInboundHandler[HandlerEnv] {
   override def channelRead0(ctx: ChannelHandlerContext, env: HandlerEnv) {
     val request = env.request
-    if (request.getMethod != GET && request.getMethod != HEAD && request.getMethod != OPTIONS) {
+    if (request.method != GET && request.method != HEAD && request.method != OPTIONS) {
       ctx.fireChannelRead(env)
       return
     }
 
-    val pathInfo = request.getUri.split('?')(0)
+    val pathInfo = request.uri.split('?')(0)
     if (Config.xitrum.staticFile.pathRegex.findFirstIn(pathInfo).isEmpty) {
       ctx.fireChannelRead(env)
       return
@@ -37,20 +37,20 @@ class PublicFileServer extends SimpleChannelInboundHandler[HandlerEnv] {
     val response = env.response
     sanitizedAbsStaticPath(pathInfo) match {
       case None =>
-        XSendFile.set404Page(response, false)
+        XSendFile.set404Page(response, fromController = false)
         ctx.channel.writeAndFlush(env)
 
       case Some(abs) =>
         val file = new File(abs)
         if (file.isFile && file.exists) {
           response.setStatus(OK)
-          if (request.getMethod == OPTIONS) {
+          if (request.method == OPTIONS) {
             ctx.channel.writeAndFlush(env)
           } else {
             if (!Config.xitrum.staticFile.revalidate)
               NotModified.setClientCacheAggressively(response)
 
-            XSendFile.setHeader(response, abs, false)
+            XSendFile.setHeader(response, abs, fromAction = false)
             ctx.channel.writeAndFlush(env)
           }
         } else {
@@ -63,7 +63,6 @@ class PublicFileServer extends SimpleChannelInboundHandler[HandlerEnv] {
    * Sanitizes and returns absolute path.
    *
    * @param pathInfo Starts with "/"
-   * @param prefixo  Starts and stops with "/", like "/static/", if any
    */
   private def sanitizedAbsStaticPath(pathInfo: String): Option[String] = {
     PathSanitizer.sanitize(pathInfo).map { path =>

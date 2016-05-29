@@ -29,7 +29,7 @@ object SeriDeseri {
       val t = kryoPool.fromBytes(bytes, m.runtimeClass.asInstanceOf[Class[T]])
       Option(t)
     } catch {
-      case NonFatal(e) => None
+      case NonFatal(_) => None
     }
   }
 
@@ -83,11 +83,11 @@ object SeriDeseri {
         else
           None
       } catch {
-        case NonFatal(e) =>
+        case NonFatal(_) =>
           try {
             Some(jvalue.extract[T](DefaultFormats, m))
           } catch {
-            case NonFatal(e) =>
+            case NonFatal(_) =>
               None
           }
       }
@@ -95,7 +95,7 @@ object SeriDeseri {
       try {
         Some(jvalue.extract[T](DefaultFormats, m))
       } catch {
-        case NonFatal(e) =>
+        case NonFatal(_) =>
           try {
             val any = jvalue.values
             if (m.runtimeClass.isAssignableFrom(any.getClass))
@@ -103,7 +103,7 @@ object SeriDeseri {
             else
               None
           } catch {
-            case NonFatal(e) =>
+            case NonFatal(_) =>
               None
           }
       }

@@ -20,7 +20,7 @@ object FileMonitor {
 
   def monitor(event: WatchEvent.Kind[Path], path: Path, callbacks: Callback*) {
     callbacks.foreach { cb =>
-      fileMonitorActor ! RegisterCallback(event, HIGH, false, path, cb)
+      fileMonitorActor ! RegisterCallback(event, HIGH, recursive = false, path, cb)
     }
   }
 

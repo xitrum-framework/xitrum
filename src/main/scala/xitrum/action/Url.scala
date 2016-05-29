@@ -4,7 +4,6 @@ import scala.util.Random
 
 import xitrum.{Config, Action, SockJsAction, WebSocketAction}
 import xitrum.etag.Etag
-import xitrum.handler.inbound.PublicFileServer
 
 trait Url {
   this: Action =>
@@ -25,7 +24,7 @@ trait Url {
   // http://example.com/ws
   // but the response URL here is
   // ws://example.com:80/ws
-  lazy val webSocketAbsRequestUrl = webSocketAbsUrlPrefix + request.getUri
+  lazy val webSocketAbsRequestUrl = webSocketAbsUrlPrefix + request.uri
 
   //----------------------------------------------------------------------------
 
@@ -36,7 +35,7 @@ trait Url {
    */
   def publicUrl(path: String): String = {
     val absPath     = xitrum.root + "/public/" + path
-    val forceReload = Etag.forFile(absPath, None, true) match {
+    val forceReload = Etag.forFile(absPath, None, gzipped = true) match {
       case Etag.NotFound                           => Random.nextLong.toString
       case Etag.TooBig(file, mimeo)                => file.lastModified
       case Etag.Small(bytes, etag, mimeo, gzipped) => etag

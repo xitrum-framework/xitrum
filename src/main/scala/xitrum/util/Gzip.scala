@@ -4,8 +4,8 @@ import java.io.{ByteArrayInputStream, ByteArrayOutputStream}
 import java.util.zip.{GZIPInputStream, GZIPOutputStream}
 
 import io.netty.buffer.{CompositeByteBuf, Unpooled}
-import io.netty.handler.codec.http.{HttpHeaders, HttpRequest, FullHttpResponse}
-import HttpHeaders.Names.{ACCEPT_ENCODING, CONTENT_ENCODING, CONTENT_TYPE}
+import io.netty.handler.codec.http.{HttpHeaderNames, HttpRequest, HttpUtil, FullHttpResponse}
+import HttpHeaderNames.{ACCEPT_ENCODING, CONTENT_ENCODING, CONTENT_TYPE}
 
 import xitrum.Config
 
@@ -57,7 +57,7 @@ object Gzip {
 
   def isAccepted(request: HttpRequest) = {
     if (Config.xitrum.response.autoGzip) {
-      val acceptEncoding = HttpHeaders.getHeader(request, ACCEPT_ENCODING)
+      val acceptEncoding = request.headers.get(ACCEPT_ENCODING)
       acceptEncoding != null && acceptEncoding.contains("gzip")
     } else {
       false
@@ -80,7 +80,7 @@ object Gzip {
 
     if (!gzipAccepted ||
         response.headers.contains(CONTENT_ENCODING) ||
-        !Mime.isTextual(HttpHeaders.getHeader(response, CONTENT_TYPE)) ||
+        !Mime.isTextual(response.headers.get(CONTENT_TYPE)) ||
         cb.readableBytes < Config.BIG_TEXTUAL_RESPONSE_SIZE_IN_KB * 1024
     ) {
       return if (needBytes) ByteBufUtil.toBytes(cb) else null
@@ -90,8 +90,8 @@ object Gzip {
     val gzippedBytes = compress(bytes)
 
     // Update CONTENT_LENGTH and set CONTENT_ENCODING
-    HttpHeaders.setContentLength(response, gzippedBytes.length)
-    HttpHeaders.setHeader(response, CONTENT_ENCODING, "gzip")
+    HttpUtil.setContentLength(response, gzippedBytes.length)
+    response.headers.set(CONTENT_ENCODING, "gzip")
 
     cb.removeComponents(0, cb.numComponents)
     cb.clear()

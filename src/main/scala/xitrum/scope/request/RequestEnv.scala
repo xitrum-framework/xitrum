@@ -5,7 +5,7 @@ import io.netty.handler.codec.http.multipart.FileUpload
 
 import xitrum.{Config, Action}
 import xitrum.handler.HandlerEnv
-import xitrum.util.{DefaultsTo, SeriDeseri}
+import xitrum.util.SeriDeseri
 
 object RequestEnv {
   def inspectParamsWithFilter(params: MMap[String, _ <: Seq[AnyRef]]): String = {

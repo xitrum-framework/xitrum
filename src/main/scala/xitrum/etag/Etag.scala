@@ -3,8 +3,7 @@ package xitrum.etag
 import java.io.File
 import java.security.MessageDigest
 
-import io.netty.handler.codec.http.{HttpHeaders, HttpRequest, HttpResponse, HttpResponseStatus}
-import HttpHeaders.Names._
+import io.netty.handler.codec.http.{HttpHeaderNames, HttpRequest, HttpResponse, HttpResponseStatus}
 import HttpResponseStatus._
 
 import xitrum.{Action, Config}
@@ -24,7 +23,7 @@ object Etag {
   def quote(etag: String) = "\"" + etag + "\""
 
   def set(response: HttpResponse, etag: String) {
-    HttpHeaders.setHeader(response, ETAG, Etag.quote(etag))
+    response.headers.set(HttpHeaderNames.ETAG, Etag.quote(etag))
   }
 
   def forBytes(bytes: Array[Byte]): String = {
@@ -52,7 +51,7 @@ object Etag {
     if (bytes == null) return NotFound
 
     val etag    = forBytes(bytes)
-    val small   = Small(bytes, etag, mimeo orElse Mime.get(path), false)
+    val small   = Small(bytes, etag, mimeo orElse Mime.get(path), gzipped = false)
     val smaller = if (gzipped) compressBigTextualFile(small) else small
     cache.synchronized { cache.put(key, smaller) }
     smaller
@@ -81,7 +80,7 @@ object Etag {
   //----------------------------------------------------------------------------
 
   def areEtagsIdentical(request: HttpRequest, etag: String) =
-    (HttpHeaders.getHeader(request, IF_NONE_MATCH) == quote(etag))
+    request.headers.get(HttpHeaderNames.IF_NONE_MATCH) == quote(etag)
 
   /** @return true if NOT_MODIFIED response has been sent */
   def respondIfEtagsIdentical(action: Action, etag: String) = {

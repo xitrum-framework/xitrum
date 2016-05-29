@@ -18,7 +18,7 @@ class UriParser extends SimpleChannelInboundHandler[HandlerEnv] {
     val request = env.request
 
     try {
-      val decoder = new QueryStringDecoder(request.getUri, Config.xitrum.request.charset)
+      val decoder = new QueryStringDecoder(request.uri, Config.xitrum.request.charset)
       val path    = decoder.path
 
       // Treat "articles" and "articles/" the same
@@ -33,7 +33,7 @@ class UriParser extends SimpleChannelInboundHandler[HandlerEnv] {
       ctx.fireChannelRead(env)
     } catch {
       case NonFatal(e) =>
-        val msg = "Could not parse query params URI: " + request.getUri
+        val msg = "Could not parse query params URI: " + request.uri
         Log.warn(msg, e)
         // https://github.com/xitrum-framework/xitrum/issues/508#issuecomment-72808997
         // Do not close channel without responding status code.

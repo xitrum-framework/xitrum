@@ -1,8 +1,7 @@
 package xitrum
 
 import scala.util.control.NonFatal
-import io.netty.handler.codec.http.HttpHeaders
-import HttpHeaders.Names
+import io.netty.handler.codec.http.HttpHeaderNames
 
 import xitrum.i18n.PoLoader
 
@@ -22,7 +21,7 @@ trait I18n {
 
   /** @return List of languages sorted by priority from high to low */
   lazy val browserLanguages: Array[String] = {
-    val header = HttpHeaders.getHeader(request, Names.ACCEPT_LANGUAGE)
+    val header = request.headers.get(HttpHeaderNames.ACCEPT_LANGUAGE)
     if (header == null) {
       Array()
     } else {

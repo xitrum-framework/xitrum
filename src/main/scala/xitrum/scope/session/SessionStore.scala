@@ -1,7 +1,5 @@
 package xitrum.scope.session
 
-import xitrum.scope.request.RequestEnv
-
 trait SessionStore {
   def start()
   def stop()

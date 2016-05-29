@@ -1,7 +1,5 @@
 package xitrum.params
 
-import scala.reflect.runtime.universe
-
 import org.json4s._
 import org.json4s.jackson.Serialization
 import org.json4s.jackson.Serialization.read
@@ -9,7 +7,7 @@ import org.scalatest._
 
 import com.m3.curly.scala._
 
-import io.netty.handler.codec.http.HttpHeaders
+import io.netty.handler.codec.http.{HttpHeaderNames, HttpHeaderValues}
 
 import xitrum.Action
 import xitrum.Server
@@ -24,7 +22,7 @@ case class ParamsPayloadResponse(key: Int, keys: Seq[Int], locale: String, optio
 @GET("/test/params/path/:path")
 @POST("/test/params/path/:path")
 class ParamsPathTestAction extends Action with SkipCsrfCheck {
-  def execute {
+  def execute() {
     respondJson(ParamsPathResponse(param("path")))
   }
 }
@@ -32,7 +30,7 @@ class ParamsPathTestAction extends Action with SkipCsrfCheck {
 @GET("test/params/query")
 @POST("test/params/query")
 class ParamsQueryTestAction extends Action with SkipCsrfCheck {
-  def execute {
+  def execute() {
     val key = param[Int]("key")
     val keys = params[Int]("keys")
 
@@ -42,7 +40,7 @@ class ParamsQueryTestAction extends Action with SkipCsrfCheck {
 
 @POST("test/params/payload")
 class ParamsPayloadTestAction extends Action with SkipCsrfCheck {
-  def execute {
+  def execute() {
     val key = param[Int]("key")
     val keys = params[Int]("keys")
     val locale = param[String]("locale")
@@ -88,16 +86,21 @@ class ParamsTest extends FlatSpec with Matchers with BeforeAndAfter {
 
   "[POST] param" should "extract values from application/x-www-form-urlencoded payload" in {
     val request = Request(s"$base/test/params/payload")
-      .header(HttpHeaders.Names.CONTENT_TYPE, HttpHeaders.Values.APPLICATION_X_WWW_FORM_URLENCODED)
-      .body("key=1&keys=2&keys=3&locale=ru-RU&optional=value".getBytes,
-        HttpHeaders.Values.APPLICATION_X_WWW_FORM_URLENCODED)
+      .header(
+        HttpHeaderNames.CONTENT_TYPE.toString,
+        HttpHeaderValues.APPLICATION_X_WWW_FORM_URLENCODED.toString
+      )
+      .body(
+        "key=1&keys=2&keys=3&locale=ru-RU&optional=value".getBytes,
+        HttpHeaderValues.APPLICATION_X_WWW_FORM_URLENCODED.toString
+      )
     val response = HTTP.post(request)
     shouldEqual(response, ParamsPayloadResponse(1, Seq(2, 3), "ru-RU", Some("value")))
   }
 
   "[POST] param" should "extract values from application/json payload" in {
     val request = Request(s"$base/test/params/payload")
-      .header(HttpHeaders.Names.CONTENT_TYPE, "application/json")
+      .header(HttpHeaderNames.CONTENT_TYPE.toString, "application/json")
       .body("""{"key": 1, "keys": [2, 3], "locale": "ru-RU", "optional": "value"}""".getBytes,
         "application/json")
     val response = HTTP.post(request)
@@ -110,6 +113,6 @@ class ParamsTest extends FlatSpec with Matchers with BeforeAndAfter {
     }
     
     response.status should equal(200)
-    read[T](response.textBody) shouldEqual (expected)
+    read[T](response.textBody) shouldEqual expected
   }
 }

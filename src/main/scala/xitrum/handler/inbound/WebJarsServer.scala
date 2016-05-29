@@ -21,12 +21,12 @@ import xitrum.util.PathSanitizer
 class WebJarsServer extends SimpleChannelInboundHandler[HandlerEnv] {
   override def channelRead0(ctx: ChannelHandlerContext, env: HandlerEnv) {
     val request = env.request
-    if (request.getMethod != GET && request.getMethod != HEAD && request.getMethod != OPTIONS) {
+    if (request.method != GET && request.method != HEAD && request.method != OPTIONS) {
       ctx.fireChannelRead(env)
       return
     }
 
-    val pathInfo = request.getUri.split('?')(0)
+    val pathInfo = request.uri.split('?')(0)
     if (!pathInfo.startsWith("/webjars/")) {
       ctx.fireChannelRead(env)
       return
@@ -35,7 +35,7 @@ class WebJarsServer extends SimpleChannelInboundHandler[HandlerEnv] {
     val response = env.response
     PathSanitizer.sanitize(pathInfo) match {
       case None =>
-        XSendFile.set404Page(response, false)
+        XSendFile.set404Page(response, fromController = false)
         ctx.channel.writeAndFlush(env)
 
       case Some(path) =>
@@ -54,7 +54,7 @@ class WebJarsServer extends SimpleChannelInboundHandler[HandlerEnv] {
             if (is.available() > 0) {
               response.setStatus(OK)
               NotModified.setClientCacheAggressively(response)
-              XSendResource.setHeader(response, resourcePath, false)
+              XSendResource.setHeader(response, resourcePath, fromController = false)
               ctx.channel.writeAndFlush(env)
             } else {
               ctx.fireChannelRead(env)

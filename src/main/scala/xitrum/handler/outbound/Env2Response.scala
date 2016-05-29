@@ -1,11 +1,8 @@
 package xitrum.handler.outbound
 
 import io.netty.channel.{ChannelHandler, ChannelHandlerContext, ChannelOutboundHandlerAdapter, ChannelPromise}
-import io.netty.handler.codec.http.{DefaultHttpResponse, HttpHeaders, HttpMethod, HttpRequest, FullHttpResponse, HttpResponseStatus, HttpVersion}
+import io.netty.handler.codec.http.{DefaultHttpResponse, HttpHeaderNames, HttpMethod, HttpRequest, FullHttpResponse, HttpResponseStatus, HttpUtil, HttpVersion}
 import ChannelHandler.Sharable
-import HttpHeaders.Names._
-import HttpMethod._
-import HttpResponseStatus._
 
 import xitrum.{Config, Log}
 import xitrum.etag.Etag
@@ -25,29 +22,29 @@ class Env2Response extends ChannelOutboundHandlerAdapter {
     val response = env.response
 
     val xsendfile = XSendFile.isHeaderSet(response)
-    val chunked   = HttpHeaders.isTransferEncodingChunked(response)
+    val chunked   = HttpUtil.isTransferEncodingChunked(response)
 
     if (xsendfile) XSendFile.removeHeaders(response)
 
     // For HEAD or OPTIONS response, Content-Length header may be > 0 even when
     // the content is empty (see below)
-    if (!chunked && !HttpHeaders.isContentLengthSet(response))
-      HttpHeaders.setContentLength(response, response.content.readableBytes)
+    if (!chunked && !HttpUtil.isContentLengthSet(response))
+      HttpUtil.setContentLength(response, response.content.readableBytes)
 
-    if ((request.getMethod == HEAD || request.getMethod == OPTIONS) && response.getStatus == OK)
+    if ((request.method == HttpMethod.HEAD || request.method == HttpMethod.OPTIONS) && response.status == HttpResponseStatus.OK)
       // http://stackoverflow.com/questions/3854842/content-length-header-with-head-requests
       response.content.clear()
     else if (!tryEtag(request, response))
-      Gzip.tryCompressBigTextualResponse(Gzip.isAccepted(request), response, false)
+      Gzip.tryCompressBigTextualResponse(Gzip.isAccepted(request), response, needBytes = false)
 
     // The status may be set to NOT_MODIFIED by tryEtag above
-    val notModified = response.getStatus == NOT_MODIFIED
+    val notModified = response.status == HttpResponseStatus.NOT_MODIFIED
 
     // 304 responses should not include Content-Type or Content-Length
     // http://sockjs.github.com/sockjs-protocol/sockjs-protocol-0.3.3.html#section-25
     // https://groups.google.com/forum/#!topic/python-tornado/-P_enYKAwrY
-    if (notModified || chunked) HttpHeaders.removeHeader(response, CONTENT_LENGTH)
-    if (notModified)            HttpHeaders.removeHeader(response, CONTENT_TYPE)
+    if (notModified || chunked) response.headers.remove(HttpHeaderNames.CONTENT_LENGTH)
+    if (notModified)            response.headers.remove(HttpHeaderNames.CONTENT_TYPE)
 
     // For the following cases, we can't just send "response" because it's a
     // FullHttpResponse, we need to send HttpResponse:
@@ -55,7 +52,7 @@ class Env2Response extends ChannelOutboundHandlerAdapter {
     //   body will be sent by XSendFile handler
     // * chunked response
     if (xsendfile || chunked) {
-      val onlyHeaders = new DefaultHttpResponse(response.getProtocolVersion, response.getStatus)
+      val onlyHeaders = new DefaultHttpResponse(response.protocolVersion, response.status)
       onlyHeaders.headers.set(response.headers)
 
       // TRANSFER_ENCODING header is not allowed in HTTP/1.0 response:
@@ -63,8 +60,8 @@ class Env2Response extends ChannelOutboundHandlerAdapter {
       //
       // The header in the original response is a mark telling the response is chunked.
       // It should not be removed from the original response.
-      if (request.getProtocolVersion.compareTo(HttpVersion.HTTP_1_0) == 0)
-        HttpHeaders.removeTransferEncodingChunked(onlyHeaders)
+      if (request.protocolVersion.compareTo(HttpVersion.HTTP_1_0) == 0)
+        HttpUtil.setTransferEncodingChunked(onlyHeaders, false)
 
       ctx.write(onlyHeaders, promise)
     } else {
@@ -94,28 +91,28 @@ class Env2Response extends ChannelOutboundHandlerAdapter {
    * e.g. not for static file (has alredy been handled and does not go through
    * this handler) or X-SendFile response (empty dynamic response).
    *
-   * If HttpHeaders.getContentLength(response) != response.content.readableBytes,
+   * If HttpUtil.getContentLength(response) != response.content.readableBytes,
    * it is because the response is sent in async mode.
    *
    * @return true if the NO_MODIFIED response is set by this method
    */
   private def tryEtag(request: HttpRequest, response: FullHttpResponse): Boolean = {
-    if (response.getStatus == NOT_MODIFIED)
+    if (response.status == HttpResponseStatus.NOT_MODIFIED)
       return true
 
-    if (response.getStatus != OK)
+    if (response.status != HttpResponseStatus.OK)
       return false
 
-    if (response.headers.contains(CACHE_CONTROL) &&
-        HttpHeaders.getHeader(response, CACHE_CONTROL).toLowerCase.contains("no-cache"))
+    if (response.headers.contains(HttpHeaderNames.CACHE_CONTROL) &&
+      response.headers.get(HttpHeaderNames.CACHE_CONTROL).equalsIgnoreCase("no-cache"))
       return false
 
-    val contentLengthInHeader = HttpHeaders.getContentLength(response, 0)
+    val contentLengthInHeader = HttpUtil.getContentLength(response, 0)
     val byteBuf               = response.content
     if (contentLengthInHeader == 0 || contentLengthInHeader != byteBuf.readableBytes) return false
 
     // No need to calculate ETag if it has been set, e.g. by the controller
-    val etag1 = HttpHeaders.getHeader(response, ETAG)
+    val etag1 = response.headers.get(HttpHeaderNames.ETAG)
     if (etag1 != null) {
       compareAndSetETag(request, response, etag1)
     } else {
@@ -129,7 +126,7 @@ class Env2Response extends ChannelOutboundHandlerAdapter {
 
   private def compareAndSetETag(request: HttpRequest, response: FullHttpResponse, etag: String): Boolean = {
     if (Etag.areEtagsIdentical(request, etag)) {
-      response.setStatus(NOT_MODIFIED)
+      response.setStatus(HttpResponseStatus.NOT_MODIFIED)
       response.content.clear()
       true
     } else {

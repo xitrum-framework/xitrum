@@ -2,7 +2,7 @@ package xitrum.handler.inbound
 
 import io.netty.buffer.Unpooled
 import io.netty.channel.{ChannelHandler, SimpleChannelInboundHandler, ChannelHandlerContext}
-import io.netty.handler.codec.http.{HttpHeaders, HttpResponseStatus, FullHttpRequest}
+import io.netty.handler.codec.http.{HttpHeaderNames, HttpResponseStatus, FullHttpRequest}
 import ChannelHandler.Sharable
 
 import xitrum.Config
@@ -28,7 +28,7 @@ object BasicAuth {
   }
 
   private def getUsernameAndPassword(request: FullHttpRequest): Option[(String, String)] = {
-    val authorization = HttpHeaders.getHeader(request, HttpHeaders.Names.AUTHORIZATION)
+    val authorization = request.headers.get(HttpHeaderNames.AUTHORIZATION)
     if (authorization == null || !authorization.startsWith("Basic ")) {
       None
     } else {
@@ -47,11 +47,12 @@ object BasicAuth {
   private def respondBasic(env: HandlerEnv, realm: String) {
     val request  = env.request
     val response = env.response
+    val headers  = response.headers
 
-    HttpHeaders.setHeader(response, HttpHeaders.Names.WWW_AUTHENTICATE, "Basic realm=\"" + realm + "\"")
+    headers.set(HttpHeaderNames.WWW_AUTHENTICATE, "Basic realm=\"" + realm + "\"")
     response.setStatus(HttpResponseStatus.UNAUTHORIZED)
 
-    HttpHeaders.setHeader(response, HttpHeaders.Names.CONTENT_TYPE, "text/plain; charset=" + Config.xitrum.request.charset)
+    headers.set(HttpHeaderNames.CONTENT_TYPE, "text/plain; charset=" + Config.xitrum.request.charset)
     ByteBufUtil.writeComposite(
       response.content,
       Unpooled.copiedBuffer("Wrong username or password", Config.xitrum.request.charset)

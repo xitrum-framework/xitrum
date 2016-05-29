@@ -1,7 +1,7 @@
 package xitrum.handler.outbound
 
 import io.netty.channel.{ChannelHandler, ChannelHandlerContext, ChannelOutboundHandlerAdapter, ChannelPromise}
-import io.netty.handler.codec.http.{HttpHeaders, HttpMethod}
+import io.netty.handler.codec.http.{HttpHeaderNames, HttpMethod}
 import ChannelHandler.Sharable
 
 import xitrum.handler.HandlerEnv
@@ -25,7 +25,7 @@ class FixiOS6SafariPOST extends ChannelOutboundHandlerAdapter {
     val request  = env.request
     val response = env.response
 
-    if (request.getMethod == HttpMethod.POST && !response.headers.contains(HttpHeaders.Names.CACHE_CONTROL))
+    if (request.method == HttpMethod.POST && !response.headers.contains(HttpHeaderNames.CACHE_CONTROL))
       NotModified.setNoClientCache(response)
 
     ctx.write(env, promise)

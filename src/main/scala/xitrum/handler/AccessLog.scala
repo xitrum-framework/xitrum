@@ -19,9 +19,9 @@ object AccessLog {
   def logStaticFileAccess(remoteAddress: SocketAddress, request: HttpRequest, response: HttpResponse) {
     Log.info(
       Net.remoteIp(remoteAddress, request) + " " +
-      request.getMethod + " " +
-      request.getUri + " -> " +
-      response.getStatus.code +
+      request.method + " " +
+      request.uri + " -> " +
+      response.status.code +
       " (static file)"
     )
   }
@@ -29,9 +29,9 @@ object AccessLog {
   def logResourceInJarAccess(remoteAddress: SocketAddress, request: HttpRequest, response: HttpResponse) {
     Log.info(
       Net.remoteIp(remoteAddress, request) + " " +
-      request.getMethod + " " +
-      request.getUri + " -> " +
-      response.getStatus.code +
+      request.method + " " +
+      request.uri + " -> " +
+      response.status.code +
       " (JAR resource)"
     )
   }
@@ -45,11 +45,11 @@ object AccessLog {
   }
 
   def logWebSocketAccess(action: Action, beginTimestamp: Long) {
-    Log.info(msgWithTime(action, beginTimestamp) + extraInfo(action, 0, false))
+    Log.info(msgWithTime(action, beginTimestamp) + extraInfo(action, 0, hit = false))
   }
 
   def logOPTIONS(request: HttpRequest) {
-    Log.info("OPTIONS " + request.getUri)
+    Log.info("OPTIONS " + request.uri)
   }
 
   //----------------------------------------------------------------------------
@@ -75,9 +75,9 @@ object AccessLog {
     val b = new StringBuilder
     b.append(action.remoteIp)
     b.append(" ")
-    b.append(action.request.getMethod)
+    b.append(action.request.method)
     b.append(" ")
-    b.append(action.request.getUri)
+    b.append(action.request.uri)
     b.append(" -> ")
     b.append(action.getClass.getName)
     if (env.queryParams.nonEmpty) {
@@ -98,7 +98,7 @@ object AccessLog {
     }
     if (action.isDoneResponding) {
       b.append(" -> ")
-      b.append(action.response.getStatus.code)
+      b.append(action.response.status.code)
     }
     b.append(", ")
     b.append(dt)

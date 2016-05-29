@@ -52,7 +52,7 @@ package object xitrum {
   // This needs to be lazy, see Server#addConfigDirectoryToClasspath
   lazy val Log = LoggerFactory.getLogger(getClass)
 
-  lazy val Metrics = (new InstrumentedBuilder {
+  lazy val Metrics = new InstrumentedBuilder {
     val metricRegistry = MetricsManager.metricRegistry
-  }).metrics
+  }.metrics
 }

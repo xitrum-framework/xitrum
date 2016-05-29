@@ -279,11 +279,13 @@ object Config {
   }
 
   private def findURLClassLoader(cl: ClassLoader): Option[URLClassLoader] = {
-    if (cl.isInstanceOf[URLClassLoader]) {
-      Some(cl.asInstanceOf[URLClassLoader])
-    } else {
-      val parent = cl.getParent
-      if (parent == null) None else findURLClassLoader(parent)
+    cl match {
+      case ucl: URLClassLoader =>
+        Some(ucl)
+
+      case _ =>
+        val parent = cl.getParent
+        if (parent == null) None else findURLClassLoader(parent)
     }
   }
 

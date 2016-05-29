@@ -4,7 +4,7 @@ import scala.collection.immutable.SortedMap
 import scala.collection.mutable.{Map => MMap}
 
 import io.netty.buffer.Unpooled
-import io.netty.handler.codec.http.{DefaultFullHttpResponse, HttpHeaders, FullHttpResponse, HttpResponseStatus, HttpVersion}
+import io.netty.handler.codec.http.{DefaultFullHttpResponse, HttpUtil, FullHttpResponse, HttpResponseStatus, HttpVersion}
 import HttpResponseStatus.OK
 
 import xitrum.Config
@@ -25,8 +25,8 @@ object ResponseCacher {
     // example when the response is served from PublicResourceServer
     route != null &&
     route.cacheSecs != 0 &&
-    response.getStatus == OK &&
-    !HttpHeaders.isTransferEncodingChunked(response)
+    response.status == OK &&
+    !HttpUtil.isTransferEncodingChunked(response)
   }
 
   def cacheResponse(env: HandlerEnv) {
@@ -56,10 +56,10 @@ object ResponseCacher {
   def removeCachedResponse(actionClass: Class[Action], urlParams: Params) {
     val cache = Config.xitrum.cache
 
-    val keyTrue = makeCacheKey(actionClass, urlParams, true)
+    val keyTrue = makeCacheKey(actionClass, urlParams, gzipped = true)
     cache.remove(keyTrue)
 
-    val keyFalse = makeCacheKey(actionClass, urlParams, false)
+    val keyFalse = makeCacheKey(actionClass, urlParams, gzipped = false)
     cache.remove(keyFalse)
   }
 
@@ -80,11 +80,11 @@ object ResponseCacher {
    *   gzipped: Boolean, big textual content is gzipped to save memory
    */
   private def serializeResponse(gzipAccepted: Boolean, response: FullHttpResponse): CachedResponse = {
-    val status = response.getStatus.code
+    val status = response.status.code
 
     // Should be before extracting headers, because the CONTENT_LENGTH header
     // can be updated if the content if gzipped
-    val bytes = Gzip.tryCompressBigTextualResponse(gzipAccepted, response, true)
+    val bytes = Gzip.tryCompressBigTextualResponse(gzipAccepted, response, needBytes = true)
 
     val headers = {
       val list = response.headers.entries  // JList[JMap.Entry[String, String]], JMap.Entry is not Serializable!
@@ -103,7 +103,7 @@ object ResponseCacher {
   private def deserializeToResponse(cachedResponse: CachedResponse): FullHttpResponse = {
     val (status, headers, bytes) = cachedResponse
     val response = new DefaultFullHttpResponse(HttpVersion.HTTP_1_1, HttpResponseStatus.valueOf(status), Unpooled.wrappedBuffer(bytes))
-    for ((k, v) <- headers) HttpHeaders.addHeader(response, k, v)
+    for ((k, v) <- headers) response.headers.add(k, v)
     response
   }
 

@@ -39,7 +39,7 @@ class LruCache extends Cache {
   }
 
   def putIfAbsent(key: Any, value: Any) {
-    if (get(key, false).isEmpty) cache.put(key, (-1, value))
+    if (get(key, removeStale = false).isEmpty) cache.put(key, (-1, value))
   }
 
   def putSecond(key: Any, value: Any, seconds: Int) {

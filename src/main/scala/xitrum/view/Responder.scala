@@ -6,9 +6,10 @@ import io.netty.buffer.{ByteBuf, Unpooled}
 import io.netty.channel.ChannelFuture
 import io.netty.handler.codec.http.{
   DefaultHttpContent, DefaultLastHttpContent,
-  HttpHeaders, HttpResponseStatus, LastHttpContent
+  EmptyHttpHeaders, HttpHeaderNames, HttpHeaders,
+  HttpResponseStatus, HttpUtil, LastHttpContent
 }
-import HttpHeaders.Names.{CONTENT_TYPE, CONTENT_LENGTH}
+import HttpHeaderNames.{CONTENT_TYPE, CONTENT_LENGTH}
 
 import xitrum.{Action, Config}
 import xitrum.etag.NotModified
@@ -50,12 +51,12 @@ trait Responder extends Js with Flash with GetActionClassDefaultsToCurrentAction
     // * If the response is chunked, because respondLastChunk will be handle keep alive
     if (!XSendFile.isHeaderSet(response) &&
         !XSendResource.isHeaderSet(response) &&
-        !HttpHeaders.isTransferEncodingChunked(response)) {
+        !HttpUtil.isTransferEncodingChunked(response)) {
       NoRealPipelining.if_keepAliveRequest_then_resumeReading_else_closeOnComplete(request, channel, future)
     }
 
     nonChunkedResponseOrFirstChunkSent = true
-    if (!HttpHeaders.isTransferEncodingChunked(response)) {
+    if (!HttpUtil.isTransferEncodingChunked(response)) {
       doneResponding = true
       onDoneResponding()
     }
@@ -74,14 +75,14 @@ trait Responder extends Js with Flash with GetActionClassDefaultsToCurrentAction
    * If Content-Type header is not set, it is set to "application/octet-stream".
    */
   def setChunked() {
-    HttpHeaders.setTransferEncodingChunked(response)
+    HttpUtil.setTransferEncodingChunked(response, true)
 
     // From now on, the header is a mark telling the response is chunked.
     // It should not be removed from the response.
   }
 
   /** See setChunked. */
-  def respondLastChunk(trailingHeaders: HttpHeaders = HttpHeaders.EMPTY_HEADERS): ChannelFuture = {
+  def respondLastChunk(trailingHeaders: HttpHeaders = EmptyHttpHeaders.INSTANCE): ChannelFuture = {
     if (doneResponding) throwDoubleResponseError()
 
     val trailer = if (trailingHeaders.isEmpty) {
@@ -116,11 +117,12 @@ trait Responder extends Js with Flash with GetActionClassDefaultsToCurrentAction
   def respondText(text: Any, fallbackContentType: String = null, convertXmlToXhtml: Boolean = true): ChannelFuture = {
     if (doneResponding) throwDoubleResponseError(Some(text))
 
-    val textIsXml = text.isInstanceOf[Node] || text.isInstanceOf[NodeSeq]
+    val instanceOfNode = text.isInstanceOf[Node]
+    val textIsXml      = instanceOfNode || text.isInstanceOf[NodeSeq]
 
     val respondedText =
       if (textIsXml && convertXmlToXhtml) {
-        if (text.isInstanceOf[Node])
+        if (instanceOfNode)
           Xhtml.toXhtml(text.asInstanceOf[Node])
         else
           Xhtml.toXhtml(text.asInstanceOf[NodeSeq])
@@ -138,17 +140,17 @@ trait Responder extends Js with Flash with GetActionClassDefaultsToCurrentAction
           else
             fallbackContentType + "; charset=" + Config.xitrum.request.charset
 
-        HttpHeaders.setHeader(response, CONTENT_TYPE, withCharset)
+        response.headers.set(CONTENT_TYPE, withCharset)
       } else {
         if (textIsXml)
-          HttpHeaders.setHeader(response, CONTENT_TYPE, "application/xml; charset=" + Config.xitrum.request.charset)
+          response.headers.set(CONTENT_TYPE, "application/xml; charset=" + Config.xitrum.request.charset)
         else
-          HttpHeaders.setHeader(response, CONTENT_TYPE, "text/plain; charset=" + Config.xitrum.request.charset)
+          response.headers.set(CONTENT_TYPE, "text/plain; charset=" + Config.xitrum.request.charset)
       }
     }
 
     val buf = Unpooled.copiedBuffer(respondedText, Config.xitrum.request.charset)
-    if (HttpHeaders.isTransferEncodingChunked(response)) {
+    if (HttpUtil.isTransferEncodingChunked(response)) {
       respondHeadersOnlyForFirstChunk()
       channel.writeAndFlush(new DefaultHttpContent(buf))
     } else {
@@ -161,7 +163,7 @@ trait Responder extends Js with Flash with GetActionClassDefaultsToCurrentAction
 
   /** Content-Type header is set to "application/xml". */
   def respondXml(any: Any): ChannelFuture = {
-    respondText(any, "application/xml", false)
+    respondText(any, "application/xml", convertXmlToXhtml = false)
   }
 
   /** Content-Type header is set to "text/html". */
@@ -315,12 +317,12 @@ trait Responder extends Js with Flash with GetActionClassDefaultsToCurrentAction
    * @param byteBuf Will be released
    */
   def respondBinary(byteBuf: ByteBuf): ChannelFuture = {
-    if (HttpHeaders.isTransferEncodingChunked(response)) {
+    if (HttpUtil.isTransferEncodingChunked(response)) {
       respondHeadersOnlyForFirstChunk()
       channel.writeAndFlush(new DefaultHttpContent(byteBuf))
     } else {
       if (!response.headers.contains(CONTENT_TYPE))
-        HttpHeaders.setHeader(response, CONTENT_TYPE, "application/octet-stream")
+        response.headers.set(CONTENT_TYPE, "application/octet-stream")
       ByteBufUtil.writeComposite(response.content, byteBuf)
       respond()
     }
@@ -340,7 +342,7 @@ trait Responder extends Js with Flash with GetActionClassDefaultsToCurrentAction
    * To sanitize the path, use xitrum.util.PathSanitizer.
    */
   def respondFile(path: String): ChannelFuture = {
-    XSendFile.setHeader(response, path, true)
+    XSendFile.setHeader(response, path, fromAction = true)
     respond()
   }
 
@@ -352,7 +354,7 @@ trait Responder extends Js with Flash with GetActionClassDefaultsToCurrentAction
    * @param path Relative to an entry in classpath, without leading "/"
    */
   def respondResource(path: String): ChannelFuture = {
-    XSendResource.setHeader(response, path, true)
+    XSendResource.setHeader(response, path, fromController = true)
     respond()
   }
 
@@ -369,8 +371,8 @@ trait Responder extends Js with Flash with GetActionClassDefaultsToCurrentAction
    */
   def respondEventSource(data: Any, event: String = "message"): ChannelFuture = {
     if (!nonChunkedResponseOrFirstChunkSent) {
-      HttpHeaders.setTransferEncodingChunked(response)
-      HttpHeaders.setHeader(response, CONTENT_TYPE, "text/event-stream; charset=UTF-8")
+      HttpUtil.setTransferEncodingChunked(response, true)
+      response.headers.set(CONTENT_TYPE, "text/event-stream; charset=UTF-8")
       respondText("\r\n")  // Send a new line prelude, due to a bug in Opera
     }
     respondText(renderEventSource(data, event))
@@ -483,10 +485,10 @@ trait Responder extends Js with Flash with GetActionClassDefaultsToCurrentAction
     if (nonChunkedResponseOrFirstChunkSent) return
 
     if (!response.headers.contains(CONTENT_TYPE))
-      HttpHeaders.setHeader(response, CONTENT_TYPE, "application/octet-stream")
+      response.headers.set(CONTENT_TYPE, "application/octet-stream")
 
     // There should be no CONTENT_LENGTH header
-    HttpHeaders.removeHeader(response, CONTENT_LENGTH)
+    response.headers.remove(CONTENT_LENGTH)
 
     setNoClientCache()
 

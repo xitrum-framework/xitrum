@@ -255,10 +255,10 @@ class XitrumMetricsChannel extends SockJsAction with PublisherLookUp {
     publisher ! Subscribe
     context.watch(publisher)
     context.become {
-      case msg @ (first :: rest) =>
-        msg.foreach { nodeMetrics =>
-          sendHeapMemory(nodeMetrics.asInstanceOf[NodeMetrics])
-          sendCpu(nodeMetrics.asInstanceOf[NodeMetrics])
+      case msg: Seq[_] =>
+        msg.asInstanceOf[Seq[NodeMetrics]].foreach { nodeMetrics =>
+          sendHeapMemory(nodeMetrics)
+          sendCpu(nodeMetrics)
         }
 
       case nodeMetrics: NodeMetrics =>
@@ -271,7 +271,7 @@ class XitrumMetricsChannel extends SockJsAction with PublisherLookUp {
       case SockJsText(text) =>
         if (text == "pull" ) publisher ! Pull
 
-      case Terminated(publisher) =>
+      case Terminated(`publisher`) =>
         lookUpPublisher()
 
       case _ =>

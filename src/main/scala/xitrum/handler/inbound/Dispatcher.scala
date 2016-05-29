@@ -53,8 +53,10 @@ object Dispatcher {
     ConstructorAccess.get(actionClass).newInstance()
 
   private def setPathPrefixForSockJs(instance: Any, handlerEnv: HandlerEnv) {
-    if (instance.isInstanceOf[SockJsPrefix])
-      instance.asInstanceOf[SockJsPrefix].setPathPrefix(handlerEnv.pathInfo)
+    instance match {
+      case sockJsPrefix: SockJsPrefix => sockJsPrefix.setPathPrefix(handlerEnv.pathInfo)
+      case _ =>
+    }
   }
 }
 
@@ -69,14 +71,14 @@ class Dispatcher extends SimpleChannelInboundHandler[HandlerEnv] {
     val request  = env.request
     val pathInfo = env.pathInfo
 
-    if (request.getMethod == HttpMethod.OPTIONS) {
+    if (request.method == HttpMethod.OPTIONS) {
       val future = ctx.channel.writeAndFlush(env)
       NoRealPipelining.if_keepAliveRequest_then_resumeReading_else_closeOnComplete(request, env.channel, future)
       return
     }
 
     // Look up GET if method is HEAD
-    val requestMethod = if (request.getMethod == HttpMethod.HEAD) HttpMethod.GET else request.getMethod
+    val requestMethod = if (request.method == HttpMethod.HEAD) HttpMethod.GET else request.method
 
     Config.routes.route(requestMethod, pathInfo) match {
       case Some((route, pathParams)) =>
@@ -100,7 +102,7 @@ class Dispatcher extends SimpleChannelInboundHandler[HandlerEnv] {
       if (!Config.xitrum.staticFile.revalidate)
         NotModified.setClientCacheAggressively(response)
 
-      XSendFile.setHeader(response, staticPath, false)
+      XSendFile.setHeader(response, staticPath, fromAction = false)
       ctx.channel.writeAndFlush(env)
       true
     } else {

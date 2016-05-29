@@ -10,7 +10,7 @@ object BadClientSilencer {
   def respond400(channel: Channel, body: String) {
     val content  = Unpooled.copiedBuffer(body, Config.xitrum.request.charset)
     val response = new DefaultFullHttpResponse(HttpVersion.HTTP_1_1, HttpResponseStatus.BAD_REQUEST, content)
-    channel.writeAndFlush(response).addListener(ChannelFutureListener.CLOSE);
+    channel.writeAndFlush(response).addListener(ChannelFutureListener.CLOSE)
   }
 }
 

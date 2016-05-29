@@ -2,10 +2,9 @@ package xitrum.handler.inbound
 
 import io.netty.channel.{ChannelHandler, SimpleChannelInboundHandler, ChannelHandlerContext}
 import ChannelHandler.Sharable
-import io.netty.handler.codec.http.{HttpHeaders, HttpMethod}
+import io.netty.handler.codec.http.{HttpHeaderNames, HttpHeaderValues, HttpMethod}
+import io.netty.util.AsciiString
 
-import HttpHeaders.Names
-import HttpHeaders.Values
 import HttpMethod.{GET, POST}
 
 import xitrum.handler.HandlerEnv
@@ -19,7 +18,8 @@ import xitrum.routing.HttpMethodWebSocket
 class MethodOverrider extends SimpleChannelInboundHandler[HandlerEnv] {
   override def channelRead0(ctx: ChannelHandlerContext, env: HandlerEnv) {
     val request        = env.request
-    val method         = request.getMethod
+    val method         = request.method
+    val headers        = request.headers
     val bodyTextParams = env.bodyTextParams
 
     // WebSocket should be GET
@@ -27,18 +27,21 @@ class MethodOverrider extends SimpleChannelInboundHandler[HandlerEnv] {
     // "Upgrade" header must be "WebSocket"
     // http://sockjs.github.com/sockjs-protocol/sockjs-protocol-0.3.3.html#section-51
     // http://sockjs.github.com/sockjs-protocol/sockjs-protocol-0.3.3.html#section-73
-    val connectionHeader = HttpHeaders.getHeader(request, Names.CONNECTION)
-    val upgradeHeader    = HttpHeaders.getHeader(request, Names.UPGRADE)
+    val connectionHeader = headers.get(HttpHeaderNames.CONNECTION)
+    val upgradeHeader    = headers.get(HttpHeaderNames.UPGRADE)
     if (method == GET &&
-        connectionHeader != null && connectionHeader.toLowerCase.contains(Values.UPGRADE.toLowerCase) &&
-        upgradeHeader    != null && upgradeHeader.toLowerCase == Values.WEBSOCKET.toLowerCase) {
+        connectionHeader != null && AsciiString.containsIgnoreCase(connectionHeader, HttpHeaderValues.UPGRADE) &&
+        upgradeHeader    != null && HttpHeaderValues.WEBSOCKET.contentEqualsIgnoreCase(upgradeHeader)) {
       request.setMethod(HttpMethodWebSocket)
     } else if (method == POST) {
-      val _methods = bodyTextParams.get("_method")
-      if (_methods != null && _methods.nonEmpty) {
-        val _method = new HttpMethod(_methods.get(0).toUpperCase)
-        request.setMethod(_method)
-        bodyTextParams.remove("_method")  // Cleaner for application developers when seeing access log
+      bodyTextParams.get("_method").foreach { _methods =>
+        if (_methods.nonEmpty) {
+          val _method = new HttpMethod(_methods.head.toUpperCase)
+          request.setMethod(_method)
+        }
+
+        // Cleaner for application developers when seeing access log
+        bodyTextParams.remove("_method")
       }
     }
 

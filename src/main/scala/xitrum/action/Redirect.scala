@@ -1,9 +1,7 @@
 package xitrum.action
 
 import io.netty.channel.ChannelFuture
-import io.netty.handler.codec.http.{HttpHeaders, HttpResponseStatus}
-import HttpHeaders.Names.LOCATION
-import HttpResponseStatus.FOUND
+import io.netty.handler.codec.http.{HttpHeaderNames, HttpResponseStatus}
 
 import xitrum.Action
 import xitrum.handler.inbound.Dispatcher
@@ -18,9 +16,9 @@ trait Redirect {
    *
    * See also forwardTo.
    */
-  def redirectTo(location: String, status: HttpResponseStatus = FOUND): ChannelFuture = {
+  def redirectTo(location: String, status: HttpResponseStatus = HttpResponseStatus.FOUND): ChannelFuture = {
     response.setStatus(status)
-    HttpHeaders.setHeader(response, LOCATION, location)
+    response.headers.set(HttpHeaderNames.LOCATION, location)
     respond()
   }
 

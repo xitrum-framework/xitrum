@@ -1,9 +1,9 @@
 package xitrum.handler.outbound
 
 import io.netty.channel.{ChannelHandler, ChannelHandlerContext, ChannelOutboundHandlerAdapter, ChannelPromise}
-import io.netty.handler.codec.http.{HttpHeaders, HttpMethod, HttpResponseStatus}
+import io.netty.handler.codec.http.{HttpHeaderNames, HttpMethod, HttpResponseStatus}
 import ChannelHandler.Sharable
-import HttpHeaders.Names._
+import HttpHeaderNames._
 import HttpMethod._
 import HttpResponseStatus._
 
@@ -24,42 +24,42 @@ class SetCORS extends ChannelOutboundHandlerAdapter {
     val request  = env.request
     val response = env.response
 
-    val requestOrigin = HttpHeaders.getHeader(request, ORIGIN)
+    val requestOrigin = request.headers.get(ORIGIN)
 
     // Access-Control-Allow-Origin
     if (!response.headers.contains(ACCESS_CONTROL_ALLOW_ORIGIN)) {
       if (corsAllowOrigins.head.equals("*")) {
         if (requestOrigin == null || requestOrigin == "null")
-          HttpHeaders.setHeader(response, ACCESS_CONTROL_ALLOW_ORIGIN, "*")
+          response.headers.set(ACCESS_CONTROL_ALLOW_ORIGIN, "*")
         else
-          HttpHeaders.setHeader(response, ACCESS_CONTROL_ALLOW_ORIGIN, requestOrigin)
+          response.headers.set(ACCESS_CONTROL_ALLOW_ORIGIN, requestOrigin)
       } else {
-        if (corsAllowOrigins.contains(requestOrigin)) HttpHeaders.setHeader(response, ACCESS_CONTROL_ALLOW_ORIGIN, requestOrigin)
+        if (corsAllowOrigins.contains(requestOrigin)) response.headers.set(ACCESS_CONTROL_ALLOW_ORIGIN, requestOrigin)
       }
     }
 
     // Access-Control-Allow-Credentials
     if (!response.headers.contains(ACCESS_CONTROL_ALLOW_CREDENTIALS))
-      HttpHeaders.setHeader(response, ACCESS_CONTROL_ALLOW_CREDENTIALS, true)
+      response.headers.set(ACCESS_CONTROL_ALLOW_CREDENTIALS, true)
 
     // Access-Control-Allow-Methods
     if (!response.headers.contains(ACCESS_CONTROL_ALLOW_METHODS)) {
       val pathInfo = env.pathInfo
       if (pathInfo == null) {
-        if (response.getStatus == NOT_FOUND)
-          HttpHeaders.setHeader(response, ACCESS_CONTROL_ALLOW_METHODS, OPTIONS.name)
+        if (response.status == NOT_FOUND)
+          response.headers.set(ACCESS_CONTROL_ALLOW_METHODS, OPTIONS.name)
         else
-          HttpHeaders.setHeader(response, ACCESS_CONTROL_ALLOW_METHODS, OPTIONS.name + ", "+ GET.name + ", " + HEAD.name)
+          response.headers.set(ACCESS_CONTROL_ALLOW_METHODS, OPTIONS.name + ", "+ GET.name + ", " + HEAD.name)
       } else {
         val allowMethods = OPTIONS +: Config.routes.tryAllMethods(pathInfo)
-        HttpHeaders.setHeader(response, ACCESS_CONTROL_ALLOW_METHODS, allowMethods.mkString(", "))
+        response.headers.set(ACCESS_CONTROL_ALLOW_METHODS, allowMethods.mkString(", "))
       }
     }
 
     // Access-Control-Allow-Headers
-    val accessControlRequestHeaders = HttpHeaders.getHeader(request, ACCESS_CONTROL_REQUEST_HEADERS)
+    val accessControlRequestHeaders = request.headers.get(ACCESS_CONTROL_REQUEST_HEADERS)
     if (accessControlRequestHeaders != null && !response.headers.contains(ACCESS_CONTROL_ALLOW_HEADERS))
-      HttpHeaders.setHeader(response, ACCESS_CONTROL_ALLOW_HEADERS, accessControlRequestHeaders)
+      response.headers.set(ACCESS_CONTROL_ALLOW_HEADERS, accessControlRequestHeaders)
 
     ctx.write(env, promise)
   }

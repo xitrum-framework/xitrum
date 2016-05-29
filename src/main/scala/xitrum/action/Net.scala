@@ -2,9 +2,8 @@ package xitrum.action
 
 import java.net.{InetSocketAddress, SocketAddress}
 
-import io.netty.handler.codec.http.{HttpHeaders, HttpRequest}
+import io.netty.handler.codec.http.{HttpHeaderNames, HttpRequest}
 import io.netty.handler.ssl.SslHandler
-import HttpHeaders.Names.HOST
 
 import xitrum.{Action, Config}
 
@@ -50,7 +49,7 @@ object Net {
     if (proxyNotAllowed(ip)) {
       ip
     } else {
-      val xForwardedFor = HttpHeaders.getHeader(request, "X-Forwarded-For")
+      val xForwardedFor = request.headers.get("X-Forwarded-For")
       if (xForwardedFor == null)
         ip
       else
@@ -81,17 +80,19 @@ trait Net {
       if (proxyNotAllowed) {
         false
       } else {
-        val xForwardedProto = HttpHeaders.getHeader(request, "X-Forwarded-Proto")
+        val headers = request.headers
+
+        val xForwardedProto = headers.get("X-Forwarded-Proto")
         if (xForwardedProto != null)
-          (xForwardedProto == "https")
+          xForwardedProto == "https"
         else {
-          val xForwardedScheme = HttpHeaders.getHeader(request, "X-Forwarded-Scheme")
+          val xForwardedScheme = headers.get("X-Forwarded-Scheme")
           if (xForwardedScheme != null)
-            (xForwardedScheme == "https")
+            xForwardedScheme == "https"
           else {
-            val xForwardedSsl = HttpHeaders.getHeader(request, "X-Forwarded-Ssl")
+            val xForwardedSsl = headers.get("X-Forwarded-Ssl")
             if (xForwardedSsl != null)
-              (xForwardedSsl == "on")
+              xForwardedSsl == "on"
             else
               false
           }
@@ -104,7 +105,7 @@ trait Net {
   lazy val webSocketScheme = if (isSsl) "wss"   else "ws"
 
   lazy val (serverName, serverPort) = {
-    val np = HttpHeaders.getHeader(request, HOST)  // Ex: localhost, localhost:3000
+    val np = request.headers.get(HttpHeaderNames.HOST)  // Ex: localhost, localhost:3000
     val xs = np.split(':')
     if (xs.length == 1) {
       val port = if (isSsl) 443 else 80

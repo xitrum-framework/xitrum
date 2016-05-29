@@ -30,7 +30,7 @@ class CookieSessionStore extends SessionStore {
       val immutableMap = session.toMap
 
       // Most browsers do not support cookie > 4KB
-      val serialized = SeriDeseri.toSecureUrlSafeBase64(immutableMap, true)
+      val serialized = SeriDeseri.toSecureUrlSafeBase64(immutableMap, forCookie = true)
       val cookieSize = serialized.length
       if (cookieSize > 4 * 1024) {
         Log.error("Cookie size = " + cookieSize + " > 4KB limit: " + immutableMap)

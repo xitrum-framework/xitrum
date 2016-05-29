@@ -1,7 +1,7 @@
 package xitrum.handler
 
 import io.netty.channel.{Channel, ChannelFuture, ChannelFutureListener}
-import io.netty.handler.codec.http.{HttpHeaders, HttpRequest}
+import io.netty.handler.codec.http.{HttpRequest, HttpUtil}
 
 /**
  * http://en.wikipedia.org/wiki/HTTP_pipelining
@@ -39,7 +39,7 @@ object NoRealPipelining {
   def if_keepAliveRequest_then_resumeReading_else_closeOnComplete(
     request: HttpRequest, channel: Channel, channelFuture: ChannelFuture
   ) {
-    if (HttpHeaders.isKeepAlive(request)) {
+    if (HttpUtil.isKeepAlive(request)) {
       channelFuture.addListener(new ChannelFutureListener {
         def operationComplete(future: ChannelFuture) { resumeReading(channel) }
       })
