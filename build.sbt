@@ -102,7 +102,7 @@ libraryDependencies += "org.webjars" % "jquery" % "2.2.4"
 libraryDependencies += "org.webjars" % "jquery-validation" % "1.15.0"
 dependencyOverrides += "org.webjars" % "jquery" % "2.2.4"
 
-libraryDependencies += "org.webjars.bower" % "sockjs-client" % "1.0.3"
+libraryDependencies += "org.webjars.bower" % "sockjs-client" % "1.1.1"
 
 libraryDependencies += "org.webjars" % "swagger-ui" % "2.1.4"
 

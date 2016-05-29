@@ -65,14 +65,14 @@ trait Js {
 
   lazy val jsDefaults = {
     // See directory src/main/resources/META-INF/resources/webjars/jquery-validation
-    val validatei18n = if (language == "en") "" else (<script type="text/javascript" src={webJarsUrl("jquery-validation/1.15.0/localization", s"messages_$language.js", s"messages_$language.min.js")}></script>)
+    val validateI18n = if (language == "en") "" else (<script type="text/javascript" src={webJarsUrl("jquery-validation/1.15.0/localization", s"messages_$language.js", s"messages_$language.min.js")}></script>)
 
     <xml:group>
       <script type="text/javascript" src={webJarsUrl("jquery/2.2.4",              "jquery.js",             "jquery.min.js")}></script>
       <script type="text/javascript" src={webJarsUrl("jquery-validation/1.15.0",  "jquery.validate.js",    "jquery.validate.min.js")}></script>
       <script type="text/javascript" src={webJarsUrl("jquery-validation/1.15.0",  "additional-methods.js", "additional-methods.min.js")}></script>
-      {validatei18n}
-      <script type="text/javascript" src={webJarsUrl("sockjs-client/1.0.3/dist",  "sockjs-1.0.3.js",       "sockjs-1.0.3.min.js")}></script>
+      {validateI18n}
+      <script type="text/javascript" src={webJarsUrl("sockjs-client/1.1.1/dist",  "sockjs.js",             "sockjs.min.js")}></script>
       <script type="text/javascript" src={url[xitrum.js]}></script>
     </xml:group>
   }
