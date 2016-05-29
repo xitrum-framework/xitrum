@@ -8,6 +8,8 @@
   Update Akka from 2.4.1 to 2.4.6
 * `#597 <https://github.com/xitrum-framework/xitrum/issues/597>`_
   Update Schwatcher from 0.2.0 to 0.3.1
+* `#600 <https://github.com/xitrum-framework/xitrum/issues/600>`_
+  Update metrics-scala from 3.5.2_a2.3 to 3.5.4_a2.3
 * `#598 <https://github.com/xitrum-framework/xitrum/issues/598>`_
   Update Twitter Chill from 0.7.2 to 0.8.0
 * `#599 <https://github.com/xitrum-framework/xitrum/issues/599>`_
