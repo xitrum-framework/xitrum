@@ -115,7 +115,7 @@ libraryDependencies += "org.scalatest" %% "scalatest" % "2.2.5" % "test"
 libraryDependencies += "com.m3" %% "curly-scala" % "0.5.+" % "test"
 
 // An implementation of SLF4J is needed for log in tests to be output
-libraryDependencies += "ch.qos.logback" % "logback-classic" % "1.1.3" % "test"
+libraryDependencies += "ch.qos.logback" % "logback-classic" % "1.1.7" % "test"
 
 // For "sbt console"
 unmanagedClasspath in Compile <+= baseDirectory map { bd => Attributed.blank(bd / "src/test/resources") }
