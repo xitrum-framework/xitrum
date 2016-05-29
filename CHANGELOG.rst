@@ -1,3 +1,8 @@
+3.27.0:
+
+* `#589 <https://github.com/xitrum-framework/xitrum/issues/589>`_
+  Update Scala from 2.11.7 to 2.11.8
+
 3.26.0:
 
 * `#547 <https://github.com/xitrum-framework/xitrum/issues/547>`_
