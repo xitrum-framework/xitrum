@@ -20,22 +20,22 @@ object FileMonitor {
 
   def monitor(event: WatchEvent.Kind[Path], path: Path, callbacks: Callback*) {
     callbacks.foreach { cb =>
-      fileMonitorActor ! RegisterCallback(event, HIGH, recursive = false, path, cb)
+      fileMonitorActor ! RegisterCallback(event, path, cb, HIGH, recursive = false, persistent = false)
     }
   }
 
   def unmonitor(event: WatchEvent.Kind[Path], path: Path) {
-    fileMonitorActor ! UnRegisterCallback(event, false, path)
+    fileMonitorActor ! UnRegisterCallback(event, path, recursive = false)
   }
 
   def monitorRecursive(event: WatchEvent.Kind[Path], path: Path, callback: Callback*) {
     callback.foreach { cb =>
-      fileMonitorActor ! RegisterCallback(event, HIGH, true, path, cb)
+      fileMonitorActor ! RegisterCallback(event, path, cb, HIGH, recursive = true, persistent = true)
     }
   }
 
   def unmonitorRecursive(event: WatchEvent.Kind[Path], path: Path) {
-    fileMonitorActor ! UnRegisterCallback(event, true, path)
+    fileMonitorActor ! UnRegisterCallback(event, path, recursive = true)
   }
 
   // http://stackoverflow.com/questions/9588737/is-java-7-watchservice-slow-for-anyone-else

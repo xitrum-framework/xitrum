@@ -6,6 +6,8 @@
   Update Netty from 4.0.33 to 4.1.0
 * `#596 <https://github.com/xitrum-framework/xitrum/issues/596>`_
   Update Akka from 2.4.1 to 2.4.6
+* `#597 <https://github.com/xitrum-framework/xitrum/issues/597>`_
+  Update Schwatcher from 0.2.0 to 0.3.1
 * `#592 <https://github.com/xitrum-framework/xitrum/issues/592>`_
   Change URL to access Swagger UI from /xitrum/swagger-ui back to /xitrum/swagger
 
