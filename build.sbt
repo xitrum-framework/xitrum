@@ -1,10 +1,6 @@
 organization := "tv.cntt"
 name         := "xitrum"
 
-// Akka 2.4.0+ dropped Scala 2.10.x support
-crossScalaVersions := Seq("2.11.8")
-scalaVersion       := "2.11.8"
-
 // Run sbt mima-report-binary-issues to check for binary compatibility ---------
 // https://github.com/typesafehub/migration-manager
 version := "3.27.0-SNAPSHOT"
@@ -12,6 +8,10 @@ version := "3.27.0-SNAPSHOT"
 //com.typesafe.tools.mima.plugin.MimaKeys.previousArtifact := Some("tv.cntt" % ("xitrum_" + scalaBinaryVersion.value) % "3.26.0")
 
 //------------------------------------------------------------------------------
+
+// Akka 2.4.0+ dropped Scala 2.10.x support
+crossScalaVersions := Seq("2.11.8")
+scalaVersion       := "2.11.8"
 
 scalacOptions ++= Seq("-deprecation", "-feature", "-unchecked")
 
