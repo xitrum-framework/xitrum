@@ -46,11 +46,11 @@ libraryDependencies += "io.netty" % "netty-transport-native-epoll" % "4.1.0.Fina
 libraryDependencies += "org.javassist" % "javassist" % "3.20.0-GA"
 
 // Redirect Akka log to SLF4J
-libraryDependencies += "com.typesafe.akka" %% "akka-actor"           % "2.4.1"
-libraryDependencies += "com.typesafe.akka" %% "akka-cluster"         % "2.4.1"
-libraryDependencies += "com.typesafe.akka" %% "akka-cluster-metrics" % "2.4.1"
-libraryDependencies += "com.typesafe.akka" %% "akka-contrib"         % "2.4.1"
-libraryDependencies += "com.typesafe.akka" %% "akka-slf4j"           % "2.4.1"
+libraryDependencies += "com.typesafe.akka" %% "akka-actor"           % "2.4.6"
+libraryDependencies += "com.typesafe.akka" %% "akka-cluster"         % "2.4.6"
+libraryDependencies += "com.typesafe.akka" %% "akka-cluster-metrics" % "2.4.6"
+libraryDependencies += "com.typesafe.akka" %% "akka-contrib"         % "2.4.6"
+libraryDependencies += "com.typesafe.akka" %% "akka-slf4j"           % "2.4.6"
 
 // For clustering SockJS with Akka
 libraryDependencies += "tv.cntt" %% "glokka" % "2.4"

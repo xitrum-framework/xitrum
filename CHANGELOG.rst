@@ -4,6 +4,8 @@
   Update Scala from 2.11.7 to 2.11.8
 * `#595 <https://github.com/xitrum-framework/xitrum/issues/595>`_
   Update Netty from 4.0.33 to 4.1.0
+* `#596 <https://github.com/xitrum-framework/xitrum/issues/596>`_
+  Update Akka from 2.4.1 to 2.4.6
 * `#592 <https://github.com/xitrum-framework/xitrum/issues/592>`_
   Change URL to access Swagger UI from /xitrum/swagger-ui back to /xitrum/swagger
 
