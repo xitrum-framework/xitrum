@@ -110,7 +110,7 @@ libraryDependencies += "org.webjars" % "d3js" % "3.5.16"
 
 // For test --------------------------------------------------------------------
 
-libraryDependencies += "org.scalatest" %% "scalatest" % "2.2.5" % "test"
+libraryDependencies += "org.scalatest" %% "scalatest" % "2.2.6" % "test"
 
 libraryDependencies += "com.m3" %% "curly-scala" % "0.5.+" % "test"
 
