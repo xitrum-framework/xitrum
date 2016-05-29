@@ -16,6 +16,8 @@
   Update RhinoCoffeeScript from 1.9.3 to 1.10.0
 * `#601 <https://github.com/xitrum-framework/xitrum/issues/601>`_
   Update jQuery 2.1.4 to 2.2.4
+* `#602 <https://github.com/xitrum-framework/xitrum/issues/602>`_
+  Update jQuery Validation from 1.14.0 to 1.15.0
 * `#592 <https://github.com/xitrum-framework/xitrum/issues/592>`_
   Change URL to access Swagger UI from /xitrum/swagger-ui back to /xitrum/swagger
 
