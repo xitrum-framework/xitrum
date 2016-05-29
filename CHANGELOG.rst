@@ -14,6 +14,8 @@
   Update Twitter Chill from 0.7.2 to 0.8.0
 * `#599 <https://github.com/xitrum-framework/xitrum/issues/599>`_
   Update RhinoCoffeeScript from 1.9.3 to 1.10.0
+* `#601 <https://github.com/xitrum-framework/xitrum/issues/601>`_
+  Update jQuery 2.1.4 to 2.2.4
 * `#592 <https://github.com/xitrum-framework/xitrum/issues/592>`_
   Change URL to access Swagger UI from /xitrum/swagger-ui back to /xitrum/swagger
 

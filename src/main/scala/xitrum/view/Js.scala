@@ -67,7 +67,7 @@ trait Js {
     val validatei18n = if (language == "en") "" else (<script type="text/javascript" src={webJarsUrl("jquery-validation/1.14.0/localization", s"messages_$language.js", s"messages_$language.min.js")}></script>)
 
     <xml:group>
-      <script type="text/javascript" src={webJarsUrl("jquery/2.1.4",              "jquery.js",             "jquery.min.js")}></script>
+      <script type="text/javascript" src={webJarsUrl("jquery/2.2.4",              "jquery.js",             "jquery.min.js")}></script>
       <script type="text/javascript" src={webJarsUrl("jquery-validation/1.14.0",  "jquery.validate.js",    "jquery.validate.min.js")}></script>
       <script type="text/javascript" src={webJarsUrl("jquery-validation/1.14.0",  "additional-methods.js", "additional-methods.min.js")}></script>
       {validatei18n}
