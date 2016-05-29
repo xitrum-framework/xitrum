@@ -75,7 +75,7 @@ libraryDependencies += "tv.cntt" %% "scaposer" % "1.7"
 libraryDependencies += "org.apache.commons" % "commons-lang3" % "3.4"
 
 // For compiling CoffeeScript to JavaScript
-libraryDependencies += "tv.cntt" % "rhinocoffeescript" % "1.9.3"
+libraryDependencies += "tv.cntt" % "rhinocoffeescript" % "1.10.0"
 
 // For metrics
 libraryDependencies += "nl.grons" %% "metrics-scala" % "3.5.2_a2.3"
