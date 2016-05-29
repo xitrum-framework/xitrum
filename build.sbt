@@ -63,7 +63,7 @@ libraryDependencies += "com.beachape.filemanagement" %% "schwatcher" % "0.3.1"
 libraryDependencies += "tv.cntt" %% "sclasner" % "1.7.0"
 
 // For binary (de)serializing
-libraryDependencies += "com.twitter" %% "chill" % "0.7.2"
+libraryDependencies += "com.twitter" %% "chill" % "0.8.0"
 
 // For JSON (de)serializing
 libraryDependencies += "org.json4s" %% "json4s-jackson" % "3.3.0"
