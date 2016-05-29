@@ -106,7 +106,7 @@ libraryDependencies += "org.webjars.bower" % "sockjs-client" % "1.1.1"
 
 libraryDependencies += "org.webjars" % "swagger-ui" % "2.1.4"
 
-libraryDependencies += "org.webjars" % "d3js" % "3.5.12"
+libraryDependencies += "org.webjars" % "d3js" % "3.5.16"
 
 // For test --------------------------------------------------------------------
 
@@ -118,10 +118,10 @@ libraryDependencies += "com.m3" %% "curly-scala" % "0.5.+" % "test"
 libraryDependencies += "ch.qos.logback" % "logback-classic" % "1.1.3" % "test"
 
 // For "sbt console"
-unmanagedClasspath in Compile <+= (baseDirectory) map { bd => Attributed.blank(bd / "src/test/resources") }
+unmanagedClasspath in Compile <+= baseDirectory map { bd => Attributed.blank(bd / "src/test/resources") }
 
 // For "sbt run/test"
-unmanagedClasspath in Runtime <+= (baseDirectory) map { bd => Attributed.blank(bd / "src/test/resources") }
+unmanagedClasspath in Runtime <+= baseDirectory map { bd => Attributed.blank(bd / "src/test/resources") }
 
 // Generate src/main/scala/xitrum/Version.scala from "version" above -----------
 
@@ -129,7 +129,7 @@ val generateVersionFileTask = TaskKey[Unit]("generateVersion", "Generate src/mai
 
 generateVersionFileTask <<= generateVersionFile
 
-(compile in Compile) <<= (compile in Compile) dependsOn (generateVersionFile)
+(compile in Compile) <<= (compile in Compile) dependsOn generateVersionFile
 
 def generateVersionFile = Def.task {
   val versions = version.value.split('.')

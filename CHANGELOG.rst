@@ -20,6 +20,8 @@
   WebJars: Update jQuery Validation from 1.14.0 to 1.15.0
 * `#603 <https://github.com/xitrum-framework/xitrum/issues/603>`_
   WebJars: Update sockjs-client from 1.0.3 to 1.1.1
+* `#604 <https://github.com/xitrum-framework/xitrum/issues/604>`_
+  WebJars: Update d3js from 3.5.12 to 3.5.16
 * `#592 <https://github.com/xitrum-framework/xitrum/issues/592>`_
   Change URL to access Swagger UI from /xitrum/swagger-ui back to /xitrum/swagger
 
