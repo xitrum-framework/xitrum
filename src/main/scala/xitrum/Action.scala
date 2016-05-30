@@ -120,13 +120,13 @@ trait Action extends RequestEnv
         val msg = e match {
           case invalidAntiCsrfToken: InvalidAntiCsrfToken =>
             session.clear()
-            "Session expired. Please refresh your browser."
+            badRequestMessageSessionExpired
 
           case missingParam: MissingParam =>
-            "Missing param: " + missingParam.key
+            badRequestMessageMissingParam(missingParam.key)
 
           case invalidInput: InvalidInput =>
-            "Validation error: " + invalidInput.message
+            badRequestMessageInvalidInput(invalidInput.message)
         }
 
         response.setStatus(HttpResponseStatus.BAD_REQUEST)
@@ -164,6 +164,24 @@ trait Action extends RequestEnv
         AccessLog.logActionAccess(this, beginTimestamp, 0, hit = false, e)
     }
   }
+
+  /**
+   * Applications may override this method to modify the default message:
+   * `Session expired. Please refresh your browser.`
+   */
+  protected def badRequestMessageSessionExpired = "Session expired. Please refresh your browser."
+
+  /**
+   * Applications may override this method to modify the default message:
+   * `Missing param: + param`
+   */
+  protected def badRequestMessageMissingParam(param: String) = "Missing param: " + param
+
+  /**
+   * Applications may override this method to modify the default message:
+   * `Validation error: + message`
+   */
+  protected def badRequestMessageInvalidInput(message: String) = "Validation error: " + message
 
   /** @return true if the cache was hit */
   private def tryCache(f: => Unit): Boolean = {

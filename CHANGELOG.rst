@@ -24,6 +24,8 @@
   WebJars: Update d3js from 3.5.12 to 3.5.17
 * `#594 <https://github.com/xitrum-framework/xitrum/issues/594>`_
   In production mode, exception in non-GET action is mistakenly handled as "Missing param: csrf-token"
+* `#593 <https://github.com/xitrum-framework/xitrum/issues/593>`_
+  Allow easy customizing error messages for BadRequest
 * `#592 <https://github.com/xitrum-framework/xitrum/issues/592>`_
   Change URL to access Swagger UI from /xitrum/swagger-ui back to /xitrum/swagger
 
