@@ -36,7 +36,7 @@ case object WebSocketPong
  */
 trait WebSocketAction extends Actor with Action {
   def receive = {
-    case env: HandlerEnv =>
+    case (env: HandlerEnv, skipCsrfCheck: Boolean) =>
       // env must be set before calling acceptWebSocket, because acceptWebSocket
       // uses webSocketAbsRequestUrl
       apply(env)
