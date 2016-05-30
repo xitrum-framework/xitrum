@@ -1,9 +1,9 @@
 organization := "tv.cntt"
 name         := "xitrum"
 
-// Run sbt mima-report-binary-issues to check for binary compatibility ---------
+// Run "sbt mima-report-binary-issues" to check for binary compatibility ---------
 // https://github.com/typesafehub/migration-manager
-version := "3.27.0-SNAPSHOT"
+version := "3.26.1-SNAPSHOT"
 //com.typesafe.tools.mima.plugin.MimaPlugin.mimaDefaultSettings
 //com.typesafe.tools.mima.plugin.MimaKeys.previousArtifact := Some("tv.cntt" % ("xitrum_" + scalaBinaryVersion.value) % "3.26.0")
 
@@ -106,7 +106,7 @@ libraryDependencies += "org.webjars.bower" % "sockjs-client" % "1.1.1"
 
 libraryDependencies += "org.webjars" % "swagger-ui" % "2.1.4"
 
-libraryDependencies += "org.webjars" % "d3js" % "3.5.16"
+libraryDependencies += "org.webjars" % "d3js" % "3.5.17"
 
 // For test --------------------------------------------------------------------
 
