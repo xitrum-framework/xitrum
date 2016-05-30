@@ -21,7 +21,7 @@ trait ActorAction extends Actor with Action {
   private var postStopCalled = false
 
   def receive = {
-    case env: HandlerEnv =>
+    case (env: HandlerEnv, skipCsrfCheck: Boolean) =>
       apply(env)
 
       // Don't use context.stop(self) to avoid leaking context outside this actor
@@ -35,7 +35,7 @@ trait ActorAction extends Actor with Action {
         }
       }
 
-      dispatchWithFailsafe()
+      dispatchWithFailsafe(skipCsrfCheck)
   }
 
   override def onDoneResponding() {
@@ -77,7 +77,7 @@ trait ActorAction extends Actor with Action {
             respondDefault500Page()
           } else {
             response.setStatus(HttpResponseStatus.INTERNAL_SERVER_ERROR)
-            Dispatcher.dispatch(error500, handlerEnv)
+            Dispatcher.dispatch(error500, handlerEnv, skipCsrfCheck = true)
           }
       }
     } else {

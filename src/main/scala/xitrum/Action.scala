@@ -73,19 +73,21 @@ trait Action extends RequestEnv
 
   //----------------------------------------------------------------------------
 
-  def dispatchWithFailsafe() {
+  def dispatchWithFailsafe(skipCsrfCheck: Boolean) {
     val beginTimestamp = System.currentTimeMillis()
     val route          = handlerEnv.route
     val cacheSecs      = if (route == null) 0 else route.cacheSecs
     var hit            = false
 
     try {
-      if ((request.method == HttpMethod.POST ||
-           request.method == HttpMethod.PUT ||
-           request.method == HttpMethod.PATCH ||
-           request.method == HttpMethod.DELETE) &&
+      if (!skipCsrfCheck) {
+        if ((request.method == HttpMethod.POST ||
+          request.method == HttpMethod.PUT ||
+          request.method == HttpMethod.PATCH ||
+          request.method == HttpMethod.DELETE) &&
           !isInstanceOf[SkipCsrfCheck] &&
           !Csrf.isValidToken(this)) throw new InvalidAntiCsrfToken
+      }
 
       // Before filters:
       // When not passed, the before filters must explicitly respond to client,
@@ -148,7 +150,7 @@ trait Action extends RequestEnv
                   respondDefault500Page()
                 } else {
                   response.setStatus(HttpResponseStatus.INTERNAL_SERVER_ERROR)
-                  Dispatcher.dispatch(error500, handlerEnv)
+                  Dispatcher.dispatch(error500, handlerEnv, skipCsrfCheck = true)
                 }
             }
           } else {

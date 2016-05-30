@@ -62,6 +62,6 @@ trait Redirect {
 
   def forwardTo(actionClass: Class[_ <:Action]) {
     forwarding = true
-    Dispatcher.dispatch(actionClass, handlerEnv)
+    Dispatcher.dispatch(actionClass, handlerEnv, skipCsrfCheck = true)
   }
 }

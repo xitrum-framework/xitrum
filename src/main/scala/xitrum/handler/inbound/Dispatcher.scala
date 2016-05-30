@@ -24,24 +24,24 @@ object Dispatcher {
 
   private val routeReloader = if (Config.productionMode) None else Some(new RouteReloader)
 
-  def dispatch(actionClass: Class[_ <: Action], handlerEnv: HandlerEnv) {
+  def dispatch(actionClass: Class[_ <: Action], handlerEnv: HandlerEnv, skipCsrfCheck: Boolean) {
     if (CLASS_OF_ACTOR.isAssignableFrom(actionClass)) {
       val actorRef = Config.actorSystem.actorOf(Props {
         val actor = newAction(actionClass)
         setPathPrefixForSockJs(actor, handlerEnv)
         actor.asInstanceOf[Actor]
       })
-      actorRef ! handlerEnv
+      actorRef ! (handlerEnv, skipCsrfCheck)
     } else {
       val action = newAction(actionClass)
       setPathPrefixForSockJs(action, handlerEnv)
       action.apply(handlerEnv)
       if (CLASS_OF_FUTURE_ACTION.isAssignableFrom(actionClass)) {
         Config.actorSystem.dispatcher.execute(new Runnable {
-          def run() { action.dispatchWithFailsafe() }
+          def run() { action.dispatchWithFailsafe(skipCsrfCheck) }
         })
       } else {
-        action.dispatchWithFailsafe()
+        action.dispatchWithFailsafe(skipCsrfCheck)
       }
     }
   }
@@ -85,7 +85,7 @@ class Dispatcher extends SimpleChannelInboundHandler[HandlerEnv] {
         env.route      = route
         env.pathParams = pathParams
         env.response.setStatus(OK)
-        Dispatcher.dispatch(route.klass, env)
+        Dispatcher.dispatch(route.klass, env, skipCsrfCheck = false)
 
       case None =>
         if (!handleIndexHtmlFallback(ctx, env, pathInfo)) handle404(ctx, env)
@@ -114,13 +114,13 @@ class Dispatcher extends SimpleChannelInboundHandler[HandlerEnv] {
     Config.routes.error404 match {
       case None =>
         val response = env.response
-        XSendFile.set404Page(response, false)
+        XSendFile.set404Page(response, fromController = false)
         ctx.channel.writeAndFlush(env)
 
       case Some(error404) =>
         env.pathParams = MMap.empty
         env.response.setStatus(NOT_FOUND)
-        Dispatcher.dispatch(error404, env)
+        Dispatcher.dispatch(error404, env, skipCsrfCheck = true)
     }
   }
 }

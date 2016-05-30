@@ -22,6 +22,8 @@
   WebJars: Update sockjs-client from 1.0.3 to 1.1.1
 * `#604 <https://github.com/xitrum-framework/xitrum/issues/604>`_
   WebJars: Update d3js from 3.5.12 to 3.5.17
+* `#594 <https://github.com/xitrum-framework/xitrum/issues/594>`_
+  In production mode, exception in non-GET action is mistakenly handled as "Missing param: csrf-token"
 * `#592 <https://github.com/xitrum-framework/xitrum/issues/592>`_
   Change URL to access Swagger UI from /xitrum/swagger-ui back to /xitrum/swagger
 
