@@ -24,10 +24,9 @@ class SetCORS extends ChannelOutboundHandlerAdapter {
     val request  = env.request
     val response = env.response
 
-    val requestOrigin = request.headers.get(ORIGIN)
-
     // Access-Control-Allow-Origin
     if (!response.headers.contains(ACCESS_CONTROL_ALLOW_ORIGIN)) {
+      val requestOrigin = request.headers.get(ORIGIN)
       if (corsAllowOrigins.head.equals("*")) {
         if (requestOrigin == null || requestOrigin == "null")
           response.headers.set(ACCESS_CONTROL_ALLOW_ORIGIN, "*")

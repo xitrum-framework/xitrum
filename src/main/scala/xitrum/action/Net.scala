@@ -106,12 +106,17 @@ trait Net {
 
   lazy val (serverName, serverPort) = {
     val np = request.headers.get(HttpHeaderNames.HOST)  // Ex: localhost, localhost:3000
-    val xs = np.split(':')
-    if (xs.length == 1) {
+    if (np == null) {
       val port = if (isSsl) 443 else 80
-      (xs(0), port)
+      ("localhost", port)
     } else {
-      (xs(0), xs(1).toInt)
+      val xs = np.split(':')
+      if (xs.length == 1) {
+        val port = if (isSsl) 443 else 80
+        (xs(0), port)
+      } else {
+        (xs(0), xs(1).toInt)
+      }
     }
   }
 }
