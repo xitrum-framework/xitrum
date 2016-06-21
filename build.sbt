@@ -3,7 +3,7 @@ name         := "xitrum"
 
 // Run "sbt mima-report-binary-issues" to check for binary compatibility ---------
 // https://github.com/typesafehub/migration-manager
-version := "3.26.1-SNAPSHOT"
+version := "3.26.2-SNAPSHOT"
 //com.typesafe.tools.mima.plugin.MimaPlugin.mimaDefaultSettings
 //com.typesafe.tools.mima.plugin.MimaKeys.previousArtifact := Some("tv.cntt" % ("xitrum_" + scalaBinaryVersion.value) % "3.26.0")
 
@@ -29,7 +29,7 @@ unmanagedSourceDirectories in Compile += baseDirectory.value / "src" / "main" / 
 libraryDependencies += "org.slf4s" %% "slf4s-api" % "1.7.12"
 
 // Netty is the core of Xitrum's HTTP(S) feature
-libraryDependencies += "io.netty" % "netty-all" % "4.1.0.Final"
+libraryDependencies += "io.netty" % "netty-all" % "4.1.1.Final"
 
 // https://github.com/netty/netty/wiki/Forked-Tomcat-Native
 // https://groups.google.com/forum/#!topic/netty/oRATC6Tl0A4
@@ -40,7 +40,7 @@ libraryDependencies += "io.netty" % "netty-tcnative" % "1.1.33.Fork17" classifie
 
 // https://github.com/netty/netty/wiki/Native-transports
 // Only works on Linux
-libraryDependencies += "io.netty" % "netty-transport-native-epoll" % "4.1.0.Final" classifier "linux-x86_64"
+libraryDependencies += "io.netty" % "netty-transport-native-epoll" % "4.1.1.Final" classifier "linux-x86_64"
 
 // Javassist boosts Netty 4 speed
 libraryDependencies += "org.javassist" % "javassist" % "3.20.0-GA"

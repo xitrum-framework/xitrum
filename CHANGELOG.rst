@@ -1,7 +1,9 @@
-3.27.0:
+3.26.2:
 
 * `#607 <https://github.com/xitrum-framework/xitrum/issues/607>`_
   Update Scaposer from 1.7 to 1.8
+* `#608 <https://github.com/xitrum-framework/xitrum/issues/608>`_
+  Update Netty from 4.1.0 to 4.1.1
 
 3.26.1:
 
