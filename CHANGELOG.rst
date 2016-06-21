@@ -1,9 +1,11 @@
 3.26.2:
 
-* `#607 <https://github.com/xitrum-framework/xitrum/issues/607>`_
-  Update Scaposer from 1.7 to 1.8
 * `#608 <https://github.com/xitrum-framework/xitrum/issues/608>`_
   Update Netty from 4.1.0 to 4.1.1
+* `#607 <https://github.com/xitrum-framework/xitrum/issues/607>`_
+  Update Scaposer from 1.7 to 1.8
+* `#609 <https://github.com/xitrum-framework/xitrum/issues/609>`_
+  Update slf4s-api from 1.7.12 to 1.7.13
 
 3.26.1:
 
