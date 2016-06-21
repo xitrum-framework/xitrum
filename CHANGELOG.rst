@@ -2,6 +2,8 @@
 
 * `#608 <https://github.com/xitrum-framework/xitrum/issues/608>`_
   Update Netty from 4.1.0 to 4.1.1
+* `#610 <https://github.com/xitrum-framework/xitrum/issues/610>`_
+  Update Akka from 2.4.6 to 2.4.7
 * `#607 <https://github.com/xitrum-framework/xitrum/issues/607>`_
   Update Scaposer from 1.7 to 1.8
 * `#609 <https://github.com/xitrum-framework/xitrum/issues/609>`_
