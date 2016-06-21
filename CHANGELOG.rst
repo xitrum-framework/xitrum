@@ -4,10 +4,12 @@
   Update Netty from 4.1.0 to 4.1.1
 * `#610 <https://github.com/xitrum-framework/xitrum/issues/610>`_
   Update Akka from 2.4.6 to 2.4.7
-* `#607 <https://github.com/xitrum-framework/xitrum/issues/607>`_
-  Update Scaposer from 1.7 to 1.8
 * `#609 <https://github.com/xitrum-framework/xitrum/issues/609>`_
   Update slf4s-api from 1.7.12 to 1.7.13
+* `#607 <https://github.com/xitrum-framework/xitrum/issues/607>`_
+  Update Scaposer from 1.7 to 1.8
+* `#611 <https://github.com/xitrum-framework/xitrum/issues/611>`_
+  Update JSON4S from 3.3.0 to 3.4.0
 
 3.26.1:
 
