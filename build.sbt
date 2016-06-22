@@ -94,13 +94,13 @@ libraryDependencies <+= scalaVersion { sv => "org.scala-lang" % "scalap" % sv }
 
 // WebJars ---------------------------------------------------------------------
 
-libraryDependencies += "org.webjars" % "jquery" % "2.2.4"
+libraryDependencies += "org.webjars" % "jquery" % "3.0.0"
 
 // jquery-validation declares dependency on jquery as "[1.9.1,)"
 // and SBT wrongly picks up the latest version like 3.0.0-alpha1,
 // so we force the version of jquery back to above
 libraryDependencies += "org.webjars" % "jquery-validation" % "1.15.0"
-dependencyOverrides += "org.webjars" % "jquery" % "2.2.4"
+dependencyOverrides += "org.webjars" % "jquery" % "3.0.0"
 
 libraryDependencies += "org.webjars.bower" % "sockjs-client" % "1.1.1"
 

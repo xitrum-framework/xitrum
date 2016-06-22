@@ -10,6 +10,8 @@
   Update Scaposer from 1.7 to 1.8
 * `#611 <https://github.com/xitrum-framework/xitrum/issues/611>`_
   Update JSON4S from 3.3.0 to 3.4.0
+* `#612 <https://github.com/xitrum-framework/xitrum/issues/612>`_
+  WebJars: Update jQuery 2.2.4 to 3.0.0
 
 3.26.1:
 
