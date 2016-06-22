@@ -12,6 +12,8 @@
   Update JSON4S from 3.3.0 to 3.4.0
 * `#612 <https://github.com/xitrum-framework/xitrum/issues/612>`_
   WebJars: Update jQuery 2.2.4 to 3.0.0
+* `#606 <https://github.com/xitrum-framework/xitrum/issues/606>`_
+  Set serverName to localhost if HOST header does not exist
 
 3.26.1:
 
