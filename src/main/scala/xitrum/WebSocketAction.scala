@@ -113,7 +113,7 @@ trait WebSocketAction extends Actor with Action {
   //----------------------------------------------------------------------------
 
   private def acceptWebSocket(): Boolean = {
-    val factory    = new WebSocketServerHandshakerFactory(webSocketAbsRequestUrl, null, false)
+    val factory    = new WebSocketServerHandshakerFactory(absWebSocketRequestUrl, null, false)
     val handshaker = factory.newHandshaker(request)
     if (handshaker == null) {
       val future = WebSocketServerHandshakerFactory.sendUnsupportedVersionResponse(channel)

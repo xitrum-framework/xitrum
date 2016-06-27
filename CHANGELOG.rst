@@ -1,3 +1,8 @@
+3.27.0:
+
+* `#614 <https://github.com/xitrum-framework/xitrum/issues/614>`_
+  Add object xitrum.action.Url so that it's easier to write URL helpers
+
 3.26.2:
 
 * `#608 <https://github.com/xitrum-framework/xitrum/issues/608>`_
