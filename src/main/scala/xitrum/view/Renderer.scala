@@ -1,6 +1,5 @@
 package xitrum.view
 
-import java.io.File
 import xitrum.{Action, Config}
 
 trait Renderer extends GetActionClassDefaultsToCurrentAction {
@@ -8,7 +7,7 @@ trait Renderer extends GetActionClassDefaultsToCurrentAction {
 
   var renderedView: Any = null
 
-  def layout = renderedView
+  def layout: Any = renderedView
 
   //----------------------------------------------------------------------------
 
@@ -41,134 +40,259 @@ trait Renderer extends GetActionClassDefaultsToCurrentAction {
   //----------------------------------------------------------------------------
 
   /**
-   * Renders the template associated with the location to "renderedView",
-   * then calls the layout function.
+   * Renders the template at ``uri`` ([[renderedView]] is not affected).
    *
    * @param options specific to the configured template engine
    */
-  def renderView(customLayout: () => Any, location: String, options: Map[String, Any]): String = {
+  def renderTemplate(uri: String, options: Map[String, Any]): String =
     Config.xitrum.template match {
       case Some(engine) =>
-        renderedView = engine.renderView(location, this, options)
-        customLayout.apply().toString
+        engine.renderTemplate(uri, this, options)
 
       case None =>
-        log.warn("No template engine is configured")
-        ""
+        throw new IllegalStateException("No template engine is configured")
     }
-  }
 
   /**
-   * Renders the template associated with the location to "renderedView",
-   * then calls the layout function.
+   * Renders the template at ``uri`` ([[renderedView]] is not affected).
    */
-  def renderView(customLayout: () => Any, location: String): String = {
-    renderView(customLayout, location, Map.empty[String, Any])
-  }
-
-  def renderView(location: String, options: Map[String, Any]): String =
-    renderView(layout _, location, options)
-
-  def renderView(location: String): String =
-    renderView(layout _, location, Map.empty[String, Any])
+  def renderTemplate(uri: String): String =
+    renderTemplate(uri, Map.empty[String, Any])
 
   //----------------------------------------------------------------------------
 
   /**
-   * Renders the template associated with the location to "renderedView",
-   * then calls the layout function.
+   * Renders the template at ``uri`` to [[renderedView]].
    *
    * @param options specific to the configured template engine
    */
-  def renderView(customLayout: () => Any, location: Class[_ <: Action], options: Map[String, Any]): String = {
-    renderView(customLayout, templatePathFromClass(location), options)
+  def renderViewNoLayout(uri: String, options: Map[String, Any]): String = {
+    val ret = renderTemplate(uri, options)
+    renderedView = ret
+    ret
   }
 
-  def renderView[T <: Action: Manifest](customLayout: () => Any, options: Map[String, Any]): String =
-    renderView(customLayout, getActionClass[T], options)
-
-  def renderView[T <: Action: Manifest](customLayout: () => Any): String =
-    renderView(customLayout, getActionClass[T], Map.empty[String, Any])
-
-  def renderView[T <: Action: Manifest](options: Map[String, Any]): String =
-    renderView(layout _, getActionClass[T], options)
-
-  def renderView[T <: Action: Manifest](): String =
-    renderView(layout _, getActionClass[T], Map.empty[String, Any])
+  /**
+   * Renders the template at ``uri`` to [[renderedView]].
+   */
+  def renderViewNoLayout(uri: String): String =
+    renderViewNoLayout(uri, Map.empty[String, Any])
 
   //----------------------------------------------------------------------------
 
-  def renderViewNoLayout(location: String, options: Map[String, Any]): String =
-    Config.xitrum.template match {
-      case Some(engine) =>
-        val ret = engine.renderView(location, this, options)
-        renderedView = ret
-        ret
+  /**
+   * Renders the template associated with the action to [[renderedView]].
+   *
+   * @param options specific to the configured template engine
+   */
+  def renderViewNoLayout(actionClass: Class[_ <: Action], options: Map[String, Any]): String =
+    renderViewNoLayout(templateUriFromClass(actionClass), options)
 
-      case None =>
-        log.warn("No template engine is configured")
-        ""
-    }
-
-  def renderViewNoLayout(location: String): String =
-    renderViewNoLayout(location, Map.empty[String, Any])
+  /**
+   * Renders the template associated with the action to [[renderedView]].
+   */
+  def renderViewNoLayout(actionClass: Class[_ <: Action]): String =
+    renderViewNoLayout(templateUriFromClass(actionClass), Map.empty[String, Any])
 
   //----------------------------------------------------------------------------
 
-  def renderViewNoLayout(location: Class[_ <: Action], options: Map[String, Any]): String =
-    renderViewNoLayout(templatePathFromClass(location), options)
-
+  /**
+   * Renders the template associated with the action to [[renderedView]].
+   *
+   * @param options specific to the configured template engine
+   */
   def renderViewNoLayout[T <: Action: Manifest](options: Map[String, Any]): String =
     renderViewNoLayout(getActionClass[T], options)
 
+  /**
+   * Renders the template associated with the action to [[renderedView]].
+   */
   def renderViewNoLayout[T <: Action: Manifest](): String =
     renderViewNoLayout(getActionClass[T], Map.empty[String, Any])
 
   //----------------------------------------------------------------------------
 
-  def renderFragment(directory: String, fragment: String, options: Map[String, Any]): String =
-    Config.xitrum.template match {
-      case Some(engine) =>
-        engine.renderFragment(directory, fragment, this, options)
+  /**
+   * Renders the template at ``uri`` to [[renderedView]], then calls the custom layout.
+   *
+   * @param options specific to the configured template engine
+   */
+  def renderView(customLayout: () => Any, uri: String, options: Map[String, Any]): String = {
+    renderViewNoLayout(uri, options)
+    customLayout.apply().toString
+  }
 
-      case None =>
-        log.warn("No template engine is configured")
-        ""
-    }
-
-  def renderFragment(directory: String, fragment: String): String =
-    renderFragment(directory, fragment, Map.empty[String, Any])
+  /**
+   * Renders the template at ``uri`` to [[renderedView]], then calls the custom layout.
+   */
+  def renderView(customLayout: () => Any, uri: String): String = {
+    renderView(customLayout, uri, Map.empty[String, Any])
+  }
 
   //----------------------------------------------------------------------------
 
-  def renderFragment(directory: Class[_ <: Action], fragment: String, options: Map[String, Any]): String =
-    renderFragment(fragmentDirectoryFromClass(directory), fragment, options)
+  /**
+   * Renders the template at ``uri`` to [[renderedView]], then calls [[layout]].
+   *
+   * @param options specific to the configured template engine
+   */
+  def renderView(uri: String, options: Map[String, Any]): String =
+    renderView(layout _, uri, options)
 
+  /**
+   * Renders the template at ``uri`` to [[renderedView]], then calls [[layout]].
+   */
+  def renderView(uri: String): String =
+    renderView(layout _, uri, Map.empty[String, Any])
+
+  //----------------------------------------------------------------------------
+
+  /**
+   * Renders the template associated with the action to [[renderedView]],
+   * then calls the custom layout.
+   *
+   * @param options specific to the configured template engine
+   */
+  def renderView(customLayout: () => Any, actionClass: Class[_ <: Action], options: Map[String, Any]): String = {
+    renderView(customLayout, templateUriFromClass(actionClass), options)
+  }
+
+  /**
+   * Renders the template associated with the action to [[renderedView]],
+   * then calls the custom layout.
+   */
+  def renderView(customLayout: () => Any, actionClass: Class[_ <: Action]): String = {
+    renderView(customLayout, templateUriFromClass(actionClass), Map.empty[String, Any])
+  }
+
+  //----------------------------------------------------------------------------
+
+  /**
+   * Renders the template associated with the action to [[renderedView]],
+   * then calls the custom layout.
+   *
+   * @param options specific to the configured template engine
+   */
+  def renderView[T <: Action: Manifest](customLayout: () => Any, options: Map[String, Any]): String =
+    renderView(customLayout, getActionClass[T], options)
+
+  /**
+   * Renders the template associated with the action to [[renderedView]],
+   * then calls the custom layout.
+   */
+  def renderView[T <: Action: Manifest](customLayout: () => Any): String =
+    renderView(customLayout, getActionClass[T], Map.empty[String, Any])
+
+  //----------------------------------------------------------------------------
+
+  /**
+   * Renders the template associated with the action to [[renderedView]],
+   * then calls [[layout]].
+   *
+   * @param options specific to the configured template engine
+   */
+  def renderView(actionClass: Class[_ <: Action], options: Map[String, Any]): String = {
+    renderView(layout _, templateUriFromClass(actionClass), options)
+  }
+
+  /**
+   * Renders the template associated with the action to [[renderedView]],
+   * then calls [[layout]].
+   */
+  def renderView(actionClass: Class[_ <: Action]): String = {
+    renderView(layout _, templateUriFromClass(actionClass), Map.empty[String, Any])
+  }
+
+  //----------------------------------------------------------------------------
+
+  /**
+   * Renders the template associated with the action to [[renderedView]],
+   * then calls [[layout]].
+   *
+   * @param options specific to the configured template engine
+   */
+  def renderView[T <: Action: Manifest](options: Map[String, Any]): String =
+    renderView(layout _, getActionClass[T], options)
+
+  /**
+   * Renders the template associated with the action to [[renderedView]],
+   * then calls [[layout]].
+   */
+  def renderView[T <: Action: Manifest](): String =
+    renderView(layout _, getActionClass[T], Map.empty[String, Any])
+
+  //----------------------------------------------------------------------------
+
+  /**
+   * Renders the template fragment at the directory.
+   *
+   * @param options specific to the configured template engine
+   */
+  def renderFragment(directoryUri: String, fragment: String, options: Map[String, Any]): String =
+    renderTemplate(directoryUri + "/_" + fragment, options)
+
+  /**
+   * Renders the template fragment at the directory.
+   */
+  def renderFragment(directoryUri: String, fragment: String): String =
+    renderFragment(directoryUri, fragment, Map.empty[String, Any])
+
+  //----------------------------------------------------------------------------
+
+  /**
+   * Renders the template fragment at the directory associated with the action.
+   *
+   * @param options specific to the configured template engine
+   */
+  def renderFragment(actionClass: Class[_ <: Action], fragment: String, options: Map[String, Any]): String =
+    renderFragment(fragmentDirectoryUriFromClass(actionClass), fragment, options)
+
+  /**
+   * Renders the template fragment at the directory associated with the action.
+   */
+  def renderFragment(actionClass: Class[_ <: Action], fragment: String): String =
+    renderFragment(actionClass, fragment, Map.empty[String, Any])
+
+  //----------------------------------------------------------------------------
+
+  /**
+   * Renders the template fragment at the directory associated with the action.
+   *
+   * @param options specific to the configured template engine
+   */
   def renderFragment[T <: Action: Manifest](fragment: String, options: Map[String, Any]): String =
     renderFragment(getActionClass[T], fragment, options)
 
+  /**
+   * Renders the template fragment at the directory associated with the action.
+   */
   def renderFragment[T <: Action: Manifest](fragment: String): String =
     renderFragment(getActionClass[T], fragment, Map.empty[String, Any])
 
   //----------------------------------------------------------------------------
 
+  /**
+   * Sets [[renderedView]] and call [[layout]].
+   */
   def renderInlineView(inlineView: Any): String = {
     renderedView = inlineView
-    val any = layout  // Call layout
+    val any = layout  // Call layout method
     any.toString
   }
 
   //----------------------------------------------------------------------------
 
   /** Converts, for example, a.b.C to a/b/C. */
-  private def templatePathFromClass(klass: Class[_]): String = {
-    klass.getName.replace('.', File.separatorChar)
+  private def templateUriFromClass(klass: Class[_]): String = {
+    // Scalate expects URI thus doesn't work with File.separatorChar on Windows
+    klass.getName.replace('.', '/')
   }
 
-  /** Converts, for example, a.b.C to a/b/C. */
-  private def fragmentDirectoryFromClass(klass: Class[_]): String = {
-    // location.getPackage will only return a non-null value if the current
-    // ClassLoader is already aware of the package
-    klass.getName.split('.').dropRight(1).mkString(File.separator)
+  /** Converts, for example, a.b.C to a/b. */
+  private def fragmentDirectoryUriFromClass(klass: Class[_]): String = {
+    // klass.getPackage only returns non-null if the current ClassLoader is already aware of the package.
+    //
+    // Scalate expects URI thus doesn't work with File.separator on Windows.
+    klass.getName.split('.').dropRight(1).mkString("/")
   }
 }

@@ -25,20 +25,11 @@ trait TemplateEngine {
    * Renders the template at the location identified by the path
    * (and may be options, depending on template engines).
    *
-   * @param path the template
+   * @param uri URI to the template
    *
    * @param options specific to the configured template engine
    */
-  def renderView(path: String, currentAction: Action, options: Map[String, Any]): String
-
-  /**
-   * Renders the fragment template at the directory.
-   *
-   * @param directory contains the fragment
-   *
-   * @param options specific to the configured template engine
-   */
-  def renderFragment(directory: String, fragment: String, currentAction: Action, options: Map[String, Any]): String
+  def renderTemplate(uri: String, currentAction: Action, options: Map[String, Any]): String
 }
 
 object TemplateEngine {
