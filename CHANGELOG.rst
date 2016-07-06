@@ -4,6 +4,8 @@
   Add object xitrum.action.Url so that it's easier to write URL helpers
 * `#616 <https://github.com/xitrum-framework/xitrum/issues/616>`_
   Use / instead of File.separatorChar in template path for Scalate so that it can work on Windows
+* `#617 <https://github.com/xitrum-framework/xitrum/issues/617>`_
+  Update Netty from 4.1.1 to 4.1.2
 
 3.26.2:
 
