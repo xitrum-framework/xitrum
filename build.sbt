@@ -1,11 +1,11 @@
 organization := "tv.cntt"
 name         := "xitrum"
-version      := "3.26.3-SNAPSHOT"
+version      := "3.27.0-SNAPSHOT"
 
 // Run "sbt mima-report-binary-issues" to check for binary compatibility
 // https://github.com/typesafehub/migration-manager
 //com.typesafe.tools.mima.plugin.MimaPlugin.mimaDefaultSettings
-//com.typesafe.tools.mima.plugin.MimaKeys.previousArtifact := Some("tv.cntt" % ("xitrum_" + scalaBinaryVersion.value) % "3.26.1")
+//com.typesafe.tools.mima.plugin.MimaKeys.previousArtifact := Some("tv.cntt" % ("xitrum_" + scalaBinaryVersion.value) % "3.27.0")
 
 //------------------------------------------------------------------------------
 
