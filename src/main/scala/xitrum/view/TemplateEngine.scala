@@ -22,8 +22,7 @@ trait TemplateEngine {
   def stop()
 
   /**
-   * Renders the template at the location identified by the path
-   * (and may be options, depending on template engines).
+   * Renders the template at ``uri``.
    *
    * @param uri URI to the template
    *
