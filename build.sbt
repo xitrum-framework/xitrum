@@ -18,6 +18,10 @@ scalacOptions ++= Seq("-deprecation", "-feature", "-unchecked")
 // Akka 2.4.0+ requires Java 8
 javacOptions ++= Seq("-source", "1.8", "-target", "1.8")
 
+// For LruCacheTest
+fork in Test := true
+javaOptions in Test += "-Dxitrum.mode=production"
+
 // Source code for Scala 2.11 and 2.12 may be a little different ---------------
 // See src/main/scala-2.11.
 
