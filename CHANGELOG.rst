@@ -18,6 +18,8 @@
   WebJars: Replace jquery-validation from org.webjars with the one from org.webjars.bower
 * `#623 <https://github.com/xitrum-framework/xitrum/issues/623>`_
   WebJars: Update Swagger from 2.1.4 to 2.1.8-M1
+* `#624 <https://github.com/xitrum-framework/xitrum/issues/624>`_
+  WebJars: Update D3.js from 3.5.17 to 4.1.1
 
 3.26.2:
 

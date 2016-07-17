@@ -79,8 +79,6 @@ libraryDependencies += "tv.cntt" % "rhinocoffeescript" % "1.10.0"
 
 // For metrics
 libraryDependencies += "nl.grons" %% "metrics-scala" % "3.5.4_a2.3"
-
-// For metrics
 libraryDependencies += "io.dropwizard.metrics" % "metrics-json" % "3.1.2"
 
 // JSON4S uses scalap 2.10.0/2.11.0, which in turn uses scala-compiler 2.10.0/2.11.0, which in
@@ -95,14 +93,10 @@ libraryDependencies <+= scalaVersion { sv => "org.scala-lang" % "scalap" % sv }
 // WebJars ---------------------------------------------------------------------
 
 libraryDependencies += "org.webjars.bower" % "jquery" % "3.1.0"
-
 libraryDependencies += "org.webjars.bower" % "jquery-validation" % "1.15.0"
-
 libraryDependencies += "org.webjars.bower" % "sockjs-client" % "1.1.1"
-
 libraryDependencies += "org.webjars.bower" % "swagger-ui" % "2.1.8-M1"
-
-libraryDependencies += "org.webjars" % "d3js" % "3.5.17"
+libraryDependencies += "org.webjars.bower" % "d3" % "4.1.1"
 
 // For test --------------------------------------------------------------------
 
