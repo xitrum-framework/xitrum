@@ -9,7 +9,7 @@
 * `#619 <https://github.com/xitrum-framework/xitrum/issues/619>`_
   Add some more render and respond variants for completeness
 * `#617 <https://github.com/xitrum-framework/xitrum/issues/617>`_
-  Update Netty from 4.1.1 to 4.1.2
+  Update Netty from 4.1.1 to 4.1.3
 
 3.26.2:
 
