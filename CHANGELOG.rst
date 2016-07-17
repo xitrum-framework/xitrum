@@ -16,6 +16,8 @@
   WebJars: Update jQuery 3.0.0 to 3.1.0
 * `#622 <https://github.com/xitrum-framework/xitrum/issues/622>`_
   WebJars: Replace jquery-validation from org.webjars with the one from org.webjars.bower
+* `#623 <https://github.com/xitrum-framework/xitrum/issues/623>`_
+  WebJars: Update Swagger from 2.1.4 to 2.1.8-M1
 
 3.26.2:
 
