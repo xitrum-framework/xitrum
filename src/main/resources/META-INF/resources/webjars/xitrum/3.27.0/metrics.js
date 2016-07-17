@@ -33,9 +33,6 @@
         height  = 300 - margin.top - margin.bottom
         ;
 
-
-    var format = d3.time.format("%Y/%m/%d %H:%M:%S");
-
     var $cpuTable        = $("#cpuTable"),
         $heapMemoryTable = $("#heapMemoryTable")
         ;
