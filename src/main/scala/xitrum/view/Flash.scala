@@ -2,14 +2,14 @@ package xitrum.view
 
 import xitrum.Action
 
-object Flash {
+object FlashRenderer {
   val FLASH_KEY = "_flash"
 }
 
-trait Flash {
+trait FlashRenderer {
   this: Action =>
 
-  import Flash._
+  import FlashRenderer._
 
   /** @see jsFlash(msg). */
   def flash(msg: Any) {
@@ -32,17 +32,7 @@ trait Flash {
 
   //----------------------------------------------------------------------------
 
-  private def jsFlashCall(msg: Any) = "xitrum.flash(\"" + jsEscape(msg) + "\")"
-
-  /**
-   * For web 2.0 style application.
-   * Used in Ajax request handling to respond a message and have the browser
-   * render it to the flash area right away.
-   */
-  def jsRespondFlash(msg: Any) {
-    val js = jsFlashCall(msg)
-    jsRespond(js)
-  }
+  protected def jsFlashCall(msg: Any) = "xitrum.flash(\"" + jsEscape(msg) + "\")"
 
   /**
    * For web 2.0 style application.
@@ -63,4 +53,18 @@ trait Flash {
 
   lazy val xitrumCss =
     <link href={webJarsUrl(s"xitrum/${xitrum.version}/xitrum.css")} type="text/css" rel="stylesheet" media="all" />
+}
+
+trait FlashResponder {
+  this: Action =>
+
+  /**
+    * For web 2.0 style application.
+    * Used in Ajax request handling to respond a message and have the browser
+    * render it to the flash area right away.
+    */
+  def jsRespondFlash(msg: Any) {
+    val js = jsFlashCall(msg)
+    jsRespond(js)
+  }
 }

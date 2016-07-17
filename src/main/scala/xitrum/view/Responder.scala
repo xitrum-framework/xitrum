@@ -21,7 +21,7 @@ import xitrum.util.{ByteBufUtil, SeriDeseri}
  * When responding text, charset is automatically set, as advised by Google:
  * http://code.google.com/speed/page-speed/docs/rendering.html#SpecifyCharsetEarly
  */
-trait Responder extends Js with Flash with GetActionClassDefaultsToCurrentAction {
+trait Responder {
   this: Action =>
 
   //----------------------------------------------------------------------------
@@ -219,93 +219,6 @@ trait Responder extends Js with Flash with GetActionClassDefaultsToCurrentAction
 
   //----------------------------------------------------------------------------
 
-  /**
-   * @param options specific to the configured template engine
-   */
-  def respondView(customLayout: () => Any, location: String, options: Map[String, Any]): ChannelFuture = {
-    val string = renderView(customLayout, location, options)
-    respondText(string, "text/html")
-  }
-
-  def respondView(customLayout: () => Any, location: String): ChannelFuture = {
-    val string = renderView(customLayout, location, Map.empty[String, Any])
-    respondText(string, "text/html")
-  }
-
-  def respondView(location: String, options: Map[String, Any]): ChannelFuture = {
-    val string = renderView(layout _, location, options)
-    respondText(string, "text/html")
-  }
-
-  def respondView(location: String): ChannelFuture = {
-    val string = renderView(layout _, location, Map.empty[String, Any])
-    respondText(string, "text/html")
-  }
-
-  //----------------------------------------------------------------------------
-
-  /**
-   * @param options specific to the configured template engine
-   */
-  def respondView(customLayout: () => Any, location: Class[_ <: Action], options: Map[String, Any]): ChannelFuture = {
-    val string = renderView(customLayout, location, options)
-    respondText(string, "text/html")
-  }
-
-  def respondView[T <: Action: Manifest](customLayout: () => Any, options: Map[String, Any]): ChannelFuture = {
-    respondView(customLayout, getActionClass[T], options)
-  }
-
-  def respondView[T <: Action: Manifest](customLayout: () => Any): ChannelFuture = {
-    respondView(customLayout, getActionClass[T], Map.empty[String, Any])
-  }
-
-  def respondView[T <: Action: Manifest](options: Map[String, Any]): ChannelFuture = {
-    respondView(layout _, getActionClass[T], options)
-  }
-
-  def respondView[T <: Action: Manifest](): ChannelFuture = {
-    respondView(layout _, getActionClass[T], Map.empty[String, Any])
-  }
-
-  //----------------------------------------------------------------------------
-
-  /** Content-Type header is set to "text/html". */
-  def respondViewNoLayout(location: String, options: Map[String, Any]): ChannelFuture = {
-    val string = renderViewNoLayout(location, options)
-    respondText(string, "text/html")
-  }
-
-  def respondViewNoLayout(location: String): ChannelFuture = {
-    val string = renderViewNoLayout(location, Map.empty[String, Any])
-    respondText(string, "text/html")
-  }
-  //----------------------------------------------------------------------------
-
-  /** Content-Type header is set to "text/html". */
-  def respondViewNoLayout(location: Class[_ <: Action], options: Map[String, Any]): ChannelFuture = {
-    val string = renderViewNoLayout(location, options)
-    respondText(string, "text/html")
-  }
-
-  def respondViewNoLayout[T <: Action: Manifest](options: Map[String, Any]): ChannelFuture = {
-    respondViewNoLayout(getActionClass[T], options)
-  }
-
-  def respondViewNoLayout[T <: Action: Manifest](): ChannelFuture = {
-    respondViewNoLayout(getActionClass[T], Map.empty[String, Any])
-  }
-
-  //----------------------------------------------------------------------------
-
-  /** Content-Type header is set to "text/html". */
-  def respondInlineView(inlineView: Any): ChannelFuture = {
-    val string = renderInlineView(inlineView)
-    respondText(string, "text/html")
-  }
-
-  //----------------------------------------------------------------------------
-
   /** If Content-Type header is not set, it is set to "application/octet-stream". */
   def respondBinary(bytes: Array[Byte]): ChannelFuture = {
     respondBinary(Unpooled.wrappedBuffer(bytes))
@@ -385,7 +298,7 @@ trait Responder extends Js with Flash with GetActionClassDefaultsToCurrentAction
       response.setStatus(HttpResponseStatus.NOT_FOUND)
       jsRespond("alert(\"" + jsEscape("Not Found") + "\")")
     } else {
-      XSendFile.set404Page(response, true)
+      XSendFile.set404Page(response, fromController = true)
       respond()
     }
   }
@@ -395,7 +308,7 @@ trait Responder extends Js with Flash with GetActionClassDefaultsToCurrentAction
       response.setStatus(HttpResponseStatus.INTERNAL_SERVER_ERROR)
       jsRespond("alert(\"" + jsEscape("Internal Server Error") + "\")")
     } else {
-      XSendFile.set500Page(response, true)
+      XSendFile.set500Page(response, fromController = true)
       respond()
     }
   }
@@ -409,7 +322,7 @@ trait Responder extends Js with Flash with GetActionClassDefaultsToCurrentAction
     } else {
       Config.routes.error404 match {
         case None =>
-          XSendFile.set404Page(response, true)
+          XSendFile.set404Page(response, fromController = true)
           respond()
 
         case Some(error404) =>
@@ -426,7 +339,7 @@ trait Responder extends Js with Flash with GetActionClassDefaultsToCurrentAction
     } else {
       Config.routes.error500 match {
         case None =>
-          XSendFile.set500Page(response, true)
+          XSendFile.set500Page(response, fromController = true)
           respond()
 
         case Some(error500) =>

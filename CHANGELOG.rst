@@ -6,6 +6,8 @@
   Use / instead of File.separatorChar in template path for Scalate so that it can work on Windows
 * `#618 <https://github.com/xitrum-framework/xitrum/issues/618>`_
   Simplify xitrum.view.TemplateEngine interface
+* `#619 <https://github.com/xitrum-framework/xitrum/issues/619>`_
+  Add some more render and respond variants for completeness
 * `#617 <https://github.com/xitrum-framework/xitrum/issues/617>`_
   Update Netty from 4.1.1 to 4.1.2
 

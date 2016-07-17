@@ -9,13 +9,10 @@ import xitrum.Action
 
 // http://stackoverflow.com/questions/2703861/chromes-loading-indicator-keeps-spinning-during-xmlhttprequest
 // http://stackoverflow.com/questions/1735560/stop-the-browser-throbber-of-doom-while-loading-comet-server-push-xmlhttpreques
-trait Js {
+trait JsRenderer {
   this: Action =>
 
   private val buffer = new StringBuilder
-
-  // lazy because request is null when this instance is created
-  lazy val isAjax = request.headers.contains("X-Requested-With")
 
   /**
    * You can use this method to add dynamic JS snippets to a buffer, then use
@@ -29,6 +26,20 @@ trait Js {
 
   /** See jsAddToView. */
   lazy val jsForView = if (buffer.isEmpty) "" else <script type="text/javascript">{Unparsed("\n//<![CDATA[\n$(function() {\n" + buffer.toString + "});\n//]]>\n")}</script>
+
+  lazy val jsDefaults = {
+    // See directory src/main/resources/META-INF/resources/webjars/jquery-validation
+    val validateI18n = if (language.contains("en")) "" else (<script type="text/javascript" src={webJarsUrl("jquery-validation/1.15.0/localization", s"messages_$language.js", s"messages_$language.min.js")}></script>)
+
+    <xml:group>
+      <script type="text/javascript" src={webJarsUrl("jquery/3.0.0",              "jquery.js",             "jquery.min.js")}></script>
+      <script type="text/javascript" src={webJarsUrl("jquery-validation/1.15.0",  "jquery.validate.js",    "jquery.validate.min.js")}></script>
+      <script type="text/javascript" src={webJarsUrl("jquery-validation/1.15.0",  "additional-methods.js", "additional-methods.min.js")}></script>
+      {validateI18n}
+      <script type="text/javascript" src={webJarsUrl("sockjs-client/1.1.1/dist",  "sockjs.js",             "sockjs.min.js")}></script>
+      <script type="text/javascript" src={url[xitrum.js]}></script>
+    </xml:group>
+  }
 
   //----------------------------------------------------------------------------
 
@@ -46,8 +57,13 @@ trait Js {
   def js$id(id: String) = js$("#" + id)
 
   def js$name(name: String) = js$("[name='" + name + "']")
+}
 
-  //----------------------------------------------------------------------------
+trait JsResponder {
+  this: Action =>
+
+  // lazy because request is null when this instance is created
+  lazy val isAjax = request.headers.contains("X-Requested-With")
 
   def jsRespond(fragments: Any*): ChannelFuture = {
     val js = fragments.mkString(";\n") + ";\n"
@@ -55,25 +71,9 @@ trait Js {
   }
 
   /** See http://stackoverflow.com/questions/503093/how-can-i-make-a-redirect-page-in-jquery */
-  def jsRedirectTo(location: Any): ChannelFuture = {
-    jsRespond("window.location.href = \"" + jsEscape(location) + "\"")
-  }
+  def jsRedirectTo(location: Any): ChannelFuture =
+  jsRespond("window.location.href = \"" + jsEscape(location) + "\"")
 
-  def jsRedirectTo[T <: Action : Manifest](params: (String, Any)*): ChannelFuture = { jsRedirectTo(url[T](params:_*)) }
-
-  //----------------------------------------------------------------------------
-
-  lazy val jsDefaults = {
-    // See directory src/main/resources/META-INF/resources/webjars/jquery-validation
-    val validateI18n = if (language == "en") "" else (<script type="text/javascript" src={webJarsUrl("jquery-validation/1.15.0/localization", s"messages_$language.js", s"messages_$language.min.js")}></script>)
-
-    <xml:group>
-      <script type="text/javascript" src={webJarsUrl("jquery/3.0.0",              "jquery.js",             "jquery.min.js")}></script>
-      <script type="text/javascript" src={webJarsUrl("jquery-validation/1.15.0",  "jquery.validate.js",    "jquery.validate.min.js")}></script>
-      <script type="text/javascript" src={webJarsUrl("jquery-validation/1.15.0",  "additional-methods.js", "additional-methods.min.js")}></script>
-      {validateI18n}
-      <script type="text/javascript" src={webJarsUrl("sockjs-client/1.1.1/dist",  "sockjs.js",             "sockjs.min.js")}></script>
-      <script type="text/javascript" src={url[xitrum.js]}></script>
-    </xml:group>
-  }
+  def jsRedirectTo[T <: Action : Manifest](params: (String, Any)*): ChannelFuture =
+    jsRedirectTo(url[T](params:_*))
 }

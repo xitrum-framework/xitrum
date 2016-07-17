@@ -168,8 +168,8 @@ trait Url {
     */
   def webJarsUrl(directory: String, devFile: String, prodFile: String) = Url.webJarsUrl(directory, devFile, prodFile)
 
-  def url(params: (String, Any)*) = Url.url(getClass.getName, params:_*)
-  lazy val url: String = url()
+  def url(params: (String, Any)*): String = Url.url(getClass.getName, params:_*)
+  lazy val url: String = Url.url(getClass.getName)
 
   def url[T <: Action : Manifest](params: (String, Any)*) = Url.url[T](params:_*)
   def url[T <: Action : Manifest]: String = url[T]()
@@ -178,14 +178,14 @@ trait Url {
 
   //----------------------------------------------------------------------------
 
-  def absUrl(params: (String, Any)*): String = absUrlPrefix + url(params:_*)
-  lazy val absUrl: String = absUrl()
+  def absUrl(params: (String, Any)*): String = absUrlPrefix + Url.url(getClass.getName, params:_*)
+  lazy val absUrl: String = absUrlPrefix + Url.url(getClass.getName)
 
   def absUrl[T <: Action : Manifest](params: (String, Any)*): String = absUrlPrefix + url[T](params:_*)
   def absUrl[T <: Action : Manifest]: String = absUrl[T]()
 
-  def absWebSocketUrl(params: (String, Any)*): String = absWebSocketUrlPrefix + url(params:_*)
-  lazy val absWebSocketUrl: String = absWebSocketUrl()
+  def absWebSocketUrl(params: (String, Any)*): String = absWebSocketUrlPrefix + Url.url(getClass.getName, params:_*)
+  lazy val absWebSocketUrl: String = absWebSocketUrlPrefix + Url.url(getClass.getName)
 
   def absWebSocketUrl[T <: WebSocketAction : Manifest](params: (String, Any)*): String = {
     val klass = manifest[T].runtimeClass.asInstanceOf[Class[Action]]

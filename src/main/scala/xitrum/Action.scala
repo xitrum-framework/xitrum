@@ -1,6 +1,7 @@
 package xitrum
 
 import java.util.concurrent.TimeUnit
+
 import scala.concurrent.duration.Duration
 import scala.util.control.NonFatal
 
@@ -16,7 +17,7 @@ import xitrum.handler.inbound.Dispatcher
 import xitrum.handler.outbound.ResponseCacher
 import xitrum.scope.request.RequestEnv
 import xitrum.scope.session.{Csrf, SessionEnv}
-import xitrum.view.{Renderer, Responder}
+import xitrum.view.{FlashRenderer, FlashResponder, JsRenderer, JsResponder, Renderer, Responder, ViewRenderer, ViewResponder}
 
 object Action {
   val TIMEOUT = Duration(5, TimeUnit.SECONDS)
@@ -38,7 +39,13 @@ trait Action extends RequestEnv
   with Redirect
   with Url
   with Renderer
+  with ViewRenderer
   with Responder
+  with ViewResponder
+  with FlashRenderer
+  with FlashResponder
+  with JsRenderer
+  with JsResponder
   with I18n
 {
   /** This is convenient, for example, when you want to get the current action in view templates. */
