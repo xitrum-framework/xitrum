@@ -32,7 +32,7 @@ trait JsRenderer {
     val validateI18n = if (language.contains("en")) "" else (<script type="text/javascript" src={webJarsUrl("jquery-validation/1.15.0/localization", s"messages_$language.js", s"messages_$language.min.js")}></script>)
 
     <xml:group>
-      <script type="text/javascript" src={webJarsUrl("jquery/3.0.0",              "jquery.js",             "jquery.min.js")}></script>
+      <script type="text/javascript" src={webJarsUrl("jquery/3.1.0/dist",         "jquery.js",             "jquery.min.js")}></script>
       <script type="text/javascript" src={webJarsUrl("jquery-validation/1.15.0",  "jquery.validate.js",    "jquery.validate.min.js")}></script>
       <script type="text/javascript" src={webJarsUrl("jquery-validation/1.15.0",  "additional-methods.js", "additional-methods.min.js")}></script>
       {validateI18n}

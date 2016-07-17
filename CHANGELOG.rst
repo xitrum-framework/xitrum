@@ -12,6 +12,8 @@
   Update Netty from 4.1.1 to 4.1.3
 * `#620 <https://github.com/xitrum-framework/xitrum/issues/620>`_
   Update Akka from 2.4.7 to 2.4.8
+* `#621 <https://github.com/xitrum-framework/xitrum/issues/621>`_
+  WebJars: Update jQuery 3.0.0 to 3.1.0
 
 3.26.2:
 
