@@ -10,6 +10,8 @@
   Add some more render and respond variants for completeness
 * `#617 <https://github.com/xitrum-framework/xitrum/issues/617>`_
   Update Netty from 4.1.1 to 4.1.3
+* `#620 <https://github.com/xitrum-framework/xitrum/issues/620>`_
+  Update Akka from 2.4.7 to 2.4.8
 
 3.26.2:
 
