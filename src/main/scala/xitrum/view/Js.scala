@@ -28,15 +28,14 @@ trait JsRenderer {
   lazy val jsForView = if (buffer.isEmpty) "" else <script type="text/javascript">{Unparsed("\n//<![CDATA[\n$(function() {\n" + buffer.toString + "});\n//]]>\n")}</script>
 
   lazy val jsDefaults = {
-    // See directory src/main/resources/META-INF/resources/webjars/jquery-validation
-    val validateI18n = if (language.contains("en")) "" else (<script type="text/javascript" src={webJarsUrl("jquery-validation/1.15.0/localization", s"messages_$language.js", s"messages_$language.min.js")}></script>)
+    val validateI18n = if (language.contains("en")) "" else (<script type="text/javascript" src={webJarsUrl(s"jquery-validation/1.15.0/src/localization/messages_$language.js")}></script>)
 
     <xml:group>
-      <script type="text/javascript" src={webJarsUrl("jquery/3.1.0/dist",         "jquery.js",             "jquery.min.js")}></script>
-      <script type="text/javascript" src={webJarsUrl("jquery-validation/1.15.0",  "jquery.validate.js",    "jquery.validate.min.js")}></script>
-      <script type="text/javascript" src={webJarsUrl("jquery-validation/1.15.0",  "additional-methods.js", "additional-methods.min.js")}></script>
+      <script type="text/javascript" src={webJarsUrl("jquery/3.1.0/dist",             "jquery.js",             "jquery.min.js")}></script>
+      <script type="text/javascript" src={webJarsUrl("jquery-validation/1.15.0/dist", "jquery.validate.js",    "jquery.validate.min.js")}></script>
+      <script type="text/javascript" src={webJarsUrl("jquery-validation/1.15.0/dist", "additional-methods.js", "additional-methods.min.js")}></script>
       {validateI18n}
-      <script type="text/javascript" src={webJarsUrl("sockjs-client/1.1.1/dist",  "sockjs.js",             "sockjs.min.js")}></script>
+      <script type="text/javascript" src={webJarsUrl("sockjs-client/1.1.1/dist",      "sockjs.js",             "sockjs.min.js")}></script>
       <script type="text/javascript" src={url[xitrum.js]}></script>
     </xml:group>
   }

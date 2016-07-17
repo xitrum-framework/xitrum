@@ -14,6 +14,8 @@
   Update Akka from 2.4.7 to 2.4.8
 * `#621 <https://github.com/xitrum-framework/xitrum/issues/621>`_
   WebJars: Update jQuery 3.0.0 to 3.1.0
+* `#622 <https://github.com/xitrum-framework/xitrum/issues/622>`_
+  WebJars: Replace jquery-validation from org.webjars with the one from org.webjars.bower
 
 3.26.2:
 
