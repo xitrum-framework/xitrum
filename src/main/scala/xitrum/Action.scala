@@ -161,7 +161,7 @@ trait Action extends RequestEnv
                 }
             }
           } else {
-            val errorMsg = e.toString + "\n\n" + ExceptionUtils.getStackTrace(e)
+            val errorMsg = ExceptionUtils.getStackTrace(e)
             if (isAjax)
               jsRespond("alert(\"" + jsEscape(errorMsg) + "\")")
             else

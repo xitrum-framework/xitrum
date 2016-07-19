@@ -1,3 +1,8 @@
+3.28.0:
+
+* `#626 <https://github.com/xitrum-framework/xitrum/issues/626>`_
+  Avoid duplicate info in error message
+
 3.27.0:
 
 * `#614 <https://github.com/xitrum-framework/xitrum/issues/614>`_
