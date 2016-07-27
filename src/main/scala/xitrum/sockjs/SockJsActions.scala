@@ -171,12 +171,12 @@ trait SockJsPrefix {
   /** Called by Dispatcher. */
   def setPathPrefix(pathInfo: PathInfo) {
     val n       = nLastTokensToRemoveFromPathInfo
-    val encoded = pathInfo.encoded
+    val decoded = pathInfo.decoded
     pathPrefix =
       if (n == 0)
-        encoded.substring(1)
+        decoded.substring(1)
       else if (n == 1)
-        encoded.substring(1, encoded.lastIndexOf("/"))
+        decoded.substring(1, decoded.lastIndexOf("/"))
       else {
         val tokens = pathInfo.tokens
         tokens.take(tokens.length - n).mkString("/")

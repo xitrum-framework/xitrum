@@ -316,7 +316,7 @@ class RouteCollection(
   def route(httpMethod: HttpMethod, pathInfo: PathInfo): Option[(Route, Params)] = {
     // This method is run for every request, thus should be fast
 
-    val key   = httpMethod + pathInfo.encoded
+    val key   = httpMethod + pathInfo.decoded
     val value = matchedRouteCache.get(key)
     if (value != null) return Some(value)
 

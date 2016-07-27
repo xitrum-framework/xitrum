@@ -1,7 +1,9 @@
-3.28.0:
+3.27.1:
 
 * `#626 <https://github.com/xitrum-framework/xitrum/issues/626>`_
   Avoid duplicate info in error message
+* `#627 <https://github.com/xitrum-framework/xitrum/issues/627>`_
+  Allow spaces and non-ASCII characters in static file names
 
 3.27.0:
 

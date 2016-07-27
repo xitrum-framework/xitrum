@@ -125,9 +125,9 @@ class DefaultHttpChannelInitializer extends ChannelInitializer[SocketChannel] {
     if (Config.xitrum.basicAuth.isDefined)
     p.addLast(classOf[BasicAuth].getName,                basicAuth)
 
+    p.addLast(classOf[UriParser].getName,                uriParser)
     p.addLast(classOf[PublicFileServer].getName,         publicFileServer)
     p.addLast(classOf[WebJarsServer].getName,            webJarsServer)
-    p.addLast(classOf[UriParser].getName,                uriParser)
     p.addLast(classOf[MethodOverrider].getName,          methodOverrider)
     p.addLast(classOf[Dispatcher].getName,               dispatcher)
     p.addLast(classOf[BadClientSilencer].getName,        badClientSilencer)

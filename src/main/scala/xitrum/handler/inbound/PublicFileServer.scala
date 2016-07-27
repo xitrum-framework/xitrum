@@ -22,13 +22,13 @@ import xitrum.util.PathSanitizer
 @Sharable
 class PublicFileServer extends SimpleChannelInboundHandler[HandlerEnv] {
   override def channelRead0(ctx: ChannelHandlerContext, env: HandlerEnv) {
-    val request = env.request
-    if (request.method != GET && request.method != HEAD && request.method != OPTIONS) {
+    val method = env.request.method
+    if (method != GET && method != HEAD && method != OPTIONS) {
       ctx.fireChannelRead(env)
       return
     }
 
-    val pathInfo = request.uri.split('?')(0)
+    val pathInfo = env.pathInfo.decoded
     if (Config.xitrum.staticFile.pathRegex.findFirstIn(pathInfo).isEmpty) {
       ctx.fireChannelRead(env)
       return
@@ -44,7 +44,7 @@ class PublicFileServer extends SimpleChannelInboundHandler[HandlerEnv] {
         val file = new File(abs)
         if (file.isFile && file.exists) {
           response.setStatus(OK)
-          if (request.method == OPTIONS) {
+          if (method == OPTIONS) {
             ctx.channel.writeAndFlush(env)
           } else {
             if (!Config.xitrum.staticFile.revalidate)
