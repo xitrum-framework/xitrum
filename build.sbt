@@ -33,11 +33,11 @@ unmanagedSourceDirectories in Compile += baseDirectory.value / "src" / "main" / 
 libraryDependencies += "org.slf4s" %% "slf4s-api" % "1.7.13"
 
 // Netty is the core of Xitrum's HTTP(S) feature
-libraryDependencies += "io.netty" % "netty-all" % "4.1.3.Final"
+libraryDependencies += "io.netty" % "netty-all" % "4.1.4.Final"
 
 // https://github.com/netty/netty/wiki/Native-transports
 // Only works on Linux
-libraryDependencies += "io.netty" % "netty-transport-native-epoll" % "4.1.3.Final" classifier "linux-x86_64"
+libraryDependencies += "io.netty" % "netty-transport-native-epoll" % "4.1.4.Final" classifier "linux-x86_64"
 
 // https://github.com/netty/netty/wiki/Forked-Tomcat-Native
 // https://groups.google.com/forum/#!topic/netty/oRATC6Tl0A4

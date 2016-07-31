@@ -4,6 +4,8 @@
   Avoid duplicate info in error message
 * `#627 <https://github.com/xitrum-framework/xitrum/issues/627>`_
   Allow spaces and non-ASCII characters in static file names
+* `#628 <https://github.com/xitrum-framework/xitrum/issues/628>`_
+  Update Netty from 4.1.3 to 4.1.4
 
 3.27.0:
 
