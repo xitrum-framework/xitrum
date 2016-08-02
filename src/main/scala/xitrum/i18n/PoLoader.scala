@@ -1,6 +1,7 @@
 package xitrum.i18n
 
 import java.io.File
+import java.util.Locale
 import scala.collection.mutable.{ArrayBuffer, Map => MMap}
 
 import scaposer.{Parser, I18n}
@@ -13,29 +14,30 @@ object PoLoader {
   // Also watch this directory in development mode
   private val DEV_RESOURCES_DIR = "src/main/resources"
 
-  private val cache = MMap.empty[String, I18n]
+  private val cache = MMap.empty[Locale, I18n]
   watch()
 
   /**
-   * For the specified language, this method loads and merges all po files in
-   * classpath and src/main/resources, at i18n/<language>.po.
+   * For the specified `locale`, this method loads and merges all `i18n/<languageTag>.po`
+   * files in classpath.
    *
-   * You can store the po files in JAR files, at src/main/resources/i18n/<language>.po
-   * (compile time), or at config/i18n/<language>.po ("config" directory is put
+   * You can store the po files in JAR files, at `src/main/resources/i18n/<languageTag>.po`
+   * (compile time), or at `config/i18n/<languageTag>.po` ("config" directory is put
    * to classpath by Xitrum at run time, this is convenient if you want to modify
    * po files at run time without having to recompile or restart).
    *
    * The result is stored in cache for further fast access. If you want to reload
-   * the po files, use clear() or remove(language) to clean the cache, then load again.
+   * the po files, use `clear()` or `remove(languageTag)` to clean the cache, then load again.
    *
    * @return Empty Po if there's no po file
    */
-  def get(language: String): I18n = {
-    if (cache.isDefinedAt(language)) return cache(language)
+  def get(locale: Locale): I18n = {
+    if (cache.isDefinedAt(locale)) return cache(locale)
 
     synchronized {
-      val urlEnum = Thread.currentThread.getContextClassLoader.getResources("i18n/" + language + ".po")
-      val buffer  = ArrayBuffer.empty[I18n]
+      val languageTag = locale.toLanguageTag
+      val urlEnum     = Thread.currentThread.getContextClassLoader.getResources("i18n/" + languageTag + ".po")
+      val buffer      = ArrayBuffer.empty[I18n]
       while (urlEnum.hasMoreElements) {
         val url    = urlEnum.nextElement()
         val is     = url.openStream()
@@ -50,7 +52,7 @@ object PoLoader {
         }
       }
 
-      val file = new File(DEV_RESOURCES_DIR + "/i18n/" + language + ".po")
+      val file = new File(DEV_RESOURCES_DIR + "/i18n/" + languageTag + ".po")
       if (file.exists) {
         val string = Loader.stringFromFile(file)
         Parser.parse(string) match {
@@ -64,7 +66,7 @@ object PoLoader {
       }
 
       val ret = buffer.foldLeft(new I18n(Map.empty)) { (acc, e) => acc ++ e }
-      cache(language) = ret
+      cache(locale) = ret
       ret
     }
   }
@@ -77,19 +79,19 @@ object PoLoader {
   }
 
   /**
-   * Clears all loaded po files of the specified language in the cache.
+   * Clears all loaded po files of the specified locale in the cache.
    */
-  def remove(language: String) = synchronized {
-    cache.remove(language)
+  def remove(locale: Locale) = synchronized {
+    cache.remove(locale)
   }
 
   /**
-   * Reloads all loaded po files of the specified language in the cache.
+   * Reloads all loaded po files of the specified languageTag in the cache.
    */
-  def reload(language: String) {
-    Log.info("Reload po file of language: " + language)
-    remove(language)
-    get(language)
+  def reload(locale: Locale) {
+    Log.info("Reload po file of locale: " + locale)
+    remove(locale)
+    get(locale)
   }
 
   /**
@@ -106,8 +108,9 @@ object PoLoader {
         FileMonitor.monitor(FileMonitor.MODIFY, i18nPath, { path =>
           val fileName = path.getFileName.toString
           if (fileName.endsWith(".po")) {
-            val lang = fileName.substring(0, fileName.length - ".po".length)
-            reload(lang)
+            val languageTag = fileName.substring(0, fileName.length - ".po".length)
+            val locale = Locale.forLanguageTag(languageTag)
+            reload(locale)
           }
         })
       }

@@ -1,5 +1,7 @@
 package xitrum
 
+import java.util.Locale
+
 trait Component extends Action {
   private var parent: Action = _
 
@@ -17,8 +19,8 @@ trait Component extends Action {
 
   override lazy val at = parent.at
 
-  override def language = parent.language
-  override def language_=(lang: String) { parent.language = lang }
+  override def locale = parent.locale
+  override def locale_=(locale: Locale) { parent.locale = locale }
 
   //----------------------------------------------------------------------------
   // Reuse things from parent, things that can be calculated from handlerEnv,
@@ -34,5 +36,5 @@ trait Component extends Action {
   override lazy val serverName = parent.serverName
   override lazy val serverPort = parent.serverPort
 
-  override lazy val browserLanguages = parent.browserLanguages
+  override lazy val browserLanguageRanges = parent.browserLanguageRanges
 }

@@ -1,9 +1,11 @@
-3.27.1:
+3.28.0:
 
 * `#626 <https://github.com/xitrum-framework/xitrum/issues/626>`_
   Avoid duplicate info in error message
 * `#627 <https://github.com/xitrum-framework/xitrum/issues/627>`_
   Allow spaces and non-ASCII characters in static file names
+* `#629 <https://github.com/xitrum-framework/xitrum/issues/629>`_
+  Remove tf, tcf, tnf, and tcnf in I18n
 * `#628 <https://github.com/xitrum-framework/xitrum/issues/628>`_
   Update Netty from 4.1.3 to 4.1.4
 

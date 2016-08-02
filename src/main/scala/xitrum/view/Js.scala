@@ -28,7 +28,9 @@ trait JsRenderer {
   lazy val jsForView = if (buffer.isEmpty) "" else <script type="text/javascript">{Unparsed("\n//<![CDATA[\n$(function() {\n" + buffer.toString + "});\n//]]>\n")}</script>
 
   lazy val jsDefaults = {
-    val validateI18n = if (language.contains("en")) "" else (<script type="text/javascript" src={webJarsUrl(s"jquery-validation/1.15.0/src/localization/messages_$language.js")}></script>)
+    // java.util.Locale.FRANCE.toLanguageTag => fr_FR
+    // java.util.Locale.FRANCE.toLanguageTag => fr-FR
+    val validateI18n = if (locale.getLanguage == "en") "" else (<script type="text/javascript" src={webJarsUrl(s"jquery-validation/1.15.0/src/localization/messages_${locale.toString}.js")}></script>)
 
     <xml:group>
       <script type="text/javascript" src={webJarsUrl("jquery/3.1.0/dist",             "jquery.js",             "jquery.min.js")}></script>

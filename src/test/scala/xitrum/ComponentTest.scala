@@ -1,5 +1,7 @@
 package xitrum
 
+import java.util.Locale
+
 import org.scalatest.{FlatSpec, Matchers}
 
 object ComponentTest {
@@ -20,15 +22,15 @@ class ComponentTest extends FlatSpec with Matchers {
     a.t("Hello World") shouldBe "Hello World"
     c.t("Hello World") shouldBe "Hello World"
 
-    a.language = "ru"
-    c.language shouldBe "ru"
+    a.locale = Locale.forLanguageTag("ru")
+    c.locale shouldBe Locale.forLanguageTag("ru")
 
     // See src/test/resources/i18n/ru.po
     a.t("Hello World") shouldBe "привет мир"
     c.t("Hello World") shouldBe "привет мир"
 
-    c.language = "ja"
-    a.language shouldBe "ja"
+    c.locale = Locale.JAPAN
+    a.locale shouldBe Locale.JAPAN
 
     // Unknown language should take no effect
     a.t("Hello World") shouldBe "Hello World"

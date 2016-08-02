@@ -1,6 +1,6 @@
 organization := "tv.cntt"
 name         := "xitrum"
-version      := "3.27.1-SNAPSHOT"
+version      := "3.28.0-SNAPSHOT"
 
 // Run "sbt mima-report-binary-issues" to check for binary compatibility
 // https://github.com/typesafehub/migration-manager
