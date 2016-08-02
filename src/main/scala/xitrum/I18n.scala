@@ -52,8 +52,8 @@ trait I18n {
    *
    * If there's no match, the locale is the default "en".
    */
-  def autosetLanguage(locales: Locale*) {
-    val bestMatched = Locale.lookup(browserLanguageRanges, locales.asJava)
+  def autosetLocale(availableLocales: Locale*) {
+    val bestMatched = Locale.lookup(browserLanguageRanges, availableLocales.asJava)
     if (bestMatched != null) locale = bestMatched
   }
 
