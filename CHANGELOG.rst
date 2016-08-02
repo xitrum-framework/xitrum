@@ -6,6 +6,8 @@
   Allow spaces and non-ASCII characters in static file names
 * `#629 <https://github.com/xitrum-framework/xitrum/issues/629>`_
   Remove tf, tcf, tnf, and tcnf in I18n
+* `#630 <https://github.com/xitrum-framework/xitrum/issues/630>`_
+  Replace language (String) in I18n with locale (java.util.Locale)
 * `#628 <https://github.com/xitrum-framework/xitrum/issues/628>`_
   Update Netty from 4.1.3 to 4.1.4
 
