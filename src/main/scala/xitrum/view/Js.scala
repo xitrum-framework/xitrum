@@ -30,12 +30,12 @@ trait JsRenderer {
   lazy val jsDefaults = {
     // java.util.Locale.FRANCE.toLanguageTag => fr_FR
     // java.util.Locale.FRANCE.toLanguageTag => fr-FR
-    val validateI18n = if (locale.getLanguage == "en") "" else (<script type="text/javascript" src={webJarsUrl(s"jquery-validation/1.15.0/src/localization/messages_${locale.toString}.js")}></script>)
+    val validateI18n = if (locale.getLanguage == "en") "" else (<script type="text/javascript" src={webJarsUrl(s"jquery-validation/1.15.1/src/localization/messages_${locale.toString}.js")}></script>)
 
     <xml:group>
       <script type="text/javascript" src={webJarsUrl("jquery/3.1.0/dist",             "jquery.js",             "jquery.min.js")}></script>
-      <script type="text/javascript" src={webJarsUrl("jquery-validation/1.15.0/dist", "jquery.validate.js",    "jquery.validate.min.js")}></script>
-      <script type="text/javascript" src={webJarsUrl("jquery-validation/1.15.0/dist", "additional-methods.js", "additional-methods.min.js")}></script>
+      <script type="text/javascript" src={webJarsUrl("jquery-validation/1.15.1/dist", "jquery.validate.js",    "jquery.validate.min.js")}></script>
+      <script type="text/javascript" src={webJarsUrl("jquery-validation/1.15.1/dist", "additional-methods.js", "additional-methods.min.js")}></script>
       {validateI18n}
       <script type="text/javascript" src={webJarsUrl("sockjs-client/1.1.1/dist",      "sockjs.js",             "sockjs.min.js")}></script>
       <script type="text/javascript" src={url[xitrum.js]}></script>

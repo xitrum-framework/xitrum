@@ -10,6 +10,8 @@
   Add I18n#locale (java.util.Locale)
 * `#628 <https://github.com/xitrum-framework/xitrum/issues/628>`_
   Update Netty from 4.1.3 to 4.1.4
+* `#631 <https://github.com/xitrum-framework/xitrum/issues/631>`_
+  WebJars: Update jQuery Validation from 1.15.0 to 1.15.1
 
 3.27.0:
 
