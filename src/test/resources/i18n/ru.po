@@ -1,3 +1,7 @@
 # Used by ComponentTest
+
 msgid "Hello World"
 msgstr "привет мир"
+
+msgid "Hello %s"
+msgstr "привет %s"

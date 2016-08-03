@@ -19,21 +19,38 @@ class ComponentTest extends FlatSpec with Matchers {
     val c = a.newComponent[C]()
 
     // Default language should be English
+    a.language shouldBe "en"
+    c.language shouldBe "en"
+    a.locale shouldBe Locale.forLanguageTag("en")
+    c.locale shouldBe Locale.forLanguageTag("en")
+
     a.t("Hello World") shouldBe "Hello World"
     c.t("Hello World") shouldBe "Hello World"
+    a.t("Hello %s", "World") shouldBe "Hello World"
+    c.t("Hello %s", "World") shouldBe "Hello World"
 
-    a.locale = Locale.forLanguageTag("ru")
+    // Set a language, c language should be affected
+    a.language = "ru"
+    c.language shouldBe "ru"
+    a.locale shouldBe Locale.forLanguageTag("ru")
     c.locale shouldBe Locale.forLanguageTag("ru")
 
     // See src/test/resources/i18n/ru.po
     a.t("Hello World") shouldBe "привет мир"
     c.t("Hello World") shouldBe "привет мир"
+    a.t("Hello %s", "мир") shouldBe "привет мир"
+    c.t("Hello %s", "мир") shouldBe "привет мир"
 
-    c.locale = Locale.JAPAN
-    a.locale shouldBe Locale.JAPAN
+    // Set c language, a language should be affected
+    c.language = "ja"
+    a.language shouldBe "ja"
+    a.locale shouldBe Locale.forLanguageTag("ja")
+    c.locale shouldBe Locale.forLanguageTag("ja")
 
-    // Unknown language should take no effect
+    // t for unknown language should take no effect (there's no ja.po)
     a.t("Hello World") shouldBe "Hello World"
     c.t("Hello World") shouldBe "Hello World"
+    a.t("Hello %s", "World") shouldBe "Hello World"
+    c.t("Hello %s", "World") shouldBe "Hello World"
   }
 }

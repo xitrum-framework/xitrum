@@ -13,24 +13,31 @@ import xitrum.i18n.PoLoader
 trait I18n {
   this: Action =>
 
-  // For Component locale to work, this should only be used in
-  // "locale" and "locale_=" methods below.
-  // Other places should not use "_locale" directly. See ComponentTest.
-  private var _locale = Locale.ENGLISH
+  // For Component language to work, this should only be used in
+  // "language" and "language_=" methods below.
+  // Other places should not use "_language" directly.
+  // See ComponentTest.
+  private[this] var _language = "en"
 
-  /** Default locale is "en". */
+  private[this] var _locale = Locale.ENGLISH
+
+  /** Default language is "en". */
+  def language = _language
+
+  /** The locale corresponding to the [[language]]. It will be updated automatically when you update [[language]]. */
   def locale = _locale
 
   /**
-   * Sets current locale manually. The locale should have a corresponding file
-   * `i18n/languageTag.po` in classpath (the languageTag should be in IETF BCP 47 format).
+   * Sets current language manually. The language should have a corresponding file
+   * `i18n/language.po` in classpath (the language should be in IETF BCP 47 format).
    */
-  def locale_=(locale: Locale) {
-    _locale = locale
+  def language_=(language: String) {
+    _language = language
+    _locale   = Locale.forLanguageTag(language)
   }
 
   /** @return List of [[Locale.LanguageRange]] sorted by priority from high to low */
-  lazy val browserLanguageRanges: JList[Locale.LanguageRange] = {
+  lazy val browserLanguages: JList[Locale.LanguageRange] = {
     val header = request.headers.get(HttpHeaderNames.ACCEPT_LANGUAGE)
     if (header == null) {
       Collections.emptyList[Locale.LanguageRange]
@@ -46,46 +53,47 @@ trait I18n {
   }
 
   /**
-   * Sets current locale automatically based on the matching of the "Accept-Language"
-   * header against the list of given locales. The locales should have corresponding files
-   * `i18n/languageTag.po` in classpath (the languageTag should be in IETF BCP 47 format).
+   * Sets current language automatically based on the matching of the "Accept-Language"
+   * header against the list of given languages. The languages should have corresponding files
+   * `i18n/language.po` in classpath (the language should be in IETF BCP 47 format).
    *
-   * If there's no match, the locale is the default "en".
+   * If there's no match, the language is still the default "en".
    */
-  def autosetLocale(availableLocales: Locale*) {
-    val bestMatched = Locale.lookup(browserLanguageRanges, availableLocales.asJava)
-    if (bestMatched != null) locale = bestMatched
+  def autosetLanguage(availableLanguages: String*) {
+    val bestMatched = Locale.lookupTag(browserLanguages, availableLanguages.asJava)
+    if (bestMatched != null) language = bestMatched
   }
 
   //----------------------------------------------------------------------------
+  // For Component language to work (see ComponentTest),
+  // must use "language" and "locale",
+  // do not use "_language" and "_locale" directly
 
   def t(singular: String) =
-    PoLoader.get(locale).t(singular)
+    PoLoader.get(language).t(singular)
 
   def tc(ctx: String, singular: String) =
-    PoLoader.get(locale).tc(ctx, singular)
+    PoLoader.get(language).tc(ctx, singular)
 
   def tn(singular: String, plural: String, n: Long) =
-    PoLoader.get(locale).tn(singular, plural, n)
+    PoLoader.get(language).tn(singular, plural, n)
 
   def tcn(ctx: String, singular: String, plural: String, n: Long) =
-    PoLoader.get(locale).tcn(ctx, singular, plural, n)
-
-  //----------------------------------------------------------------------------
+    PoLoader.get(language).tcn(ctx, singular, plural, n)
 
   /** `formatLocal` using the current locale. */
   def t(singular: String, args: Any*) =
-    PoLoader.get(locale).t(singular).formatLocal(locale, args:_*)
+    PoLoader.get(language).t(singular).formatLocal(locale, args:_*)
 
   /** `formatLocal` using the current locale. */
   def tc(ctx: String, singular: String, args: Any*) =
-    PoLoader.get(locale).tc(ctx, singular).formatLocal(locale, args:_*)
+    PoLoader.get(language).tc(ctx, singular).formatLocal(locale, args:_*)
 
   /** `formatLocal` using the current locale. */
   def tn(singular: String, plural: String, n: Long, args: Any*) =
-    PoLoader.get(locale).tn(singular, plural, n).formatLocal(locale, args:_*)
+    PoLoader.get(language).tn(singular, plural, n).formatLocal(locale, args:_*)
 
   /** `formatLocal` using the current locale. */
   def tcn(ctx: String, singular: String, plural: String, n: Long, args: Any*) =
-    PoLoader.get(locale).tcn(ctx, singular, plural, n).formatLocal(locale, args:_*)
+    PoLoader.get(language).tcn(ctx, singular, plural, n).formatLocal(locale, args:_*)
 }
