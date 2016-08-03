@@ -120,11 +120,9 @@ unmanagedClasspath in Runtime <+= baseDirectory map { bd => Attributed.blank(bd 
 // Generate src/main/scala/xitrum/Version.scala from "version" above -----------
 
 val generateVersionFileTask = TaskKey[Unit]("generateVersion", "Generate src/main/scala/xitrum/Version.scala")
-
 generateVersionFileTask <<= generateVersionFile
 
 (compile in Compile) <<= (compile in Compile) dependsOn generateVersionFile
-
 def generateVersionFile = Def.task {
   val versions = version.value.split('.')
   val major    = versions(0).toInt
@@ -133,9 +131,16 @@ def generateVersionFile = Def.task {
   val ma_mi_pa = s"$major.$minor.$patch"
   val base     = (baseDirectory in Compile).value
 
-  // Also check if the directory name is correct
+  // Check if the resource directory name contains version
   val resDir = base / s"src/main/resources/META-INF/resources/webjars/xitrum/$ma_mi_pa"
-  if (!resDir.exists) throw new Exception(s"Directory name incorrect: $resDir")
+  if (!resDir.exists)
+    throw new IllegalStateException(s"Directory name incorrect: $resDir")
+
+  // Check if the URL to xitrum.js contains the version
+  val xitrumJsFile = base / "src/main/scala/xitrum/js.scala"
+  val expectedUrl  = s"""@GET("xitrum/xitrum-$ma_mi_pa.js")"""
+  if (!IO.read(xitrumJsFile).contains(expectedUrl))
+    throw new IllegalStateException(s"Incorrect URL to xitrum.js in $xitrumJsFile, should be: $expectedUrl")
 
   // Do not overwrite version file if its content doesn't change
   val file    = base / "src/main/scala/xitrum/Version.scala"

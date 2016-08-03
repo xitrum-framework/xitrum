@@ -2,9 +2,16 @@ package xitrum
 
 import xitrum.annotation.{First, GET}
 
-object js {
-  val body =
-"""var xitrum = {
+/** To innclude xitrum.js in your view, use: `url[xitrum.js]`. */
+@First
+@GET("xitrum/xitrum-3.28.0.js")
+class js extends FutureAction {
+  def execute() {
+    setClientCacheAggressively()
+    respondJs(body)
+  }
+
+  private def body = """var xitrum = {
   withBaseUrl: function(path) {
     var baseUrl = '""" + Config.baseUrl + """';
 
@@ -19,28 +26,59 @@ object js {
     }
   },
 
-  ajaxLoadingImg: null,
-
   antiCsrfToken: function() {
     return $("meta[name='csrf-token']").attr('content');
   },
 
-  postback: function(event) {
-    var target1 = $(event.target);
+  ajaxLoading: function(target) {
+    var ajaxLoadingImgId = 'ajaxLoadingImg-' + Math.random().toString().replace('.', '');
+    var showTime = 0;
 
-    var confirmMsg = target1.attr('data-confirm');
+    var show = function() {
+      showTime = Date.now();
+
+      // Hide the inputs to avoid user double submit
+      target.hide();
+
+      // Display Ajax loading animation image
+      target.after('<img id="' + ajaxLoadingImgId + '" src="""" + webJarsUrl(s"xitrum/${xitrum.version}/ajax.gif") + """" />');
+    };
+
+    var doHide = function() {
+      $('#' + ajaxLoadingImgId).remove();
+      target.show();
+    };
+
+    var hide = function() {
+      var dt = Date.now() - showTime;
+      if (dt >= 1000) {
+        doHide();
+      } else {
+        setTimeout(doHide, 1000 - dt);
+      }
+    };
+
+    return {show: show, hide: hide};
+  },
+
+  postback: function(event) {
+    // Must use currentTarget instead of target, to get the element containing data we want;
+    // target may be a child in the element
+    var target = $(event.currentTarget);
+
+    var confirmMsg = target.attr('data-confirm');
     if (confirmMsg && !confirm(confirmMsg)) return false;
 
-    var action = target1.attr('action');
+    var action = target.attr('action');
     var data   = '';
 
     // data may come from "data-params"
     // http://api.jquery.com/data/
-    var params = target1.data('params');
+    var params = target.data('params');
     if (params) data = params + '&';
 
     // or come from "data-form"
-    var formSelector = target1.attr('data-form');
+    var formSelector = target.attr('data-form');
     if (formSelector) {
       var form = $(formSelector);
       if (form && form[0].tagName === 'FORM' && form.valid())
@@ -48,17 +86,13 @@ object js {
     }
 
     // or come from this element itself
-    if (target1[0].tagName === 'FORM') {
-       if (!target1.valid()) return false;
-       data = data + target1.serialize();
+    if (target[0].tagName === 'FORM') {
+       if (!target.valid()) return false;
+       data = data + target.serialize();
     }
 
-    // Hide the inputs to avoid user double submit
-    target1.hide();
-
-    // Display Ajax loading (animation) image if any
-    if (this.ajaxLoadingImg != null)
-      target1.after('<img src="' + ajaxLoadingImg + '" />');
+    var show_hide = this.ajaxLoading(target);
+    show_hide.show();
 
     $.ajax({
       type: 'POST',
@@ -79,14 +113,11 @@ object js {
         }
       },
       complete: function() {
-        target1.show();
-
-        if (this.ajaxLoadingImg != null)
-          target1.next().remove();
+        show_hide.hide();
       }
     });
 
-    var after = target1.attr('data-after');
+    var after = target.attr('data-after');
     if (after) {
       var f = eval('(function() {' + after + '})');
       f();
@@ -146,17 +177,7 @@ $(function() {
 
   $('[data-postback]').each(function(index, elem) {
     var eventType = $(elem).attr('data-postback');
-    $(elem).bind(eventType, xitrum.postback);
+    $(elem).on(eventType, xitrum.postback.bind(xitrum));
   });
 });"""
-}
-
-/** To innclude xitrum.js in your view, use: url[xitrum.js]. */
-@First
-@GET("xitrum/xitrum.js")
-class js extends FutureAction {
-  def execute() {
-    setClientCacheAggressively()  // See Url#url[xitrum.js]
-    respondJs(js.body)
-  }
 }

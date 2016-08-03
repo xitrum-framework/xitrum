@@ -8,6 +8,8 @@
   Remove tf, tcf, tnf, and tcnf in I18n; replace them with added t, tc, tn, and tcn variants
 * `#630 <https://github.com/xitrum-framework/xitrum/issues/630>`_
   Add I18n#locale (java.util.Locale)
+* `#632 <https://github.com/xitrum-framework/xitrum/issues/632>`_
+  Add default loading image for Ajax post back
 * `#628 <https://github.com/xitrum-framework/xitrum/issues/628>`_
   Update Netty from 4.1.3 to 4.1.4
 * `#631 <https://github.com/xitrum-framework/xitrum/issues/631>`_

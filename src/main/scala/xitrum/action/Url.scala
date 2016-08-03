@@ -86,13 +86,7 @@ object Url {
 
   def url[T <: Action : Manifest](params: (String, Any)*): String = {
     val className = manifest[T].runtimeClass.getName
-    val path      = url(className, params:_*)
-
-    // See xitrum.js
-    if (className == classOf[xitrum.js].getName)
-      path + "?" + Etag.forString(xitrum.js.body)
-    else
-      path
+    url(className, params:_*)
   }
   def url[T <: Action : Manifest]: String = url[T]()
 
