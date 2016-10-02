@@ -8,6 +8,8 @@
   Update Akka from 2.4.8 to 2.4.11
 * `#638 <https://github.com/xitrum-framework/xitrum/issues/638>`_
   Update JSON4S from 3.4.0 to 3.4.1
+* `#639 <https://github.com/xitrum-framework/xitrum/issues/639>`_
+  Update metrics-scala from 3.5.4_a2.3 to 3.5.5_a2.3
 
 3.28.0:
 

@@ -82,7 +82,7 @@ libraryDependencies += "org.apache.commons" % "commons-lang3" % "3.4"
 libraryDependencies += "tv.cntt" % "rhinocoffeescript" % "1.10.0"
 
 // For metrics
-libraryDependencies += "nl.grons" %% "metrics-scala" % "3.5.4_a2.3"
+libraryDependencies += "nl.grons" %% "metrics-scala" % "3.5.5_a2.3"
 libraryDependencies += "io.dropwizard.metrics" % "metrics-json" % "3.1.2"
 
 // JSON4S uses scalap 2.10.0/2.11.0, which in turn uses scala-compiler 2.10.0/2.11.0, which in
