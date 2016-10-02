@@ -1,3 +1,8 @@
+3.28.1:
+
+* `#634 <https://github.com/xitrum-framework/xitrum/issues/634>`_
+  Fix memory leak when params in request body are large and they need to be saved in temporary files
+
 3.28.0:
 
 * `#626 <https://github.com/xitrum-framework/xitrum/issues/626>`_

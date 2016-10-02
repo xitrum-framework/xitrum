@@ -34,9 +34,12 @@ object Request2Env {
   DiskAttribute.baseDirectory  = uploadDir.getAbsolutePath
   DiskFileUpload.baseDirectory = uploadDir.getAbsolutePath
 
-  // Should delete file on exit (in normal exit)
-  DiskAttribute.deleteOnExitTemporaryFile  = true
-  DiskFileUpload.deleteOnExitTemporaryFile = true
+  // "true" will cause out of memory when there are too many temporary files
+  // https://github.com/xitrum-framework/xitrum/issues/634
+  //
+  // Temporary files of a request will be deleted immediately after the response is responded
+  DiskAttribute.deleteOnExitTemporaryFile  = false
+  DiskFileUpload.deleteOnExitTemporaryFile = false
 
   // Save a field to disk if its size exceeds maxSizeInBytesOfUploadMem;
   // creating factory should be after the above for the factory to take effect of the settings
@@ -130,7 +133,7 @@ class Request2Env extends SimpleChannelInboundHandler[HttpObject] {
     val bodyDecoder  =
       if (bodyToDecode && isAPPLICATION_X_WWW_FORM_URLENCODED_or_MULTIPART_FORM_DATA(request)){
         try {
-          new HttpPostRequestDecoder(factory, request)
+          new HttpPostRequestDecoder(factory, request, Config.xitrum.request.charset)
         } catch {
           // Another exception is IncompatibleDataDecoderException, which means the
           // request is valid, just no need to decode (see the check above)
