@@ -87,12 +87,14 @@ Create ~/.sbt/0.13/sonatype.sbt (for SBT 0.12: ~/.sbt/sonatype.sbt) file:
 
 Then:
 
-1. Copy content of
-     dev/build.sbt.end   to the end of build.sbt
+1. Temporarily remove ``-SNAPSHOT`` from the version in build.sbt.
+   Also comment out ``publishArtifact in (Compile, packageDoc) := false`` in build.sbt.
+2. Copy
+     dev/build.sbt.end   to the end of build.sbt, and
      dev/plugins.sbt.end to the end of project/plugins.sbt
-2. Run ``sbt publish-signed``. Alternatively you can run ``sbt`` then from SBT
+3. Run ``sbt publish-signed``. Alternatively you can run ``sbt`` then from SBT
    command prompt run ``+ publish-signed``.
-3. Login at https://oss.sonatype.org/ and from "Staging Repositories" select the
+4. Login at https://oss.sonatype.org/ and from "Staging Repositories" select the
    newly published item, click "Close" then "Release".
 
 Update related projects
