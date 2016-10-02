@@ -6,6 +6,8 @@
   Update Netty from 4.1.4 to 4.1.5
 * `#637 <https://github.com/xitrum-framework/xitrum/issues/637>`_
   Update Akka from 2.4.8 to 2.4.11
+* `#638 <https://github.com/xitrum-framework/xitrum/issues/638>`_
+  Update JSON4S from 3.4.0 to 3.4.1
 
 3.28.0:
 
