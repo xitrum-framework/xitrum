@@ -2,6 +2,8 @@
 
 * `#634 <https://github.com/xitrum-framework/xitrum/issues/634>`_
   Fix memory leak when params in request body are large and they need to be saved in temporary files
+* `#635 <https://github.com/xitrum-framework/xitrum/issues/634>`_
+  Update Netty from 4.1.4 to 4.1.5
 
 3.28.0:
 
