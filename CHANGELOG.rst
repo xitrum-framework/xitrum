@@ -12,6 +12,8 @@
   Update metrics-scala from 3.5.4_a2.3 to 3.5.5_a2.3
 * `#640 <https://github.com/xitrum-framework/xitrum/issues/640>`_
   WebJars: Update jQuery 3.1.0 to 3.1.1
+* `#641 <https://github.com/xitrum-framework/xitrum/issues/641>`_
+  WebJars: Update Swagger UI from 2.1.8-M1 to 2.2.5
 
 3.28.0:
 
@@ -49,7 +51,7 @@
 * `#622 <https://github.com/xitrum-framework/xitrum/issues/622>`_
   WebJars: Replace jquery-validation from org.webjars with the one from org.webjars.bower
 * `#623 <https://github.com/xitrum-framework/xitrum/issues/623>`_
-  WebJars: Update Swagger from 2.1.4 to 2.1.8-M1
+  WebJars: Update Swagger UI from 2.1.4 to 2.1.8-M1
 
 3.26.2:
 
@@ -132,7 +134,7 @@
 * `#585 <https://github.com/xitrum-framework/xitrum/issues/585>`_
   WebJars: Update d3js from 3.5.5-1 to 3.5.12
 * `#586 <https://github.com/xitrum-framework/xitrum/issues/586>`_
-  WebJars: Update Swagger-UI from 2.1.1 to 2.1.4
+  WebJars: Update Swagger UI from 2.1.1 to 2.1.4
 
 3.25.0:
 
@@ -159,7 +161,7 @@
 * `#558 <https://github.com/xitrum-framework/xitrum/issues/558>`_
   Update Swagger from 1.2 to 2.0
 * `#559 <https://github.com/xitrum-framework/xitrum/issues/559>`_
-  Update Swagger-UI from 2.0.24 to 2.1.1
+  Update Swagger UI from 2.0.24 to 2.1.1
 * `#557 <https://github.com/xitrum-framework/xitrum/issues/557>`_
   Update jQuery Validation from 1.13.1 to 1.14.0
 * `#560 <https://github.com/xitrum-framework/xitrum/issues/560>`_
@@ -442,7 +444,7 @@
 * `#381 <https://github.com/xitrum-framework/xitrum/issues/381>`_
   Update D3.js from 3.4.6 to 3.4.7
 * `#382 <https://github.com/xitrum-framework/xitrum/issues/382>`_
-  Update Swagger-UI from 2.0.16 to 2.0.17
+  Update Swagger UI from 2.0.16 to 2.0.17
 
 3.11:
 
@@ -461,7 +463,7 @@
 * `#369 <https://github.com/xitrum-framework/xitrum/issues/369>`_
   jQuery Validate from 1.11.1 to 1.12.0
 * `#370 <https://github.com/xitrum-framework/xitrum/issues/370>`_
-  Update Swagger-UI from 2.0.14 to 2.0.16
+  Update Swagger UI from 2.0.14 to 2.0.16
 * `#356 <https://github.com/xitrum-framework/xitrum/issues/356>`_
   Fix: Remove metrics route when metrics is disabled
 * `#360 <https://github.com/xitrum-framework/xitrum/issues/360>`_
