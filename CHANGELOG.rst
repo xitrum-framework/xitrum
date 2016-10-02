@@ -4,6 +4,8 @@
   Fix memory leak when params in request body are large and they need to be saved in temporary files
 * `#635 <https://github.com/xitrum-framework/xitrum/issues/634>`_
   Update Netty from 4.1.4 to 4.1.5
+* `#637 <https://github.com/xitrum-framework/xitrum/issues/637>`_
+  Update Akka from 2.4.8 to 2.4.11
 
 3.28.0:
 
