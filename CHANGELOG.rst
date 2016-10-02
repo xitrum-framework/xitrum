@@ -10,6 +10,8 @@
   Update JSON4S from 3.4.0 to 3.4.1
 * `#639 <https://github.com/xitrum-framework/xitrum/issues/639>`_
   Update metrics-scala from 3.5.4_a2.3 to 3.5.5_a2.3
+* `#640 <https://github.com/xitrum-framework/xitrum/issues/640>`_
+  WebJars: Update jQuery 3.1.0 to 3.1.1
 
 3.28.0:
 
