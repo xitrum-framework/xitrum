@@ -5,6 +5,7 @@ import scala.collection.mutable.{Map => MMap}
 import scala.reflect.runtime.universe
 
 import xitrum.Action
+import xitrum.Annotateable
 import xitrum.annotation.ActionAnnotations
 
 /**
@@ -64,7 +65,7 @@ private case class ActionTreeBuilder(xitrumVersion: String, parent2Children: Map
     //   modified annotations (if any) can be recollected.
     // * We use class name instead of class, to avoid conflict between different
     //   class loaders.
-    val actionClass   = cl.loadClass(classOf[Action].getName)
+    val annotateableClass   = cl.loadClass(classOf[Annotateable].getName)
     val runtimeMirror = universe.runtimeMirror(cl)
     val cache         = MMap.empty[String, ActionAnnotations]
 
@@ -79,7 +80,7 @@ private case class ActionTreeBuilder(xitrumVersion: String, parent2Children: Map
             // parentClass is null if klass is a trait/interface
             if (parentClass == null) {
               acc
-            } else if (actionClass.isAssignableFrom(parentClass)) {
+            } else if (annotateableClass.isAssignableFrom(parentClass)) {
               val aa = getActionAccumulatedAnnotations(parentClass.getName)
               acc.inherit(aa)
             } else {
