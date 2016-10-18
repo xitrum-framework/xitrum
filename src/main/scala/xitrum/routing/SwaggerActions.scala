@@ -238,7 +238,7 @@ object SwaggerJson {
       val response = arg.asInstanceOf[Swagger.Response]
       val code = if (response.code <= 0) "default" else response.code.toString
       val desc = response.desc
-      code -> JString(desc)
+      code -> JObject("description" -> JString(desc))
     }
     Some("responses" -> JObject(codeToDescs: _*))
   }
