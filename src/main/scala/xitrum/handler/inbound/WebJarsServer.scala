@@ -39,7 +39,7 @@ class WebJarsServer extends SimpleChannelInboundHandler[HandlerEnv] {
         ctx.channel.writeAndFlush(env)
 
       case Some(path) =>
-        val resourcePath = "META-INF/resources" + pathInfo
+        val resourcePath = "META-INF/resources" + path
 
         // Check resource existence, null means the resource does not exist
         val is = Thread.currentThread.getContextClassLoader.getResourceAsStream(resourcePath)
@@ -60,10 +60,10 @@ class WebJarsServer extends SimpleChannelInboundHandler[HandlerEnv] {
               ctx.fireChannelRead(env)
             }
           } catch {
-            case NonFatal(e) => ctx.fireChannelRead(env)
+            case NonFatal(_) => ctx.fireChannelRead(env)
           } finally {
             // getResourceAsStream("dir") => is.close() will cause NullPointerException
-            try { is.close() } catch { case NonFatal(e) => }
+            try { is.close() } catch { case NonFatal(_) => }
           }
         }
     }

@@ -1,3 +1,10 @@
+3.28.2:
+
+* `#644 <https://github.com/xitrum-framework/xitrum/issues/644>`_
+  Fix Swagger response object
+* `#645 <https://github.com/xitrum-framework/xitrum/issues/645>`_
+  Support Scala 2.12
+
 3.28.1:
 
 * `#634 <https://github.com/xitrum-framework/xitrum/issues/634>`_

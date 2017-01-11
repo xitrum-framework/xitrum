@@ -26,7 +26,7 @@ class SwaggerJson extends FutureAction {
 @GET("xitrum/swagger")
 class SwaggerUi extends FutureAction {
   def execute() {
-    redirectTo(webJarsUrl("swagger-ui/2.2.5/index.html?url=" + url[SwaggerJson]))
+    redirectTo(webJarsUrl("swagger-ui/2.2.8/dist/index.html?url=" + url[SwaggerJson]))
   }
 }
 
@@ -43,7 +43,7 @@ object SwaggerJson {
 
   //----------------------------------------------------------------------------
 
-  def json = prettyJson
+  def json: String = prettyJson
 
   /** Maybe called multiple times in development mode when reloading routes. */
   def reloadFromRoutes() {

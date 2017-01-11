@@ -1,17 +1,15 @@
 package xitrum.params
 
+import io.netty.handler.codec.http.{HttpHeaderNames, HttpHeaderValues}
+import org.asynchttpclient.Dsl.asyncHttpClient
+import org.asynchttpclient.Response
+
 import org.json4s._
 import org.json4s.jackson.Serialization
 import org.json4s.jackson.Serialization.read
 import org.scalatest._
 
-import com.m3.curly.scala._
-
-import io.netty.handler.codec.http.{HttpHeaderNames, HttpHeaderValues}
-
-import xitrum.Action
-import xitrum.Server
-import xitrum.SkipCsrfCheck
+import xitrum.{Action, Log, Server, SkipCsrfCheck}
 import xitrum.annotation.GET
 import xitrum.annotation.POST
 
@@ -50,9 +48,10 @@ class ParamsPayloadTestAction extends Action with SkipCsrfCheck {
   }
 }
 
-class ParamsTest extends FlatSpec with Matchers with BeforeAndAfter {
-  implicit val formats = Serialization.formats(NoTypeHints)
-  val base = "http://127.0.0.1:8000"
+class ParamsTest extends FlatSpec with Matchers with BeforeAndAfter with Log {
+  private implicit val formats = Serialization.formats(NoTypeHints)
+  private val base = "http://127.0.0.1:8000"
+  private val client = asyncHttpClient()
 
   behavior of "param* method"
 
@@ -65,54 +64,55 @@ class ParamsTest extends FlatSpec with Matchers with BeforeAndAfter {
   }
 
   "[GET] param" should "extract string value from path" in {
-    val response = HTTP.get(s"$base/test/params/path/test-value")
+    val response = client.prepareGet(s"$base/test/params/path/test-value").execute().get()
     shouldEqual(response, ParamsPathResponse("test-value"))
   }
 
   "[POST] param" should "extract string value from path" in {
-    val response = HTTP.post(s"$base/test/params/path/test-value")
+    val response = client.preparePost(s"$base/test/params/path/test-value").execute().get()
     shouldEqual(response, ParamsPathResponse("test-value"))
   }
 
   "[GET] param" should "extract int value/s from query" in {
-    val response = HTTP.get(s"$base/test/params/query", "key" -> 1, "keys" -> 2, "keys" -> 3)
+    val response = client.prepareGet(s"$base/test/params/query")
+      .addQueryParam("key", "1")
+      .addQueryParam("keys", "2")
+      .addQueryParam("keys", "3")
+      .execute().get()
     shouldEqual(response, ParamsQueryResponse(1, Seq(2, 3)))
   }
 
   "[POST] param" should "extract int value/s from query" in {
-    val response = HTTP.post(s"$base/test/params/query?key=1&keys=2&keys=3")
+    val response = client.preparePost(s"$base/test/params/query?key=1&keys=2&keys=3").execute().get()
     shouldEqual(response, ParamsQueryResponse(1, Seq(2, 3)))
   }
 
   "[POST] param" should "extract values from application/x-www-form-urlencoded payload" in {
-    val request = Request(s"$base/test/params/payload")
-      .header(
-        HttpHeaderNames.CONTENT_TYPE.toString,
-        HttpHeaderValues.APPLICATION_X_WWW_FORM_URLENCODED.toString
-      )
-      .body(
-        "key=1&keys=2&keys=3&locale=ru-RU&optional=value".getBytes,
-        HttpHeaderValues.APPLICATION_X_WWW_FORM_URLENCODED.toString
-      )
-    val response = HTTP.post(request)
+    val response = client.preparePost(s"$base/test/params/payload")
+      .addHeader(HttpHeaderNames.CONTENT_TYPE.toString, HttpHeaderValues.APPLICATION_X_WWW_FORM_URLENCODED.toString)
+      .addFormParam("key", "1")
+      .addFormParam("keys", "2")
+      .addFormParam("keys", "3")
+      .addFormParam("locale", "ru-RU")
+      .addFormParam("optional", "value")
+      .execute().get()
     shouldEqual(response, ParamsPayloadResponse(1, Seq(2, 3), "ru-RU", Some("value")))
   }
 
   "[POST] param" should "extract values from application/json payload" in {
-    val request = Request(s"$base/test/params/payload")
-      .header(HttpHeaderNames.CONTENT_TYPE.toString, "application/json")
-      .body("""{"key": 1, "keys": [2, 3], "locale": "ru-RU", "optional": "value"}""".getBytes,
-        "application/json")
-    val response = HTTP.post(request)
+    val response = client.preparePost(s"$base/test/params/payload")
+      .addHeader(HttpHeaderNames.CONTENT_TYPE.toString, "application/json")
+      .setBody("""{"key": 1, "keys": [2, 3], "locale": "ru-RU", "optional": "value"}""".getBytes)
+      .execute().get()
     shouldEqual(response, ParamsPayloadResponse(1, Seq(2, 3), "ru-RU", Some("value")))
   }
 
   private def shouldEqual[T](response: Response, expected: T)(implicit formats: Formats, mf: Manifest[T]) = {
-    if (response.status != 200) {
-      println(s"[DEBUG] Response dump:\n${response.textBody}\n------")
+    if (response.getStatusCode != 200) {
+      log.warn(s"Response:\n$response")
     }
     
-    response.status should equal(200)
-    read[T](response.textBody) shouldEqual expected
+    response.getStatusCode should equal(200)
+    read[T](response.getResponseBody) shouldEqual expected
   }
 }

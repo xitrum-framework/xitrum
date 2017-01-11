@@ -37,7 +37,7 @@ object RouteCollector {
     // is for the (Swagger) annotation inheritance feature. The traits/classes
     // are then loaded to get annotations.
     val xitrumVersion     = xitrum.version.toString
-    val actionTreeBuilder = Scanner.foldLeft(cachedFile, new ActionTreeBuilder(xitrumVersion), discovered(cl) _)
+    val actionTreeBuilder = Scanner.foldLeft(cachedFile, ActionTreeBuilder(xitrumVersion), discovered(cl) _)
 
     if (actionTreeBuilder.xitrumVersion != xitrumVersion) {
       // The caller should see that the Xitrum version is invalid and act properly
@@ -74,11 +74,11 @@ object RouteCollector {
       acc.addBranches(klass.getName, superclassNameo, klass.getInterfaces.map(_.getName))
     } catch {
       // Probably java.lang.NoClassDefFoundError: javax/servlet/http/HttpServlet
-      case e: java.lang.Error =>
+      case _: java.lang.Error =>
         acc
 
       // Probably the .class file name -> class name guess was wrong
-      case NonFatal(e) =>
+      case NonFatal(_) =>
         acc
     }
   }
@@ -108,9 +108,9 @@ object RouteCollector {
       className:   String,
       annotations: ActionAnnotations
   ) {
-    var routeOrder          = optRouteOrder(annotations.routeOrder)  // -1: first, 1: last, 0: other
-    var cacheSecs           = optCacheSecs(annotations.cache)        // < 0: cache action, > 0: cache page, 0: no cache
-    var method_pattern_coll = ArrayBuffer.empty[(String, String)]
+    val routeOrder          = optRouteOrder(annotations.routeOrder)  // -1: first, 1: last, 0: other
+    val cacheSecs           = optCacheSecs(annotations.cache)        // < 0: cache action, > 0: cache page, 0: no cache
+    val method_pattern_coll = ArrayBuffer.empty[(String, String)]
 
     annotations.routes.foreach { a =>
       listMethodAndPattern(a).foreach { m_p   => method_pattern_coll.append(m_p) }
@@ -143,6 +143,8 @@ object RouteCollector {
         case (-1, "WEBSOCKET") => routes.firstWEBSOCKETs
         case ( 1, "WEBSOCKET") => routes.lastWEBSOCKETs
         case ( 0, "WEBSOCKET") => routes.otherWEBSOCKETs
+
+        case _ => throw new IllegalArgumentException
       }
       coll.append(serializableRoute)
     }
@@ -153,7 +155,7 @@ object RouteCollector {
       className:   String,
       annotations: ActionAnnotations)
   {
-    annotations.error.foreach { case a =>
+    annotations.error.foreach { a =>
       val tpe       = a.tree.tpe
       val tpeString = tpe.toString
       if (tpeString == TYPE_OF_ERROR_404.toString) routes.error404 = Some(className)
@@ -168,7 +170,7 @@ object RouteCollector {
   ): Map[String, SockJsClassAndOptions] =
   {
     var pathPrefix: String = null
-    annotations.routes.foreach { case a =>
+    annotations.routes.foreach { a =>
       val tpe       = a.tree.tpe
       val tpeString = tpe.toString
 
