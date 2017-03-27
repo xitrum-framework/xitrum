@@ -8,6 +8,8 @@ import xitrum.handler.HandlerEnv
 import xitrum.util.SeriDeseri
 
 object RequestEnv {
+  private val LOG_LIMIT = 16
+
   def inspectParamsWithFilter(params: MMap[String, _ <: Seq[AnyRef]]): String = {
     val sb = new StringBuilder
     sb.append("{")
@@ -17,31 +19,31 @@ object RequestEnv {
     for (i <- 0 until size) {
       val key = keys(i)
 
-      sb.append(key)
+      sb.append(limitLog(key))
       sb.append(": ")
 
       // Log is ouput after the response has been sent.
       // For FileUpload, the file will be cleaned up so FileUpload#toString
       // will throw null pointer exception.
       if (Config.xitrum.request.filteredParams.contains(key)) {
-        sb.append("[FILTERED]")
+        sb.append("<filtered>")
       } else {
         val values = params(key)
         if (values.isEmpty) {
-          sb.append("[EMPTY]")
+          sb.append("<empty>")
         } else if (values.length == 1) {
           val value = values.head
           if (value.isInstanceOf[FileUpload])
             sb.append("<file>")
           else
-            sb.append(values.head)
+            sb.append(limitLog(values.head.toString))
         } else {
           sb.append("[")
           val value = values.head
           if (value.isInstanceOf[FileUpload])
-            sb.append("<files>")
+            sb.append(s"<${values.size} files>")
           else
-            sb.append(values.mkString(", "))
+            sb.append(values.map(v => limitLog(v.toString)).mkString(", "))
           sb.append("]")
         }
       }
@@ -51,6 +53,14 @@ object RequestEnv {
 
     sb.append("}")
     sb.toString
+  }
+
+  private def limitLog(string: String): String = {
+    if (string.length <= LOG_LIMIT + 3) {  // 3: length of "..."
+      string
+    } else {
+      string.substring(0, LOG_LIMIT) + "..."
+    }
   }
 }
 

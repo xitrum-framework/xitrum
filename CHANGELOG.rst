@@ -2,6 +2,8 @@
 
 * `#646 <https://github.com/xitrum-framework/xitrum/issues/646>`_
   Update dependencies
+* `#636 <https://github.com/xitrum-framework/xitrum/issues/636>`_
+  Truncate long params in access log
 
 3.28.2:
 
