@@ -1,6 +1,6 @@
 organization := "tv.cntt"
 name         := "xitrum"
-version      := "3.28.2-SNAPSHOT"
+version      := "3.28.3-SNAPSHOT"
 
 // Run "sbt mima-report-binary-issues" to check for binary compatibility
 // https://github.com/typesafehub/migration-manager
@@ -24,31 +24,31 @@ javaOptions in Test += "-Dxitrum.mode=production"
 //------------------------------------------------------------------------------
 
 // Projects using Xitrum must provide a concrete implementation of SLF4J (Logback etc.)
-libraryDependencies += "tv.cntt" %% "slf4s-api" % "1.7.22"
+libraryDependencies += "tv.cntt" %% "slf4s-api" % "1.7.25"
 
 // Netty is the core of Xitrum's HTTP(S) feature
-libraryDependencies += "io.netty" % "netty-all" % "4.1.6.Final"
+libraryDependencies += "io.netty" % "netty-all" % "4.1.9.Final"
 
 // https://github.com/netty/netty/wiki/Native-transports
 // Only works on Linux
-libraryDependencies += "io.netty" % "netty-transport-native-epoll" % "4.1.6.Final" classifier "linux-x86_64"
+libraryDependencies += "io.netty" % "netty-transport-native-epoll" % "4.1.9.Final" classifier "linux-x86_64"
 
 // https://github.com/netty/netty/wiki/Forked-Tomcat-Native
 // https://groups.google.com/forum/#!topic/netty/oRATC6Tl0A4
 // Include all classifiers for convenience
-libraryDependencies += "io.netty" % "netty-tcnative" % "1.1.33.Fork25" classifier "linux-x86_64"
-libraryDependencies += "io.netty" % "netty-tcnative" % "1.1.33.Fork25" classifier "osx-x86_64"
-libraryDependencies += "io.netty" % "netty-tcnative" % "1.1.33.Fork25" classifier "windows-x86_64"
+libraryDependencies += "io.netty" % "netty-tcnative" % "2.0.0.Final" classifier "linux-x86_64"
+libraryDependencies += "io.netty" % "netty-tcnative" % "2.0.0.Final" classifier "osx-x86_64"
+libraryDependencies += "io.netty" % "netty-tcnative" % "2.0.0.Final" classifier "windows-x86_64"
 
 // Javassist boosts Netty 4 speed
 libraryDependencies += "org.javassist" % "javassist" % "3.21.0-GA"
 
 // Redirect Akka log to SLF4J
-libraryDependencies += "com.typesafe.akka" %% "akka-actor"           % "2.4.16"
-libraryDependencies += "com.typesafe.akka" %% "akka-cluster"         % "2.4.16"
-libraryDependencies += "com.typesafe.akka" %% "akka-cluster-metrics" % "2.4.16"
-libraryDependencies += "com.typesafe.akka" %% "akka-contrib"         % "2.4.16"
-libraryDependencies += "com.typesafe.akka" %% "akka-slf4j"           % "2.4.16"
+libraryDependencies += "com.typesafe.akka" %% "akka-actor"           % "2.4.17"
+libraryDependencies += "com.typesafe.akka" %% "akka-cluster"         % "2.4.17"
+libraryDependencies += "com.typesafe.akka" %% "akka-cluster-metrics" % "2.4.17"
+libraryDependencies += "com.typesafe.akka" %% "akka-contrib"         % "2.4.17"
+libraryDependencies += "com.typesafe.akka" %% "akka-slf4j"           % "2.4.17"
 
 // For clustering SockJS with Akka
 libraryDependencies += "tv.cntt" %% "glokka" % "2.4.0"
@@ -61,10 +61,10 @@ libraryDependencies += "com.beachape.filemanagement" %% "schwatcher" % "0.3.3"
 libraryDependencies += "tv.cntt" %% "sclasner" % "1.7.0"
 
 // For binary (de)serializing
-libraryDependencies += "com.twitter" %% "chill" % "0.9.1"
+libraryDependencies += "com.twitter" %% "chill" % "0.9.2"
 
 // For JSON (de)serializing
-libraryDependencies += "org.json4s" %% "json4s-jackson" % "3.5.0"
+libraryDependencies += "org.json4s" %% "json4s-jackson" % "3.5.1"
 
 // For i18n
 libraryDependencies += "tv.cntt" %% "scaposer" % "1.10"
@@ -77,10 +77,10 @@ libraryDependencies += "tv.cntt" % "rhinocoffeescript" % "1.10.0"
 
 // For metrics
 libraryDependencies <+= scalaVersion { sv =>
-  val v = if (sv.contains("2.11")) "3.5.5_a2.3" else "3.5.5_a2.4"
+  val v = if (sv.contains("2.11")) "3.5.6_a2.3" else "3.5.6_a2.4"
   "nl.grons" %% "metrics-scala" % v
 }
-libraryDependencies += "io.dropwizard.metrics" % "metrics-json" % "3.1.2"
+libraryDependencies += "io.dropwizard.metrics" % "metrics-json" % "3.2.2"
 
 // JSON4S uses scalap 2.10.0/2.11.0, which in turn uses scala-compiler 2.10.0/2.11.0, which in
 // turn uses scala-reflect 2.10.0/2.11.0. We need to force "scalaVersion" above, because
@@ -93,20 +93,20 @@ libraryDependencies <+= scalaVersion { sv => "org.scala-lang" % "scalap" % sv }
 
 // WebJars ---------------------------------------------------------------------
 
-libraryDependencies += "org.webjars.bower" % "jquery" % "3.1.1"
-libraryDependencies += "org.webjars.bower" % "jquery-validation" % "1.15.1"
-libraryDependencies += "org.webjars.bower" % "sockjs-client" % "1.1.1"
-libraryDependencies += "org.webjars.bower" % "swagger-ui" % "2.2.8"
+libraryDependencies += "org.webjars.bower" % "jquery" % "3.2.1"
+libraryDependencies += "org.webjars.bower" % "jquery-validation" % "1.16.0"
+libraryDependencies += "org.webjars.bower" % "sockjs-client" % "1.1.2"
+libraryDependencies += "org.webjars.bower" % "swagger-ui" % "2.2.10"
 libraryDependencies += "org.webjars.bower" % "d3" % "3.5.17"
 
 // For test --------------------------------------------------------------------
 
 libraryDependencies += "org.scalatest" %% "scalatest" % "3.0.1" % "test"
 
-libraryDependencies += "org.asynchttpclient" % "async-http-client" % "2.0.24" % "test"
+libraryDependencies += "org.asynchttpclient" % "async-http-client" % "2.0.30" % "test"
 
 // An implementation of SLF4J is needed for log in tests to be output
-libraryDependencies += "ch.qos.logback" % "logback-classic" % "1.1.8" % "test"
+libraryDependencies += "ch.qos.logback" % "logback-classic" % "1.2.2" % "test"
 
 // For "sbt console"
 unmanagedClasspath in Compile <+= baseDirectory map { bd => Attributed.blank(bd / "src/test/resources") }
