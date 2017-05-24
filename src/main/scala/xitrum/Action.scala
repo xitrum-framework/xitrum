@@ -52,7 +52,7 @@ trait Action extends RequestEnv
   implicit val currentAction = Action.this
 
   /** This is convenient, for example, when you use scala.concurrent.Future. */
-  implicit val executionContext = Config.actorSystem.dispatcher
+  lazy implicit val executionContext = Config.actorSystem.dispatcher
 
   /** This is convenient, for example, when you use scala.concurrent.Await. */
   implicit val timeout = Action.TIMEOUT
