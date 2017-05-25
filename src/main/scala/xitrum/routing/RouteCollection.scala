@@ -316,7 +316,10 @@ class RouteCollection(
   def route(httpMethod: HttpMethod, pathInfo: PathInfo): Option[(Route, Params)] = {
     // This method is run for every request, thus should be fast
 
-    val key   = httpMethod + pathInfo.decoded
+    // Look up in cache first.
+    // We include pathInfo.encoded instead of pathInfo.decoded as part of the cache key, because
+    // after being decoded, the original paths /test1/123%2F456 and /test1/123/456 will be the same.
+    val key   = httpMethod + pathInfo.encoded
     val value = matchedRouteCache.get(key)
     if (value != null) return Some(value)
 
@@ -353,7 +356,7 @@ class RouteCollection(
 
   /** @return Option[(Class[Action], cacheSecs, Params)] */
   @tailrec
-  private def matchAndExtractPathParams(tokens: Array[String], routes: Seq[Route]): Option[(Route, Params)] = {
+  private def matchAndExtractPathParams(tokens: Seq[String], routes: Seq[Route]): Option[(Route, Params)] = {
     if (routes.isEmpty) return None
 
     val route = routes.head

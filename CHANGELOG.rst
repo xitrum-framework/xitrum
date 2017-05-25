@@ -1,5 +1,7 @@
 3.28.4:
 
+* `#647 <https://github.com/xitrum-framework/xitrum/issues/647>`_
+  Readd support for %2F in path params
 * `#648 <https://github.com/xitrum-framework/xitrum/issues/648>`_
   Make ``Action#executionContext`` lazy to avoid starting Akka in tests
 * `#650 <https://github.com/xitrum-framework/xitrum/issues/650>`_

@@ -28,7 +28,7 @@ class UriParser extends SimpleChannelInboundHandler[HandlerEnv] {
         else
           path
 
-      env.pathInfo    = new PathInfo(noSlashSuffix)
+      env.pathInfo    = new PathInfo(decoder, Config.xitrum.request.charset)
       env.queryParams = jParamsToParams(decoder.parameters)
       ctx.fireChannelRead(env)
     } catch {
