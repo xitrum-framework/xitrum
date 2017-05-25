@@ -37,7 +37,7 @@ trait JsRenderer {
       <script type="text/javascript" src={webJarsUrl("jquery-validation/1.16.0/dist", "jquery.validate.js",    "jquery.validate.min.js")}></script>
       <script type="text/javascript" src={webJarsUrl("jquery-validation/1.16.0/dist", "additional-methods.js", "additional-methods.min.js")}></script>
       {validateI18n}
-      <script type="text/javascript" src={webJarsUrl("sockjs-client/1.1.2/dist",      "sockjs.js",             "sockjs.min.js")}></script>
+      <script type="text/javascript" src={webJarsUrl("sockjs-client/1.1.4/dist",      "sockjs.js",             "sockjs.min.js")}></script>
       <script type="text/javascript" src={url[xitrum.js]}></script>
     </xml:group>
   }

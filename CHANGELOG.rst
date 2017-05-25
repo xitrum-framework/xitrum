@@ -1,3 +1,10 @@
+3.28.4:
+
+* `#648 <https://github.com/xitrum-framework/xitrum/issues/648>`_
+  Make ``Action#executionContext`` lazy to avoid starting Akka in tests
+* `#650 <https://github.com/xitrum-framework/xitrum/issues/650>`_
+  Update dependencies
+
 3.28.3:
 
 * `#646 <https://github.com/xitrum-framework/xitrum/issues/646>`_

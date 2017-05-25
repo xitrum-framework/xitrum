@@ -1,6 +1,6 @@
 organization := "tv.cntt"
 name         := "xitrum"
-version      := "3.28.3-SNAPSHOT"
+version      := "3.28.4-SNAPSHOT"
 
 // Run "sbt mima-report-binary-issues" to check for binary compatibility
 // https://github.com/typesafehub/migration-manager
@@ -10,8 +10,8 @@ version      := "3.28.3-SNAPSHOT"
 //------------------------------------------------------------------------------
 
 // Akka 2.4.0+ dropped Scala 2.10.x support
-crossScalaVersions := Seq("2.12.1", "2.11.8")
-scalaVersion       := "2.12.1"
+crossScalaVersions := Seq("2.12.2", "2.11.11")
+scalaVersion       := "2.12.2"
 
 // Akka 2.4.0+ requires Java 8
 javacOptions ++= Seq("-source", "1.8", "-target", "1.8")
@@ -27,28 +27,28 @@ javaOptions in Test += "-Dxitrum.mode=production"
 libraryDependencies += "tv.cntt" %% "slf4s-api" % "1.7.25"
 
 // Netty is the core of Xitrum's HTTP(S) feature
-libraryDependencies += "io.netty" % "netty-all" % "4.1.9.Final"
+libraryDependencies += "io.netty" % "netty-all" % "4.1.11.Final"
 
 // https://github.com/netty/netty/wiki/Native-transports
 // Only works on Linux
-libraryDependencies += "io.netty" % "netty-transport-native-epoll" % "4.1.9.Final" classifier "linux-x86_64"
+libraryDependencies += "io.netty" % "netty-transport-native-epoll" % "4.1.11.Final" classifier "linux-x86_64"
 
 // https://github.com/netty/netty/wiki/Forked-Tomcat-Native
 // https://groups.google.com/forum/#!topic/netty/oRATC6Tl0A4
 // Include all classifiers for convenience
-libraryDependencies += "io.netty" % "netty-tcnative" % "2.0.0.Final" classifier "linux-x86_64"
-libraryDependencies += "io.netty" % "netty-tcnative" % "2.0.0.Final" classifier "osx-x86_64"
-libraryDependencies += "io.netty" % "netty-tcnative" % "2.0.0.Final" classifier "windows-x86_64"
+libraryDependencies += "io.netty" % "netty-tcnative" % "2.0.1.Final" classifier "linux-x86_64"
+libraryDependencies += "io.netty" % "netty-tcnative" % "2.0.1.Final" classifier "osx-x86_64"
+libraryDependencies += "io.netty" % "netty-tcnative" % "2.0.1.Final" classifier "windows-x86_64"
 
 // Javassist boosts Netty 4 speed
 libraryDependencies += "org.javassist" % "javassist" % "3.21.0-GA"
 
 // Redirect Akka log to SLF4J
-libraryDependencies += "com.typesafe.akka" %% "akka-actor"           % "2.4.17"
-libraryDependencies += "com.typesafe.akka" %% "akka-cluster"         % "2.4.17"
-libraryDependencies += "com.typesafe.akka" %% "akka-cluster-metrics" % "2.4.17"
-libraryDependencies += "com.typesafe.akka" %% "akka-contrib"         % "2.4.17"
-libraryDependencies += "com.typesafe.akka" %% "akka-slf4j"           % "2.4.17"
+libraryDependencies += "com.typesafe.akka" %% "akka-actor"           % "2.5.2"
+libraryDependencies += "com.typesafe.akka" %% "akka-cluster"         % "2.5.2"
+libraryDependencies += "com.typesafe.akka" %% "akka-cluster-metrics" % "2.5.2"
+libraryDependencies += "com.typesafe.akka" %% "akka-contrib"         % "2.5.2"
+libraryDependencies += "com.typesafe.akka" %% "akka-slf4j"           % "2.5.2"
 
 // For clustering SockJS with Akka
 libraryDependencies += "tv.cntt" %% "glokka" % "2.4.0"
@@ -64,7 +64,7 @@ libraryDependencies += "tv.cntt" %% "sclasner" % "1.7.0"
 libraryDependencies += "com.twitter" %% "chill" % "0.9.2"
 
 // For JSON (de)serializing
-libraryDependencies += "org.json4s" %% "json4s-jackson" % "3.5.1"
+libraryDependencies += "org.json4s" %% "json4s-jackson" % "3.5.2"
 
 // For i18n
 libraryDependencies += "tv.cntt" %% "scaposer" % "1.10"
@@ -76,8 +76,8 @@ libraryDependencies += "org.apache.commons" % "commons-lang3" % "3.5"
 libraryDependencies += "tv.cntt" % "rhinocoffeescript" % "1.10.0"
 
 // For metrics
-libraryDependencies <+= scalaVersion { sv =>
-  val v = if (sv.contains("2.11")) "3.5.6_a2.3" else "3.5.6_a2.4"
+libraryDependencies += {
+  val v = if (scalaVersion.value.contains("2.11")) "3.5.6_a2.3" else "3.5.6_a2.4"
   "nl.grons" %% "metrics-scala" % v
 }
 libraryDependencies += "io.dropwizard.metrics" % "metrics-json" % "3.2.2"
@@ -89,35 +89,35 @@ libraryDependencies += "io.dropwizard.metrics" % "metrics-json" % "3.2.2"
 //
 // Also, we must release a new version of Xitrum every time a new version of
 // Scala is released.
-libraryDependencies <+= scalaVersion { sv => "org.scala-lang" % "scalap" % sv }
+libraryDependencies += "org.scala-lang" % "scalap" % scalaVersion.value
 
 // WebJars ---------------------------------------------------------------------
 
 libraryDependencies += "org.webjars.bower" % "jquery" % "3.2.1"
 libraryDependencies += "org.webjars.bower" % "jquery-validation" % "1.16.0"
-libraryDependencies += "org.webjars.bower" % "sockjs-client" % "1.1.2"
-libraryDependencies += "org.webjars.bower" % "swagger-ui" % "2.2.10"
+libraryDependencies += "org.webjars.bower" % "sockjs-client" % "1.1.4"
+libraryDependencies += "org.webjars.bower" % "swagger-ui" % "3.0.10"
 libraryDependencies += "org.webjars.bower" % "d3" % "3.5.17"
 
 // For test --------------------------------------------------------------------
 
-libraryDependencies += "org.scalatest" %% "scalatest" % "3.0.1" % "test"
+libraryDependencies += "org.scalatest" %% "scalatest" % "3.0.3" % "test"
 
-libraryDependencies += "org.asynchttpclient" % "async-http-client" % "2.0.30" % "test"
+libraryDependencies += "org.asynchttpclient" % "async-http-client" % "2.0.32" % "test"
 
 // An implementation of SLF4J is needed for log in tests to be output
 libraryDependencies += "ch.qos.logback" % "logback-classic" % "1.2.2" % "test"
 
 // For "sbt console"
-unmanagedClasspath in Compile <+= baseDirectory map { bd => Attributed.blank(bd / "src/test/resources") }
+unmanagedClasspath in Compile += Attributed.blank(baseDirectory.value / "src/test/resources")
 
 // For "sbt run/test"
-unmanagedClasspath in Runtime <+= baseDirectory map { bd => Attributed.blank(bd / "src/test/resources") }
+unmanagedClasspath in Runtime += Attributed.blank(baseDirectory.value / "src/test/resources")
 
 // Generate src/main/scala/xitrum/Version.scala from "version" above -----------
 
 val generateVersionFileTask = TaskKey[Unit]("generateVersion", "Generate src/main/scala/xitrum/Version.scala")
-generateVersionFileTask <<= generateVersionFile
+generateVersionFileTask := generateVersionFile
 
 (compile in Compile) <<= (compile in Compile) dependsOn generateVersionFile
 def generateVersionFile = Def.task {
