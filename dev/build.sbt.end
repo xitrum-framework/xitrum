@@ -5,10 +5,10 @@ scalacOptions in (Compile, doc) += "-diagrams"
 // Publish to Sonatype
 // https://github.com/sbt/sbt.github.com/blob/gen-master/src/jekyll/using_sonatype.md
 
-publishTo <<= (version) { version: String =>
+publishTo := {
   val nexus = "https://oss.sonatype.org/"
-  if (version.trim.endsWith("SNAPSHOT")) Some("snapshots" at nexus + "content/repositories/snapshots")
-  else                                   Some("releases"  at nexus + "service/local/staging/deploy/maven2")
+  if (version.value.trim.endsWith("SNAPSHOT")) Some("snapshots" at nexus + "content/repositories/snapshots")
+  else                                         Some("releases"  at nexus + "service/local/staging/deploy/maven2")
 }
 
 publishMavenStyle := true
