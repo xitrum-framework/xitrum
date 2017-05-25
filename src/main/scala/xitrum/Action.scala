@@ -48,14 +48,21 @@ trait Action extends RequestEnv
   with JsResponder
   with I18n
 {
-  /** This is convenient, for example, when you want to get the current action in view templates. */
+  /**
+   * Convenient implicit, for example for use when you want to get the current action in view templates.
+   */
   implicit val currentAction = Action.this
 
-  /** This is convenient, for example, when you use scala.concurrent.Future. */
-  lazy implicit val executionContext = Config.actorSystem.dispatcher
-
-  /** This is convenient, for example, when you use scala.concurrent.Await. */
+  /**
+   * Convenient implicit, for example for use when you use scala.concurrent.Await.
+   */
   implicit val timeout = Action.TIMEOUT
+
+  /**
+   * Convenient implicit, for example for use when you use scala.concurrent.Future.
+   * It's lazy to avoid starting Akka in tests.
+   */
+  lazy implicit val executionContext = Config.actorSystem.dispatcher
 
   //----------------------------------------------------------------------------
 
