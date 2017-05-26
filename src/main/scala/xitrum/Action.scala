@@ -47,6 +47,7 @@ trait Action extends RequestEnv
   with JsRenderer
   with JsResponder
   with I18n
+  with Annotateable
 {
   /**
    * Convenient implicit, for example for use when you want to get the current action in view templates.
