@@ -4,23 +4,11 @@ import io.netty.channel.{ChannelInitializer, EventLoopGroup}
 import io.netty.channel.socket.SocketChannel
 import io.netty.util.ResourceLeakDetector
 
-import xitrum.handler.{
-  Bootstrap,
-  DefaultHttpChannelInitializer,
-  NetOption,
-  SslChannelInitializer
-}
-
+import xitrum.handler.{Bootstrap, DefaultHttpChannelInitializer, NetOption, SslChannelInitializer}
 import xitrum.metrics.MetricsManager
 
 object Server {
-
   private var eventLoopGroups = Seq.empty[EventLoopGroup]
-
-  def stop() {
-    eventLoopGroups.foreach(_.shutdownGracefully())
-    Log.info(s"Xitrum $version stopped")
-  }
 
   /**
    * Starts with the default ChannelInitializer provided by Xitrum.
@@ -67,9 +55,35 @@ object Server {
     else
       Log.info(s"Xitrum $version started in development mode")
 
-    // This is a good timing to warn
+    // This is a good timing to warn, after Xitrum has just started
     Config.warnOnDefaultSecureKey()
+
     eventLoopGroups
+  }
+
+  /**
+   * Stops Xitrum gracefully.
+   * Do not call in Ximtrum action thread to avoid deadlock (start a new thread or use [[stopAtShutdown]]).
+   */
+  def stop() {
+    Log.info(s"Xitrum $version gracefully stopping...")
+
+    val futures = eventLoopGroups.map(_.shutdownGracefully())
+    futures.foreach(_.awaitUninterruptibly())
+
+    Log.info(s"Xitrum $version gracefully stopped")
+  }
+
+  /**
+   * Registers a JVM shutdown hook that calls [[stop]] to stop Xitrum gracefully.
+   * After the hook has been registered, you can stop Xitrum gracefully by running OS command `kill <Xitrum PID>`.
+   */
+  def stopAtShutdown() {
+    Runtime.getRuntime.addShutdownHook(new Thread {
+      override def run() {
+        Server.this.stop()
+      }
+    })
   }
 
   //----------------------------------------------------------------------------
@@ -95,6 +109,7 @@ object Server {
       case Some(hostnameOrIp) =>
         Log.info(s"$service server started on $hostnameOrIp:$port")
     }
+
     groups
   }
 }

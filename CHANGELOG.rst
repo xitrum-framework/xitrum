@@ -1,3 +1,8 @@
+3.28.5:
+
+* `#651 <https://github.com/xitrum-framework/xitrum/issues/651>`_
+  xitrum.Server.stop should wait until Xitrum is stopped
+
 3.28.4:
 
 * `#647 <https://github.com/xitrum-framework/xitrum/issues/647>`_

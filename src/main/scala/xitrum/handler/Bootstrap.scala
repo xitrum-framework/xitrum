@@ -10,7 +10,7 @@ import io.netty.channel.socket.nio.NioServerSocketChannel
 import xitrum.Config
 
 object Bootstrap {
-  def newBootstrap(channelInitializer: ChannelInitializer[SocketChannel]) =
+  def newBootstrap(channelInitializer: ChannelInitializer[SocketChannel]): (ServerBootstrap, Seq[EventLoopGroup]) =
     if (Config.xitrum.edgeTriggeredEpoll)
       newEpollBootstrap(channelInitializer)
     else
