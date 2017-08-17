@@ -243,7 +243,7 @@ object Swagger {
     * Usage:
     * create some `case class Response(value: String)` for your API response
     * create somewhere type definition `val swagger = Swagger.valueOf[Response]`
-    * use that type definition to document your Swagger API `Swagger.Response(200, "Success", swagger)`
+    * use that type definition to document your Swagger API `Swagger.Response(200, "Success", Some(swagger))`
     */
   def valueOf[T](implicit tag: TypeTag[T]): JsonType = {
     val tpe = tag.tpe
