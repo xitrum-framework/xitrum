@@ -87,7 +87,8 @@ private case class ActionTreeBuilder(xitrumVersion: String, parent2Children: Map
             }
           }
 
-          val universeAnnotations = runtimeMirror.classSymbol(klass).asClass.annotations
+          val universeClass = runtimeMirror.classSymbol(klass).asClass
+          val universeAnnotations = universeClass.annotations
           val thisAnnotationsOnly = ActionAnnotations.fromUniverse(universeAnnotations)
           val ret                 = thisAnnotationsOnly.inherit(parentAnnotations)
           cache(className)        = ret
