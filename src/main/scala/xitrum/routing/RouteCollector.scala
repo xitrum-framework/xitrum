@@ -273,12 +273,97 @@ object RouteCollector {
     if (universeAnnotations.isEmpty) {
       None
     } else {
-      val cl = Thread.currentThread.getContextClassLoader
-      val rm = universe.runtimeMirror(cl)
-      val tb = rm.mkToolBox()
+      var swaggerArgs = Seq.empty[SwaggerTypes.SwaggerArg]
+      universeAnnotations.foreach { annotation =>
+        annotation.tree.children.tail.foreach { scalaArg =>
+          // Ex:
+          // List(xitrum.annotation.Swagger.Response.apply, 200, "ID of the newly created article will be returned")
+          // List(xitrum.annotation.Swagger.StringForm.apply, "title", xitrum.annotation.Swagger.StringForm.apply$default$2)
+          // List(xitrum.annotation.Swagger.StringForm.apply, "title", "desc")
+          val children = scalaArg.children
 
-      val swaggerArgs = universeAnnotations.map(annotation => tb.eval(tb.untypecheck(annotation.tree)).asInstanceOf[Swagger]).flatMap(_.swaggerArgs)
+          val child0 = children.head.toString
+          if (child0 == "xitrum.annotation.Swagger.Tags.apply") {
+            val tags = children.tail.map(_.productElement(0).asInstanceOf[universe.Constant].value.toString)
+            swaggerArgs = swaggerArgs :+ Swagger.Tags(tags: _*)
+          } else if (child0 == "xitrum.annotation.Swagger.Summary.apply") {
+            val summary = children(1).productElement(0).asInstanceOf[universe.Constant].value.toString
+            swaggerArgs = swaggerArgs :+ Swagger.Summary(summary)
+          } else if (child0 == "xitrum.annotation.Swagger.Description.apply") {
+            val description = children(1).productElement(0).asInstanceOf[universe.Constant].value.toString
+            swaggerArgs = swaggerArgs :+ Swagger.Description(description)
+          } else if (child0 == "xitrum.annotation.Swagger.ExternalDocs.apply") {
+            val url = children(1).productElement(0).asInstanceOf[universe.Constant].value.toString
+            val desc =
+              if (children(2).toString.startsWith("xitrum.annotation.Swagger"))
+                ""
+              else
+                children(2).productElement(0).asInstanceOf[universe.Constant].value.toString
+            swaggerArgs = swaggerArgs :+ Swagger.ExternalDocs(url, desc)
+          } else if (child0 == "xitrum.annotation.Swagger.OperationId.apply") {
+            val id = children(1).productElement(0).asInstanceOf[universe.Constant].value.toString
+            swaggerArgs = swaggerArgs :+ Swagger.OperationId(id)
+          } else if (child0 == "xitrum.annotation.Swagger.Consumes.apply") {
+            val contentTypes = children.tail.map(_.productElement(0).asInstanceOf[universe.Constant].value.toString)
+            swaggerArgs = swaggerArgs :+ Swagger.Consumes(contentTypes: _*)
+          } else if (child0 == "xitrum.annotation.Swagger.Produces.apply") {
+            val contentTypes = children.tail.map(_.productElement(0).asInstanceOf[universe.Constant].value.toString)
+            swaggerArgs = swaggerArgs :+ Swagger.Produces(contentTypes: _*)
+          } else if (child0 == "xitrum.annotation.Swagger.Response.apply") {
+            val code =
+                     if (children(1).toString.startsWith("xitrum.annotation.Swagger"))
+                0
+              else
+                children(1).productElement(0).asInstanceOf[universe.Constant].value.toString.toInt
+            val desc = children(2).productElement(0).asInstanceOf[universe.Constant].value.toString
+            swaggerArgs = swaggerArgs :+ Swagger.Response(code, desc)
+          } else if (child0 == "xitrum.annotation.Swagger.Schemes.apply") {
+            val schemes = children.tail.map(_.productElement(0).asInstanceOf[universe.Constant].value.toString)
+            swaggerArgs = swaggerArgs :+ Swagger.Schemes(schemes: _*)
+          } else if (child0 == "xitrum.annotation.Swagger.Deprecated.apply") {
+            swaggerArgs = swaggerArgs :+ Swagger.Deprecated
+          } else if (child0 == "xitrum.annotation.Swagger.JsonBody.apply") {
+            val name = children(1).productElement(0).asInstanceOf[universe.Constant].value.toString
 
+            val desc =
+              if (children(2).toString.startsWith("xitrum.annotation.Swagger"))
+                ""
+              else
+                children(2).productElement(0).asInstanceOf[universe.Constant].value.toString
+
+            val cl = Thread.currentThread.getContextClassLoader
+            val rm = universe.runtimeMirror(cl)
+            val tb = rm.mkToolBox()
+
+            val tpe = tb.eval(tb.untypecheck(children(3))).asInstanceOf[Swagger.JsonType]
+
+            swaggerArgs = swaggerArgs :+ Swagger.JsonBody(name, desc, tpe)
+          } else {  // param or optional param
+            val name = children(1).productElement(0).asInstanceOf[universe.Constant].value.toString
+
+            val desc =
+              if (children(2).toString.startsWith("xitrum.annotation.Swagger"))
+                ""
+              else
+                children(2).productElement(0).asInstanceOf[universe.Constant].value.toString
+
+            // Use reflection to create annotation
+
+            // Ex: xitrum.annotation.Swagger.StringForm.apply
+            val scalaClassName = child0.substring(0, child0.length - ".apply".length)
+
+            val builder = new StringBuilder(scalaClassName)
+            builder.setCharAt("xitrum.annotation.Swagger".length, '$')
+
+            // Ex: xitrum.annotation.Swagger$StringForm
+            val cl            = Thread.currentThread.getContextClassLoader
+            val javaClassName = builder.toString
+            val klass         = cl.loadClass(javaClassName)
+            val constructor   = klass.getConstructor(classOf[String], classOf[String])
+            swaggerArgs = swaggerArgs :+ constructor.newInstance(name, desc).asInstanceOf[SwaggerTypes.SwaggerArg]
+          }
+        }
+      }
       Some(Swagger(swaggerArgs: _*))
     }
   }
