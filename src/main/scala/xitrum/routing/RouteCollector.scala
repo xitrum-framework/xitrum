@@ -316,7 +316,14 @@ object RouteCollector {
               else
                 children(1).productElement(0).asInstanceOf[universe.Constant].value.toString.toInt
             val desc = children(2).productElement(0).asInstanceOf[universe.Constant].value.toString
-            swaggerArgs = swaggerArgs :+ Swagger.Response(code, desc)
+
+            val cl = Thread.currentThread.getContextClassLoader
+            val rm = universe.runtimeMirror(cl)
+            val tb = rm.mkToolBox()
+
+            val tpeOpt = if (children.length > 3) tb.eval(tb.untypecheck(children(3))).asInstanceOf[Option[Swagger.JsonType]] else None
+
+            swaggerArgs = swaggerArgs :+ Swagger.Response(code, desc, tpeOpt)
           } else if (child0 == "xitrum.annotation.Swagger.Schemes.apply") {
             val schemes = children.tail.map(_.productElement(0).asInstanceOf[universe.Constant].value.toString)
             swaggerArgs = swaggerArgs :+ Swagger.Schemes(schemes: _*)
