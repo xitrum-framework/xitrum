@@ -1,5 +1,6 @@
 package xitrum.annotation
 
+import scala.reflect.runtime.universe.{TypeTag, symbolOf}
 import scala.annotation.StaticAnnotation
 
 case class Swagger(swaggerArgs: SwaggerTypes.SwaggerArg*) extends StaticAnnotation
@@ -34,6 +35,7 @@ object SwaggerTypes {
   sealed trait SwaggerDateTimeParam
   sealed trait SwaggerPasswordParam
   sealed trait SwaggerFileParam
+  sealed trait SwaggerJsonParam
 }
 
 /** See: https://github.com/swagger-api/swagger-spec/blob/master/versions/2.0.md */
@@ -45,12 +47,11 @@ object Swagger {
   case class Description(desc: String) extends SwaggerArg
   case class ExternalDocs(url: String, desc: String = "") extends SwaggerArg
   case class OperationId(id: String) extends SwaggerArg
-
   case class Consumes(contentTypes: String*) extends SwaggerArg
   case class Produces(contentTypes: String*) extends SwaggerArg
 
   /** Can use this multiple times at an action. */
-  case class Response(code: Int = 0, desc: String) extends SwaggerArg
+  case class Response(code: Int = 0, desc: String, tpeOpt: Option[JsonType] = None) extends SwaggerArg
 
   case class Schemes(schemes: String*) extends SwaggerArg
   case object Deprecated extends SwaggerArg
@@ -117,6 +118,7 @@ object Swagger {
   case class DateBody    (name: String, desc: String = "") extends SwaggerParamArg with SwaggerBodyParam with SwaggerDateParam
   case class DateTimeBody(name: String, desc: String = "") extends SwaggerParamArg with SwaggerBodyParam with SwaggerDateTimeParam
   case class PasswordBody(name: String, desc: String = "") extends SwaggerParamArg with SwaggerBodyParam with SwaggerPasswordParam
+  case class JsonBody    (name: String, desc: String = "", tpe: JsonType) extends SwaggerParamArg with SwaggerBodyParam with SwaggerJsonParam
 
   //----------------------------------------------------------------------------
 
@@ -180,4 +182,81 @@ object Swagger {
   case class OptDateBody    (name: String, desc: String = "") extends SwaggerOptParamArg with SwaggerBodyParam with SwaggerDateParam
   case class OptDateTimeBody(name: String, desc: String = "") extends SwaggerOptParamArg with SwaggerBodyParam with SwaggerDateTimeParam
   case class OptPasswordBody(name: String, desc: String = "") extends SwaggerOptParamArg with SwaggerBodyParam with SwaggerPasswordParam
+
+  // Types definitions
+
+  /**
+    * Structure for building object fields documentation
+    *
+    * @param name         field name
+    * @param tpe          field type
+    * @param isRequired_? if true means that field is required
+    */
+  case class JsonField(name: String, tpe: JsonType, isRequired_? : Boolean = false)
+
+  /**
+    * Structure for building object types documentation
+    *
+    * @param name      type name (actual for `tpe` == "object" only)
+    * @param tpe       type in Swagger terms @see https://github.com/OAI/OpenAPI-Specification/blob/master/versions/2.0.md#data-types
+    * @param format    additional Swagger type definition
+    * @param isArray_? true is marking the type as array of `tpe` items
+    * @param fields    list of `object` fields (actual for `tpe` == "object" only)
+    */
+  case class JsonType(name: Option[String], tpe: String, format: String = "", var isArray_? : Boolean = false, var fields: Seq[JsonField] = Seq()) {
+
+    def isArray(value: Boolean): JsonType = {
+      isArray_? = value
+      this
+    }
+  }
+
+  object JsonType {
+
+    object tpe {
+      val integer = "integer"
+      val number = "number"
+      val string = "string"
+      val boolean = "boolean"
+      val obj = "object"
+      val file = "file"
+    }
+
+    object fmt {
+      val none = ""
+      val int32 = "int32"
+      val int64 = "int64"
+      val float = "float"
+      val double = "double"
+      val dateTime = "date-time"
+      val byte = "byte"
+      val binary = "binary"
+      val date = "date"
+      val password = "password"
+    }
+
+  }
+
+  /**
+    * Builds the Swagger type definition structure for documenting API requests/responses represented by single objects
+    *
+    * Usage:
+    * create some `case class Response(value: String)` for your API response
+    * create somewhere type definition `val swagger = Swagger.valueOf[Response]`
+    * use that type definition to document your Swagger API `Swagger.Response(200, "Success", Some(swagger))`
+    */
+  def valueOf[T](implicit tag: TypeTag[T]): JsonType = {
+    val tpe = tag.tpe
+    assert(tpe.typeSymbol != symbolOf[Option[_]], "Root types can not be optional, optional parameters should be implemented with Opt version of annotations")
+    assert(!SwaggerReflection.isArrayType_?(tpe), "Root types should not be of collection types, to specify the array type use `arrayOf` method instead")
+    SwaggerReflection.reflect(tpe)
+  }
+
+  /**
+    * Builds the Swagger type definition structure for documenting API requests/responses represented by arrays of specific object type
+    */
+  def arrayOf[T](implicit tag: TypeTag[T]): JsonType = {
+    valueOf(tag).isArray(true)
+  }
+
 }

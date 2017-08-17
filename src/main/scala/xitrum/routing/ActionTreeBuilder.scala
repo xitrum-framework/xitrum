@@ -50,7 +50,6 @@ private case class ActionTreeBuilder(xitrumVersion: String, parent2Children: Map
    *
    * @param cl In development mode, we must use a new throwaway class loader,
    *        so that modified annotations (if any) can be recollected
-   *
    * @return Concrete (non-trait) action classes and their annotations
    */
   def getConcreteActionsAndAnnotations(cl: ClassLoader): Set[(Class[_ <: Action], ActionAnnotations)] = {
@@ -102,6 +101,7 @@ private case class ActionTreeBuilder(xitrumVersion: String, parent2Children: Map
 
   private def getConcreteActions: Set[Class[_ <: Action]] = {
     var concreteActions = Set.empty[Class[_ <: Action]]
+
     def traverseActionTree(className: String) {
       if (parent2Children.isDefinedAt(className)) {
         val children = parent2Children(className)
