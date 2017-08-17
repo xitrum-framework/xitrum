@@ -4,6 +4,7 @@ import java.io.File
 import scala.collection.mutable.ArrayBuffer
 import scala.reflect.runtime.universe
 import scala.util.control.NonFatal
+import scala.tools.reflect.ToolBox
 
 import sclasner.{FileEntry, Scanner}
 
@@ -310,17 +311,40 @@ object RouteCollector {
             swaggerArgs = swaggerArgs :+ Swagger.Produces(contentTypes: _*)
           } else if (child0 == "xitrum.annotation.Swagger.Response.apply") {
             val code =
-              if (children(1).toString.startsWith("xitrum.annotation.Swagger"))
+                     if (children(1).toString.startsWith("xitrum.annotation.Swagger"))
                 0
               else
                 children(1).productElement(0).asInstanceOf[universe.Constant].value.toString.toInt
             val desc = children(2).productElement(0).asInstanceOf[universe.Constant].value.toString
-            swaggerArgs = swaggerArgs :+ Swagger.Response(code, desc)
+
+            val cl = Thread.currentThread.getContextClassLoader
+            val rm = universe.runtimeMirror(cl)
+            val tb = rm.mkToolBox()
+
+            val tpeOpt = if (children.length > 3) tb.eval(tb.untypecheck(children(3))).asInstanceOf[Option[Swagger.JsonType]] else None
+
+            swaggerArgs = swaggerArgs :+ Swagger.Response(code, desc, tpeOpt)
           } else if (child0 == "xitrum.annotation.Swagger.Schemes.apply") {
             val schemes = children.tail.map(_.productElement(0).asInstanceOf[universe.Constant].value.toString)
             swaggerArgs = swaggerArgs :+ Swagger.Schemes(schemes: _*)
           } else if (child0 == "xitrum.annotation.Swagger.Deprecated.apply") {
             swaggerArgs = swaggerArgs :+ Swagger.Deprecated
+          } else if (child0 == "xitrum.annotation.Swagger.JsonBody.apply") {
+            val name = children(1).productElement(0).asInstanceOf[universe.Constant].value.toString
+
+            val desc =
+              if (children(2).toString.startsWith("xitrum.annotation.Swagger"))
+                ""
+              else
+                children(2).productElement(0).asInstanceOf[universe.Constant].value.toString
+
+            val cl = Thread.currentThread.getContextClassLoader
+            val rm = universe.runtimeMirror(cl)
+            val tb = rm.mkToolBox()
+
+            val tpe = tb.eval(tb.untypecheck(children(3))).asInstanceOf[Swagger.JsonType]
+
+            swaggerArgs = swaggerArgs :+ Swagger.JsonBody(name, desc, tpe)
           } else {  // param or optional param
             val name = children(1).productElement(0).asInstanceOf[universe.Constant].value.toString
 
@@ -347,7 +371,6 @@ object RouteCollector {
           }
         }
       }
-
       Some(Swagger(swaggerArgs: _*))
     }
   }
