@@ -2,6 +2,8 @@
 
 * `#651 <https://github.com/xitrum-framework/xitrum/issues/651>`_
   xitrum.Server.stop should wait until Xitrum is stopped
+* `#654 <https://github.com/xitrum-framework/xitrum/issues/651>`_
+  Update dependency libraries
 
 3.28.4:
 
