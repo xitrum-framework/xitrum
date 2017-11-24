@@ -76,7 +76,7 @@ if there's any wrong with the versions of .jar files.
 See:
 https://github.com/sbt/sbt.github.com/blob/gen-master/src/jekyll/using_sonatype.md
 
-Create ~/.sbt/0.13/sonatype.sbt (for SBT 0.12: ~/.sbt/sonatype.sbt) file:
+Create ~/.sbt/1.0/sonatype.sbt file:
 
 ::
 
@@ -92,8 +92,8 @@ Then:
 2. Copy
      dev/build.sbt.end   to the end of build.sbt, and
      dev/plugins.sbt.end to the end of project/plugins.sbt
-3. Run ``sbt publish-signed``. Alternatively you can run ``sbt`` then from SBT
-   command prompt run ``+ publish-signed``.
+3. Run ``sbt publishSigned``. Alternatively you can run ``sbt`` then from SBT
+   command prompt run ``+ publishSigned``.
 4. Login at https://oss.sonatype.org/ and from "Staging Repositories" select the
    newly published item, click "Close" then "Release".
 
