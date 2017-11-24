@@ -3,13 +3,26 @@ package xitrum.handler.inbound
 import io.netty.buffer.Unpooled
 import io.netty.channel.{Channel, ChannelHandler, ChannelHandlerContext, ChannelFutureListener, SimpleChannelInboundHandler}
 import ChannelHandler.Sharable
-import io.netty.handler.codec.http.{DefaultFullHttpResponse, HttpVersion, HttpResponseStatus}
+import io.netty.handler.codec.http.{DefaultFullHttpResponse, HttpVersion, HttpResponseStatus, HttpUtil}
 import xitrum.{Config, Log}
 
 object BadClientSilencer {
+  /**
+   * Responds 400 Bad Request to client.
+   *
+   * For security, do not expose server internal info to client via response content body.
+   * Because the problem is caused by bad client, generally do not log at INFO or WARN level
+   * to avoid noise in server log.
+   */
   def respond400(channel: Channel, body: String) {
-    val content  = Unpooled.copiedBuffer(body, Config.xitrum.request.charset)
+    val content = Unpooled.copiedBuffer(body, Config.xitrum.request.charset)
+
+    // https://github.com/xitrum-framework/xitrum/issues/508#issuecomment-72808997
+    // Do not close channel without responding status code.
+    // Nginx decides that upstream is down if upstream drop connection without responding status code.
     val response = new DefaultFullHttpResponse(HttpVersion.HTTP_1_1, HttpResponseStatus.BAD_REQUEST, content)
+
+    HttpUtil.setContentLength(response, content.readableBytes)
     channel.writeAndFlush(response).addListener(ChannelFutureListener.CLOSE)
   }
 }

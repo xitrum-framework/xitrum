@@ -44,6 +44,7 @@ object Request2Env {
   // Save a field to disk if its size exceeds maxSizeInBytesOfUploadMem;
   // creating factory should be after the above for the factory to take effect of the settings
   val factory = new DefaultHttpDataFactory(Config.xitrum.request.maxSizeInBytesOfUploadMem)
+  factory.setMaxLimit(Config.xitrum.request.maxSizeInBytes)
 }
 
 /**
@@ -55,8 +56,12 @@ class Request2Env extends SimpleChannelInboundHandler[HttpObject] {
 
   import Request2Env._
 
-  private[this] var env: HandlerEnv   = null   // Will be reset to null after being sent upstream to the next handler
-  private[this] var bodyBytesReceived = 0L     // For checking if the body is too big, bigger than Config.xitrum.request.maxSizeInBytes
+  // Will be reset to null after being sent upstream to the next handler
+  private[this] var env: HandlerEnv  = _
+
+  // For checking if decoded body is too big, bigger than Config.xitrum.request.maxSizeInBytes;
+  // raw request body size is checked separately (see factory.setMaxLimit above)
+  private[this] var bodyBytesDecoded = 0L
 
   override def channelInactive(ctx: ChannelHandlerContext) {
     // In case the connection is closed when the request is not fully received,
@@ -70,7 +75,8 @@ class Request2Env extends SimpleChannelInboundHandler[HttpObject] {
   override def channelRead0(ctx: ChannelHandlerContext, msg: HttpObject) {
     val decRet = msg.decoderResult
     if (decRet.isFailure) {
-      BadClientSilencer.respond400(ctx.channel, "Could not decode request: " + decRet.cause.getMessage)
+      Log.debug("Could not decode request", decRet.cause)
+      BadClientSilencer.respond400(ctx.channel, "Could not decode request")
       return
     }
 
@@ -109,9 +115,8 @@ class Request2Env extends SimpleChannelInboundHandler[HttpObject] {
       }
     } catch {
       case NonFatal(e) =>
-        val m = "Could not parse content body of request: " + msg
-        Log.warn(m, e)
-        BadClientSilencer.respond400(ctx.channel, "Could not parse content body of request: " + e.getMessage)
+        Log.debug(s"Could not parse content body of request: $msg", e)
+        BadClientSilencer.respond400(ctx.channel, "Could not parse content body of request")
     }
   }
 
@@ -138,7 +143,8 @@ class Request2Env extends SimpleChannelInboundHandler[HttpObject] {
           // Another exception is IncompatibleDataDecoderException, which means the
           // request is valid, just no need to decode (see the check above)
           case e: HttpPostRequestDecoder.ErrorDataDecoderException =>
-            BadClientSilencer.respond400(ctx.channel, "Could not parse content body of request: " + e.getMessage)
+            Log.debug("Could not parse content body of request", e)
+            BadClientSilencer.respond400(ctx.channel, "Could not parse content body of request")
             responded400 = true
             null
         }
@@ -155,7 +161,7 @@ class Request2Env extends SimpleChannelInboundHandler[HttpObject] {
       env.request        = createEmptyFullHttpRequest(request)
       env.response       = createEmptyFullResponse(request)
       env.bodyDecoder    = bodyDecoder
-      bodyBytesReceived  = 0
+      bodyBytesDecoded   = 0
     }
   }
 
@@ -164,14 +170,17 @@ class Request2Env extends SimpleChannelInboundHandler[HttpObject] {
     if (env.bodyDecoder == null) {
       val body   = content.content
       val length = body.readableBytes
-      if (bodyBytesReceived + length <= Config.xitrum.request.maxSizeInBytes) {
+      if (bodyBytesDecoded + length <= Config.xitrum.request.maxSizeInBytes) {
         env.request.content.writeBytes(body)
-        bodyBytesReceived += length
+        bodyBytesDecoded += length
       } else {
         closeOnBigRequest(ctx)
       }
     } else {
+      // Raw request body size will be checked (see factory.setMaxLimit above)
       env.bodyDecoder.offer(content)
+
+      // Decoded request body size will be checked
       if (!readHttpDataChunkByChunk()) closeOnBigRequest(ctx)
     }
   }
@@ -222,7 +231,7 @@ class Request2Env extends SimpleChannelInboundHandler[HttpObject] {
       }
       sizeOk
     } catch {
-      case e: HttpPostRequestDecoder.EndOfDataDecoderException =>
+      case _: HttpPostRequestDecoder.EndOfDataDecoderException =>
         true
     }
   }
@@ -255,7 +264,7 @@ class Request2Env extends SimpleChannelInboundHandler[HttpObject] {
   /** @return true if OK */
   private def checkHttpDataSize(data: InterfaceHttpData): Boolean = {
     val hd = data.asInstanceOf[HttpData]
-    bodyBytesReceived + hd.length <= Config.xitrum.request.maxSizeInBytes
+    bodyBytesDecoded + hd.length <= Config.xitrum.request.maxSizeInBytes
   }
 
   private def putDataToEnv(data: InterfaceHttpData) {
@@ -265,7 +274,7 @@ class Request2Env extends SimpleChannelInboundHandler[HttpObject] {
       val name      = attribute.getName
       val value     = attribute.getValue
       putOrAppendString(env.bodyTextParams, name, value)
-      bodyBytesReceived += attribute.length
+      bodyBytesDecoded += attribute.length
     } else if (dataType == HttpDataType.FileUpload) {
       // Do not skip empty file
       // https://github.com/xitrum-framework/xitrum/issues/463
@@ -275,13 +284,13 @@ class Request2Env extends SimpleChannelInboundHandler[HttpObject] {
         val length = fileUpload.length
         sanitizeFileUploadFilename(fileUpload)
         putOrAppendFileUpload(env.bodyFileParams, name, fileUpload)
-        bodyBytesReceived += length
+        bodyBytesDecoded += length
       }
     }
   }
 
   private def closeOnBigRequest(ctx: ChannelHandlerContext) {
-    Log.warn("Request content body is too big, see xitrum.request.maxSizeInMB in xitrum.conf")
+    Log.debug("Request content body is too big, see xitrum.request.maxSizeInMB in xitrum.conf")
     BadClientSilencer.respond400(ctx.channel, "Request content body is too big. Limit: " + Config.xitrum.request.config.getLong("maxSizeInMB") + " bytes")
 
     // Mark that closeOnBigRequest has been called.
@@ -304,7 +313,7 @@ class Request2Env extends SimpleChannelInboundHandler[HttpObject] {
 
     // Reset for the next request on this same connection (e.g. keep alive)
     env               = null
-    bodyBytesReceived = 0
+    bodyBytesDecoded = 0
   }
 
   private def isAPPLICATION_JSON(request: HttpRequest): Boolean = {

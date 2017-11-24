@@ -33,12 +33,8 @@ class UriParser extends SimpleChannelInboundHandler[HandlerEnv] {
       ctx.fireChannelRead(env)
     } catch {
       case NonFatal(e) =>
-        val msg = "Could not parse query params URI: " + request.uri
-        Log.warn(msg, e)
-        // https://github.com/xitrum-framework/xitrum/issues/508#issuecomment-72808997
-        // Do not close channel without responding status code.
-        // Nginx decides that upstream is down if upstream drop connection without responding status code.
-        BadClientSilencer.respond400(ctx.channel, "Could not parse params in URI: " + e.getMessage)
+        Log.debug(s"Could not parse query params URI: ${request.uri}", e)
+        BadClientSilencer.respond400(ctx.channel, "Could not parse params in URI")
     }
   }
 

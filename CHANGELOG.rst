@@ -1,3 +1,8 @@
+3.28.6:
+
+* `#656 <https://github.com/xitrum-framework/xitrum/issues/656>`_
+  Fix OutOfMemoryError with too big request body
+
 3.28.5:
 
 * `#651 <https://github.com/xitrum-framework/xitrum/issues/651>`_
