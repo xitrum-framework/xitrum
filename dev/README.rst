@@ -56,9 +56,9 @@ Publish to local
 ----------------
 
 While developing, you may need do local publish. Run
-``sbt publish-local``.
+``sbt publishLocal``.
 Alternatively you can run ``sbt`` then from SBT command prompt run
-``+ publish-local``.
+``+ publishLocal``.
 
 To delete the local publish:
 

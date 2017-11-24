@@ -2,6 +2,8 @@
 
 * `#656 <https://github.com/xitrum-framework/xitrum/issues/656>`_
   Fix OutOfMemoryError with too big request body
+* `#657 <https://github.com/xitrum-framework/xitrum/issues/657>`_
+  Update dependency libraries
 
 3.28.5:
 
