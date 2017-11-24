@@ -41,7 +41,7 @@ Generate target/dependencies-compile.dot:
 
 ::
 
-  sbt dependency-dot
+  sbt dependencyDot
 
 Convert dependencies-compile.dot to deps.png:
 
