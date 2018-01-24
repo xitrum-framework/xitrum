@@ -1,4 +1,4 @@
-Use SBT 0.13.5 to compile. See project/build.properties.
+Use SBT to compile. See project/build.properties.
 
 Update src/main/resources/META-INF/mime.types
 ---------------------------------------------
