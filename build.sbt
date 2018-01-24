@@ -1,6 +1,6 @@
 organization := "tv.cntt"
 name         := "xitrum"
-version      := "3.28.6-SNAPSHOT"
+version      := "3.28.7-SNAPSHOT"
 
 // Run "sbt mima-report-binary-issues" to check for binary compatibility
 // https://github.com/typesafehub/migration-manager
@@ -27,11 +27,11 @@ javaOptions in Test += "-Dxitrum.mode=production"
 libraryDependencies += "tv.cntt" %% "slf4s-api" % "1.7.25"
 
 // Netty is the core of Xitrum's HTTP(S) feature
-libraryDependencies += "io.netty" % "netty-all" % "4.1.17.Final"
+libraryDependencies += "io.netty" % "netty-all" % "4.1.20.Final"
 
 // https://github.com/netty/netty/wiki/Native-transports
 // Only works on Linux
-libraryDependencies += "io.netty" % "netty-transport-native-epoll" % "4.1.17.Final" classifier "linux-x86_64"
+libraryDependencies += "io.netty" % "netty-transport-native-epoll" % "4.1.20.Final" classifier "linux-x86_64"
 
 // https://github.com/netty/netty/wiki/Forked-Tomcat-Native
 // https://groups.google.com/forum/#!topic/netty/oRATC6Tl0A4
@@ -44,18 +44,18 @@ libraryDependencies += "io.netty" % "netty-tcnative" % "2.0.7.Final" classifier 
 libraryDependencies += "org.javassist" % "javassist" % "3.22.0-GA"
 
 // Redirect Akka log to SLF4J
-libraryDependencies += "com.typesafe.akka" %% "akka-actor"           % "2.5.7"
-libraryDependencies += "com.typesafe.akka" %% "akka-cluster"         % "2.5.7"
-libraryDependencies += "com.typesafe.akka" %% "akka-cluster-metrics" % "2.5.7"
-libraryDependencies += "com.typesafe.akka" %% "akka-contrib"         % "2.5.7"
-libraryDependencies += "com.typesafe.akka" %% "akka-slf4j"           % "2.5.7"
+libraryDependencies += "com.typesafe.akka" %% "akka-actor"           % "2.5.9"
+libraryDependencies += "com.typesafe.akka" %% "akka-cluster"         % "2.5.9"
+libraryDependencies += "com.typesafe.akka" %% "akka-cluster-metrics" % "2.5.9"
+libraryDependencies += "com.typesafe.akka" %% "akka-contrib"         % "2.5.9"
+libraryDependencies += "com.typesafe.akka" %% "akka-slf4j"           % "2.5.9"
 
 // For clustering SockJS with Akka
 libraryDependencies += "tv.cntt" %% "glokka" % "2.5.0"
 
 // For file watch
 // (akka-agent is added here, should ensure same Akka version as above)
-libraryDependencies += "com.beachape.filemanagement" %% "schwatcher" % "0.3.4"
+libraryDependencies += "com.beachape.filemanagement" %% "schwatcher" % "0.3.5"
 
 // For scanning routes
 libraryDependencies += "tv.cntt" %% "sclasner" % "1.7.0"
@@ -76,8 +76,8 @@ libraryDependencies += "org.apache.commons" % "commons-lang3" % "3.7"
 libraryDependencies += "tv.cntt" % "rhinocoffeescript" % "1.10.0"
 
 // For metrics
-libraryDependencies += "nl.grons" %% "metrics-scala" % "3.5.9"
-libraryDependencies += "io.dropwizard.metrics" % "metrics-json" % "3.2.5"
+libraryDependencies += "nl.grons" %% "metrics4-scala" % "4.0.1"
+libraryDependencies += "io.dropwizard.metrics" % "metrics-json" % "4.0.2"
 
 // JSON4S uses scalap 2.10.0/2.11.0, which in turn uses scala-compiler 2.10.0/2.11.0, which in
 // turn uses scala-reflect 2.10.0/2.11.0. We need to force "scalaVersion" above, because
@@ -90,8 +90,8 @@ libraryDependencies += "org.scala-lang" % "scalap" % scalaVersion.value
 
 // WebJars ---------------------------------------------------------------------
 
-libraryDependencies += "org.webjars.bower" % "jquery" % "3.2.1"
-libraryDependencies += "org.webjars.bower" % "jquery-validation" % "1.16.0"
+libraryDependencies += "org.webjars.bower" % "jquery" % "3.3.1"
+libraryDependencies += "org.webjars.bower" % "jquery-validation" % "1.17.0"
 libraryDependencies += "org.webjars.bower" % "sockjs-client" % "1.1.4"
 libraryDependencies += "org.webjars.bower" % "swagger-ui" % "3.4.0"
 libraryDependencies += "org.webjars.bower" % "d3" % "3.5.17"
@@ -100,7 +100,7 @@ libraryDependencies += "org.webjars.bower" % "d3" % "3.5.17"
 
 libraryDependencies += "org.scalatest" %% "scalatest" % "3.0.4" % "test"
 
-libraryDependencies += "org.asynchttpclient" % "async-http-client" % "2.0.37" % "test"
+libraryDependencies += "org.asynchttpclient" % "async-http-client" % "2.2.0" % "test"
 
 // An implementation of SLF4J is needed for log in tests to be output
 libraryDependencies += "ch.qos.logback" % "logback-classic" % "1.2.3" % "test"

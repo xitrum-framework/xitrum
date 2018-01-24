@@ -1,5 +1,5 @@
 import org.slf4s.LoggerFactory
-import nl.grons.metrics.scala.InstrumentedBuilder
+import nl.grons.metrics4.scala.InstrumentedBuilder
 import xitrum.metrics.MetricsManager
 
 /**

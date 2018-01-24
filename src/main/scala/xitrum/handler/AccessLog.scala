@@ -3,7 +3,7 @@ package xitrum.handler
 import java.net.SocketAddress
 import scala.collection.mutable.{Map => MMap}
 
-import nl.grons.metrics.scala.Histogram
+import nl.grons.metrics4.scala.Histogram
 import io.netty.handler.codec.http.{HttpRequest, HttpResponse}
 
 import xitrum.{Action, Config, Log}

@@ -7,7 +7,7 @@ import xitrum.etag.Etag
 
 object Url {
   /**
-    * Ex: publicUrl("jquery/3.2.1/dist/jquery.js")
+    * Ex: publicUrl("jquery/3.3.1/dist/jquery.js")
     *
     * @param path Relative to the "public" directory, without leading "/"
     */
@@ -24,7 +24,7 @@ object Url {
   }
 
   /**
-    * Ex: publicUrl("jquery/3.2.1/dist/jquery.js", "jquery/3.2.1/dist/jquery.min.js")
+    * Ex: publicUrl("jquery/3.3.1/dist/jquery.js", "jquery/3.3.1/dist/jquery.min.js")
     *
     * @param devPath File path to use in development mode, relative to the "public" directory, without leading "/"
     * @param prodPath File path to use in production mode, relative to the "public" directory, without leading "/"
@@ -35,7 +35,7 @@ object Url {
   }
 
   /**
-    * Ex: publicUrl("jquery/3.2.1/dist", "jquery.js", "jquery.min.js")
+    * Ex: publicUrl("jquery/3.3.1/dist", "jquery.js", "jquery.min.js")
     *
     * @param directory Relative to the "public" directory, without leading "/"
     * @param devFile File in the directory to use in development mode
@@ -58,7 +58,7 @@ object Url {
   }
 
   /**
-    * Ex: webJarsUrl("jquery/3.2.1/dist/jquery.js", "jquery/3.2.1/dist/jquery.min.js")
+    * Ex: webJarsUrl("jquery/3.3.1/dist/jquery.js", "jquery/3.3.1/dist/jquery.min.js")
     *
     * @param devPath File path to use in development mode
     * @param prodPath File path to use in production mode
@@ -69,7 +69,7 @@ object Url {
   }
 
   /**
-    * Ex: webJarsUrl("jquery/3.2.1/dist", "jquery.js", "jquery.min.js")
+    * Ex: webJarsUrl("jquery/3.3.1/dist", "jquery.js", "jquery.min.js")
     *
     * @param devFile File in the directory to use in development mode
     * @param prodFile File in the directory to use in production mode
@@ -120,14 +120,14 @@ trait Url {
   //----------------------------------------------------------------------------
 
   /**
-    * Ex: publicUrl("jquery/3.2.1/dist/jquery.js")
+    * Ex: publicUrl("jquery/3.3.1/dist/jquery.js")
     *
     * @param path Relative to the "public" directory, without leading "/"
     */
   def publicUrl(path: String) = Url.publicUrl(path)
 
   /**
-    * Ex: publicUrl("jquery/3.2.1/dist/jquery.js", "jquery/3.2.1/dist/jquery.min.js")
+    * Ex: publicUrl("jquery/3.3.1/dist/jquery.js", "jquery/3.3.1/dist/jquery.min.js")
     *
     * @param devPath File path to use in development mode, relative to the "public" directory, without leading "/"
     * @param prodPath File path to use in production mode, relative to the "public" directory, without leading "/"
@@ -135,7 +135,7 @@ trait Url {
   def publicUrl(devPath: String, prodPath: String) = Url.publicUrl(devPath, prodPath)
 
   /**
-    * Ex: publicUrl("jquery/3.2.1/dist", "jquery.js", "jquery.min.js")
+    * Ex: publicUrl("jquery/3.3.1/dist", "jquery.js", "jquery.min.js")
     *
     * @param directory Relative to the "public" directory, without leading "/"
     * @param devFile File in the directory to use in development mode
@@ -147,7 +147,7 @@ trait Url {
   def webJarsUrl(path: String) = Url.webJarsUrl(path)
 
   /**
-    * Ex: webJarsUrl("jquery/3.2.1/dist/jquery.js", "jquery/3.2.1/dist/jquery.min.js")
+    * Ex: webJarsUrl("jquery/3.3.1/dist/jquery.js", "jquery/3.3.1/dist/jquery.min.js")
     *
     * @param devPath File path to use in development mode
     * @param prodPath File path to use in production mode
@@ -155,7 +155,7 @@ trait Url {
   def webJarsUrl(devPath: String, prodPath: String) = Url.webJarsUrl(devPath, prodPath)
 
   /**
-    * Ex: webJarsUrl("jquery/3.2.1/dist", "jquery.js", "jquery.min.js")
+    * Ex: webJarsUrl("jquery/3.3.1/dist", "jquery.js", "jquery.min.js")
     *
     * @param devFile File in the directory to use in development mode
     * @param prodFile File in the directory to use in production mode
