@@ -1,3 +1,8 @@
+3.28.8:
+
+* `#661 <https://github.com/xitrum-framework/xitrum/issues/661>`_
+  Update dependency libraries
+
 3.28.7:
 
 * `#660 <https://github.com/xitrum-framework/xitrum/issues/660>`_
