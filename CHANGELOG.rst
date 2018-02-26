@@ -1,5 +1,7 @@
 3.28.8:
 
+* `#662 <https://github.com/xitrum-framework/xitrum/issues/662>`_
+  Set up WebSocket pipeline before handshake
 * `#661 <https://github.com/xitrum-framework/xitrum/issues/661>`_
   Update dependency libraries
 
