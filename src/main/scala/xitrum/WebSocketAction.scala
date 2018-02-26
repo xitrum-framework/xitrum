@@ -120,8 +120,6 @@ trait WebSocketAction extends Actor with Action {
       future.addListener(ChannelFutureListener.CLOSE)
       false
     } else {
-      handshaker.handshake(channel, request)
-
       val pipeline = channel.pipeline
       DefaultHttpChannelInitializer.removeUnusedHandlersForWebSocket(pipeline)
       pipeline.addBefore(
@@ -129,6 +127,7 @@ trait WebSocketAction extends Actor with Action {
         classOf[WebSocketEventDispatcher].getName,
         new WebSocketEventDispatcher(handshaker, self)
       )
+      handshaker.handshake(channel, request)
 
       // Resume reading paused at NoRealPipelining
       NoRealPipelining.resumeReading(channel)
