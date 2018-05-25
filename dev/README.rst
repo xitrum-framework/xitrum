@@ -92,8 +92,7 @@ Then:
 2. Copy
      dev/build.sbt.end   to the end of build.sbt, and
      dev/plugins.sbt.end to the end of project/plugins.sbt
-3. Run ``sbt publishSigned``. Alternatively you can run ``sbt`` then from SBT
-   command prompt run ``+ publishSigned``.
+3. Run ``sbt`` then from SBT command prompt run ``+ publishSigned``.
 4. Login at https://oss.sonatype.org/ and from "Staging Repositories" select the
    newly published item, click "Close" then "Release".
 
