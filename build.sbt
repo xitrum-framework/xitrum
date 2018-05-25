@@ -1,6 +1,6 @@
 organization := "tv.cntt"
 name         := "xitrum"
-version      := "3.28.8-SNAPSHOT"
+version      := "3.28.9-SNAPSHOT"
 
 // Run "sbt mima-report-binary-issues" to check for binary compatibility
 // https://github.com/typesafehub/migration-manager
@@ -9,9 +9,8 @@ version      := "3.28.8-SNAPSHOT"
 
 //------------------------------------------------------------------------------
 
-// Akka 2.4.0+ dropped Scala 2.10.x support
-crossScalaVersions := Seq("2.12.4", "2.11.12")
-scalaVersion       := "2.12.4"
+crossScalaVersions := Seq("2.12.6", "2.11.12")
+scalaVersion       := "2.12.6"
 
 // Akka 2.4.0+ requires Java 8
 javacOptions ++= Seq("-source", "1.8", "-target", "1.8")
@@ -27,28 +26,28 @@ javaOptions in Test += "-Dxitrum.mode=production"
 libraryDependencies += "tv.cntt" %% "slf4s-api" % "1.7.25"
 
 // Netty is the core of Xitrum's HTTP(S) feature
-libraryDependencies += "io.netty" % "netty-all" % "4.1.22.Final"
+libraryDependencies += "io.netty" % "netty-all" % "4.1.25.Final"
 
 // https://github.com/netty/netty/wiki/Native-transports
 // Only works on Linux
-libraryDependencies += "io.netty" % "netty-transport-native-epoll" % "4.1.22.Final" classifier "linux-x86_64"
+libraryDependencies += "io.netty" % "netty-transport-native-epoll" % "4.1.25.Final" classifier "linux-x86_64"
 
 // https://github.com/netty/netty/wiki/Forked-Tomcat-Native
 // https://groups.google.com/forum/#!topic/netty/oRATC6Tl0A4
 // Include all classifiers for convenience
-libraryDependencies += "io.netty" % "netty-tcnative" % "2.0.7.Final" classifier "linux-x86_64"
-libraryDependencies += "io.netty" % "netty-tcnative" % "2.0.7.Final" classifier "osx-x86_64"
-libraryDependencies += "io.netty" % "netty-tcnative" % "2.0.7.Final" classifier "windows-x86_64"
+libraryDependencies += "io.netty" % "netty-tcnative" % "2.0.8.Final" classifier "linux-x86_64"
+libraryDependencies += "io.netty" % "netty-tcnative" % "2.0.8.Final" classifier "osx-x86_64"
+libraryDependencies += "io.netty" % "netty-tcnative" % "2.0.8.Final" classifier "windows-x86_64"
 
 // Javassist boosts Netty 4 speed
 libraryDependencies += "org.javassist" % "javassist" % "3.22.0-GA"
 
 // Redirect Akka log to SLF4J
-libraryDependencies += "com.typesafe.akka" %% "akka-actor"           % "2.5.10"
-libraryDependencies += "com.typesafe.akka" %% "akka-cluster"         % "2.5.10"
-libraryDependencies += "com.typesafe.akka" %% "akka-cluster-metrics" % "2.5.10"
-libraryDependencies += "com.typesafe.akka" %% "akka-contrib"         % "2.5.10"
-libraryDependencies += "com.typesafe.akka" %% "akka-slf4j"           % "2.5.10"
+libraryDependencies += "com.typesafe.akka" %% "akka-actor"           % "2.5.12"
+libraryDependencies += "com.typesafe.akka" %% "akka-cluster"         % "2.5.12"
+libraryDependencies += "com.typesafe.akka" %% "akka-cluster-metrics" % "2.5.12"
+libraryDependencies += "com.typesafe.akka" %% "akka-contrib"         % "2.5.12"
+libraryDependencies += "com.typesafe.akka" %% "akka-slf4j"           % "2.5.12"
 
 // For clustering SockJS with Akka
 libraryDependencies += "tv.cntt" %% "glokka" % "2.5.0"
@@ -64,7 +63,7 @@ libraryDependencies += "tv.cntt" %% "sclasner" % "1.7.0"
 libraryDependencies += "com.twitter" %% "chill" % "0.9.2"
 
 // For JSON (de)serializing
-libraryDependencies += "org.json4s" %% "json4s-jackson" % "3.5.3"
+libraryDependencies += "org.json4s" %% "json4s-jackson" % "3.5.4"
 
 // For i18n
 libraryDependencies += "tv.cntt" %% "scaposer" % "1.10"
@@ -79,12 +78,10 @@ libraryDependencies += "tv.cntt" % "rhinocoffeescript" % "1.10.0"
 libraryDependencies += "nl.grons" %% "metrics4-scala" % "4.0.1"
 libraryDependencies += "io.dropwizard.metrics" % "metrics-json" % "4.0.2"
 
-// JSON4S uses scalap 2.10.0/2.11.0, which in turn uses scala-compiler 2.10.0/2.11.0, which in
-// turn uses scala-reflect 2.10.0/2.11.0. We need to force "scalaVersion" above, because
 // Scala annotations (used by routes and Swagger) compiled by a newer version
 // can't be read by an older version.
 //
-// Also, we must release a new version of Xitrum every time a new version of
+// We must release a new version of Xitrum every time a new version of
 // Scala is released.
 libraryDependencies += "org.scala-lang" % "scalap" % scalaVersion.value
 
@@ -100,7 +97,7 @@ libraryDependencies += "org.webjars.bower" % "d3" % "3.5.17"
 
 libraryDependencies += "org.scalatest" %% "scalatest" % "3.0.5" % "test"
 
-libraryDependencies += "org.asynchttpclient" % "async-http-client" % "2.4.2" % "test"
+libraryDependencies += "org.asynchttpclient" % "async-http-client" % "2.4.7" % "test"
 
 // An implementation of SLF4J is needed for log in tests to be output
 libraryDependencies += "ch.qos.logback" % "logback-classic" % "1.2.3" % "test"

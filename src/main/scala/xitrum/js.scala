@@ -4,7 +4,7 @@ import xitrum.annotation.{First, GET}
 
 /** To innclude xitrum.js in your view, use: `url[xitrum.js]`. */
 @First
-@GET("xitrum/xitrum-3.28.8.js")
+@GET("xitrum/xitrum-3.28.9.js")
 class js extends FutureAction {
   def execute() {
     setClientCacheAggressively()
