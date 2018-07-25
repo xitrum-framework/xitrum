@@ -5,6 +5,7 @@ import java.util.Locale
 
 import scala.collection.JavaConverters._
 import scala.util.control.NonFatal
+import scala.util.Try
 
 import io.netty.handler.codec.http.HttpHeaderNames
 
@@ -60,7 +61,9 @@ trait I18n {
    * If there's no match, the language is still the default "en".
    */
   def autosetLanguage(availableLanguages: String*) {
-    val bestMatched = Locale.lookupTag(browserLanguages, availableLanguages.asJava)
+    // lookupTag may throw exception:
+    // https://bugs.openjdk.java.net/browse/JDK-8135061
+    val bestMatched = Try(Locale.lookupTag(browserLanguages, availableLanguages.asJava)).getOrElse(null)
     if (bestMatched != null) language = bestMatched
   }
 

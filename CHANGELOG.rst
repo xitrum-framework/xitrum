@@ -1,3 +1,8 @@
+3.28.10:
+
+* `#664 <https://github.com/xitrum-framework/xitrum/issues/664>`_
+  Catch autosetLanguage exception
+
 3.28.9:
 
 * `#663 <https://github.com/xitrum-framework/xitrum/issues/663>`_
