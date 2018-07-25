@@ -2,6 +2,8 @@
 
 * `#664 <https://github.com/xitrum-framework/xitrum/issues/664>`_
   Catch autosetLanguage exception
+* `#665 <https://github.com/xitrum-framework/xitrum/issues/665>`_
+  Update dependency libraries
 
 3.28.9:
 
