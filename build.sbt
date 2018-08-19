@@ -1,6 +1,6 @@
 organization := "tv.cntt"
 name         := "xitrum"
-version      := "3.28.10-SNAPSHOT"
+version      := "3.28.11-SNAPSHOT"
 
 // Run "sbt mima-report-binary-issues" to check for binary compatibility
 // https://github.com/typesafehub/migration-manager
@@ -66,7 +66,7 @@ libraryDependencies += "com.twitter" %% "chill" % "0.9.2"
 libraryDependencies += "org.json4s" %% "json4s-jackson" % "3.6.0"
 
 // For i18n
-libraryDependencies += "tv.cntt" %% "scaposer" % "1.10"
+libraryDependencies += "tv.cntt" %% "scaposer" % "1.11.0"
 
 // For jsEscape
 libraryDependencies += "org.apache.commons" % "commons-lang3" % "3.7"
