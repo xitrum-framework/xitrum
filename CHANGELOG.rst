@@ -1,5 +1,7 @@
 3.28.11:
 
+* `#667 <https://github.com/xitrum-framework/xitrum/issues/667>`_
+  Serve dot files in public directory
 * `#666 <https://github.com/xitrum-framework/xitrum/issues/666>`_
   Update dependency libraries
 
