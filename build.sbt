@@ -90,7 +90,7 @@ libraryDependencies += "org.scala-lang" % "scalap" % scalaVersion.value
 libraryDependencies += "org.webjars.bower" % "jquery" % "3.3.1"
 libraryDependencies += "org.webjars.bower" % "jquery-validation" % "1.17.0"
 libraryDependencies += "org.webjars.bower" % "sockjs-client" % "1.1.5"
-libraryDependencies += "org.webjars.bower" % "swagger-ui" % "3.18.2"
+libraryDependencies += "org.webjars.bower" % "swagger-ui" % "3.4.0"
 libraryDependencies += "org.webjars.bower" % "d3" % "3.5.17"
 
 // For test --------------------------------------------------------------------
