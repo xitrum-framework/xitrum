@@ -111,7 +111,7 @@ unmanagedClasspath in Runtime += Attributed.blank(baseDirectory.value / "src/tes
 // Generate src/main/scala/xitrum/Version.scala from "version" above -----------
 
 val generateVersionFileTask = TaskKey[Unit]("generateVersion", "Generate src/main/scala/xitrum/Version.scala")
-generateVersionFileTask := generateVersionFile
+generateVersionFileTask := generateVersionFile.value
 
 (compile in Compile) := ((compile in Compile) dependsOn generateVersionFile).value
 def generateVersionFile = Def.task {
