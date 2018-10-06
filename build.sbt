@@ -9,8 +9,8 @@ version      := "3.28.12-SNAPSHOT"
 
 //------------------------------------------------------------------------------
 
-crossScalaVersions := Seq("2.12.6", "2.11.12")
-scalaVersion       := "2.12.6"
+crossScalaVersions := Seq("2.12.7", "2.11.12")
+scalaVersion       := "2.12.7"
 
 // Akka 2.4.0+ requires Java 8
 javacOptions ++= Seq("-source", "1.8", "-target", "1.8")
@@ -26,28 +26,28 @@ javaOptions in Test += "-Dxitrum.mode=production"
 libraryDependencies += "tv.cntt" %% "slf4s-api" % "1.7.25"
 
 // Netty is the core of Xitrum's HTTP(S) feature
-libraryDependencies += "io.netty" % "netty-all" % "4.1.29.Final"
+libraryDependencies += "io.netty" % "netty-all" % "4.1.30.Final"
 
 // https://github.com/netty/netty/wiki/Native-transports
 // Only works on Linux
-libraryDependencies += "io.netty" % "netty-transport-native-epoll" % "4.1.29.Final" classifier "linux-x86_64"
+libraryDependencies += "io.netty" % "netty-transport-native-epoll" % "4.1.30.Final" classifier "linux-x86_64"
 
 // https://github.com/netty/netty/wiki/Forked-Tomcat-Native
 // https://groups.google.com/forum/#!topic/netty/oRATC6Tl0A4
 // Include all classifiers for convenience
-libraryDependencies += "io.netty" % "netty-tcnative" % "2.0.15.Final" classifier "linux-x86_64"
-libraryDependencies += "io.netty" % "netty-tcnative" % "2.0.15.Final" classifier "osx-x86_64"
-libraryDependencies += "io.netty" % "netty-tcnative" % "2.0.15.Final" classifier "windows-x86_64"
+libraryDependencies += "io.netty" % "netty-tcnative" % "2.0.17.Final" classifier "linux-x86_64"
+libraryDependencies += "io.netty" % "netty-tcnative" % "2.0.17.Final" classifier "osx-x86_64"
+libraryDependencies += "io.netty" % "netty-tcnative" % "2.0.17.Final" classifier "windows-x86_64"
 
 // Javassist boosts Netty 4 speed
 libraryDependencies += "org.javassist" % "javassist" % "3.23.1-GA"
 
 // Redirect Akka log to SLF4J
-libraryDependencies += "com.typesafe.akka" %% "akka-actor"           % "2.5.16"
-libraryDependencies += "com.typesafe.akka" %% "akka-cluster"         % "2.5.16"
-libraryDependencies += "com.typesafe.akka" %% "akka-cluster-metrics" % "2.5.16"
-libraryDependencies += "com.typesafe.akka" %% "akka-contrib"         % "2.5.16"
-libraryDependencies += "com.typesafe.akka" %% "akka-slf4j"           % "2.5.16"
+libraryDependencies += "com.typesafe.akka" %% "akka-actor"           % "2.5.17"
+libraryDependencies += "com.typesafe.akka" %% "akka-cluster"         % "2.5.17"
+libraryDependencies += "com.typesafe.akka" %% "akka-cluster-metrics" % "2.5.17"
+libraryDependencies += "com.typesafe.akka" %% "akka-contrib"         % "2.5.17"
+libraryDependencies += "com.typesafe.akka" %% "akka-slf4j"           % "2.5.17"
 
 // For clustering SockJS with Akka
 libraryDependencies += "tv.cntt" %% "glokka" % "2.5.0"
@@ -63,13 +63,13 @@ libraryDependencies += "tv.cntt" %% "sclasner" % "1.7.0"
 libraryDependencies += "com.twitter" %% "chill" % "0.9.3"
 
 // For JSON (de)serializing
-libraryDependencies += "org.json4s" %% "json4s-jackson" % "3.6.0"
+libraryDependencies += "org.json4s" %% "json4s-jackson" % "3.6.1"
 
 // For i18n
 libraryDependencies += "tv.cntt" %% "scaposer" % "1.11.0"
 
 // For jsEscape
-libraryDependencies += "org.apache.commons" % "commons-lang3" % "3.8"
+libraryDependencies += "org.apache.commons" % "commons-lang3" % "3.8.1"
 
 // For compiling CoffeeScript to JavaScript
 libraryDependencies += "tv.cntt" % "rhinocoffeescript" % "1.10.0"
@@ -88,7 +88,7 @@ libraryDependencies += "org.scala-lang" % "scalap" % scalaVersion.value
 // WebJars ---------------------------------------------------------------------
 
 libraryDependencies += "org.webjars.bower" % "jquery" % "3.3.1"
-libraryDependencies += "org.webjars.bower" % "jquery-validation" % "1.17.0"
+libraryDependencies += "org.webjars.bower" % "jquery-validation" % "1.18.0"
 libraryDependencies += "org.webjars.bower" % "sockjs-client" % "1.1.5"
 libraryDependencies += "org.webjars.bower" % "swagger-ui" % "3.4.0"
 libraryDependencies += "org.webjars.bower" % "d3" % "3.5.17"
@@ -97,16 +97,16 @@ libraryDependencies += "org.webjars.bower" % "d3" % "3.5.17"
 
 libraryDependencies += "org.scalatest" %% "scalatest" % "3.0.5" % "test"
 
-libraryDependencies += "org.asynchttpclient" % "async-http-client" % "2.5.2" % "test"
+libraryDependencies += "org.asynchttpclient" % "async-http-client" % "2.5.4" % "test"
 
 // An implementation of SLF4J is needed for log in tests to be output
 libraryDependencies += "ch.qos.logback" % "logback-classic" % "1.2.3" % "test"
 
 // For "sbt console"
-unmanagedClasspath in Compile += Attributed.blank(baseDirectory.value / "src/test/resources")
+unmanagedClasspath in Compile += baseDirectory.value / "src/test/resources"
 
 // For "sbt run/test"
-unmanagedClasspath in Runtime += Attributed.blank(baseDirectory.value / "src/test/resources")
+unmanagedClasspath in Runtime += baseDirectory.value / "src/test/resources"
 
 // Generate src/main/scala/xitrum/Version.scala from "version" above -----------
 

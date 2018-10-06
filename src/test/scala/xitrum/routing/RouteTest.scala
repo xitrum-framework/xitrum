@@ -13,4 +13,3 @@ class RouteTest extends FlatSpec with Matchers {
     route.url(Map("p1" -> "x", "p2" -> "y")) shouldBe Right("/my_site/test1/x?p2=y")
   }
 }
-

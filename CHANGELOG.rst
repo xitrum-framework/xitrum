@@ -2,6 +2,8 @@
 
 * `#669 <https://github.com/xitrum-framework/xitrum/issues/669>`_
   Url.absUrl returns duplicate Config.baseUrl
+* `#670 <https://github.com/xitrum-framework/xitrum/issues/670>`_
+  Update dependency libraries
 
 3.28.11:
 
