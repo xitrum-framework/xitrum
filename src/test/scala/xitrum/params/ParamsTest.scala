@@ -50,7 +50,7 @@ class ParamsPayloadTestAction extends Action with SkipCsrfCheck {
 
 class ParamsTest extends FlatSpec with Matchers with BeforeAndAfter with Log {
   private implicit val formats = Serialization.formats(NoTypeHints)
-  private val base = "http://127.0.0.1:8000"
+  private val base = "http://127.0.0.1:8000/my_site"
   private val client = asyncHttpClient()
 
   behavior of "param* method"

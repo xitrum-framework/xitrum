@@ -1,3 +1,8 @@
+3.28.12:
+
+* `#669 <https://github.com/xitrum-framework/xitrum/issues/669>`_
+  Url.absUrl returns duplicate Config.baseUrl
+
 3.28.11:
 
 * `#667 <https://github.com/xitrum-framework/xitrum/issues/667>`_

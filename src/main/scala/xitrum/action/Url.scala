@@ -99,13 +99,15 @@ object Url {
 trait Url {
   this: Action =>
 
+  // Doesn't include Config.baseUrl, because when URLs are appended to this prefix,
+  // they already include Config.baseUrl
   lazy val absUrlPrefixWithoutScheme: String = {
     val portSuffix =
       if ((isSsl && serverPort == 443) || (!isSsl && serverPort == 80))
         ""
       else
         ":" + serverPort
-    serverName + portSuffix + Config.baseUrl
+    serverName + portSuffix
   }
 
   lazy val absUrlPrefix: String          = scheme          + "://" + absUrlPrefixWithoutScheme
