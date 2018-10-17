@@ -7,15 +7,15 @@ import org.json4s.jackson.Serialization
 import org.json4s.jackson.Serialization.read
 import org.scalatest._
 
-import xitrum.{Action, Log, Server, SkipCsrfCheck}
+import xitrum.{Action, Log, Server, SkipCsrfCheck, version}
 import xitrum.annotation.GET
 
-case class UrlTestActionResponse(abs: String, rel: String)
+case class TestUrls(abs: String, rel: String, webJars: String)
 
 @GET("/test")
 class UrlTestAction extends Action with SkipCsrfCheck {
   def execute() {
-    respondJson(UrlTestActionResponse(absUrl[UrlTestAction], url[UrlTestAction]))
+    respondJson(TestUrls(absUrl[UrlTestAction], url[UrlTestAction], webJarsUrl("xitrum/" + version + "/ajax.gif")))
   }
 }
 
@@ -45,6 +45,10 @@ class UrlTest extends FlatSpec with Matchers with BeforeAndAfter with Log {
 
     response.getStatusCode should equal(200)
 
-    read[UrlTestActionResponse](response.getResponseBody) shouldEqual UrlTestActionResponse(absPath, relPath)
+    val testUrls = read[TestUrls](response.getResponseBody)
+    testUrls.abs shouldEqual absPath
+    testUrls.rel shouldEqual relPath
+
+    client.prepareGet(site + testUrls.webJars).execute().get().getStatusCode should equal(200)
   }
 }

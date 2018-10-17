@@ -1,3 +1,8 @@
+3.18.13:
+
+* `#671 <https://github.com/xitrum-framework/xitrum/issues/671>`_
+  WebJars files cannot be served on Windows
+
 3.28.12:
 
 * `#669 <https://github.com/xitrum-framework/xitrum/issues/669>`_
