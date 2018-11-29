@@ -322,7 +322,7 @@ class Iframe extends SockJsAction {
     document.domain = document.domain;
     _sockjs_onload = function(){SockJS.bootstrap_iframe();};
   </xml:unparsed></script>
-  <script src={webJarsUrl("sockjs-client/1.1.5/dist", "sockjs.js", "sockjs.min.js")}></script>
+  <script src={webJarsUrl("sockjs-client/1.3.0/dist", "sockjs.js", "sockjs.min.js")}></script>
 </head>
 <body>
   <h2>Don't panic!</h2>

@@ -1,6 +1,6 @@
 organization := "tv.cntt"
 name         := "xitrum"
-version      := "3.28.14-SNAPSHOT"
+version      := "3.28.15-SNAPSHOT"
 
 // Run "sbt mima-report-binary-issues" to check for binary compatibility
 // https://github.com/typesafehub/migration-manager
@@ -35,19 +35,19 @@ libraryDependencies += "io.netty" % "netty-transport-native-epoll" % "4.1.31.Fin
 // https://github.com/netty/netty/wiki/Forked-Tomcat-Native
 // https://groups.google.com/forum/#!topic/netty/oRATC6Tl0A4
 // Include all classifiers for convenience
-libraryDependencies += "io.netty" % "netty-tcnative" % "2.0.19.Final" classifier "linux-x86_64"
-libraryDependencies += "io.netty" % "netty-tcnative" % "2.0.19.Final" classifier "osx-x86_64"
-libraryDependencies += "io.netty" % "netty-tcnative" % "2.0.19.Final" classifier "windows-x86_64"
+libraryDependencies += "io.netty" % "netty-tcnative" % "2.0.20.Final" classifier "linux-x86_64"
+libraryDependencies += "io.netty" % "netty-tcnative" % "2.0.20.Final" classifier "osx-x86_64"
+libraryDependencies += "io.netty" % "netty-tcnative" % "2.0.20.Final" classifier "windows-x86_64"
 
 // Javassist boosts Netty 4 speed
 libraryDependencies += "org.javassist" % "javassist" % "3.24.0-GA"
 
 // Redirect Akka log to SLF4J
-libraryDependencies += "com.typesafe.akka" %% "akka-actor"           % "2.5.17"
-libraryDependencies += "com.typesafe.akka" %% "akka-cluster"         % "2.5.17"
-libraryDependencies += "com.typesafe.akka" %% "akka-cluster-metrics" % "2.5.17"
-libraryDependencies += "com.typesafe.akka" %% "akka-contrib"         % "2.5.17"
-libraryDependencies += "com.typesafe.akka" %% "akka-slf4j"           % "2.5.17"
+libraryDependencies += "com.typesafe.akka" %% "akka-actor"           % "2.5.18"
+libraryDependencies += "com.typesafe.akka" %% "akka-cluster"         % "2.5.18"
+libraryDependencies += "com.typesafe.akka" %% "akka-cluster-metrics" % "2.5.18"
+libraryDependencies += "com.typesafe.akka" %% "akka-contrib"         % "2.5.18"
+libraryDependencies += "com.typesafe.akka" %% "akka-slf4j"           % "2.5.18"
 
 // For clustering SockJS with Akka
 libraryDependencies += "tv.cntt" %% "glokka" % "2.5.0"
@@ -75,7 +75,7 @@ libraryDependencies += "org.apache.commons" % "commons-lang3" % "3.8.1"
 libraryDependencies += "tv.cntt" % "rhinocoffeescript" % "1.10.0"
 
 // For metrics
-libraryDependencies += "nl.grons" %% "metrics4-scala" % "4.0.1"
+libraryDependencies += "nl.grons" %% "metrics4-scala" % "4.0.3"
 libraryDependencies += "io.dropwizard.metrics" % "metrics-json" % "4.0.3"
 
 // Scala annotations (used by routes and Swagger) compiled by a newer version
@@ -88,8 +88,8 @@ libraryDependencies += "org.scala-lang" % "scalap" % scalaVersion.value
 // WebJars ---------------------------------------------------------------------
 
 libraryDependencies += "org.webjars.bower" % "jquery" % "3.3.1"
-libraryDependencies += "org.webjars.bower" % "jquery-validation" % "1.18.0"
-libraryDependencies += "org.webjars.bower" % "sockjs-client" % "1.1.5"
+libraryDependencies += "org.webjars.bower" % "jquery-validation" % "1.19.0"
+libraryDependencies += "org.webjars.bower" % "sockjs-client" % "1.3.0"
 libraryDependencies += "org.webjars.bower" % "swagger-ui" % "3.4.0"
 libraryDependencies += "org.webjars.bower" % "d3" % "3.5.17"
 
