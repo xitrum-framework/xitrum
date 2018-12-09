@@ -9,8 +9,8 @@ version      := "3.28.15-SNAPSHOT"
 
 //------------------------------------------------------------------------------
 
-crossScalaVersions := Seq("2.12.7", "2.11.12")
-scalaVersion       := "2.12.7"
+crossScalaVersions := Seq("2.12.8", "2.11.12")
+scalaVersion       := "2.12.8"
 
 // Akka 2.4.0+ requires Java 8
 javacOptions ++= Seq("-source", "1.8", "-target", "1.8")
@@ -26,11 +26,11 @@ javaOptions in Test += "-Dxitrum.mode=production"
 libraryDependencies += "tv.cntt" %% "slf4s-api" % "1.7.25"
 
 // Netty is the core of Xitrum's HTTP(S) feature
-libraryDependencies += "io.netty" % "netty-all" % "4.1.31.Final"
+libraryDependencies += "io.netty" % "netty-all" % "4.1.32.Final"
 
 // https://github.com/netty/netty/wiki/Native-transports
 // Only works on Linux
-libraryDependencies += "io.netty" % "netty-transport-native-epoll" % "4.1.31.Final" classifier "linux-x86_64"
+libraryDependencies += "io.netty" % "netty-transport-native-epoll" % "4.1.32.Final" classifier "linux-x86_64"
 
 // https://github.com/netty/netty/wiki/Forked-Tomcat-Native
 // https://groups.google.com/forum/#!topic/netty/oRATC6Tl0A4
@@ -43,11 +43,11 @@ libraryDependencies += "io.netty" % "netty-tcnative" % "2.0.20.Final" classifier
 libraryDependencies += "org.javassist" % "javassist" % "3.24.0-GA"
 
 // Redirect Akka log to SLF4J
-libraryDependencies += "com.typesafe.akka" %% "akka-actor"           % "2.5.18"
-libraryDependencies += "com.typesafe.akka" %% "akka-cluster"         % "2.5.18"
-libraryDependencies += "com.typesafe.akka" %% "akka-cluster-metrics" % "2.5.18"
-libraryDependencies += "com.typesafe.akka" %% "akka-contrib"         % "2.5.18"
-libraryDependencies += "com.typesafe.akka" %% "akka-slf4j"           % "2.5.18"
+libraryDependencies += "com.typesafe.akka" %% "akka-actor"           % "2.5.19"
+libraryDependencies += "com.typesafe.akka" %% "akka-cluster"         % "2.5.19"
+libraryDependencies += "com.typesafe.akka" %% "akka-cluster-metrics" % "2.5.19"
+libraryDependencies += "com.typesafe.akka" %% "akka-contrib"         % "2.5.19"
+libraryDependencies += "com.typesafe.akka" %% "akka-slf4j"           % "2.5.19"
 
 // For clustering SockJS with Akka
 libraryDependencies += "tv.cntt" %% "glokka" % "2.5.0"
