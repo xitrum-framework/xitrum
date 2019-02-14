@@ -1,3 +1,8 @@
+3.18.16:
+
+* `#675 <https://github.com/xitrum-framework/xitrum/issues/675>`_
+  Invalid range request causes increase in CPU usage as 100%
+
 3.18.15:
 
 * `#674 <https://github.com/xitrum-framework/xitrum/issues/674>`_

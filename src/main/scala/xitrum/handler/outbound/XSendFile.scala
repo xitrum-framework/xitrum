@@ -19,6 +19,18 @@ import xitrum.etag.{Etag, NotModified}
 import xitrum.handler.{AccessLog, HandlerEnv, NoRealPipelining}
 import xitrum.util.{ByteBufUtil, Gzip}
 
+// valid range is send by client
+// xitrum should return 206 (Partial content)
+private case class SatisfiableRange(startIndex: Long, endIndex: Long)
+
+// first-byte-pos value greater than the current length of the selected resource
+// Xitrum should return 416 (Requested Range Not Satisfiable)
+private case class UnsatisfiableRange()
+
+// Unsupported format, include syntax error
+// Xitrum should ignore range header
+private case class UnsupportedRange()
+
 // Based on https://github.com/netty/netty/tree/master/example/src/main/java/io/netty/example/http/file
 object XSendFile {
   // setClientCacheAggressively should be called at PublicFileServer, not
@@ -133,16 +145,24 @@ object XSendFile {
 
         val raf = new RandomAccessFile(path, "r")
 
-        val (offset, length) = getRangeFromRequest(request) match {
-          case None =>
+        val (offset, length) = getRangeFromRequest(request, raf.length) match {
+          case UnsupportedRange =>
             (0L, raf.length)  // 0L is for avoiding "type mismatch" compile error
 
-          case Some((startIndex, endIndex)) =>
-            val endIndex2 = if (endIndex >= 0) endIndex else raf.length - 1
+          case UnsatisfiableRange =>
+            // A server sending a response with status code 416 (Requested range notsatisfiable)
+            // SHOULD include a Content-Range field with a byte-range-resp-spec of "*".
+            // The instance-length specifies the current length of
+            response.setStatus(REQUESTED_RANGE_NOT_SATISFIABLE)
+            response.headers.set(ACCEPT_RANGES, BYTES)
+            response.headers.set(CONTENT_RANGE, "bytes */" + raf.length)
+            (0L, 0L)
+
+          case SatisfiableRange(startIndex, endIndex) =>
             response.setStatus(PARTIAL_CONTENT)
             response.headers.set(ACCEPT_RANGES, BYTES)
-            response.headers.set(CONTENT_RANGE, "bytes " + startIndex + "-" + endIndex2 + "/" + raf.length)
-            (startIndex, endIndex2 - startIndex + 1)
+            response.headers.set(CONTENT_RANGE, "bytes " + startIndex + "-" + endIndex + "/" + raf.length)
+            (startIndex, endIndex - startIndex + 1)
         }
 
         HttpUtil.setContentLength(response, length)
@@ -154,6 +174,14 @@ object XSendFile {
           XSendFile.removeHeaders(response)
 
           // http://stackoverflow.com/questions/3854842/content-length-header-with-head-requests
+          response.content.clear()
+          ctx.write(env, promise)
+          NoRealPipelining.if_keepAliveRequest_then_resumeReading_else_closeOnComplete(request, channel, promise)
+          return
+        }
+
+        if (response.status == REQUESTED_RANGE_NOT_SATISFIABLE) {
+          XSendFile.removeHeaders(response)
           response.content.clear()
           ctx.write(env, promise)
           NoRealPipelining.if_keepAliveRequest_then_resumeReading_else_closeOnComplete(request, channel, promise)
@@ -192,38 +220,60 @@ object XSendFile {
    * For simplicity only these specs are supported:
    * bytes=123-456
    * bytes=123-
+   * If the last-byte-pos value is present, it MUST be greater than or
+   * equal to the first-byte-pos in that byte-range-spec, or the byte-
+   * range-spec is syntactically invalid. The recipient of a byte-range-
+   * set that includes one or more syntactically invalid byte-range-spec
+   * values MUST ignore the header field that includes that byte-range-
+   * set.
+   * If the last-byte-pos value is absent, or if the value is greater than
+   * or equal to the current length of the entity-body, last-byte-pos is
+   * taken to be equal to one less than the current length of the entity-
+   * body in bytes.
    *
-   * @return None or Some((start index, end index)), negative end index means file length - 1
+   * @return SatisfiableRange(startIndex, endIndex) or UnsatisfiableRange or UnsupportedRange
    */
-  private def getRangeFromRequest(request: FullHttpRequest): Option[(Long, Long)] = {
+  private def getRangeFromRequest(request: FullHttpRequest, length: Long) = {
     val spec = request.headers.get(RANGE)
-
     try {
       if (spec == null) {
-        None
+        UnsupportedRange
       } else {
         if (spec.length <= 6) {
-          None
+          Log.warn("Unsupported Range spec: " + spec)
+          UnsupportedRange
         } else {
           val range = spec.substring(6)  // Skip "bytes="
           val se    = range.split('-')
           if (se.length == 2) {
             val s = se(0).toLong
             val e = se(1).toLong
-            Some((s, e))
+            if (s > length - 1) {
+              UnsatisfiableRange
+            } else if (s <= e) {
+              SatisfiableRange(s, Math.min(e, length - 1))
+            } else {
+              Log.warn("Unsupported Range, last-byte-pos MUST be greater than or equal to the first-byte-pos. spec: " + spec)
+              UnsupportedRange
+            }
           } else if (se.length != 1) {
-            None
+            Log.warn("Unsupported Range spec: " + spec)
+            UnsupportedRange
           } else {
             val s = se(0).toLong
-            val e = -1L
-            Some((s, e))
+            val e = length - 1
+            if (s > length - 1) {
+              UnsatisfiableRange
+            } else  {
+              SatisfiableRange(s, e)
+            }
           }
         }
       }
     } catch {
       case NonFatal(e) =>
         Log.warn("Unsupported Range spec: " + spec)
-        None
+        UnsupportedRange
     }
   }
 }
