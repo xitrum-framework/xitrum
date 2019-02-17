@@ -3,8 +3,8 @@ package xitrum.handler.outbound
 import java.io.RandomAccessFile
 
 import io.netty.buffer.Unpooled
-import io.netty.channel.{ChannelOutboundHandlerAdapter, ChannelHandler, ChannelHandlerContext, ChannelFuture, ChannelPromise, DefaultFileRegion}
-import io.netty.handler.codec.http.{FullHttpResponse, HttpMethod, HttpHeaderNames, HttpHeaderValues, HttpResponseStatus, HttpUtil, LastHttpContent}
+import io.netty.channel.{ChannelFuture, ChannelFutureListener, ChannelHandler, ChannelHandlerContext, ChannelOutboundHandlerAdapter, ChannelPromise, DefaultFileRegion}
+import io.netty.handler.codec.http.{FullHttpResponse, HttpHeaderNames, HttpHeaderValues, HttpMethod, HttpResponseStatus, HttpUtil, LastHttpContent}
 import io.netty.handler.ssl.SslHandler
 import io.netty.handler.stream.ChunkedFile
 import ChannelHandler.Sharable
@@ -175,13 +175,17 @@ object XSendFile {
           // Cannot use zero-copy with HTTPS
           ctx
             .write(new ChunkedFile(raf, offset, length, CHUNK_SIZE))
-            .addListener((_: ChannelFuture) => raf.close())
+            .addListener(new ChannelFutureListener {
+              def operationComplete(f: ChannelFuture) { raf.close() }
+            })
         } else {
           // No encryption - use zero-copy
           val region = new DefaultFileRegion(raf.getChannel, offset, length)
           ctx
             .write(region)  // region will automatically be released
-            .addListener((_: ChannelFuture) => raf.close())
+            .addListener(new ChannelFutureListener {
+              def operationComplete(f: ChannelFuture) { raf.close() }
+            })
         }
 
         // Write the end marker
