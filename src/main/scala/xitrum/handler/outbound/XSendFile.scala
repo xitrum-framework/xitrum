@@ -1,11 +1,10 @@
 package xitrum.handler.outbound
 
 import java.io.RandomAccessFile
-import scala.util.control.NonFatal
 
 import io.netty.buffer.Unpooled
-import io.netty.channel.{ChannelOutboundHandlerAdapter, ChannelHandler, ChannelHandlerContext, ChannelFuture, ChannelPromise, DefaultFileRegion, ChannelFutureListener}
-import io.netty.handler.codec.http.{FullHttpRequest, FullHttpResponse, HttpMethod, HttpHeaderNames, HttpHeaderValues, HttpResponseStatus, HttpUtil, LastHttpContent}
+import io.netty.channel.{ChannelOutboundHandlerAdapter, ChannelHandler, ChannelHandlerContext, ChannelFuture, ChannelPromise, DefaultFileRegion}
+import io.netty.handler.codec.http.{FullHttpResponse, HttpMethod, HttpHeaderNames, HttpHeaderValues, HttpResponseStatus, HttpUtil, LastHttpContent}
 import io.netty.handler.ssl.SslHandler
 import io.netty.handler.stream.ChunkedFile
 import ChannelHandler.Sharable
@@ -14,22 +13,9 @@ import HttpHeaderValues._
 import HttpMethod._
 import HttpResponseStatus._
 
-import xitrum.Log
 import xitrum.etag.{Etag, NotModified}
 import xitrum.handler.{AccessLog, HandlerEnv, NoRealPipelining}
 import xitrum.util.{ByteBufUtil, Gzip}
-
-// valid range is send by client
-// xitrum should return 206 (Partial content)
-private case class SatisfiableRange(startIndex: Long, endIndex: Long)
-
-// first-byte-pos value greater than the current length of the selected resource
-// Xitrum should return 416 (Requested Range Not Satisfiable)
-private case class UnsatisfiableRange()
-
-// Unsupported format, include syntax error
-// Xitrum should ignore range header
-private case class UnsupportedRange()
 
 // Based on https://github.com/netty/netty/tree/master/example/src/main/java/io/netty/example/http/file
 object XSendFile {
@@ -91,7 +77,7 @@ object XSendFile {
     // headers, not a FullHttpResponse.
     Etag.forFile(path, mimeo, Gzip.isAccepted(request)) match {
       case Etag.NotFound =>
-        XSendFile.removeHeaders(response)
+        removeHeaders(response)
 
         response.setStatus(NOT_FOUND)
         NotModified.setNoClientCache(response)
@@ -106,7 +92,7 @@ object XSendFile {
         }
 
       case Etag.Small(bytes, etag, mmo, gzipped) =>
-        XSendFile.removeHeaders(response)
+        removeHeaders(response)
 
         if (Etag.areEtagsIdentical(request, etag)) {
           response.setStatus(NOT_MODIFIED)
@@ -133,7 +119,7 @@ object XSendFile {
         // but it's still good to give it a try
         val lastModifiedRfc2822 = NotModified.formatRfc2822(file.lastModified)
         if (request.headers.get(IF_MODIFIED_SINCE) == lastModifiedRfc2822) {
-          XSendFile.removeHeaders(response)
+          removeHeaders(response)
 
           response.setStatus(NOT_MODIFIED)
           response.content.clear()
@@ -145,12 +131,12 @@ object XSendFile {
 
         val raf = new RandomAccessFile(path, "r")
 
-        val (offset, length) = getRangeFromRequest(request, raf.length) match {
+        val (offset, length) = RangeParser.parse(request.headers.get(RANGE), raf.length) match {
           case UnsupportedRange =>
             (0L, raf.length)  // 0L is for avoiding "type mismatch" compile error
 
           case UnsatisfiableRange =>
-            // A server sending a response with status code 416 (Requested range notsatisfiable)
+            // A server sending a response with status code 416 (Requested range not satisfiable)
             // SHOULD include a Content-Range field with a byte-range-resp-spec of "*".
             // The instance-length specifies the current length of
             response.setStatus(REQUESTED_RANGE_NOT_SATISFIABLE)
@@ -170,19 +156,12 @@ object XSendFile {
         if (mmo.isDefined) response.headers.set(CONTENT_TYPE, mmo.get)
         if (!noLog) AccessLog.logStaticFileAccess(remoteAddress, request, response)
 
-        if (request.method == HEAD && response.status == OK) {
-          XSendFile.removeHeaders(response)
+        if (response.status == REQUESTED_RANGE_NOT_SATISFIABLE || (request.method == HEAD && response.status == OK)) {
+          removeHeaders(response)
 
           // http://stackoverflow.com/questions/3854842/content-length-header-with-head-requests
           response.content.clear()
-          ctx.write(env, promise)
-          NoRealPipelining.if_keepAliveRequest_then_resumeReading_else_closeOnComplete(request, channel, promise)
-          return
-        }
 
-        if (response.status == REQUESTED_RANGE_NOT_SATISFIABLE) {
-          XSendFile.removeHeaders(response)
-          response.content.clear()
           ctx.write(env, promise)
           NoRealPipelining.if_keepAliveRequest_then_resumeReading_else_closeOnComplete(request, channel, promise)
           return
@@ -196,84 +175,18 @@ object XSendFile {
           // Cannot use zero-copy with HTTPS
           ctx
             .write(new ChunkedFile(raf, offset, length, CHUNK_SIZE))
-            .addListener(new ChannelFutureListener {
-              def operationComplete(f: ChannelFuture) { raf.close() }
-            })
+            .addListener((_: ChannelFuture) => raf.close())
         } else {
           // No encryption - use zero-copy
           val region = new DefaultFileRegion(raf.getChannel, offset, length)
           ctx
             .write(region)  // region will automatically be released
-            .addListener(new ChannelFutureListener {
-              def operationComplete(f: ChannelFuture) { raf.close() }
-            })
+            .addListener((_: ChannelFuture) => raf.close())
         }
 
         // Write the end marker
         val future = ctx.writeAndFlush(LastHttpContent.EMPTY_LAST_CONTENT, promise)
         NoRealPipelining.if_keepAliveRequest_then_resumeReading_else_closeOnComplete(request, channel, future)
-    }
-  }
-
-  /**
-   * "Range" request: http://tools.ietf.org/html/rfc2616#section-14.35
-   * For simplicity only these specs are supported:
-   * bytes=123-456
-   * bytes=123-
-   * If the last-byte-pos value is present, it MUST be greater than or
-   * equal to the first-byte-pos in that byte-range-spec, or the byte-
-   * range-spec is syntactically invalid. The recipient of a byte-range-
-   * set that includes one or more syntactically invalid byte-range-spec
-   * values MUST ignore the header field that includes that byte-range-
-   * set.
-   * If the last-byte-pos value is absent, or if the value is greater than
-   * or equal to the current length of the entity-body, last-byte-pos is
-   * taken to be equal to one less than the current length of the entity-
-   * body in bytes.
-   *
-   * @return SatisfiableRange(startIndex, endIndex) or UnsatisfiableRange or UnsupportedRange
-   */
-  private def getRangeFromRequest(request: FullHttpRequest, length: Long) = {
-    val spec = request.headers.get(RANGE)
-    try {
-      if (spec == null) {
-        UnsupportedRange
-      } else {
-        if (spec.length <= 6) {
-          Log.warn("Unsupported Range spec: " + spec)
-          UnsupportedRange
-        } else {
-          val range = spec.substring(6)  // Skip "bytes="
-          val se    = range.split('-')
-          if (se.length == 2) {
-            val s = se(0).toLong
-            val e = se(1).toLong
-            if (s > length - 1) {
-              UnsatisfiableRange
-            } else if (s <= e) {
-              SatisfiableRange(s, Math.min(e, length - 1))
-            } else {
-              Log.warn("Unsupported Range, last-byte-pos MUST be greater than or equal to the first-byte-pos. spec: " + spec)
-              UnsupportedRange
-            }
-          } else if (se.length != 1) {
-            Log.warn("Unsupported Range spec: " + spec)
-            UnsupportedRange
-          } else {
-            val s = se(0).toLong
-            val e = length - 1
-            if (s > length - 1) {
-              UnsatisfiableRange
-            } else  {
-              SatisfiableRange(s, e)
-            }
-          }
-        }
-      }
-    } catch {
-      case NonFatal(e) =>
-        Log.warn("Unsupported Range spec: " + spec)
-        UnsupportedRange
     }
   }
 }
