@@ -2,6 +2,8 @@
 
 * `#675 <https://github.com/xitrum-framework/xitrum/issues/675>`_
   Invalid range request causes increase in CPU usage as 100%
+* `#677 <https://github.com/xitrum-framework/xitrum/issues/677>`_
+  Update dependency libraries
 
 3.18.15:
 
