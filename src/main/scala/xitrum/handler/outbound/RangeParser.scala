@@ -4,7 +4,7 @@ import xitrum.Log
 
 import scala.util.control.NonFatal
 
-trait RangeParserResult
+sealed trait RangeParserResult
 
 // Valid range is send by client
 // Xitrum should return 206 (Partial content).
