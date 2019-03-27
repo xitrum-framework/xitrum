@@ -9,6 +9,11 @@ import io.netty.handler.codec.http.cookie.{Cookie, ServerCookieDecoder, ServerCo
 import xitrum.{Action, Config, Log}
 import xitrum.util.DefaultsTo
 
+trait TransientSession {
+  this: SessionEnv =>
+  ignoreSessionStore = true
+}
+
 trait SessionEnv extends Csrf {
   this: Action =>
 
@@ -46,11 +51,14 @@ trait SessionEnv extends Csrf {
 
   lazy val responseCookies = new ArrayBuffer[Cookie]
 
+  // Avoid storing or retrieving from session store explicitly for this request
+  private[session] var ignoreSessionStore = false
+
   // Avoid encoding, decoding cookies when session is not touched by the application
   private var sessionTouched = false
 
   /** To reset session: session.clear() */
-  lazy val session = {
+  lazy val session = if (ignoreSessionStore) MMap.empty[String, Any] else {
     sessionTouched = true
     try {
       Config.xitrum.session.store.restore(this)
@@ -66,7 +74,7 @@ trait SessionEnv extends Csrf {
     session.get(key).map(_.asInstanceOf[T])
 
   def setCookieAndSessionIfTouchedOnRespond() {
-    if (sessionTouched || Config.xitrum.session.cookieMaxAge > 0) Config.xitrum.session.store.store(session, this)
+    if (!ignoreSessionStore && (sessionTouched || Config.xitrum.session.cookieMaxAge > 0)) Config.xitrum.session.store.store(session, this)
 
     if (responseCookies.nonEmpty) {
       // To avoid accidental duplicate cookies, if cookie path is not set,
