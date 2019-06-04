@@ -1,3 +1,8 @@
+3.18.17:
+
+* `#679 <https://github.com/xitrum-framework/xitrum/issues/679>`_
+  Update dependency libraries
+
 3.18.16:
 
 * `#675 <https://github.com/xitrum-framework/xitrum/issues/675>`_
