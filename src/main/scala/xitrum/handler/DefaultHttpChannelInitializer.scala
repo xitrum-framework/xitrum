@@ -41,6 +41,7 @@ object DefaultHttpChannelInitializer {
   lazy val methodOverrider   = new MethodOverrider
   lazy val dispatcher        = new Dispatcher
   lazy val badClientSilencer = new BadClientSilencer
+  lazy val proxyProtocolHandler = new ProxyProtocolHandler
 
   // Sharable outbound handlers
 
@@ -131,6 +132,17 @@ class DefaultHttpChannelInitializer extends ChannelInitializer[SocketChannel] {
     p.addLast(classOf[MethodOverrider].getName,          methodOverrider)
     p.addLast(classOf[Dispatcher].getName,               dispatcher)
     p.addLast(classOf[BadClientSilencer].getName,        badClientSilencer)
+    // add support proxy protocol
+    // https://github.com/xitrum-framework/xitrum/issues/613
+    Config.xitrum.reverseProxy.foreach( r => {
+      r.proxyProtocolEnabledOpt.foreach(proxyProtocolEnabled => {
+        if (proxyProtocolEnabled) {
+          p.addLast(classOf[ProxyProtocolHandler].getName, proxyProtocolHandler)
+        }
+      })
+
+    })
+
 
     // Outbound
 

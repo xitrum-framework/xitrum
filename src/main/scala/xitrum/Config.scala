@@ -96,6 +96,7 @@ class HttpsConfig(val config: TConfig) {
 class ReverseProxyConfig(val config: TConfig) {
   val ips     = config.getStringList("ips").asScala
   val baseUrl = config.getString("baseUrl")
+  val proxyProtocolEnabledOpt = if (config.hasPath("proxyProtocolEnabled")) Some(config.getBoolean("proxyProtocolEnabled")) else None
 }
 
 class SessionConfig(val config: TConfig) {
