@@ -4,8 +4,11 @@ import java.net.{InetSocketAddress, SocketAddress}
 
 import io.netty.handler.codec.http.{HttpHeaderNames, HttpRequest}
 import io.netty.handler.ssl.SslHandler
-
 import xitrum.{Action, Config}
+
+import io.netty.channel.Channel
+import io.netty.handler.codec.haproxy.HAProxyMessage
+import io.netty.util.AttributeKey
 
 // See:
 //   http://httpd.apache.org/docs/2.2/mod/mod_proxy.html
@@ -54,6 +57,18 @@ object Net {
         ip
       else
         xForwardedFor.split(",")(0).trim
+    }
+  }
+
+  def setRemoteIp(ch: Channel, request: HttpRequest): HttpRequest = {
+
+    val HAPROXY_PROTOCOL_MSG = AttributeKey.valueOf("HAProxyMessage").asInstanceOf[AttributeKey[HAProxyMessage]]
+    ch.attr(HAPROXY_PROTOCOL_MSG).get() match {
+      case haMsg:HAProxyMessage =>
+        request.headers()
+        .add("X-Forwarded-For", haMsg.sourceAddress())
+        request
+      case _ => request
     }
   }
 }
