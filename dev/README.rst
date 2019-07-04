@@ -69,7 +69,7 @@ To delete the local publish:
 Publish to Sonatype
 -------------------
 
-Before releasing a new Xitrum version, run ``sbt xitrum-package`` on project
+Before releasing a new Xitrum version, run ``sbt xitrumPackage`` on project
 xitrum-new and xitrum-demos, then see directory ``target/xitrum/lib`` to see
 if there's any wrong with the versions of .jar files.
 
