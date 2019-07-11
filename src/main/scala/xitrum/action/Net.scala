@@ -1,13 +1,18 @@
 package xitrum.action
 
-import java.net.{InetSocketAddress, SocketAddress}
+import java.net.InetSocketAddress
+import java.net.SocketAddress
 
-import io.netty.handler.codec.http.{HttpHeaderNames, HttpRequest}
-import io.netty.handler.ssl.SslHandler
-import xitrum.{Action, Config}
+import xitrum.Action
+import xitrum.Config
 
 import io.netty.channel.Channel
 import io.netty.handler.codec.haproxy.HAProxyMessage
+import io.netty.handler.codec.http.HttpHeaderNames
+import io.netty.handler.codec.http.HttpRequest
+import io.netty.handler.ipfilter.IpFilterRuleType
+import io.netty.handler.ipfilter.IpSubnetFilterRule
+import io.netty.handler.ssl.SslHandler
 import io.netty.util.AttributeKey
 
 // See:
@@ -32,7 +37,27 @@ object Net {
   def proxyNotAllowed(clientIp: String): Boolean = {
     Config.xitrum.reverseProxy match {
       case None               => false
-      case Some(reverseProxy) => !reverseProxy.ips.contains(clientIp)
+      case Some(reverseProxy) => if (reverseProxy.ips.contains(clientIp)) {
+       false
+      } else {
+        val rangeIps = reverseProxy.ips.filter(_.contains("/")).toList
+        if (rangeIps.length == 0) {
+          true
+        } else {
+          !rangeIps.exists((rangeIp) => {
+            val parts = rangeIp.split("/")
+            if (parts.length < 2) {
+              val rule = new IpSubnetFilterRule(parts(0), 32, IpFilterRuleType.ACCEPT)
+              rule.matches(new InetSocketAddress(clientIp, 1234))
+            } else {
+              val cidr = parts(1).toInt
+              val rule = new IpSubnetFilterRule(parts(0), cidr, IpFilterRuleType.ACCEPT)
+              rule.matches(new
+                  InetSocketAddress(clientIp, 1234))
+            }
+          })
+        }
+      }
     }
   }
 
@@ -65,9 +90,16 @@ object Net {
     val HAPROXY_PROTOCOL_MSG = AttributeKey.valueOf("HAProxyMessage").asInstanceOf[AttributeKey[HAProxyMessage]]
     ch.attr(HAPROXY_PROTOCOL_MSG).get() match {
       case haMsg:HAProxyMessage =>
-        request.headers()
-        .add("X-Forwarded-For", haMsg.sourceAddress())
-        request
+        val xForwardedFor = request.headers().get("X-Forwarded-For")
+        if (xForwardedFor != null) {
+          request.headers()
+            .add("X-Forwarded-For", xForwardedFor.concat(s", ${haMsg.sourceAddress()}"))
+          request
+        } else {
+          request.headers()
+            .add("X-Forwarded-For", haMsg.sourceAddress())
+          request
+        }
       case _ => request
     }
   }
