@@ -19,19 +19,16 @@ class ProxyProtocolHandler extends ChannelInboundHandlerAdapter {
   override def channelRead(ctx: ChannelHandlerContext, msg: Object) {
     val ch = ctx.channel()
     try {
-      Config.xitrum.reverseProxy.foreach(r => {
-        r.proxyProtocolEnabledOpt.foreach(proxyProtocolEnabled => {
-          if (proxyProtocolEnabled) {
-            msg match {
-              case haMsg:HAProxyMessage =>
-                ch.attr(HAPROXY_PROTOCOL_MSG).set(haMsg)
-              case _ =>
-            }
-          }
-        })
-
-      })
-      ctx.fireChannelRead(msg)
+      if (Config.xitrum.proxyProtocolEnabled) {
+        msg match {
+          case haMsg:HAProxyMessage =>
+            ch.attr(HAPROXY_PROTOCOL_MSG).set(haMsg)
+          case _ =>
+            ctx.fireChannelRead(msg)
+        }
+      } else {
+        ctx.fireChannelRead(msg)
+      }
     } catch {
       case NonFatal(e) =>
         Log.debug(s"Could not parse proxy protocol message: ", e)

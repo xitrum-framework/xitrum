@@ -188,6 +188,14 @@ class XitrumConfig(val config: TConfig) {
     else
       None
 
+  val proxyProtocolEnabled: Boolean = {
+    if (this.reverseProxy.isDefined) {
+      this.reverseProxy.get.proxyProtocolEnabledOpt.getOrElse(false)
+    } else {
+      false
+    }
+  }
+
   val tmpDir: File = {
     if (config.hasPath("tmpDir")) {
       val name = config.getString("tmpDir")

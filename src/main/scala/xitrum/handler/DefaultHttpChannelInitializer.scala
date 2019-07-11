@@ -72,6 +72,9 @@ object DefaultHttpChannelInitializer {
     removeHandlerIfExists(pipeline, classOf[UriParser])
     removeHandlerIfExists(pipeline, classOf[MethodOverrider])
     removeHandlerIfExists(pipeline, classOf[Dispatcher])
+    removeHandlerIfExists(pipeline, classOf[HAProxyMessageDecoder])
+    removeHandlerIfExists(pipeline, classOf[ProxyProtocolHandler])
+    removeHandlerIfExists(pipeline, classOf[ProxyProtocolSetIPHandler])
 
     // Do not remove BadClientSilencer; WebSocketEventDispatcher will be added
     // before BadClientSilencer, see WebSocketAction#acceptWebSocket
@@ -118,15 +121,10 @@ class DefaultHttpChannelInitializer extends ChannelInitializer[SocketChannel] {
 
     // add support proxy protocol
     // https://github.com/xitrum-framework/xitrum/issues/613
-    Config.xitrum.reverseProxy.foreach( r => {
-      r.proxyProtocolEnabledOpt.foreach(proxyProtocolEnabled => {
-        if (proxyProtocolEnabled) {
-          p.addLast(classOf[HAProxyMessageDecoder].getName, new HAProxyMessageDecoder)
-          p.addLast(classOf[ProxyProtocolHandler].getName, proxyProtocolHandler)
-        }
-      })
-
-    })
+    if (Config.xitrum.proxyProtocolEnabled) {
+      p.addLast(classOf[HAProxyMessageDecoder].getName, new HAProxyMessageDecoder)
+      p.addLast(classOf[ProxyProtocolHandler].getName, proxyProtocolHandler)
+    }
 
     if (portConfig.flashSocketPolicy.isDefined && portConfig.flashSocketPolicy == portConfig.http)
     p.addLast(classOf[FlashSocketPolicyHandler].getName, new FlashSocketPolicyHandler)
@@ -135,14 +133,10 @@ class DefaultHttpChannelInitializer extends ChannelInitializer[SocketChannel] {
                                                            Config.xitrum.request.maxInitialLineLength,
                                                            Config.xitrum.request.maxHeaderSize,
                                                            8192))
-    Config.xitrum.reverseProxy.foreach( r => {
-      r.proxyProtocolEnabledOpt.foreach(proxyProtocolEnabled => {
-        if (proxyProtocolEnabled) {
-          p.addLast(classOf[ProxyProtocolSetIPHandler].getName, new ProxyProtocolSetIPHandler)
-        }
-      })
+    if (Config.xitrum.proxyProtocolEnabled) {
+      p.addLast(classOf[ProxyProtocolSetIPHandler].getName, new ProxyProtocolSetIPHandler)
 
-    })
+    }
 
     p.addLast(classOf[Request2Env].getName,              new Request2Env)
     p.addLast(classOf[BaseUrlRemover].getName,           baseUrlRemover)
