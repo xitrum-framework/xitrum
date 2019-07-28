@@ -1,15 +1,18 @@
 package xitrum.handler
 
-import io.netty.channel.{ChannelHandler, ChannelInitializer, ChannelPipeline}
-import io.netty.channel.ChannelHandler.Sharable
-import io.netty.channel.socket.SocketChannel
-
-import io.netty.handler.codec.http.{HttpRequestDecoder, HttpResponseEncoder}
-import io.netty.handler.stream.ChunkedWriteHandler
-
 import xitrum.Config
 import xitrum.handler.inbound._
 import xitrum.handler.outbound._
+
+import io.netty.channel.ChannelHandler
+import io.netty.channel.ChannelHandler.Sharable
+import io.netty.channel.ChannelInitializer
+import io.netty.channel.ChannelPipeline
+import io.netty.channel.socket.SocketChannel
+import io.netty.handler.codec.haproxy.HAProxyMessageDecoder
+import io.netty.handler.codec.http.HttpRequestDecoder
+import io.netty.handler.codec.http.HttpResponseEncoder
+import io.netty.handler.stream.ChunkedWriteHandler
 
 /**
  * Sharable handlers are put here so that they can be easily picked up by apps
@@ -41,6 +44,7 @@ object DefaultHttpChannelInitializer {
   lazy val methodOverrider   = new MethodOverrider
   lazy val dispatcher        = new Dispatcher
   lazy val badClientSilencer = new BadClientSilencer
+  lazy val proxyProtocolHandler = new ProxyProtocolHandler
 
   // Sharable outbound handlers
 
@@ -59,10 +63,18 @@ object DefaultHttpChannelInitializer {
 
     // Inbound
 
+    if (Config.xitrum.reverseProxy.map(_.proxyProtocol).getOrElse(false)) {
+    removeHandlerIfExists(pipeline, classOf[HAProxyMessageDecoder])
+    removeHandlerIfExists(pipeline, classOf[ProxyProtocolHandler])
+    removeHandlerIfExists(pipeline, classOf[ProxyProtocolSetIPHandler])
+    }
+
     removeHandlerIfExists(pipeline, classOf[Request2Env])
     removeHandlerIfExists(pipeline, classOf[BaseUrlRemover])
+
     if (Config.xitrum.basicAuth.isDefined)
     removeHandlerIfExists(pipeline, classOf[BasicAuth])
+
     removeHandlerIfExists(pipeline, classOf[PublicFileServer])
     removeHandlerIfExists(pipeline, classOf[WebJarsServer])
     removeHandlerIfExists(pipeline, classOf[UriParser])
@@ -112,6 +124,14 @@ class DefaultHttpChannelInitializer extends ChannelInitializer[SocketChannel] {
 
     // Inbound
 
+    // Add support proxy protocol
+    // https://github.com/xitrum-framework/xitrum/issues/613
+    val proxyProtocol = Config.xitrum.reverseProxy.map(_.proxyProtocol).getOrElse(false)
+    if (proxyProtocol) {
+    p.addLast(classOf[HAProxyMessageDecoder].getName,    new HAProxyMessageDecoder)
+    p.addLast(classOf[ProxyProtocolHandler].getName,     proxyProtocolHandler)
+    }
+
     if (portConfig.flashSocketPolicy.isDefined && portConfig.flashSocketPolicy == portConfig.http)
     p.addLast(classOf[FlashSocketPolicyHandler].getName, new FlashSocketPolicyHandler)
 
@@ -119,6 +139,9 @@ class DefaultHttpChannelInitializer extends ChannelInitializer[SocketChannel] {
                                                            Config.xitrum.request.maxInitialLineLength,
                                                            Config.xitrum.request.maxHeaderSize,
                                                            8192))
+    if (proxyProtocol)
+    p.addLast(classOf[ProxyProtocolSetIPHandler].getName,new ProxyProtocolSetIPHandler)
+
     p.addLast(classOf[Request2Env].getName,              new Request2Env)
     p.addLast(classOf[BaseUrlRemover].getName,           baseUrlRemover)
 
@@ -131,6 +154,7 @@ class DefaultHttpChannelInitializer extends ChannelInitializer[SocketChannel] {
     p.addLast(classOf[MethodOverrider].getName,          methodOverrider)
     p.addLast(classOf[Dispatcher].getName,               dispatcher)
     p.addLast(classOf[BadClientSilencer].getName,        badClientSilencer)
+
 
     // Outbound
 

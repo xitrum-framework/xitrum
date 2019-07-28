@@ -1,11 +1,19 @@
 package xitrum.action
 
-import java.net.{InetSocketAddress, SocketAddress}
+import java.net.InetSocketAddress
+import java.net.SocketAddress
 
-import io.netty.handler.codec.http.{HttpHeaderNames, HttpRequest}
+import xitrum.Action
+import xitrum.Config
+
+import io.netty.channel.Channel
+import io.netty.handler.codec.haproxy.HAProxyMessage
+import io.netty.handler.codec.http.HttpHeaderNames
+import io.netty.handler.codec.http.HttpRequest
+import io.netty.handler.ipfilter.IpFilterRuleType
+import io.netty.handler.ipfilter.IpSubnetFilterRule
 import io.netty.handler.ssl.SslHandler
-
-import xitrum.{Action, Config}
+import io.netty.util.AttributeKey
 
 // See:
 //   http://httpd.apache.org/docs/2.2/mod/mod_proxy.html
@@ -29,8 +37,31 @@ object Net {
   def proxyNotAllowed(clientIp: String): Boolean = {
     Config.xitrum.reverseProxy match {
       case None               => false
-      case Some(reverseProxy) => !reverseProxy.ips.contains(clientIp)
+      case Some(reverseProxy) => ipNotAllowed(reverseProxy.ips, clientIp)
     }
+  }
+
+  private def ipNotAllowed(ips: Seq[String], clientIp: String): Boolean = {
+    if (ips.contains(clientIp)) {
+      return false
+    }
+
+    val rangeIps = ips.filter(_.contains("/")).toList
+    if (rangeIps.length == 0) {
+      return true
+    }
+
+    return !rangeIps.exists((rangeIp) => {
+      val parts = rangeIp.split("/")
+      if (parts.length < 2) {
+        val rule = new IpSubnetFilterRule(parts(0), 32, IpFilterRuleType.ACCEPT)
+        rule.matches(new InetSocketAddress(clientIp, 1234))
+      } else {
+        val cidr = parts(1).toInt
+        val rule = new IpSubnetFilterRule(parts(0), cidr, IpFilterRuleType.ACCEPT)
+        rule.matches(new InetSocketAddress(clientIp, 1234))
+      }
+    })
   }
 
   /** @return IP of the direct HTTP client (may be the proxy) */
