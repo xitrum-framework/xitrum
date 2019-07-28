@@ -1,38 +1,44 @@
 package xitrum.handler.inbound
 
-import scala.util.control.NonFatal
-
 import xitrum.Config
-import xitrum.Log
-
 import io.netty.channel.ChannelHandler.Sharable
-import io.netty.channel.ChannelHandlerContext
-import io.netty.channel.ChannelInboundHandlerAdapter
+import io.netty.channel.{Channel, ChannelHandlerContext, ChannelInboundHandlerAdapter}
 import io.netty.handler.codec.haproxy.HAProxyMessage
+import io.netty.handler.codec.http.HttpRequest
 import io.netty.util.AttributeKey
+
+object ProxyProtocolHandler {
+  val HAPROXY_PROTOCOL_MSG: AttributeKey[HAProxyMessage] =
+    AttributeKey.valueOf("HAProxyMessage").asInstanceOf[AttributeKey[HAProxyMessage]]
+
+  def setHAProxyMessage(channel: Channel, msg: HAProxyMessage) {
+    channel.attr(HAPROXY_PROTOCOL_MSG).set(msg)
+  }
+
+  def setRemoteIp(channel: Channel, request: HttpRequest) {
+    channel.attr(HAPROXY_PROTOCOL_MSG).get() match {
+      case haMsg: HAProxyMessage =>
+        val headers = request.headers
+        val xForwardedFor = headers.get("X-Forwarded-For")
+        if (xForwardedFor != null) {
+          headers.set("X-Forwarded-For", xForwardedFor.concat(s", ${haMsg.sourceAddress}"))
+        } else {
+          headers.add("X-Forwarded-For", haMsg.sourceAddress)
+        }
+
+      case _ =>
+    }
+  }
+}
 
 @Sharable
 class ProxyProtocolHandler extends ChannelInboundHandlerAdapter {
-
-  val HAPROXY_PROTOCOL_MSG = AttributeKey.valueOf("HAProxyMessage").asInstanceOf[AttributeKey[HAProxyMessage]]
-
   override def channelRead(ctx: ChannelHandlerContext, msg: Object) {
-    val ch = ctx.channel()
-    try {
-      if (Config.xitrum.proxyProtocolEnabled) {
-        msg match {
-          case haMsg:HAProxyMessage =>
-            ch.attr(HAPROXY_PROTOCOL_MSG).set(haMsg)
-          case _ =>
-            ctx.fireChannelRead(msg)
-        }
-      } else {
-        ctx.fireChannelRead(msg)
-      }
-    } catch {
-      case NonFatal(e) =>
-        Log.debug(s"Could not parse proxy protocol message: ", e)
-        BadClientSilencer.respond400(ctx.channel, "Could not parse proxy protocol message")
+    if (Config.xitrum.reverseProxy.get.proxyProtocol && msg.isInstanceOf[HAProxyMessage]) {
+      ProxyProtocolHandler.setHAProxyMessage(ctx.channel, msg.asInstanceOf[HAProxyMessage])
+      ctx.channel.pipeline.remove(classOf[ProxyProtocolHandler])
+    } else {
+      ctx.fireChannelRead(msg)
     }
   }
 }

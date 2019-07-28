@@ -63,18 +63,23 @@ object DefaultHttpChannelInitializer {
 
     // Inbound
 
+    if (Config.xitrum.reverseProxy.map(_.proxyProtocol).getOrElse(false)) {
+    removeHandlerIfExists(pipeline, classOf[HAProxyMessageDecoder])
+    removeHandlerIfExists(pipeline, classOf[ProxyProtocolHandler])
+    removeHandlerIfExists(pipeline, classOf[ProxyProtocolSetIPHandler])
+    }
+
     removeHandlerIfExists(pipeline, classOf[Request2Env])
     removeHandlerIfExists(pipeline, classOf[BaseUrlRemover])
+
     if (Config.xitrum.basicAuth.isDefined)
     removeHandlerIfExists(pipeline, classOf[BasicAuth])
+
     removeHandlerIfExists(pipeline, classOf[PublicFileServer])
     removeHandlerIfExists(pipeline, classOf[WebJarsServer])
     removeHandlerIfExists(pipeline, classOf[UriParser])
     removeHandlerIfExists(pipeline, classOf[MethodOverrider])
     removeHandlerIfExists(pipeline, classOf[Dispatcher])
-    removeHandlerIfExists(pipeline, classOf[HAProxyMessageDecoder])
-    removeHandlerIfExists(pipeline, classOf[ProxyProtocolHandler])
-    removeHandlerIfExists(pipeline, classOf[ProxyProtocolSetIPHandler])
 
     // Do not remove BadClientSilencer; WebSocketEventDispatcher will be added
     // before BadClientSilencer, see WebSocketAction#acceptWebSocket
@@ -119,11 +124,12 @@ class DefaultHttpChannelInitializer extends ChannelInitializer[SocketChannel] {
 
     // Inbound
 
-    // add support proxy protocol
+    // Add support proxy protocol
     // https://github.com/xitrum-framework/xitrum/issues/613
-    if (Config.xitrum.proxyProtocolEnabled) {
-      p.addLast(classOf[HAProxyMessageDecoder].getName, new HAProxyMessageDecoder)
-      p.addLast(classOf[ProxyProtocolHandler].getName, proxyProtocolHandler)
+    val proxyProtocol = Config.xitrum.reverseProxy.map(_.proxyProtocol).getOrElse(false)
+    if (proxyProtocol) {
+    p.addLast(classOf[HAProxyMessageDecoder].getName,    new HAProxyMessageDecoder)
+    p.addLast(classOf[ProxyProtocolHandler].getName,     proxyProtocolHandler)
     }
 
     if (portConfig.flashSocketPolicy.isDefined && portConfig.flashSocketPolicy == portConfig.http)
@@ -133,10 +139,8 @@ class DefaultHttpChannelInitializer extends ChannelInitializer[SocketChannel] {
                                                            Config.xitrum.request.maxInitialLineLength,
                                                            Config.xitrum.request.maxHeaderSize,
                                                            8192))
-    if (Config.xitrum.proxyProtocolEnabled) {
-      p.addLast(classOf[ProxyProtocolSetIPHandler].getName, new ProxyProtocolSetIPHandler)
-
-    }
+    if (proxyProtocol)
+    p.addLast(classOf[ProxyProtocolSetIPHandler].getName,new ProxyProtocolSetIPHandler)
 
     p.addLast(classOf[Request2Env].getName,              new Request2Env)
     p.addLast(classOf[BaseUrlRemover].getName,           baseUrlRemover)

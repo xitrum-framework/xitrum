@@ -94,9 +94,9 @@ class HttpsConfig(val config: TConfig) {
 }
 
 class ReverseProxyConfig(val config: TConfig) {
-  val ips     = config.getStringList("ips").asScala
-  val baseUrl = config.getString("baseUrl")
-  val proxyProtocolEnabledOpt = if (config.hasPath("proxyProtocolEnabled")) Some(config.getBoolean("proxyProtocolEnabled")) else None
+  val ips           = config.getStringList("ips").asScala
+  val baseUrl       = config.getString("baseUrl")
+  val proxyProtocol = if (config.hasPath("proxyProtocol")) config.getBoolean("proxyProtocol") else false
 }
 
 class SessionConfig(val config: TConfig) {
@@ -187,14 +187,6 @@ class XitrumConfig(val config: TConfig) {
       Some(new ReverseProxyConfig(config.getConfig("reverseProxy")))
     else
       None
-
-  val proxyProtocolEnabled: Boolean = {
-    if (this.reverseProxy.isDefined) {
-      this.reverseProxy.get.proxyProtocolEnabledOpt.getOrElse(false)
-    } else {
-      false
-    }
-  }
 
   val tmpDir: File = {
     if (config.hasPath("tmpDir")) {

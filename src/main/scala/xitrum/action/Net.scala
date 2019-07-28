@@ -37,28 +37,31 @@ object Net {
   def proxyNotAllowed(clientIp: String): Boolean = {
     Config.xitrum.reverseProxy match {
       case None               => false
-      case Some(reverseProxy) => if (reverseProxy.ips.contains(clientIp)) {
-       false
-      } else {
-        val rangeIps = reverseProxy.ips.filter(_.contains("/")).toList
-        if (rangeIps.length == 0) {
-          true
-        } else {
-          !rangeIps.exists((rangeIp) => {
-            val parts = rangeIp.split("/")
-            if (parts.length < 2) {
-              val rule = new IpSubnetFilterRule(parts(0), 32, IpFilterRuleType.ACCEPT)
-              rule.matches(new InetSocketAddress(clientIp, 1234))
-            } else {
-              val cidr = parts(1).toInt
-              val rule = new IpSubnetFilterRule(parts(0), cidr, IpFilterRuleType.ACCEPT)
-              rule.matches(new
-                  InetSocketAddress(clientIp, 1234))
-            }
-          })
-        }
-      }
+      case Some(reverseProxy) => ipNotAllowed(reverseProxy.ips, clientIp)
     }
+  }
+
+  private def ipNotAllowed(ips: Seq[String], clientIp: String): Boolean = {
+    if (ips.contains(clientIp)) {
+      return false
+    }
+
+    val rangeIps = ips.filter(_.contains("/")).toList
+    if (rangeIps.length == 0) {
+      return true
+    }
+
+    return !rangeIps.exists((rangeIp) => {
+      val parts = rangeIp.split("/")
+      if (parts.length < 2) {
+        val rule = new IpSubnetFilterRule(parts(0), 32, IpFilterRuleType.ACCEPT)
+        rule.matches(new InetSocketAddress(clientIp, 1234))
+      } else {
+        val cidr = parts(1).toInt
+        val rule = new IpSubnetFilterRule(parts(0), cidr, IpFilterRuleType.ACCEPT)
+        rule.matches(new InetSocketAddress(clientIp, 1234))
+      }
+    })
   }
 
   /** @return IP of the direct HTTP client (may be the proxy) */
@@ -82,25 +85,6 @@ object Net {
         ip
       else
         xForwardedFor.split(",")(0).trim
-    }
-  }
-
-  def setRemoteIp(ch: Channel, request: HttpRequest): HttpRequest = {
-
-    val HAPROXY_PROTOCOL_MSG = AttributeKey.valueOf("HAProxyMessage").asInstanceOf[AttributeKey[HAProxyMessage]]
-    ch.attr(HAPROXY_PROTOCOL_MSG).get() match {
-      case haMsg:HAProxyMessage =>
-        val xForwardedFor = request.headers().get("X-Forwarded-For")
-        if (xForwardedFor != null) {
-          request.headers()
-            .add("X-Forwarded-For", xForwardedFor.concat(s", ${haMsg.sourceAddress()}"))
-          request
-        } else {
-          request.headers()
-            .add("X-Forwarded-For", haMsg.sourceAddress())
-          request
-        }
-      case _ => request
     }
   }
 }
