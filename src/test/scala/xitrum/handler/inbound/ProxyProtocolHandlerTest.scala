@@ -23,6 +23,7 @@ class XFFTestAction extends Action with SkipCsrfCheck {
   }
 }
 
+@Ignore
 class ProxyProtocolHandlerTest extends FlatSpec with Matchers with BeforeAndAfter with Log {
   behavior of "ProxyProtocol"
 
@@ -48,7 +49,6 @@ class ProxyProtocolHandlerTest extends FlatSpec with Matchers with BeforeAndAfte
 
     out.write(s"PROXY TCP4 192.168.1.2 192.168.1.3 8080 8000\r\nGET /my_site/test/xff HTTP/1.1\r\nConnection: close$header\r\n\r\n")
     out.flush()
-    out.close()
 
     var line: String = null
     val headers = MMap[String, String]()
@@ -60,6 +60,7 @@ class ProxyProtocolHandlerTest extends FlatSpec with Matchers with BeforeAndAfte
           Log.debug(line)
       }
     }
+    out.close()
     in.close()
 
     headers
