@@ -13,6 +13,9 @@ object ProxyProtocolHandler {
 
   def setHAProxyMessage(channel: Channel, msg: HAProxyMessage) {
     channel.attr(HAPROXY_PROTOCOL_MSG).set(msg)
+    // Fix memory leak
+    // https://github.com/netty/netty/pull/9250
+    msg.release()
   }
 
   def setRemoteIp(channel: Channel, request: HttpRequest) {

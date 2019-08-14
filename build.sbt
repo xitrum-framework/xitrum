@@ -26,7 +26,7 @@ javaOptions in Test += "-Dxitrum.mode=production"
 libraryDependencies += "tv.cntt" %% "slf4s-api" % "1.7.25"
 
 // Netty is the core of Xitrum's HTTP(S) feature
-libraryDependencies += "io.netty" % "netty-all" % "4.1.36.Final"
+libraryDependencies += "io.netty" % "netty-all" % "4.1.37.Final"
 
 // https://github.com/netty/netty/wiki/Native-transports
 // Only works on Linux
