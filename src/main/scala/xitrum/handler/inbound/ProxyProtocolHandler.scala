@@ -9,18 +9,18 @@ import io.netty.handler.codec.http.HttpRequest
 import io.netty.util.AttributeKey
 
 object ProxyProtocolHandler {
-  val HAPROXY_PROTOCOL_MSG: AttributeKey[HAProxyMessage] =
-    AttributeKey.valueOf("HAProxyMessage").asInstanceOf[AttributeKey[HAProxyMessage]]
+  val HAPROXY_PROTOCOL_SOURCE_IP: AttributeKey[String] =
+    AttributeKey.valueOf("HAProxyMessageSourceIp").asInstanceOf[AttributeKey[String]]
 
   def setRemoteIp(channel: Channel, request: HttpRequest) {
-    channel.attr(HAPROXY_PROTOCOL_MSG).get() match {
-      case haMsg: HAProxyMessage =>
+    channel.attr(HAPROXY_PROTOCOL_SOURCE_IP).get() match {
+      case sourceIp: String =>
         val headers = request.headers
         val xForwardedFor = headers.get("X-Forwarded-For")
         if (xForwardedFor != null) {
-          headers.set("X-Forwarded-For", xForwardedFor.concat(s", ${haMsg.sourceAddress}"))
+          headers.set("X-Forwarded-For", xForwardedFor.concat(s", ${sourceIp}"))
         } else {
-          headers.add("X-Forwarded-For", haMsg.sourceAddress)
+          headers.add("X-Forwarded-For", sourceIp)
         }
 
       case _ =>
@@ -31,7 +31,7 @@ object ProxyProtocolHandler {
 @Sharable
 class ProxyProtocolHandler extends SimpleChannelInboundHandler[HAProxyMessage] {
   override def channelRead0(ctx: ChannelHandlerContext, msg: HAProxyMessage) {
-      ctx.channel.attr(ProxyProtocolHandler.HAPROXY_PROTOCOL_MSG).set(msg)
-      ctx.channel.pipeline.remove(classOf[ProxyProtocolHandler])
+      ctx.channel.attr(ProxyProtocolHandler.HAPROXY_PROTOCOL_SOURCE_IP).set(msg.sourceAddress)
+      ctx.channel.pipeline.remove(this)
   }
 }
