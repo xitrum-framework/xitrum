@@ -48,6 +48,17 @@ class ParamsPayloadTestAction extends Action with SkipCsrfCheck {
   }
 }
 
+@GET("test/params/validation")
+class ParamsValidationTestAction extends Action with SkipCsrfCheck {
+  def execute() {
+    param[Char]("keyChar")
+    param[Int]("keyInt")
+    param[Boolean]("keyBoolean")
+    
+    respondText("Ok")
+  }
+}
+
 class ParamsTest extends FlatSpec with Matchers with BeforeAndAfter with Log {
   private implicit val formats = Serialization.formats(NoTypeHints)
   private val base = "http://127.0.0.1:8000/my_site"
@@ -105,6 +116,50 @@ class ParamsTest extends FlatSpec with Matchers with BeforeAndAfter with Log {
       .setBody("""{"key": 1, "keys": [2, 3], "locale": "ru-RU", "optional": "value"}""".getBytes)
       .execute().get()
     shouldEqual(response, ParamsPayloadResponse(1, Seq(2, 3), "ru-RU", Some("value")))
+  }
+
+  "[GET] param" should "response validation error char" in {
+    val response = client.prepareGet(s"$base/test/params/validation")
+      .addQueryParam("keyChar", "")
+      .addQueryParam("keyInt", "1")
+      .addQueryParam("keyBoolean", "true")
+      .execute().get()
+    (response.getStatusCode, response.getResponseBody) shouldEqual
+      (400, """Validation error: Cannot convert "" of param "keyChar" to Char""")
+  }
+
+  "[GET] param" should "response validation error overflow int" in {
+    val keyValue = Int.MaxValue + 1L
+    val response = client.prepareGet(s"$base/test/params/validation")
+      .addQueryParam("keyChar", "a")
+      .addQueryParam("keyInt", keyValue.toString)
+      .addQueryParam("keyBoolean", "true")
+      .execute().get()
+    (response.getStatusCode, response.getResponseBody) shouldEqual
+      (400, s"""Validation error: Cannot convert "$keyValue" of param "keyInt" to Int""")
+  }
+
+
+  "[GET] param" should "response validation error parse int" in {
+    val keyValue = "1a"
+    val response = client.prepareGet(s"$base/test/params/validation")
+      .addQueryParam("keyChar", "a")
+      .addQueryParam("keyInt", keyValue)
+      .addQueryParam("keyBoolean", "true")
+      .execute().get()
+    (response.getStatusCode, response.getResponseBody) shouldEqual
+      (400, s"""Validation error: Cannot convert "$keyValue" of param "keyInt" to Int""")
+  }
+
+  "[GET] param" should "response validation error parse boolean" in {
+    val value = "tru"
+    val response = client.prepareGet(s"$base/test/params/validation")
+      .addQueryParam("keyChar", "c")
+      .addQueryParam("keyInt", "1")
+      .addQueryParam("keyBoolean", value)
+      .execute().get()
+    (response.getStatusCode, response.getResponseBody) shouldEqual
+      (400, s"""Validation error: Cannot convert "$value" of param "keyBoolean" to Boolean""")
   }
 
   private def shouldEqual[T](response: Response, expected: T)(implicit formats: Formats, mf: Manifest[T]) = {
