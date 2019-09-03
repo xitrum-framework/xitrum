@@ -4,7 +4,7 @@ import scala.reflect.runtime.universe._
 import io.netty.handler.codec.http.multipart.FileUpload
 
 import xitrum.Action
-import xitrum.exception.MissingParam
+import xitrum.exception.{InvalidInput, MissingParam}
 import xitrum.util.DefaultsTo
 
 /**
@@ -43,7 +43,7 @@ trait ParamAccess {
     } else {
       coll.get(key) match {
         case None         => throw new MissingParam(key)
-        case Some(values) => convertTextParam[T](values.head)
+        case Some(values) => convertTextParam[T](key, values.head)
       }
     }
   }
@@ -55,7 +55,7 @@ trait ParamAccess {
     if (typeOf[T] <:< TYPE_FILE_UPLOAD) {
       bodyFileParams.get(key).map(_.head.asInstanceOf[T])
     } else {
-      coll.get(key).map(values => convertTextParam[T](values.head))
+      coll.get(key).map(values => convertTextParam[T](key, values.head))
     }
   }
 
@@ -71,7 +71,7 @@ trait ParamAccess {
     } else {
       coll.get(key) match {
         case None         => Seq.empty
-        case Some(values) => values.map(convertTextParam[T])
+        case Some(values) => values.map(convertTextParam[T](key, _))
       }
     }
   }
@@ -79,9 +79,9 @@ trait ParamAccess {
   //----------------------------------------------------------------------------
 
   /** Applications may override this method to convert to more types. */
-  def convertTextParam[T: TypeTag](value: String): T = {
+  def convertTextParam[T: TypeTag](key: String, value: String): T = {
     val t = typeOf[T]
-    val any: Any =
+    scala.util.Try[Any] {
            if (t <:< TYPE_STRING)  value
       else if (t <:< TYPE_CHAR)    value(0)
       else if (t <:< TYPE_BOOLEAN) value.toBoolean
@@ -91,7 +91,11 @@ trait ParamAccess {
       else if (t <:< TYPE_LONG)    value.toLong
       else if (t <:< TYPE_FLOAT)   value.toFloat
       else if (t <:< TYPE_DOUBLE)  value.toDouble
-      else throw new Exception("convertTextParam cannot covert " + value + " to " + t)
-    any.asInstanceOf[T]
+      else throw new Exception(s"convertTextParam $key cannot convert $value to $t")
+    }.recoverWith {
+      case _: StringIndexOutOfBoundsException |
+           _: IllegalArgumentException =>
+        scala.util.Failure(new InvalidInput(s"""Cannot convert "$value" of param "$key" to $t"""))
+    }.get.asInstanceOf[T]
   }
 }
