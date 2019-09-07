@@ -1,4 +1,4 @@
-3.18.18:
+3.28.18:
 
 * `#613 <https://github.com/xitrum-framework/xitrum/issues/613>`_
   Support Proxy Protocol
@@ -6,29 +6,29 @@
   Respond bad request 400 for incorrect param types
 * `Update dependency libraries <https://github.com/xitrum-framework/xitrum/commit/2bf4228934d0c22f07f69a1e4e44f4e1b6bf41a4>`_
 
-3.18.17:
+3.28.17:
 
 * `#679 <https://github.com/xitrum-framework/xitrum/issues/679>`_
   Update dependency libraries
 
-3.18.16:
+3.28.16:
 
 * `#675 <https://github.com/xitrum-framework/xitrum/issues/675>`_
   Invalid range request causes increase in CPU usage as 100%
 * `#677 <https://github.com/xitrum-framework/xitrum/issues/677>`_
   Update dependency libraries
 
-3.18.15:
+3.28.15:
 
 * `#674 <https://github.com/xitrum-framework/xitrum/issues/674>`_
   Update dependency libraries
 
-3.18.14:
+3.28.14:
 
 * `#672 <https://github.com/xitrum-framework/xitrum/issues/672>`_
   Update dependency libraries
 
-3.18.13:
+3.28.13:
 
 * `#671 <https://github.com/xitrum-framework/xitrum/issues/671>`_
   WebJars files cannot be served on Windows
