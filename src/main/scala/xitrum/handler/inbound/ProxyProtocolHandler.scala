@@ -1,29 +1,30 @@
 package xitrum.handler.inbound
 
-import xitrum.Config
+import io.netty.channel.Channel
 import io.netty.channel.ChannelHandler.Sharable
-import io.netty.channel.{Channel, ChannelHandlerContext, ChannelInboundHandlerAdapter}
+import io.netty.channel.ChannelHandlerContext
+import io.netty.channel.SimpleChannelInboundHandler
 import io.netty.handler.codec.haproxy.HAProxyMessage
 import io.netty.handler.codec.http.HttpRequest
 import io.netty.util.AttributeKey
 
 object ProxyProtocolHandler {
-  val HAPROXY_PROTOCOL_MSG: AttributeKey[HAProxyMessage] =
-    AttributeKey.valueOf("HAProxyMessage").asInstanceOf[AttributeKey[HAProxyMessage]]
+  private val HAPROXY_PROTOCOL_SOURCE_IP: AttributeKey[String] =
+    AttributeKey.valueOf("HAProxyMessageSourceIp").asInstanceOf[AttributeKey[String]]
 
-  def setHAProxyMessage(channel: Channel, msg: HAProxyMessage) {
-    channel.attr(HAPROXY_PROTOCOL_MSG).set(msg)
+  def setRemoteIp(channel: Channel, sourceIp: String) {
+    channel.attr(HAPROXY_PROTOCOL_SOURCE_IP).set(sourceIp)
   }
 
   def setRemoteIp(channel: Channel, request: HttpRequest) {
-    channel.attr(HAPROXY_PROTOCOL_MSG).get() match {
-      case haMsg: HAProxyMessage =>
+    channel.attr(HAPROXY_PROTOCOL_SOURCE_IP).get() match {
+      case sourceIp: String =>
         val headers = request.headers
         val xForwardedFor = headers.get("X-Forwarded-For")
         if (xForwardedFor != null) {
-          headers.set("X-Forwarded-For", xForwardedFor.concat(s", ${haMsg.sourceAddress}"))
+          headers.set("X-Forwarded-For", xForwardedFor.concat(s", ${sourceIp}"))
         } else {
-          headers.add("X-Forwarded-For", haMsg.sourceAddress)
+          headers.add("X-Forwarded-For", sourceIp)
         }
 
       case _ =>
@@ -32,13 +33,9 @@ object ProxyProtocolHandler {
 }
 
 @Sharable
-class ProxyProtocolHandler extends ChannelInboundHandlerAdapter {
-  override def channelRead(ctx: ChannelHandlerContext, msg: Object) {
-    if (Config.xitrum.reverseProxy.get.proxyProtocol && msg.isInstanceOf[HAProxyMessage]) {
-      ProxyProtocolHandler.setHAProxyMessage(ctx.channel, msg.asInstanceOf[HAProxyMessage])
-      ctx.channel.pipeline.remove(classOf[ProxyProtocolHandler])
-    } else {
-      ctx.fireChannelRead(msg)
-    }
+class ProxyProtocolHandler extends SimpleChannelInboundHandler[HAProxyMessage] {
+  override def channelRead0(ctx: ChannelHandlerContext, msg: HAProxyMessage) {
+      ProxyProtocolHandler.setRemoteIp(ctx.channel, msg.sourceAddress)
+      ctx.channel.pipeline.remove(this)
   }
 }
