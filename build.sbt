@@ -1,6 +1,6 @@
 organization := "tv.cntt"
 name         := "xitrum"
-version      := "3.28.17-SNAPSHOT"
+version      := "3.28.18-SNAPSHOT"
 
 // Run "sbt mima-report-binary-issues" to check for binary compatibility
 // https://github.com/typesafehub/migration-manager
@@ -9,8 +9,8 @@ version      := "3.28.17-SNAPSHOT"
 
 //------------------------------------------------------------------------------
 
-crossScalaVersions := Seq("2.12.8", "2.11.12")
-scalaVersion       := "2.12.8"
+crossScalaVersions := Seq("2.12.9", "2.11.12")
+scalaVersion       := "2.12.9"
 
 // Akka 2.4.0+ requires Java 8
 javacOptions ++= Seq("-source", "1.8", "-target", "1.8")
@@ -43,11 +43,11 @@ libraryDependencies += "io.netty" % "netty-tcnative" % "2.0.25.Final" classifier
 libraryDependencies += "org.javassist" % "javassist" % "3.25.0-GA"
 
 // Redirect Akka log to SLF4J
-libraryDependencies += "com.typesafe.akka" %% "akka-actor"           % "2.5.23"
-libraryDependencies += "com.typesafe.akka" %% "akka-cluster"         % "2.5.23"
-libraryDependencies += "com.typesafe.akka" %% "akka-cluster-metrics" % "2.5.23"
-libraryDependencies += "com.typesafe.akka" %% "akka-contrib"         % "2.5.23"
-libraryDependencies += "com.typesafe.akka" %% "akka-slf4j"           % "2.5.23"
+libraryDependencies += "com.typesafe.akka" %% "akka-actor"           % "2.5.25"
+libraryDependencies += "com.typesafe.akka" %% "akka-cluster"         % "2.5.25"
+libraryDependencies += "com.typesafe.akka" %% "akka-cluster-metrics" % "2.5.25"
+libraryDependencies += "com.typesafe.akka" %% "akka-contrib"         % "2.5.25"
+libraryDependencies += "com.typesafe.akka" %% "akka-slf4j"           % "2.5.25"
 
 // For clustering SockJS with Akka
 libraryDependencies += "tv.cntt" %% "glokka" % "2.5.0"
@@ -63,7 +63,7 @@ libraryDependencies += "tv.cntt" %% "sclasner" % "1.7.0"
 libraryDependencies += "com.twitter" %% "chill" % "0.9.3"
 
 // For JSON (de)serializing
-libraryDependencies += "org.json4s" %% "json4s-jackson" % "3.6.6"
+libraryDependencies += "org.json4s" %% "json4s-jackson" % "3.6.7"
 
 // For i18n
 libraryDependencies += "tv.cntt" %% "scaposer" % "1.11.0"
@@ -75,7 +75,7 @@ libraryDependencies += "org.apache.commons" % "commons-lang3" % "3.9"
 libraryDependencies += "tv.cntt" % "rhinocoffeescript" % "1.10.0"
 
 // For metrics
-libraryDependencies += "nl.grons" %% "metrics4-scala" % "4.0.5"
+libraryDependencies += "nl.grons" %% "metrics4-scala" % "4.0.8"
 libraryDependencies += "io.dropwizard.metrics" % "metrics-json" % "4.1.0"
 
 // Scala annotations (used by routes and Swagger) compiled by a newer version
@@ -95,9 +95,9 @@ libraryDependencies += "org.webjars.bower" % "d3" % "3.5.17"
 
 // For test --------------------------------------------------------------------
 
-libraryDependencies += "org.scalatest" %% "scalatest" % "3.0.5" % "test"
+libraryDependencies += "org.scalatest" %% "scalatest" % "3.0.8" % "test"
 
-libraryDependencies += "org.asynchttpclient" % "async-http-client" % "2.10.0" % "test"
+libraryDependencies += "org.asynchttpclient" % "async-http-client" % "2.10.2" % "test"
 
 // An implementation of SLF4J is needed for log in tests to be output
 libraryDependencies += "ch.qos.logback" % "logback-classic" % "1.2.3" % "test"
