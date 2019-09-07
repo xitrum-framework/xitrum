@@ -9,8 +9,12 @@ import io.netty.handler.codec.http.HttpRequest
 import io.netty.util.AttributeKey
 
 object ProxyProtocolHandler {
-  val HAPROXY_PROTOCOL_SOURCE_IP: AttributeKey[String] =
+  private val HAPROXY_PROTOCOL_SOURCE_IP: AttributeKey[String] =
     AttributeKey.valueOf("HAProxyMessageSourceIp").asInstanceOf[AttributeKey[String]]
+
+  def setRemoteIp(channel: Channel, sourceIp: String) {
+    channel.attr(HAPROXY_PROTOCOL_SOURCE_IP).set(sourceIp)
+  }
 
   def setRemoteIp(channel: Channel, request: HttpRequest) {
     channel.attr(HAPROXY_PROTOCOL_SOURCE_IP).get() match {
@@ -31,7 +35,7 @@ object ProxyProtocolHandler {
 @Sharable
 class ProxyProtocolHandler extends SimpleChannelInboundHandler[HAProxyMessage] {
   override def channelRead0(ctx: ChannelHandlerContext, msg: HAProxyMessage) {
-      ctx.channel.attr(ProxyProtocolHandler.HAPROXY_PROTOCOL_SOURCE_IP).set(msg.sourceAddress)
+      ProxyProtocolHandler.setRemoteIp(ctx.channel, msg.sourceAddress)
       ctx.channel.pipeline.remove(this)
   }
 }
