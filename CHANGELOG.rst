@@ -2,6 +2,8 @@
 
 * `#613 <https://github.com/xitrum-framework/xitrum/issues/613>`_
   Support Proxy Protocol
+* `#681 <https://github.com/xitrum-framework/xitrum/pull/681>`_
+  Respond bad request 400 for incorrect param types
 * `Update dependency libraries <https://github.com/xitrum-framework/xitrum/commit/2bf4228934d0c22f07f69a1e4e44f4e1b6bf41a4>`_
 
 3.18.17:
