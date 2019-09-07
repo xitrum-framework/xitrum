@@ -1,3 +1,9 @@
+3.18.18:
+
+* `#682 <https://github.com/xitrum-framework/xitrum/pull/682>`_
+  Fix HAProxyMessage memory leak
+* `Update dependency libraries <https://github.com/xitrum-framework/xitrum/commit/2bf4228934d0c22f07f69a1e4e44f4e1b6bf41a4>`_
+
 3.18.17:
 
 * `#679 <https://github.com/xitrum-framework/xitrum/issues/679>`_
