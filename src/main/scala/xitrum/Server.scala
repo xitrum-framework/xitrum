@@ -79,11 +79,7 @@ object Server {
    * After the hook has been registered, you can stop Xitrum gracefully by running OS command `kill <Xitrum PID>`.
    */
   def stopAtShutdown() {
-    Runtime.getRuntime.addShutdownHook(new Thread {
-      override def run() {
-        Server.this.stop()
-      }
-    })
+    Runtime.getRuntime.addShutdownHook(new Thread(() => Server.this.stop()))
   }
 
   //----------------------------------------------------------------------------

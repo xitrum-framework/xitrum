@@ -88,16 +88,12 @@ object MetricsManager {
    */
   def tickPublisher(publisher: ActorRef) = {
     // Send newest registry as JSON
-    publishing = Config.actorSystem.scheduler.scheduleAtFixedRate(
+    publishing = Config.actorSystem.scheduler.scheduleWithFixedDelay(
       metrics.collectActorInterval + 1.seconds,  // Publish after first collect execution
       metrics.collectActorInterval
-    ) (
-      new Runnable {
-        def run() {
-          publisher ! Publish(registryAsJson)
-        }
-      }
-    )
+    ) {
+      () => publisher ! Publish(registryAsJson)
+    }
   }
 
   // The exponentially weighted moving average (EWMA)

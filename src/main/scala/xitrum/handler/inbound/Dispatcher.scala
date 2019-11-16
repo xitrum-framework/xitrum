@@ -37,9 +37,7 @@ object Dispatcher {
       setPathPrefixForSockJs(action, handlerEnv)
       action.apply(handlerEnv)
       if (CLASS_OF_FUTURE_ACTION.isAssignableFrom(actionClass)) {
-        Config.actorSystem.dispatcher.execute(new Runnable {
-          def run() { action.dispatchWithFailsafe(skipCsrfCheck) }
-        })
+        Config.actorSystem.dispatcher.execute(() => action.dispatchWithFailsafe(skipCsrfCheck))
       } else {
         action.dispatchWithFailsafe(skipCsrfCheck)
       }
