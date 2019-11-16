@@ -2,6 +2,8 @@
 
 * `#685 <https://github.com/xitrum-framework/xitrum/issues/685>`_
   Update dependency libraries
+* `#684 <https://github.com/xitrum-framework/xitrum/issues/684>`_
+  Drop support for Scala 2.11
 
 3.28.18:
 

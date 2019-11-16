@@ -9,16 +9,12 @@ version      := "3.29.0-SNAPSHOT"
 
 //------------------------------------------------------------------------------
 
-crossScalaVersions := Seq("2.12.10", "2.11.12")
+crossScalaVersions := Seq("2.12.10")
 scalaVersion       := "2.12.10"
 
 // Akka 2.4.0+ requires Java 8
 javacOptions ++= Seq("-source", "1.8", "-target", "1.8")
 scalacOptions ++= Seq("-deprecation", "-feature", "-unchecked")
-
-// For LruCacheTest
-fork in Test := true
-javaOptions in Test += "-Dxitrum.mode=production"
 
 //------------------------------------------------------------------------------
 
@@ -90,6 +86,10 @@ libraryDependencies += "org.webjars.bower" % "swagger-ui" % "3.4.0"
 libraryDependencies += "org.webjars.bower" % "d3" % "3.5.17"
 
 // For test --------------------------------------------------------------------
+
+// For LruCacheTest
+fork in Test := true
+javaOptions in Test += "-Dxitrum.mode=production"
 
 libraryDependencies += "org.scalatest" %% "scalatest" % "3.0.8" % "test"
 
