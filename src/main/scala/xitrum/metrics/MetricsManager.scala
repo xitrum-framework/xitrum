@@ -67,7 +67,7 @@ object MetricsManager {
         Config.actorSystem.actorOf(Props(classOf[ClusterMetricsCollector], localPublisher))
       } else {
         collector  = Config.actorSystem.actorOf(Props(classOf[MetricsCollector], localPublisher))
-        collecting = Config.actorSystem.scheduler.schedule(
+        collecting = Config.actorSystem.scheduler.scheduleAtFixedRate(
           metrics.collectActorInitialDelay,
           metrics.collectActorInterval,
           collector,
@@ -88,12 +88,16 @@ object MetricsManager {
    */
   def tickPublisher(publisher: ActorRef) = {
     // Send newest registry as JSON
-    publishing = Config.actorSystem.scheduler.schedule(
+    publishing = Config.actorSystem.scheduler.scheduleAtFixedRate(
       metrics.collectActorInterval + 1.seconds,  // Publish after first collect execution
       metrics.collectActorInterval
-    )({
-      publisher ! Publish(registryAsJson)
-    })
+    ) (
+      new Runnable {
+        def run() {
+          publisher ! Publish(registryAsJson)
+        }
+      }
+    )
   }
 
   // The exponentially weighted moving average (EWMA)
