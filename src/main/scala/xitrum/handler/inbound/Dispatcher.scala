@@ -24,7 +24,7 @@ object Dispatcher {
 
   private val routeReloader = if (Config.productionMode) None else Some(new RouteReloader)
 
-  def dispatch(actionClass: Class[_ <: Action], handlerEnv: HandlerEnv, skipCsrfCheck: Boolean) {
+  def dispatch(actionClass: Class[_ <: Action], handlerEnv: HandlerEnv, skipCsrfCheck: Boolean): Unit = {
     if (CLASS_OF_ACTOR.isAssignableFrom(actionClass)) {
       val actorRef = Config.actorSystem.actorOf(Props {
         val actor = newAction(actionClass)
@@ -50,7 +50,7 @@ object Dispatcher {
     // ReflectASM is included by Kryo included by Chill.
     ConstructorAccess.get(actionClass).newInstance()
 
-  private def setPathPrefixForSockJs(instance: Any, handlerEnv: HandlerEnv) {
+  private def setPathPrefixForSockJs(instance: Any, handlerEnv: HandlerEnv): Unit = {
     instance match {
       case sockJsPrefix: SockJsPrefix => sockJsPrefix.setPathPrefix(handlerEnv.pathInfo)
       case _ =>
@@ -62,7 +62,7 @@ object Dispatcher {
 
 @Sharable
 class Dispatcher extends SimpleChannelInboundHandler[HandlerEnv] {
-  override def channelRead0(ctx: ChannelHandlerContext, env: HandlerEnv) {
+  override def channelRead0(ctx: ChannelHandlerContext, env: HandlerEnv): Unit = {
     // Reload routes before doing the route matching
     Dispatcher.routeReloader.foreach(_.reloadIfShould())
 
@@ -108,7 +108,7 @@ class Dispatcher extends SimpleChannelInboundHandler[HandlerEnv] {
     }
   }
 
-  private def handle404(ctx: ChannelHandlerContext, env: HandlerEnv) {
+  private def handle404(ctx: ChannelHandlerContext, env: HandlerEnv): Unit = {
     Config.routes.error404 match {
       case None =>
         val response = env.response

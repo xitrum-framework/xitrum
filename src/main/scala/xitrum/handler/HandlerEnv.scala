@@ -88,7 +88,7 @@ class HandlerEnv extends MHashMap[Any, Any] {
   }
 
   /** Releases native memory used by the request, response, and bodyDecoder. */
-  def release() {
+  def release(): Unit = {
     if (request .refCnt() > 0) request .release()
     if (response.refCnt() > 0) response.release()
 

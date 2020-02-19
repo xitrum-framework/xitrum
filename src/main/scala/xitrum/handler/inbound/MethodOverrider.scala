@@ -16,7 +16,7 @@ import xitrum.routing.HttpMethodWebSocket
  */
 @Sharable
 class MethodOverrider extends SimpleChannelInboundHandler[HandlerEnv] {
-  override def channelRead0(ctx: ChannelHandlerContext, env: HandlerEnv) {
+  override def channelRead0(ctx: ChannelHandlerContext, env: HandlerEnv): Unit = {
     val request        = env.request
     val method         = request.method
     val headers        = request.headers

@@ -107,7 +107,7 @@ object RouteCollector {
       routes:      SerializableRouteCollection,
       className:   String,
       annotations: ActionAnnotations
-  ) {
+  ): Unit = {
     val routeOrder          = optRouteOrder(annotations.routeOrder)  // -1: first, 1: last, 0: other
     val cacheSecs           = optCacheSecs(annotations.cache)        // < 0: cache action, > 0: cache page, 0: no cache
     val method_pattern_coll = ArrayBuffer.empty[(String, String)]
@@ -153,8 +153,8 @@ object RouteCollector {
   private def collectErrorRoutes(
       routes:      SerializableRouteCollection,
       className:   String,
-      annotations: ActionAnnotations)
-  {
+      annotations: ActionAnnotations
+  ): Unit = {
     annotations.error.foreach { a =>
       val tpe       = a.tree.tpe
       val tpeString = tpe.toString

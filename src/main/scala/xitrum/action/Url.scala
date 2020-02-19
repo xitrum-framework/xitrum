@@ -14,9 +14,9 @@ object Url {
   def publicUrl(path: String): String = {
     val absPath     = xitrum.root + "/public/" + path
     val forceReload = Etag.forFile(absPath, None, gzipped = true) match {
-      case Etag.NotFound                           => Random.nextLong.toString
-      case Etag.TooBig(file, mimeo)                => file.lastModified
-      case Etag.Small(bytes, etag, mimeo, gzipped) => etag
+      case Etag.NotFound             => Random.nextLong().toString
+      case Etag.TooBig(file, _)      => file.lastModified
+      case Etag.Small(_, etag, _, _) => etag
     }
 
     val url = "/" + path
@@ -51,8 +51,8 @@ object Url {
   def webJarsUrl(path: String): String = {
     val classPathPath = "META-INF/resources/webjars/" + path
     val forceReload = Etag.forResource(classPathPath, None, gzipped = true) match {
-      case Etag.NotFound                           => Random.nextLong.toString
-      case Etag.Small(bytes, etag, mimeo, gzipped) => etag
+      case Etag.NotFound             => Random.nextLong().toString
+      case Etag.Small(_, etag, _, _) => etag
     }
     Config.withBaseUrl("/webjars/" + path + "?" + forceReload)
   }
@@ -86,7 +86,7 @@ object Url {
 
   def url[T <: Action : Manifest](params: (String, Any)*): String = {
     val className = manifest[T].runtimeClass.getName
-    url(className, params:_*)
+    url(className, params: _*)
   }
   def url[T <: Action : Manifest]: String = url[T]()
 
@@ -126,7 +126,7 @@ trait Url {
     *
     * @param path Relative to the "public" directory, without leading "/"
     */
-  def publicUrl(path: String) = Url.publicUrl(path)
+  def publicUrl(path: String): String = Url.publicUrl(path)
 
   /**
     * Ex: publicUrl("jquery/3.4.1/dist/jquery.js", "jquery/3.4.1/dist/jquery.min.js")
@@ -134,7 +134,7 @@ trait Url {
     * @param devPath File path to use in development mode, relative to the "public" directory, without leading "/"
     * @param prodPath File path to use in production mode, relative to the "public" directory, without leading "/"
     */
-  def publicUrl(devPath: String, prodPath: String) = Url.publicUrl(devPath, prodPath)
+  def publicUrl(devPath: String, prodPath: String): String = Url.publicUrl(devPath, prodPath)
 
   /**
     * Ex: publicUrl("jquery/3.4.1/dist", "jquery.js", "jquery.min.js")
@@ -143,10 +143,10 @@ trait Url {
     * @param devFile File in the directory to use in development mode
     * @param prodFile File in the directory to use in production mode
     */
-  def publicUrl(directory: String, devFile: String, prodFile: String) = Url.publicUrl(directory, devFile, prodFile)
+  def publicUrl(directory: String, devFile: String, prodFile: String): String = Url.publicUrl(directory, devFile, prodFile)
 
   /** @param path Use "myapp/foo.js" to specify "META-INF/resources/webjars/myapp/foo.js" */
-  def webJarsUrl(path: String) = Url.webJarsUrl(path)
+  def webJarsUrl(path: String): String = Url.webJarsUrl(path)
 
   /**
     * Ex: webJarsUrl("jquery/3.4.1/dist/jquery.js", "jquery/3.4.1/dist/jquery.min.js")
@@ -154,7 +154,7 @@ trait Url {
     * @param devPath File path to use in development mode
     * @param prodPath File path to use in production mode
     */
-  def webJarsUrl(devPath: String, prodPath: String) = Url.webJarsUrl(devPath, prodPath)
+  def webJarsUrl(devPath: String, prodPath: String): String = Url.webJarsUrl(devPath, prodPath)
 
   /**
     * Ex: webJarsUrl("jquery/3.4.1/dist", "jquery.js", "jquery.min.js")
@@ -162,25 +162,25 @@ trait Url {
     * @param devFile File in the directory to use in development mode
     * @param prodFile File in the directory to use in production mode
     */
-  def webJarsUrl(directory: String, devFile: String, prodFile: String) = Url.webJarsUrl(directory, devFile, prodFile)
+  def webJarsUrl(directory: String, devFile: String, prodFile: String): String = Url.webJarsUrl(directory, devFile, prodFile)
 
-  def url(params: (String, Any)*): String = Url.url(getClass.getName, params:_*)
+  def url(params: (String, Any)*): String = Url.url(getClass.getName, params: _*)
   lazy val url: String = Url.url(getClass.getName)
 
-  def url[T <: Action : Manifest](params: (String, Any)*) = Url.url[T](params:_*)
+  def url[T <: Action : Manifest](params: (String, Any)*): String = Url.url[T](params: _*)
   def url[T <: Action : Manifest]: String = url[T]()
 
-  def sockJsUrl[T <: SockJsAction : Manifest] = Url.sockJsUrl[T]
+  def sockJsUrl[T <: SockJsAction : Manifest]: String = Url.sockJsUrl[T]
 
   //----------------------------------------------------------------------------
 
-  def absUrl(params: (String, Any)*): String = absUrlPrefix + Url.url(getClass.getName, params:_*)
+  def absUrl(params: (String, Any)*): String = absUrlPrefix + Url.url(getClass.getName, params: _*)
   lazy val absUrl: String = absUrlPrefix + Url.url(getClass.getName)
 
-  def absUrl[T <: Action : Manifest](params: (String, Any)*): String = absUrlPrefix + url[T](params:_*)
+  def absUrl[T <: Action : Manifest](params: (String, Any)*): String = absUrlPrefix + url[T](params: _*)
   def absUrl[T <: Action : Manifest]: String = absUrl[T]()
 
-  def absWebSocketUrl(params: (String, Any)*): String = absWebSocketUrlPrefix + Url.url(getClass.getName, params:_*)
+  def absWebSocketUrl(params: (String, Any)*): String = absWebSocketUrlPrefix + Url.url(getClass.getName, params: _*)
   lazy val absWebSocketUrl: String = absWebSocketUrlPrefix + Url.url(getClass.getName)
 
   def absWebSocketUrl[T <: WebSocketAction : Manifest](params: (String, Any)*): String = {

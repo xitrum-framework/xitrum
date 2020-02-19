@@ -3,16 +3,13 @@ package xitrum.metrics
 import java.util.concurrent.TimeUnit
 import scala.concurrent.duration._
 import scala.concurrent.duration.FiniteDuration
-
 import com.codahale.metrics.MetricRegistry
 import com.codahale.metrics.json.MetricsModule
 import com.fasterxml.jackson.databind.ObjectMapper
-
 import akka.actor.{Actor, ActorRef, Cancellable, ExtendedActorSystem, Props, Terminated}
 import akka.cluster.metrics.{ClusterMetricsChanged, JmxMetricsCollector, NodeMetrics}
 import glokka.Registry
-
-import xitrum.Config
+import xitrum.{Config, MetricsConfig}
 
 case object Subscribe
 case object UnSubscribe
@@ -27,10 +24,10 @@ object MetricsManager {
 
   val PUBLISHER = "XitrumMetricsPublisher"
 
-  lazy val metrics = Config.xitrum.metrics.get
+  lazy val metrics: MetricsConfig = Config.xitrum.metrics.get
 
   // Glokka registry
-  val actorRegistry = Registry.start(Config.actorSystem, getClass.getName)
+  val actorRegistry: ActorRef = Registry.start(Config.actorSystem, getClass.getName)
 
   // For non-clusterd actor system
   // http://grokbase.com/t/gg/akka-user/136m8mmyed/get-address-of-the-actorsystem-in-akka-2-2
@@ -46,7 +43,7 @@ object MetricsManager {
   // For json metrics reporting
   private val module  = new MetricsModule(TimeUnit.SECONDS, TimeUnit.MILLISECONDS, true)
   private val mapper  = (new ObjectMapper).registerModule(module)
-  def registryAsJson  = {
+  def registryAsJson: String = {
     // Add address of current node into JSON
     // TODO: Make this better!
     mapper.writeValueAsString(metricRegistry).patch(0, s"""{"TYPE": "metrics", "address": "$address", """, 1)
@@ -58,7 +55,7 @@ object MetricsManager {
   var collecting:     Cancellable = _
   var publishing:     Cancellable = _
 
-  def start() {
+  def start(): Unit = {
     localPublisher = Config.actorSystem.actorOf(Props(classOf[LocalPublisher]))
     tickPublisher(localPublisher)
 
@@ -77,7 +74,7 @@ object MetricsManager {
     }
   }
 
-  def stop() {
+  def stop(): Unit = {
     if (collector  != null) collector ! UnSubscribe
     if (collecting != null) collecting.cancel()
     if (publishing != null) publishing.cancel()
@@ -86,7 +83,7 @@ object MetricsManager {
   /**
    * Tick registry to publisher
    */
-  def tickPublisher(publisher: ActorRef) = {
+  def tickPublisher(publisher: ActorRef): Unit = {
     // Send newest registry as JSON
     publishing = Config.actorSystem.scheduler.scheduleWithFixedDelay(
       metrics.collectActorInterval + 1.seconds,  // Publish after first collect execution
@@ -124,15 +121,15 @@ object MetricsManager {
    * Relay messages to MetricsPublisher.
    */
   private class LocalPublisher extends Actor with PublisherLookUp {
-    override def preStart() {
+    override def preStart(): Unit = {
       lookUpPublisher()
     }
 
-    def receive = {
+    def receive: Receive = {
       case _ =>
     }
 
-    override def doWithPublisher(globalPublisher: ActorRef) = {
+    override def doWithPublisher(globalPublisher: ActorRef): Unit = {
       context.watch(globalPublisher)
       context.become {
         case Publish(registryAsJson) =>
@@ -157,8 +154,8 @@ object MetricsManager {
 trait PublisherLookUp {
   this: Actor =>
 
-  def lookUpPublisher() {
-    val props = Props[MetricsPublisher]
+  def lookUpPublisher(): Unit = {
+    val props = Props[MetricsPublisher]()
     MetricsManager.actorRegistry ! Registry.Register(MetricsManager.PUBLISHER, props)
     context.become {
       case msg: Registry.FoundOrCreated => doWithPublisher(msg.ref)
@@ -166,5 +163,5 @@ trait PublisherLookUp {
     }
   }
 
-  def doWithPublisher(publisher: ActorRef)
+  def doWithPublisher(publisher: ActorRef): Unit
 }

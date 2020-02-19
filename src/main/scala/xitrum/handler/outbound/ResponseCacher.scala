@@ -29,7 +29,7 @@ object ResponseCacher {
     !HttpUtil.isTransferEncodingChunked(response)
   }
 
-  def cacheResponse(env: HandlerEnv) {
+  def cacheResponse(env: HandlerEnv): Unit = {
     val actionClass = env.route.klass
     val urlParams   = env.urlParams
     val gzipped     = Gzip.isAccepted(env.request)
@@ -53,7 +53,7 @@ object ResponseCacher {
     cache.getAs[CachedResponse](key).map(deserializeToResponse)
   }
 
-  def removeCachedResponse(actionClass: Class[Action], urlParams: Params) {
+  def removeCachedResponse(actionClass: Class[Action], urlParams: Params): Unit = {
     val cache = Config.xitrum.cache
 
     val keyTrue = makeCacheKey(actionClass, urlParams, gzipped = true)
@@ -63,7 +63,7 @@ object ResponseCacher {
     cache.remove(keyFalse)
   }
 
-  def removeCachedResponse(actionClass: Class[Action], urlParams: (String, Any)*) {
+  def removeCachedResponse(actionClass: Class[Action], urlParams: (String, Any)*): Unit = {
     val params = MMap.empty[String, Seq[String]]
     urlParams.foreach { case (k, v) => params += (k -> Seq(v.toString)) }
     removeCachedResponse(actionClass, params)

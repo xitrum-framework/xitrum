@@ -42,7 +42,7 @@ object RouteCompiler {
     } else {
       val nonDotRouteTokens =
         compileNonDotPatternFragment(parts.head) +:
-        parts.tail.map { part => compileNonDotPatternFragment(':' + part) }
+        parts.tail.map { part => compileNonDotPatternFragment(":" + part) }
       DotRouteToken(nonDotRouteTokens)
     }
   }

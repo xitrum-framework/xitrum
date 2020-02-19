@@ -1,9 +1,11 @@
 package xitrum.etag
 
-import java.io.{File, FileOutputStream}
-import org.scalatest.{FlatSpec, Matchers}
+import org.scalatest.flatspec.AnyFlatSpec
+import org.scalatest.matchers.should.Matchers
 
-class EtagTest extends FlatSpec with Matchers {
+import java.io.{File, FileOutputStream}
+
+class EtagTest extends AnyFlatSpec with Matchers {
   behavior of "ETag"
 
   it should "stay same while file is not modified" in {

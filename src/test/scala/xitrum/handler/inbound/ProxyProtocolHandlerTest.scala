@@ -8,23 +8,25 @@ import java.net.Socket
 
 import scala.collection.mutable.{Map => MMap}
 
+import org.scalatest.{BeforeAndAfter, Ignore}
+import org.scalatest.flatspec.AnyFlatSpec
+import org.scalatest.matchers.should.Matchers
+
 import xitrum.Action
 import xitrum.Log
 import xitrum.Server
 import xitrum.SkipCsrfCheck
 import xitrum.annotation.GET
 
-import org.scalatest._
-
 @GET("/test/xff")
 class XFFTestAction extends Action with SkipCsrfCheck {
-  def execute() {
+  def execute(): Unit = {
     respondText("X-Forwarded-For: " + request.headers.get("X-Forwarded-For"))
   }
 }
 
 @Ignore
-class ProxyProtocolHandlerTest extends FlatSpec with Matchers with BeforeAndAfter with Log {
+class ProxyProtocolHandlerTest extends AnyFlatSpec with Matchers with BeforeAndAfter with Log {
   behavior of "ProxyProtocol"
 
   private val site = "127.0.0.1"
@@ -55,7 +57,7 @@ class ProxyProtocolHandlerTest extends FlatSpec with Matchers with BeforeAndAfte
     while ({line = in.readLine; line != null}) {
       line.split(":").toList match {
         case h: List[String] if h.length > 1 =>
-          headers += (h(0) -> h(1).trim())
+          headers += (h.head -> h(1).trim())
         case _=>
           Log.debug(line)
       }

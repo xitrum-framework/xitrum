@@ -27,35 +27,35 @@ class LruCache extends Cache {
     LocalLruCache[Any, (Int,        Any)](maxElems)
   }
 
-  def start() {}
-  def stop() {}
+  def start(): Unit = {}
+  def stop(): Unit = {}
 
-  def isDefinedAt(key: Any) = cache.containsKey(key)
+  def isDefinedAt(key: Any): Boolean = cache.containsKey(key)
 
-  def get(key: Any) = get(key, true)
+  def get(key: Any): Option[Any] = get(key, removeStale = true)
 
-  def put(key: Any, value: Any) {
+  def put(key: Any, value: Any): Unit = {
     cache.put(key, (-1, value))
   }
 
-  def putIfAbsent(key: Any, value: Any) {
+  def putIfAbsent(key: Any, value: Any): Unit = {
     if (get(key, removeStale = false).isEmpty) cache.put(key, (-1, value))
   }
 
-  def putSecond(key: Any, value: Any, seconds: Int) {
+  def putSecond(key: Any, value: Any, seconds: Int): Unit = {
     val expireAtSec = (System.currentTimeMillis() / 1000L + seconds).toInt
     cache.put(key, (expireAtSec, value))
   }
 
-  def putSecondIfAbsent(key: Any, value: Any, seconds: Int) {
-    if (get(key, false).isEmpty) putSecond(key, value, seconds)
+  def putSecondIfAbsent(key: Any, value: Any, seconds: Int): Unit = {
+    if (get(key, removeStale = false).isEmpty) putSecond(key, value, seconds)
   }
 
-  def remove(key: Any) {
+  def remove(key: Any): Unit = {
     cache.remove(key)
   }
 
-  def clear() {
+  def clear(): Unit = {
     cache.clear()
   }
 

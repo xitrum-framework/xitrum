@@ -1,13 +1,17 @@
 package xitrum.params
 
 import io.netty.handler.codec.http.{HttpHeaderNames, HttpHeaderValues}
+
 import org.asynchttpclient.Dsl.asyncHttpClient
 import org.asynchttpclient.Response
 
 import org.json4s._
 import org.json4s.jackson.Serialization
 import org.json4s.jackson.Serialization.read
-import org.scalatest._
+
+import org.scalatest.BeforeAndAfter
+import org.scalatest.flatspec.AnyFlatSpec
+import org.scalatest.matchers.should.Matchers
 
 import xitrum.{Action, Log, Server, SkipCsrfCheck}
 import xitrum.annotation.GET
@@ -20,7 +24,7 @@ case class ParamsPayloadResponse(key: Int, keys: Seq[Int], locale: String, optio
 @GET("/test/params/path/:path")
 @POST("/test/params/path/:path")
 class ParamsPathTestAction extends Action with SkipCsrfCheck {
-  def execute() {
+  def execute(): Unit = {
     respondJson(ParamsPathResponse(param("path")))
   }
 }
@@ -28,7 +32,7 @@ class ParamsPathTestAction extends Action with SkipCsrfCheck {
 @GET("test/params/query")
 @POST("test/params/query")
 class ParamsQueryTestAction extends Action with SkipCsrfCheck {
-  def execute() {
+  def execute(): Unit = {
     val key = param[Int]("key")
     val keys = params[Int]("keys")
 
@@ -38,7 +42,7 @@ class ParamsQueryTestAction extends Action with SkipCsrfCheck {
 
 @POST("test/params/payload")
 class ParamsPayloadTestAction extends Action with SkipCsrfCheck {
-  def execute() {
+  def execute(): Unit = {
     val key = param[Int]("key")
     val keys = params[Int]("keys")
     val locale = param[String]("locale")
@@ -50,7 +54,7 @@ class ParamsPayloadTestAction extends Action with SkipCsrfCheck {
 
 @GET("test/params/validation")
 class ParamsValidationTestAction extends Action with SkipCsrfCheck {
-  def execute() {
+  def execute(): Unit = {
     param[Char]("keyChar")
     param[Int]("keyInt")
     param[Boolean]("keyBoolean")
@@ -59,8 +63,8 @@ class ParamsValidationTestAction extends Action with SkipCsrfCheck {
   }
 }
 
-class ParamsTest extends FlatSpec with Matchers with BeforeAndAfter with Log {
-  private implicit val formats = Serialization.formats(NoTypeHints)
+class ParamsTest extends AnyFlatSpec with Matchers with BeforeAndAfter with Log {
+  private implicit val formats: AnyRef with Formats = Serialization.formats(NoTypeHints)
   private val base = "http://127.0.0.1:8000/my_site"
   private val client = asyncHttpClient()
 

@@ -12,10 +12,11 @@ object FlashSocketPolicyHandler {
   // The request must be exactly "<policy-file-request/>\0"
   // To test:
   // perl -e 'printf "<policy-file-request/>%c",0' | nc localhost 8000
-  val REQUEST        = Unpooled.copiedBuffer("<policy-file-request/>\u0000", CharsetUtil.UTF_8)
-  val REQUEST_LENGTH = REQUEST.readableBytes
+  val REQUEST: ByteBuf = Unpooled.copiedBuffer("<policy-file-request/>\u0000", CharsetUtil.UTF_8)
 
-  val RESPONSE = Unpooled.wrappedBuffer(Loader.bytesFromClasspath("flash_socket_policy.xml"))
+  val REQUEST_LENGTH: Int = REQUEST.readableBytes
+
+  val RESPONSE: ByteBuf = Unpooled.wrappedBuffer(Loader.bytesFromClasspath("flash_socket_policy.xml"))
 }
 
 class FlashSocketPolicyHandler extends SimpleChannelInboundHandler[ByteBuf] {
@@ -23,7 +24,7 @@ class FlashSocketPolicyHandler extends SimpleChannelInboundHandler[ByteBuf] {
 
   private var nextIdx = 0
 
-  override def channelRead0(ctx: ChannelHandlerContext, msg: ByteBuf) {
+  override def channelRead0(ctx: ChannelHandlerContext, msg: ByteBuf): Unit = {
     if (msg.readableBytes + nextIdx > REQUEST_LENGTH) {
       sendUpstream(ctx, msg)
       return
@@ -55,7 +56,7 @@ class FlashSocketPolicyHandler extends SimpleChannelInboundHandler[ByteBuf] {
     AccessLog.logFlashSocketPolicyFileAccess(channel.remoteAddress)
   }
 
-  private def sendUpstream(ctx: ChannelHandlerContext, msg: ByteBuf) {
+  private def sendUpstream(ctx: ChannelHandlerContext, msg: ByteBuf): Unit = {
     if (nextIdx == 0)
       ctx.fireChannelRead(msg.retain())
     else

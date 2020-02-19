@@ -21,11 +21,11 @@ import io.netty.handler.codec.http.{HttpRequest, HttpUtil}
  * having to handle these requests which will go nowhere."
  */
 object NoRealPipelining {
-  def pauseReading(channel: Channel) {
+  def pauseReading(channel: Channel): Unit = {
     channel.config.setAutoRead(false)
   }
 
-  def resumeReading(channel: Channel) {
+  def resumeReading(channel: Channel): Unit = {
     // We don't have to call channel.read() because setAutoRead also calls
     // channel.read() if not reading
     channel.config.setAutoRead(true)
@@ -38,10 +38,10 @@ object NoRealPipelining {
    */
   def if_keepAliveRequest_then_resumeReading_else_closeOnComplete(
     request: HttpRequest, channel: Channel, channelFuture: ChannelFuture
-  ) {
+  ): Unit = {
     if (HttpUtil.isKeepAlive(request)) {
-      channelFuture.addListener(new ChannelFutureListener {
-        def operationComplete(future: ChannelFuture) { resumeReading(channel) }
+      channelFuture.addListener((_: ChannelFuture) => {
+        resumeReading(channel)
       })
     } else {
       channelFuture.addListener(ChannelFutureListener.CLOSE)

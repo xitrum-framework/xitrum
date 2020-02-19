@@ -18,7 +18,7 @@ object ByteBufUtil {
     ret
   }
 
-  def writeComposite(compositeBuf: ByteBuf, component: ByteBuf) {
+  def writeComposite(compositeBuf: ByteBuf, component: ByteBuf): Unit = {
     // https://github.com/netty/netty/issues/2137
     val cb = compositeBuf.asInstanceOf[CompositeByteBuf]
     cb.addComponent(component).writerIndex(cb.writerIndex() + component.readableBytes)

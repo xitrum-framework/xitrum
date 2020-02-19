@@ -55,7 +55,7 @@ object DefaultHttpChannelInitializer {
   lazy val xSendResource     = new XSendResource
   lazy val env2Response      = new Env2Response
 
-  def removeUnusedHandlersForWebSocket(pipeline: ChannelPipeline) {
+  def removeUnusedHandlersForWebSocket(pipeline: ChannelPipeline): Unit = {
     // WebSocket handshaker in Netty dynamically changes the pipeline like this:
     // pipeline.remove(classOf[HttpChunkAggregator])
     // pipeline.replace(classOf[HttpRequestDecoder],  "wsdecoder", new WebSocket08FrameDecoder(true, this.allowExtensions))
@@ -63,7 +63,7 @@ object DefaultHttpChannelInitializer {
 
     // Inbound
 
-    if (Config.xitrum.reverseProxy.map(_.proxyProtocol).getOrElse(false)) {
+    if (Config.xitrum.reverseProxy.exists(_.proxyProtocol)) {
     removeHandlerIfExists(pipeline, classOf[HAProxyMessageDecoder])
     removeHandlerIfExists(pipeline, classOf[ProxyProtocolHandler])
     removeHandlerIfExists(pipeline, classOf[ProxyProtocolSetIPHandler])
@@ -100,7 +100,7 @@ object DefaultHttpChannelInitializer {
    * ChannelPipeline#remove(handler) throws exception if the handler does not
    * exist in the pipeline.
    */
-  def removeHandlerIfExists(pipeline: ChannelPipeline, klass: Class[_ <: ChannelHandler]) {
+  def removeHandlerIfExists(pipeline: ChannelPipeline, klass: Class[_ <: ChannelHandler]): Unit = {
     val handler = pipeline.get(klass)
     if (handler != null) pipeline.remove(handler)
   }
@@ -116,7 +116,7 @@ class DefaultHttpChannelInitializer extends ChannelInitializer[SocketChannel] {
    * Inbound direction: first handler -> last handler
    * Outbound direction: last handler -> first handler
    */
-  override def initChannel(ch: SocketChannel) {
+  override def initChannel(ch: SocketChannel): Unit = {
     // This method is run for every request, thus should be fast
 
     val p          = ch.pipeline
@@ -126,7 +126,7 @@ class DefaultHttpChannelInitializer extends ChannelInitializer[SocketChannel] {
 
     // Add support proxy protocol
     // https://github.com/xitrum-framework/xitrum/issues/613
-    val proxyProtocol = Config.xitrum.reverseProxy.map(_.proxyProtocol).getOrElse(false)
+    val proxyProtocol = Config.xitrum.reverseProxy.exists(_.proxyProtocol)
     if (proxyProtocol) {
     p.addLast(classOf[HAProxyMessageDecoder].getName,    new HAProxyMessageDecoder)
     p.addLast(classOf[ProxyProtocolHandler].getName,     proxyProtocolHandler)

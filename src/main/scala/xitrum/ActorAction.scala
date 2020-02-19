@@ -20,7 +20,7 @@ trait ActorAction extends Actor with Action {
   // postStop to be called again!
   private var postStopCalled = false
 
-  def receive = {
+  def receive: Receive = {
     case (env: HandlerEnv, skipCsrfCheck: Boolean) =>
       apply(env)
 
@@ -38,7 +38,7 @@ trait ActorAction extends Actor with Action {
       dispatchWithFailsafe(skipCsrfCheck)
   }
 
-  override def onDoneResponding() {
+  override def onDoneResponding(): Unit = {
     // Use context.stop(self) instead of sending PoisonPill to avoid double
     // response, because the PoisonPill mesage takes some time to arrive, and
     // during that time other messages may arrive, and the actor logic may
@@ -50,7 +50,7 @@ trait ActorAction extends Actor with Action {
     if (!postStopCalled) context.stop(self)
   }
 
-  override def postStop() {
+  override def postStop(): Unit = {
     if (postStopCalled) return
     postStopCalled = true
 

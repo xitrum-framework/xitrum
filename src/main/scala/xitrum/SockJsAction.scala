@@ -38,20 +38,20 @@ trait SockJsAction extends Actor with Action {
     p.future
   }
 
-  def receive = {
+  def receive: Receive = {
     case (sessionActorRef: ActorRef, action: Action) =>
       this.sessionActorRef = sessionActorRef
       apply(action.handlerEnv)
       execute()
 
     case NotificationToHandlerChannelCloseSuccess(index) =>
-      promises.remove(index).foreach(_.success(Unit))
+      promises.remove(index).foreach(_.success((): Unit))
 
     case NotificationToHandlerChannelCloseFailure(index) =>
       promises.remove(index).foreach(_.failure(new Throwable))
 
     case NotificationToHandlerChannelWriteSuccess(index) =>
-      promises.remove(index).foreach(_.success(Unit))
+      promises.remove(index).foreach(_.success((): Unit))
 
     case NotificationToHandlerChannelWriteFailure(index) =>
       promises.remove(index).foreach(_.failure(new Throwable))
@@ -62,7 +62,7 @@ trait SockJsAction extends Actor with Action {
    * You can extract session data, request headers etc. from it, but do not use
    * respondText, respondView etc. Use respondSockJsText and respondSockJsClose.
    */
-  def execute()
+  def execute(): Unit
 
   //----------------------------------------------------------------------------
 
@@ -87,7 +87,7 @@ trait SockJsAction extends Actor with Action {
     createPromise(index)
   }
 
-  override def postStop() {
+  override def postStop(): Unit = {
     promises.values.foreach(_.failure(new Throwable))
     super.postStop()
   }

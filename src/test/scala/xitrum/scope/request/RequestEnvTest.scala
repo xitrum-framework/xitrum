@@ -1,13 +1,17 @@
 package xitrum.scope.request
 
-import org.scalatest.{FlatSpec, Matchers}
+import org.scalatest.flatspec.AnyFlatSpec
+import org.scalatest.matchers.should.Matchers
+
 import xitrum.Action
 
-class RequestEnvTest extends FlatSpec with Matchers {
+class RequestEnvTest extends AnyFlatSpec with Matchers {
   behavior of "RequestEnv"
 
   it should "should have atJson method" in {
-    val action = new Action { def execute() {} }
+    val action = new Action {
+      def execute(): Unit = {}
+    }
 
     action.at("test_string") = "abc"
     action.atJson("test_string") should equal("\"abc\"")

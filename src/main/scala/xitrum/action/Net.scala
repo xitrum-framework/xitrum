@@ -6,14 +6,11 @@ import java.net.SocketAddress
 import xitrum.Action
 import xitrum.Config
 
-import io.netty.channel.Channel
-import io.netty.handler.codec.haproxy.HAProxyMessage
 import io.netty.handler.codec.http.HttpHeaderNames
 import io.netty.handler.codec.http.HttpRequest
 import io.netty.handler.ipfilter.IpFilterRuleType
 import io.netty.handler.ipfilter.IpSubnetFilterRule
 import io.netty.handler.ssl.SslHandler
-import io.netty.util.AttributeKey
 
 // See:
 //   http://httpd.apache.org/docs/2.2/mod/mod_proxy.html
@@ -47,11 +44,11 @@ object Net {
     }
 
     val rangeIps = ips.filter(_.contains("/")).toList
-    if (rangeIps.length == 0) {
+    if (rangeIps.isEmpty) {
       return true
     }
 
-    return !rangeIps.exists((rangeIp) => {
+    !rangeIps.exists(rangeIp => {
       val parts = rangeIp.split("/")
       if (parts.length < 2) {
         val rule = new IpSubnetFilterRule(parts(0), 32, IpFilterRuleType.ACCEPT)
@@ -102,9 +99,9 @@ trait Net {
   private lazy val clientIp = Net.clientIp(channel.remoteAddress)
 
   /** @return IPv4 or IPv6 of the original remote HTTP client (not the proxy), X-Forwarded-For is supported */
-  lazy val remoteIp = Net.remoteIp(channel.remoteAddress, request)
+  lazy val remoteIp: String = Net.remoteIp(channel.remoteAddress, request)
 
-  lazy val isSsl = {
+  lazy val isSsl: Boolean = {
     if (channel.pipeline.get(classOf[SslHandler]) != null) {
       true
     } else {
@@ -132,8 +129,8 @@ trait Net {
     }
   }
 
-  lazy val scheme          = if (isSsl) "https" else "http"
-  lazy val webSocketScheme = if (isSsl) "wss"   else "ws"
+  lazy val scheme         : String = if (isSsl) "https" else "http"
+  lazy val webSocketScheme: String = if (isSsl) "wss"   else "ws"
 
   lazy val (serverName, serverPort) = {
     val np = request.headers.get(HttpHeaderNames.HOST)  // Ex: localhost, localhost:3000

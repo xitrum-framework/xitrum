@@ -9,7 +9,7 @@ import io.netty.handler.codec.http.HttpRequest
 
 @Sharable
 class ProxyProtocolSetIPHandler extends SimpleChannelInboundHandler[HttpRequest] {
-  override def channelRead0(ctx: ChannelHandlerContext, request: HttpRequest) {
+  override def channelRead0(ctx: ChannelHandlerContext, request: HttpRequest): Unit = {
     if (Config.xitrum.reverseProxy.get.proxyProtocol) ProxyProtocolHandler.setRemoteIp(ctx.channel, request)
     ctx.fireChannelRead(request)
   }

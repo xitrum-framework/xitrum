@@ -23,16 +23,16 @@ trait I18n {
   private[this] var _locale = Locale.ENGLISH
 
   /** Default language is "en". */
-  def language = _language
+  def language: String = _language
 
   /** The locale corresponding to the [[language]]. It will be updated automatically when you update [[language]]. */
-  def locale = _locale
+  def locale: Locale = _locale
 
   /**
    * Sets current language manually. The language should have a corresponding file
    * `i18n/language.po` in classpath (the language should be in IETF BCP 47 format).
    */
-  def language_=(language: String) {
+  def language_=(language: String): Unit = {
     _language = language
     _locale   = Locale.forLanguageTag(language)
   }
@@ -60,7 +60,7 @@ trait I18n {
    *
    * If there's no match, the language is still the default "en".
    */
-  def autosetLanguage(availableLanguages: String*) {
+  def autosetLanguage(availableLanguages: String*): Unit = {
     // lookupTag may throw exception:
     // https://bugs.openjdk.java.net/browse/JDK-8135061
     val bestMatched = Try(Locale.lookupTag(browserLanguages, availableLanguages.asJava)).getOrElse(null)
@@ -72,31 +72,31 @@ trait I18n {
   // must use "language" and "locale",
   // do not use "_language" and "_locale" directly
 
-  def t(singular: String) =
+  def t(singular: String): String =
     PoLoader.get(language).t(singular)
 
-  def tc(ctx: String, singular: String) =
+  def tc(ctx: String, singular: String): String =
     PoLoader.get(language).tc(ctx, singular)
 
-  def tn(singular: String, plural: String, n: Long) =
+  def tn(singular: String, plural: String, n: Long): String =
     PoLoader.get(language).tn(singular, plural, n)
 
-  def tcn(ctx: String, singular: String, plural: String, n: Long) =
+  def tcn(ctx: String, singular: String, plural: String, n: Long): String =
     PoLoader.get(language).tcn(ctx, singular, plural, n)
 
   /** `formatLocal` using the current locale. */
-  def t(singular: String, args: Any*) =
-    PoLoader.get(language).t(singular).formatLocal(locale, args:_*)
+  def t(singular: String, args: Any*): String =
+    PoLoader.get(language).t(singular).formatLocal(locale, args: _*)
 
   /** `formatLocal` using the current locale. */
-  def tc(ctx: String, singular: String, args: Any*) =
-    PoLoader.get(language).tc(ctx, singular).formatLocal(locale, args:_*)
+  def tc(ctx: String, singular: String, args: Any*): String =
+    PoLoader.get(language).tc(ctx, singular).formatLocal(locale, args: _*)
 
   /** `formatLocal` using the current locale. */
-  def tn(singular: String, plural: String, n: Long, args: Any*) =
-    PoLoader.get(language).tn(singular, plural, n).formatLocal(locale, args:_*)
+  def tn(singular: String, plural: String, n: Long, args: Any*): String =
+    PoLoader.get(language).tn(singular, plural, n).formatLocal(locale, args: _*)
 
   /** `formatLocal` using the current locale. */
-  def tcn(ctx: String, singular: String, plural: String, n: Long, args: Any*) =
-    PoLoader.get(language).tcn(ctx, singular, plural, n).formatLocal(locale, args:_*)
+  def tcn(ctx: String, singular: String, plural: String, n: Long, args: Any*): String =
+    PoLoader.get(language).tcn(ctx, singular, plural, n).formatLocal(locale, args: _*)
 }

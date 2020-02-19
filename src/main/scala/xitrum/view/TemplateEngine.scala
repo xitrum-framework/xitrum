@@ -13,13 +13,13 @@ trait TemplateEngine {
    * Called once when Xitrum server starts. If necessary the template engine
    * should allocate its resources here.
    */
-  def start()
+  def start(): Unit
 
   /**
    * Called once when Xitrum server stops. If necessary the template engine
    * should release its resources here.
    */
-  def stop()
+  def stop(): Unit
 
   /**
    * Renders the template at ``uri``.

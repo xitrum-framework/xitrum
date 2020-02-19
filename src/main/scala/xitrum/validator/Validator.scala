@@ -10,7 +10,7 @@ trait Validator[T] {
   def message(name: String, value: T): Option[String]
 
   /** Throws exception InvalidInput(error message) if validation fails. */
-  def exception(name: String, value: T) {
-    message(name, value).foreach { message => throw new InvalidInput(message) }
+  def exception(name: String, value: T): Unit = {
+    message(name, value).foreach { message => throw InvalidInput(message) }
   }
 }

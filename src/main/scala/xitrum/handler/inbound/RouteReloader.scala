@@ -21,22 +21,13 @@ private class RouteReloader {
     SwaggerJson.reloadFromRoutes()
   }
 
-  private def monitorClassesDir(classesDir: Path) {
-    FileMonitor.monitorRecursive(FileMonitor.MODIFY, classesDir, { path =>
+  private def monitorClassesDir(classesDir: Path): Unit = {
+    FileMonitor.monitor(classesDir) { (_, _, _) =>
       CLASSES_DIRS.synchronized {
         // Do this not only for .class files, because file change events may
         // sometimes be skipped!
         shouldReloadOnNextRequest = true
-
-        // https://github.com/lloydmeta/schwatcher
-        // Callbacks that are registered with recursive=true are not
-        // persistently-recursive. That is, they do not propagate to new files
-        // or folders created/deleted after registration. Currently, the plan is
-        // to have developers handle this themselves in the callback functions.
-        FileMonitor.unmonitorRecursive(FileMonitor.MODIFY, classesDir)
-
-        monitorClassesDir(classesDir)
       }
-    })
+    }
   }
 }

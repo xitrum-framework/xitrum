@@ -12,15 +12,15 @@ object Mime {
   private[this] val map = new MimetypesFileTypeMap
 
   /** Same as javax.activation.MimetypesFileTypeMap#addMimeTypes */
-  def addMimeTypes(mime_types: String) {
+  def addMimeTypes(mime_types: String): Unit = {
     map.addMimeTypes(mime_types)
   }
 
-  def get(file: String) = Option(map.getContentType(file))
+  def get(file: String): Option[String] = Option(map.getContentType(file))
 
-  def get(file: File) = Option(map.getContentType(file))
+  def get(file: File): Option[String] = Option(map.getContentType(file))
 
-  def isTextual(mime: String) = {
+  def isTextual(mime: String): Boolean = {
     if (mime == null) {
       false
     } else {

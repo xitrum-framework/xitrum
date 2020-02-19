@@ -14,7 +14,7 @@ object BadClientSilencer {
    * Because the problem is caused by bad client, generally do not log at INFO or WARN level
    * to avoid noise in server log.
    */
-  def respond400(channel: Channel, body: String) {
+  def respond400(channel: Channel, body: String): Unit = {
     val content = Unpooled.copiedBuffer(body, Config.xitrum.request.charset)
 
     // https://github.com/xitrum-framework/xitrum/issues/508#issuecomment-72808997
@@ -33,13 +33,13 @@ object BadClientSilencer {
  */
 @Sharable
 class BadClientSilencer extends SimpleChannelInboundHandler[Any] {
-  override def channelRead0(ctx: ChannelHandlerContext, msg: Any) {
+  override def channelRead0(ctx: ChannelHandlerContext, msg: Any): Unit = {
     // msg has not been handled by any previous handler
     ctx.channel.close()
     Log.trace("Unknown msg: " + msg)
   }
 
-  override def exceptionCaught(ctx: ChannelHandlerContext, e: Throwable) {
+  override def exceptionCaught(ctx: ChannelHandlerContext, e: Throwable): Unit = {
     ctx.channel.close()
     if (e.isInstanceOf[java.io.IOException]                            ||  // Connection reset by peer, Broken pipe
         e.isInstanceOf[java.nio.channels.ClosedChannelException]       ||

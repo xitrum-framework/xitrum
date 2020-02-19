@@ -17,40 +17,40 @@ object ActionAnnotations {
   //
   // <:< still works for different universes!
 
-  val TYPE_OF_GET       = universe.typeOf[GET]
-  val TYPE_OF_POST      = universe.typeOf[POST]
-  val TYPE_OF_PUT       = universe.typeOf[PUT]
-  val TYPE_OF_PATCH     = universe.typeOf[PATCH]
-  val TYPE_OF_DELETE    = universe.typeOf[DELETE]
-  val TYPE_OF_WEBSOCKET = universe.typeOf[WEBSOCKET]
-  val TYPE_OF_SOCKJS    = universe.typeOf[SOCKJS]
+  val TYPE_OF_GET      : universe.Type = universe.typeOf[GET]
+  val TYPE_OF_POST     : universe.Type = universe.typeOf[POST]
+  val TYPE_OF_PUT      : universe.Type = universe.typeOf[PUT]
+  val TYPE_OF_PATCH    : universe.Type = universe.typeOf[PATCH]
+  val TYPE_OF_DELETE   : universe.Type = universe.typeOf[DELETE]
+  val TYPE_OF_WEBSOCKET: universe.Type = universe.typeOf[WEBSOCKET]
+  val TYPE_OF_SOCKJS   : universe.Type = universe.typeOf[SOCKJS]
 
-  val TYPE_OF_FIRST = universe.typeOf[First]
-  val TYPE_OF_LAST  = universe.typeOf[Last]
+  val TYPE_OF_FIRST: universe.Type = universe.typeOf[First]
+  val TYPE_OF_LAST : universe.Type = universe.typeOf[Last]
 
-  val TYPE_OF_CACHE_ACTION_DAY    = universe.typeOf[CacheActionDay]
-  val TYPE_OF_CACHE_ACTION_HOUR   = universe.typeOf[CacheActionHour]
-  val TYPE_OF_CACHE_ACTION_MINUTE = universe.typeOf[CacheActionMinute]
-  val TYPE_OF_CACHE_ACTION_SECOND = universe.typeOf[CacheActionSecond]
+  val TYPE_OF_CACHE_ACTION_DAY   : universe.Type = universe.typeOf[CacheActionDay]
+  val TYPE_OF_CACHE_ACTION_HOUR  : universe.Type = universe.typeOf[CacheActionHour]
+  val TYPE_OF_CACHE_ACTION_MINUTE: universe.Type = universe.typeOf[CacheActionMinute]
+  val TYPE_OF_CACHE_ACTION_SECOND: universe.Type = universe.typeOf[CacheActionSecond]
 
-  val TYPE_OF_CACHE_PAGE_DAY    = universe.typeOf[CachePageDay]
-  val TYPE_OF_CACHE_PAGE_HOUR   = universe.typeOf[CachePageHour]
-  val TYPE_OF_CACHE_PAGE_MINUTE = universe.typeOf[CachePageMinute]
-  val TYPE_OF_CACHE_PAGE_SECOND = universe.typeOf[CachePageSecond]
+  val TYPE_OF_CACHE_PAGE_DAY   : universe.Type = universe.typeOf[CachePageDay]
+  val TYPE_OF_CACHE_PAGE_HOUR  : universe.Type = universe.typeOf[CachePageHour]
+  val TYPE_OF_CACHE_PAGE_MINUTE: universe.Type = universe.typeOf[CachePageMinute]
+  val TYPE_OF_CACHE_PAGE_SECOND: universe.Type = universe.typeOf[CachePageSecond]
 
-  val TYPE_OF_ROUTE       = universe.typeOf[Route]
-  val TYPE_OF_ROUTE_ORDER = universe.typeOf[RouteOrder]
-  val TYPE_OF_ERROR       = universe.typeOf[Error]
-  val TYPE_OF_CACHE       = universe.typeOf[Cache]
+  val TYPE_OF_ROUTE      : universe.Type = universe.typeOf[Route]
+  val TYPE_OF_ROUTE_ORDER: universe.Type = universe.typeOf[RouteOrder]
+  val TYPE_OF_ERROR      : universe.Type = universe.typeOf[Error]
+  val TYPE_OF_CACHE      : universe.Type = universe.typeOf[Cache]
 
-  val TYPE_OF_SWAGGER = universe.typeOf[Swagger]
+  val TYPE_OF_SWAGGER: universe.Type = universe.typeOf[Swagger]
 
-  val TYPE_OF_SOCKJS_COOKIE_NEEDED    = universe.typeOf[SockJsCookieNeeded]
-  val TYPE_OF_SOCKJS_NO_COOKIE_NEEDED = universe.typeOf[SockJsNoCookieNeeded]
-  val TYPE_OF_SOCKJS_NO_WEBSOCKET     = universe.typeOf[SockJsNoWebSocket]
+  val TYPE_OF_SOCKJS_COOKIE_NEEDED   : universe.Type = universe.typeOf[SockJsCookieNeeded]
+  val TYPE_OF_SOCKJS_NO_COOKIE_NEEDED: universe.Type = universe.typeOf[SockJsNoCookieNeeded]
+  val TYPE_OF_SOCKJS_NO_WEBSOCKET    : universe.Type = universe.typeOf[SockJsNoWebSocket]
 
-  val TYPE_OF_ERROR_404 = universe.typeOf[Error404]
-  val TYPE_OF_ERROR_500 = universe.typeOf[Error500]
+  val TYPE_OF_ERROR_404: universe.Type = universe.typeOf[Error404]
+  val TYPE_OF_ERROR_500: universe.Type = universe.typeOf[Error500]
 
   def fromUniverse(annotations: Seq[universe.Annotation]): ActionAnnotations = {
     var ret = ActionAnnotations()
@@ -104,7 +104,7 @@ case class ActionAnnotations(
    * Do not inherit routes, routeOrder, and error.
    * Current values if exist will override those in ancestor.
    */
-  def inherit(ancestor: ActionAnnotations) = ActionAnnotations(
+  def inherit(ancestor: ActionAnnotations): ActionAnnotations = ActionAnnotations(
     routes,
     routeOrder,
     sockJsCookieNeeded   orElse ancestor.sockJsCookieNeeded,

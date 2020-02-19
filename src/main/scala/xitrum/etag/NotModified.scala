@@ -18,7 +18,7 @@ object NotModified {
     ret
   }
 
-  def formatRfc2822(timestamp: Long) = RFC_2822.format(timestamp)
+  def formatRfc2822(timestamp: Long): String = RFC_2822.format(timestamp)
 
   /**
    * Tells the browser to cache static files for a long time.
@@ -34,7 +34,7 @@ object NotModified {
    * Both Max-age and Expires header are set because IEs use Expires, not max-age:
    * http://mrcoles.com/blog/cookies-max-age-vs-expires/
    */
-  def setClientCacheAggressively(response: FullHttpResponse) {
+  def setClientCacheAggressively(response: FullHttpResponse): Unit = {
     if (!response.headers.contains(CACHE_CONTROL))
       response.headers.set(CACHE_CONTROL, "public, " + MAX_AGE + "=" + SECS_IN_A_YEAR)
 
@@ -54,7 +54,7 @@ object NotModified {
    * Note that "pragma: no-cache" is linked to requests, not responses:
    * http://palizine.plynt.com/issues/2008Jul/cache-control-attributes/
    */
-  def setNoClientCache(response: FullHttpResponse) {
+  def setNoClientCache(response: FullHttpResponse): Unit = {
     // http://sockjs.github.com/sockjs-protocol/sockjs-protocol-0.3.html#section-11
     response.headers.remove(EXPIRES)
     response.headers.remove(LAST_MODIFIED)

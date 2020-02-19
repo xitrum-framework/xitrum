@@ -47,7 +47,7 @@ trait ViewResponder {
   //----------------------------------------------------------------------------
 
   def respondView(uri: String, options: Map[String, Any]): ChannelFuture =
-    respondText(renderView(layout _, uri, options), "text/html")
+    respondText(renderView(() => layout, uri, options), "text/html")
 
   def respondView(uri: String): ChannelFuture =
     respondView(uri, Map.empty[String, Any])
@@ -71,7 +71,7 @@ trait ViewResponder {
   //----------------------------------------------------------------------------
 
   def respondView(actionClass: Class[_ <: Action], options: Map[String, Any]): ChannelFuture =
-    respondView(layout _, actionClass, options)
+    respondView(() => layout, actionClass, options)
 
   def respondView(actionClass: Class[_ <: Action]): ChannelFuture =
     respondView(actionClass, Map.empty[String, Any])
@@ -79,10 +79,10 @@ trait ViewResponder {
   //----------------------------------------------------------------------------
 
   def respondView[T <: Action: Manifest](options: Map[String, Any]): ChannelFuture =
-    respondView(layout _, getActionClass[T], options)
+    respondView(() => layout, getActionClass[T], options)
 
   def respondView[T <: Action: Manifest](): ChannelFuture =
-    respondView(layout _, getActionClass[T], Map.empty[String, Any])
+    respondView(() => layout, getActionClass[T], Map.empty[String, Any])
 
   //----------------------------------------------------------------------------
 

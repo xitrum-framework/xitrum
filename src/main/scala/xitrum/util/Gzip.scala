@@ -14,14 +14,14 @@ object Gzip {
   private val GZIP_SIGNATURE_BYTE1 = GZIPInputStream.GZIP_MAGIC.toByte
   private val GZIP_SIGNATURE_BYTE2 = (GZIPInputStream.GZIP_MAGIC >> 8).toByte
 
-  def isCompressed(bytes: Array[Byte]) = {
+  def isCompressed(bytes: Array[Byte]): Boolean = {
     if (bytes.length < 2)
       false
     else
       bytes(0) == GZIP_SIGNATURE_BYTE1 && bytes(1) == GZIP_SIGNATURE_BYTE2
   }
 
-  def compress(bytes: Array[Byte]) = {
+  def compress(bytes: Array[Byte]): Array[Byte] = {
     val b = new ByteArrayOutputStream
     val g = new GZIPOutputStream(b)
     g.write(bytes)
@@ -32,7 +32,7 @@ object Gzip {
     ret
   }
 
-  def uncompress(bytes: Array[Byte]) = {
+  def uncompress(bytes: Array[Byte]): Array[Byte] = {
     val b = new ByteArrayInputStream(bytes)
     val g = new GZIPInputStream(b)
 
@@ -52,10 +52,10 @@ object Gzip {
   }
 
   /** @return The uncompressed bytes, or the input itself if it's not compressed */
-  def mayUncompress(maybeCompressed: Array[Byte]) =
+  def mayUncompress(maybeCompressed: Array[Byte]): Array[Byte] =
     if (isCompressed(maybeCompressed)) uncompress(maybeCompressed) else maybeCompressed
 
-  def isAccepted(request: HttpRequest) = {
+  def isAccepted(request: HttpRequest): Boolean = {
     if (Config.xitrum.response.autoGzip) {
       val acceptEncoding = request.headers.get(ACCEPT_ENCODING)
       acceptEncoding != null && acceptEncoding.contains("gzip")

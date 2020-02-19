@@ -22,7 +22,7 @@ import xitrum.util.TypeCheck
  *    representation type `Repr` and the new element type `B`.
  */
 abstract class OptVar[+A](implicit m: Manifest[A]) {
-  protected[this] val key = getClass.getName
+  protected[this] val key: String = getClass.getName
 
   def getAll(implicit action: Action): MMap[String, Any]
 
@@ -35,7 +35,7 @@ abstract class OptVar[+A](implicit m: Manifest[A]) {
    * We clear all, instead of just removing the key, to avoid inconsistent app logic,
    * which is worse than the ClassCastException.
    */
-  private def clearAllOnClassCastException(maybeA: Any)(implicit action: Action) {
+  private def clearAllOnClassCastException(maybeA: Any)(implicit action: Action): Unit = {
     val rClass = m.runtimeClass
     if (!TypeCheck.isInstance(rClass, maybeA)) {
       action.log.warn(s"Value $maybeA of key $key can't be cast to $rClass, $this is now cleared to try to recover from ClassCastException on next call")
@@ -50,7 +50,7 @@ abstract class OptVar[+A](implicit m: Manifest[A]) {
     a.asInstanceOf[A]
   }
 
-  def set[B >: A](value: B)(implicit action: Action) { getAll.update(key, value) }
+  def set[B >: A](value: B)(implicit action: Action): Unit = { getAll.update(key, value) }
 
   def remove()(implicit action: Action): Option[A] = {
     getAll.remove(key) match {
@@ -79,11 +79,11 @@ abstract class OptVar[+A](implicit m: Manifest[A]) {
 
   /** Returns true if the option is $none, false otherwise.
    */
-  def isEmpty(implicit action: Action) = !getAll.isDefinedAt(key)
+  def isEmpty(implicit action: Action): Boolean = !getAll.isDefinedAt(key)
 
   /** Returns true if the option is an instance of $some, false otherwise.
    */
-  def isDefined(implicit action: Action) = getAll.isDefinedAt(key)
+  def isDefined(implicit action: Action): Boolean = getAll.isDefinedAt(key)
 
   /** Returns the option's value if the option is nonempty, otherwise
    * return the result of evaluating `default`.
@@ -165,7 +165,7 @@ abstract class OptVar[+A](implicit m: Manifest[A]) {
   /** Returns false if the option is $none, true otherwise.
    *  @note   Implemented here to avoid the implicit conversion to Iterable.
    */
-  final def nonEmpty(implicit action: Action) = isDefined
+  final def nonEmpty(implicit action: Action): Boolean = isDefined
 
   /** Necessary to keep $option from being implicitly converted to
    *  [[scala.collection.Iterable]] in `for` comprehensions.
@@ -226,7 +226,7 @@ abstract class OptVar[+A](implicit m: Manifest[A]) {
    *  @see map
    *  @see flatMap
    */
-  @inline final def foreach[U](f: A => U)(implicit action: Action) {
+  @inline final def foreach[U](f: A => U)(implicit action: Action): Unit = {
     if (!isEmpty) f(this.get)
   }
 
@@ -281,7 +281,7 @@ abstract class OptVar[+A](implicit m: Manifest[A]) {
    * @param left the expression to evaluate and return if this is empty
    * @see toLeft
    */
-  @inline final def toRight[X](left: => X)(implicit action: Action) =
+  @inline final def toRight[X](left: => X)(implicit action: Action): Either[X, A] =
     if (isEmpty) Left(left) else Right(this.get)
 
   /** Returns a [[scala.util.Right]] containing the given
@@ -292,6 +292,6 @@ abstract class OptVar[+A](implicit m: Manifest[A]) {
    * @param right the expression to evaluate and return if this is empty
    * @see toRight
    */
-  @inline final def toLeft[X](right: => X)(implicit action: Action) =
+  @inline final def toLeft[X](right: => X)(implicit action: Action): Either[A, X] =
     if (isEmpty) Right(right) else Left(this.get)
 }

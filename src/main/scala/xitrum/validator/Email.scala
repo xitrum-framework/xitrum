@@ -4,10 +4,10 @@ object Email extends Validator[String] {
   // http://www.w3.org/TR/html-markup/input.email.html
   private val PATTERN = """^[a-zA-Z0-9.!#$%&’*+/=?^_`{|}~-]+@[a-zA-Z0-9-]+(?:\.[a-zA-Z0-9-]+)*$""".r
 
-  def check(value: String) =
+  def check(value: String): Boolean =
     PATTERN.findFirstIn(value).isDefined
 
-  def message(name: String, value: String) =
+  def message(name: String, value: String): Option[String] =
     if (check(value))
       None
     else

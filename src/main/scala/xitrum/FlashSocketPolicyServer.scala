@@ -17,10 +17,8 @@ object FlashSocketPolicyServer {
   }
 
   private def newChannelInitializer(): ChannelInitializer[SocketChannel] = {
-    new ChannelInitializer[SocketChannel] {
-      override def initChannel(ch: SocketChannel) {
-        ch.pipeline.addLast(new FlashSocketPolicyHandler)
-      }
+    (ch: SocketChannel) => {
+      ch.pipeline.addLast(new FlashSocketPolicyHandler)
     }
   }
 }

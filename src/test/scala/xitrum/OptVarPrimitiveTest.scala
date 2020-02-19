@@ -1,16 +1,18 @@
 package xitrum
 
-import scala.collection.mutable.{Map => MMap}
-import org.scalatest.{FlatSpec, Matchers}
+import org.scalatest.flatspec.AnyFlatSpec
+import org.scalatest.matchers.should.Matchers
 
-class OptVarPrimitiveTest extends FlatSpec with Matchers {
+import scala.collection.mutable.{Map => MMap}
+
+class OptVarPrimitiveTest extends AnyFlatSpec with Matchers {
   behavior of "OptVarPrimitive"
 
-  implicit val action = new Action { def execute() {} }
+  implicit val action: Action = () => {}
 
-  def newOptVar() = new OptVar[Int] {
+  def newOptVar(): OptVar[Int] = new OptVar[Int] {
     private val all = MMap[String, Any](key -> 123)
-    def getAll(implicit action: Action) = all
+    def getAll(implicit action: Action): MMap[String, Any] = all
   }
 
   "get" should "handle primitive" in {

@@ -1,3 +1,9 @@
+3.30.0:
+
+* `#683 <https://github.com/xitrum-framework/xitrum/issues/683>`_
+  Support Scala 2.13 and 2.12, and update dependency libraries;
+  Scala 2.11 and below are not supported
+
 3.29.0:
 
 * `#685 <https://github.com/xitrum-framework/xitrum/issues/685>`_

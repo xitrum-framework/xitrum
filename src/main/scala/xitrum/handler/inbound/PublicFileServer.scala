@@ -21,7 +21,7 @@ import xitrum.util.PathSanitizer
  */
 @Sharable
 class PublicFileServer extends SimpleChannelInboundHandler[HandlerEnv] {
-  override def channelRead0(ctx: ChannelHandlerContext, env: HandlerEnv) {
+  override def channelRead0(ctx: ChannelHandlerContext, env: HandlerEnv): Unit = {
     val method = env.request.method
     if (method != GET && method != HEAD && method != OPTIONS) {
       ctx.fireChannelRead(env)

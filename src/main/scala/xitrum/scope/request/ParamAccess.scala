@@ -1,6 +1,8 @@
 package xitrum.scope.request
 
+import scala.reflect.runtime.universe
 import scala.reflect.runtime.universe._
+
 import io.netty.handler.codec.http.multipart.FileUpload
 
 import xitrum.Action
@@ -12,16 +14,16 @@ import xitrum.util.DefaultsTo
  * https://github.com/ngocdaothanh/xitrum/issues/155
  */
 object ParamAccess {
-  val TYPE_FILE_UPLOAD = typeOf[FileUpload]
-  val TYPE_STRING      = typeOf[String]
-  val TYPE_CHAR        = typeOf[Char]
-  val TYPE_BOOLEAN     = typeOf[Boolean]
-  val TYPE_BYTE        = typeOf[Byte]
-  val TYPE_SHORT       = typeOf[Short]
-  val TYPE_INT         = typeOf[Int]
-  val TYPE_LONG        = typeOf[Long]
-  val TYPE_FLOAT       = typeOf[Float]
-  val TYPE_DOUBLE      = typeOf[Double]
+  val TYPE_FILE_UPLOAD: universe.Type = typeOf[FileUpload]
+  val TYPE_STRING     : universe.Type = typeOf[String]
+  val TYPE_CHAR       : universe.Type = typeOf[Char]
+  val TYPE_BOOLEAN    : universe.Type = typeOf[Boolean]
+  val TYPE_BYTE       : universe.Type = typeOf[Byte]
+  val TYPE_SHORT      : universe.Type = typeOf[Short]
+  val TYPE_INT        : universe.Type = typeOf[Int]
+  val TYPE_LONG       : universe.Type = typeOf[Long]
+  val TYPE_FLOAT      : universe.Type = typeOf[Float]
+  val TYPE_DOUBLE     : universe.Type = typeOf[Double]
 }
 
 trait ParamAccess {
@@ -95,7 +97,7 @@ trait ParamAccess {
     }.recoverWith {
       case _: StringIndexOutOfBoundsException |
            _: IllegalArgumentException =>
-        scala.util.Failure(new InvalidInput(s"""Cannot convert "$value" of param "$key" to $t"""))
+        scala.util.Failure(InvalidInput(s"""Cannot convert "$value" of param "$key" to $t"""))
     }.get.asInstanceOf[T]
   }
 }

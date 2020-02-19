@@ -9,7 +9,7 @@ private object IgnoredPackages {
    * because they obviously don't contain Xitrum routes, to speed up the
    * scanning of routes
    */
-  def isIgnored(relPath: String) = {
+  def isIgnored(relPath: String): Boolean = {
     // Standard Java and Scala
     relPath.startsWith("java/")  ||
     relPath.startsWith("javafx/") ||

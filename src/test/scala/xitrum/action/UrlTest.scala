@@ -1,11 +1,13 @@
 package xitrum.action
 
 import org.asynchttpclient.Dsl.asyncHttpClient
-
 import org.json4s._
 import org.json4s.jackson.Serialization
 import org.json4s.jackson.Serialization.read
-import org.scalatest._
+
+import org.scalatest.BeforeAndAfter
+import org.scalatest.flatspec.AnyFlatSpec
+import org.scalatest.matchers.should.Matchers
 
 import xitrum.{Action, Log, Server, SkipCsrfCheck, version}
 import xitrum.annotation.GET
@@ -14,12 +16,12 @@ case class TestUrls(abs: String, rel: String, webJars: String)
 
 @GET("/test")
 class UrlTestAction extends Action with SkipCsrfCheck {
-  def execute() {
+  def execute(): Unit = {
     respondJson(TestUrls(absUrl[UrlTestAction], url[UrlTestAction], webJarsUrl("xitrum/" + version + "/ajax.gif")))
   }
 }
 
-class UrlTest extends FlatSpec with Matchers with BeforeAndAfter with Log {
+class UrlTest extends AnyFlatSpec with Matchers with BeforeAndAfter with Log {
   private val site = "http://127.0.0.1:8000"
   private val base = "/my_site"
   private val path = "/test"
@@ -28,7 +30,7 @@ class UrlTest extends FlatSpec with Matchers with BeforeAndAfter with Log {
   private val relPath = s"$base$path"
 
   private val client = asyncHttpClient()
-  private implicit val formats = Serialization.formats(NoTypeHints)
+  private implicit val formats: AnyRef with Formats = Serialization.formats(NoTypeHints)
 
   behavior of "Url"
 

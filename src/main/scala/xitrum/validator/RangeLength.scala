@@ -5,12 +5,12 @@ object RangeLength {
 }
 
 class RangeLength(min: Int, max: Int) extends Validator[String] {
-  def check(value: String) = {
+  def check(value: String): Boolean = {
     val length = value.length
     min <= length && length <= max
   }
 
-  def message(name: String, value: String) = {
+  def message(name: String, value: String): Option[String] = {
     val length = value.length
     if (min <= length && length <= max)
       None

@@ -1,15 +1,19 @@
 package xitrum
 
+import org.scalatest.flatspec.AnyFlatSpec
+import org.scalatest.matchers.should.Matchers
+
 import java.util.Locale
 
-import org.scalatest.{FlatSpec, Matchers}
-
 object ComponentTest {
-  class A extends Action { def execute() {} }
+  class A extends Action {
+    def execute(): Unit = {}
+  }
+
   class C extends Component
 }
 
-class ComponentTest extends FlatSpec with Matchers {
+class ComponentTest extends AnyFlatSpec with Matchers {
   behavior of "Component"
 
   "newComponent" should "return a component whose language is in sync with the language of its parent action" in {

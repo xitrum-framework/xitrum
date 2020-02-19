@@ -36,6 +36,7 @@ object PoLoader {
     synchronized {
       val urlEnum = Thread.currentThread.getContextClassLoader.getResources("i18n/" + language + ".po")
       val buffer  = ArrayBuffer.empty[I18n]
+
       while (urlEnum.hasMoreElements) {
         val url    = urlEnum.nextElement()
         val is     = url.openStream()
@@ -72,21 +73,21 @@ object PoLoader {
   /**
    * Clears all loaded po files of all languages in the cache.
    */
-  def clear() = synchronized {
+  def clear(): Unit = synchronized {
     cache.clear()
   }
 
   /**
    * Clears all loaded po files of the specified language in the cache.
    */
-  def remove(language: String) = synchronized {
+  def remove(language: String): Unit = synchronized {
     cache.remove(language)
   }
 
   /**
    * Reloads all loaded po files of the specified language in the cache.
    */
-  def reload(language: String) {
+  def reload(language: String): Unit = {
     Log.info("Reload po file of language: " + language)
     remove(language)
     get(language)
@@ -96,20 +97,21 @@ object PoLoader {
    * Watches i18n directories in classpath and src/main/resources
    * (for development mode) to reload .po files automatically.
    */
-  private def watch() {
+  private def watch(): Unit = {
     val searchDirs = Discoverer.containers.filter(_.isDirectory) ++ Seq(new File(DEV_RESOURCES_DIR))
     searchDirs.foreach { dir =>
       val withI18n = new File(dir, "i18n")
       if (withI18n.exists && withI18n.isDirectory) {
         val i18nPath = withI18n.toPath
         Log.info("Monitor po files in: " + i18nPath)
-        FileMonitor.monitor(FileMonitor.MODIFY, i18nPath, { path =>
+
+        FileMonitor.monitor(i18nPath) { (_, path, _) =>
           val fileName = path.getFileName.toString
           if (fileName.endsWith(".po")) {
             val language = fileName.substring(0, fileName.length - ".po".length)
             reload(language)
           }
-        })
+        }
       }
     }
   }

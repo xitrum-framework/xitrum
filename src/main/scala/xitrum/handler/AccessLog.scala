@@ -12,11 +12,11 @@ import xitrum.sockjs.SockJsAction
 import xitrum.action.Net
 
 object AccessLog {
-  def logFlashSocketPolicyFileAccess(remoteAddress: SocketAddress) {
+  def logFlashSocketPolicyFileAccess(remoteAddress: SocketAddress): Unit = {
     Log.info(Net.clientIp(remoteAddress) + " (flash socket policy file)")
   }
 
-  def logStaticFileAccess(remoteAddress: SocketAddress, request: HttpRequest, response: HttpResponse) {
+  def logStaticFileAccess(remoteAddress: SocketAddress, request: HttpRequest, response: HttpResponse): Unit = {
     Log.info(
       Net.remoteIp(remoteAddress, request) + " " +
       request.method + " " +
@@ -26,7 +26,7 @@ object AccessLog {
     )
   }
 
-  def logResourceInJarAccess(remoteAddress: SocketAddress, request: HttpRequest, response: HttpResponse) {
+  def logResourceInJarAccess(remoteAddress: SocketAddress, request: HttpRequest, response: HttpResponse): Unit = {
     Log.info(
       Net.remoteIp(remoteAddress, request) + " " +
       request.method + " " +
@@ -36,7 +36,7 @@ object AccessLog {
     )
   }
 
-  def logActionAccess(action: Action, beginTimestamp: Long, cacheSecs: Int, hit: Boolean, e: Throwable = null) {
+  def logActionAccess(action: Action, beginTimestamp: Long, cacheSecs: Int, hit: Boolean, e: Throwable = null): Unit = {
     if (e == null) {
       Log.info(msgWithTime(action, beginTimestamp) + extraInfo(action, cacheSecs, hit))
     } else {
@@ -44,11 +44,11 @@ object AccessLog {
     }
   }
 
-  def logWebSocketAccess(action: Action, beginTimestamp: Long) {
+  def logWebSocketAccess(action: Action, beginTimestamp: Long): Unit = {
     Log.info(msgWithTime(action, beginTimestamp) + extraInfo(action, 0, hit = false))
   }
 
-  def logOPTIONS(request: HttpRequest) {
+  def logOPTIONS(request: HttpRequest): Unit = {
     Log.info("OPTIONS " + request.uri)
   }
 
@@ -106,7 +106,7 @@ object AccessLog {
     b.toString
   }
 
-  private def takeActionExecutionTimeMetrics(action: Action, beginTimestamp: Long, executionTime: Long) {
+  private def takeActionExecutionTimeMetrics(action: Action, beginTimestamp: Long, executionTime: Long): Unit = {
     val isSockJSMetricsChannelClient =
       action.isInstanceOf[SockJsAction] &&
       action.asInstanceOf[SockJsAction].pathPrefix == "xitrum/metrics/channel"
@@ -124,7 +124,7 @@ object AccessLog {
     }
   }
 
-  private def takeActionExecutionTimeHistogram(name: String, executionTime: Long) {
+  private def takeActionExecutionTimeHistogram(name: String, executionTime: Long): Unit = {
     val histograms = xitrum.Metrics.registry.getHistograms
     val histogram  = Option(histograms.get(name).asInstanceOf[Histogram]).getOrElse(xitrum.Metrics.histogram(name))
     histogram += executionTime

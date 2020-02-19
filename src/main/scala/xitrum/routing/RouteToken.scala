@@ -56,9 +56,9 @@ case class NonDotRouteToken(value: String, isPlaceholder: Boolean, regex: Option
     }
   }
 
-  def numPlaceholders = if (isPlaceholder) 1 else 0
+  def numPlaceholders: Int = if (isPlaceholder) 1 else 0
 
-  def url(params: Map[String, Any]) = {
+  def url(params: Map[String, Any]): Either[String, (Any, Map[String, Any])] = {
     if (isPlaceholder) {
       if (params.isDefinedAt(value))
         Right((params(value), params - value))
@@ -81,7 +81,7 @@ case class NonDotRouteToken(value: String, isPlaceholder: Boolean, regex: Option
           } else {
             // Placeholder in URL can't be empty
             val value = pathTokens.head
-            if (value.length == 0) false else matchRegex(pathParams, value)
+            if (value.isEmpty) false else matchRegex(pathParams, value)
           }
         }
       } else {
@@ -90,7 +90,7 @@ case class NonDotRouteToken(value: String, isPlaceholder: Boolean, regex: Option
         } else {
           // Placeholder in URL can't be empty
           val value = pathTokens.head
-          if (value.length == 0) false else matchRegex(pathParams, value)
+          if (value.isEmpty) false else matchRegex(pathParams, value)
         }
       }
     } else {
@@ -126,9 +126,9 @@ case class NonDotRouteToken(value: String, isPlaceholder: Boolean, regex: Option
 case class DotRouteToken(nonDotRouteTokens: Seq[NonDotRouteToken]) extends RouteToken {
   def decompile(forSwagger: Boolean): String = nonDotRouteTokens.map(_.decompile(forSwagger)).mkString(".")
 
-  def numPlaceholders = nonDotRouteTokens.foldLeft(0) { (sum, rt) => sum + rt.numPlaceholders }
+  def numPlaceholders: Int = nonDotRouteTokens.foldLeft(0) { (sum, rt) => sum + rt.numPlaceholders }
 
-  def url(params: Map[String, Any]) = {
+  def url(params: Map[String, Any]): Either[String, (String, Map[String, Any])] = {
     ReverseRoute.collectReverseTokens(Seq.empty[String], nonDotRouteTokens, params) match {
       case Left(e) => Left(e)
 

@@ -109,13 +109,13 @@ trait ViewRenderer extends GetActionClassDefaultsToCurrentAction {
    * @param options specific to the configured template engine
    */
   def renderView(uri: String, options: Map[String, Any]): String =
-    renderView(layout _, uri, options)
+    renderView(() => layout, uri, options)
 
   /**
    * Renders the template at ``uri`` to [[renderedView]], then calls [[layout]].
    */
   def renderView(uri: String): String =
-    renderView(layout _, uri, Map.empty[String, Any])
+    renderView(() => layout, uri, Map.empty[String, Any])
 
   //----------------------------------------------------------------------------
 
@@ -164,7 +164,7 @@ trait ViewRenderer extends GetActionClassDefaultsToCurrentAction {
    * @param options specific to the configured template engine
    */
   def renderView(actionClass: Class[_ <: Action], options: Map[String, Any]): String = {
-    renderView(layout _, templateUriFromClass(actionClass), options)
+    renderView(() => layout, templateUriFromClass(actionClass), options)
   }
 
   /**
@@ -172,7 +172,7 @@ trait ViewRenderer extends GetActionClassDefaultsToCurrentAction {
    * then calls [[layout]].
    */
   def renderView(actionClass: Class[_ <: Action]): String = {
-    renderView(layout _, templateUriFromClass(actionClass), Map.empty[String, Any])
+    renderView(() => layout, templateUriFromClass(actionClass), Map.empty[String, Any])
   }
 
   //----------------------------------------------------------------------------
@@ -184,14 +184,14 @@ trait ViewRenderer extends GetActionClassDefaultsToCurrentAction {
    * @param options specific to the configured template engine
    */
   def renderView[T <: Action: Manifest](options: Map[String, Any]): String =
-    renderView(layout _, getActionClass[T], options)
+    renderView(() => layout, getActionClass[T], options)
 
   /**
    * Renders the template associated with the action to [[renderedView]],
    * then calls [[layout]].
    */
   def renderView[T <: Action: Manifest](): String =
-    renderView(layout _, getActionClass[T], Map.empty[String, Any])
+    renderView(() => layout, getActionClass[T], Map.empty[String, Any])
 
   //----------------------------------------------------------------------------
 

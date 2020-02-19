@@ -1,11 +1,10 @@
 package xitrum
 
 import java.util.concurrent.TimeUnit
-
-import scala.concurrent.duration.Duration
+import scala.concurrent.duration.{Duration, FiniteDuration}
 import scala.util.control.NonFatal
 
-import io.netty.channel.{ChannelFuture, ChannelFutureListener}
+import io.netty.channel.ChannelFuture
 import io.netty.handler.codec.http.{HttpMethod, HttpResponseStatus}
 
 import org.apache.commons.lang3.exception.ExceptionUtils
@@ -19,8 +18,10 @@ import xitrum.scope.request.RequestEnv
 import xitrum.scope.session.{Csrf, SessionEnv}
 import xitrum.view.{FlashRenderer, FlashResponder, JsRenderer, JsResponder, Renderer, Responder, ViewRenderer, ViewResponder}
 
+import scala.concurrent.ExecutionContextExecutor
+
 object Action {
-  val TIMEOUT = Duration(5, TimeUnit.SECONDS)
+  val TIMEOUT: FiniteDuration = Duration(5, TimeUnit.SECONDS)
 }
 
 /**
@@ -51,18 +52,18 @@ trait Action extends RequestEnv
   /**
    * Convenient implicit, for example for use when you want to get the current action in view templates.
    */
-  implicit val currentAction = Action.this
+  implicit val currentAction: Action = Action.this
 
   /**
    * Convenient implicit, for example for use when you use scala.concurrent.Await.
    */
-  implicit val timeout = Action.TIMEOUT
+  implicit val timeout: FiniteDuration = Action.TIMEOUT
 
   /**
    * Convenient implicit, for example for use when you use scala.concurrent.Future.
    * It's lazy to avoid starting Akka in tests.
    */
-  lazy implicit val executionContext = Config.actorSystem.dispatcher
+  lazy implicit val executionContext: ExecutionContextExecutor = Config.actorSystem.dispatcher
 
   //----------------------------------------------------------------------------
 
@@ -70,11 +71,11 @@ trait Action extends RequestEnv
    * Called when the HTTP request comes in.
    * Actions have to implement this method.
    */
-  def execute()
+  def execute(): Unit
 
-  def addConnectionClosedListener(listener: => Unit) {
-    channel.closeFuture.addListener(new ChannelFutureListener {
-      def operationComplete(future: ChannelFuture) { listener }
+  def addConnectionClosedListener(listener: => Unit): Unit = {
+    channel.closeFuture.addListener((_: ChannelFuture) => {
+      listener
     })
   }
 
@@ -87,7 +88,7 @@ trait Action extends RequestEnv
 
   //----------------------------------------------------------------------------
 
-  def dispatchWithFailsafe(skipCsrfCheck: Boolean) {
+  def dispatchWithFailsafe(skipCsrfCheck: Boolean): Unit = {
     val beginTimestamp = System.currentTimeMillis()
     val route          = handlerEnv.route
     val cacheSecs      = if (route == null) 0 else route.cacheSecs
@@ -132,7 +133,7 @@ trait Action extends RequestEnv
         // These exceptions are special cases:
         // We know that the exception is caused by the client (bad request)
         val msg = e match {
-          case invalidAntiCsrfToken: InvalidAntiCsrfToken =>
+          case _: InvalidAntiCsrfToken =>
             session.clear()
             badRequestMessageSessionExpired
 
@@ -189,13 +190,13 @@ trait Action extends RequestEnv
    * Applications may override this method to modify the default message:
    * `Missing param: + param`
    */
-  protected def badRequestMessageMissingParam(param: String) = "Missing param: " + param
+  protected def badRequestMessageMissingParam(param: String): String = "Missing param: " + param
 
   /**
    * Applications may override this method to modify the default message:
    * `Validation error: + message`
    */
-  protected def badRequestMessageInvalidInput(message: String) = "Validation error: " + message
+  protected def badRequestMessageInvalidInput(message: String): String = "Validation error: " + message
 
   /** @return true if the cache was hit */
   private def tryCache(f: => Unit): Boolean = {
@@ -212,7 +213,7 @@ trait Action extends RequestEnv
     }
   }
 
-  private def callExecuteWrappedInAroundFiltersThenAfterFilters() {
+  private def callExecuteWrappedInAroundFiltersThenAfterFilters(): Unit = {
     callExecuteWrappedInAroundFilters()
     callAfterFilters()
   }

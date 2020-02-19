@@ -5,7 +5,7 @@ object TypeCheck {
    * Checks if the value is an instance of the class. The class can be a
    * primitive class (java.lang.Integer, java.lang.Long etc.).
    */
-  def isInstance(klass: Class[_], value: Any) = {
+  def isInstance(klass: Class[_], value: Any): Boolean = {
     // http://docs.oracle.com/javase/7/docs/api/java/lang/Class.html#isPrimitive()
     // http://stackoverflow.com/questions/16825927/classtag-based-pattern-matching-fails-for-primitives
     if (klass.isPrimitive) {

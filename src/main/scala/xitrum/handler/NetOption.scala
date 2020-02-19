@@ -4,13 +4,13 @@ import java.net.InetSocketAddress
 
 import io.netty.bootstrap.ServerBootstrap
 import io.netty.buffer.PooledByteBufAllocator
-import io.netty.channel.{ChannelFuture, ChannelFutureListener, ChannelOption, EventLoopGroup}
+import io.netty.channel.{ChannelFuture, ChannelOption, EventLoopGroup}
 
 import xitrum.Config
 
 object NetOption {
   /** Stops the JVM process if cannot bind to the port. */
-  def bind(service: String, bootstrap: ServerBootstrap, port: Int, groups: Seq[EventLoopGroup]) {
+  def bind(service: String, bootstrap: ServerBootstrap, port: Int, groups: Seq[EventLoopGroup]): Unit = {
     setOptions(bootstrap)
 
     val ic = Config.xitrum.interface
@@ -46,14 +46,12 @@ object NetOption {
     // At this point, connection has been established successfully
 
     // Graceful shutdown when the socket is closed
-    portOpenFuture.channel.closeFuture.addListener(new ChannelFutureListener {
-      override def operationComplete(future: ChannelFuture) {
-        groups.foreach(_.shutdownGracefully())
-      }
+    portOpenFuture.channel.closeFuture.addListener((_: ChannelFuture) => {
+      groups.foreach(_.shutdownGracefully())
     })
   }
 
-  private def setOptions(bootstrap: ServerBootstrap) {
+  private def setOptions(bootstrap: ServerBootstrap): Unit = {
     // Backlog: Netty 4.0.23+ uses io.netty.util.NetUtil.SOMAXCONN for backlog by default.
     // See http://lionet.livejournal.com/42016.html and the
     // "Tune Linux for many connections" section in the Xitrum guide to know

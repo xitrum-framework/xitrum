@@ -10,8 +10,8 @@ trait Filter {
   private val beforeFilters = ArrayBuffer.empty[() => Any]
 
   /** Adds a before filter. */
-  def beforeFilter(f: => Any) {
-    beforeFilters.append(f _)
+  def beforeFilter(f: => Any): Unit = {
+    beforeFilters.append(() => f)
   }
 
   /**
@@ -19,7 +19,7 @@ trait Filter {
    * Calls all before filters until a filter has responded something.
    *
    * @return false if a before filter has responded something and later before
-   * filters and the action's "execute" method should not be called 
+   * filters and the action's "execute" method should not be called
    */
   def callBeforeFilters(): Boolean = {
     beforeFilters.forall { bf =>
@@ -33,15 +33,15 @@ trait Filter {
   /** Adds an after filter. */
   private val afterFilters = ArrayBuffer.empty[() => Any]
 
-  def afterFilter(f: => Any) {
-    afterFilters.append(f _)
+  def afterFilter(f: => Any): Unit = {
+    afterFilters.append(() => f)
   }
 
   /**
    * Called by Dispatcher.
    * Calls all after filters.
    */
-  def callAfterFilters() {
+  def callAfterFilters(): Unit = {
     afterFilters.foreach { af => af() }
   }
 
@@ -49,12 +49,12 @@ trait Filter {
 
   private val aroundFilters = ArrayBuffer.empty[(() => Any) => Any]
 
-  def aroundFilter(f: (() => Any) => Any) {
+  def aroundFilter(f: (() => Any) => Any): Unit = {
     aroundFilters.append(f)
   }
 
   /** Called by Dispatcher */
-  def callExecuteWrappedInAroundFilters() {
+  def callExecuteWrappedInAroundFilters(): Unit = {
     val initialWrapper = () => execute()
     val bigWrapper = aroundFilters.foldLeft(initialWrapper) { (wrapper, af) =>
       () => af(wrapper)

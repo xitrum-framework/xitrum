@@ -2,6 +2,7 @@ package xitrum.routing
 
 import scala.collection.mutable.{Map => MMap}
 import akka.actor.{Actor, ActorRef, ActorRefFactory, Props}
+
 import xitrum.{Config, Log, SockJsAction}
 import xitrum.handler.inbound.Dispatcher
 
@@ -20,7 +21,7 @@ class SockJsClassAndOptions(
 
 class SockJsRouteMap(map: MMap[String, SockJsClassAndOptions]) {
   /** @param xitrumRoutes true: log only Xitrum routes, false: log only app routes */
-  def logRoutes(xitrumRoutes: Boolean) {
+  def logRoutes(xitrumRoutes: Boolean): Unit = {
     // This method is only run once on start, speed is not a problem
 
     val map = this.map.filter { case (path, sockJsClassAndOptions) =>
@@ -79,10 +80,10 @@ class SockJsRouteMap(map: MMap[String, SockJsClassAndOptions]) {
     }
   }
 
-  def lookup(pathPrefix: String) = map(pathPrefix)
+  def lookup(pathPrefix: String): SockJsClassAndOptions = map(pathPrefix)
 
-  def removeByPrefix(withoutSlashPrefix: String) = {
-    map.map { case (pathPrefixOfAction, sockJsClassAndOptions) =>
+  def removeByPrefix(withoutSlashPrefix: String): Unit = {
+    map.map { case (pathPrefixOfAction, _) =>
       if (pathPrefixOfAction.startsWith(withoutSlashPrefix)) map.remove(pathPrefixOfAction)
     }
   }

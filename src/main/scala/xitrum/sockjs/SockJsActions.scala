@@ -27,7 +27,7 @@ private object NotificationToHandlerUtil {
     index: Int, sockJsActorRef: ActorRef, write: Boolean
   ): ChannelFuture = {
     channelFuture.addListener(new ChannelFutureListener {
-      def operationComplete(f: ChannelFuture) {
+      def operationComplete(f: ChannelFuture): Unit = {
         val msg =
           if (write) {
             if (f.isSuccess)
@@ -58,26 +58,26 @@ private object NotificationToHandlerUtil {
 object SockJsAction {
   // The server must send a heartbeat frame every 25 seconds
   // http://sockjs.github.com/sockjs-protocol/sockjs-protocol-0.3.3.html#section-46
-  val TIMEOUT_HEARTBEAT = 25.seconds
+  val TIMEOUT_HEARTBEAT: FiniteDuration = 25.seconds
 
   // All the chunking transports are closed by the server after 128K (production mode)
   // or 4K (development mode) was sent, in order to force client to GC and reconnect.
   // Last chunk is forcefully sent when limit is reached.
-  val CHUNKED_RESPONSE_LIMIT = if (Config.productionMode) 128 * 1024 else 4 * 1024
+  val CHUNKED_RESPONSE_LIMIT: Int = if (Config.productionMode) 128 * 1024 else 4 * 1024
 
-  val actorRegistry = Registry.start(Config.actorSystem, getClass.getName)
+  val actorRegistry: ActorRef = Registry.start(Config.actorSystem, getClass.getName)
 
   //----------------------------------------------------------------------------
 
   private[this] val random = new Random(System.currentTimeMillis())
 
   /** `0 to 2^32 - 1` */
-  def entropy() = random.nextInt().abs
+  def entropy(): Int = random.nextInt().abs
 
   //----------------------------------------------------------------------------
 
   /** 2K 'h' characters */
-  val H2K = {
+  val H2K: Array[Byte] = {
     val bytes   = Array.fill[Byte](2048 + 1)('h')
     bytes(2048) = '\n'
     bytes
@@ -169,7 +169,7 @@ trait SockJsPrefix {
   var pathPrefix = ""
 
   /** Called by Dispatcher. */
-  def setPathPrefix(pathInfo: PathInfo) {
+  def setPathPrefix(pathInfo: PathInfo): Unit = {
     val n       = nLastTokensToRemoveFromPathInfo
     val decoded = pathInfo.decoded
     pathPrefix =
@@ -190,7 +190,7 @@ trait SockJsAction extends ServerIdSessionIdValidator with SockJsPrefix {
   // JSESSIONID cookie must be echoed back if sent by the client, or created
   // http://groups.google.com/group/sockjs/browse_thread/thread/71dfdff6e8f1e5f7
   // Can't use beforeFilter, see comment of pathPrefix at the top of this controller.
-  protected def handleCookie() {
+  protected def handleCookie(): Unit = {
     val sockJsClassAndOptions = Config.routes.sockJsRouteMap.lookup(pathPrefix)
     if (sockJsClassAndOptions.cookieNeeded) {
       val value  = requestCookies.getOrElse("JSESSIONID", "dummy")
@@ -211,7 +211,7 @@ trait SockJsAction extends ServerIdSessionIdValidator with SockJsPrefix {
 }
 
 trait NonWebSocketSessionActorAction extends ActorAction with SockJsAction {
-  protected def lookupNonWebSocketSessionActor(sessionId: String) {
+  protected def lookupNonWebSocketSessionActor(sessionId: String): Unit = {
     SockJsAction.actorRegistry ! Registry.Lookup(sessionId)
   }
 
@@ -252,7 +252,7 @@ trait NonWebSocketSessionActorAction extends ActorAction with SockJsAction {
     ret
   }
 
-  protected def closeWithLastChunk(index_handler: Option[(Int, ActorRef)] = None) {
+  protected def closeWithLastChunk(index_handler: Option[(Int, ActorRef)] = None): Unit = {
     val f = respondLastChunk().addListener(ChannelFutureListener.CLOSE)
     index_handler.foreach { case (index, handler) =>
       NotificationToHandlerUtil.onComplete(f, index, handler, write = false)
@@ -265,11 +265,11 @@ trait NonWebSocketSessionReceiverActorAction extends NonWebSocketSessionActorAct
 
   // Call lookupOrCreateNonWebSocketSessionActor and continue with this method.
   // Here, context.become(receiveNotification) may be called.
-  protected def onLookupOrRecreateResult(newlyCreated: Boolean)
+  protected def onLookupOrRecreateResult(newlyCreated: Boolean): Unit
 
   protected def receiveNotification: Receive
 
-  protected def lookupOrCreateNonWebSocketSessionActor(sessionId: String) {
+  protected def lookupOrCreateNonWebSocketSessionActor(sessionId: String): Unit = {
     // Try to lookup first, then create later
     val props = Props(new NonWebSocketSession(Some(self), pathPrefix, this))
     SockJsAction.actorRegistry ! Registry.Register(sessionId, props)
@@ -286,7 +286,7 @@ trait NonWebSocketSessionReceiverActorAction extends NonWebSocketSessionActorAct
     })
   }
 
-  override def postStop() {
+  override def postStop(): Unit = {
     if (nonWebSocketSession != null) {
       context.unwatch(nonWebSocketSession)
       if (!isDoneResponding) nonWebSocketSession ! AbortFromReceiverClient
@@ -299,7 +299,7 @@ trait NonWebSocketSessionReceiverActorAction extends NonWebSocketSessionActorAct
 class Greeting extends SockJsAction {
   def nLastTokensToRemoveFromPathInfo = 0
 
-  def execute() {
+  def execute(): Unit = {
     respondText("Welcome to SockJS!\n")
   }
 }
@@ -309,7 +309,7 @@ class Greeting extends SockJsAction {
 class Iframe extends SockJsAction {
   def nLastTokensToRemoveFromPathInfo = 1
 
-  def execute() {
+  def execute(): Unit = {
     val iframe = param("iframe")
     if (iframe.startsWith("iframe") && iframe.endsWith(".html")) {
       setClientCacheAggressively()
@@ -340,7 +340,7 @@ class Iframe extends SockJsAction {
 class InfoGET extends SockJsAction {
   def nLastTokensToRemoveFromPathInfo = 1
 
-  def execute() {
+  def execute(): Unit = {
     setNoClientCache()
 
     val sockJsClassAndOptions = Config.routes.sockJsRouteMap.lookup(pathPrefix)
@@ -357,7 +357,7 @@ class InfoGET extends SockJsAction {
 class XhrPollingReceive extends NonWebSocketSessionReceiverActorAction with SkipCsrfCheck {
   def nLastTokensToRemoveFromPathInfo = 3
 
-  def execute() {
+  def execute(): Unit = {
     val sessionId = param("sessionId")
 
     handleCookie()
@@ -366,7 +366,7 @@ class XhrPollingReceive extends NonWebSocketSessionReceiverActorAction with Skip
     lookupOrCreateNonWebSocketSessionActor(sessionId)
   }
 
-  protected def onLookupOrRecreateResult(newlyCreated: Boolean) {
+  protected def onLookupOrRecreateResult(newlyCreated: Boolean): Unit = {
     if (newlyCreated) {
       respondJs("o\n")
     } else {
@@ -401,7 +401,7 @@ class XhrPollingReceive extends NonWebSocketSessionReceiverActorAction with Skip
     case NotificationToReceiverClientMessage(index, message, handler) =>
       val json   = SeriDeseri.toJson(Seq(message))
       val quoted = SockJsAction.quoteUnicode(json)
-      NotificationToHandlerUtil.onComplete(respondJs("a" + quoted + "\n"), index, handler, true)
+      NotificationToHandlerUtil.onComplete(respondJs("a" + quoted + "\n"), index, handler, write = true)
 
     case NotificationToReceiverClientHeartbeat =>
       respondJs("h\n")
@@ -409,7 +409,7 @@ class XhrPollingReceive extends NonWebSocketSessionReceiverActorAction with Skip
     case NotificationToReceiverClientClosed(index, handler) =>
       NotificationToHandlerUtil.onComplete(
         respondJs("c[3000,\"Go away!\"]\n"),
-        index, handler, false
+        index, handler, write = false
       ).addListener(ChannelFutureListener.CLOSE)
 
     case Terminated(actorRef) if actorRef == nonWebSocketSession =>
@@ -422,7 +422,7 @@ class XhrPollingReceive extends NonWebSocketSessionReceiverActorAction with Skip
 class XhrSend extends NonWebSocketSessionActorAction with SkipCsrfCheck {
   def nLastTokensToRemoveFromPathInfo = 3
 
-  def execute() {
+  def execute(): Unit = {
     val body = request.content.toString(Config.xitrum.request.charset)
     if (body.isEmpty) {
       response.setStatus(HttpResponseStatus.INTERNAL_SERVER_ERROR)
@@ -456,7 +456,7 @@ class XhrSend extends NonWebSocketSessionActorAction with SkipCsrfCheck {
 class XhrStreamingReceive extends NonWebSocketSessionReceiverActorAction with SkipCsrfCheck {
   def nLastTokensToRemoveFromPathInfo = 3
 
-  def execute() {
+  def execute(): Unit = {
     val sessionId = param("sessionId")
 
     handleCookie()
@@ -470,7 +470,7 @@ class XhrStreamingReceive extends NonWebSocketSessionReceiverActorAction with Sk
     lookupOrCreateNonWebSocketSessionActor(sessionId)
   }
 
-  protected def onLookupOrRecreateResult(newlyCreated: Boolean) {
+  protected def onLookupOrRecreateResult(newlyCreated: Boolean): Unit = {
     if (newlyCreated) {
       respondStreamingWithLimit("o\n")
       context.become(receiveNotification)
@@ -507,18 +507,18 @@ class XhrStreamingReceive extends NonWebSocketSessionReceiverActorAction with Sk
     case NotificationToReceiverClientMessage(index, message, handler) =>
       val json   = SeriDeseri.toJson(Seq(message))
       val quoted = SockJsAction.quoteUnicode(json)
-      respondStreamingWithLimit("a" + quoted + "\n", false, Some(index, handler))
+      respondStreamingWithLimit("a" + quoted + "\n", isEventSource = false, Some(index, handler))
 
     case NotificationToReceiverClientHeartbeat =>
       respondStreamingWithLimit("h\n")
 
     case NotificationToReceiverClientClosed(index, handler) =>
       respondJs("c[3000,\"Go away!\"]\n").addListener(new ChannelFutureListener {
-        def operationComplete(f: ChannelFuture) {
+        def operationComplete(f: ChannelFuture): Unit = {
           if (f.isSuccess)
             closeWithLastChunk(Some(index, handler))
           else
-            NotificationToHandlerUtil.onComplete(f, index, handler, false)
+            NotificationToHandlerUtil.onComplete(f, index, handler, write = false)
         }
       })
 
@@ -532,9 +532,9 @@ class XhrStreamingReceive extends NonWebSocketSessionReceiverActorAction with Sk
 class HtmlFileReceive extends NonWebSocketSessionReceiverActorAction {
   def nLastTokensToRemoveFromPathInfo = 3
 
-  var callback: String = null
+  var callback: String = _
 
-  def execute() {
+  def execute(): Unit = {
     val callbacko = callbackParam()
     if (callbacko.isEmpty) return
 
@@ -547,7 +547,7 @@ class HtmlFileReceive extends NonWebSocketSessionReceiverActorAction {
     lookupOrCreateNonWebSocketSessionActor(sessionId)
   }
 
-  protected def onLookupOrRecreateResult(newlyCreated: Boolean) {
+  protected def onLookupOrRecreateResult(newlyCreated: Boolean): Unit = {
     if (newlyCreated) {
       HttpUtil.setTransferEncodingChunked(response, true)
       respondHtml(SockJsAction.htmlFile(callback, with1KSpaces = true))
@@ -607,27 +607,27 @@ class HtmlFileReceive extends NonWebSocketSessionReceiverActorAction {
       buffer.append("<script>\np(\"a")
       buffer.append(jsEscape(quoted))
       buffer.append("\");\n</script>\r\n")
-      respondStreamingWithLimit(buffer.toString, false, Some(index, handler))
+      respondStreamingWithLimit(buffer.toString, isEventSource = false, Some(index, handler))
 
     case NotificationToReceiverClientHeartbeat =>
       respondStreamingWithLimit("<script>\np(\"h\");\n</script>\r\n")
 
     case NotificationToReceiverClientClosed(index, handler) =>
       respondHtml(
-        SockJsAction.htmlFile(callback, false) +
+        SockJsAction.htmlFile(callback, with1KSpaces = false) +
         "<script>\np(\"c[3000,\\\"Go away!\\\"]\");\n</script>\r\n"
       ).addListener(new ChannelFutureListener {
-        def operationComplete(f: ChannelFuture) {
+        def operationComplete(f: ChannelFuture): Unit = {
           if (f.isSuccess)
             closeWithLastChunk(Some(index, handler))
           else
-            NotificationToHandlerUtil.onComplete(f, index, handler, false)
+            NotificationToHandlerUtil.onComplete(f, index, handler, write = false)
         }
       })
 
     case Terminated(actorRef) if actorRef == nonWebSocketSession =>
       respondHtml(
-        SockJsAction.htmlFile(callback, false) +
+        SockJsAction.htmlFile(callback, with1KSpaces = false) +
         "<script>\np(\"c[2011,\\\"Server error\\\"]\");\n</script>\r\n"
       )
       closeWithLastChunk()
@@ -638,9 +638,9 @@ class HtmlFileReceive extends NonWebSocketSessionReceiverActorAction {
 class JsonPPollingReceive extends NonWebSocketSessionReceiverActorAction {
   def nLastTokensToRemoveFromPathInfo = 3
 
-  var callback: String = null
+  var callback: String = _
 
-  def execute() {
+  def execute(): Unit = {
     val callbacko = callbackParam()
     if (callbacko.isEmpty) return
 
@@ -653,7 +653,7 @@ class JsonPPollingReceive extends NonWebSocketSessionReceiverActorAction {
     lookupOrCreateNonWebSocketSessionActor(sessionId)
   }
 
-  protected def onLookupOrRecreateResult(newlyCreated: Boolean) {
+  protected def onLookupOrRecreateResult(newlyCreated: Boolean): Unit = {
     if (newlyCreated) {
       respondJs(callback + "(\"o\");\r\n")
     } else {
@@ -696,7 +696,7 @@ class JsonPPollingReceive extends NonWebSocketSessionReceiverActorAction {
       buffer.append(callback + "(\"a")
       buffer.append(jsEscape(quoted))
       buffer.append("\");\r\n")
-      NotificationToHandlerUtil.onComplete(respondJs(buffer.toString), index, handler, true)
+      NotificationToHandlerUtil.onComplete(respondJs(buffer.toString), index, handler, write = true)
 
     case NotificationToReceiverClientHeartbeat =>
       respondJs(callback + "(\"h\");\r\n")
@@ -704,7 +704,7 @@ class JsonPPollingReceive extends NonWebSocketSessionReceiverActorAction {
     case NotificationToReceiverClientClosed(index, handler) =>
       NotificationToHandlerUtil.onComplete(
         respondJs(callback + "(\"c[3000,\\\"Go away!\\\"]\");\r\n"),
-        index, handler, false
+        index, handler, write = false
       ).addListener(ChannelFutureListener.CLOSE)
 
     case Terminated(actorRef) if actorRef == nonWebSocketSession =>
@@ -717,7 +717,7 @@ class JsonPPollingReceive extends NonWebSocketSessionReceiverActorAction {
 class JsonPPollingSend extends NonWebSocketSessionActorAction with SkipCsrfCheck {
   def nLastTokensToRemoveFromPathInfo = 3
 
-  def execute() {
+  def execute(): Unit = {
     val body: String = try {
       val contentType = request.headers.get(HttpHeaderNames.CONTENT_TYPE)
       if (contentType != null && contentType.toLowerCase.startsWith(HttpHeaderValues.APPLICATION_X_WWW_FORM_URLENCODED.toString)) {
@@ -764,7 +764,7 @@ class JsonPPollingSend extends NonWebSocketSessionActorAction with SkipCsrfCheck
 class EventSourceReceive extends NonWebSocketSessionReceiverActorAction {
   def nLastTokensToRemoveFromPathInfo = 3
 
-  def execute() {
+  def execute(): Unit = {
     val sessionId = param("sessionId")
 
     handleCookie()
@@ -773,7 +773,7 @@ class EventSourceReceive extends NonWebSocketSessionReceiverActorAction {
     lookupOrCreateNonWebSocketSessionActor(sessionId)
   }
 
-  protected def onLookupOrRecreateResult(newlyCreated: Boolean) {
+  protected def onLookupOrRecreateResult(newlyCreated: Boolean): Unit = {
     if (newlyCreated) {
       respondEventSource("o")
       context.become(receiveNotification)
@@ -795,7 +795,7 @@ class EventSourceReceive extends NonWebSocketSessionReceiverActorAction {
     case SubscribeResultToReceiverClientMessages(messages) =>
       val json   = "a" + SeriDeseri.toJson(messages)
       val quoted = SockJsAction.quoteUnicode(json)
-      if (respondStreamingWithLimit(quoted, true))
+      if (respondStreamingWithLimit(quoted, isEventSource = true))
         context.become(receiveNotification)
 
     case SubscribeResultToReceiverClientWaitForMessage =>
@@ -810,10 +810,10 @@ class EventSourceReceive extends NonWebSocketSessionReceiverActorAction {
     case NotificationToReceiverClientMessage(index, message, handler) =>
       val json   = "a" + SeriDeseri.toJson(Seq(message))
       val quoted = SockJsAction.quoteUnicode(json)
-      respondStreamingWithLimit(quoted, true, Some(index, handler))
+      respondStreamingWithLimit(quoted, isEventSource = true, Some(index, handler))
 
     case NotificationToReceiverClientHeartbeat =>
-      respondStreamingWithLimit("h", true)
+      respondStreamingWithLimit("h", isEventSource = true)
 
     case NotificationToReceiverClientClosed(index, handler) =>
       respondJs("c[3000,\"Go away!\"]\n")
@@ -831,7 +831,7 @@ class EventSourceReceive extends NonWebSocketSessionReceiverActorAction {
 class WebSocketGET extends SockJsAction {
   def nLastTokensToRemoveFromPathInfo = 3
 
-  def execute() {
+  def execute(): Unit = {
     response.setStatus(HttpResponseStatus.BAD_REQUEST)
     respondText("""'Can "Upgrade" only to "WebSocket".'""")
   }
@@ -844,7 +844,7 @@ class WebSocketGET extends SockJsAction {
 class WebSocketPOST extends SockJsAction with SkipCsrfCheck {
   def nLastTokensToRemoveFromPathInfo = 3
 
-  def execute() {
+  def execute(): Unit = {
     response.setStatus(HttpResponseStatus.METHOD_NOT_ALLOWED)
     response.headers.set(HttpHeaderNames.ALLOW, "GET")
     respond()
@@ -858,7 +858,7 @@ class WebSocket extends WebSocketAction with ServerIdSessionIdValidator with Soc
 
   private[this] var sockJsActorRef: ActorRef = _
 
-  def execute() {
+  def execute(): Unit = {
     sockJsActorRef = Config.routes.sockJsRouteMap.createSockJsAction(pathPrefix)
     respondWebSocketText("o")
     sockJsActorRef ! (self, currentAction)
@@ -871,7 +871,7 @@ class WebSocket extends WebSocketAction with ServerIdSessionIdValidator with Soc
       case WebSocketText(body) =>
         // Server must ignore empty messages
         // http://sockjs.github.com/sockjs-protocol/sockjs-protocol-0.3.3.html#section-69
-        if (!body.isEmpty) {
+        if (body.nonEmpty) {
           // body: can be ["m1", "m2"] or "m1"
           // http://sockjs.github.com/sockjs-protocol/sockjs-protocol-0.3.3.html#section-61
           val normalizedBody = if (body.startsWith("[")) body else "[" + body + "]"
@@ -891,21 +891,21 @@ class WebSocket extends WebSocketAction with ServerIdSessionIdValidator with Soc
 
       case MessageFromHandler(index, text) =>
         val json = SeriDeseri.toJson(Seq(text))
-        NotificationToHandlerUtil.onComplete(respondWebSocketText("a" + json), index, sockJsActorRef, true)
+        NotificationToHandlerUtil.onComplete(respondWebSocketText("a" + json), index, sockJsActorRef, write = true)
 
       case CloseFromHandler(index) =>
         respondWebSocketText("c[3000,\"Go away!\"]").addListener(new ChannelFutureListener {
-          def operationComplete(f: ChannelFuture) {
+          def operationComplete(f: ChannelFuture): Unit = {
             if (f.isSuccess)
-              NotificationToHandlerUtil.onComplete(respondWebSocketClose(), index, sockJsActorRef, false)
+              NotificationToHandlerUtil.onComplete(respondWebSocketClose(), index, sockJsActorRef, write = false)
             else
-              NotificationToHandlerUtil.onComplete(f, index, sockJsActorRef, false)
+              NotificationToHandlerUtil.onComplete(f, index, sockJsActorRef, write = false)
           }
         })
     }
   }
 
-  override def postStop() {
+  override def postStop(): Unit = {
     if (sockJsActorRef != null) Config.actorSystem.stop(sockJsActorRef)
     super.postStop()
   }
@@ -917,7 +917,7 @@ class RawWebSocket extends WebSocketAction with ServerIdSessionIdValidator with 
 
   private[this] var sockJsActorRef: ActorRef = _
 
-  def execute() {
+  def execute(): Unit = {
     sockJsActorRef = Config.routes.sockJsRouteMap.createSockJsAction(pathPrefix)
     sockJsActorRef ! (self, currentAction)
 
@@ -933,7 +933,7 @@ class RawWebSocket extends WebSocketAction with ServerIdSessionIdValidator with 
     }
   }
 
-  override def postStop() {
+  override def postStop(): Unit = {
     if (sockJsActorRef != null) Config.actorSystem.stop(sockJsActorRef)
     super.postStop()
   }

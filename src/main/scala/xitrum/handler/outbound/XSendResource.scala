@@ -17,24 +17,24 @@ object XSendResource {
   // here because XSendResource may be used by applications which does not want
   // to clients to cache.
 
-  val CHUNK_SIZE            = 8 * 1024
+  val CHUNK_SIZE: Int = 8 * 1024
   val X_SENDRESOURCE_HEADER = "X-Sendresource"
 
   // See comment of X_SENDFILE_HEADER_IS_FROM_CONTROLLER
   val X_SENDRESOURCE_HEADER_IS_FROM_CONTROLLER = "X-Sendresource-Is-From-Controller"
 
-  def setHeader(response: FullHttpResponse, path: String, fromController: Boolean) {
+  def setHeader(response: FullHttpResponse, path: String, fromController: Boolean): Unit = {
     response.headers.set(X_SENDRESOURCE_HEADER, path)
     if (fromController) response.headers.set(X_SENDRESOURCE_HEADER_IS_FROM_CONTROLLER, "true")
   }
 
-  def isHeaderSet(response: FullHttpResponse) = response.headers.contains(X_SENDRESOURCE_HEADER)
+  def isHeaderSet(response: FullHttpResponse): Boolean = response.headers.contains(X_SENDRESOURCE_HEADER)
 
   /** @return false if not found */
   def sendResource(
       ctx: ChannelHandlerContext, env: HandlerEnv, promise: ChannelPromise,
-      request: HttpRequest, response: FullHttpResponse, path: String, noLog: Boolean)
-  {
+      request: HttpRequest, response: FullHttpResponse, path: String, noLog: Boolean
+  ): Unit = {
     val mimeo = Option(response.headers.get(CONTENT_TYPE))
     Etag.forResource(path, mimeo, Gzip.isAccepted(request)) match {
       case Etag.NotFound =>
@@ -78,7 +78,7 @@ object XSendResource {
 class XSendResource extends ChannelOutboundHandlerAdapter {
   import XSendResource._
 
-  override def write(ctx: ChannelHandlerContext, msg: Object, promise: ChannelPromise) {
+  override def write(ctx: ChannelHandlerContext, msg: Object, promise: ChannelPromise): Unit = {
     if (!msg.isInstanceOf[HandlerEnv]) {
       ctx.write(msg, promise)
       return

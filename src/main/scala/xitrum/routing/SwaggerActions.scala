@@ -1,6 +1,6 @@
 package xitrum.routing
 
-import org.apache.commons.lang3.text.WordUtils
+import org.apache.commons.text.WordUtils
 
 import org.json4s.JField
 import org.json4s.JsonAST.{JString, JArray, JValue, JObject}
@@ -16,7 +16,7 @@ import scala.collection.mutable.ArrayBuffer
 @First
 @GET("xitrum/swagger.json")
 class SwaggerJson extends FutureAction {
-  def execute() {
+  def execute(): Unit = {
     respondJsonText(SwaggerJson.json)
   }
 }
@@ -25,7 +25,7 @@ class SwaggerJson extends FutureAction {
 @First
 @GET("xitrum/swagger")
 class SwaggerUi extends FutureAction {
-  def execute() {
+  def execute(): Unit = {
     redirectTo(webJarsUrl("swagger-ui/3.4.0/dist/index.html?url=" + url[SwaggerJson]))
   }
 }
@@ -46,7 +46,7 @@ object SwaggerJson {
   def json: String = prettyJson
 
   /** Maybe called multiple times in development mode when reloading routes. */
-  def reloadFromRoutes() {
+  def reloadFromRoutes(): Unit = {
     prettyJson = JsonMethods.pretty(JsonMethods.render(getSwaggerObject))
   }
 
@@ -78,7 +78,7 @@ object SwaggerJson {
     val swaggerMap = Config.routes.swaggerMap
 
     // Use ListMap to preserve the order of routes
-    Config.routes.allFlatten().foldLeft(ListMap.empty[String, ArrayBuffer[Route]]) { (acc, route) =>
+    val map = Config.routes.allFlatten().foldLeft(ListMap.empty[String, ArrayBuffer[Route]]) { (acc, route) =>
       if (swaggerMap.contains(route.klass)) {
         val path = RouteCompiler.decompile(route.compiledPattern, forSwagger = true)
         acc.get(path) match {
@@ -94,6 +94,10 @@ object SwaggerJson {
         acc
       }
     }
+
+    // Scala 2.13 shows deprecation warning for map.mapValues, and suggests map.view.mapValues
+    // TODO Do as suggested when we drop Scala 2.12 support
+    map.mapValues { arrayBuffer => arrayBuffer.toSeq } .toMap
   }
 
   private def getPathItem(routes: Seq[Route]): JValue = {

@@ -20,7 +20,7 @@ class WebSocketEventDispatcher(
     actorRef:   ActorRef
 ) extends SimpleChannelInboundHandler[WebSocketFrame]
 {
-  override def channelRead0(ctx: ChannelHandlerContext, frame: WebSocketFrame) {
+  override def channelRead0(ctx: ChannelHandlerContext, frame: WebSocketFrame): Unit = {
     frame match {
       case textFrame: TextWebSocketFrame =>
         val text = textFrame.text
@@ -38,15 +38,15 @@ class WebSocketEventDispatcher(
         Log.trace("[WS in] ping")
         Log.trace("[WS out] pong")
 
-      case pongFrame: PongWebSocketFrame =>
+      case _: PongWebSocketFrame =>
         actorRef ! WebSocketPong
         Log.trace("[WS in] pong")
 
-      case closeFrame: CloseWebSocketFrame =>
+      case _: CloseWebSocketFrame =>
         handshaker.close(ctx.channel, frame.retain().asInstanceOf[CloseWebSocketFrame]).addListener(ChannelFutureListener.CLOSE)
         Log.trace("[WS in] close")
 
-      case otherFrame =>
+      case _ =>
         Log.trace("[WS in] unprocessed frame: $otherFrame")
     }
   }

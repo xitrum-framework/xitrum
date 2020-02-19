@@ -19,7 +19,7 @@ import xitrum.util.PathSanitizer
  */
 @Sharable
 class WebJarsServer extends SimpleChannelInboundHandler[HandlerEnv] {
-  override def channelRead0(ctx: ChannelHandlerContext, env: HandlerEnv) {
+  override def channelRead0(ctx: ChannelHandlerContext, env: HandlerEnv): Unit = {
     val request = env.request
     if (request.method != GET && request.method != HEAD && request.method != OPTIONS) {
       ctx.fireChannelRead(env)

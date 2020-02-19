@@ -5,9 +5,9 @@ object MinLength {
 }
 
 class MinLength(min: Int) extends Validator[String] {
-  def check(value: String) = value.length >= min
+  def check(value: String): Boolean = value.length >= min
 
-  def message(name: String, value: String) =
+  def message(name: String, value: String): Option[String] =
     if (value.length >= min)
       None
     else

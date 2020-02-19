@@ -1,11 +1,12 @@
 package xitrum.handler.outbound
 
-import org.scalatest.{FlatSpec, Matchers}
+import org.scalatest.flatspec.AnyFlatSpec
+import org.scalatest.matchers.should.Matchers
 
-class RangeParserTest extends FlatSpec with Matchers {
+class RangeParserTest extends AnyFlatSpec with Matchers {
   behavior of "RangeParser"
 
-  def test(spec: String, expected: RangeParserResult) {
+  def test(spec: String, expected: RangeParserResult): Unit = {
     "parse" should s"handle $spec" in {
       RangeParser.parse(spec, 1048576) shouldBe expected
     }

@@ -10,11 +10,11 @@ import xitrum.util.SeriDeseri
 
 /** Compress big session cookie to try to avoid the 4KB limit. */
 class CookieSessionStore extends SessionStore {
-  def start() {}
+  def start(): Unit = {}
 
-  def stop() {}
+  def stop(): Unit = {}
 
-  def store(session: Session, env: SessionEnv) {
+  def store(session: Session, env: SessionEnv): Unit = {
     if (session.isEmpty) {
       // If session cookie has been sent by browser, send back session cookie
       // with max age = 0 so that browser will delete it immediately
@@ -60,7 +60,7 @@ class CookieSessionStore extends SessionStore {
       // See "store" method to know why this map needs to be immutable
       case Some(encryptedImmutableMap) =>
         val immutableMap = SeriDeseri
-          .fromSecureUrlSafeBase64[Map[String, Any]](encryptedImmutableMap, true)
+          .fromSecureUrlSafeBase64[Map[String, Any]](encryptedImmutableMap, forCookie = true)
           .getOrElse(Map.empty[String, Any])
 
         // Convert to mutable map

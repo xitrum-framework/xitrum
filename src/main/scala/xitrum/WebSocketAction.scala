@@ -35,8 +35,8 @@ case object WebSocketPong
  * - WebSocket close frame is received or sent
  */
 trait WebSocketAction extends Actor with Action {
-  def receive = {
-    case (env: HandlerEnv, skipCsrfCheck: Boolean) =>
+  def receive: Receive = {
+    case (env: HandlerEnv, _) =>
       // env must be set before calling acceptWebSocket, because acceptWebSocket
       // uses webSocketAbsRequestUrl
       apply(env)
@@ -72,7 +72,7 @@ trait WebSocketAction extends Actor with Action {
    *
    * There's no respondWebSocketPong, because Xitrum automatically sends pong for you.
    */
-  def execute()
+  def execute(): Unit
 
   //----------------------------------------------------------------------------
 
@@ -81,7 +81,7 @@ trait WebSocketAction extends Actor with Action {
     channel.writeAndFlush(new TextWebSocketFrame(text.toString))
   }
 
-  def respondWebSocketJson(scalaObject: AnyRef) {
+  def respondWebSocketJson(scalaObject: AnyRef): Unit = {
     val json = SeriDeseri.toJson(scalaObject)
     log.trace("[WS out] text: " + json)
     channel.writeAndFlush(new TextWebSocketFrame(json))

@@ -13,7 +13,7 @@ import xitrum.view.DocType
 
 /** JMX metrics collector for single node application. */
 class MetricsCollector(localPublisher: ActorRef) extends Actor {
-  def receive = {
+  def receive: Receive = {
     case Collect => localPublisher ! MetricsManager.jmx.sample()
     case _ =>
   }
@@ -23,15 +23,15 @@ class MetricsCollector(localPublisher: ActorRef) extends Actor {
 class ClusterMetricsCollector(localPublisher: ActorRef) extends Actor {
   private val extension = ClusterMetricsExtension(context.system)
 
-  override def preStart() {
+  override def preStart(): Unit = {
     extension.subscribe(self)
   }
 
-  override def postStop() {
+  override def postStop(): Unit = {
     extension.unsubscribe(self)
   }
 
-  def receive = {
+  def receive: Receive = {
     case m: ClusterMetricsChanged =>
       localPublisher ! m
 
@@ -52,7 +52,7 @@ class MetricsPublisher extends Actor {
   private var cachedClusterMetrics: Set[NodeMetrics] = _
   private var cachedRegistryAsJson: String           = _
 
-  def receive = {
+  def receive: Receive = {
     case ClusterMetricsChanged(clusterMetrics) =>
       cachedClusterMetrics = clusterMetrics
 
@@ -72,16 +72,16 @@ class MetricsPublisher extends Actor {
       }
 
     case Pull =>
-      sender ! Publish(MetricsManager.registryAsJson)
-      if (cachedNodeMetrics != null)    sender ! cachedNodeMetrics
-      if (cachedClusterMetrics != null) sender ! cachedClusterMetrics.toList
+      sender() ! Publish(MetricsManager.registryAsJson)
+      if (cachedNodeMetrics != null)    sender() ! cachedNodeMetrics
+      if (cachedClusterMetrics != null) sender() ! cachedClusterMetrics.toList
 
     case Subscribe =>
-      clients = clients :+ sender
+      clients = clients :+ sender()
       context.watch(sender())
 
     case UnSubscribe =>
-      clients =  clients.filterNot(_ == sender)
+      clients =  clients.filterNot(_ == sender())
       context.unwatch(sender())
 
     case Terminated(client) =>
@@ -93,7 +93,7 @@ class MetricsPublisher extends Actor {
 
 /** Javascript fragment for establish metrics JSON sockJS channel. */
 trait MetricsViewer extends FutureAction {
-  def jsAddMetricsNameSpace(namespace: String = null) {
+  def jsAddMetricsNameSpace(namespace: String = null): Unit = {
     jsAddToView(s"""
 (function (namespace) {
   var ns  = namespace || window;
@@ -135,7 +135,7 @@ class XitrumMetricsViewer extends FutureAction with MetricsViewer {
     }
   }
 
-  lazy val html = DocType.html5(
+  lazy val html: String = DocType.html5(
     <html>
       <head>
         {xitrumCss}
@@ -197,7 +197,7 @@ class XitrumMetricsViewer extends FutureAction with MetricsViewer {
     </html>
   )
 
-  lazy val focusHtml = DocType.html5(
+  lazy val focusHtml: String = DocType.html5(
     <html>
       <head>
         {xitrumCss}
@@ -216,7 +216,7 @@ class XitrumMetricsViewer extends FutureAction with MetricsViewer {
     </html>
   )
 
-  def execute() {
+  def execute(): Unit = {
     jsAddMetricsNameSpace("window")
     paramo("focusAction") match {
       case Some(key) =>
@@ -233,11 +233,11 @@ class XitrumMetricsViewer extends FutureAction with MetricsViewer {
 /** SockJS channel for metrics JSON. */
 @SOCKJS("xitrum/metrics/channel")
 class XitrumMetricsChannel extends SockJsAction with PublisherLookUp {
-  def execute() {
+  def execute(): Unit = {
     checkAPIKey()
   }
 
-  private def checkAPIKey() {
+  private def checkAPIKey(): Unit = {
     context.become {
       case SockJsText(text) if text == MetricsManager.metrics.apiKey =>
         lookUpPublisher()
@@ -251,7 +251,7 @@ class XitrumMetricsChannel extends SockJsAction with PublisherLookUp {
     }
   }
 
-  override def doWithPublisher(publisher: ActorRef) {
+  override def doWithPublisher(publisher: ActorRef): Unit = {
     publisher ! Subscribe
     context.watch(publisher)
     context.become {
@@ -278,7 +278,7 @@ class XitrumMetricsChannel extends SockJsAction with PublisherLookUp {
     }
   }
 
-  private def sendHeapMemory(nodeMetrics:NodeMetrics) {
+  private def sendHeapMemory(nodeMetrics: NodeMetrics): Unit = {
     nodeMetrics match {
       case HeapMemory(address, timestamp, used, committed, max) =>
         respondSockJsText(SeriDeseri.toJson(Map(
@@ -291,11 +291,13 @@ class XitrumMetricsChannel extends SockJsAction with PublisherLookUp {
           "USED"      -> used,
           "COMMITTED" -> committed,
           "MAX"       -> max
-      )))
+        )))
+
+      case _ =>
     }
   }
 
-  private def sendCpu(nodeMetrics:NodeMetrics):Unit = {
+  private def sendCpu(nodeMetrics: NodeMetrics):Unit = {
     nodeMetrics match {
       case Cpu(address, timestamp, Some(systemLoadAverage), cpuCombined, cpuStolen, processors) =>
         respondSockJsText(SeriDeseri.toJson(Map(
@@ -308,7 +310,9 @@ class XitrumMetricsChannel extends SockJsAction with PublisherLookUp {
           "SYSTEMLOADAVERAGE" -> systemLoadAverage,
           "CPUCOMBINED"       -> cpuCombined,
           "PROCESSORS"        -> processors
-      )))
+        )))
+
+      case _ =>
     }
   }
 }

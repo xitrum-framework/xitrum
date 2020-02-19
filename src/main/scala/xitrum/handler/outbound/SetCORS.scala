@@ -12,7 +12,7 @@ import xitrum.handler.HandlerEnv
 
 @Sharable
 class SetCORS extends ChannelOutboundHandlerAdapter {
-  override def write(ctx: ChannelHandlerContext, msg: Object, promise: ChannelPromise) {
+  override def write(ctx: ChannelHandlerContext, msg: Object, promise: ChannelPromise): Unit = {
     import Config.xitrum.response.corsAllowOrigins
 
     if (!msg.isInstanceOf[HandlerEnv] || corsAllowOrigins.isEmpty) {

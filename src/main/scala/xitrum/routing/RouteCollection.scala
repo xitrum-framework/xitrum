@@ -105,20 +105,22 @@ class RouteCollection(
 )
 {
   /**
-   * Class name -> ReverseRoute
+   * Returns class name -> [[ReverseRoute]] mappings.
    *
    * Use class name (String) instead of Class[_] becasuse we want to reload
    * classes in development mode, but classes loaded by different class loaders
    * can't be compared.
    */
-  lazy val reverseMappings: scala.collection.Map[String, ReverseRoute] = {
+  lazy val reverseMappings: Map[String, ReverseRoute] = {
     val mmap = MMap.empty[String, ArrayBuffer[Route]]
 
     allFirsts(None).foreach { r => mmap.getOrElseUpdate(r.klass.getName, ArrayBuffer()).append(r) }
     allOthers(None).foreach { r => mmap.getOrElseUpdate(r.klass.getName, ArrayBuffer()).append(r) }
     allLasts (None).foreach { r => mmap.getOrElseUpdate(r.klass.getName, ArrayBuffer()).append(r) }
 
-    mmap.mapValues { routes => ReverseRoute(routes) }
+    // Scala 2.13 shows deprecation warning for mmap.mapValues, and suggests mmap.view.mapValues
+    // TODO Do as suggested when we drop Scala 2.12 support
+    mmap.mapValues { routes => ReverseRoute(routes.toSeq) } .toMap
   }
 
   //----------------------------------------------------------------------------
@@ -137,9 +139,9 @@ class RouteCollection(
 
   /**
    * @param xitrumRoutes
-   * - None: No filter, return all routes
-   * - Some(true): Only return Xitrum internal routes
-   * - Some(false): Only return non Xitrum internal routes
+   * - None: No filter, returns all routes
+   * - Some(true): Only returns Xitrum internal routes
+   * - Some(false): Only returns non Xitrum routes
    */
   def allFirsts(xitrumRoutes: Option[Boolean]): Seq[Route] = {
     xitrumRoutes match {
@@ -150,7 +152,7 @@ class RouteCollection(
         ret.appendAll(firstPUTs)
         ret.appendAll(firstDELETEs)
         ret.appendAll(firstWEBSOCKETs)
-        ret
+        ret.toSeq
 
       case Some(x) =>
         val ret = ArrayBuffer.empty[Route]
@@ -159,7 +161,7 @@ class RouteCollection(
         ret.appendAll(firstPUTs      .filter(_.klass.getName.startsWith("xitrum") == x))
         ret.appendAll(firstDELETEs   .filter(_.klass.getName.startsWith("xitrum") == x))
         ret.appendAll(firstWEBSOCKETs.filter(_.klass.getName.startsWith("xitrum") == x))
-        ret
+        ret.toSeq
     }
   }
 
@@ -173,7 +175,7 @@ class RouteCollection(
         ret.appendAll(lastPUTs)
         ret.appendAll(lastDELETEs)
         ret.appendAll(lastWEBSOCKETs)
-        ret
+        ret.toSeq
 
       case Some(x) =>
         val ret = ArrayBuffer.empty[Route]
@@ -182,7 +184,7 @@ class RouteCollection(
         ret.appendAll(lastPUTs      .filter(_.klass.getName.startsWith("xitrum") == x))
         ret.appendAll(lastDELETEs   .filter(_.klass.getName.startsWith("xitrum") == x))
         ret.appendAll(lastWEBSOCKETs.filter(_.klass.getName.startsWith("xitrum") == x))
-        ret
+        ret.toSeq
     }
   }
 
@@ -197,7 +199,7 @@ class RouteCollection(
         ret.appendAll(otherPATCHs)
         ret.appendAll(otherDELETEs)
         ret.appendAll(otherWEBSOCKETs)
-        ret
+        ret.toSeq
 
       case Some(x) =>
         val ret = ArrayBuffer.empty[Route]
@@ -207,14 +209,14 @@ class RouteCollection(
         ret.appendAll(otherPATCHs    .filter(_.klass.getName.startsWith("xitrum") == x))
         ret.appendAll(otherDELETEs   .filter(_.klass.getName.startsWith("xitrum") == x))
         ret.appendAll(otherWEBSOCKETs.filter(_.klass.getName.startsWith("xitrum") == x))
-        ret
+        ret.toSeq
     }
   }
 
   //----------------------------------------------------------------------------
   // Run only at startup, speed is not a problem
 
-  def logAll() {
+  def logAll(): Unit = {
     logRoutes(false)
     sockJsRouteMap.logRoutes(false)
     logErrorRoutes()
@@ -224,7 +226,7 @@ class RouteCollection(
   }
 
   /** @param xitrumRoutes true: log only Xitrum routes, false: log only app routes */
-  def logRoutes(xitrumRoutes: Boolean) {
+  def logRoutes(xitrumRoutes: Boolean): Unit = {
     // This method is only run once on start, speed is not a problem
 
     //                              method  pattern target
@@ -271,7 +273,7 @@ class RouteCollection(
       Log.info("Normal routes:\n" + strings.mkString("\n"))
   }
 
-  def logErrorRoutes() {
+  def logErrorRoutes(): Unit = {
     val strings = ArrayBuffer.empty[String]
     error404.foreach { klass => strings.append("404  " + klass.getName) }
     error500.foreach { klass => strings.append("500  " + klass.getName) }
@@ -319,7 +321,7 @@ class RouteCollection(
     // Look up in cache first.
     // We include pathInfo.encoded instead of pathInfo.decoded as part of the cache key, because
     // after being decoded, the original paths /test1/123%2F456 and /test1/123/456 will be the same.
-    val key   = httpMethod + pathInfo.encoded
+    val key   = httpMethod.toString + pathInfo.encoded
     val value = matchedRouteCache.get(key)
     if (value != null) return Some(value)
 
@@ -345,12 +347,12 @@ class RouteCollection(
   /** @return Option[(firsts, lasts, others)] */
   private def matchMethod(httpMethod: HttpMethod): Option[(Seq[Route], Seq[Route], Seq[Route])] = {
     val methodName = httpMethod.name
-    if (methodName == "GET")       return Some(firstGETs,       lastGETs,       otherGETs)
-    if (methodName == "POST")      return Some(firstPOSTs,      lastPOSTs,      otherPOSTs)
-    if (methodName == "PUT")       return Some(firstPUTs,       lastPUTs,       otherPUTs)
-    if (methodName == "PATCH")     return Some(firstPATCHs,     lastPATCHs,     otherPATCHs)
-    if (methodName == "DELETE")    return Some(firstDELETEs,    lastDELETEs,    otherDELETEs)
-    if (methodName == "WEBSOCKET") return Some(firstWEBSOCKETs, lastWEBSOCKETs, otherWEBSOCKETs)
+    if (methodName == "GET")       return Some((firstGETs.toSeq,       lastGETs.toSeq,       otherGETs.toSeq))
+    if (methodName == "POST")      return Some((firstPOSTs.toSeq,      lastPOSTs.toSeq,      otherPOSTs.toSeq))
+    if (methodName == "PUT")       return Some((firstPUTs.toSeq,       lastPUTs.toSeq,       otherPUTs.toSeq))
+    if (methodName == "PATCH")     return Some((firstPATCHs.toSeq,     lastPATCHs.toSeq,     otherPATCHs.toSeq))
+    if (methodName == "DELETE")    return Some((firstDELETEs.toSeq,    lastDELETEs.toSeq,    otherDELETEs.toSeq))
+    if (methodName == "WEBSOCKET") return Some((firstWEBSOCKETs.toSeq, lastWEBSOCKETs.toSeq, otherWEBSOCKETs.toSeq))
     None
   }
 
@@ -394,7 +396,7 @@ class RouteCollection(
   // Convenient methods for modifying routes.
 
   /** removeByClass[ActionClassToRemove]()  */
-  def removeByClass[A <: Action]()(implicit action: Manifest[A]) {
+  def removeByClass[A <: Action]()(implicit action: Manifest[A]): Unit = {
     val className = action.toString
     all.foreach { routes =>
       val tobeRemoved = routes.filter(_.klass.getName == className)
@@ -403,7 +405,7 @@ class RouteCollection(
   }
 
   /** removeByPrefix("/path/prefix") or removeByPrefix("path/prefix") */
-  def removeByPrefix(prefix: String) {
+  def removeByPrefix(prefix: String): Unit = {
     val withoutSlashPrefix = if (prefix.startsWith("/")) prefix.substring(1) else prefix
 
     all.foreach { routes =>

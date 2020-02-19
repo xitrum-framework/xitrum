@@ -12,9 +12,9 @@ object Max {
 }
 
 class Max[T <: Comparable[T]](max: T) extends Validator[T] {
-  def check(value: T) = value.compareTo(max) <= 0
+  def check(value: T): Boolean = value.compareTo(max) <= 0
 
-  def message(name: String, value: T) =
+  def message(name: String, value: T): Option[String] =
     if (value.compareTo(max) <= 0)
       None
     else

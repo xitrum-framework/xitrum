@@ -28,14 +28,14 @@ trait ServerSessionStore extends SessionStore {
   def get(sessionId: String): Option[Map[String, Any]]
 
   /** To be implemented by server side session store implementations */
-  def put(sessionId: String, immutableMap: Map[String, Any])
+  def put(sessionId: String, immutableMap: Map[String, Any]): Unit
 
   /** To be implemented by server side session store implementations */
-  def remove(sessionId: String)
+  def remove(sessionId: String): Unit
 
   //----------------------------------------------------------------------------
 
-  def store(session: Session, env: SessionEnv) {
+  def store(session: Session, env: SessionEnv): Unit = {
     if (session.isEmpty) {
       // If session cookie has been sent by browser, send back session cookie
       // with max age = 0 so that browser will delete it immediately

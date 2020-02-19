@@ -13,7 +13,7 @@ class ClassFileLoader extends ClassLoader {
   private val searchDirs = Discoverer.containers.filter(_.isDirectory).map(_.toPath)
 
   // Need to cache because calling defineClass twice will cause exception
-  protected val cache = MMap[String, Class[_]]()
+  protected val cache: MMap[String, Class[_]] = MMap[String, Class[_]]()
 
   override def loadClass(className: String): Class[_] = {
     findClass(className)
@@ -43,7 +43,7 @@ class ClassFileLoader extends ClassLoader {
   /** @return None to use the fallback ClassLoader */
   protected def classNameToFilePath(className: String): Option[String] = {
     val relPath = className.replaceAllLiterally(".", File.separator) + ".class"
-    val paths   = searchDirs.map(_ + File.separator + relPath)
+    val paths   = searchDirs.map(_.toString + File.separator + relPath)
     paths.find(new File(_).exists)
   }
 }

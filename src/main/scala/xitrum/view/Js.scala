@@ -1,10 +1,8 @@
 package xitrum.view
 
-import scala.xml.Unparsed
-
-import org.apache.commons.lang3.StringEscapeUtils
+import scala.xml.{Node, Unparsed}
 import io.netty.channel.ChannelFuture
-
+import org.apache.commons.text.StringEscapeUtils
 import xitrum.Action
 
 // http://stackoverflow.com/questions/2703861/chromes-loading-indicator-keeps-spinning-during-xmlhttprequest
@@ -19,15 +17,15 @@ trait JsRenderer {
    * method jsForView to take out that buffer to embed the snippets to view
    * template.
    */
-  def jsAddToView(js: Any) {
+  def jsAddToView(js: Any): Unit = {
     buffer.append(js.toString)
     buffer.append(";\n")
   }
 
   /** See jsAddToView. */
-  lazy val jsForView = if (buffer.isEmpty) "" else <script type="text/javascript">{Unparsed("\n//<![CDATA[\n$(function() {\n" + buffer.toString + "});\n//]]>\n")}</script>
+  lazy val jsForView: Any = if (buffer.isEmpty) "" else <script type="text/javascript">{Unparsed("\n//<![CDATA[\n$(function() {\n" + buffer.toString + "});\n//]]>\n")}</script>
 
-  lazy val jsDefaults = {
+  lazy val jsDefaults: Node = {
     // java.util.Locale.FRANCE.toLanguageTag => fr_FR
     // java.util.Locale.FRANCE.toLanguageTag => fr-FR
     val validateI18n = if (locale.getLanguage == "en") "" else (<script type="text/javascript" src={webJarsUrl(s"jquery-validation/1.19.1/src/localization/messages_${locale.toString}.js")}></script>)
@@ -51,20 +49,20 @@ trait JsRenderer {
    *
    * org.apache.commons.lang3.StringEscapeUtils is used internally.
    */
-  def jsEscape(string: Any) = StringEscapeUtils.escapeEcmaScript(string.toString)
+  def jsEscape(string: Any): String = StringEscapeUtils.escapeEcmaScript(string.toString)
 
-  def js$(selector: String) = "$(\"" + selector + "\")"
+  def js$(selector: String): String = "$(\"" + selector + "\")"
 
-  def js$id(id: String) = js$("#" + id)
+  def js$id(id: String): String = js$("#" + id)
 
-  def js$name(name: String) = js$("[name='" + name + "']")
+  def js$name(name: String): String = js$("[name='" + name + "']")
 }
 
 trait JsResponder {
   this: Action =>
 
   // lazy because request is null when this instance is created
-  lazy val isAjax = request.headers.contains("X-Requested-With")
+  lazy val isAjax: Boolean = request.headers.contains("X-Requested-With")
 
   def jsRespond(fragments: Any*): ChannelFuture = {
     val js = fragments.mkString(";\n") + ";\n"
@@ -76,5 +74,5 @@ trait JsResponder {
   jsRespond("window.location.href = \"" + jsEscape(location) + "\"")
 
   def jsRedirectTo[T <: Action : Manifest](params: (String, Any)*): ChannelFuture =
-    jsRedirectTo(url[T](params:_*))
+    jsRedirectTo(url[T](params: _*))
 }

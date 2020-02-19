@@ -12,17 +12,17 @@ object ProxyProtocolHandler {
   private val HAPROXY_PROTOCOL_SOURCE_IP: AttributeKey[String] =
     AttributeKey.valueOf("HAProxyMessageSourceIp").asInstanceOf[AttributeKey[String]]
 
-  def setRemoteIp(channel: Channel, sourceIp: String) {
+  def setRemoteIp(channel: Channel, sourceIp: String): Unit = {
     channel.attr(HAPROXY_PROTOCOL_SOURCE_IP).set(sourceIp)
   }
 
-  def setRemoteIp(channel: Channel, request: HttpRequest) {
+  def setRemoteIp(channel: Channel, request: HttpRequest): Unit = {
     channel.attr(HAPROXY_PROTOCOL_SOURCE_IP).get() match {
       case sourceIp: String =>
         val headers = request.headers
         val xForwardedFor = headers.get("X-Forwarded-For")
         if (xForwardedFor != null) {
-          headers.set("X-Forwarded-For", xForwardedFor.concat(s", ${sourceIp}"))
+          headers.set("X-Forwarded-For", xForwardedFor.concat(s", $sourceIp"))
         } else {
           headers.add("X-Forwarded-For", sourceIp)
         }
@@ -34,7 +34,7 @@ object ProxyProtocolHandler {
 
 @Sharable
 class ProxyProtocolHandler extends SimpleChannelInboundHandler[HAProxyMessage] {
-  override def channelRead0(ctx: ChannelHandlerContext, msg: HAProxyMessage) {
+  override def channelRead0(ctx: ChannelHandlerContext, msg: HAProxyMessage): Unit = {
       ProxyProtocolHandler.setRemoteIp(ctx.channel, msg.sourceAddress)
       ctx.channel.pipeline.remove(this)
   }

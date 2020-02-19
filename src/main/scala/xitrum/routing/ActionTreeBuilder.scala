@@ -102,7 +102,7 @@ private case class ActionTreeBuilder(xitrumVersion: String, parent2Children: Map
 
   private def getConcreteActions: Set[Class[_ <: Action]] = {
     var concreteActions = Set.empty[Class[_ <: Action]]
-    def traverseActionTree(className: String) {
+    def traverseActionTree(className: String): Unit = {
       if (parent2Children.isDefinedAt(className)) {
         val children = parent2Children(className)
         children.foreach { className =>

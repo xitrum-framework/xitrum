@@ -2,6 +2,7 @@ package xitrum.util
 
 import java.util.{Collections, LinkedHashMap, Map}
 import javax.script.ScriptException
+
 import tv.cntt.rhinocoffeescript.Compiler
 import xitrum.Log
 
@@ -16,7 +17,7 @@ object CoffeeScriptCompiler {
 
   private[this] val cache = Collections.synchronizedMap(
     new LinkedHashMap[String, String](MAX_CACHE_SIZE, 1.0f, true) {
-      protected override def removeEldestEntry(eldest: Map.Entry[String, String]) =
+      protected override def removeEldestEntry(eldest: Map.Entry[String, String]): Boolean =
         size() > MAX_CACHE_SIZE * 0.9
     }
   )

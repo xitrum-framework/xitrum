@@ -16,7 +16,7 @@ class Route(
   val klass: Class[_ <: Action], val cacheSecs: Int
 )
 {
-  def numPlaceholders = compiledPattern.foldLeft(0) { (sum, rt) => sum + rt.numPlaceholders }
+  def numPlaceholders: Int = compiledPattern.foldLeft(0) { (sum, rt) => sum + rt.numPlaceholders }
 
   def url(params: Map[String, Any]): Either[String, String] = {
     ReverseRoute.collectReverseTokens(Seq.empty[String], compiledPattern, params) match {

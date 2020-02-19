@@ -44,7 +44,7 @@ object BasicAuth {
     }
   }
 
-  private def respondBasic(env: HandlerEnv, realm: String) {
+  private def respondBasic(env: HandlerEnv, realm: String): Unit = {
     val request  = env.request
     val response = env.response
     val headers  = response.headers
@@ -65,7 +65,7 @@ object BasicAuth {
 
 @Sharable
 class BasicAuth extends SimpleChannelInboundHandler[HandlerEnv] {
-  override def channelRead0(ctx: ChannelHandlerContext, env: HandlerEnv) {
+  override def channelRead0(ctx: ChannelHandlerContext, env: HandlerEnv): Unit = {
     val go = Config.xitrum.basicAuth
     if (go.isEmpty) {
       ctx.fireChannelRead(env)

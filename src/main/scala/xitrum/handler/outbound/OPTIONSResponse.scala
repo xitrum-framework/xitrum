@@ -12,7 +12,7 @@ import xitrum.handler.{AccessLog, HandlerEnv}
 
 @Sharable
 class OPTIONSResponse extends ChannelOutboundHandlerAdapter {
-  override def write(ctx: ChannelHandlerContext, msg: Object, promise: ChannelPromise) {
+  override def write(ctx: ChannelHandlerContext, msg: Object, promise: ChannelPromise): Unit = {
     if (!msg.isInstanceOf[HandlerEnv]) {
       ctx.write(msg, promise)
       return

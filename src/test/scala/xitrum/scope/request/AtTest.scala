@@ -1,11 +1,12 @@
 package xitrum.scope.request
 
-import org.scalatest.{FlatSpec, Matchers}
+import org.scalatest.flatspec.AnyFlatSpec
+import org.scalatest.matchers.should.Matchers
 
 private class AtTestClass(val a: String, val b: Double)
 private case class AtTestCaseClass(a: String, b: Int)
 
-class AtTest extends FlatSpec with Matchers {
+class AtTest extends AnyFlatSpec with Matchers {
   behavior of "At"
 
   it should "store objects" in {
@@ -34,7 +35,7 @@ class AtTest extends FlatSpec with Matchers {
     at("string") = "string"
     at("int") = 10
     at("class") = new AtTestClass("a_field", 10.5)
-    at("caseclass") = new AtTestCaseClass("a_field", 10)
+    at("caseclass") = AtTestCaseClass("a_field", 10)
 
     at.toJson("string") should equal("\"string\"")
     at.toJson("int") should equal("""10""")

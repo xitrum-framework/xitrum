@@ -11,7 +11,7 @@ object Loader {
   private[this] val BUFFER_SIZE = 1024
 
   /** Writes bytes to the specified file path. */
-  def bytesToFile(bytes: Array[Byte], path: String) {
+  def bytesToFile(bytes: Array[Byte], path: String): Unit = {
     // http://stackoverflow.com/questions/6879427/scala-write-string-to-file-in-one-statement
     Files.write(Paths.get(path), bytes)
   }

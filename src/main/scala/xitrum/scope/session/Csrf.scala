@@ -1,9 +1,10 @@
 package xitrum.scope.session
 
 import java.util.UUID
-
 import xitrum.Action
 import xitrum.util.{DefaultsTo, SeriDeseri}
+
+import scala.xml.Node
 
 /**
  * SeriDeseri's to/fromSecureUrlSafeBase64 is for preventing a user to mess with
@@ -64,7 +65,7 @@ trait Csrf {
     }
   }
 
-  lazy val antiCsrfMeta  = <meta name={TOKEN} content={antiCsrfToken} />
+  lazy val antiCsrfMeta: Node = <meta name={TOKEN} content={antiCsrfToken} />
 
-  lazy val antiCsrfInput = <input type="hidden" name={TOKEN} value={antiCsrfToken} />
+  lazy val antiCsrfInput: Node = <input type="hidden" name={TOKEN} value={antiCsrfToken} />
 }

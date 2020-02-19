@@ -1,16 +1,18 @@
 package xitrum
 
-import scala.collection.mutable.{Map => MMap}
-import org.scalatest.{FlatSpec, Matchers}
+import org.scalatest.flatspec.AnyFlatSpec
+import org.scalatest.matchers.should.Matchers
 
-class OptVarRecoveryTest extends FlatSpec with Matchers {
+import scala.collection.mutable.{Map => MMap}
+
+class OptVarRecoveryTest extends AnyFlatSpec with Matchers {
   behavior of "OptVarRecovery"
 
-  implicit val action = new Action { def execute() {} }
+  implicit val action: Action = () => {}
 
-  def newOptVar() = new OptVar[String] {
+  def newOptVar(): OptVar[String] = new OptVar[String] {
     private val all = MMap[String, Any](key -> Seq("blah"))
-    def getAll(implicit action: Action) = all
+    def getAll(implicit action: Action): MMap[String, Any] = all
   }
 
   "get" should "throw ClassCastException on first call, then NoSuchElementException on next calls" in {

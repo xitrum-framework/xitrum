@@ -1,7 +1,5 @@
 package xitrum.util
 
-import java.io.File
-
 object PathSanitizer {
   /** @return None if the path is suspicious (starts with ../ etc.) */
   def sanitize(path: String): Option[String] = {

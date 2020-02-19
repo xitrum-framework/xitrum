@@ -1,8 +1,9 @@
 package xitrum.util
 
-import org.scalatest.{FlatSpec, Matchers}
+import org.scalatest.flatspec.AnyFlatSpec
+import org.scalatest.matchers.should.Matchers
 
-class PathSanitizerTest extends FlatSpec with Matchers {
+class PathSanitizerTest extends AnyFlatSpec with Matchers {
   // "Let's Encrypt" uses .well-known directory
   "sanitize" should "allow dot directory" in {
     PathSanitizer.sanitize("/.well-known") should equal (Some("/.well-known"))

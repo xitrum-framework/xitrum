@@ -41,7 +41,7 @@ trait Redirect {
    * Redirects back to the current action. See also forwardTo.
    */
   def redirectToThis(params: (String, Any)*): ChannelFuture = {
-    redirectTo(url(params: _*))
+    redirectTo(Url.url(params: _*))
   }
 
   //----------------------------------------------------------------------------
@@ -55,12 +55,12 @@ trait Redirect {
    * Tells another action to process the current request for the current action.
    * See also redirectTo.
    */
-  def forwardTo[T <: Action : Manifest]() {
+  def forwardTo[T <: Action : Manifest](): Unit = {
     val actionClass = manifest[T].runtimeClass.asInstanceOf[Class[Action]]
     forwardTo(actionClass)
   }
 
-  def forwardTo(actionClass: Class[_ <:Action]) {
+  def forwardTo(actionClass: Class[_ <:Action]): Unit = {
     forwarding = true
     Dispatcher.dispatch(actionClass, handlerEnv, skipCsrfCheck = true)
   }

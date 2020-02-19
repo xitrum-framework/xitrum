@@ -70,7 +70,7 @@ class NonWebSocketSession(var receiverCliento: Option[ActorRef], pathPrefix: Str
   // Until the timeout occurs, the server must constantly serve the close message
   private[this] var closed = false
 
-  override def preStart() {
+  override def preStart(): Unit = {
     // Attach sockJsActorRef to the current actor, so that sockJsActorRef is
     // automatically stopped when the current actor stops
     sockJsActorRef = Config.routes.sockJsRouteMap.createSockJsAction(context, pathPrefix)
@@ -89,14 +89,14 @@ class NonWebSocketSession(var receiverCliento: Option[ActorRef], pathPrefix: Str
     context.setReceiveTimeout(SockJsAction.TIMEOUT_HEARTBEAT)
   }
 
-  private def unwatchAndStop() {
+  private def unwatchAndStop(): Unit = {
     receiverCliento.foreach(context.unwatch)
     context.unwatch(sockJsActorRef)
     context.stop(sockJsActorRef)
     context.stop(self)
   }
 
-  def receive = {
+  def receive: Receive = {
     // When non-WebSocket receiverClient stops normally after sending data to
     // browser, we need to wait for TIMEOUT_CONNECTION amount of time for the
     // to reconnect. Non-streaming client disconnects everytime. Note that for
@@ -108,7 +108,7 @@ class NonWebSocketSession(var receiverCliento: Option[ActorRef], pathPrefix: Str
       if (monitored == sockJsActorRef && !closed) {
         // See CloseFromHandler
         unwatchAndStop()
-      } else if (receiverCliento == Some(monitored)) {  // Scala 2.10 doesn't have Option#contains
+      } else if (receiverCliento.contains(monitored)) {
         context.unwatch(monitored)
         receiverCliento = None
         context.setReceiveTimeout(TIMEOUT_CONNECTION)

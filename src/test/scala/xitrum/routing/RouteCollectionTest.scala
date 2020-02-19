@@ -1,15 +1,19 @@
 package xitrum.routing
 
 import scala.collection.mutable.{Map => MMap}
+
 import io.netty.handler.codec.http.{HttpMethod, QueryStringDecoder}
 import io.netty.util.CharsetUtil
-import org.scalatest.{FlatSpec, Matchers}
+
+import org.scalatest.flatspec.AnyFlatSpec
+import org.scalatest.matchers.should.Matchers
+
 import xitrum.Action
 import xitrum.scope.request.PathInfo
 
 import scala.collection.mutable.ArrayBuffer
 
-class RouteCollectionTest extends FlatSpec with Matchers {
+class RouteCollectionTest extends AnyFlatSpec with Matchers {
   behavior of "RouteCollection"
 
   private val route = new Route(HttpMethod.GET, RouteCompiler.compile("/test1/:p1"), classOf[Action], -1)
@@ -25,7 +29,7 @@ class RouteCollectionTest extends FlatSpec with Matchers {
     None, None
   )
 
-  private def testMatchRoute(uri: String) {
+  private def testMatchRoute(uri: String): Unit = {
     uri should "match /test1/:p1" in {
       val decoder = new QueryStringDecoder(uri, CharsetUtil.UTF_8)
       val opt = routeCollection.route(HttpMethod.GET, new PathInfo(decoder, CharsetUtil.UTF_8))
@@ -35,7 +39,7 @@ class RouteCollectionTest extends FlatSpec with Matchers {
     }
   }
 
-  private def testNotMatchRoute(uri: String) {
+  private def testNotMatchRoute(uri: String): Unit = {
     uri should "match /test1/:p1" in {
       val decoder = new QueryStringDecoder(uri, CharsetUtil.UTF_8)
       val opt = routeCollection.route(HttpMethod.GET, new PathInfo(decoder, CharsetUtil.UTF_8))

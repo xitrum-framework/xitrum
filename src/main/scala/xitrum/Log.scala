@@ -1,6 +1,6 @@
 package xitrum
 
-import org.slf4s.LoggerFactory
+import org.slf4s.{Logger, LoggerFactory}
 
 /**
  * If you don't care about the class name where the log is made, without having
@@ -14,5 +14,5 @@ trait Log {
   // We use a trait for better speed, because getStackTrace is slow.
 
   /** Log name is inferred from name of the class extending this trait. */
-  lazy val log = LoggerFactory.getLogger(getClass)
+  lazy val log: Logger = LoggerFactory.getLogger(getClass)
 }

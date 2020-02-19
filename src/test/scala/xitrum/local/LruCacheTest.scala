@@ -1,8 +1,9 @@
 package xitrum.local
 
-import org.scalatest.{FlatSpec, Matchers}
+import org.scalatest.flatspec.AnyFlatSpec
+import org.scalatest.matchers.should.Matchers
 
-class LruCacheTest extends FlatSpec with Matchers {
+class LruCacheTest extends AnyFlatSpec with Matchers {
   behavior of "LruCache"
 
   it should "put/get any object" in {
@@ -83,7 +84,7 @@ class LruCacheTest extends FlatSpec with Matchers {
       // not millisecond
       Thread.sleep(2000)
     } catch {
-      case e: InterruptedException => fail()
+      case _: InterruptedException => fail()
     }
 
     cache.get("second") should equal (None)
@@ -101,7 +102,7 @@ class LruCacheTest extends FlatSpec with Matchers {
       // not millisecond
       Thread.sleep(2000)
     } catch {
-      case e: InterruptedException => fail()
+      case _: InterruptedException => fail()
     }
 
     cache.putIfAbsent("key", "xyz")

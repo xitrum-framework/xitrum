@@ -29,13 +29,13 @@ trait Responder {
   private var nonChunkedResponseOrFirstChunkSent = false
   private var doneResponding                     = false
 
-  def isDoneResponding = doneResponding
+  def isDoneResponding: Boolean = doneResponding
 
   /**
    * Called when the response or the last chunk (in case of chunked response)
    * has been sent to the client.
    */
-  def onDoneResponding() {}
+  def onDoneResponding(): Unit = {}
 
   def respond(): ChannelFuture = {
     // For chunked response, this method is only called to respond the 1st chunk,
@@ -74,7 +74,7 @@ trait Responder {
    *
    * If Content-Type header is not set, it is set to "application/octet-stream".
    */
-  def setChunked() {
+  def setChunked(): Unit = {
     HttpUtil.setTransferEncodingChunked(response, true)
 
     // From now on, the header is a mark telling the response is chunked.
@@ -315,7 +315,7 @@ trait Responder {
 
   //----------------------------------------------------------------------------
 
-  def respond404Page() {
+  def respond404Page(): Unit = {
     if (isAjax) {
       response.setStatus(HttpResponseStatus.NOT_FOUND)
       jsRespond("alert(\"" + jsEscape("Not Found") + "\")")
@@ -332,7 +332,7 @@ trait Responder {
     }
   }
 
-  def respond500Page() {
+  def respond500Page(): Unit = {
     if (isAjax) {
       response.setStatus(HttpResponseStatus.INTERNAL_SERVER_ERROR)
       jsRespond("alert(\"" + jsEscape("Internal Server Error") + "\")")
@@ -365,7 +365,7 @@ trait Responder {
    * Both Max-age and Expires header are set because IEs use Expires, not max-age:
    * http://mrcoles.com/blog/cookies-max-age-vs-expires/
    */
-  def setClientCacheAggressively() {
+  def setClientCacheAggressively(): Unit = {
     NotModified.setClientCacheAggressively(response)
   }
 
@@ -374,13 +374,13 @@ trait Responder {
    * Note that "pragma: no-cache" is linked to requests, not responses:
    * http://palizine.plynt.com/issues/2008Jul/cache-control-attributes/
    */
-  def setNoClientCache() {
+  def setNoClientCache(): Unit = {
     NotModified.setNoClientCache(response)
   }
 
   //----------------------------------------------------------------------------
 
-  private def throwDoubleResponseError(texto: Option[Any] = None) {
+  private def throwDoubleResponseError(texto: Option[Any] = None): Unit = {
     texto match {
       case None =>
         throw new IllegalStateException("Double response error. See stack trace to know where to fix the error.")
@@ -391,7 +391,7 @@ trait Responder {
   }
 
   /** If Content-Type header is not set, it is set to "application/octet-stream" */
-  private def respondHeadersOnlyForFirstChunk() {
+  private def respondHeadersOnlyForFirstChunk(): Unit = {
     // doneResponding is set to true by respondLastChunk
     if (doneResponding) throwDoubleResponseError()
 

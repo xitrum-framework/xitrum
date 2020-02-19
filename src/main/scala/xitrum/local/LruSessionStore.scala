@@ -26,16 +26,16 @@ class LruSessionStore extends ServerSessionStore {
     LocalLruCache[String, Map[String, Any]](maxElems)
   }
 
-  def start() {}
-  def stop() {}
+  def start(): Unit = {}
+  def stop(): Unit = {}
 
-  def get(sessionId: String) = Option(store.get(sessionId))
+  def get(sessionId: String): Option[Map[String, Any]] = Option(store.get(sessionId))
 
-  def put(sessionId: String, immutableMap: Map[String, Any]) {
+  def put(sessionId: String, immutableMap: Map[String, Any]): Unit = {
     store.put(sessionId, immutableMap)
   }
 
-  def remove(sessionId: String) {
+  def remove(sessionId: String): Unit = {
     store.remove(sessionId)
   }
 }

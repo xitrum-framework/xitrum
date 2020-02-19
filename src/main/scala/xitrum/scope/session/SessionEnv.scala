@@ -50,7 +50,7 @@ trait SessionEnv extends Csrf {
   private var sessionTouched = false
 
   /** To reset session: session.clear() */
-  lazy val session = {
+  lazy val session: MMap[String, Any] = {
     sessionTouched = true
     try {
       Config.xitrum.session.store.restore(this)
@@ -65,7 +65,7 @@ trait SessionEnv extends Csrf {
   def sessiono[T](key: String)(implicit d: T DefaultsTo String): Option[T] =
     session.get(key).map(_.asInstanceOf[T])
 
-  def setCookieAndSessionIfTouchedOnRespond() {
+  def setCookieAndSessionIfTouchedOnRespond(): Unit = {
     if (sessionTouched || Config.xitrum.session.cookieMaxAge > 0) Config.xitrum.session.store.store(session, this)
 
     if (responseCookies.nonEmpty) {

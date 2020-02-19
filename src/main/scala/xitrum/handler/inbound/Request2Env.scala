@@ -63,7 +63,7 @@ class Request2Env extends SimpleChannelInboundHandler[HttpObject] {
   // raw request body size is checked separately (see factory.setMaxLimit above)
   private[this] var bodyBytesDecoded = 0L
 
-  override def channelInactive(ctx: ChannelHandlerContext) {
+  override def channelInactive(ctx: ChannelHandlerContext): Unit = {
     // In case the connection is closed when the request is not fully received,
     // thus env is initialized but not sent upstream to the next handler
     if (env != null) {
@@ -72,7 +72,7 @@ class Request2Env extends SimpleChannelInboundHandler[HttpObject] {
     }
   }
 
-  override def channelRead0(ctx: ChannelHandlerContext, msg: HttpObject) {
+  override def channelRead0(ctx: ChannelHandlerContext, msg: HttpObject): Unit = {
     val decRet = msg.decoderResult
     if (decRet.isFailure) {
       Log.debug("Could not decode request", decRet.cause)
@@ -122,7 +122,7 @@ class Request2Env extends SimpleChannelInboundHandler[HttpObject] {
 
   //----------------------------------------------------------------------------
 
-  private def handleHttpRequestHead(ctx: ChannelHandlerContext, request: HttpRequest) {
+  private def handleHttpRequestHead(ctx: ChannelHandlerContext, request: HttpRequest): Unit = {
     // See DefaultHttpChannelInitializer
     // This is the first Xitrum handler, log the request
     Log.trace(request.toString)
@@ -165,7 +165,7 @@ class Request2Env extends SimpleChannelInboundHandler[HttpObject] {
     }
   }
 
-  private def handleHttpRequestContent(ctx: ChannelHandlerContext, content: HttpContent) {
+  private def handleHttpRequestContent(ctx: ChannelHandlerContext, content: HttpContent): Unit = {
     // To save memory, only set env.request.content when env.bodyDecoder is not in action
     if (env.bodyDecoder == null) {
       val body   = content.content
@@ -236,14 +236,14 @@ class Request2Env extends SimpleChannelInboundHandler[HttpObject] {
     }
   }
 
-  private def sanitizeFileUploadFilename(fileUpload: FileUpload) {
+  private def sanitizeFileUploadFilename(fileUpload: FileUpload): Unit = {
     val filename1 = fileUpload.getFilename
     val filename2 = filename1.split('/').last.split('\\').last.trim.replaceAll("^\\.+", "")
     val filename3 = if (filename2.isEmpty) "filename" else filename2
     fileUpload.setFilename(filename3)
   }
 
-  private def putOrAppendString(map: Params, key: String, value: String) {
+  private def putOrAppendString(map: Params, key: String, value: String): Unit = {
     if (!map.contains(key)) {
       map(key) = Seq(value)
     } else {
@@ -252,7 +252,7 @@ class Request2Env extends SimpleChannelInboundHandler[HttpObject] {
     }
   }
 
-  private def putOrAppendFileUpload(map: FileUploadParams, key: String, value: FileUpload) {
+  private def putOrAppendFileUpload(map: FileUploadParams, key: String, value: FileUpload): Unit = {
     if (!map.contains(key)) {
       map(key) = Seq(value)
     } else {
@@ -267,7 +267,7 @@ class Request2Env extends SimpleChannelInboundHandler[HttpObject] {
     bodyBytesDecoded + hd.length <= Config.xitrum.request.maxSizeInBytes
   }
 
-  private def putDataToEnv(data: InterfaceHttpData) {
+  private def putDataToEnv(data: InterfaceHttpData): Unit = {
     val dataType = data.getHttpDataType
     if (dataType == HttpDataType.Attribute) {
       val attribute = data.asInstanceOf[Attribute]
@@ -289,7 +289,7 @@ class Request2Env extends SimpleChannelInboundHandler[HttpObject] {
     }
   }
 
-  private def closeOnBigRequest(ctx: ChannelHandlerContext) {
+  private def closeOnBigRequest(ctx: ChannelHandlerContext): Unit = {
     Log.debug("Request content body is too big, see xitrum.request.maxSizeInMB in xitrum.conf")
     BadClientSilencer.respond400(ctx.channel, "Request content body is too big. Limit: " + Config.xitrum.request.config.getLong("maxSizeInMB") + " bytes")
 
@@ -299,7 +299,7 @@ class Request2Env extends SimpleChannelInboundHandler[HttpObject] {
     env = null
   }
 
-  private def sendUpstream(ctx: ChannelHandlerContext) {
+  private def sendUpstream(ctx: ChannelHandlerContext): Unit = {
     // NoRealPipelining.resumeReading should be called when the response has been sent
     //
     // PITFALL:
@@ -328,7 +328,7 @@ class Request2Env extends SimpleChannelInboundHandler[HttpObject] {
    * Only parses one level.
    * Should use requestContentJValue directly for more advanced uses.
    */
-  private def parseTextParamsFromJson(env: HandlerEnv) {
+  private def parseTextParamsFromJson(env: HandlerEnv): Unit = {
     env.requestContentJValue match {
       case JObject(fields) =>
         fields.foreach {
@@ -339,6 +339,9 @@ class Request2Env extends SimpleChannelInboundHandler[HttpObject] {
 
           case JField(name, value) =>
             putOrAppendString(env.bodyTextParams, name, jValue2String(value))
+
+          case _ =>
+            // Other cases not supported
         }
 
       case _ => // Nothing to do

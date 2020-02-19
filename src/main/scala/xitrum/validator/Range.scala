@@ -12,9 +12,9 @@ object Range {
 }
 
 class Range[T <: Comparable[T]](min: T, max: T) extends Validator[T] {
-  def check(value: T) = value.compareTo(min) >= 0 && value.compareTo(max) <= 0
+  def check(value: T): Boolean = value.compareTo(min) >= 0 && value.compareTo(max) <= 0
 
-  def message(name: String, value: T) =
+  def message(name: String, value: T): Option[String] =
     if (value.compareTo(min) >= 0 && value.compareTo(max) <= 0)
       None
     else

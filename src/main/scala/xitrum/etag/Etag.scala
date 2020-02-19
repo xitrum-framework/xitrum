@@ -20,9 +20,9 @@ object Etag {
   private[this] val gzippedSmallFileCache = LocalLruCache[(String, Long), Small](Config.xitrum.staticFile.maxNumberOfCachedFiles)
 
   /** Etag without quotes is technically illegal. */
-  def quote(etag: String) = "\"" + etag + "\""
+  def quote(etag: String): String = "\"" + etag + "\""
 
-  def set(response: HttpResponse, etag: String) {
+  def set(response: HttpResponse, etag: String): Unit = {
     response.headers.set(HttpHeaderNames.ETAG, Etag.quote(etag))
   }
 
@@ -33,7 +33,7 @@ object Etag {
     SeriDeseri.bytesToUrlSafeBase64(md5.digest)
   }
 
-  def forString(string: String) = forBytes(string.getBytes(Config.xitrum.request.charset))
+  def forString(string: String): String = forBytes(string.getBytes(Config.xitrum.request.charset))
 
   def forFile(path: String, mimeo: Option[String], gzipped: Boolean): Result = {
     val file = new File(path)
@@ -62,7 +62,7 @@ object Etag {
    * No one is stupid enough to store large files in resources.
    */
   def forResource(path: String, mimeo: Option[String], gzipped: Boolean): Result = {
-    val key   = ("[resource]" + path, 0l)
+    val key   = ("[resource]" + path, 0L)
     val cache = if (gzipped) gzippedSmallFileCache else smallFileCache
     val value = cache.get(key)
     if (value != null) return value
@@ -71,7 +71,7 @@ object Etag {
     if (bytes == null) return NotFound
 
     val etag    = forBytes(bytes)
-    val small   = Small(bytes, etag, mimeo orElse Mime.get(path), false)
+    val small   = Small(bytes, etag, mimeo orElse Mime.get(path), gzipped = false)
     val smaller = if (gzipped) compressBigTextualFile(small) else small
     cache.synchronized { cache.put(key, smaller) }
     smaller
@@ -79,11 +79,11 @@ object Etag {
 
   //----------------------------------------------------------------------------
 
-  def areEtagsIdentical(request: HttpRequest, etag: String) =
+  def areEtagsIdentical(request: HttpRequest, etag: String): Boolean =
     request.headers.get(HttpHeaderNames.IF_NONE_MATCH) == quote(etag)
 
   /** @return true if NOT_MODIFIED response has been sent */
-  def respondIfEtagsIdentical(action: Action, etag: String) = {
+  def respondIfEtagsIdentical(action: Action, etag: String): Boolean = {
     val request  = action.request
     val response = action.response
     if (areEtagsIdentical(request, etag)) {

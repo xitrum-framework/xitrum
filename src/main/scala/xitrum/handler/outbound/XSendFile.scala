@@ -3,7 +3,7 @@ package xitrum.handler.outbound
 import java.io.RandomAccessFile
 
 import io.netty.buffer.Unpooled
-import io.netty.channel.{ChannelFuture, ChannelFutureListener, ChannelHandler, ChannelHandlerContext, ChannelOutboundHandlerAdapter, ChannelPromise, DefaultFileRegion}
+import io.netty.channel.{ChannelFuture, ChannelHandler, ChannelHandlerContext, ChannelOutboundHandlerAdapter, ChannelPromise, DefaultFileRegion}
 import io.netty.handler.codec.http.{FullHttpResponse, HttpHeaderNames, HttpHeaderValues, HttpMethod, HttpResponseStatus, HttpUtil, LastHttpContent}
 import io.netty.handler.ssl.SslHandler
 import io.netty.handler.stream.ChunkedFile
@@ -17,13 +17,15 @@ import xitrum.etag.{Etag, NotModified}
 import xitrum.handler.{AccessLog, HandlerEnv, NoRealPipelining}
 import xitrum.util.{ByteBufUtil, Gzip}
 
+import scala.annotation.tailrec
+
 // Based on https://github.com/netty/netty/tree/master/example/src/main/java/io/netty/example/http/file
 object XSendFile {
   // setClientCacheAggressively should be called at PublicFileServer, not
   // here because XSendFile may be used by applications which does not want
   // to clients to cache.
 
-  val CHUNK_SIZE        = 8 * 1024
+  val CHUNK_SIZE: Int = 8 * 1024
   val X_SENDFILE_HEADER = "X-Sendfile"
 
   // To avoid duplicate log like this when X_SENDFILE_HEADER is set by action
@@ -35,33 +37,34 @@ object XSendFile {
   private[this] val ABS_500 = xitrum.root + "/public/500.html"
 
   /** @param path see Renderer#renderFile */
-  def setHeader(response: FullHttpResponse, path: String, fromAction: Boolean) {
+  def setHeader(response: FullHttpResponse, path: String, fromAction: Boolean): Unit = {
     response.headers.set(X_SENDFILE_HEADER, path)
     if (fromAction) response.headers.set(X_SENDFILE_HEADER_IS_FROM_ACTION, "true")
   }
 
-  def isHeaderSet(response: FullHttpResponse) = response.headers.contains(X_SENDFILE_HEADER)
+  def isHeaderSet(response: FullHttpResponse): Boolean = response.headers.contains(X_SENDFILE_HEADER)
 
   /**
    * Removes non-standard headers, specific to this handler, to avoid leaking
    * information to the remote client.
    */
-  def removeHeaders(response: FullHttpResponse) {
+  def removeHeaders(response: FullHttpResponse): Unit = {
     response.headers.remove(X_SENDFILE_HEADER)
     response.headers.remove(X_SENDFILE_HEADER_IS_FROM_ACTION)
   }
 
-  def set404Page(response: FullHttpResponse, fromController: Boolean) {
+  def set404Page(response: FullHttpResponse, fromController: Boolean): Unit = {
     response.setStatus(NOT_FOUND)
     setHeader(response, ABS_404, fromController)
   }
 
-  def set500Page(response: FullHttpResponse, fromController: Boolean) {
+  def set500Page(response: FullHttpResponse, fromController: Boolean): Unit = {
     response.setStatus(INTERNAL_SERVER_ERROR)
     setHeader(response, ABS_500, fromController)
   }
 
-  def sendFile(ctx: ChannelHandlerContext, env: HandlerEnv, promise: ChannelPromise) {
+  @tailrec
+  def sendFile(ctx: ChannelHandlerContext, env: HandlerEnv, promise: ChannelPromise): Unit = {
     val channel       = ctx.channel
     val remoteAddress = channel.remoteAddress
     val request       = env.request
@@ -175,16 +178,16 @@ object XSendFile {
           // Cannot use zero-copy with HTTPS
           ctx
             .write(new ChunkedFile(raf, offset, length, CHUNK_SIZE))
-            .addListener(new ChannelFutureListener {
-              def operationComplete(f: ChannelFuture) { raf.close() }
+            .addListener((_: ChannelFuture) => {
+              raf.close()
             })
         } else {
           // No encryption - use zero-copy
           val region = new DefaultFileRegion(raf.getChannel, offset, length)
           ctx
             .write(region)  // region will automatically be released
-            .addListener(new ChannelFutureListener {
-              def operationComplete(f: ChannelFuture) { raf.close() }
+            .addListener((_: ChannelFuture) => {
+              raf.close()
             })
         }
 
@@ -202,7 +205,7 @@ object XSendFile {
  */
 @Sharable
 class XSendFile extends ChannelOutboundHandlerAdapter {
-  override def write(ctx: ChannelHandlerContext, msg: Object, promise: ChannelPromise) {
+  override def write(ctx: ChannelHandlerContext, msg: Object, promise: ChannelPromise): Unit = {
     if (!msg.isInstanceOf[HandlerEnv]) {
       ctx.write(msg, promise)
       return

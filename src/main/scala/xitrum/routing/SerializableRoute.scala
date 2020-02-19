@@ -42,7 +42,7 @@ class SerializableRoute(
     )
   }
 
-  override def toString =
+  override def toString: String =
     if (cacheSecs == 0)
       s"$httpMethod $compiledPattern -> $actionClass"
     else

@@ -1,6 +1,6 @@
 organization := "tv.cntt"
 name         := "xitrum"
-version      := "3.29.1-SNAPSHOT"
+version      := "3.30.0-SNAPSHOT"
 
 // Run "sbt mima-report-binary-issues" to check for binary compatibility
 // https://github.com/typesafehub/migration-manager
@@ -9,8 +9,8 @@ version      := "3.29.1-SNAPSHOT"
 
 //------------------------------------------------------------------------------
 
-crossScalaVersions := Seq("2.12.10")
-scalaVersion       := "2.12.10"
+crossScalaVersions := Seq("2.13.4", "2.12.13")
+scalaVersion       := "2.13.4"
 
 // Akka 2.4.0+ requires Java 8
 javacOptions ++= Seq("-source", "1.8", "-target", "1.8")
@@ -18,57 +18,67 @@ scalacOptions ++= Seq("-deprecation", "-feature", "-unchecked")
 
 //------------------------------------------------------------------------------
 
+// From Scala 2.13, to compile XML syntax, the scala.xml package must be on the classpath
+libraryDependencies += "org.scala-lang.modules" %% "scala-xml" % "1.3.0"
+
 // Projects using Xitrum must provide a concrete implementation of SLF4J (Logback etc.)
-libraryDependencies += "tv.cntt" %% "slf4s-api" % "1.7.25"
+libraryDependencies += "tv.cntt" %% "slf4s-api" % "1.7.30"
 
 // Netty is the core of Xitrum's HTTP(S) feature
-libraryDependencies += "io.netty" % "netty-all" % "4.1.43.Final"
+libraryDependencies += "io.netty" % "netty-all" % "4.1.58.Final"
 
 // https://github.com/netty/netty/wiki/Native-transports
 // Only works on Linux
-libraryDependencies += "io.netty" % "netty-transport-native-epoll" % "4.1.43.Final" classifier "linux-x86_64"
+libraryDependencies += "io.netty" % "netty-transport-native-epoll" % "4.1.58.Final" classifier "linux-x86_64"
 
 // https://github.com/netty/netty/wiki/Forked-Tomcat-Native
 // https://groups.google.com/forum/#!topic/netty/oRATC6Tl0A4
 // Include all classifiers for convenience
-libraryDependencies += "io.netty" % "netty-tcnative" % "2.0.27.Final" classifier "linux-x86_64"
-libraryDependencies += "io.netty" % "netty-tcnative" % "2.0.27.Final" classifier "osx-x86_64"
-libraryDependencies += "io.netty" % "netty-tcnative" % "2.0.27.Final" classifier "windows-x86_64"
+libraryDependencies += "io.netty" % "netty-tcnative" % "2.0.36.Final" classifier "linux-x86_64"
+libraryDependencies += "io.netty" % "netty-tcnative" % "2.0.36.Final" classifier "osx-x86_64"
+libraryDependencies += "io.netty" % "netty-tcnative" % "2.0.36.Final" classifier "windows-x86_64"
 
 // Javassist boosts Netty 4 speed
-libraryDependencies += "org.javassist" % "javassist" % "3.26.0-GA"
+libraryDependencies += "org.javassist" % "javassist" % "3.27.0-GA"
 
 // For clustering SockJS with Akka
 // Redirect Akka log to SLF4J
-libraryDependencies += "tv.cntt"           %% "glokka"               % "2.6.0"
-libraryDependencies += "com.typesafe.akka" %% "akka-cluster-metrics" % "2.6.0"
-libraryDependencies += "com.typesafe.akka" %% "akka-slf4j"           % "2.6.0"
+libraryDependencies += "tv.cntt"           %% "glokka"               % "2.6.1"
+libraryDependencies += "com.typesafe.akka" %% "akka-cluster-metrics" % "2.6.11"
+libraryDependencies += "com.typesafe.akka" %% "akka-slf4j"           % "2.6.11"
 
 // For file watch
 // (akka-agent is added here, should ensure same Akka version as above)
-libraryDependencies += "com.beachape.filemanagement" %% "schwatcher" % "0.3.5"
+libraryDependencies += "com.github.pathikrit" %% "better-files" % "3.9.1"
+libraryDependencies += "com.github.pathikrit" %% "better-files-akka"  % "3.9.1"
+libraryDependencies += "io.methvin" % "directory-watcher" % "0.12.0"
+libraryDependencies += "io.methvin" %% "directory-watcher-better-files" % "0.12.0"
+
+// http://download.oracle.com/javaee/5/api/javax/activation/MimetypesFileTypeMap.html
+libraryDependencies += "javax.activation" % "activation" % "1.1.1"
 
 // For scanning routes
 libraryDependencies += "tv.cntt" %% "sclasner" % "1.8.0"
 
 // For binary (de)serializing
-libraryDependencies += "com.twitter" %% "chill" % "0.9.3"
+libraryDependencies += "com.twitter" %% "chill" % "0.9.5"
 
 // For JSON (de)serializing
-libraryDependencies += "org.json4s" %% "json4s-jackson" % "3.6.7"
+libraryDependencies += "org.json4s" %% "json4s-jackson" % "3.6.10"
 
 // For i18n
 libraryDependencies += "tv.cntt" %% "scaposer" % "1.11.1"
 
 // For jsEscape
-libraryDependencies += "org.apache.commons" % "commons-lang3" % "3.9"
+libraryDependencies += "org.apache.commons" % "commons-text"  % "1.9"
+libraryDependencies += "org.apache.commons" % "commons-lang3" % "3.11"
 
 // For compiling CoffeeScript to JavaScript
 libraryDependencies += "tv.cntt" % "rhinocoffeescript" % "1.10.0"
 
 // For metrics
-libraryDependencies += "nl.grons"              %% "metrics4-scala" % "4.1.1"
-libraryDependencies += "io.dropwizard.metrics" %  "metrics-json"   % "4.1.1"
+libraryDependencies += "nl.grons"              %% "metrics4-scala" % "4.1.14"
+libraryDependencies += "io.dropwizard.metrics" %  "metrics-json"   % "4.1.17"
 
 // Scala annotations (used by routes and Swagger) compiled by a newer version
 // can't be read by an older version.
@@ -91,10 +101,11 @@ libraryDependencies += "org.webjars.bower" % "d3" % "3.5.17"
 fork in Test := true
 javaOptions in Test += "-Dxitrum.mode=production"
 
-libraryDependencies += "org.scalatest" %% "scalatest" % "3.0.8" % "test"
+libraryDependencies += "org.scalatest" %% "scalatest" % "3.2.2" % "test"
+libraryDependencies += "org.scalatest" %% "scalatest-flatspec" % "3.2.2" % "test"
 
 // For integration tests when a Xitrum server is started
-libraryDependencies += "org.asynchttpclient" % "async-http-client" % "2.10.4" % "test"
+libraryDependencies += "org.asynchttpclient" % "async-http-client" % "2.12.2" % "test"
 
 // An implementation of SLF4J is needed for log in tests to be output
 libraryDependencies += "ch.qos.logback" % "logback-classic" % "1.2.3" % "test"

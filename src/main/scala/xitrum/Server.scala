@@ -65,7 +65,7 @@ object Server {
    * Stops Xitrum gracefully.
    * Do not call in Ximtrum action thread to avoid deadlock (start a new thread or use [[stopAtShutdown]]).
    */
-  def stop() {
+  def stop(): Unit = {
     Log.info(s"Xitrum $version gracefully stopping...")
 
     val futures = eventLoopGroups.map(_.shutdownGracefully())
@@ -78,7 +78,7 @@ object Server {
    * Registers a JVM shutdown hook that calls [[stop]] to stop Xitrum gracefully.
    * After the hook has been registered, you can stop Xitrum gracefully by running OS command `kill <Xitrum PID>`.
    */
-  def stopAtShutdown() {
+  def stopAtShutdown(): Unit = {
     Runtime.getRuntime.addShutdownHook(new Thread(() => Server.this.stop()))
   }
 

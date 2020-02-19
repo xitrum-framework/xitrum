@@ -1,10 +1,11 @@
 package xitrum.action
 
+import org.scalatest.flatspec.AnyFlatSpec
+import org.scalatest.matchers.should.Matchers
+
 import xitrum.Log
 
-import org.scalatest._
-
-class NetTest extends FlatSpec with Matchers with Log {
+class NetTest extends AnyFlatSpec with Matchers with Log {
   behavior of "proxyNotAllowed"
 
   "0.0.0.0" should "allowed" in {

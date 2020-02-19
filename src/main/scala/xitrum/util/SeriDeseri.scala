@@ -2,15 +2,12 @@ package xitrum.util
 
 import scala.util.Try
 import scala.util.control.NonFatal
-
 import com.twitter.chill.{KryoInstantiator, KryoPool, KryoSerializer}
-import org.json4s.{DefaultFormats, Extraction, JValue, NoTypeHints}
+import org.json4s.{DefaultFormats, Extraction, Formats, JValue, NoTypeHints}
 import org.json4s.jackson.{JsonMethods, Serialization}
-
 import io.netty.buffer.{ByteBuf, Unpooled}
 import io.netty.handler.codec.base64.{Base64, Base64Dialect}
 import io.netty.util.CharsetUtil
-
 import xitrum.Config
 
 object SeriDeseri {
@@ -35,7 +32,7 @@ object SeriDeseri {
 
   //----------------------------------------------------------------------------
 
-  private implicit val noTypeHints = Serialization.formats(NoTypeHints)
+  private implicit val noTypeHints: AnyRef with Formats = Serialization.formats(NoTypeHints)
 
   /**
    * Converts Scala object (case class, Map, Seq etc.) to JSON string.

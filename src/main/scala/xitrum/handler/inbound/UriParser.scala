@@ -14,20 +14,11 @@ import xitrum.scope.request.{Params, PathInfo}
 
 @Sharable
 class UriParser extends SimpleChannelInboundHandler[HandlerEnv] {
-  override def channelRead0(ctx: ChannelHandlerContext, env: HandlerEnv) {
+  override def channelRead0(ctx: ChannelHandlerContext, env: HandlerEnv): Unit = {
     val request = env.request
 
     try {
-      val decoder = new QueryStringDecoder(request.uri, Config.xitrum.request.charset)
-      val path    = decoder.path
-
-      // Treat "articles" and "articles/" the same
-      val noSlashSuffix =
-        if (path.endsWith("/"))
-          path.substring(0, path.length - 1)
-        else
-          path
-
+      val decoder     = new QueryStringDecoder(request.uri, Config.xitrum.request.charset)
       env.pathInfo    = new PathInfo(decoder, Config.xitrum.request.charset)
       env.queryParams = jParamsToParams(decoder.parameters)
       ctx.fireChannelRead(env)

@@ -1,9 +1,12 @@
 package xitrum.scope.request
 
+import io.netty.channel.Channel
+import io.netty.handler.codec.http.{FullHttpRequest, FullHttpResponse}
+
 import scala.collection.mutable.{Map => MMap}
 import io.netty.handler.codec.http.multipart.FileUpload
-
-import xitrum.{Config, Action}
+import org.json4s.JValue
+import xitrum.{Action, Config}
 import xitrum.handler.HandlerEnv
 import xitrum.util.SeriDeseri
 
@@ -73,7 +76,7 @@ trait RequestEnv extends ParamAccess {
 
   var handlerEnv: HandlerEnv = _
 
-  def apply(handlerEnv: HandlerEnv) {
+  def apply(handlerEnv: HandlerEnv): Unit = {
     this.handlerEnv = handlerEnv
 
     // Javadoc of Netty says channel.remoteAddress may be
@@ -91,39 +94,39 @@ trait RequestEnv extends ParamAccess {
   // Shortcuts to handlerEnv for easy access for app developers;
   // comments are copied from HandlerEnv.scala
 
-  lazy val channel              = handlerEnv.channel
-  lazy val request              = handlerEnv.request
-  lazy val response             = handlerEnv.response
+  lazy val channel: Channel = handlerEnv.channel
+  lazy val request: FullHttpRequest = handlerEnv.request
+  lazy val response: FullHttpResponse = handlerEnv.response
 
   /** Params in request body. */
-  lazy val bodyTextParams = handlerEnv.bodyTextParams
+  lazy val bodyTextParams: Params = handlerEnv.bodyTextParams
 
   /** File params in request body. */
-  lazy val bodyFileParams       = handlerEnv.bodyFileParams
+  lazy val bodyFileParams: FileUploadParams = handlerEnv.bodyFileParams
 
   /** Params embedded in the path. Ex: /articles/:id */
-  lazy val pathParams           = handlerEnv.pathParams
+  lazy val pathParams: Params = handlerEnv.pathParams
 
   /** Params after the question mark of the URL. Ex: /search?q=xitrum */
-  lazy val queryParams          = handlerEnv.queryParams
+  lazy val queryParams: Params = handlerEnv.queryParams
 
   /** The merge of queryParams and pathParams, things that appear in the request URL. */
-  lazy val urlParams            = handlerEnv.urlParams
+  lazy val urlParams: Params = handlerEnv.urlParams
 
   /**
    * The merge of all text params (queryParams, bodyParams, and pathParams),
    * as contrast to file upload (bodyFileParams).
    */
-  lazy val textParams           = handlerEnv.textParams
+  lazy val textParams: Params = handlerEnv.textParams
 
   /** The whole request body as String. */
-  lazy val requestContentString = handlerEnv.requestContentString
+  lazy val requestContentString: String = handlerEnv.requestContentString
 
   /**
    * The whole request body parsed as JSON4S JValue. You can use [[SeriDeseri.fromJValue]]
    * to convert this to Scala object (case class, Map, Seq etc.).
    */
-  lazy val requestContentJValue = handlerEnv.requestContentJValue
+  lazy val requestContentJValue: JValue = handlerEnv.requestContentJValue
 
   lazy val at = new At
   def atJson(key: String): String = at.toJson(key)
