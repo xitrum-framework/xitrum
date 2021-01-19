@@ -9,75 +9,65 @@ case class Sub1(name: String, value: Int)
 case class Sub2(key: String, value: Boolean)
 
 object Namespace {
-
   case class Sub(name: String, value: Option[Int])
-
 }
 
 case class Test(
-                 int: Int,
-                 long: Long,
-                 float: Float,
-                 double: Double,
-                 string: String,
-                 boolean: Boolean,
-                 opInt: Option[Int],
-                 opLong: Option[Long],
-                 opFloat: Option[Float],
-                 opDouble: Option[Double],
-                 opString: Option[String],
-                 opBoolean: Option[Boolean],
-                 arrInt: Seq[Int],
-                 arrLong: List[Long],
-                 arrFloat: Array[Float],
-                 arrDouble: Set[Double],
-                 sub: Sub1,
-                 opSub: Option[Sub2],
-                 arrSub1: Seq[Sub1],
-                 arrSub2: Array[Sub2]
-               )
+  int:       Int,
+  long:      Long,
+  float:     Float,
+  double:    Double,
+  string:    String,
+  boolean:   Boolean,
+  opInt:     Option[Int],
+  opLong:    Option[Long],
+  opFloat:   Option[Float],
+  opDouble:  Option[Double],
+  opString:  Option[String],
+  opBoolean: Option[Boolean],
+  arrInt:    Seq[Int],
+  arrLong:   List[Long],
+  arrFloat:  Array[Float],
+  arrDouble: Set[Double],
+  sub:       Sub1,
+  opSub:     Option[Sub2],
+  arrSub1:   Seq[Sub1],
+  arrSub2:   Array[Sub2]
+)
 
-/**
-  * User: smeagol
-  * Date: 09.08.17
-  * Time: 1:47
-  */
 class SwaggerReflectionSpec extends AsyncFunSpec {
-
   object jsonType {
-    def int(isArray : Boolean = false) = Swagger.JsonType(None, "integer", "int32", isArray = isArray)
+    def int(isArray : Boolean = false): Swagger.JsonType = Swagger.JsonType(None, "integer", "int32", isArray = isArray)
 
-    def long(isArray : Boolean = false) = Swagger.JsonType(None, "integer", "int64", isArray = isArray)
+    def long(isArray : Boolean = false): Swagger.JsonType = Swagger.JsonType(None, "integer", "int64", isArray = isArray)
 
-    def float(isArray : Boolean = false) = Swagger.JsonType(None, "number", "float", isArray = isArray)
+    def float(isArray : Boolean = false): Swagger.JsonType = Swagger.JsonType(None, "number", "float", isArray = isArray)
 
-    def double(isArray : Boolean = false) = Swagger.JsonType(None, "number", "double", isArray = isArray)
+    def double(isArray : Boolean = false): Swagger.JsonType = Swagger.JsonType(None, "number", "double", isArray = isArray)
 
-    def string(isArray : Boolean = false) = Swagger.JsonType(None, "string", isArray = isArray)
+    def string(isArray : Boolean = false): Swagger.JsonType = Swagger.JsonType(None, "string", isArray = isArray)
 
-    def boolean(isArray : Boolean = false) = Swagger.JsonType(None, "boolean", isArray = isArray)
+    def boolean(isArray : Boolean = false): Swagger.JsonType = Swagger.JsonType(None, "boolean", isArray = isArray)
 
-    def sub1(isArray : Boolean = false) = Swagger.JsonType(Some("Sub1"), "object", fields = Seq(
+    def sub1(isArray : Boolean = false): Swagger.JsonType = Swagger.JsonType(Some("Sub1"), "object", fields = Seq(
       Swagger.JsonField("name", Swagger.JsonType(None, "string"), isRequired = true),
       Swagger.JsonField("value", Swagger.JsonType(None, "integer", "int32"), isRequired = true)
     ), isArray = isArray)
 
-    def sub2(isArray : Boolean = false) = Swagger.JsonType(Some("Sub2"), "object", fields = Seq(
+    def sub2(isArray : Boolean = false): Swagger.JsonType = Swagger.JsonType(Some("Sub2"), "object", fields = Seq(
       Swagger.JsonField("key", Swagger.JsonType(None, "string"), isRequired = true),
       Swagger.JsonField("value", Swagger.JsonType(None, "boolean"), isRequired = true)
     ), isArray = isArray)
 
-    def sub(isArray : Boolean = false) = Swagger.JsonType(Some("Namespace.Sub"), "object", fields = Seq(
+    def sub(isArray : Boolean = false): Swagger.JsonType = Swagger.JsonType(Some("Namespace.Sub"), "object", fields = Seq(
       Swagger.JsonField("name", Swagger.JsonType(None, "string"), isRequired = true),
       Swagger.JsonField("value", Swagger.JsonType(None, "integer", "int32"))
     ), isArray = isArray)
-
   }
 
   describe("SwaggerReflection") {
 
     describe("_reflectField") {
-
       val tpe = typeOf[Test]
 
       def call(field: String): Swagger.JsonField = {
@@ -124,7 +114,6 @@ class SwaggerReflectionSpec extends AsyncFunSpec {
             call("boolean")
           }
         }
-
       }
 
       describe("Optional simple types") {
@@ -163,7 +152,6 @@ class SwaggerReflectionSpec extends AsyncFunSpec {
             call("opBoolean")
           }
         }
-
       }
 
       describe("Simple arrays") {
@@ -190,7 +178,6 @@ class SwaggerReflectionSpec extends AsyncFunSpec {
             call("arrDouble")
           }
         }
-
       }
 
       describe("Case classes") {
@@ -207,7 +194,6 @@ class SwaggerReflectionSpec extends AsyncFunSpec {
             call("opSub")
           }
         }
-
       }
 
       describe("Case classes arrays") {
@@ -222,12 +208,10 @@ class SwaggerReflectionSpec extends AsyncFunSpec {
             call("arrSub2")
           }
         }
-
       }
     }
 
     describe("_reflectTypeFormat") {
-
       def call(tpe: Type) = SwaggerReflection.reflectTypeFormat(tpe)
 
       describe("Simple types") {
@@ -266,7 +250,6 @@ class SwaggerReflectionSpec extends AsyncFunSpec {
             call(typeOf[Boolean])
           }
         }
-
       }
 
       describe("Case classes") {
@@ -288,7 +271,6 @@ class SwaggerReflectionSpec extends AsyncFunSpec {
           }
         }
       }
-
     }
 
     describe("isArrayType") {
@@ -358,7 +340,6 @@ class SwaggerReflectionSpec extends AsyncFunSpec {
             call(typeOf[Boolean])
           }
         }
-
       }
 
       describe("Simple Arrays") {
@@ -385,7 +366,6 @@ class SwaggerReflectionSpec extends AsyncFunSpec {
             call(typeOf[Set[Double]])
           }
         }
-
       }
 
       describe("Case Classes") {
@@ -430,11 +410,7 @@ class SwaggerReflectionSpec extends AsyncFunSpec {
             call(typeOf[Set[Namespace.Sub]])
           }
         }
-
       }
     }
-
   }
-
 }
-

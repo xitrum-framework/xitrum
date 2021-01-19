@@ -204,7 +204,6 @@ object Swagger {
     * @param fields    list of `object` fields (actual for `tpe` == "object" only)
     */
   case class JsonType(name: Option[String], tpe: String, format: String = "", var isArray : Boolean = false, var fields: Seq[JsonField] = Seq()) {
-
     def isArray(value: Boolean): JsonType = {
       isArray = value
       this
@@ -212,7 +211,6 @@ object Swagger {
   }
 
   object JsonType {
-
     object tpe {
       val integer = "integer"
       val number = "number"
@@ -234,7 +232,6 @@ object Swagger {
       val date = "date"
       val password = "password"
     }
-
   }
 
   /**
@@ -258,5 +255,4 @@ object Swagger {
   def arrayOf[T](implicit tag: TypeTag[T]): JsonType = {
     valueOf(tag).isArray(true)
   }
-
 }

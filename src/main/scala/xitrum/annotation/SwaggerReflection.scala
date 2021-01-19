@@ -6,7 +6,6 @@ import scala.reflect.runtime.universe._
  * Utility functions to reflect scala case classes to structure that can be rendered to Swagger documentation
  */
 object SwaggerReflection {
-
   private val _arraySymbols = Set[Name](
     symbolOf[Seq[_]].name,
     symbolOf[Set[_]].name,
@@ -15,7 +14,6 @@ object SwaggerReflection {
   )
 
   def isArrayType(tpe: Type): Boolean = _arraySymbols.contains(tpe.typeSymbol.name)
-
 
   private[annotation] def reflectField(fld: TermSymbol): Swagger.JsonField = {
     val retType = fld.asMethod.returnType
@@ -36,7 +34,7 @@ object SwaggerReflection {
       var pack = tpe.typeSymbol.owner
       while (!pack.isPackage)
         pack = pack.owner
-      (Some(tpe.typeSymbol.fullName.toString.substring(pack.fullName.length + 1)), Swagger.JsonType.tpe.obj, Swagger.JsonType.fmt.none)
+      (Some(tpe.typeSymbol.fullName.substring(pack.fullName.length + 1)), Swagger.JsonType.tpe.obj, Swagger.JsonType.fmt.none)
   }
 
   def reflect(tpe: Type): Swagger.JsonType = {
@@ -48,5 +46,4 @@ object SwaggerReflection {
     val (name, tipe, format) = reflectTypeFormat(tip)
     Swagger.JsonType(name, tipe, format, isTpeArray, fields)
   }
-
 }

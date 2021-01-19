@@ -50,7 +50,7 @@ object SwaggerJson {
   private lazy val definitions = mutable.Map.empty[String, JValue]
 
   /** Maybe called multiple times in development mode when reloading routes. */
-  def reloadFromRoutes() {
+  def reloadFromRoutes(): Unit = {
     prettyJson = JsonMethods.pretty(JsonMethods.render(getSwaggerObject))
   }
 
@@ -233,7 +233,7 @@ object SwaggerJson {
 
   private def _definitionPath(tpe: Swagger.JsonType): String = s"#/definitions/${tpe.name.get}"
 
-  private def _simpleType(tipe: String, format: String, withoutSchema : Boolean): JObject = {
+  private def _simpleType(tipe: String, format: String, withoutSchema: Boolean): JObject = {
     val tpe = ("type" -> tipe) ~
       ("format" -> format)
     if (withoutSchema)
@@ -241,7 +241,7 @@ object SwaggerJson {
     else "schema" -> tpe
   }
 
-  private def _simpleArrayType(tipe: String, format: String, withoutSchema : Boolean): JObject = {
+  private def _simpleArrayType(tipe: String, format: String, withoutSchema: Boolean): JObject = {
     val tpe = ("type" -> "array") ~
       ("items" -> _simpleType(tipe, format, withoutSchema = true))
     if (withoutSchema)
@@ -249,7 +249,7 @@ object SwaggerJson {
     else "schema" -> tpe
   }
 
-  private def _objectArrayType(path: String, withoutSchema : Boolean): JObject = {
+  private def _objectArrayType(path: String, withoutSchema: Boolean): JObject = {
     val tpe = ("type" -> "array") ~
       ("items" -> ("$ref" -> path))
     if (withoutSchema)
@@ -258,14 +258,14 @@ object SwaggerJson {
   }
 
 
-  private def _objectType(path: String, withoutSchema : Boolean): JObject = {
+  private def _objectType(path: String, withoutSchema: Boolean): JObject = {
     val tpe = "$ref" -> path
     if (withoutSchema)
       tpe
     else "schema" -> tpe
   }
 
-  private def _autoJsonType(tpe: Swagger.JsonType, asField : Boolean = false): JObject = {
+  private def _autoJsonType(tpe: Swagger.JsonType, asField: Boolean = false): JObject = {
     _addObjectDefinition(tpe)
     tpe.tpe match {
       case Swagger.JsonType.tpe.obj =>
@@ -299,18 +299,18 @@ object SwaggerJson {
     ("description" -> arg.desc) ~
     ("required"    -> required) ~
     (arg match {
-      case _: SwaggerIntParam      => _simpleType(Swagger.JsonType.tpe.integer, Swagger.JsonType.fmt.int32, withoutSchema = true)
-      case _: SwaggerLongParam     => _simpleType(Swagger.JsonType.tpe.integer, Swagger.JsonType.fmt.int64, withoutSchema = true)
-      case _: SwaggerFloatParam    => _simpleType(Swagger.JsonType.tpe.number, Swagger.JsonType.fmt.float, withoutSchema = true)
-      case _: SwaggerDoubleParam   => _simpleType(Swagger.JsonType.tpe.number, Swagger.JsonType.fmt.double, withoutSchema = true)
-      case _: SwaggerStringParam   => _simpleType(Swagger.JsonType.tpe.string, Swagger.JsonType.fmt.none, withoutSchema = true)
-      case _: SwaggerByteParam     => _simpleType(Swagger.JsonType.tpe.string, Swagger.JsonType.fmt.byte, withoutSchema = true)
-      case _: SwaggerBinaryParam   => _simpleType(Swagger.JsonType.tpe.string, Swagger.JsonType.fmt.binary, withoutSchema = true)
-      case _: SwaggerBooleanParam  => _simpleType(Swagger.JsonType.tpe.boolean, Swagger.JsonType.fmt.none, withoutSchema = true)
-      case _: SwaggerDateParam     => _simpleType(Swagger.JsonType.tpe.string, Swagger.JsonType.fmt.date, withoutSchema = true)
-      case _: SwaggerDateTimeParam => _simpleType(Swagger.JsonType.tpe.string, Swagger.JsonType.fmt.dateTime, withoutSchema = true)
-      case _: SwaggerPasswordParam => _simpleType(Swagger.JsonType.tpe.string, Swagger.JsonType.fmt.password, withoutSchema = true)
-      case _: SwaggerFileParam     => _simpleType(Swagger.JsonType.tpe.file, Swagger.JsonType.fmt.none, withoutSchema = true)
+      case _: SwaggerIntParam      => _simpleType(Swagger.JsonType.tpe.integer, Swagger.JsonType.fmt.int32,    withoutSchema = true)
+      case _: SwaggerLongParam     => _simpleType(Swagger.JsonType.tpe.integer, Swagger.JsonType.fmt.int64,    withoutSchema = true)
+      case _: SwaggerFloatParam    => _simpleType(Swagger.JsonType.tpe.number,  Swagger.JsonType.fmt.float,    withoutSchema = true)
+      case _: SwaggerDoubleParam   => _simpleType(Swagger.JsonType.tpe.number,  Swagger.JsonType.fmt.double,   withoutSchema = true)
+      case _: SwaggerStringParam   => _simpleType(Swagger.JsonType.tpe.string,  Swagger.JsonType.fmt.none,     withoutSchema = true)
+      case _: SwaggerByteParam     => _simpleType(Swagger.JsonType.tpe.string,  Swagger.JsonType.fmt.byte,     withoutSchema = true)
+      case _: SwaggerBinaryParam   => _simpleType(Swagger.JsonType.tpe.string,  Swagger.JsonType.fmt.binary,   withoutSchema = true)
+      case _: SwaggerBooleanParam  => _simpleType(Swagger.JsonType.tpe.boolean, Swagger.JsonType.fmt.none,     withoutSchema = true)
+      case _: SwaggerDateParam     => _simpleType(Swagger.JsonType.tpe.string,  Swagger.JsonType.fmt.date,     withoutSchema = true)
+      case _: SwaggerDateTimeParam => _simpleType(Swagger.JsonType.tpe.string,  Swagger.JsonType.fmt.dateTime, withoutSchema = true)
+      case _: SwaggerPasswordParam => _simpleType(Swagger.JsonType.tpe.string,  Swagger.JsonType.fmt.password, withoutSchema = true)
+      case _: SwaggerFileParam     => _simpleType(Swagger.JsonType.tpe.file,    Swagger.JsonType.fmt.none,     withoutSchema = true)
       case _: SwaggerJsonParam     => arg match {
         case argJson: Swagger.JsonBody => _autoJsonType(argJson.tpe)
         case _                         => _simpleType(Swagger.JsonType.tpe.string, Swagger.JsonType.fmt.none, withoutSchema = true)
