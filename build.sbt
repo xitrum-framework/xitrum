@@ -1,15 +1,16 @@
 organization := "tv.cntt"
 name         := "xitrum"
-version      := "3.30.0-SNAPSHOT"
+version      := "3.30.1-SNAPSHOT"
 
-// Run "sbt mima-report-binary-issues" to check for binary compatibility
+// Run "sbt mimaReportBinaryIssues" to check for binary compatibility
 // https://github.com/typesafehub/migration-manager
-//com.typesafe.tools.mima.plugin.MimaPlugin.mimaDefaultSettings
-//com.typesafe.tools.mima.plugin.MimaKeys.previousArtifact := Some("tv.cntt" % ("xitrum_" + scalaBinaryVersion.value) % "3.27.0")
+// mimaPreviousArtifacts := Set("tv.cntt" %% "xitrum" % "3.30.0")
 
 //------------------------------------------------------------------------------
 
-crossScalaVersions := Seq("2.13.4", "2.12.13")
+// Cannot use 2.12.13+ yet:
+// https://github.com/scalate/scalate/issues/309
+crossScalaVersions := Seq("2.13.4", "2.12.12")
 scalaVersion       := "2.13.4"
 
 // Akka 2.4.0+ requires Java 8

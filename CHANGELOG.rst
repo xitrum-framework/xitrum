@@ -1,5 +1,7 @@
-3.30.1 (to be released):
+3.30.1:
 
+* `#688 <https://github.com/xitrum-framework/xitrum/issues/688>`_
+  Swagger documentation for BodyParam and Responses with JSON models generated from case classes
 * `#689 <https://github.com/xitrum-framework/xitrum/issues/689>`_
   Update dependency libraries
 
