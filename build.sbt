@@ -74,7 +74,7 @@ libraryDependencies += "org.apache.commons" % "commons-text"  % "1.9"
 libraryDependencies += "org.apache.commons" % "commons-lang3" % "3.11"
 
 // For compiling CoffeeScript to JavaScript
-libraryDependencies += "tv.cntt" % "rhinocoffeescript" % "1.10.0"
+libraryDependencies += "tv.cntt" % "rhinocoffeescript" % "1.12.7"
 
 // For metrics
 libraryDependencies += "nl.grons"              %% "metrics4-scala" % "4.1.14"

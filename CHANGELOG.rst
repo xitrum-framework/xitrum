@@ -1,3 +1,8 @@
+3.30.1 (to be released):
+
+* `#689 <https://github.com/xitrum-framework/xitrum/issues/689>`_
+  Update dependency libraries
+
 3.30.0:
 
 * `#683 <https://github.com/xitrum-framework/xitrum/issues/683>`_
