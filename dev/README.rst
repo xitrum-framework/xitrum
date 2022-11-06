@@ -101,9 +101,16 @@ Then:
 2. Copy
      dev/build.sbt.end   to the end of build.sbt, and
      dev/plugins.sbt.end to the end of project/plugins.sbt
-3. Run ``sbt`` then from SBT command prompt run ``+ publishSigned``.
+3. Run ``sbt "+ publishSigned"``.
 4. Login at https://oss.sonatype.org/ and from "Staging Repositories" select the
    newly published item, click "Close" then "Release".
+
+On Mac, if you see error ``Cannot run program "gpg": error=2, No such file or directory``,
+install ``gnupg``:
+
+::
+
+  brew install gnupg
 
 Update related projects
 -----------------------
