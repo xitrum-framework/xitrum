@@ -55,10 +55,19 @@ https://github.com/jrudolph/sbt-dependency-graph.
 Publish to local
 ----------------
 
-While developing, you may need do local publish. Run
-``sbt publishLocal``.
-Alternatively you can run ``sbt`` then from SBT command prompt run
-``+ publishLocal``.
+While developing, you may need do local publish.
+
+To do local publish for the ``scalaVersion`` specified in ``build.sbt``:
+
+::
+
+  sbt publishLocal
+
+To do local publish for all the ``crossScalaVersions``:
+
+::
+
+  sbt "+ publishLocal"
 
 To delete the local publish:
 

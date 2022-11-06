@@ -2,7 +2,7 @@ package xitrum.handler.inbound
 
 import java.io.File
 
-import io.netty.channel.{ChannelHandler, SimpleChannelInboundHandler, ChannelHandlerContext}
+import io.netty.channel.{ChannelHandler, ChannelHandlerContext, SimpleChannelInboundHandler}
 import io.netty.handler.codec.http.{HttpMethod, HttpResponseStatus}
 
 import ChannelHandler.Sharable

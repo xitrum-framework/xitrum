@@ -1,3 +1,8 @@
+3.30.2:
+
+* `#690 <https://github.com/xitrum-framework/xitrum/issues/690>`_
+  Support running on Apple machines with M1 chip
+
 3.30.1:
 
 * `#688 <https://github.com/xitrum-framework/xitrum/issues/688>`_

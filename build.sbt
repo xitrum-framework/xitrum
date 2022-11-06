@@ -1,6 +1,6 @@
 organization := "tv.cntt"
 name         := "xitrum"
-version      := "3.30.1-SNAPSHOT"
+version      := "3.30.2-SNAPSHOT"
 
 // Run "sbt mimaReportBinaryIssues" to check for binary compatibility
 // https://github.com/typesafehub/migration-manager
@@ -52,8 +52,8 @@ libraryDependencies += "com.typesafe.akka" %% "akka-slf4j"           % "2.6.11"
 // (akka-agent is added here, should ensure same Akka version as above)
 libraryDependencies += "com.github.pathikrit" %% "better-files" % "3.9.1"
 libraryDependencies += "com.github.pathikrit" %% "better-files-akka"  % "3.9.1"
-libraryDependencies += "io.methvin" % "directory-watcher" % "0.12.0"
-libraryDependencies += "io.methvin" %% "directory-watcher-better-files" % "0.12.0"
+libraryDependencies += "io.methvin" % "directory-watcher" % "0.16.1"
+libraryDependencies += "io.methvin" %% "directory-watcher-better-files" % "0.16.1"
 
 // http://download.oracle.com/javaee/5/api/javax/activation/MimetypesFileTypeMap.html
 libraryDependencies += "javax.activation" % "activation" % "1.1.1"
@@ -99,8 +99,8 @@ libraryDependencies += "org.webjars.bower" % "d3" % "3.5.17"
 // For test --------------------------------------------------------------------
 
 // For LruCacheTest
-fork in Test := true
-javaOptions in Test += "-Dxitrum.mode=production"
+Test / fork := true
+Test / javaOptions += "-Dxitrum.mode=production"
 
 libraryDependencies += "org.scalatest" %% "scalatest" % "3.2.2" % "test"
 libraryDependencies += "org.scalatest" %% "scalatest-flatspec" % "3.2.2" % "test"
@@ -112,24 +112,24 @@ libraryDependencies += "org.asynchttpclient" % "async-http-client" % "2.12.2" % 
 libraryDependencies += "ch.qos.logback" % "logback-classic" % "1.2.3" % "test"
 
 // For "sbt console"
-unmanagedClasspath in Compile += baseDirectory.value / "src/test/resources"
+Compile / unmanagedClasspath += baseDirectory.value / "src/test/resources"
 
 // For "sbt run/test"
-unmanagedClasspath in Runtime += baseDirectory.value / "src/test/resources"
+Runtime / unmanagedClasspath += baseDirectory.value / "src/test/resources"
 
 // Generate src/main/scala/xitrum/Version.scala from "version" above -----------
 
 val generateVersionFileTask = TaskKey[Unit]("generateVersion", "Generate src/main/scala/xitrum/Version.scala")
 generateVersionFileTask := generateVersionFile.value
 
-(compile in Compile) := ((compile in Compile) dependsOn generateVersionFile).value
+(Compile / compile) := ((Compile / compile) dependsOn generateVersionFile).value
 def generateVersionFile = Def.task {
   val versions = version.value.split('.')
   val major    = versions(0).toInt
   val minor    = versions(1).toInt
   val patch    = versions(2).split('-')(0).toInt
   val ma_mi_pa = s"$major.$minor.$patch"
-  val base     = (baseDirectory in Compile).value
+  val base     = (Compile / baseDirectory).value
 
   // Check if the resource directory name contains version
   val resDir = base / s"src/main/resources/META-INF/resources/webjars/xitrum/$ma_mi_pa"
@@ -166,8 +166,8 @@ class Version {
 
 // Avoid messy Scaladoc by excluding things that are not intended to be used
 // directly by normal Xitrum users.
-scalacOptions in (Compile, doc) ++= Seq("-skip-packages", "xitrum.sockjs")
+Compile / doc / scalacOptions ++= Seq("-skip-packages", "xitrum.sockjs")
 
 // Skip API doc generation to speedup "publishLocal" while developing.
 // Comment out this line when publishing to Sonatype.
-publishArtifact in (Compile, packageDoc) := false
+Compile / packageDoc / publishArtifact := false
