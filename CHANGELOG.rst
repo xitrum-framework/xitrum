@@ -1,3 +1,8 @@
+3.31.0:
+
+* `#691 <https://github.com/xitrum-framework/xitrum/issues/691>`_
+  Reload SSL certificate when certChainFile and keyFile have been modified
+
 3.30.2:
 
 * `#690 <https://github.com/xitrum-framework/xitrum/issues/690>`_

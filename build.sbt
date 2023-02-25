@@ -1,10 +1,10 @@
 organization := "tv.cntt"
 name         := "xitrum"
-version      := "3.30.2-SNAPSHOT"
+version      := "3.31.0-SNAPSHOT"
 
 // Run "sbt mimaReportBinaryIssues" to check for binary compatibility
 // https://github.com/typesafehub/migration-manager
-// mimaPreviousArtifacts := Set("tv.cntt" %% "xitrum" % "3.30.0")
+// mimaPreviousArtifacts := Set("tv.cntt" %% "xitrum" % "3.30.2")
 
 //------------------------------------------------------------------------------
 
