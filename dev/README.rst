@@ -112,10 +112,24 @@ install ``gnupg``:
 
   brew install gnupg
 
+Tag the newly published version
+-------------------------------
+
+See:
+https://github.com/xitrum-framework/xitrum/tags
+
+To tag:
+
+::
+
+  git tag --list
+  git tag <new version number>
+  git push origin <new version number>
+
 Update related projects
 -----------------------
 
-After each new version release, please update these projects to use that new Xitrum version:
+Each time, after publishing a new Xitrum version (above), please update these projects to use that new version:
 
 * `xitrum-new <https://github.com/xitrum-framework/xitrum-new>`_
 * `xitrum-demos <https://github.com/xitrum-framework/xitrum-demos>`_
@@ -128,3 +142,9 @@ and `Xitrum guide <https://github.com/xitrum-framework/xitrum-doc>`_.
 
 When a new SBT generation is released, also update
 `xitrum-sbt-plugin <https://github.com/xitrum-framework/xitrum-sbt-plugin>`_.
+
+Announce the newly published version
+------------------------------------
+
+Post to a new thread about the new version to:
+https://groups.google.com/g/xitrum-framework
