@@ -1,7 +1,7 @@
 3.31.0:
 
 * `#691 <https://github.com/xitrum-framework/xitrum/issues/691>`_
-  Reload SSL certificate when certChainFile and keyFile have been modified
+  Cache SSL certificate files certChainFile and keyFile for 1 hour, and reload them if they are modified
 
 3.30.2:
 

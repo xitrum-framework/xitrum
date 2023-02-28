@@ -16,6 +16,7 @@ object FileMonitor {
 
   /**
    * Recursively monitors the path.
+   * Symlink is not supported: https://github.com/gmethvin/directory-watcher/issues/30
    *
    * @return Function to stop the file monitor
    */
